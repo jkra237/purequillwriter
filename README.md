@@ -8,7 +8,8 @@ Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine
 
 ## Was drin ist
 
-- **Schreiben** mit echter Seitenansicht in Millimetermaßen, Seitenumbruch, Kopf- und Fußzeile
+- **Schreiben** mit echter Seitenansicht in Millimetermaßen, Seitenumbruch, Einrücken
+- **Kopf- und Fußzeile** direkt auf der Seite per Doppelklick auf den oberen/unteren Rand
 - **Sticky Notes**, die sich an beliebig viele Textstellen anheften lassen
 - **Glossar** mit Markierung und Nachschlagefunktion im Text
 - **Kommandopalette** (`Alt` `⇧` `P`) und Schrägstrich-Menü für alles ohne Maus

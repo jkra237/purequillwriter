@@ -141,6 +141,15 @@ input,select,textarea{font:inherit;color:inherit}
 .sheetpage .mg{position:absolute;top:0;bottom:0;border-left:1px dashed var(--rule)}
 .hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
   pointer-events:none;white-space:nowrap;overflow:hidden;line-height:1.2}
+/* Kopf-/Fußzeile direkt auf der Seite bearbeiten */
+.hfhint{position:absolute;z-index:2;pointer-events:none;display:none;
+  align-items:center;justify-content:center;border:1px dashed var(--stamp);border-radius:2px;
+  font-family:"Segoe UI",system-ui,sans-serif;font-size:11px;color:var(--stamp);opacity:.65}
+.hfhint.on{display:flex}
+.hfedit{position:absolute;z-index:6;display:none;outline:none;padding:1px 3px;
+  background:var(--paper);box-shadow:0 0 0 1px var(--stamp);border-radius:2px;
+  font-family:Georgia,serif;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden}
+.hfedit.on{display:block}
 .printhf{display:none}
 .sheetpage .pn{position:absolute;bottom:5px;right:9px;font-family:Consolas,monospace;
   font-size:10px;color:var(--ink-faint)}
@@ -225,6 +234,7 @@ input,select,textarea{font:inherit;color:inherit}
   border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);padding:6px 9px;
   display:none;align-items:center;gap:7px;white-space:nowrap}
 .imgbar.on{display:flex}
+#hfbar{flex-wrap:wrap;max-width:calc(100vw - 20px);row-gap:5px}
 .imgbar input[type=range]{width:96px}
 .imgbar .pct{font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);min-width:38px}
 .glossterm{border-bottom:1.5px dotted var(--stamp);cursor:help}
@@ -478,6 +488,7 @@ body.focus .sheet{padding-top:9vh}
   </div>
 </div>
 <div class="imgbar" id="imgbar"></div>
+<div class="imgbar" id="hfbar"></div>
 <div class="printhf" id="printhdr"></div>
 <div class="printhf" id="printftr"></div>
 <div class="focusbar" id="focusbar"><span id="focusLabel">Fokusmodus</span> <button id="focusOut">verlassen (Esc)</button></div>
@@ -623,6 +634,9 @@ const EN={
   "Absätze":"Paragraphs","Seiten":"Pages","Normseiten (1500 Z.)":"Manuscript pages (1500 ch.)",
   "Lesedauer (≈ 180 W/min)":"Reading time (≈ 180 wpm)","Markierte Auswahl":"Selected text",
   "Kopfzeile":"Header","Fußzeile":"Footer","Text oder Platzhalter":"Text or placeholder",
+  "Doppelklick: Kopfzeile":"Double-click: header","Doppelklick: Fußzeile":"Double-click: footer",
+  "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
+  "Kopfzeile entfernt":"Header removed","Fußzeile entfernt":"Footer removed","Entfernen":"Remove",
   "Links":"Left","Mitte":"Center","Rechts":"Right","Abstand":"Spacing",
   "Seitenzahl":"Page number","Gesamtseiten":"Total pages","Titel":"Title",
   "Seitenzahl einfügen":"Insert page number","Gesamtseiten einfügen":"Insert total pages",
@@ -966,6 +980,8 @@ function drawWrite(){
       <div class="paper" id="paper">
         <div id="pagelayer"></div>
         <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar"))}"></div>
+        <div class="hfhint" id="hfhint"></div>
+        <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
       </div>
     </div>
     <div class="anchcol" id="anchcol"></div>
@@ -1016,8 +1032,28 @@ function drawWrite(){
   });
   ed.addEventListener("keyup",e=>{
     if(["ArrowUp","ArrowDown","PageUp","PageDown","Enter"].includes(e.key))typewriter()});
-  $("#sheet").addEventListener("scroll",pageFlag);
+  $("#sheet").addEventListener("scroll",()=>{pageFlag();if(hfEditing)drawHfBar()});
   ed.addEventListener("blur",()=>{flush();if(S.settings.autosave)commit()});
+  /* Kopf-/Fußzeile: Hinweis beim Überfahren, Doppelklick öffnet sie */
+  $("#sheet").addEventListener("mousemove",e=>hfHintAt(e.clientY));
+  $("#sheet").addEventListener("mouseleave",()=>{const h=$("#hfhint");if(h)h.classList.remove("on")});
+  ed.addEventListener("dblclick",e=>{
+    const zone=hfZoneAt(e.clientY);
+    if(!zone)return;
+    e.preventDefault();hfEditOpen(zone.which,zone.page);
+  });
+  const hb=$("#hfedit");
+  hb.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
+    if(e.key==="Escape"){e.preventDefault();hfEditClose();ed.focus();return}
+    if(e.key==="Tab"){e.preventDefault();
+      const other=hfEditing&&hfEditing.which==="hdr"?"ftr":"hdr",pg=hfEditing?hfEditing.page:0;
+      hfEditCommit();hfEditClose();hfEditOpen(other,pg)}
+  });
+  hb.addEventListener("blur",()=>{
+    /* Klicks in der Leiste dürfen die Bearbeitung nicht beenden */
+    setTimeout(()=>{if(hfEditing&&document.activeElement!==hb){hfEditCommit();hfEditClose()}},0);
+  });
   ed.addEventListener("click",e=>{
     const fig=e.target.closest("figure.fig");
     if(fig&&!e.target.closest("figcaption")){selectFig(fig);return}
@@ -2087,6 +2123,125 @@ function hfText(tpl,page,total,forPrint){
     ? t.replace(/\{seite\}/gi,'<span class="pageno"></span>')
     : t.replace(/\{seite\}/gi,String(page));
 }
+/* ---- Direktbearbeitung auf der Seite ---- */
+let hfEditing=null;
+function hfZoneAt(clientY){
+  const paper=$("#paper");if(!paper||S.mode!=="write")return null;
+  const f=fmtOf(doc()),z=S.zoom;
+  const ph=MM(f.h)*z,mt=MM(f.m[0])*z,mb=MM(f.m[2])*z,stride=ph+GAP;
+  const y=clientY-paper.getBoundingClientRect().top;
+  if(y<0)return null;
+  const page=Math.floor(y/stride);
+  if(page<0||page>=pageCount)return null;
+  const yp=y-page*stride;
+  if(yp<0||yp>ph)return null;
+  if(yp<mt)return{which:"hdr",page};
+  if(yp>ph-mb)return{which:"ftr",page};
+  return null;
+}
+function hfRect(which,page){
+  const f=fmtOf(doc()),z=S.zoom;
+  const ph=MM(f.h)*z,stride=ph+GAP;
+  const fs=(9*96/72)*z,h=Math.max(fs*1.6,16);
+  const d=MM(hfOf(doc(),which).dist)*z;
+  return {top:which==="hdr"?page*stride+d:page*stride+ph-d-h,
+    left:MM(f.m[3])*z,right:MM(f.m[1])*z,h,fs};
+}
+function hfHintAt(clientY){
+  const hint=$("#hfhint");if(!hint)return;
+  if(hfEditing){hint.classList.remove("on");return}
+  const zone=hfZoneAt(clientY);
+  if(!zone){hint.classList.remove("on");return}
+  const r=hfRect(zone.which,zone.page),on=hfOf(doc(),zone.which).on;
+  hint.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;height:${r.h}px`;
+  hint.textContent=on?"":tr(zone.which==="hdr"?"Doppelklick: Kopfzeile":"Doppelklick: Fußzeile");
+  hint.classList.add("on");
+}
+function hfEditOpen(which,page){
+  const d=doc();
+  if(!hfOf(d,which).on){d[which]={...hfOf(d,which),on:true};commit();paginate();setPrintHF()}
+  const box=$("#hfedit");if(!box)return;
+  hfEditing={which,page};
+  const v=hfOf(d,which),r=hfRect(which,page);
+  box.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;`+
+    `min-height:${r.h}px;font-size:${r.fs}px;text-align:${v.align}`;
+  box.textContent=v.text||"";
+  box.classList.add("on");
+  $("#hfhint").classList.remove("on");
+  box.focus();
+  const rg=document.createRange();rg.selectNodeContents(box);
+  const s=getSelection();s.removeAllRanges();s.addRange(rg);
+  drawHfBar();
+}
+function hfEditCommit(){
+  if(!hfEditing)return;
+  const d=doc(),box=$("#hfedit");
+  d[hfEditing.which]={...hfOf(d,hfEditing.which),text:(box.textContent||"").trim()};
+  commit();paginate();setPrintHF();
+}
+function hfEditClose(){
+  const box=$("#hfedit");if(box){box.classList.remove("on");box.textContent=""}
+  const bar=$("#hfbar");if(bar)bar.classList.remove("on");
+  hfEditing=null;
+}
+function drawHfBar(){
+  const bar=$("#hfbar"),box=$("#hfedit");
+  if(!hfEditing||!bar||!box){if(bar)bar.classList.remove("on");return}
+  const v=hfOf(doc(),hfEditing.which);
+  const ic={left:'<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>',
+    center:'<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>',
+    right:'<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>'};
+  bar.innerHTML=
+    `<span style="font-family:Consolas,monospace;font-size:10px;letter-spacing:.06em;
+      text-transform:uppercase;color:var(--ink-faint)">${tr(hfEditing.which==="hdr"?"Kopfzeile":"Fußzeile")}</span>
+    <div class="sep"></div>
+    ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
+      title="${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}">${ICO(ic[a])}</button>`).join("")}
+    <div class="sep"></div>
+    ${[["{seite}","Seitenzahl einfügen"],["{seiten}","Gesamtseiten einfügen"],
+       ["{titel}","Titel einfügen"],["{datum}","Datum einfügen"]].map(([p,n])=>
+      `<button class="pill" data-hfp="${p}" title="${tr(n)}">${p}</button>`).join("")}
+    <div class="sep"></div>
+    <span style="color:var(--ink-soft);font-size:11.5px">${tr("Abstand")}</span>
+    <input type="number" id="hfDist" value="${v.dist}" style="width:50px;background:var(--paper);
+      border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
+    <span style="color:var(--ink-faint);font-size:11px">mm</span>
+    <div class="sep"></div>
+    <button class="pill" data-hfx="del">${tr("Entfernen")}</button>
+    <button class="pill" data-hfx="done">${tr("Fertig")}</button>`;
+  bar.classList.add("on");
+  /* Erst an den linken Rand setzen, damit Umbruch und Höhe korrekt gemessen werden */
+  bar.style.left="8px";bar.style.top="0px";
+  const bw=bar.offsetWidth,bh=bar.offsetHeight;
+  const r=box.getBoundingClientRect();
+  bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bw-10))+"px";
+  bar.style.top=(r.bottom+8+bh<innerHeight-8?r.bottom+8:Math.max(8,r.top-bh-8))+"px";
+}
+$("#hfbar").addEventListener("mousedown",e=>{if(e.target.closest("button"))e.preventDefault()});
+$("#hfbar").addEventListener("click",e=>{
+  if(!hfEditing)return;
+  const d=doc(),k=hfEditing.which;
+  const al=e.target.closest("[data-hfa]");
+  if(al){hfEditCommit();d[k]={...hfOf(d,k),align:al.dataset.hfa};
+    $("#hfedit").style.textAlign=al.dataset.hfa;commit();paginate();drawHfBar();return}
+  const ph=e.target.closest("[data-hfp]");
+  if(ph){$("#hfedit").focus();document.execCommand("insertText",false,ph.dataset.hfp);return}
+  const x=e.target.closest("[data-hfx]");
+  if(!x)return;
+  if(x.dataset.hfx==="del"){d[k]={...hfOf(d,k),on:false};hfEditClose();
+    commit();paginate();setPrintHF();toast(tr(k==="hdr"?"Kopfzeile entfernt":"Fußzeile entfernt"));return}
+  hfEditCommit();hfEditClose();
+  const ed=$("#editor");ed&&ed.focus();
+});
+$("#hfbar").addEventListener("change",e=>{
+  if(e.target.id!=="hfDist"||!hfEditing)return;
+  const d=doc(),k=hfEditing.which;
+  d[k]={...hfOf(d,k),dist:Math.max(0,+e.target.value||0)};
+  commit();paginate();
+  const r=hfRect(k,hfEditing.page);
+  $("#hfedit").style.top=r.top+"px";
+  drawHfBar();
+});
 function hfHtml(i,total,ml,mr,z){
   const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr");
   let out="";
@@ -2141,7 +2296,8 @@ function hfDialog(){
   };
   const body=()=>row("hdr",tr("Kopfzeile"))+row("ftr",tr("Fußzeile"))+warn()+
     `<div style="color:var(--ink-faint);font-size:11.5px;line-height:1.5;margin-top:6px">
-      ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}</div>`;
+      ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}<br>
+      ${tr("Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.")}</div>`;
   overlay(`<div class="modal"><h3>${tr("Kopf- und Fußzeile")}</h3>
     <div class="pad" id="hfbody">${body()}</div>
     <div class="rowend"><button class="btn" id="hfClose">${tr("Fertig")}</button></div></div>`);
@@ -2727,7 +2883,8 @@ document.addEventListener("keydown",e=>{
     if(S.mode==="write"){fitZoom();render()}return}
   if(as&&e.key.toLowerCase()==="z"){e.preventDefault();
     document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus();return}
-  if(e.key==="Escape"){if(slashOn)slashClose();
+  if(e.key==="Escape"){if(hfEditing){hfEditClose();const ed=$("#editor");ed&&ed.focus();return}
+    if(slashOn)slashClose();
     else if($("#findbar").classList.contains("on")&&document.activeElement&&document.activeElement.closest(".findbar"))fdClose();
     else if($("#ovl").innerHTML)closeOvl();
     else if(openNoteId)closeNote();
@@ -2801,6 +2958,7 @@ $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
 
 /* ================= Render ================= */
 function render(){
+  hfEditClose();
   document.title=tr(doc().title||"Ohne Titel")+" — PureQuill Writer";
   drawTabs();
   document.querySelectorAll(".rb[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===S.mode));
