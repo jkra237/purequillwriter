@@ -75,6 +75,48 @@
   --rule:#B8B2A4; --stamp:#0F7C82; --manila:#EBDFC4;
   --ok:#1F8A5D; --pageedge:rgba(0,0,0,.4);
 }
+/* Getöntes Schreibmaschinenpapier */
+[data-theme="sepia"]{
+  --paper:#F4EADA; --chrome:#E4D6BE; --chrome-2:#EFE5D2; --canvas:#9C8B72;
+  --ink:#3B2F23; --ink-soft:#6E5C46; --ink-faint:#9C8B73;
+  --rule:#CDBB9E; --stamp:#8A3324; --manila:#EBDFC4;
+  --ok:#5B6B3A; --pageedge:rgba(59,47,35,.38);
+}
+/* Graue Windows-Oberfläche der frühen Neunziger */
+[data-theme="werkbank"]{
+  --paper:#FFFFFF; --chrome:#C0C0C0; --chrome-2:#DCDCDC; --canvas:#6E6E6E;
+  --ink:#000000; --ink-soft:#3F3F3F; --ink-faint:#767676;
+  --rule:#9A9A9A; --stamp:#8B1A1A; --manila:#EBDFC4;
+  --ok:#00680E; --pageedge:rgba(0,0,0,.5);
+}
+/* Blauvioletter Heimcomputer-Bildschirm der Achtziger */
+[data-theme="brotkasten"]{
+  --paper:#3B33A6; --chrome:#2C2685; --chrome-2:#3F37B4; --canvas:#1B1758;
+  --ink:#DEDAFF; --ink-soft:#C3BDFF; --ink-faint:#A49DE6;
+  --rule:#564DCC; --stamp:#FFE97F; --manila:#EBDFC4;
+  --ok:#9BE8B0; --pageedge:rgba(255,255,255,.3);
+}
+/* Schwarzer Bildschirm mit Cyan, wie farbige Tabellenkalkulationen der DOS-Zeit */
+[data-theme="zyan"]{
+  --paper:#05161A; --chrome:#0A2228; --chrome-2:#0F2F37; --canvas:#02090B;
+  --ink:#67E8F9; --ink-soft:#3EA9BD; --ink-faint:#256E80;
+  --rule:#164E5B; --stamp:#FFD24A; --manila:#EBDFC4;
+  --ok:#5FE3A1; --pageedge:rgba(103,232,249,.3);
+}
+/* Weiß auf Schwarz, wie frühe Monochromkarten */
+[data-theme="hercules"]{
+  --paper:#000000; --chrome:#0C0C0C; --chrome-2:#171717; --canvas:#000000;
+  --ink:#E9E9E9; --ink-soft:#A6A6A6; --ink-faint:#6B6B6B;
+  --rule:#2C2C2C; --stamp:#FFFFFF; --manila:#EBDFC4;
+  --ok:#B4B4B4; --pageedge:rgba(255,255,255,.25);
+}
+/* Gedämpftes Teal-Dunkelschema für lange Sitzungen */
+[data-theme="solar"]{
+  --paper:#002B36; --chrome:#073642; --chrome-2:#0B4453; --canvas:#001A21;
+  --ink:#EEE8D5; --ink-soft:#93A1A1; --ink-faint:#6A8085;
+  --rule:#14556A; --stamp:#B58900; --manila:#EBDFC4;
+  --ok:#859900; --pageedge:rgba(238,232,213,.25);
+}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
@@ -519,13 +561,19 @@ const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
+  {k:"sepia",    n:"Sepia",      d:"Getöntes Schreibmaschinenpapier",   c:["#F4EADA","#9C8B72","#8A3324"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
+  {k:"werkbank", n:"Werkbank",   d:"Graue Windows-Oberfläche der frühen Neunziger — erinnert an Lotus Ami Pro", c:["#FFFFFF","#6E6E6E","#8B1A1A"]},
   {k:"leinen",   n:"Leinen",     d:"Zurückhaltend, modern",             c:["#FAF9F5","#ADA79B","#2F6F6A"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
-  {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
-  {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
+  {k:"kobalt",   n:"Kobalt",     d:"Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit",        c:["#0A1EA6","#050B40","#FFDD55"]},
+  {k:"brotkasten",n:"Brotkasten",d:"Blauvioletter Heimcomputer-Bildschirm der Achtziger",                  c:["#3B33A6","#1B1758","#FFE97F"]},
+  {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
   {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]},
-  {k:"kobalt",   n:"Kobalt",     d:"Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit",        c:["#0A1EA6","#050B40","#FFDD55"]}
+  {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
+  {k:"hercules", n:"Hercules",   d:"Weiß auf Schwarz — Monochrombildschirme unter WordStar",               c:["#000000","#000000","#FFFFFF"]},
+  {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
+  {k:"solar",    n:"Solar",      d:"Gedämpftes Teal-Dunkelschema, inspiriert von Solarized",               c:["#002B36","#001A21","#B58900"]}
 ];
 const ICO=p=>`<svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const KEY="lw.v1";
@@ -673,6 +721,14 @@ const EN={
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era","Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
   "Phosphor":"Phosphor","Kobalt":"Cobalt","Lagune":"Lagoon",
+  "Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
+  "Hercules":"Hercules","Solar":"Solar",
+  "Getöntes Schreibmaschinenpapier":"Tinted typewriter paper",
+  "Graue Windows-Oberfläche der frühen Neunziger — erinnert an Lotus Ami Pro":"Gray Windows interface from the early nineties — reminiscent of Lotus Ami Pro",
+  "Blauvioletter Heimcomputer-Bildschirm der Achtziger":"Blue-violet home computer screen from the eighties",
+  "Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe":"Black with cyan and yellow — reminiscent of Lotus 1-2-3 in colour",
+  "Weiß auf Schwarz — Monochrombildschirme unter WordStar":"White on black — monochrome screens under WordStar",
+  "Gedämpftes Teal-Dunkelschema, inspiriert von Solarized":"Muted teal dark scheme, inspired by Solarized",
   "Umbenennen":"Rename","Farbe":"Color","Keine Farbe":"No color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
   "Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit":"Bold office blue — reminiscent of WordPerfect 5.1 from the DOS era",
