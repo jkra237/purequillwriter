@@ -1,4 +1,4 @@
-# Lightweight Writer
+# PureQuill Writer
 
 Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine einzige HTML-Datei, keine Installation, keine Abhängigkeiten.
 
