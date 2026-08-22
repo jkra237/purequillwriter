@@ -213,11 +213,19 @@ input,select,textarea{font:inherit;color:inherit}
 .hfedit{position:absolute;z-index:6;display:none;outline:none;padding:1px 3px;
   background:var(--paper);box-shadow:0 0 0 1px var(--stamp);border-radius:2px;
   font-family:Georgia,serif;color:var(--ink);line-height:1.3;white-space:pre-wrap}
-/* Griff zum Ziehen des Abstands zum Seitenrand */
-.hfgrip{position:absolute;z-index:7;display:none;width:40px;height:8px;margin-left:-20px;
-  border-radius:4px;background:var(--stamp);opacity:.45;cursor:ns-resize}
-.hfgrip:hover,.hfgrip.drag{opacity:.9}
+/* Ziehkante über die volle Feldbreite, damit man sie überall fassen kann */
+.hfgrip{position:absolute;z-index:7;display:none;height:13px;cursor:ns-resize}
 .hfgrip.on{display:block}
+.hfgrip::after{content:"";position:absolute;left:0;right:0;top:6px;height:1px;
+  background:var(--stamp);opacity:.3}
+.hfgrip::before{content:"";position:absolute;left:50%;top:3px;width:46px;height:7px;margin-left:-23px;
+  border-radius:4px;background:var(--stamp);opacity:.5}
+.hfgrip:hover::before,.hfgrip.drag::before{opacity:.95}
+.hfgrip:hover::after,.hfgrip.drag::after{opacity:.6}
+/* Eckanfasser zum Skalieren des ausgewählten Bildes */
+.figrsz{position:absolute;z-index:8;display:none;width:15px;height:15px;border-radius:50%;
+  background:var(--stamp);border:2px solid var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.figrsz.on{display:block}
 .hfedit.on{display:block}
 .printhf{display:none}
 .sheetpage .pn{position:absolute;bottom:5px;right:9px;font-family:Consolas,monospace;
@@ -735,6 +743,7 @@ const EN={
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
   "Kopfzeile entfernt":"Header removed","Fußzeile entfernt":"Footer removed","Entfernen":"Remove",
   "Abstand zum Seitenrand ziehen":"Drag the distance to the page edge",
+  "Ziehen, um die Bildgröße zu ändern":"Drag to resize the image",
   "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Multiple lines are possible; in the document, Shift+Enter adds a line.",
   "Links":"Left","Mitte":"Center","Rechts":"Right","Abstand":"Spacing",
   "Seitenzahl":"Page number","Gesamtseiten":"Total pages","Titel":"Title",
@@ -1092,6 +1101,7 @@ function drawWrite(){
         <div class="hfhint" id="hfhint"></div>
         <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
         <div class="hfgrip" id="hfgrip" title="${esc(tr("Abstand zum Seitenrand ziehen"))}"></div>
+        <div class="figrsz" id="figrsz" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
       </div>
     </div>
     <div class="anchcol" id="anchcol"></div>
@@ -1143,7 +1153,7 @@ function drawWrite(){
   });
   ed.addEventListener("keyup",e=>{
     if(["ArrowUp","ArrowDown","PageUp","PageDown","Enter"].includes(e.key))typewriter()});
-  $("#sheet").addEventListener("scroll",()=>{pageFlag();if(hfEditing)drawHfBar()});
+  $("#sheet").addEventListener("scroll",()=>{pageFlag();if(hfEditing)drawHfBar();if(selFig)drawImgBar()});
   ed.addEventListener("blur",()=>{flush();if(S.settings.autosave)commit()});
   /* Kopf-/Fußzeile: Hinweis beim Überfahren, Doppelklick öffnet sie */
   $("#sheet").addEventListener("mousemove",e=>hfHintAt(e.clientY));
@@ -1154,6 +1164,7 @@ function drawWrite(){
     e.preventDefault();hfEditOpen(zone.which,zone.page);
   });
   $("#hfgrip").addEventListener("mousedown",hfGripDrag);
+  $("#figrsz").addEventListener("mousedown",figResizeDrag);
   const hb=$("#hfedit");
   hb.addEventListener("keydown",e=>{
     if(e.key==="Enter"&&e.shiftKey){   /* zweite Zeile in der Kopf-/Fußzeile */
@@ -2310,9 +2321,9 @@ function placeHfGrip(){
   if(!hfEditing||!grip||!box){if(grip)grip.classList.remove("on");return}
   const paper=$("#paper");if(!paper)return;
   const pr=paper.getBoundingClientRect(),br=box.getBoundingClientRect();
-  const mid=br.left-pr.left+br.width/2;
-  const y=hfEditing.which==="hdr"?br.bottom-pr.top+3:br.top-pr.top-11;
-  grip.style.left=mid+"px";grip.style.top=y+"px";
+  grip.style.left=(br.left-pr.left)+"px";
+  grip.style.width=br.width+"px";
+  grip.style.top=(hfEditing.which==="hdr"?br.bottom-pr.top+1:br.top-pr.top-14)+"px";
   grip.classList.add("on");
 }
 function hfEditCommit(){
@@ -2846,9 +2857,52 @@ function selectFig(f){
   if(ed)ed.querySelectorAll("figure.fig").forEach(x=>x.classList.remove("sel"));
   selFig=f||null;
   const bar=$("#imgbar");
-  if(!f){bar.classList.remove("on");return}
+  if(!f){bar.classList.remove("on");placeFigHandle();return}
   f.classList.add("sel");
   drawImgBar();
+}
+/* Bei rechtsbündigen Bildern ist die rechte Kante fest — dort gehört der Anfasser nach links */
+const figFreeSide=f=>(f.style.textAlign==="right")?"left":"right";
+function placeFigHandle(){
+  const h=$("#figrsz"),paper=$("#paper");
+  if(!h)return;
+  const im=selFig&&selFig.querySelector("img");
+  if(!selFig||!im||!paper||S.mode!=="write"){h.classList.remove("on");return}
+  const pr=paper.getBoundingClientRect(),ir=im.getBoundingClientRect();
+  const x=figFreeSide(selFig)==="right"?ir.right-pr.left:ir.left-pr.left;
+  h.style.left=(x-7)+"px";
+  h.style.top=(ir.bottom-pr.top-7)+"px";
+  h.style.cursor=figFreeSide(selFig)==="right"?"nwse-resize":"nesw-resize";
+  h.classList.add("on");
+}
+function figResizeDrag(e){
+  const im=selFig&&selFig.querySelector("img");
+  if(!im)return;
+  e.preventDefault();
+  const ed=$("#editor");
+  /* Prozent beziehen sich auf die Textbreite, nicht auf die Bildbreite */
+  const cs=getComputedStyle(ed);
+  const cw=ed.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const startX=e.clientX,startW=+(selFig.dataset.w||70);
+  const align=selFig.style.textAlign||"center";
+  /* Zentrierte Bilder wachsen an beiden Seiten, brauchen also den doppelten Faktor */
+  const faktor=(align==="center"?2:1)*(figFreeSide(selFig)==="right"?1:-1);
+  const move=ev=>{
+    const w=Math.min(100,Math.max(10,Math.round(startW+faktor*(ev.clientX-startX)/cw*100)));
+    if(w===+(selFig.dataset.w||70))return;
+    selFig.dataset.w=w;im.style.width=w+"%";
+    const s=$("#ibW");if(s)s.value=w;
+    const p=$("#ibP");if(p)p.textContent=w+" %";
+    placeFigHandle();
+  };
+  const up=()=>{
+    document.removeEventListener("mousemove",move);
+    document.removeEventListener("mouseup",up);
+    flush();dirty=true;commit();queuePaginate();drawStatus();
+    setTimeout(()=>{drawImgBar();placeFigHandle()},0);
+  };
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",up);
 }
 function drawImgBar(){
   const f=selFig,bar=$("#imgbar");if(!f){bar.classList.remove("on");return}
@@ -2869,6 +2923,7 @@ function drawImgBar(){
   const r=f.getBoundingClientRect();
   bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bar.offsetWidth-10))+"px";
   bar.style.top=Math.min(r.bottom+6,innerHeight-bar.offsetHeight-8)+"px";
+  placeFigHandle();
 }
 function imgApply(){flush();dirty=true;commit();queuePaginate();drawImgBar()}
 $("#imgbar").addEventListener("input",e=>{
@@ -2877,7 +2932,7 @@ $("#imgbar").addEventListener("input",e=>{
   selFig.dataset.w=v;
   const im=selFig.querySelector("img");if(im)im.style.width=v+"%";
   $("#ibP").textContent=v+" %";
-  dirty=true;queuePaginate();
+  dirty=true;queuePaginate();placeFigHandle();
 });
 $("#imgbar").addEventListener("change",e=>{if(e.target.id==="ibW")imgApply()});
 $("#imgbar").addEventListener("click",e=>{
