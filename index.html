@@ -675,7 +675,7 @@ function applyStaticLabels(){
 function isTrulyEmpty(){return S.docs.every(d=>!stripHtmlSafe(d.html))}
 const stripHtmlSafe=h=>{const e=document.createElement("div");e.innerHTML=h||"";return (e.innerText||"").trim()};
 function startNew(){
-  closeOvl();
+  lockedOvl=false;closeOvl();
   if(S.docs.length===1&&!stripHtmlSafe(S.docs[0].html)){
     formatDialog("new",val=>{S.docs[0].fmt=val;save();render()});
   }else newDocument();
@@ -700,7 +700,7 @@ function startupDialog(){
       <button class="btn pri" id="stNew" style="flex:1;padding:11px">${tr("Neues Dokument")}</button>
       <button class="btn" id="stOpen" style="flex:1;padding:11px">${tr("Datei laden")}&hellip;</button>
     </div>
-    </div></div>`);
+    </div></div>`,true);
   const paintSwatch=k=>{
     const t=THEMES.find(x=>x.k===k)||THEMES[0];
     $("#stSwatch").innerHTML=`<span style="flex:2;background:${t.c[0]}"></span>
@@ -712,7 +712,7 @@ function startupDialog(){
   $("#stTheme").onchange=()=>{
     S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
   $("#stNew").onclick=startNew;
-  $("#stOpen").onclick=()=>{closeOvl();importJson()};
+  $("#stOpen").onclick=importJson;
 }
 
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}
@@ -1188,9 +1188,10 @@ function resetTimer(){clearInterval(timer);
   if(S.settings.autosave)timer=setInterval(()=>{if(dirty)commit()},S.settings.interval*1000)}
 
 /* ================= Overlays ================= */
-function closeOvl(){$("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
-function overlay(html){$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
-  $("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
+let lockedOvl=false;
+function closeOvl(){if(lockedOvl)return;$("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
+function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
+  if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
 
 /* ---- Export ---- */
 function exportTxt(){flush();const d=doc();download(d.title+".txt",stripHtml(d.html))}
@@ -1359,7 +1360,7 @@ function exportDoc(){
 function importJson(){
   const i=document.createElement("input");i.type="file";i.accept=".json";
   i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();
-    r.onload=()=>{try{S=JSON.parse(r.result);save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"))}catch(e){toast(tr("Datei nicht lesbar"))}};
+    r.onload=()=>{try{S=JSON.parse(r.result);lockedOvl=false;closeOvl();save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"))}catch(e){toast(tr("Datei nicht lesbar"))}};
     r.readAsText(f)};i.click();
 }
 function closeMenu(){document.querySelectorAll(".menu").forEach(m=>m.remove());
@@ -2664,6 +2665,6 @@ function render(){
   else drawGloss();
   drawStatus();
 }
-applyTheme();applyStaticLabels();render();resetTimer();
-if(isTrulyEmpty())startupDialog();
+applyTheme();applyStaticLabels();resetTimer();
+if(isTrulyEmpty())startupDialog();else render();
 </script>
