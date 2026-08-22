@@ -35,6 +35,7 @@ Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinat
 | `Alt` `⇧` `L` / `E` / `R` | Linksbündig / Zentriert / Rechtsbündig |
 | `Alt` `⇧` `+` / `−` / `0` | Vergrößern / Verkleinern / Seitenbreite einpassen |
 | `Alt` `⇧` `⏎` | Seitenumbruch einfügen |
+| `Tab` / `⇧` `Tab` | Absatz ein- / ausrücken (in Tabellen: nächste Zelle) |
 | `/` | Einfügemenü am Anfang eines leeren Absatzes |
 
 Übrige Kürzel folgen Word: `Strg B`/`I`/`U` (Fett/Kursiv/Unterstrichen), `Strg Z`/`Y` (Rückgängig/Wiederholen), `Strg P` (Drucken).

@@ -536,6 +536,7 @@ const EN={
   "Unterstrichen (Strg+U)":"Underline (Ctrl+U)","Absatzformat":"Paragraph style","Fließtext":"Body text",
   "Überschrift 1":"Heading 1","Überschrift 2":"Heading 2","Überschrift 3":"Heading 3",
   "Aufzählung":"Bulleted list","Nummerierung":"Numbered list","Linksbündig":"Align left","Zentriert":"Center","Blocksatz":"Justify",
+  "Einrücken":"Indent","Ausrücken":"Outdent","Einrücken (Tab)":"Indent (Tab)","Ausrücken (⇧ Tab)":"Outdent (⇧ Tab)",
   "Bild einfügen":"Insert image","Link einfügen (Alt+⇧+K)":"Insert link (Alt+⇧+K)","Tabelle einfügen":"Insert table",
   "Verkleinern (Alt+⇧+Minus)":"Zoom out (Alt+⇧+Minus)","Vergrößern (Alt+⇧+Plus)":"Zoom in (Alt+⇧+Plus)","Vorgaben":"Presets",
   "Zoomstufe eintippen und Eingabe drücken":"Type a zoom level and press Enter",
@@ -924,6 +925,10 @@ function drawTools(){
         <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option></select>
       <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICO('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
       <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICO('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.2 4.6 4.6 4v4M2.9 12.2c0-.7.6-1.2 1.3-1.2s1.2.5 1.2 1.1c0 1.1-2.5 1.5-2.5 2.9h2.6M2.9 16.6c.2-.5.7-.7 1.3-.7.7 0 1.2.4 1.2 1s-.5 1-1.1 1c.7 0 1.3.4 1.3 1.1 0 .7-.6 1.1-1.4 1.1-.6 0-1.1-.2-1.3-.7"/>')}</button>
+      <span style="display:flex;gap:7px">
+        <button class="tb" id="outdentBtn" title="${tr("Ausrücken (⇧ Tab)")}">${ICO('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M7.5 9 4.5 12l3 3"/>')}</button>
+        <button class="tb" id="indentBtn" title="${tr("Einrücken (Tab)")}">${ICO('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M4.5 9 7.5 12l-3 3"/>')}</button>
+      </span>
       <div class="sep"></div>
       <button class="tb" data-cmd="justifyLeft" title="${tr("Linksbündig")}">${ICO('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyCenter" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
@@ -981,7 +986,8 @@ function drawWrite(){
       if(e.key==="Escape"){e.preventDefault();slashClose();return}
     }
     if(e.key!=="Tab")return;
-    const cell=curCell();if(!cell)return;
+    const cell=curCell();
+    if(!cell){e.preventDefault();indentBlocks(e.shiftKey?-1:1);return}
     e.preventDefault();
     const table=cell.closest("table");
     const cells=[...table.querySelectorAll("td,th")];
@@ -1040,6 +1046,43 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   d.html=c.innerHTML;
   if(!d.customTitle){const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
 function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus()}
+
+/* ---- Einrücken / Ausrücken ---- */
+const IND_STEP=2,IND_MAX=12; /* em, also skaliert mit Schriftgröße und Zoom */
+function curListItem(){
+  const s=getSelection();if(!s.rangeCount)return null;
+  let n=s.getRangeAt(0).startContainer;
+  n=n.nodeType===1?n:n.parentElement;
+  const ed=$("#editor");
+  return (n&&ed&&ed.contains(n))?n.closest("li"):null;
+}
+function selectedBlocks(){
+  const ed=$("#editor");if(!ed)return[];
+  const s=getSelection();if(!s.rangeCount)return[];
+  const r=s.getRangeAt(0);
+  const out=[...ed.children].filter(b=>{try{return r.intersectsNode(b)}catch(e){return false}});
+  if(out.length)return out;
+  const b=curBlock();return b?[b]:[];
+}
+function indentBlocks(dir){
+  const ed=$("#editor");
+  if(S.mode!=="write"||!ed){toast(tr("Nur im Schreibmodus"));return}
+  ed.focus();
+  /* In Listen macht die native Verschachtelung mehr Sinn als ein Rand */
+  if(curListItem()){
+    document.execCommand(dir>0?"indent":"outdent");
+    flush();dirty=true;commit();queuePaginate();drawStatus();return;
+  }
+  const blocks=selectedBlocks();
+  if(!blocks.length)return;
+  blocks.forEach(b=>{
+    if(b.classList&&b.classList.contains("pgbreak"))return;
+    const cur=parseFloat(b.style.marginLeft)||0;
+    const next=Math.min(IND_MAX,Math.max(0,cur+dir*IND_STEP));
+    b.style.marginLeft=next>0?next+"em":"";
+  });
+  flush();dirty=true;commit();queuePaginate();drawAnchors();drawStatus();
+}
 
 /* Glossarbegriffe markieren */
 function markTerms(){
@@ -1316,6 +1359,10 @@ function commandList(){
   [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
   fmtCmd("Aufzählung","",()=>document.execCommand("insertUnorderedList"));
   fmtCmd("Nummerierung","",()=>document.execCommand("insertOrderedList"));
+  const blockCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
+    if(S.mode!=="write"){setMode("write");setTimeout(fn,40)}else fn()});
+  blockCmd("Einrücken","Tab",()=>indentBlocks(1));
+  blockCmd("Ausrücken","⇧ Tab",()=>indentBlocks(-1));
   fmtCmd("Linksbündig","Alt ⇧ L",()=>document.execCommand("justifyLeft"));
   fmtCmd("Zentriert","Alt ⇧ E",()=>document.execCommand("justifyCenter"));
   fmtCmd("Bild einfügen","",pickImage);
@@ -2694,6 +2741,8 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#imgBtn")){pickImage();return}
   if(e.target.closest("#lnkBtn")){linkDialog();return}
   if(e.target.closest("#tblBtn")){tablePicker();return}
+  if(e.target.closest("#indentBtn")){indentBlocks(1);return}
+  if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
   if(e.target.id==="addNote"){const n=addNote("");render();openNote(n.id);return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
