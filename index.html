@@ -162,9 +162,25 @@ input,select,textarea{font:inherit;color:inherit}
 .fmtopt.on{border-color:var(--stamp);box-shadow:inset 0 0 0 1px var(--stamp)}
 .fmtopt b{display:block;font-weight:600;margin-bottom:2px}
 .fmtopt span{font-family:Consolas,monospace;font-size:10.5px;color:var(--ink-faint)}
+/* Gleich hohe Formatkarten, auch wenn die Beschreibung umbricht */
+#fbody .fmtopt{min-height:56px;display:flex;flex-direction:column;justify-content:center}
+#fbody .fmtopt span{line-height:1.35}
 .mmrow{display:flex;gap:6px;align-items:center;margin-bottom:7px}
 .mmrow label{flex:0 0 96px;color:var(--ink-soft)}
 .mmrow input{width:100%}
+/* Gesperrte Felder müssen als gesperrt erkennbar sein */
+.modal input:disabled,.modal textarea:disabled,.modal select:disabled{
+  background:var(--chrome-2);color:var(--ink-faint);cursor:not-allowed}
+.pill:disabled{opacity:.4;pointer-events:none}
+/* Seitenvorschau im Formatdialog */
+.fmtwrap{display:flex;gap:15px;align-items:flex-start}
+.fmtfields{flex:1;min-width:0}
+.fmtprev{flex:0 0 104px;display:flex;justify-content:center;padding-top:20px}
+.fmtprev .pg{position:relative;background:var(--paper);border:1px solid var(--ink-soft);
+  box-shadow:0 2px 7px rgba(0,0,0,.2)}
+.fmtprev .pg i{position:absolute;border:1px dashed var(--stamp);opacity:.55}
+.fmtinfo{font-family:Consolas,monospace;font-size:11.5px;color:var(--ink-soft);margin-top:11px}
+.fmttip{color:var(--ink-faint);font-size:11.5px;line-height:1.5;margin-top:4px}
 #editor h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
 #editor h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
@@ -291,6 +307,7 @@ input,select,textarea{font:inherit;color:inherit}
 .veil{position:fixed;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:flex-start;justify-content:center;padding-top:13vh;z-index:50}
 .modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
+.modal.wide{width:min(600px,94vw)}
 .modal h3{margin:0;padding:11px 14px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .modal .pad{padding:13px 14px}
@@ -597,6 +614,9 @@ const EN={
   "Eigene Maße":"Custom size","Breite und Höhe frei wählen":"Choose width and height freely","Ausrichtung":"Orientation",
   "Hochformat":"Portrait","Querformat":"Landscape","Seitengröße in mm":"Page size in mm","Breite / Höhe":"Width / Height",
   "Ränder in mm":"Margins in mm","Oben / Unten":"Top / Bottom","Links / Rechts":"Left / Right","merken":"remember",
+  "Als Standard":"As default","Dieses Format für neue Dokumente voreinstellen":"Preset this format for new documents",
+  "Nur bei „Eigene Maße“ änderbar":"Only editable with \"Custom size\"","Satzspiegel":"Text block",
+  "Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.":"You can also drag the left and right margin in the ruler above the page.",
   "Anlegen":"Create","Übernehmen":"Apply",
   "Zeichen (mit Leerzeichen)":"Characters (with spaces)","Zeichen (ohne Leerzeichen)":"Characters (without spaces)",
   "Absätze":"Paragraphs","Seiten":"Pages","Normseiten (1500 Z.)":"Manuscript pages (1500 ch.)",
@@ -1795,6 +1815,14 @@ function formatDialog(mode,onDone){
   let sel=start.key||"custom";
   let cfg={n:start.n,w:start.w,h:start.h,m:[...start.m],key:sel};
   const quer=()=>cfg.w>cfg.h;
+  const pagePreview=()=>{
+    const sc=100/Math.max(cfg.w||1,cfg.h||1);
+    const px=v=>Math.max(0,Math.round((v||0)*sc));
+    const w=Math.max(14,px(cfg.w)),h=Math.max(14,px(cfg.h));
+    return `<div class="fmtprev"><div class="pg" style="width:${w}px;height:${h}px">
+      <i style="top:${px(cfg.m[0])}px;right:${px(cfg.m[1])}px;bottom:${px(cfg.m[2])}px;left:${px(cfg.m[3])}px"></i>
+    </div></div>`;
+  };
   const body=()=>`
     <div class="fmtgrid">${Object.entries(FORMATS).map(([k,f])=>
       `<button class="fmtopt ${sel===k?"on":""}" data-f="${k}">
@@ -1807,27 +1835,31 @@ function formatDialog(mode,onDone){
       <button class="pill ${!quer()?"on":""}" data-o="hoch" style="flex:1">${tr("Hochformat")}</button>
       <button class="pill ${quer()?"on":""}" data-o="quer" style="flex:1">${tr("Querformat")}</button>
     </div>
-    <div class="mlabel" style="padding-left:0">${tr("Seitengröße in mm")}</div>
-    <div class="mmrow"><label>${tr("Breite / Höhe")}</label>
-      <input type="number" id="cw" value="${cfg.w}" ${sel==="custom"?"":"disabled"}>
-      <input type="number" id="ch" value="${cfg.h}" ${sel==="custom"?"":"disabled"}></div>
-    <div class="mlabel" style="padding-left:0">${tr("Ränder in mm")}</div>
-    <div class="mmrow"><label>${tr("Oben / Unten")}</label>
-      <input type="number" id="c0" value="${cfg.m[0]}"><input type="number" id="c2" value="${cfg.m[2]}"></div>
-    <div class="mmrow"><label>${tr("Links / Rechts")}</label>
-      <input type="number" id="c3" value="${cfg.m[3]}"><input type="number" id="c1" value="${cfg.m[1]}"></div>
-    <div style="color:var(--ink-faint);font-size:11.5px;line-height:1.5;margin-top:4px">
-      ${S.settings.uiLang==="en"
-        ?`Text block ${Math.max(0,cfg.w-cfg.m[1]-cfg.m[3])} &times; ${Math.max(0,cfg.h-cfg.m[0]-cfg.m[2])} mm.
-      You can also drag the left and right margin in the ruler above the page.`
-        :`Satzspiegel ${Math.max(0,cfg.w-cfg.m[1]-cfg.m[3])} &times; ${Math.max(0,cfg.h-cfg.m[0]-cfg.m[2])} mm.
-      Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.`}</div>`;
-  overlay(`<div class="modal"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
+    <div class="fmtwrap">
+      <div class="fmtfields">
+        <div class="mlabel" style="padding-left:0">${tr("Seitengröße in mm")}</div>
+        <div class="mmrow"><label>${tr("Breite / Höhe")}</label>
+          <input type="number" id="cw" value="${cfg.w}" ${sel==="custom"?"":"disabled"}
+            title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}">
+          <input type="number" id="ch" value="${cfg.h}" ${sel==="custom"?"":"disabled"}
+            title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}"></div>
+        <div class="mlabel" style="padding-left:0">${tr("Ränder in mm")}</div>
+        <div class="mmrow"><label>${tr("Oben / Unten")}</label>
+          <input type="number" id="c0" value="${cfg.m[0]}"><input type="number" id="c2" value="${cfg.m[2]}"></div>
+        <div class="mmrow" style="margin-bottom:0"><label>${tr("Links / Rechts")}</label>
+          <input type="number" id="c3" value="${cfg.m[3]}"><input type="number" id="c1" value="${cfg.m[1]}"></div>
+      </div>
+      ${pagePreview()}
+    </div>
+    <div class="fmtinfo">${tr("Satzspiegel")} ${Math.max(0,cfg.w-cfg.m[1]-cfg.m[3])} &times; ${Math.max(0,cfg.h-cfg.m[0]-cfg.m[2])} mm</div>
+    <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`;
+  overlay(`<div class="modal wide"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
     <div class="pad" id="fbody">${body()}</div>
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="fHf">${tr("Kopf- und Fußzeile&hellip;")}</button>
-      <label style="color:var(--ink-soft);display:flex;align-items:center;gap:6px;margin-right:8px">
-        <input type="checkbox" id="fDef" style="width:auto"> ${tr("merken")}</label>
+      <label style="color:var(--ink-soft);display:flex;align-items:center;gap:6px;margin-right:8px"
+        title="${tr("Dieses Format für neue Dokumente voreinstellen")}">
+        <input type="checkbox" id="fDef" style="width:auto"> ${tr("Als Standard")}</label>
       <button class="btn" id="fCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="fOk">${isNew?tr("Anlegen"):tr("Übernehmen")}</button></div></div>`);
   const readM=()=>{cfg.m=[+$("#c0").value||0,+$("#c1").value||0,+$("#c2").value||0,+$("#c3").value||0];
