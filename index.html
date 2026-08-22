@@ -217,6 +217,8 @@ input,select,textarea{font:inherit;color:inherit}
 .status{display:flex;align-items:center;gap:17px;padding:5px 13px;border-top:1px solid var(--rule);
   background:var(--chrome-2);font-family:Consolas,monospace;font-size:11.5px;color:var(--ink-soft);flex:0 0 auto}
 .status .grow{flex:1}
+.status .zoomctl{border:none}
+.status .zoomctl button{width:18px;height:18px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
 .dot.dirty{background:var(--stamp)}
 
@@ -738,7 +740,7 @@ function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],fo
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
   settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"platin"},
-  gsort:"alpha",marks:false,zoom:1.2,guides:true,showCol:true
+  gsort:"alpha",marks:false,zoom:1.2,fitPage:false,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
 if(!S.notes){
@@ -909,15 +911,7 @@ function drawTools(){
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
       <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
-      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
-      <div class="sep"></div>
-      <div style="flex:1"></div>
-      <div class="zoomctl">
-        <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
-        <input id="zVal" value="${Math.round(S.zoom*100)}%" title="${tr("Zoomstufe eintippen und Eingabe drücken")}">
-        <button id="zPre" title="${tr("Vorgaben")}">&#9662;</button>
-        <button id="zIn" title="${tr("Vergrößern (Alt+⇧+Plus)")}">+</button>
-      </div>`;
+      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="btn" id="addNote">${tr("Neue Notiz")}</button>
       <input type="text" id="nSearch" placeholder="${tr("Notizen durchsuchen")}" style="width:210px">
@@ -1229,7 +1223,12 @@ function drawStatus(){
     <span class="grow"></span>
     <span><span class="dot ${dirty?"dirty":""}"></span>${dirty?tr("Nicht gesichert"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Bereit"))}</span>
     <span>${S.settings.autosave?"Autosave "+S.settings.interval+"s":"Autosave "+tr("aus")}</span>
-    <span>${Math.round(S.zoom*100)}%</span>
+    ${S.mode==="write"?`<span class="zoomctl" id="zoomctl">
+      <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
+      <input id="zVal" value="${Math.round(S.zoom*100)}%" title="${tr("Zoomstufe eintippen und Eingabe drücken")}">
+      <button id="zPre" title="${tr("Vorgaben")}">&#9662;</button>
+      <button id="zIn" title="${tr("Vergrößern (Alt+⇧+Plus)")}">+</button>
+    </span>`:`<span>${Math.round(S.zoom*100)}%</span>`}
     <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">Alt ⇧ P</span>`;
   const ph=$("#pHint");if(ph)ph.onclick=palette;
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
@@ -1708,13 +1707,18 @@ function drawAnchors(){
     prev=y+el.offsetHeight+9});
   col.style.height=Math.max(0,prev)+"px";
 }
-$("#tools").addEventListener("keydown",e=>{
+$("#status").addEventListener("keydown",e=>{
   if(e.target.id!=="zVal")return;
   if(e.key==="Enter"){e.preventDefault();applyZoomField();$("#editor")&&$("#editor").focus()}
   if(e.key==="Escape"){e.target.value=Math.round(S.zoom*100)+"%";e.target.blur()}
 });
-$("#tools").addEventListener("focusout",e=>{if(e.target.id==="zVal")applyZoomField()});
-$("#tools").addEventListener("focusin",e=>{if(e.target.id==="zVal")e.target.select()});
+$("#status").addEventListener("focusout",e=>{if(e.target.id==="zVal")applyZoomField()});
+$("#status").addEventListener("focusin",e=>{if(e.target.id==="zVal")e.target.select()});
+$("#status").addEventListener("click",e=>{
+  if(e.target.id==="zPre"){zoomPresets();return}
+  if(e.target.id==="zIn"){setZoom(S.zoom+.1);return}
+  if(e.target.id==="zOut"){setZoom(S.zoom-.1);return}
+});
 function applyZoomField(){
   const v=$("#zVal");if(!v)return;
   const n=parseFloat(String(v.value).replace(",","."));
@@ -2612,7 +2616,7 @@ function zoomPresets(){
   document.body.appendChild(m);
   const r=$("#zPre").getBoundingClientRect();
   m.style.left=Math.min(r.left-60,innerWidth-m.offsetWidth-8)+"px";
-  m.style.top=(r.bottom+4)+"px";
+  m.style.top=(r.top-m.offsetHeight-4>0?r.top-m.offsetHeight-4:r.bottom+4)+"px";
   m.onclick=e=>{const b=e.target.closest("[data-z]");if(!b)return;closeMenu();
     if(b.dataset.z==="fit"){S.fitPage=true;save();fitZoom();render()}
     else setZoom(+b.dataset.z/100)};
@@ -2658,9 +2662,6 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#imgBtn")){pickImage();return}
   if(e.target.closest("#lnkBtn")){linkDialog();return}
   if(e.target.closest("#tblBtn")){tablePicker();return}
-  if(e.target.id==="zPre"){zoomPresets();return}
-  if(e.target.id==="zIn"){setZoom(S.zoom+.1);return}
-  if(e.target.id==="zOut"){setZoom(S.zoom-.1);return}
   if(e.target.id==="addNote"){const n=addNote("");render();openNote(n.id);return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
