@@ -2,8 +2,7 @@
 
 Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine einzige HTML-Datei, keine Installation, keine Abhängigkeiten.
 
-**Testumgebung:** https://BENUTZERNAME.github.io/lightweight-writer/
-*(Adresse nach dem Einrichten von GitHub Pages hier eintragen.)*
+**Testumgebung:** https://jkra237.github.io/purequillwriter/
 
 ---
 
@@ -12,24 +11,33 @@ Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine
 - **Schreiben** mit echter Seitenansicht in Millimetermaßen, Seitenumbruch, Kopf- und Fußzeile
 - **Sticky Notes**, die sich an beliebig viele Textstellen anheften lassen
 - **Glossar** mit Markierung und Nachschlagefunktion im Text
-- **Kommandopalette** (`Strg ⇧ P`) und Schrägstrich-Menü für alles ohne Maus
+- **Kommandopalette** (`Alt` `⇧` `P`) und Schrägstrich-Menü für alles ohne Maus
 - Tabellen, Bilder, Links, Suchen und Ersetzen, Autosave mit Versionsverlauf
-- Sieben Farbschemata, Fokusmodus, Schreibmaschinen-Scrollen
+- Zehn Farbschemata (darunter historische wie Phosphor, Kobalt, Lagune), Fokusmodus, Schreibmaschinen-Scrollen
+- Deutsch/Englisch umschaltbar, mit Startdialog beim ersten Öffnen
 
 ## Bedienung
 
+Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinationen im Browser oft schon vom Browser selbst belegt sind (z. B. `Strg N`, `Strg F`, `Strg 1`). Bearbeiten-Kürzel wie Fett/Kursiv/Rückgängig bleiben bei `Strg`, da diese vom Browser nicht beansprucht werden.
+
 | Taste | Funktion |
 |---|---|
-| `Strg` `⇧` `P` | Kommandopalette |
-| `Strg` `1` / `2` / `3` | Schreiben / Notizen / Glossar |
-| `Strg` `⇧` `N` | Neue Notiz |
-| `Strg` `⇧` `K` | Textstelle mit Notiz verknüpfen |
-| `Strg` `G` | Glossar nachschlagen |
-| `Strg` `F` / `H` | Suchen / Ersetzen |
-| `F11` | Fokusmodus (`Esc` verlässt ihn) |
+| `Alt` `⇧` `P` | Kommandopalette |
+| `Alt` `1` / `2` / `3` | Schreiben / Notizen / Glossar |
+| `Alt` `⇧` `D` | Neues Dokument |
+| `Alt` `⇧` `N` | Neue Notiz |
+| `Alt` `⇧` `M` | Textstelle mit Notiz verknüpfen |
+| `Alt` `⇧` `K` | Link einfügen/bearbeiten |
+| `Alt` `⇧` `G` | Glossar nachschlagen |
+| `Alt` `⇧` `F` / `H` | Suchen / Ersetzen |
+| `Alt` `⇧` `S` | Jetzt sichern |
+| `Alt` `⇧` `Z` | Fokusmodus (`Esc` verlässt ihn) |
+| `Alt` `⇧` `L` / `E` / `R` | Linksbündig / Zentriert / Rechtsbündig |
+| `Alt` `⇧` `+` / `−` / `0` | Vergrößern / Verkleinern / Seitenbreite einpassen |
+| `Alt` `⇧` `⏎` | Seitenumbruch einfügen |
 | `/` | Einfügemenü am Anfang eines leeren Absatzes |
 
-Übrige Kürzel folgen Word: `Strg N`, `S`, `P`, `K` (Link), `B`/`I`/`U`, `L`/`E`/`R`, `Strg Enter`.
+Übrige Kürzel folgen Word: `Strg B`/`I`/`U` (Fett/Kursiv/Unterstrichen), `Strg Z`/`Y` (Rückgängig/Wiederholen), `Strg P` (Drucken).
 
 ---
 

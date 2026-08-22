@@ -1,13 +1,13 @@
 {
-  "name": "Lightweight Writer",
-  "short_name": "Writer",
+  "name": "PureQuill Writer",
+  "short_name": "PureQuill",
   "description": "Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#EAE8E0",
   "theme_color": "#EAE8E0",
-  "lang": "de",
+  "lang": "en",
   "icons": [
     {
       "src": "icon.svg",

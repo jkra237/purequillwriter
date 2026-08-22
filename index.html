@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#EAE8E0">
 <meta name="description" content="Minimalistische Textverarbeitung mit Notizen und Glossar.">
-<title>Lightweight Writer</title>
+<title>PureQuill Writer</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
@@ -422,9 +422,9 @@ body.focus .sheet{padding-top:9vh}
   </div>
   <div class="body">
     <div class="rail">
-      <button class="rb" data-mode="write" title="Schreiben (Strg+1)"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
-      <button class="rb" data-mode="notes" title="Notizen (Strg+2)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></button>
-      <button class="rb" data-mode="gloss" title="Glossar (Strg+3)"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 11h5"/></svg></button>
+      <button class="rb" data-mode="write" title="Schreiben (Alt+1)"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
+      <button class="rb" data-mode="notes" title="Notizen (Alt+2)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></button>
+      <button class="rb" data-mode="gloss" title="Glossar (Alt+3)"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 11h5"/></svg></button>
       <div style="flex:1"></div>
       <button class="rb" id="setBtn" title="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.5-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4z"/></svg></button>
     </div>
@@ -503,11 +503,11 @@ let mem=null;
 
 /* ================= Übersetzung ================= */
 const EN={
-  "Tipp: Strg ⇧ P für Befehle · Strg 2 für Notizen · Strg 3 für Glossar":"Tip: Ctrl ⇧ P for commands · Ctrl 2 for notes · Ctrl 3 for glossary",
+  "Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar":"Tip: Alt ⇧ P for commands · Alt 2 for notes · Alt 3 for glossary",
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
   "Datei":"File","Ansicht":"View","Format":"Format","Dokument":"Document","Notiz":"Note","Glossar":"Glossary","Einstellungen":"Settings",
-  "Schreiben (Strg+1)":"Write (Ctrl+1)","Notizen (Strg+2)":"Notes (Ctrl+2)","Glossar (Strg+3)":"Glossary (Ctrl+3)",
+  "Schreiben (Alt+1)":"Write (Alt+1)","Notizen (Alt+2)":"Notes (Alt+2)","Glossar (Alt+3)":"Glossary (Alt+3)",
   "Suchen":"Search","Vorheriger Treffer":"Previous match","Nächster Treffer (Enter)":"Next match (Enter)",
   "Schließen (Esc)":"Close (Esc)","Ersetzen durch":"Replace with","Ersetzen":"Replace","Alle":"All",
   "Groß-/Kleinschreibung":"Match case","Ganzes Wort":"Whole word","Fokusmodus":"Focus mode","verlassen (Esc)":"exit (Esc)",
@@ -517,14 +517,14 @@ const EN={
   "Unterstrichen (Strg+U)":"Underline (Ctrl+U)","Absatzformat":"Paragraph style","Fließtext":"Body text",
   "Überschrift 1":"Heading 1","Überschrift 2":"Heading 2","Überschrift 3":"Heading 3",
   "Aufzählung":"Bulleted list","Nummerierung":"Numbered list","Linksbündig":"Align left","Zentriert":"Center","Blocksatz":"Justify",
-  "Bild einfügen":"Insert image","Link einfügen (Strg+K)":"Insert link (Ctrl+K)","Tabelle einfügen":"Insert table",
-  "Verkleinern (Strg+Minus)":"Zoom out (Ctrl+Minus)","Vergrößern (Strg+Plus)":"Zoom in (Ctrl+Plus)","Vorgaben":"Presets",
+  "Bild einfügen":"Insert image","Link einfügen (Alt+⇧+K)":"Insert link (Alt+⇧+K)","Tabelle einfügen":"Insert table",
+  "Verkleinern (Alt+⇧+Minus)":"Zoom out (Alt+⇧+Minus)","Vergrößern (Alt+⇧+Plus)":"Zoom in (Alt+⇧+Plus)","Vorgaben":"Presets",
   "Zoomstufe eintippen und Eingabe drücken":"Type a zoom level and press Enter",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
   "CSV exportieren":"Export CSV",
-  "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Strg+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":
-    "No notes yet.<br>Create one with <b>Ctrl+Shift+N</b> — this works even mid-writing, without switching views.<br>Click a note to open it, drag to move it.",
+  "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":
+    "No notes yet.<br>Create one with <b>Alt+Shift+N</b> — this works even mid-writing, without switching views.<br>Click a note to open it, drag to move it.",
   "hier":"here","Löschen":"Delete","löschen":"delete","bearbeiten":"edit",
   "Manila":"Manila","Zitrone":"Lemon","Salbei":"Sage","Himmel":"Sky","Rosé":"Rose","Flieder":"Lilac","Papier":"Paper",
   "Überschrift":"Heading","Leere Notiz":"Empty note",
@@ -532,8 +532,8 @@ const EN={
   "Kleiner":"Smaller","Größer":"Larger","Durchgestrichen":"Strikethrough",
   "Begriff":"Term","Definition":"Definition","Kategorie (optional)":"Category (optional)","Verwerfen":"Discard",
   "Eintrag sichern":"Save entry","angelegt":"created",
-  "Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Strg+G</b> jederzeit nachschlagen.":
-    "The glossary is empty.<br>Add terms that recur in your writing — they can then be highlighted in the text and looked up anytime with <b>Ctrl+G</b>.",
+  "Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.":
+    "The glossary is empty.<br>Add terms that recur in your writing — they can then be highlighted in the text and looked up anytime with <b>Alt+⇧+G</b>.",
   "Wörter zählen":"Count words","Seitenformat ändern":"Change page format","Wörter":"words","Zeichen":"characters",
   "Nicht gesichert":"Not saved","Gesichert ":"Saved ","Bereit":"Ready","aus":"off","an":"on",
   "Kommandopalette öffnen":"Open command palette",
@@ -619,7 +619,7 @@ const EN={
   "Beschreibung des Bildes":"Description of the image",
   "Wird angezeigt, wenn das Bild fehlt, und von Vorlesesoftware verwendet.":"Shown if the image is missing, and used by screen readers.",
   "Glossar nachschlagen":"Look up in glossary","Begriff eingeben":"Enter a term",
-  "Kein Treffer. Neue Einträge legst du mit Strg+3 an.":"No match. Create new entries with Ctrl+3.",
+  "Kein Treffer. Neue Einträge legst du mit Alt+3 an.":"No match. Create new entries with Alt+3.",
   "Notiz anlegen":"Create note","Gedanke, Recherchelücke, Umbauidee …":"Thought, research gap, revision idea…",
   "Notiz sichern":"Save note",
   "wiederherstellen":"restore","Noch keine gesicherten Stände.":"No saved versions yet.",
@@ -655,9 +655,9 @@ const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
 function applyStaticLabels(){
   $("#fileBtn").innerHTML=`${tr("Datei")} <span style="font-size:9px">&#9660;</span>`;
   $("#viewBtn").innerHTML=`${tr("Ansicht")} <span style="font-size:9px">&#9660;</span>`;
-  const rw=document.querySelector('.rb[data-mode="write"]');if(rw)rw.title=tr("Schreiben (Strg+1)");
-  const rn=document.querySelector('.rb[data-mode="notes"]');if(rn)rn.title=tr("Notizen (Strg+2)");
-  const rg=document.querySelector('.rb[data-mode="gloss"]');if(rg)rg.title=tr("Glossar (Strg+3)");
+  const rw=document.querySelector('.rb[data-mode="write"]');if(rw)rw.title=tr("Schreiben (Alt+1)");
+  const rn=document.querySelector('.rb[data-mode="notes"]');if(rn)rn.title=tr("Notizen (Alt+2)");
+  const rg=document.querySelector('.rb[data-mode="gloss"]');if(rg)rg.title=tr("Glossar (Alt+3)");
   $("#setBtn").title=tr("Einstellungen");
   $("#fdQ").placeholder=tr("Suchen");
   $("#fdPrev").title=tr("Vorheriger Treffer");
@@ -676,7 +676,7 @@ function applyStaticLabels(){
 function isTrulyEmpty(){return S.docs.every(d=>!stripHtmlSafe(d.html))}
 function clearShell(){
   $("#tabbar").innerHTML="";$("#tools").innerHTML="";$("#pane").innerHTML="";$("#status").innerHTML="";
-  document.title="Lightweight Writer";
+  document.title="PureQuill Writer";
 }
 const stripHtmlSafe=h=>{const e=document.createElement("div");e.innerHTML=h||"";return (e.innerText||"").trim()};
 function startNew(){
@@ -737,7 +737,7 @@ function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],fo
 
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
-  settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"de",uiLang:"de",theme:"platin"},
+  settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"platin"},
   gsort:"alpha",marks:false,zoom:1.2,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
@@ -754,8 +754,8 @@ if(S.settings&&(S.settings.theme==="hell"||!S.settings.theme))S.settings.theme="
 if(S.settings&&S.settings.theme==="dunkel")S.settings.theme="tinte";
 if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
-if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"de",uiLang:"de",theme:"platin"};
-if(S.settings&&!S.settings.uiLang)S.settings.uiLang="de";
+if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"platin"};
+if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
 S.docs.forEach(d=>{
   if(d.html&&d.html.indexOf('class="pgbreak"')>=0&&d.html.indexOf("data-label=")<0)
     d.html=d.html.replace(/<div class="pgbreak" contenteditable="false">/g,
@@ -908,15 +908,15 @@ function drawTools(){
       <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICO('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
-      <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Strg+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
+      <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
       <div class="sep"></div>
       <div style="flex:1"></div>
       <div class="zoomctl">
-        <button id="zOut" title="${tr("Verkleinern (Strg+Minus)")}">&minus;</button>
+        <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
         <input id="zVal" value="${Math.round(S.zoom*100)}%" title="${tr("Zoomstufe eintippen und Eingabe drücken")}">
         <button id="zPre" title="${tr("Vorgaben")}">&#9662;</button>
-        <button id="zIn" title="${tr("Vergrößern (Strg+Plus)")}">+</button>
+        <button id="zIn" title="${tr("Vergrößern (Alt+⇧+Plus)")}">+</button>
       </div>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="btn" id="addNote">${tr("Neue Notiz")}</button>
@@ -946,7 +946,7 @@ function drawWrite(){
       <div class="ruler" id="ruler"></div>
       <div class="paper" id="paper">
         <div id="pagelayer"></div>
-        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Strg ⇧ P für Befehle · Strg 2 für Notizen · Strg 3 für Glossar"))}"></div>
+        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar"))}"></div>
       </div>
     </div>
     <div class="anchcol" id="anchcol"></div>
@@ -1081,7 +1081,7 @@ function drawNotes(){
         <div class="sw">${NOTECOLORS.map(x=>`<button data-color="${x.c}" data-nid="${n.id}" style="background:${x.c}" title="${tr(x.n)}"></button>`).join("")}</div>
         <button class="del" data-del="${n.id}" title="${tr("Löschen")}">&times;</button>
       </div>`).join("")
-    :`<div class="empty">${tr("Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Strg+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.")}</div>`
+    :`<div class="empty">${tr("Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.")}</div>`
   }</div>`;
   enableDrag();
 }
@@ -1205,7 +1205,7 @@ function drawGloss(){
             <button data-edit="${g.id}">${tr("bearbeiten")}</button><button data-gdel="${g.id}">${tr("löschen")}</button></div>
         </div>
       </div>`).join("")
-    :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Strg+G</b> jederzeit nachschlagen.")}</div>`}
+    :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.")}</div>`}
   </div>`;
 }
 let editingG=null;
@@ -1230,7 +1230,7 @@ function drawStatus(){
     <span><span class="dot ${dirty?"dirty":""}"></span>${dirty?tr("Nicht gesichert"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Bereit"))}</span>
     <span>${S.settings.autosave?"Autosave "+S.settings.interval+"s":"Autosave "+tr("aus")}</span>
     <span>${Math.round(S.zoom*100)}%</span>
-    <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">${en?"Ctrl":"Strg"} ⇧ P</span>`;
+    <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">Alt ⇧ P</span>`;
   const ph=$("#pHint");if(ph)ph.onclick=palette;
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
   const wh=$("#wcHint");if(wh)wh.onclick=()=>{
@@ -1270,10 +1270,10 @@ function exportCsv(){
 function commandList(){
   const c=[];
   const add=(grp,label,hint,run)=>c.push({grp:tr(grp),label:tr(label),hint:hint?hint.replace(/Strg/,tr("Strg")):hint,run});
-  add("Ansicht","Schreiben","Strg 1",()=>setMode("write"));
-  add("Ansicht","Notizen","Strg 2",()=>setMode("notes"));
-  add("Ansicht","Glossar","Strg 3",()=>setMode("gloss"));
-  add("Ansicht","Fokusmodus umschalten","F11",()=>{document.body.classList.toggle("focus")});
+  add("Ansicht","Schreiben","Alt 1",()=>setMode("write"));
+  add("Ansicht","Notizen","Alt 2",()=>setMode("notes"));
+  add("Ansicht","Glossar","Alt 3",()=>setMode("gloss"));
+  add("Ansicht","Fokusmodus umschalten","Alt ⇧ Z",()=>{document.body.classList.toggle("focus")});
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
   add("Ansicht","Farbschema wählen","",themeDialog);
   THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
@@ -1281,9 +1281,9 @@ function commandList(){
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")});
   add("Ansicht","Seitenzahlen umschalten","",()=>{S.pagenum=S.pagenum===false;save();
     if(S.mode==="write")paginate()});
-  add("Ansicht","Vergrößern","Strg +",()=>setZoom(S.zoom+.1));
-  add("Ansicht","Verkleinern","Strg −",()=>setZoom(S.zoom-.1));
-  add("Ansicht","Seitenbreite einpassen","Strg 0",()=>{S.fitPage=true;save();
+  add("Ansicht","Vergrößern","Alt ⇧ +",()=>setZoom(S.zoom+.1));
+  add("Ansicht","Verkleinern","Alt ⇧ −",()=>setZoom(S.zoom-.1));
+  add("Ansicht","Seitenbreite einpassen","Alt ⇧ 0",()=>{S.fitPage=true;save();
     if(S.mode==="write"){fitZoom();render()}});
 
   const fmtCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
@@ -1297,27 +1297,27 @@ function commandList(){
   [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
   fmtCmd("Aufzählung","",()=>document.execCommand("insertUnorderedList"));
   fmtCmd("Nummerierung","",()=>document.execCommand("insertOrderedList"));
-  fmtCmd("Linksbündig","Strg L",()=>document.execCommand("justifyLeft"));
-  fmtCmd("Zentriert","Strg E",()=>document.execCommand("justifyCenter"));
+  fmtCmd("Linksbündig","Alt ⇧ L",()=>document.execCommand("justifyLeft"));
+  fmtCmd("Zentriert","Alt ⇧ E",()=>document.execCommand("justifyCenter"));
   fmtCmd("Bild einfügen","",pickImage);
-  fmtCmd("Suchen","Strg F",()=>fdOpen(false));
-  fmtCmd("Suchen und ersetzen","Strg H",()=>fdOpen(true));
-  fmtCmd("Rechtsbündig","Strg R",()=>document.execCommand("justifyRight"));
+  fmtCmd("Suchen","Alt ⇧ F",()=>fdOpen(false));
+  fmtCmd("Suchen und ersetzen","Alt ⇧ H",()=>fdOpen(true));
+  fmtCmd("Rechtsbündig","Alt ⇧ R",()=>document.execCommand("justifyRight"));
   fmtCmd("Blocksatz","",()=>document.execCommand("justifyFull"));
-  fmtCmd("Link einfügen oder bearbeiten…","Strg K",linkDialog);
-  fmtCmd("Seitenumbruch einfügen","Strg ⏎",insertPageBreak);
+  fmtCmd("Link einfügen oder bearbeiten…","Alt ⇧ K",linkDialog);
+  fmtCmd("Seitenumbruch einfügen","Alt ⇧ ⏎",insertPageBreak);
   fmtCmd("Formatierung entfernen","",()=>document.execCommand("removeFormat"));
   fmtCmd("Rückgängig","Strg Z",()=>document.execCommand("undo"));
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
-  add("Dokument","Neues Dokument mit Format","Strg N",newDocument);
+  add("Dokument","Neues Dokument mit Format","Alt ⇧ D",newDocument);
   add("Dokument","Seitenformat ändern","",changeFormat);
   add("Dokument","Tabelle einfügen","",()=>{if(S.mode!=="write")setMode("write");setTimeout(tablePicker,40)});
   add("Dokument","Kopf- und Fußzeile","",hfDialog);
   add("Dokument","Dokument schließen","",()=>closeDoc(S.active));
   S.docs.filter(d=>d.id!==S.active).forEach(d=>
     add("Dokument",tr("Wechseln zu: ")+tr(d.title),"",()=>{flush();S.active=d.id;save();render()}));
-  add("Dokument","Jetzt sichern","Strg S",()=>{commit();toast(tr("Gesichert"))});
+  add("Dokument","Jetzt sichern","Alt ⇧ S",()=>{commit();toast(tr("Gesichert"))});
   add("Dokument","Versionsverlauf","",history);
   add("Dokument","Drucken","Strg P",()=>{flush();setPrintPage();setTimeout(()=>window.print(),60)});
   add("Dokument","Als TXT exportieren","",exportTxt);
@@ -1325,8 +1325,8 @@ function commandList(){
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
   add("Dokument","Als HTML exportieren","",exportHtml);
 
-  add("Notiz","Neue Notiz","Strg ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id)});
-  add("Notiz","Markierte Stelle mit Notiz verknüpfen","Strg ⇧ K",linkSelection);
+  add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id)});
+  add("Notiz","Markierte Stelle mit Notiz verknüpfen","Alt ⇧ M",linkSelection);
   add("Notiz","Notizen am Seitenrand umschalten","",()=>{S.showCol=!S.showCol;save();
     if(S.mode==="write")drawAnchors()});
   add("Notiz","Markierungen im Text umschalten","",()=>{S.showAnchMarks=S.showAnchMarks===false;save();
@@ -1338,7 +1338,7 @@ function commandList(){
     const disp=(raw==="Leere Notiz"?tr("Leere Notiz"):raw).slice(0,44);
     add("Notiz",tr("Öffnen: ")+disp,"",()=>{setMode("notes");openNote(n.id)})});
 
-  add("Glossar","Nachschlagen","Strg G",glossSearch);
+  add("Glossar","Nachschlagen","Alt ⇧ G",glossSearch);
   add("Glossar","Neuer Eintrag","",()=>{setMode("gloss");setTimeout(()=>openGForm(null),40)});
   add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{
     S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}});
@@ -1359,7 +1359,7 @@ function commandList(){
   add("Einstellungen",S.settings.autosave?"Autosave ausschalten":"Autosave einschalten","",()=>{
     S.settings.autosave=!S.settings.autosave;save();resetTimer();drawStatus();
     toast(tr(S.settings.autosave?"Autosave an":"Autosave aus"))});
-  add("Einstellungen","Alles als Datei sichern","",()=>{flush();download("lightweight-writer.json",JSON.stringify(S,null,1),"application/json")});
+  add("Einstellungen","Alles als Datei sichern","",()=>{flush();download("purequillwriter.json",JSON.stringify(S,null,1),"application/json")});
   return c;
 }
 function fuzzy(q,s){
@@ -1434,11 +1434,11 @@ function fileMenu(){
   const m=document.createElement("div");m.className="menu";m.id="fmenu";
   m.style.left=$("#fileBtn").offsetLeft+"px";
   m.innerHTML=`
-    <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">${K} N</span></button>
+    <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="hf"><span class="chk">${(hfOf(doc(),"hdr").on||hfOf(doc(),"ftr").on)?"&#10003;":""}</span>${tr("Kopf- und Fußzeile&hellip;")}</button>
     <button class="mi" data-act="open"><span class="chk"></span>${tr("Datei laden")}<span class="k">.json</span></button>
-    <button class="mi" data-act="save"><span class="chk"></span>${tr("Jetzt sichern")}<span class="k">${K} S</span></button>
+    <button class="mi" data-act="save"><span class="chk"></span>${tr("Jetzt sichern")}<span class="k">Alt ⇧ S</span></button>
     <button class="mi" data-act="saveall"><span class="chk"></span>${tr("Alles sichern als Datei")}</button>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
     <div class="msep"></div>
@@ -1453,7 +1453,7 @@ function fileMenu(){
     <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch sichern")}
       <span class="k">${s.autosave?s.interval+" s":tr("aus")}</span></button>
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
-    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">${K} ⇧ P</span></button>`;
+    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>`;
   $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
@@ -1464,7 +1464,7 @@ function fileMenu(){
     if(a==="hf")hfDialog();
     if(a==="open")importJson();
     if(a==="save"){commit();toast(tr("Gesichert"))}
-    if(a==="saveall"){flush();download("lightweight-writer.json",JSON.stringify(S,null,1),"application/json")}
+    if(a==="saveall"){flush();download("purequillwriter.json",JSON.stringify(S,null,1),"application/json")}
     if(a==="hist")history();
     if(a==="print"){flush();setPrintPage();setTimeout(()=>window.print(),60)}
     if(a==="txt")exportTxt();
@@ -1496,8 +1496,8 @@ function viewMenu(){
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
     <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi!==false)}</span>${tr("Oberfläche tritt zurück")}</button>
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
-    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">${tr("Strg")} 0</span></button>
-    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">F11</span></button>`;
+    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
+    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
@@ -1535,15 +1535,15 @@ function contextMenu(e){
     <button class="mi" data-c="paste"><span class="chk"></span>${tr("Einfügen")}<span class="k">${K} V</span></button>
     <button class="mi" data-c="selall"><span class="chk"></span>${tr("Alles auswählen")}<span class="k">${K} A</span></button>
     <div class="msep"></div>
-    <button class="mi" data-c="link2"><span class="chk"></span>${e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen")}&hellip;<span class="k">${K} K</span></button>
+    <button class="mi" data-c="link2"><span class="chk"></span>${e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen")}&hellip;<span class="k">Alt ⇧ K</span></button>
     <button class="mi" data-c="img"><span class="chk"></span>${tr("Bild einfügen&hellip;")}</button>
-    <button class="mi" data-c="pgbr"><span class="chk"></span>${tr("Seitenumbruch einfügen")}<span class="k">${K} ⏎</span></button>
+    <button class="mi" data-c="pgbr"><span class="chk"></span>${tr("Seitenumbruch einfügen")}<span class="k">Alt ⇧ ⏎</span></button>
     <div class="msep"></div>
-    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">${K} ⇧ K</span></button>
+    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">Alt ⇧ M</span></button>
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
       <button class="mi" data-c="unlink"><span class="chk"></span>${tr("Verknüpfung lösen")}</button>`:""}
     <div class="msep"></div>
-    <button class="mi" data-c="look"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">${K} G</span></button>
+    <button class="mi" data-c="look"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">Alt ⇧ G</span></button>
     <button class="mi" data-c="newg" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Als Glossareintrag anlegen")}</button>
     <div class="msep"></div>
     ${cell?`<div class="mlabel">${tr("Tabelle")}</div>
@@ -2496,7 +2496,7 @@ function glossSearch(){
   const run=()=>{const v=q.value.toLowerCase();
     const hits=S.glossary.filter(g=>!v||g.term.toLowerCase().includes(v)||(g.def||"").toLowerCase().includes(v)).slice(0,25);
     r.innerHTML=hits.length?hits.map(g=>`<div class="hit" data-t="${esc(g.term)}"><b>${esc(g.term)}</b><p>${esc(g.def||"")}</p></div>`).join("")
-      :`<div style="padding:13px 14px;color:var(--ink-faint)">${tr("Kein Treffer. Neue Einträge legst du mit Strg+3 an.")}</div>`};
+      :`<div style="padding:13px 14px;color:var(--ink-faint)">${tr("Kein Treffer. Neue Einträge legst du mit Alt+3 an.")}</div>`};
   q.oninput=run;run();q.focus();
   r.onclick=e=>{const h=e.target.closest(".hit");if(!h)return;
     closeOvl();const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,h.dataset.t);dirty=true;drawStatus()}};
@@ -2608,7 +2608,7 @@ function zoomPresets(){
   const vals=[50,75,100,125,150,200];
   const m=document.createElement("div");m.className="menu ctx";m.id="zmenu";
   m.innerHTML=vals.map(v=>`<button class="mi" data-z="${v}"><span class="chk">${Math.round(S.zoom*100)===v?"&#10003;":""}</span>${v} %</button>`).join("")
-    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">${tr("Strg")} 0</span></button>`;
+    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>`;
   document.body.appendChild(m);
   const r=$("#zPre").getBoundingClientRect();
   m.style.left=Math.min(r.left-60,innerWidth-m.offsetWidth-8)+"px";
@@ -2621,27 +2621,28 @@ function zoomPresets(){
 /* ================= Tastatur ================= */
 document.addEventListener("keydown",e=>{
   const c=e.ctrlKey||e.metaKey;
-  if(c&&e.shiftKey&&e.key.toLowerCase()==="p"){e.preventDefault();
+  const as=e.altKey&&e.shiftKey&&!c;
+  if(as&&e.key.toLowerCase()==="p"){e.preventDefault();
     if($("#ovl").innerHTML)closeOvl();else palette();return}
-  if(c&&e.shiftKey&&e.key.toLowerCase()==="k"){e.preventDefault();linkSelection();return}
-  if(c&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
-  if(c&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
-  if(c&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
-  if(c&&!e.shiftKey&&e.key.toLowerCase()==="l"){e.preventDefault();cmd("justifyLeft");return}
-  if(c&&!e.shiftKey&&e.key.toLowerCase()==="e"){e.preventDefault();cmd("justifyCenter");return}
-  if(c&&!e.shiftKey&&e.key.toLowerCase()==="r"){e.preventDefault();cmd("justifyRight");return}
-  if(c&&e.shiftKey&&e.key.toLowerCase()==="n"){e.preventDefault();quickNote();return}
-  if(c&&e.key.toLowerCase()==="n"){e.preventDefault();newDocument();return}
-  if(c&&!e.shiftKey&&["1","2","3"].includes(e.key)){e.preventDefault();setMode({1:"write",2:"notes",3:"gloss"}[e.key]);return}
-    if(c&&e.key==="Enter"){e.preventDefault();insertPageBreak();return}
-  if(c&&e.key.toLowerCase()==="g"){e.preventDefault();glossSearch();return}
+  if(as&&e.key.toLowerCase()==="m"){e.preventDefault();linkSelection();return}
+  if(as&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
+  if(as&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
+  if(as&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
+  if(as&&e.key.toLowerCase()==="l"){e.preventDefault();cmd("justifyLeft");return}
+  if(as&&e.key.toLowerCase()==="e"){e.preventDefault();cmd("justifyCenter");return}
+  if(as&&e.key.toLowerCase()==="r"){e.preventDefault();cmd("justifyRight");return}
+  if(as&&e.key.toLowerCase()==="n"){e.preventDefault();quickNote();return}
+  if(as&&e.key.toLowerCase()==="d"){e.preventDefault();newDocument();return}
+  if(e.altKey&&!e.shiftKey&&!c&&["1","2","3"].includes(e.key)){e.preventDefault();setMode({1:"write",2:"notes",3:"gloss"}[e.key]);return}
+  if(as&&e.key==="Enter"){e.preventDefault();insertPageBreak();return}
+  if(as&&e.key.toLowerCase()==="g"){e.preventDefault();glossSearch();return}
   if(c&&e.key.toLowerCase()==="p"){flush();setPrintPage();return}
-  if(c&&e.key.toLowerCase()==="s"){e.preventDefault();commit();toast(tr("Gesichert"));return}
-  if(c&&(e.key==="+"||e.key==="=")){e.preventDefault();setZoom(S.zoom+.1);return}
-  if(c&&(e.key==="-"||e.key==="_")){e.preventDefault();setZoom(S.zoom-.1);return}
-  if(c&&e.key==="0"){e.preventDefault();S.fitPage=true;save();
+  if(as&&e.key.toLowerCase()==="s"){e.preventDefault();commit();toast(tr("Gesichert"));return}
+  if(as&&(e.key==="+"||e.key==="=")){e.preventDefault();setZoom(S.zoom+.1);return}
+  if(as&&(e.key==="-"||e.key==="_")){e.preventDefault();setZoom(S.zoom-.1);return}
+  if(as&&e.key==="0"){e.preventDefault();S.fitPage=true;save();
     if(S.mode==="write"){fitZoom();render()}return}
-  if(e.key==="F11"||(c&&e.shiftKey&&e.key.toLowerCase()==="f")){e.preventDefault();
+  if(as&&e.key.toLowerCase()==="z"){e.preventDefault();
     document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus();return}
   if(e.key==="Escape"){if(slashOn)slashClose();
     else if($("#findbar").classList.contains("on")&&document.activeElement&&document.activeElement.closest(".findbar"))fdClose();
@@ -2718,7 +2719,7 @@ $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
 
 /* ================= Render ================= */
 function render(){
-  document.title=tr(doc().title||"Ohne Titel")+" — Lightweight Writer";
+  document.title=tr(doc().title||"Ohne Titel")+" — PureQuill Writer";
   drawTabs();
   document.querySelectorAll(".rb[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===S.mode));
   drawTools();
