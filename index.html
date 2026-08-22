@@ -636,6 +636,7 @@ const EN={
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era","Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
   "Phosphor":"Phosphor","Kobalt":"Cobalt","Lagune":"Lagoon",
+  "Umbenennen":"Rename","Farbe":"Color","Keine Farbe":"No color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
   "Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit":"Bold office blue — reminiscent of WordPerfect 5.1 from the DOS era",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beige office interface with teal — reminiscent of Lotus SmartSuite '97",
@@ -673,6 +674,10 @@ function applyStaticLabels(){
   document.documentElement.lang=S.settings.uiLang==="en"?"en":"de";
 }
 function isTrulyEmpty(){return S.docs.every(d=>!stripHtmlSafe(d.html))}
+function clearShell(){
+  $("#tabbar").innerHTML="";$("#tools").innerHTML="";$("#pane").innerHTML="";$("#status").innerHTML="";
+  document.title="Lightweight Writer";
+}
 const stripHtmlSafe=h=>{const e=document.createElement("div");e.innerHTML=h||"";return (e.innerText||"").trim()};
 function startNew(){
   lockedOvl=false;closeOvl();
@@ -767,7 +772,8 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 /* ================= Tabs ================= */
 function drawTabs(){
   $("#tabbar").innerHTML=S.docs.map(d=>
-    `<div class="tab ${d.id===S.active?"on":""}" data-id="${d.id}"><span>${esc(tr(d.title))}</span><button class="x" data-close="${d.id}" title="${tr("Dokument schließen")}">&times;</button></div>`
+    `<div class="tab ${d.id===S.active?"on":""}" data-id="${d.id}" ${d.tabColor?`style="background:${d.tabColor};color:#22242A;border-color:rgba(0,0,0,.18)"`:""}>
+      <span>${esc(tr(d.title))}</span><button class="x" data-close="${d.id}" title="${tr("Dokument schließen")}" ${d.tabColor?'style="color:#22242A"':""}>&times;</button></div>`
   ).join("")+`<button class="tabadd" id="newdoc" title="${tr("Neues Dokument")}">+</button>`;
 }
 function anchorsInDocCount(d){
@@ -785,7 +791,8 @@ function closeDoc(id){
     S.docs.splice(i,1);
     if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
-    save();render();
+    save();
+    if(isTrulyEmpty()){clearShell();startupDialog();}else render();
     if(anker)toast(S.settings.uiLang==="en"
       ?anker+(anker>1?" linked notes remain":" linked note remains")
       :anker+(anker>1?" verknüpfte Notizen bleiben":" verknüpfte Notiz bleibt")+" erhalten");
@@ -817,6 +824,61 @@ $("#tabbar").onclick=e=>{
   const t=e.target.closest(".tab");
   if(t&&t.dataset.id!==S.active){flush();S.active=t.dataset.id;save();render()}
 };
+$("#tabbar").addEventListener("contextmenu",e=>{
+  const t=e.target.closest(".tab");
+  if(!t)return;
+  e.preventDefault();tabContextMenu(e,t.dataset.id);
+});
+function tabContextMenu(e,id){
+  closeMenu();
+  const d=S.docs.find(x=>x.id===id);if(!d)return;
+  const m=document.createElement("div");m.className="menu ctx";m.id="tabmenu";
+  m.innerHTML=`
+    <button class="mi" data-ta="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
+    <div class="msep"></div>
+    <div class="mlabel">${tr("Farbe")}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:2px 9px 8px">
+      <button data-tc="" title="${tr("Keine Farbe")}" style="width:18px;height:18px;border-radius:50%;padding:0;
+        background:transparent;border:1px dashed var(--ink-faint);${!d.tabColor?"box-shadow:0 0 0 2px var(--stamp);":""}"></button>
+      ${NOTECOLORS.map(x=>`<button data-tc="${x.c}" title="${tr(x.n)}" style="width:18px;height:18px;border-radius:50%;
+        padding:0;background:${x.c};border:1px solid rgba(0,0,0,.25);${d.tabColor===x.c?"box-shadow:0 0 0 2px var(--stamp);":""}"></button>`).join("")}
+    </div>`;
+  document.body.appendChild(m);
+  const w=m.offsetWidth,h=m.offsetHeight;
+  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
+  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  m.onclick=ev=>{
+    const rb=ev.target.closest("[data-ta]");
+    if(rb){closeMenu();renameTab(id);return}
+    const cb=ev.target.closest("[data-tc]");
+    if(cb){d.tabColor=cb.dataset.tc||null;save();closeMenu();drawTabs();return}
+  };
+}
+function renameTab(id){
+  const d=S.docs.find(x=>x.id===id);if(!d)return;
+  const el=document.querySelector(`.tab[data-id="${id}"] span`);
+  if(!el)return;
+  const input=document.createElement("input");
+  input.value=d.title||"";input.maxLength=60;
+  input.style.cssText="width:130px;border:none;background:rgba(255,255,255,.6);font:inherit;color:inherit;outline:none;border-radius:2px;padding:0 2px";
+  el.replaceWith(input);input.focus();input.select();
+  let done=false;
+  const finish=()=>{
+    if(done)return;done=true;
+    const v=input.value.trim().slice(0,60);
+    if(!v){
+      d.customTitle=false;
+      const t=stripHtml(d.html).trim().split("\n")[0].slice(0,32);
+      d.title=t||"Ohne Titel";
+    }else{d.title=v;d.customTitle=true}
+    save();render();
+  };
+  input.addEventListener("blur",finish);
+  input.addEventListener("keydown",ev=>{
+    if(ev.key==="Enter"){ev.preventDefault();input.blur()}
+    if(ev.key==="Escape"){ev.preventDefault();done=true;render()}
+  });
+}
 
 /* ================= Modus ================= */
 function setMode(m){flush();selectFig(null);if(m!=="notes"&&openNoteId)closeNote();
@@ -884,7 +946,7 @@ function drawWrite(){
       <div class="ruler" id="ruler"></div>
       <div class="paper" id="paper">
         <div id="pagelayer"></div>
-        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-hint="${esc(tr("Tipp: Strg ⇧ P für Befehle · Strg 2 für Notizen · Strg 3 für Glossar"))}"></div>
+        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Strg ⇧ P für Befehle · Strg 2 für Notizen · Strg 3 für Glossar"))}"></div>
       </div>
     </div>
     <div class="anchcol" id="anchcol"></div>
@@ -955,14 +1017,14 @@ function drawWrite(){
 }
 function placeCaretEnd(el){const r=document.createRange();r.selectNodeContents(el);r.collapse(false);
   const s=getSelection();s.removeAllRanges();s.addRange(r)}
-function flush(){const ed=$("#editor");if(ed){const d=doc();
+function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const d=doc();
   const c=ed.cloneNode(true);
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
   c.querySelectorAll(".hit,.glossterm").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.normalize();
   d.html=c.innerHTML;
-  const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}
+  if(!d.customTitle){const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
 function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus()}
 
 /* Glossarbegriffe markieren */
@@ -2666,5 +2728,5 @@ function render(){
   drawStatus();
 }
 applyTheme();applyStaticLabels();resetTimer();
-if(isTrulyEmpty())startupDialog();else render();
+if(isTrulyEmpty()){clearShell();startupDialog();}else render();
 </script>
