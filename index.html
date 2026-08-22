@@ -86,11 +86,11 @@
   --rule:#9A9A9A; --stamp:#0B7580; --manila:#EBDFC4;
   --ok:#12708A; --pageedge:rgba(0,0,0,.45);
 }
-/* Graues Windows-Büro mit goldgelbem Infobox-Rahmen, späte Neunziger */
+/* Hellgelbe Infobox-Oberfläche mit türkisen Reitern, späte Neunziger */
 [data-theme="goldrand"]{
-  --paper:#FFFFFF; --chrome:#C6C4BC; --chrome-2:#E0DED6; --canvas:#8A8578;
-  --ink:#141414; --ink-soft:#3D3B36; --ink-faint:#75726A;
-  --rule:#9C9890; --stamp:#8A6805; --manila:#EBDFC4;
+  --paper:#FFFFFF; --chrome:#F0E5A2; --chrome-2:#F8F1C9; --canvas:#9A9478;
+  --ink:#141414; --ink-soft:#403B28; --ink-faint:#7A7454;
+  --rule:#D2C275; --stamp:#0E6F7A; --manila:#EBDFC4;
   --ok:#3F6B4A; --pageedge:rgba(0,0,0,.45);
 }
 /* Getöntes Schreibmaschinenpapier */
@@ -383,7 +383,11 @@ input,select,textarea{font:inherit;color:inherit}
 .empty{color:var(--ink-faint);font-family:Georgia,serif;font-size:14px;padding:26px 2px;line-height:1.6}
 
 /* ---- Overlays ---- */
-.veil{position:fixed;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:flex-start;justify-content:center;padding-top:13vh;z-index:50}
+/* Scrollbar, damit hohe Dialoge auf kleinen Fenstern nicht abgeschnitten werden */
+.veil{position:fixed;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:flex-start;
+  justify-content:center;padding:13vh 10px 28px;z-index:50;overflow-y:auto}
+@media (max-height:820px){.veil{padding-top:5vh}}
+@media (max-height:620px){.veil{padding-top:12px}}
 .modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
 .modal.wide{width:min(600px,94vw)}
@@ -404,7 +408,20 @@ input,select,textarea{font:inherit;color:inherit}
 .btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2)}
 .btn:hover{border-color:var(--ink-soft)}
 .btn.pri{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp,#fff)}
-.rowend{display:flex;gap:7px;justify-content:flex-end;padding:11px 14px;border-top:1px solid var(--rule)}
+.rowend{display:flex;gap:7px;justify-content:flex-end;padding:11px 14px;border-top:1px solid var(--rule);flex-wrap:wrap}
+/* Schmale Fenster: zweispaltige Dialogteile untereinander legen */
+@media (max-width:560px){
+  .fmtgrid{grid-template-columns:1fr}
+  .fmtgrid .fmtopt[style*="grid-column"]{grid-column:1!important}
+  .fmtwrap{flex-direction:column}
+  .fmtprev{padding-top:4px;align-self:center}
+  .mmrow{flex-wrap:wrap}
+  .mmrow label{flex:0 0 100%}
+  .setrow{flex-wrap:wrap;gap:6px}
+  .setrow .ctl{width:100%}
+  .rowend{justify-content:flex-start}
+  .rowend .btn[style*="margin-right:auto"]{margin-right:0!important}
+}
 .papercol{display:flex;flex-direction:column;flex:0 0 auto}
 .ruler{position:sticky;top:0;z-index:20;height:19px;flex:0 0 19px;margin-bottom:7px;
   background:var(--chrome-2);border:1px solid var(--rule);border-radius:2px;position:relative}
@@ -590,7 +607,7 @@ const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
-  {k:"goldrand", n:"Goldrand",   d:"Graues Windows-Büro mit goldgelbem Infobox-Rahmen — erinnert an Lotus Word Pro", c:["#FFFFFF","#8A8578","#8A6805"]},
+  {k:"goldrand", n:"Goldrand",   d:"Hellgelbe Infobox mit türkisen Reitern — erinnert an Lotus Word Pro", c:["#F0E5A2","#9A9478","#0E6F7A"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"sepia",    n:"Sepia",      d:"Getöntes Schreibmaschinenpapier",   c:["#F4EADA","#9C8B72","#8A3324"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
@@ -756,7 +773,7 @@ const EN={
   "Dunkelmodus":"Dark mode",
   "Phosphor":"Phosphor","Kobalt":"Cobalt","Lagune":"Lagoon",
   "Aquamarin":"Aquamarine","Goldrand":"Gold Trim","Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
-  "Graues Windows-Büro mit goldgelbem Infobox-Rahmen — erinnert an Lotus Word Pro":"Gray Windows office with a golden infobox frame — reminiscent of Lotus Word Pro",
+  "Hellgelbe Infobox mit türkisen Reitern — erinnert an Lotus Word Pro":"Pale yellow infobox with teal tabs — reminiscent of Lotus Word Pro",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Gray Windows office with a teal infobox — reminiscent of Lotus Word Pro",
   "Hercules":"Hercules","Solar":"Solar",
   "Getöntes Schreibmaschinenpapier":"Tinted typewriter paper",
