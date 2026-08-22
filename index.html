@@ -36,6 +36,7 @@
 }
 /* Blaue Textmodus-Oberflächen der DOS-Zeit */
 [data-theme="enzian"]{
+  --on-stamp:#141414;
   --paper:#12256E; --chrome:#0B1A52; --chrome-2:#152C7C; --canvas:#050C33;
   --ink:#F3F5FF; --ink-soft:#B7C3EC; --ink-faint:#8593C9;
   --rule:#2E4AA0; --stamp:#FFC24A; --manila:#EBDFC4;
@@ -43,6 +44,7 @@
 }
 /* Bernsteinfarbene Monochrom-Bildschirme */
 [data-theme="bernstein"]{
+  --on-stamp:#141414;
   --paper:#171208; --chrome:#1D1709; --chrome-2:#272010; --canvas:#0A0804;
   --ink:#FFB53D; --ink-soft:#C98A19; --ink-faint:#8C6414;
   --rule:#4C3712; --stamp:#FFD98A; --manila:#EBDFC4;
@@ -56,6 +58,7 @@
 }
 /* Grüner Röhrenbildschirm, wie frühe Tabellenkalkulationen und DOS-Editoren */
 [data-theme="phosphor"]{
+  --on-stamp:#141414;
   --paper:#02120A; --chrome:#051D10; --chrome-2:#092A18; --canvas:#010B06;
   --ink:#3CFF74; --ink-soft:#25BD56; --ink-faint:#166838;
   --rule:#124126; --stamp:#8CFFB0; --manila:#EBDFC4;
@@ -63,6 +66,7 @@
 }
 /* Kräftiges Amtsblau, wie DOS-Textverarbeitungen der frühen Neunziger */
 [data-theme="kobalt"]{
+  --on-stamp:#141414;
   --paper:#0A1EA6; --chrome:#081766; --chrome-2:#0F27A0; --canvas:#050B40;
   --ink:#FFFFFF; --ink-soft:#C9D3FF; --ink-faint:#8FA0E0;
   --rule:#3350C0; --stamp:#FFDD55; --manila:#EBDFC4;
@@ -79,8 +83,15 @@
 [data-theme="aquamarin"]{
   --paper:#FFFFFF; --chrome:#C3C3C3; --chrome-2:#DEDEDE; --canvas:#7E8C8C;
   --ink:#000000; --ink-soft:#3A3A3A; --ink-faint:#727272;
-  --rule:#9A9A9A; --stamp:#0E8B96; --manila:#EBDFC4;
+  --rule:#9A9A9A; --stamp:#0B7580; --manila:#EBDFC4;
   --ok:#12708A; --pageedge:rgba(0,0,0,.45);
+}
+/* Graues Windows-Büro mit goldgelbem Infobox-Rahmen, späte Neunziger */
+[data-theme="goldrand"]{
+  --paper:#FFFFFF; --chrome:#C6C4BC; --chrome-2:#E0DED6; --canvas:#8A8578;
+  --ink:#141414; --ink-soft:#3D3B36; --ink-faint:#75726A;
+  --rule:#9C9890; --stamp:#8A6805; --manila:#EBDFC4;
+  --ok:#3F6B4A; --pageedge:rgba(0,0,0,.45);
 }
 /* Getöntes Schreibmaschinenpapier */
 [data-theme="sepia"]{
@@ -98,6 +109,7 @@
 }
 /* Blauvioletter Heimcomputer-Bildschirm der Achtziger */
 [data-theme="brotkasten"]{
+  --on-stamp:#141414;
   --paper:#3B33A6; --chrome:#2C2685; --chrome-2:#3F37B4; --canvas:#1B1758;
   --ink:#DEDAFF; --ink-soft:#C3BDFF; --ink-faint:#A49DE6;
   --rule:#564DCC; --stamp:#FFE97F; --manila:#EBDFC4;
@@ -105,6 +117,7 @@
 }
 /* Schwarzer Bildschirm mit Cyan, wie farbige Tabellenkalkulationen der DOS-Zeit */
 [data-theme="zyan"]{
+  --on-stamp:#141414;
   --paper:#05161A; --chrome:#0A2228; --chrome-2:#0F2F37; --canvas:#02090B;
   --ink:#67E8F9; --ink-soft:#3EA9BD; --ink-faint:#256E80;
   --rule:#164E5B; --stamp:#FFD24A; --manila:#EBDFC4;
@@ -112,6 +125,7 @@
 }
 /* Weiß auf Schwarz, wie frühe Monochromkarten */
 [data-theme="hercules"]{
+  --on-stamp:#141414;
   --paper:#000000; --chrome:#0C0C0C; --chrome-2:#171717; --canvas:#000000;
   --ink:#E9E9E9; --ink-soft:#A6A6A6; --ink-faint:#6B6B6B;
   --rule:#2C2C2C; --stamp:#FFFFFF; --manila:#EBDFC4;
@@ -119,6 +133,7 @@
 }
 /* Gedämpftes Teal-Dunkelschema für lange Sitzungen */
 [data-theme="solar"]{
+  --on-stamp:#141414;
   --paper:#002B36; --chrome:#073642; --chrome-2:#0B4453; --canvas:#001A21;
   --ink:#EEE8D5; --ink-soft:#93A1A1; --ink-faint:#6A8085;
   --rule:#14556A; --stamp:#B58900; --manila:#EBDFC4;
@@ -278,7 +293,7 @@ input,select,textarea{font:inherit;color:inherit}
 .findbar .fb:hover{color:var(--ink);background:var(--chrome-2)}
 .findbar .fopt{font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;gap:4px}
 #editor .hit{background:rgba(255,214,0,.42);border-radius:2px}
-#editor .hit.cur{background:var(--stamp);color:#fff}
+#editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
 #editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top}
 #editor figure.fig figcaption{font-family:"Segoe UI",system-ui,sans-serif;font-size:.72em;
@@ -388,7 +403,7 @@ input,select,textarea{font:inherit;color:inherit}
 .setrow .ctl select,.setrow .ctl input[type=number]{width:auto;flex:1}
 .btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2)}
 .btn:hover{border-color:var(--ink-soft)}
-.btn.pri{background:var(--stamp);border-color:var(--stamp);color:#fff}
+.btn.pri{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp,#fff)}
 .rowend{display:flex;gap:7px;justify-content:flex-end;padding:11px 14px;border-top:1px solid var(--rule)}
 .papercol{display:flex;flex-direction:column;flex:0 0 auto}
 .ruler{position:sticky;top:0;z-index:20;height:19px;flex:0 0 19px;margin-bottom:7px;
@@ -574,7 +589,8 @@ function fmtOf(d){
 const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
-  {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0E8B96"]},
+  {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
+  {k:"goldrand", n:"Goldrand",   d:"Graues Windows-Büro mit goldgelbem Infobox-Rahmen — erinnert an Lotus Word Pro", c:["#FFFFFF","#8A8578","#8A6805"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"sepia",    n:"Sepia",      d:"Getöntes Schreibmaschinenpapier",   c:["#F4EADA","#9C8B72","#8A3324"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
@@ -739,7 +755,8 @@ const EN={
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era","Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
   "Phosphor":"Phosphor","Kobalt":"Cobalt","Lagune":"Lagoon",
-  "Aquamarin":"Aquamarine","Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
+  "Aquamarin":"Aquamarine","Goldrand":"Gold Trim","Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
+  "Graues Windows-Büro mit goldgelbem Infobox-Rahmen — erinnert an Lotus Word Pro":"Gray Windows office with a golden infobox frame — reminiscent of Lotus Word Pro",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Gray Windows office with a teal infobox — reminiscent of Lotus Word Pro",
   "Hercules":"Hercules","Solar":"Solar",
   "Getöntes Schreibmaschinenpapier":"Tinted typewriter paper",
