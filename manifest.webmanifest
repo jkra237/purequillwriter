@@ -1,0 +1,19 @@
+{
+  "name": "Lightweight Writer",
+  "short_name": "Writer",
+  "description": "Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#EAE8E0",
+  "theme_color": "#EAE8E0",
+  "lang": "de",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
