@@ -15,6 +15,8 @@ Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine
 - **Kommandopalette** (`Alt` `⇧` `P`) und Schrägstrich-Menü für alles ohne Maus
 - Tabellen, Bilder, Links, Suchen und Ersetzen, Autosave mit Versionsverlauf
 - Zehn Farbschemata (darunter historische wie Phosphor, Kobalt, Lagune), Fokusmodus, Schreibmaschinen-Scrollen
+- **Leseansicht** und **Exportvorschau** — den Text beurteilen, bevor gedruckt wird
+- **Dokumentnotizen** je Dokument und ein abschaltbares **Schreibziel** in der Statuszeile
 - Deutsch/Englisch umschaltbar, mit Startdialog beim ersten Öffnen
 
 ## Bedienung
@@ -33,6 +35,9 @@ Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinat
 | `Alt` `⇧` `F` / `H` | Suchen / Ersetzen |
 | `Alt` `⇧` `S` | Jetzt sichern |
 | `Alt` `⇧` `Z` | Fokusmodus (`Esc` verlässt ihn) |
+| `Alt` `⇧` `B` | Leseansicht (`Esc` verlässt sie) |
+| `Alt` `⇧` `V` | Exportvorschau (`Esc` verlässt sie) |
+| `Alt` `⇧` `T` | Dokumentnotizen ein-/ausblenden |
 | `Alt` `⇧` `L` / `E` / `R` | Linksbündig / Zentriert / Rechtsbündig |
 | `Alt` `⇧` `+` / `−` / `0` | Vergrößern / Verkleinern / Seitenbreite einpassen |
 | `Alt` `⇧` `⏎` | Seitenumbruch einfügen |

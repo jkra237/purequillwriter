@@ -320,6 +320,17 @@ input,select,textarea{font:inherit;color:inherit}
 .status{display:flex;align-items:center;gap:17px;padding:5px 13px;border-top:1px solid var(--rule);
   background:var(--chrome-2);font-family:Consolas,monospace;font-size:11.5px;color:var(--ink-soft);flex:0 0 auto}
 .status .grow{flex:1}
+/* Dokumentnotizen: Gedanken zum Dokument, nicht zum Text */
+.side .memo{flex:1;border:none;outline:none;resize:none;padding:14px 16px;
+  background:var(--chrome-2);color:var(--ink);
+  font-family:Georgia,serif;font-size:14px;line-height:1.6}
+.side .memo::placeholder{color:var(--ink-faint)}
+/* Schreibziel: dezenter Balken, kein Alarm */
+.goal{cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.goalbar{display:inline-block;width:58px;height:5px;border-radius:3px;
+  background:var(--rule);overflow:hidden}
+.goalbar i{display:block;height:100%;background:var(--stamp);transition:width .25s}
+.goalbar.done i{background:var(--ok)}
 .status .zoomctl{border:1px solid var(--rule);gap:0}
 .status .zoomctl button{width:24px;height:22px;font-size:15px;line-height:1}
 .status .zoomctl #zVal{width:auto;min-width:58px;font-family:Consolas,monospace;font-size:12px;padding:0 7px}
@@ -510,8 +521,43 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor td,#editor th{border:1px solid #000!important}
   #editor th{background:none!important}
   .glossterm{border-bottom:none!important}
-  .pageflag,.menu,.veil,.toast,.ruler,.focusbar{display:none!important}
+  .pageflag,.menu,.veil,.toast,.ruler,.focusbar,.readview,.pvwrap{display:none!important}
 }
+/* ---- Leseansicht: nur der Text, ohne jede Bedienoberfläche ---- */
+.readview{position:fixed;inset:0;z-index:80;display:none;overflow-y:auto;
+  background:var(--paper);color:var(--ink)}
+.readview.on{display:block}
+.readview .rinner{max-width:36em;margin:0 auto;padding:9vh 26px 16vh;
+  font-family:Georgia,serif;font-size:19px;line-height:1.75}
+.readview .rinner h1{font-size:1.7em;font-weight:600;margin:1.2em 0 .5em}
+.readview .rinner h2{font-size:1.35em;font-weight:600;margin:1.15em 0 .45em}
+.readview .rinner h3{font-size:1.15em;font-weight:600;margin:1.1em 0 .4em}
+.readview .rinner p{margin:0 0 .9em}
+.readview .rinner ul,.readview .rinner ol{margin:0 0 .9em;padding-left:1.5em}
+.readview .rinner img{max-width:100%;height:auto}
+.readview .rinner table{border-collapse:collapse;width:100%;margin:0 0 .9em}
+.readview .rinner td,.readview .rinner th{border:1px solid var(--rule);padding:.35em .5em}
+/* Arbeitsspuren gehören nicht in die Leseansicht */
+.readview .anch{background:none!important;border-bottom:none!important}
+.readview .glossterm{border-bottom:none!important}
+.readview .pgbreak{border-top:1px solid var(--rule);margin:2.2em 0;height:0}
+.readview .pgbreak::before{content:""!important}
+.rbar{position:fixed;top:14px;right:18px;z-index:2;display:flex;gap:10px;align-items:center;
+  background:var(--chrome);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:6px 11px;font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:var(--ink-soft);
+  opacity:.35;transition:opacity .25s}
+.rbar:hover{opacity:1}
+/* ---- Exportvorschau: das Dokument, wie es auf Papier aussieht ---- */
+.pvwrap{position:fixed;inset:0;z-index:85;display:none;overflow:auto;background:var(--canvas)}
+.pvwrap.on{display:block}
+.pvbar{position:sticky;top:0;z-index:2;display:flex;gap:9px;align-items:center;
+  padding:8px 14px;background:var(--chrome);border-bottom:1px solid var(--rule);
+  font-size:12px;color:var(--ink-soft)}
+.pvinner{padding:22px 14px 44px;display:flex;justify-content:center}
+.pvinner .anch{background:none!important;border-bottom:none!important}
+.pvinner .glossterm{border-bottom:none!important}
+.pvinner .pgbreak::before{content:""!important}
+.pvinner .mg{display:none}
 .cmdlist{max-height:340px;overflow:auto}
 .cmd{display:flex;align-items:center;gap:11px;padding:8px 13px;cursor:pointer;border-bottom:1px solid var(--rule)}
 .cmd:last-child{border-bottom:none}
@@ -590,6 +636,8 @@ body.focus .sheet{padding-top:9vh}
 <div class="printhf" id="printftr"></div>
 <div class="focusbar" id="focusbar"><span id="focusLabel">Fokusmodus</span> <button id="focusOut">verlassen (Esc)</button></div>
 <div id="ovl"></div>
+<div class="readview" id="readview"></div>
+<div class="pvwrap" id="pvwrap"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -659,6 +707,14 @@ const EN={
   "Verkleinern (Alt+⇧+Minus)":"Zoom out (Alt+⇧+Minus)","Vergrößern (Alt+⇧+Plus)":"Zoom in (Alt+⇧+Plus)","Vorgaben":"Presets",
   "Zoomstufe eintippen und Eingabe drücken":"Type a zoom level and press Enter",
   "Zoomstufe wählen":"Choose zoom level","Eigene Größe&hellip;":"Custom size&hellip;",
+  "Leseansicht":"Reading view","Exportvorschau":"Print preview","Seiten":"pages",
+  "Schreibziel":"Writing goal","Schreibziel einstellen":"Set the writing goal",
+  "Dokumentnotizen":"Document notes",
+  "Handlungsnotizen, offene Fragen, Recherche-Links …":"Plot notes, open questions, research links…",
+  "Gehört zu diesem Dokument und erscheint nicht im Text.":"Belongs to this document and never appears in the text.",
+  "Wörter in dieser Sitzung":"Words this session","Bereits geschafft":"Done so far",
+  "Zurücksetzen":"Reset","Ausschalten":"Turn off",
+  "Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.":"Counts the words added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
@@ -936,6 +992,8 @@ if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
 if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"platin"};
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
+/* Schreibziel: standardmäßig aus; „base" ist der Wortstand beim Einschalten */
+if(!S.goal)S.goal={on:false,target:1000,base:0};
 S.docs.forEach(d=>{
   if(d.html&&d.html.indexOf('class="pgbreak"')>=0&&d.html.indexOf("data-label=")<0)
     d.html=d.html.replace(/<div class="pgbreak" contenteditable="false">/g,
@@ -1459,6 +1517,15 @@ function openGForm(g){
   $("#gTerm").value=g?g.term:"";$("#gDef").value=g?g.def:"";$("#gCat").value=g?g.cat||"":"";$("#gTerm").focus()}
 
 /* ================= Statuszeile ================= */
+function goalHtml(words){
+  const g=S.goal;
+  if(!g||!g.on)return "";
+  const geschafft=Math.max(0,goalTotal(words)-(g.base||0));
+  const anteil=Math.min(100,Math.round(geschafft/g.target*100));
+  return `<span class="goal" id="goalBox" title="${tr("Schreibziel einstellen")}">
+    ${geschafft.toLocaleString(LOC())} / ${g.target.toLocaleString(LOC())}
+    <span class="goalbar ${geschafft>=g.target?"done":""}"><i style="width:${anteil}%"></i></span></span>`;
+}
 function drawStatus(){
   const ed=$("#editor");const d=doc();
   const txt=ed?(ed.innerText||""):stripHtml(d.html);
@@ -1468,6 +1535,7 @@ function drawStatus(){
   const en=S.settings.uiLang==="en";
   $("#status").innerHTML=`<span id="wcHint" style="cursor:pointer" title="${tr("Wörter zählen")}">${words.toLocaleString(LOC())} ${tr("Wörter")}</span>
     <span>${chars.toLocaleString(LOC())} ${tr("Zeichen")}</span>
+    ${goalHtml(words)}
     <span>${S.mode==="write"?(en?pageCount+(pageCount>1?" pages":" page"):pageCount+" Seite"+(pageCount>1?"n":"")):pages+" "+tr("Normseiten")}</span>
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
     <span>${S.notes.length} ${en?"notes":"Notizen"}</span>
@@ -1481,6 +1549,7 @@ function drawStatus(){
     </span>`:`<span>${Math.round(S.zoom*100)}%</span>`}
     <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">Alt ⇧ P</span>`;
   const ph=$("#pHint");if(ph)ph.onclick=palette;
+  const gb=$("#goalBox");if(gb)gb.onclick=goalDialog;
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
   const wh=$("#wcHint");if(wh)wh.onclick=()=>{
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")};
@@ -1494,6 +1563,29 @@ const stripHtml=h=>{
     .forEach(el=>el.appendChild(document.createTextNode("\n")));
   return t.textContent||"";
 };
+const wordsOf=h=>{const t=stripHtml(h).trim();return t?t.split(/\s+/).length:0};
+/* Wörter der übrigen Dokumente werden zwischengespeichert, damit die Statuszeile
+   nicht bei jedem Tastendruck alle Dokumente neu auszählen muss. */
+let goalOthers=0;
+function recalcGoalOthers(){
+  goalOthers=S.docs.reduce((s,d)=>s+(d.id===S.active?0:wordsOf(d.html)),0);
+}
+function goalTotal(words){return goalOthers+words}
+function setGoal(on,target){
+  S.goal=S.goal||{on:false,target:1000,base:0};
+  if(target!==undefined)S.goal.target=Math.max(1,Math.round(target));
+  if(on!==undefined&&on!==S.goal.on){
+    S.goal.on=on;
+    if(on)goalReset();
+  }
+  save();drawStatus();
+}
+function goalReset(){
+  flush();recalcGoalOthers();
+  const ed=$("#editor");
+  S.goal.base=goalTotal(ed?wordsOf(ed.innerHTML):wordsOf(doc().html));
+  save();drawStatus();
+}
 
 /* ================= Sichern + Verlauf ================= */
 function commit(){
@@ -1544,6 +1636,9 @@ function commandList(){
   add("Ansicht","Notizen","Alt 2",()=>setMode("notes"));
   add("Ansicht","Glossar","Alt 3",()=>setMode("gloss"));
   add("Ansicht","Fokusmodus umschalten","Alt ⇧ Z",()=>{document.body.classList.toggle("focus")});
+  add("Ansicht","Dokumentnotizen","Alt ⇧ T",toggleMemo);
+  add("Ansicht","Leseansicht","Alt ⇧ B",readView);
+  add("Ansicht","Exportvorschau","Alt ⇧ V",printPreview);
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
   add("Ansicht","Farbschema wählen","",themeDialog);
   THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
@@ -1967,12 +2062,22 @@ function viewMenu(){
     <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi!==false)}</span>${tr("Oberfläche tritt zurück")}</button>
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
-    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>`;
+    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
+    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokumentnotizen")}<span class="k">Alt ⇧ T</span></button>
+    <button class="mi" data-v="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
+      S.goal&&S.goal.on?`<span class="k">${S.goal.target}</span>`:""}</button>
+    <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
+    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Exportvorschau")}<span class="k">Alt ⇧ V</span></button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
-    const a=b.dataset.v,stay=!["fit","focus","theme"].includes(a);
+    const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","goal","memo"].includes(a);
+    if(a==="memo"){closeMenu();toggleMemo();return}
     if(a==="theme"){closeMenu();themeDialog();return}
+    if(a==="goal"){closeMenu();
+      if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}return}
+    if(a==="read"){closeMenu();readView();return}
+    if(a==="pv"){closeMenu();printPreview();return}
     if(a==="guides"){S.guides=!S.guides;save();if(S.mode==="write")paginate()}
     if(a==="pnum"){S.pagenum=S.pagenum===false;save();if(S.mode==="write")paginate()}
     if(a==="col"){S.showCol=!S.showCol;save();if(S.mode==="write")drawAnchors()}
@@ -3320,6 +3425,112 @@ function setZoom(z,keepFit){
   if($("#editor"))paginate();
   queueAnchors();drawStatus();   /* baut die Zoomanzeige neu auf */
 }
+/* ================= Dokumentnotizen ================= */
+function toggleMemo(){
+  if(S.mode!=="write"){setMode("write");S.memoOpen=true;save();setTimeout(drawMemo,50);return}
+  S.memoOpen=!S.memoOpen;save();drawMemo();
+}
+function drawMemo(){
+  const side=$("#side");if(!side)return;
+  if(!S.memoOpen||S.mode!=="write"){
+    if(!openNoteId){side.className="side";side.innerHTML=""}
+    return;
+  }
+  const d=doc();
+  side.className="side on";
+  side.innerHTML=`
+    <div class="head">
+      <span style="flex:1;font-family:Georgia,serif;font-size:16px;font-weight:600">${tr("Dokumentnotizen")}</span>
+      <button class="hb" id="memoClose" title="${tr("Schließen (Esc)")}">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+    <textarea class="memo" id="memoText" spellcheck="true" lang="${S.settings.lang}"
+      placeholder="${tr("Handlungsnotizen, offene Fragen, Recherche-Links …")}">${esc(d.memo||"")}</textarea>
+    <div class="foot"><span>${tr("Gehört zu diesem Dokument und erscheint nicht im Text.")}</span></div>`;
+  const ta=$("#memoText");
+  ta.addEventListener("input",()=>{doc().memo=ta.value;dirty=true;drawStatus()});
+  ta.addEventListener("blur",()=>{if(S.settings.autosave)commit()});
+  $("#memoClose").onclick=()=>{S.memoOpen=false;save();drawMemo();const ed=$("#editor");ed&&ed.focus()};
+}
+function goalDialog(){
+  const g=S.goal;
+  overlay(`<div class="modal"><h3>${tr("Schreibziel")}</h3><div class="pad">
+    <div class="setrow"><label>${tr("Wörter in dieser Sitzung")}</label><div class="ctl">
+      <input type="number" id="glTarget" min="1" max="100000" value="${g.target}"></div></div>
+    <div class="setrow"><label>${tr("Bereits geschafft")}</label><div class="ctl">
+      <span style="font-family:Consolas,monospace">${Math.max(0,goalTotal(wordsOf(doc().html))-(g.base||0)).toLocaleString(LOC())}</span>
+      <button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div></div>
+    <div class="fmttip">${tr("Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.")}</div>
+    </div>
+    <div class="rowend">
+      <button class="btn" style="margin-right:auto" id="glOff">${tr("Ausschalten")}</button>
+      <button class="btn pri" id="glOk">${tr("Fertig")}</button></div></div>`);
+  const lies=()=>+$("#glTarget").value||1000;
+  $("#glTarget").onchange=()=>setGoal(undefined,lies());
+  $("#glReset").onclick=()=>{goalReset();closeOvl();goalDialog()};
+  $("#glOff").onclick=()=>{setGoal(false);closeOvl()};
+  $("#glOk").onclick=()=>{setGoal(undefined,lies());closeOvl()};
+}
+
+/* ================= Leseansicht ================= */
+let readOn=false;
+function readView(){
+  if(readOn){readClose();return}
+  flush();
+  const d=doc(),rv=$("#readview");
+  rv.innerHTML=`<div class="rbar">
+      <span>${esc(tr(d.title))}</span>
+      <span style="color:var(--ink-faint)">${wordsOf(d.html).toLocaleString(LOC())} ${tr("Wörter")}</span>
+      <button class="btn" id="rvClose">${tr("Schließen (Esc)")}</button>
+    </div>
+    <div class="rinner">${d.html||""}</div>`;
+  /* Rein zum Lesen: nichts darin ist bearbeitbar */
+  rv.querySelectorAll("[contenteditable]").forEach(el=>el.setAttribute("contenteditable","false"));
+  rv.classList.add("on");rv.scrollTop=0;readOn=true;
+  $("#rvClose").onclick=readClose;
+}
+function readClose(){
+  const rv=$("#readview");if(rv){rv.classList.remove("on");rv.innerHTML=""}
+  readOn=false;const ed=$("#editor");ed&&ed.focus();
+}
+
+/* ================= Exportvorschau ================= */
+let pvOn=false;
+function printPreview(){
+  if(S.mode!=="write"){setMode("write");setTimeout(printPreview,60);return}
+  flush();setPrintPage();paginate();
+  const paper=$("#paper");if(!paper)return;
+  const f=fmtOf(doc());
+  const pw=MM(f.w)*S.zoom,ph=parseFloat(paper.style.height)||paper.offsetHeight;
+  /* Über transform skalieren: die Seitenpositionen stehen in festen Pixeln */
+  const s=Math.min(1.1,Math.max(.25,(Math.min(innerWidth-90,880))/pw));
+  const klon=paper.cloneNode(true);
+  klon.removeAttribute("id");   /* sonst gäbe es #paper zweimal im Dokument */
+  klon.querySelectorAll("[id]").forEach(el=>el.removeAttribute("id"));
+  klon.querySelectorAll(".hfhint,.hfedit,.hfgrip,.figrsz,.pageflag,.ruler").forEach(el=>el.remove());
+  klon.querySelectorAll("[contenteditable]").forEach(el=>el.setAttribute("contenteditable","false"));
+  klon.querySelectorAll(".sel").forEach(el=>el.classList.remove("sel"));
+  klon.style.cssText+=";position:absolute;left:0;top:0;transform-origin:top left;transform:scale("+s+")";
+  const box=document.createElement("div");
+  box.style.cssText=`position:relative;width:${pw*s}px;height:${ph*s}px`;
+  box.appendChild(klon);
+  const w=$("#pvwrap");
+  w.innerHTML=`<div class="pvbar">
+      <b style="color:var(--ink)">${tr("Exportvorschau")}</b>
+      <span>${tr(fmtOf(doc()).n)} &middot; ${pageCount} ${tr(pageCount===1?"Seite":"Seiten")}</span>
+      <div style="flex:1"></div>
+      <button class="btn" id="pvPrint">${tr("Drucken")}&hellip;</button>
+      <button class="btn pri" id="pvClose">${tr("Schließen (Esc)")}</button>
+    </div><div class="pvinner"></div>`;
+  w.querySelector(".pvinner").appendChild(box);
+  w.classList.add("on");w.scrollTop=0;pvOn=true;
+  $("#pvClose").onclick=pvClose;
+  $("#pvPrint").onclick=()=>{setPrintPage();setTimeout(()=>window.print(),60)};
+}
+function pvClose(){
+  const w=$("#pvwrap");if(w){w.classList.remove("on");w.innerHTML=""}
+  pvOn=false;const ed=$("#editor");ed&&ed.focus();
+}
 function zoomPresets(){
   if($("#zmenu")){closeMenu();return}
   closeMenu();
@@ -3365,7 +3576,13 @@ document.addEventListener("keydown",e=>{
     if(S.mode==="write"){fitZoom();render()}return}
   if(as&&e.key.toLowerCase()==="z"){e.preventDefault();
     document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus();return}
-  if(e.key==="Escape"){if(hfEditing){hfEditClose();const ed=$("#editor");ed&&ed.focus();return}
+  if(as&&e.key.toLowerCase()==="t"){e.preventDefault();toggleMemo();return}
+  if(as&&e.key.toLowerCase()==="b"){e.preventDefault();readView();return}
+  if(as&&e.key.toLowerCase()==="v"){e.preventDefault();printPreview();return}
+  if(e.key==="Escape"){
+    if(pvOn){pvClose();return}
+    if(readOn){readClose();return}
+    if(hfEditing){hfEditClose();const ed=$("#editor");ed&&ed.focus();return}
     if(slashOn)slashClose();
     else if($("#findbar").classList.contains("on")&&document.activeElement&&document.activeElement.closest(".findbar"))fdClose();
     else if($("#ovl").innerHTML)closeOvl();
@@ -3442,6 +3659,7 @@ $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
 /* ================= Render ================= */
 function render(){
   hfEditClose();
+  recalcGoalOthers();
   document.title=tr(doc().title||"Ohne Titel")+" — PureQuill Writer";
   drawTabs();
   document.querySelectorAll(".rb[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===S.mode));
@@ -3449,6 +3667,7 @@ function render(){
   if(S.mode==="write")drawWrite();
   else if(S.mode==="notes")drawNotes();
   else drawGloss();
+  drawMemo();   /* blendet sich außerhalb des Schreibmodus selbst aus */
   drawStatus();
 }
 applyTheme();applyStaticLabels();resetTimer();
