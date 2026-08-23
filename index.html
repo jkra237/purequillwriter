@@ -347,7 +347,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
      die Zahlen beim Tippen ruhig — dafür war die Festbreitenschrift da. */
   font-family:var(--ui);font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .status .grow{flex:1}
-/* Dokumentnotizen: Gedanken zum Dokument, nicht zum Text */
+/* Dokument-Memo: Gedanken zum Dokument, nicht zum Text */
 .side .memo{flex:1;border:none;outline:none;resize:none;padding:14px 16px;
   background:var(--chrome-2);color:var(--ink);
   font-family:Georgia,serif;font-size:14px;line-height:1.6}
@@ -865,7 +865,7 @@ const EN={
   "Zoomstufe wählen":"Choose zoom level","Eigene Größe&hellip;":"Custom size&hellip;",
   "Leseansicht":"Reading view","Druckvorschau":"Print preview","Seiten":"pages",
   "Schreibziel":"Writing goal","Schreibziel einstellen":"Set the writing goal",
-  "Dokumentnotizen":"Document notes",
+  "Dokument-Memo":"Document Memo",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Plot notes, open questions, research links…",
   "Gehört zu diesem Dokument und erscheint nicht im Text.":"Belongs to this document and never appears in the text.",
   "Wörter in dieser Sitzung":"Words this session","Bereits geschafft":"Done so far",
@@ -2417,7 +2417,7 @@ function commandList(){
   add("Ansicht","Notizen","Alt 2",()=>setMode("notes"));
   add("Ansicht","Glossar","Alt 3",()=>setMode("gloss"));
   add("Ansicht","Fokusmodus umschalten","Alt ⇧ Z",()=>{document.body.classList.toggle("focus")});
-  add("Ansicht","Dokumentnotizen","Alt ⇧ T",toggleMemo);
+  add("Ansicht","Dokument-Memo","Alt ⇧ T",toggleMemo);
   add("Ansicht","Leseansicht","Alt ⇧ B",readView);
   add("Ansicht","Druckvorschau","Alt ⇧ V",printPreview);
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
@@ -3079,7 +3079,7 @@ function viewMenu(){
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
-    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokumentnotizen")}<span class="k">Alt ⇧ T</span></button>
+    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">Alt ⇧ T</span></button>
     <button class="mi" data-v="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
       S.goal&&S.goal.on?`<span class="k">${S.goal.target}</span>`:""}</button>
     <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
@@ -4463,7 +4463,7 @@ function setZoom(z,keepFit){
   if($("#editor"))paginate();
   queueAnchors();drawStatus();   /* baut die Zoomanzeige neu auf */
 }
-/* ================= Dokumentnotizen ================= */
+/* ================= Dokument-Memo ================= */
 function toggleMemo(){
   if(S.mode!=="write"){setMode("write");S.memoOpen=true;save();setTimeout(drawMemo,50);return}
   S.memoOpen=!S.memoOpen;save();drawMemo();
@@ -4478,7 +4478,7 @@ function drawMemo(){
   side.className="side on";
   side.innerHTML=`
     <div class="head">
-      <span style="flex:1;font-family:Georgia,serif;font-size:16px;font-weight:600">${tr("Dokumentnotizen")}</span>
+      <span style="flex:1;font-family:Georgia,serif;font-size:16px;font-weight:600">${tr("Dokument-Memo")}</span>
       <button class="hb" id="memoClose" title="${tr("Schließen (Esc)")}">
         <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
