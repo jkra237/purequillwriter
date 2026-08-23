@@ -11,7 +11,9 @@
   --ink:#1E2023; --ink-soft:#6A6D71; --ink-faint:#9A9C9E;
   --rule:#D6D3C9; --stamp:#8C3B2E; --manila:#EBDFC4;
   --ok:#3F6B4A; --pageedge:rgba(0,0,0,.35);
-  --radius:3px;
+  --radius:7px;      /* Bedienelemente */
+  --radius-lg:12px;  /* Dialoge */
+  --radius-paper:3px;/* Papierobjekte bleiben kantig */
 }
 /* Graue Systemoberfläche der späten Neunziger */
 [data-theme="silber"]{
@@ -133,6 +135,14 @@ body{
 }
 button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
 input,select,textarea{font:inherit;color:inherit}
+/* Farbwechsel überblenden statt springen. Bewusst nur Farben und Schatten —
+   keine Layout-Eigenschaften, die würden beim Neuzeichnen flackern.
+   `.gitem .act button` steht bewusst nicht hier: die Regel hat weiter unten
+   einen eigenen transition, der diesen sonst verdrängen würde. */
+.tb,.pill,.rb,.filebtn,.btn,.mi,.tab,.tab .x,.tabadd,.sw,.addg,.gmore,.gitem,.hit,
+.tools select,.tools input[type=text],.modal select,.setrow select{
+  transition:background-color .14s ease-out,color .14s ease-out,
+             border-color .14s ease-out,box-shadow .14s ease-out}
 .app{display:flex;flex-direction:column;height:100%}
 
 /* ---- Dokument-Tabs ---- */
@@ -151,7 +161,7 @@ input,select,textarea{font:inherit;color:inherit}
 .menu.ctx{position:fixed;top:auto;min-width:212px}
 .mi[disabled]{opacity:.38;pointer-events:none}
 #editor.nomark .anch{background:none;border-bottom:none}
-.mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 9px;border-radius:2px;text-align:left}
+.mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 9px;border-radius:4px;text-align:left}
 .mi:hover{background:var(--chrome)}
 .mi .k{margin-left:auto;font-family:Consolas,monospace;font-size:10.5px;color:var(--ink-faint)}
 .mi .chk{width:12px;flex:0 0 12px;color:var(--stamp)}
@@ -362,7 +372,7 @@ input,select,textarea{font:inherit;color:inherit}
 .notecanvas{position:relative;min-height:100%;padding:14px}
 .work{flex:1;display:flex;min-height:0;position:relative}
 .note{position:absolute;width:224px;background:#EBDFC4;color:#22242A;
-  border:1px solid rgba(0,0,0,.16);border-radius:var(--radius);cursor:default;
+  border:1px solid rgba(0,0,0,.16);border-radius:var(--radius-paper);cursor:default;
   padding:13px 12px 28px;box-shadow:1px 1px 0 rgba(0,0,0,.13);max-height:230px;overflow:hidden}
 .note.sel{box-shadow:0 0 0 2px var(--stamp),1px 1px 0 rgba(0,0,0,.13)}
 .note .grip{position:absolute;top:0;left:0;right:0;height:17px;cursor:move}
@@ -449,7 +459,8 @@ input,select,textarea{font:inherit;color:inherit}
 .ggroup:first-child{border-radius:var(--radius) var(--radius) 0 0}
 .gitem{display:grid;grid-template-columns:minmax(120px,210px) 1fr auto;gap:6px 18px;
   padding:11px 13px;border-bottom:1px solid var(--rule);align-items:baseline}
-.gitem:last-child{border-bottom:none}
+/* Sonst würde die Hover-Fläche der letzten Zeile die runde Unterkante überdecken */
+.gitem:last-child{border-bottom:none;border-radius:0 0 var(--radius) var(--radius)}
 .gitem:hover{background:var(--chrome-2)}
 .gitem .t{font-family:Georgia,serif;font-size:15px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
 .gitem .c{display:block;margin-top:3px;font-family:Consolas,monospace;font-size:10px;
@@ -459,7 +470,8 @@ input,select,textarea{font:inherit;color:inherit}
 /* Dauerhaft sichtbar, nur gedämpft — auf Tastatur und Touch gäbe es kein Hover */
 .gitem .act{display:flex;gap:2px;align-self:start}
 .gitem .act button{width:26px;height:24px;display:flex;align-items:center;justify-content:center;
-  border-radius:var(--radius);color:var(--ink-soft);opacity:.85;transition:opacity .15s}
+  border-radius:var(--radius);color:var(--ink-soft);opacity:.85;
+  transition:opacity .15s,background-color .14s ease-out,color .14s ease-out}
 .gitem:hover .act button,.gitem .act button:focus-visible{opacity:1}
 .gitem .act button:hover{background:var(--chrome);color:var(--ink)}
 @media (max-width:620px){
@@ -491,7 +503,7 @@ input,select,textarea{font:inherit;color:inherit}
   justify-content:center;padding:13vh 10px 28px;z-index:50;overflow-y:auto}
 @media (max-height:820px){.veil{padding-top:5vh}}
 @media (max-height:620px){.veil{padding-top:12px}}
-.modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);width:min(520px,92vw);
+.modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius-lg);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
 .modal.wide{width:min(600px,94vw)}
 .modal h3{margin:0;padding:11px 14px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;
@@ -665,6 +677,16 @@ body.focus .sheet{padding-top:9vh}
 .toast{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);
   padding:7px 15px;border-radius:var(--radius);font-size:12px;z-index:70;opacity:0;transition:opacity .18s}
 .toast.on{opacity:1}
+
+/* Wer im Betriebssystem weniger Bewegung eingestellt hat, bekommt keine.
+   Ganz am Ende, damit die Regel jede vorherige übersteuert. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    scroll-behavior:auto!important}
+}
 </style>
 
 <div class="app">
