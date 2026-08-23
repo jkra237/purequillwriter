@@ -580,6 +580,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   .rowend{justify-content:flex-start}
   .rowend .btn[style*="margin-right:auto"]{margin-right:0!important}
 }
+/* Signaturfeld: immer weißes Papier, unabhängig vom Farbschema - eine
+   Unterschrift auf dunklem Grund zu üben, wäre keine sinnvolle Vorschau. */
+.sigwrap{position:relative}
+.sigpad{display:block;width:100%;aspect-ratio:2.6/1;background:#fff;
+  border:1px solid var(--rule);border-radius:var(--radius);cursor:crosshair;touch-action:none}
+.sigline{position:absolute;left:20px;right:20px;bottom:38px;height:1px;background:rgba(0,0,0,.15);pointer-events:none}
 .papercol{display:flex;flex-direction:column;flex:0 0 auto}
 .ruler{position:sticky;top:0;z-index:20;height:19px;flex:0 0 19px;margin-bottom:7px;
   background:var(--chrome-2);border:1px solid var(--rule);border-radius:2px;position:relative}
@@ -945,6 +951,10 @@ const EN={
   "Nicht gesichert":"Not saved","Gesichert ":"Saved ","Bereit":"Ready","aus":"off","an":"on",
   "Kommandopalette öffnen":"Open command palette",
   "Angelegt":"Created",
+  "Signatur erstellen":"Create signature","Signatur erstellen&hellip;":"Create signature&hellip;",
+  "Signatur einfügen":"Insert signature","Signatur":"Signature",
+  "Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.":
+    "Sign with the mouse button held down. Only the signature itself is inserted, without the white space around it.",
   "Ansicht ":"View ",
   "Fokusmodus umschalten":"Toggle focus mode","Seitenränder umschalten":"Toggle page margins","Farbschema wählen":"Choose color scheme",
   "Schema: ":"Scheme: ","Wörter zählen&hellip;":"Count words&hellip;","Seitenzahlen umschalten":"Toggle page numbers",
@@ -3180,7 +3190,8 @@ function toolsMenu(){
   m.innerHTML=`
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
-    <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>`;
+    <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
+    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Signatur erstellen&hellip;")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-t]");if(!b)return;
@@ -3188,6 +3199,7 @@ function toolsMenu(){
     const a=b.dataset.t;
     if(a==="goal"){if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}}
     if(a==="find")fdOpen(true);
+    if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
   };
 }
 
@@ -4311,13 +4323,80 @@ function addImage(file){
   };
   r.readAsDataURL(file);
 }
-function insertFigure(src,alt){
+function insertFigure(src,alt,width){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
-  const html=`<figure class="fig" contenteditable="false" data-w="70" style="text-align:center">`+
-    `<img src="${src}" alt="${esc(alt||"")}" style="width:70%"></figure><p><br></p>`;
+  const w=width||70;
+  const html=`<figure class="fig" contenteditable="false" data-w="${w}" style="text-align:center">`+
+    `<img src="${src}" alt="${esc(alt||"")}" style="width:${w}%"></figure><p><br></p>`;
   document.execCommand("insertHTML",false,html);
   flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
+}
+/* ================= Signatur ================= */
+/* Auf transparentem Grund gezeichnet (das weiße Papier ist nur die CSS-
+   Hintergrundfarbe des Feldes) und beim Einfügen auf die tatsächlich
+   gezeichnete Fläche zugeschnitten - sonst würde ein halb leeres Rechteck
+   im Dokument landen statt einer knapp sitzenden Unterschrift. */
+function signatureDialog(){
+  overlay(`<div class="modal wide"><h3>${tr("Signatur erstellen")}</h3><div class="pad">
+    <div class="sigwrap">
+      <canvas id="sigCanvas" class="sigpad"></canvas>
+      <div class="sigline"></div>
+    </div>
+    <div class="fmttip">${tr("Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.")}</div>
+    </div>
+    <div class="rowend">
+      <button class="btn" style="margin-right:auto" id="sigClear">${tr("Löschen")}</button>
+      <button class="btn" id="sigCancel">${tr("Abbrechen")}</button>
+      <button class="btn pri" id="sigInsert" disabled>${tr("Signatur einfügen")}</button>
+    </div></div>`);
+  sigInit();
+}
+function sigInit(){
+  const cv=$("#sigCanvas");
+  const dpr=window.devicePixelRatio||1;
+  const rect=cv.getBoundingClientRect();
+  cv.width=Math.round(rect.width*dpr);cv.height=Math.round(rect.height*dpr);
+  const ctx=cv.getContext("2d");
+  ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#1a1a1a";
+  let drawing=false,lastX=0,lastY=0,bounds=null;
+  const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
+  const extend=(x,y)=>{
+    if(!bounds)bounds={minX:x,maxX:x,minY:y,maxY:y};
+    else{bounds.minX=Math.min(bounds.minX,x);bounds.maxX=Math.max(bounds.maxX,x);
+      bounds.minY=Math.min(bounds.minY,y);bounds.maxY=Math.max(bounds.maxY,y)}
+  };
+  const dot=(x,y)=>{ctx.beginPath();ctx.arc(x,y,ctx.lineWidth/2,0,Math.PI*2);ctx.fillStyle=ctx.strokeStyle;ctx.fill()};
+  cv.onpointerdown=e=>{
+    drawing=true;
+    [lastX,lastY]=pos(e);extend(lastX,lastY);dot(lastX,lastY);
+    $("#sigInsert").disabled=false;
+    try{cv.setPointerCapture(e.pointerId)}catch(err){}
+  };
+  cv.onpointermove=e=>{
+    if(!drawing)return;
+    const[x,y]=pos(e);extend(x,y);
+    ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(x,y);ctx.stroke();
+    [lastX,lastY]=[x,y];
+  };
+  const stop=()=>drawing=false;
+  cv.onpointerup=stop;cv.onpointerleave=stop;cv.onpointercancel=stop;
+  $("#sigClear").onclick=()=>{
+    ctx.clearRect(0,0,cv.width,cv.height);bounds=null;$("#sigInsert").disabled=true;
+  };
+  $("#sigCancel").onclick=closeOvl;
+  $("#sigInsert").onclick=()=>{
+    if(!bounds)return;
+    const pad=8;
+    const x=Math.max(0,bounds.minX-pad),y=Math.max(0,bounds.minY-pad);
+    const w=Math.min(rect.width,bounds.maxX+pad)-x,h=Math.min(rect.height,bounds.maxY+pad)-y;
+    const out=document.createElement("canvas");
+    out.width=Math.round(w*dpr);out.height=Math.round(h*dpr);
+    out.getContext("2d").drawImage(cv,Math.round(x*dpr),Math.round(y*dpr),out.width,out.height,0,0,out.width,out.height);
+    const data=out.toDataURL("image/png");
+    closeOvl();
+    insertFigure(data,tr("Signatur"),28);
+  };
 }
 let selFig=null;
 function selectFig(f){
