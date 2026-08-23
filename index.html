@@ -64,14 +64,6 @@
   --rule:#124126; --stamp:#8CFFB0; --manila:#EBDFC4;
   --ok:#4CFF88; --pageedge:rgba(60,255,116,.28);
 }
-/* Kräftiges Amtsblau, wie DOS-Textverarbeitungen der frühen Neunziger */
-[data-theme="kobalt"]{
-  --on-stamp:#141414;
-  --paper:#0A1EA6; --chrome:#081766; --chrome-2:#0F27A0; --canvas:#050B40;
-  --ink:#FFFFFF; --ink-soft:#C9D3FF; --ink-faint:#8FA0E0;
-  --rule:#3350C0; --stamp:#FFDD55; --manila:#EBDFC4;
-  --ok:#7FE0A0; --pageedge:rgba(255,255,255,.3);
-}
 /* Beige Bürosoftware-Oberfläche mit türkisen Akzenten, Ende der Neunziger */
 [data-theme="lagune"]{
   --paper:#FBFBF8; --chrome:#D9D6CD; --chrome-2:#EDEBE3; --canvas:#8FA8A6;
@@ -85,13 +77,6 @@
   --ink:#000000; --ink-soft:#3A3A3A; --ink-faint:#727272;
   --rule:#9A9A9A; --stamp:#0B7580; --manila:#EBDFC4;
   --ok:#12708A; --pageedge:rgba(0,0,0,.45);
-}
-/* Hellgelbe Infobox-Oberfläche mit türkisen Reitern, späte Neunziger */
-[data-theme="goldrand"]{
-  --paper:#FFFFFF; --chrome:#F0E5A2; --chrome-2:#F8F1C9; --canvas:#9A9478;
-  --ink:#141414; --ink-soft:#403B28; --ink-faint:#7A7454;
-  --rule:#D2C275; --stamp:#0E6F7A; --manila:#EBDFC4;
-  --ok:#3F6B4A; --pageedge:rgba(0,0,0,.45);
 }
 /* Getöntes Schreibmaschinenpapier */
 [data-theme="sepia"]{
@@ -666,14 +651,12 @@ const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
-  {k:"goldrand", n:"Goldrand",   d:"Hellgelbe Infobox mit türkisen Reitern — erinnert an Lotus Word Pro", c:["#F0E5A2","#9A9478","#0E6F7A"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"sepia",    n:"Sepia",      d:"Getöntes Schreibmaschinenpapier",   c:["#F4EADA","#9C8B72","#8A3324"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
   {k:"werkbank", n:"Werkbank",   d:"Graue Windows-Oberfläche der frühen Neunziger — erinnert an Lotus Ami Pro", c:["#FFFFFF","#6E6E6E","#8B1A1A"]},
   {k:"leinen",   n:"Leinen",     d:"Zurückhaltend, modern",             c:["#FAF9F5","#ADA79B","#2F6F6A"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
-  {k:"kobalt",   n:"Kobalt",     d:"Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit",        c:["#0A1EA6","#050B40","#FFDD55"]},
   {k:"brotkasten",n:"Brotkasten",d:"Blauvioletter Heimcomputer-Bildschirm der Achtziger",                  c:["#3B33A6","#1B1758","#FFE97F"]},
   {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
   {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]},
@@ -861,9 +844,8 @@ const EN={
   "Klassische Macintosh-Grautöne":"Classic Macintosh grays","Zurückhaltend, modern":"Understated, modern",
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era","Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
-  "Phosphor":"Phosphor","Kobalt":"Cobalt","Lagune":"Lagoon",
-  "Aquamarin":"Aquamarine","Goldrand":"Gold Trim","Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
-  "Hellgelbe Infobox mit türkisen Reitern — erinnert an Lotus Word Pro":"Pale yellow infobox with teal tabs — reminiscent of Lotus Word Pro",
+  "Phosphor":"Phosphor","Lagune":"Lagoon",
+  "Aquamarin":"Aquamarine","Sepia":"Sepia","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Gray Windows office with a teal infobox — reminiscent of Lotus Word Pro",
   "Hercules":"Hercules","Solar":"Solar",
   "Getöntes Schreibmaschinenpapier":"Tinted typewriter paper",
@@ -874,7 +856,6 @@ const EN={
   "Gedämpftes Teal-Dunkelschema, inspiriert von Solarized":"Muted teal dark scheme, inspired by Solarized",
   "Umbenennen":"Rename","Farbe":"Color","Keine Farbe":"No color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
-  "Kräftiges Amtsblau — erinnert an WordPerfect 5.1 der DOS-Zeit":"Bold office blue — reminiscent of WordPerfect 5.1 from the DOS era",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beige office interface with teal — reminiscent of Lotus SmartSuite '97",
   "Sprache der Benutzeroberfläche":"Interface language",
   "Willkommen":"Welcome","Sprache":"Language","Wie möchtest du beginnen?":"How would you like to start?",
@@ -988,6 +969,11 @@ if(S.settings&&S.settings.dimUi===undefined)S.settings.dimUi=true;
 if(!S.zoom)S.zoom=1.2;
 if(S.settings&&(S.settings.theme==="hell"||!S.settings.theme))S.settings.theme="papier";
 if(S.settings&&S.settings.theme==="dunkel")S.settings.theme="tinte";
+/* Entfernte Schemata auf das jeweils nächstliegende umstellen */
+if(S.settings&&S.settings.theme==="kobalt")S.settings.theme="enzian";
+if(S.settings&&S.settings.theme==="goldrand")S.settings.theme="aquamarin";
+/* Sicherheitsnetz: ein unbekanntes Schema hätte keine Farben, aber einen Namen */
+if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="platin";
 if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
 if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"platin"};
