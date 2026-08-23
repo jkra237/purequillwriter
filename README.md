@@ -14,6 +14,7 @@ Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine
 - **Glossar** mit Markierung und Nachschlagefunktion im Text
 - **Kommandopalette** (`Alt` `⇧` `P`) und Schrägstrich-Menü für alles ohne Maus
 - Tabellen, Bilder, Links, Suchen und Ersetzen, Autosave mit Versionsverlauf
+- **Dokumente laden** aus `.docx`, `.odt`, `.rtf`, `.html`, `.md` und `.txt`
 - Zwölf Farbschemata (historische wie Phosphor und Enzian, moderne wie Alabaster und Azur), Fokusmodus, Schreibmaschinen-Scrollen
 - **Leseansicht** und **Exportvorschau** — den Text beurteilen, bevor gedruckt wird
 - **Dokumentnotizen** je Dokument und ein abschaltbares **Schreibziel** in der Statuszeile

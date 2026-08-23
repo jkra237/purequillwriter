@@ -912,7 +912,7 @@ const EN={
   "Einstellungen öffnen":"Open settings","Datei laden":"Load file",
   "Exportieren — für andere Programme":"Export — for other programs",
   "Dokument laden&hellip;":"Load a document&hellip;","Dokument geladen":"Document loaded","geladen":"loaded",
-  "Word-Dateien (.docx) lassen sich nicht lesen — in Word als HTML oder Text speichern":"Word files (.docx) cannot be read — save them as HTML or text in Word",
+  "Diese Datei ließ sich nicht lesen":"This file could not be read",
   "Sichern — später wieder einlesbar":"Back up — can be loaded again later",
   "Glossar als Tabelle":"Glossary as a table",
   "Dieses Dokument mit Notizen":"This document with its notes",
@@ -2024,7 +2024,6 @@ function drawGloss(){
   const alle=S.glossary.filter(g=>g.gid===gid);
   const list=alle.filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
   const en=S.settings.uiLang==="en";
-  const hier=doc().glossaryId===gid;
   const nutzer=S.docs.filter(d=>d.glossaryId===gid).length;
   const zahl=n=>n.toLocaleString(LOC());
   const meta=[
@@ -2044,7 +2043,6 @@ function drawGloss(){
         <span class="gulabel">${tr("Zugeordnete Dokumente")}</span>
         <button class="btn gupick" id="gAssign" aria-haspopup="true">
           <span>${zuordnungText(gid)}</span><i class="caret"></i></button>
-        ${hier?"":`<button class="btn pri" id="gUse">${en?"Use here":"Hier verwenden"}</button>`}
       </div>
     </div>
     <div class="gform" id="gform" style="display:none">
@@ -2553,33 +2551,29 @@ function looksBinary(s){
 function loadDocumentFile(){
   const i=document.createElement("input");
   i.type="file";i.multiple=true;
-  i.accept=".txt,.text,.md,.markdown,.html,.htm,.doc";
-  i.onchange=()=>{
+  i.accept=".txt,.text,.md,.markdown,.html,.htm,.doc,.docx,.odt,.rtf";
+  i.onchange=async()=>{
     const dateien=[...i.files];if(!dateien.length)return;
-    let fertig=0,geladen=0,abgelehnt=0;
-    dateien.forEach(f=>{
-      const r=new FileReader();
-      r.onload=()=>{
-        if(importDocumentText(f.name,r.result))geladen++;else abgelehnt++;
-        if(++fertig===dateien.length)meldung();
-      };
-      r.onerror=()=>{abgelehnt++;if(++fertig===dateien.length)meldung()};
-      r.readAsText(f);
-    });
-    const meldung=()=>{
-      if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
-      else if(abgelehnt)toast(tr("Word-Dateien (.docx) lassen sich nicht lesen — in Word als HTML oder Text speichern"));
-    };
+    let geladen=0,abgelehnt=0;
+    for(const f of dateien){
+      const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+      try{
+        if(ZIPFORMATE.includes(ext)){
+          const html=await zipDokument(f.name,await f.arrayBuffer());
+          if(neuesDokumentAus(f.name,html))geladen++;else abgelehnt++;
+        }else{
+          if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
+        }
+      }catch(e){abgelehnt++}
+    }
+    if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
+    else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
   };
   i.click();
 }
-function importDocumentText(name,raw){
-  if(looksBinary(raw))return false;
-  const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
-  let html;
-  if(ext==="md"||ext==="markdown")html=mdToHtml(raw);
-  else if(["html","htm","doc"].includes(ext)||/^\s*<(!doctype|html|meta|body|div|p|h[1-6])\b/i.test(raw))html=cleanHtml(raw);
-  else html=textToHtml(raw);
+/* Gemeinsamer Abschluss für alle Formate */
+function neuesDokumentAus(name,html){
+  if(!html)return false;
   flush();
   const d=blankDoc(String(name).replace(/\.[^.]+$/,"").slice(0,60));
   d.customTitle=true;           /* Dateiname als Titel behalten */
@@ -2588,6 +2582,234 @@ function importDocumentText(name,raw){
   S.docs.push(d);S.active=d.id;
   save();render();
   return true;
+}
+function importDocumentText(name,raw){
+  if(looksBinary(raw))return false;
+  const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+  let html;
+  if(ext==="md"||ext==="markdown")html=mdToHtml(raw);
+  else if(ext==="rtf"||/^\s*\{\\rtf/i.test(raw))html=rtfToHtml(raw);
+  else if(["html","htm","doc"].includes(ext)||/^\s*<(!doctype|html|meta|body|div|p|h[1-6])\b/i.test(raw))html=cleanHtml(raw);
+  else html=textToHtml(raw);
+  return neuesDokumentAus(name,html);
+}
+/* RTF ist reiner Text mit Steuerworten. Absätze, Auszeichnungen und
+   Sonderzeichen decken ab, was Textverarbeitungen üblicherweise ausgeben. */
+function rtfToHtml(raw){
+  let t=String(raw);
+  t=t.replace(/\\'([0-9a-f]{2})/gi,(m,h)=>String.fromCharCode(parseInt(h,16)));
+  t=t.replace(/\\u(-?\d+)\??/g,(m,n)=>String.fromCharCode(+n<0?+n+65536:+n));
+  /* Gruppen, die nicht in den Text gehören */
+  t=t.replace(/\{\\\*[^{}]*\}/g,"");
+  t=t.replace(/\{\\(?:fonttbl|colortbl|stylesheet|info|generator)[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/gi,"");
+  const marken=[];
+  t=t.replace(/\\(par|line|b0|b|i0|i|ul0|ulnone|ul|strike0|strike)\b ?/g,(m,w)=>{
+    marken.push(w);return "\u0000"+(marken.length-1)+"\u0000"});
+  t=t.replace(/\\[a-z]+-?\d* ?/gi,"");     /* übrige Steuerworte */
+  t=t.replace(/[{}]/g,"");
+  let out="",offen=[],absatz="";
+  const zu=()=>{while(offen.length)absatz+="</"+offen.pop()+">"};
+  const auf=tag=>{if(!offen.includes(tag)){absatz+="<"+tag+">";offen.push(tag)}};
+  const ab=tag=>{const k=offen.indexOf(tag);if(k<0)return;
+    for(let j=offen.length-1;j>=k;j--)absatz+="</"+offen[j]+">";
+    const wieder=offen.slice(k+1);offen=offen.slice(0,k);
+    wieder.forEach(x=>{absatz+="<"+x+">";offen.push(x)})};
+  t.split(/\u0000(\d+)\u0000/).forEach((teil,idx)=>{
+    if(idx%2===1){
+      const w=marken[+teil];
+      if(w==="par"){zu();out+="<p>"+(absatz.trim()||"<br>")+"</p>";absatz=""}
+      else if(w==="line")absatz+="<br>";
+      else if(w==="b")auf("b"); else if(w==="b0")ab("b");
+      else if(w==="i")auf("i"); else if(w==="i0")ab("i");
+      else if(w==="ul")auf("u"); else if(w==="ul0"||w==="ulnone")ab("u");
+      else if(w==="strike")auf("s"); else if(w==="strike0")ab("s");
+      return;
+    }
+    absatz+=esc(teil.replace(/\r?\n/g,""));
+  });
+  zu();
+  if(absatz.trim())out+="<p>"+absatz+"</p>";
+  return out||null;
+}
+
+/* ---- .docx und .odt ----
+   Beide sind ZIP-Archive. Browser können seit 2023 selbst entpacken
+   (DecompressionStream), deshalb braucht es dafür keine Fremdbibliothek. */
+const ZIPFORMATE=["docx","odt"];
+async function zipEintrag(buf,name){
+  const dv=new DataView(buf),u8=new Uint8Array(buf),dec=new TextDecoder();
+  /* Zentrales Verzeichnis steht am Dateiende, Signatur rückwärts suchen */
+  let eocd=-1;
+  for(let i=u8.length-22;i>=0&&i>u8.length-65558;i--)
+    if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}
+  if(eocd<0)return null;
+  const anzahl=dv.getUint16(eocd+10,true);
+  let q=dv.getUint32(eocd+16,true);
+  for(let k=0;k<anzahl;k++){
+    if(q+46>u8.length||dv.getUint32(q,true)!==0x02014b50)return null;
+    const methode=dv.getUint16(q+10,true);
+    const komp=dv.getUint32(q+20,true);
+    const nlen=dv.getUint16(q+28,true);
+    const elen=dv.getUint16(q+30,true);
+    const clen=dv.getUint16(q+32,true);
+    const lokal=dv.getUint32(q+42,true);
+    if(dec.decode(u8.subarray(q+46,q+46+nlen))===name){
+      const ln=dv.getUint16(lokal+26,true),le=dv.getUint16(lokal+28,true);
+      const start=lokal+30+ln+le;
+      const daten=u8.subarray(start,start+komp);
+      if(methode===0)return dec.decode(daten);
+      if(methode!==8||typeof DecompressionStream!=="function")return null;
+      const strom=new Blob([daten]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return dec.decode(await new Response(strom).arrayBuffer());
+    }
+    q+=46+nlen+elen+clen;
+  }
+  return null;
+}
+const xesc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const xattr=(el,n)=>el.getAttribute("w:"+n)||el.getAttribute(n)||
+  el.getAttributeNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main",n);
+
+/* --- Word --- */
+function docxLauf(p){
+  let out="";
+  [...p.children].forEach(el=>{
+    if(el.localName==="hyperlink"){out+=docxLauf(el);return}
+    if(el.localName!=="r")return;
+    let t="";
+    [...el.children].forEach(c=>{
+      if(c.localName==="t")t+=xesc(c.textContent);
+      else if(c.localName==="br")t+="<br>";
+      else if(c.localName==="tab")t+=" ";
+    });
+    if(!t)return;
+    const pr=[...el.children].find(c=>c.localName==="rPr");
+    if(pr){
+      const an=n=>{const e=[...pr.children].find(c=>c.localName===n);
+        if(!e)return false;const v=xattr(e,"val");return v!=="0"&&v!=="false"};
+      if(an("b"))t="<b>"+t+"</b>";
+      if(an("i"))t="<i>"+t+"</i>";
+      if(an("u"))t="<u>"+t+"</u>";
+      if(an("strike"))t="<s>"+t+"</s>";
+    }
+    out+=t;
+  });
+  return out;
+}
+function docxToHtml(xml){
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return null;
+  const body=[...dom.documentElement.children].find(e=>e.localName==="body");
+  if(!body)return null;
+  let out="",liste=false;
+  const zu=()=>{if(liste){out+="</ul>";liste=false}};
+  const absatz=p=>{
+    const pr=[...p.children].find(c=>c.localName==="pPr");
+    const stil=pr&&[...pr.children].find(c=>c.localName==="pStyle");
+    const nummer=pr&&[...pr.children].some(c=>c.localName==="numPr");
+    const name=stil?String(xattr(stil,"val")||""):"";
+    /* Word beschriftet Überschriften je nach Sprache anders */
+    const h=name.match(/^(?:Heading|berschrift|Titre|Ttulo)\s*([1-6])/i);
+    const inhalt=docxLauf(p);
+    if(nummer){if(!liste){out+="<ul>";liste=true}out+="<li>"+(inhalt||"<br>")+"</li>";return}
+    zu();
+    if(h)out+="<h"+Math.min(3,+h[1])+">"+(inhalt||"<br>")+"</h"+Math.min(3,+h[1])+">";
+    else out+="<p>"+(inhalt||"<br>")+"</p>";
+  };
+  const tabelle=t=>{
+    zu();
+    let r="<table>";
+    [...t.children].filter(x=>x.localName==="tr").forEach(tr=>{
+      r+="<tr>";
+      [...tr.children].filter(x=>x.localName==="tc").forEach(tc=>{
+        const inner=[...tc.children].filter(x=>x.localName==="p").map(docxLauf).join("<br>");
+        r+="<td>"+(inner||"&nbsp;")+"</td>";
+      });
+      r+="</tr>";
+    });
+    out+=r+"</table>";
+  };
+  [...body.children].forEach(el=>{
+    if(el.localName==="p")absatz(el);
+    else if(el.localName==="tbl")tabelle(el);
+  });
+  zu();
+  return out||null;
+}
+
+/* --- OpenDocument (LibreOffice) --- */
+function odtToHtml(xml){
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return null;
+  /* Auszeichnungen stecken in den automatischen Formatvorlagen */
+  const stile={};
+  [...dom.getElementsByTagName("*")].forEach(el=>{
+    if(el.localName!=="style")return;
+    const n=el.getAttribute("style:name");if(!n)return;
+    const tp=[...el.children].find(c=>c.localName==="text-properties");if(!tp)return;
+    stile[n]={
+      b:/bold/i.test(tp.getAttribute("fo:font-weight")||""),
+      i:/italic|oblique/i.test(tp.getAttribute("fo:font-style")||""),
+      u:!!(tp.getAttribute("style:text-underline-style")||"").replace(/none/i,""),
+      s:!!(tp.getAttribute("style:text-line-through-style")||"").replace(/none/i,"")
+    };
+  });
+  const inhalt=[...dom.getElementsByTagName("*")].find(e=>e.localName==="text"&&
+    e.parentElement&&e.parentElement.localName==="body");
+  if(!inhalt)return null;
+  const lauf=el=>{
+    let t="";
+    [...el.childNodes].forEach(k=>{
+      if(k.nodeType===3){t+=xesc(k.nodeValue);return}
+      if(k.nodeType!==1)return;
+      if(k.localName==="line-break"){t+="<br>";return}
+      if(k.localName==="s"){t+=" ";return}
+      if(k.localName==="tab"){t+=" ";return}
+      let s=lauf(k);
+      if(k.localName==="span"){
+        const st=stile[k.getAttribute("text:style-name")];
+        if(st){if(st.b)s="<b>"+s+"</b>";if(st.i)s="<i>"+s+"</i>";
+               if(st.u)s="<u>"+s+"</u>";if(st.s)s="<s>"+s+"</s>"}
+      }
+      t+=s;
+    });
+    return t;
+  };
+  let out="";
+  const block=el=>{
+    if(el.localName==="h"){
+      const n=Math.min(3,+(el.getAttribute("text:outline-level")||1));
+      out+="<h"+n+">"+(lauf(el)||"<br>")+"</h"+n+">";
+    } else if(el.localName==="p"){
+      out+="<p>"+(lauf(el)||"<br>")+"</p>";
+    } else if(el.localName==="list"){
+      out+="<ul>";
+      [...el.children].filter(x=>x.localName==="list-item").forEach(li=>{
+        out+="<li>"+[...li.children].map(lauf).join(" ")+"</li>"});
+      out+="</ul>";
+    } else if(el.localName==="table"){
+      out+="<table>";
+      [...el.children].filter(x=>x.localName==="table-row").forEach(tr=>{
+        out+="<tr>";
+        [...tr.children].filter(x=>x.localName==="table-cell").forEach(tc=>{
+          out+="<td>"+([...tc.children].map(lauf).join("<br>")||"&nbsp;")+"</td>"});
+        out+="</tr>"});
+      out+="</table>";
+    }
+  };
+  [...inhalt.children].forEach(block);
+  return out||null;
+}
+async function zipDokument(name,buf){
+  const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+  try{
+    if(ext==="docx"){
+      const xml=await zipEintrag(buf,"word/document.xml");
+      return xml?docxToHtml(xml):null;
+    }
+    const xml=await zipEintrag(buf,"content.xml");
+    return xml?odtToHtml(xml):null;
+  }catch(e){return null}
 }
 
 /* ---- Sicherungsdateien ----
@@ -4381,10 +4603,6 @@ $("#pane").addEventListener("click",e=>{
   if(d){if(openNoteId===d.dataset.del)closeNote();
     S.notes=S.notes.filter(y=>y.id!==d.dataset.del);
     dropAnchorsFor(d.dataset.del);commit();render();return}
-  if(e.target.closest("#gUse")){
-    doc().glossaryId=curGView();commit();render();
-    const c=S.glossaries.find(x=>x.id===curGView());
-    toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(c?c.name:"Glossar")+"“");return}
   const ga=e.target.closest("#gAssign");
   if(ga){const r=ga.getBoundingClientRect();
     assignMenu({clientX:r.left,clientY:r.bottom+4},curGView());return}
