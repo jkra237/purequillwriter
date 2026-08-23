@@ -327,7 +327,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor .hit{background:rgba(255,214,0,.42);border-radius:2px}
 #editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
-#editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top}
+/* Bilder sind per Default nativ ziehbar - in einem contenteditable-Bereich
+   legt der Browser dabei gern eine zweite Kopie am Ablageort ab, statt nur
+   den Anfasser zum Resizen zuzulassen. Fürs Verschieben gibt es hier keine
+   Funktion, also ganz abschalten. */
+#editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top;
+  -webkit-user-drag:none;user-drag:none}
 #editor figure.fig figcaption{font-family:var(--ui);font-size:.72em;
   color:var(--ink-soft);margin-top:.35em;line-height:1.4;text-align:inherit}
 #editor figure.fig.sel img{outline:2px solid var(--stamp);outline-offset:2px}
@@ -952,7 +957,7 @@ const EN={
   "Kommandopalette öffnen":"Open command palette",
   "Angelegt":"Created",
   "Signatur erstellen":"Create signature","Signatur erstellen&hellip;":"Create signature&hellip;",
-  "Signatur einfügen":"Insert signature","Signatur":"Signature",
+  "Signatur einfügen":"Insert signature",
   "Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.":
     "Sign with the mouse button held down. Only the signature itself is inserted, without the white space around it.",
   "Ansicht ":"View ",
@@ -4323,12 +4328,12 @@ function addImage(file){
   };
   r.readAsDataURL(file);
 }
-function insertFigure(src,alt,width){
+function insertFigure(src,alt,width,attrs){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   const w=width||70;
-  const html=`<figure class="fig" contenteditable="false" data-w="${w}" style="text-align:center">`+
-    `<img src="${src}" alt="${esc(alt||"")}" style="width:${w}%"></figure><p><br></p>`;
+  const html=`<figure class="fig" contenteditable="false" data-w="${w}"${attrs||""} style="text-align:center">`+
+    `<img src="${src}" alt="${esc(alt||"")}" draggable="false" style="width:${w}%"></figure><p><br></p>`;
   document.execCommand("insertHTML",false,html);
   flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
 }
@@ -4395,7 +4400,7 @@ function sigInit(){
     out.getContext("2d").drawImage(cv,Math.round(x*dpr),Math.round(y*dpr),out.width,out.height,0,0,out.width,out.height);
     const data=out.toDataURL("image/png");
     closeOvl();
-    insertFigure(data,tr("Signatur"),28);
+    insertFigure(data,"",28,' data-sig="1"');
   };
 }
 let selFig=null;
@@ -4455,6 +4460,7 @@ function drawImgBar(){
   const f=selFig,bar=$("#imgbar");if(!f){bar.classList.remove("on");return}
   const w=+(f.dataset.w||70), al=f.style.textAlign||"center";
   const hasCap=!!f.querySelector("figcaption");
+  const isSig=!!f.dataset.sig;
   bar.innerHTML=`
     <input type="range" id="ibW" min="10" max="100" step="5" value="${w}" title="${tr("Breite")}">
     <span class="pct" id="ibP">${w} %</span>
@@ -4463,8 +4469,8 @@ function drawImgBar(){
     <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
     <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
-    <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Unterschrift")}</button>
-    <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>
+    ${isSig?"":`<button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Unterschrift")}</button>
+    <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>`}
     <button class="pill" data-ic="del">${tr("Löschen")}</button>`;
   bar.classList.add("on");
   const r=f.getBoundingClientRect();
