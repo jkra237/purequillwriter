@@ -179,6 +179,22 @@ input,select,textarea{font:inherit;color:inherit}
 /* ---- Werkzeugleiste ---- */
 .tools{display:flex;align-items:center;gap:7px;padding:6px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap;flex:0 0 auto}
 .tools select,.tools input[type=text]{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);padding:3px 5px}
+/* Ohne appearance:none zeichnet Windows das Auswahlfeld selbst und übergeht
+   dabei die gesetzte Papierfarbe. Der Pfeil wird deshalb aus zwei Verläufen
+   gebaut — anders als eine Bilddatei nimmt der die Farbe des Schemas an. */
+.tools select,.modal select,.setrow select{
+  appearance:none;-webkit-appearance:none;
+  color:var(--ink);
+  padding-right:21px;
+  background-color:var(--paper);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),
+                   linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);
+  background-position:right 11px center,right 6.5px center;
+  background-size:5px 5px,5px 5px;
+  background-repeat:no-repeat}
+.tools select:hover,.modal select:hover,.setrow select:hover{border-color:var(--ink-soft)}
+/* Die aufgeklappte Liste zeichnet der Browser; wo er es zulässt, folgt sie dem Schema */
+.tools select option,.modal select option,.setrow select option{background:var(--paper);color:var(--ink)}
 .tb{width:26px;height:24px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .tb:hover{background:var(--chrome-2);color:var(--ink)}
 .tb.on{background:var(--chrome);color:var(--stamp)}
