@@ -781,18 +781,18 @@ function hfBand(d,which,z){
   return MM(which==="hdr"?f.hd:f.fd)*z + fs*1.35*zeilen + MM(2)*z;
 }
 const THEMES=[
-  {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
-  {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
-  {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
-  {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
-  {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
-  {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
-  {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
-  {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]},
-  {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
-  {k:"alabaster",n:"Alabaster", d:"Helles Systemgrau moderner Mac-Programme — erinnert an Pages",      c:["#FFFFFF","#E5E5EA","#0069D2"]},
   {k:"azur",     n:"Azur",       d:"Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word", c:["#FFFFFF","#7F858C","#0F6CBD"]},
+  {k:"alabaster",n:"Alabaster",  d:"Helles Systemgrau moderner Mac-Programme — erinnert an Pages",      c:["#FFFFFF","#E5E5EA","#0069D2"]},
+  {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
+  {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
+  {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
+  {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
+  {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
+  {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
   {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
+  {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
+  {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
+  {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]}
 ];
 const ICOSZ=(p,px,sw)=>`<svg viewBox="0 0 24 24" style="width:${px}px;height:${px}px;fill:none;stroke:currentColor;stroke-width:${sw};stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const ICO=p=>ICOSZ(p,16,1.6);
