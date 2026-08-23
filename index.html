@@ -360,9 +360,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .notecanvas{position:relative;min-height:100%;padding:14px}
 .work{flex:1;display:flex;min-height:0;position:relative}
 .note{position:absolute;width:224px;background:#EBDFC4;color:#22242A;
-  border:1px solid rgba(0,0,0,.16);border-radius:var(--radius-paper);cursor:default;
+  border:1px solid rgba(0,0,0,.16);border-radius:var(--radius-paper);cursor:move;
   padding:13px 12px 28px;box-shadow:1px 1px 0 rgba(0,0,0,.13);max-height:230px;overflow:hidden}
 .note.sel{box-shadow:0 0 0 2px var(--stamp),1px 1px 0 rgba(0,0,0,.13)}
+.note.drag{z-index:9;box-shadow:0 8px 20px rgba(0,0,0,.26);opacity:.95}
 .note .grip{position:absolute;top:0;left:0;right:0;height:17px;cursor:move}
 .ntitle{font-family:Georgia,serif;font-size:16px;font-weight:600;line-height:1.3;margin:0 0 5px;
   padding-bottom:5px;border-bottom:1px solid rgba(0,0,0,.14)}
@@ -1673,32 +1674,63 @@ function addNote(text,open){
   const n={id:uid(),title:"",html:text?"<p>"+esc(text).replace(/\n/g,"<br>")+"</p>":"",
     color:NOTECOLORS[0].c,fs:14,x:pos.x,y:pos.y,created:Date.now()};
   S.notes.push(n);dirty=true;commit();
-  if(open){setMode("notes");openNote(n.id)}
+  if(open){setMode("notes");openNote(n.id,"titel")}
   return n;
 }
 function enableDrag(){
-  let cur=null,ox=0,oy=0,sx=0,sy=0,moved=false;
-  $("#pane").querySelectorAll(".note").forEach(el=>{
+  const pane=$("#pane"),canvas=$("#canvas");
+  if(!canvas)return;
+  let cur=null,gx=0,gy=0,sx=0,sy=0,moved=false,lauf=null,letzteX=0,letzteY=0;
+  const stopp=()=>{if(lauf){cancelAnimationFrame(lauf);lauf=null}};
+  /* Position aus der Zeigerlage im Blatt, nicht aus einem Startversatz —
+     so bleibt die Notiz am Zeiger, auch wenn die Fläche mitscrollt. */
+  const setzen=()=>{
+    if(!cur)return;
+    const cr=canvas.getBoundingClientRect();
+    const maxX=Math.max(0,canvas.clientWidth-NW);
+    cur.style.left=Math.min(maxX,Math.max(0,letzteX-cr.left-gx))+"px";
+    cur.style.top=Math.max(0,letzteY-cr.top-gy)+"px";
+  };
+  canvas.querySelectorAll(".note").forEach(el=>{
     el.onmousedown=e=>{
       if(e.target.closest("button"))return;
-      cur=el;ox=e.clientX-el.offsetLeft;oy=e.clientY-el.offsetTop;
+      const r=el.getBoundingClientRect();
+      cur=el;gx=e.clientX-r.left;gy=e.clientY-r.top;
       sx=e.clientX;sy=e.clientY;moved=false;e.preventDefault()};
   });
-  document.onmousemove=e=>{if(!cur)return;
-    if(Math.abs(e.clientX-sx)>4||Math.abs(e.clientY-sy)>4)moved=true;
-    if(!moved)return;
-    const x=Math.max(0,e.clientX-ox),y=Math.max(0,e.clientY-oy);
-    cur.style.left=x+"px";cur.style.top=y+"px"};
-  document.onmouseup=()=>{if(!cur)return;
-    if(moved){const n=findNote(cur.dataset.id);
-      if(n){n.x=parseInt(cur.style.left);n.y=parseInt(cur.style.top);dirty=true;commit()}}
-    else openNote(cur.dataset.id);
-    cur=null};
+  document.onmousemove=e=>{
+    if(!cur)return;
+    if(!moved&&Math.abs(e.clientX-sx)<=4&&Math.abs(e.clientY-sy)<=4)return;
+    if(!moved){moved=true;cur.classList.add("drag")}
+    letzteX=e.clientX;letzteY=e.clientY;
+    setzen();
+    /* Am oberen und unteren Rand mitscrollen, sonst endet das Ziehen am Fensterrand */
+    const pr=pane.getBoundingClientRect();
+    const oben=letzteY-pr.top,unten=pr.bottom-letzteY;
+    stopp();
+    const schritt=oben<44?-Math.min(20,(44-oben)/2):unten<44?Math.min(20,(44-unten)/2):0;
+    if(schritt){
+      const tick=()=>{pane.scrollTop+=schritt;setzen();lauf=requestAnimationFrame(tick)};
+      lauf=requestAnimationFrame(tick);
+    }
+  };
+  document.onmouseup=()=>{
+    if(!cur)return;
+    stopp();
+    cur.classList.remove("drag");
+    const el=cur;cur=null;
+    if(!moved){openNote(el.dataset.id);return}
+    const n=findNote(el.dataset.id);
+    if(n){n.x=parseInt(el.style.left)||0;n.y=parseInt(el.style.top)||0;dirty=true;commit()}
+    /* Neu zeichnen, damit die Fläche mitwächst — sonst bleibt eine weit unten
+       abgelegte Notiz außerhalb des scrollbaren Bereichs. */
+    drawNotes();
+  };
 }
 
 /* ---- Geöffnete Notiz in der Seitenleiste ---- */
 let openNoteId=null;
-function openNote(id){
+function openNote(id,fokus){
   const n=findNote(id);if(!n)return;
   openNoteId=id;
   const side=$("#side"),col=n.color||NOTECOLORS[0].c;
@@ -1741,17 +1773,23 @@ function openNote(id){
   $("#nTitle").addEventListener("input",e=>{n.title=e.target.value;dirty=true});
   $("#nTitle").addEventListener("blur",()=>{commit();drawNotes()});
   $("#nClose").onclick=closeNote;
-  $("#nMax").onclick=()=>{S.sideMax=!S.sideMax;save();openNote(id)};
+  $("#nMax").onclick=()=>{const imTitel=document.activeElement===$("#nTitle");
+    S.sideMax=!S.sideMax;save();openNote(id,imTitel?"titel":"text")};
   $("#nDel").onclick=()=>{S.notes=S.notes.filter(x=>x.id!==id);
     dropAnchorsFor(id);closeNote();commit();render()};
   side.querySelectorAll("[data-ncmd]").forEach(b=>b.onmousedown=e=>{
     e.preventDefault();document.execCommand(b.dataset.ncmd,false,null);
     n.html=ed.innerHTML;dirty=true});
   side.querySelectorAll("[data-ncolor]").forEach(b=>b.onclick=()=>{
-    n.color=b.dataset.ncolor;commit();openNote(id);drawNotes()});
+    const imTitel=document.activeElement===$("#nTitle");
+    n.color=b.dataset.ncolor;commit();openNote(id,imTitel?"titel":"text");drawNotes()});
   $("#nFsUp").onclick=()=>setNoteFs(n,(n.fs||14)+1,id);
   $("#nFsDown").onclick=()=>setNoteFs(n,(n.fs||14)-1,id);
-  drawNotes();ed.focus();
+  drawNotes();
+  /* Eine frisch angelegte Notiz hat noch keine Überschrift — dort beginnt man */
+  const tt=$("#nTitle");
+  if(fokus==="titel"&&tt){tt.focus();tt.select()}
+  else if(fokus!=="keiner")ed.focus();
 }
 function setNoteFs(n,v,id){n.fs=Math.min(30,Math.max(10,v));
   $("#nEdit").style.fontSize=n.fs+"px";$("#nFsVal").textContent=n.fs;commit()}
@@ -2301,7 +2339,7 @@ function commandList(){
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
   add("Dokument","Als HTML exportieren","",exportHtml);
 
-  add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id)});
+  add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
   add("Notiz","Markierte Stelle mit Notiz verknüpfen","Alt ⇧ M",linkSelection);
   add("Notiz","Notizen am Seitenrand umschalten","",()=>{S.showCol=!S.showCol;save();
     if(S.mode==="write")drawAnchors()});
@@ -4239,7 +4277,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#pgbBtn")){insertPageBreak();return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
-  if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id);return}
+  if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id,"titel");return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
   const gc=e.target.closest("[data-gc]");
