@@ -1065,8 +1065,8 @@ function startupDialog(){
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
       <label>${tr("Sprache")}</label><div class="ctl">
         <select id="stLang">
-          <option value="de" ${S.settings.uiLang!=="en"?"selected":""}>Deutsch</option>
           <option value="en" ${S.settings.uiLang==="en"?"selected":""}>English</option>
+          <option value="de" ${S.settings.uiLang!=="en"?"selected":""}>Deutsch</option>
         </select></div></div>
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:14px">
       <label>${tr("Farbschema")}</label><div class="ctl">
@@ -3987,8 +3987,8 @@ function settings(){
   overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3><div class="pad">
     <div class="setrow"><label>${tr("Sprache der Benutzeroberfläche")}</label><div class="ctl">
       <select id="sUiLang">
-        <option value="de" ${s.uiLang!=="en"?"selected":""}>Deutsch</option>
         <option value="en" ${s.uiLang==="en"?"selected":""}>English</option>
+        <option value="de" ${s.uiLang!=="en"?"selected":""}>Deutsch</option>
       </select></div></div>
     <div class="setrow"><label>${tr("Standardschrift")}</label><div class="ctl">
       <select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
