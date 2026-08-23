@@ -188,6 +188,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .tools select:hover,.modal select:hover,.setrow select:hover{border-color:var(--ink-soft)}
 /* Die aufgeklappte Liste zeichnet der Browser; wo er es zulässt, folgt sie dem Schema */
 .tools select option,.modal select option,.setrow select option{background:var(--paper);color:var(--ink)}
+/* Beschreibbares Kombifeld: tippen oder aus der Liste wählen, wie in Word */
+.combo{display:inline-flex;align-items:stretch;border:1px solid var(--rule);
+  border-radius:var(--radius);background:var(--paper);overflow:hidden}
+.tools .combo input[type=text]{width:40px;border:none;background:none;padding:3px 2px;
+  text-align:center;outline:none;font-variant-numeric:tabular-nums;color:var(--ink)}
+.combo .cbdrop{width:19px;display:flex;align-items:center;justify-content:center;
+  border-left:1px solid var(--rule);color:var(--ink-soft)}
+.combo .cbdrop::after{content:"";width:0;height:0;border-left:4px solid transparent;
+  border-right:4px solid transparent;border-top:5px solid currentColor}
+.combo .cbdrop:hover{background:var(--chrome-2);color:var(--ink)}
+.combo:focus-within{border-color:var(--ink-soft)}
 .tb{width:26px;height:24px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .tb:hover{background:var(--chrome-2);color:var(--ink)}
 .tb.on{background:var(--chrome);color:var(--stamp)}
@@ -1295,7 +1306,11 @@ function drawTools(){
   if(S.mode==="write"){
     T.innerHTML=`
       <select id="fFont" title="${tr("Schriftart")}">${FONTS.map(f=>`<option ${(d.font||S.settings.font)===f?"selected":""} style="font-family:'${f}'">${f}</option>`).join("")}</select>
-      <select id="fSize" title="${tr("Schriftgröße")}">${SIZES.map(s=>`<option ${(d.size||S.settings.size)==s?"selected":""}>${s}</option>`).join("")}</select>
+      <span class="combo" title="${tr("Schriftgröße")}">
+        <input type="text" id="fSize" inputmode="decimal" autocomplete="off"
+          value="${d.size||S.settings.size}" aria-label="${tr("Schriftgröße")}">
+        <button class="cbdrop" id="fSizeList" aria-label="${tr("Größe wählen")}"></button>
+      </span>
       <div class="sep"></div>
       <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>F</b></button>
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
@@ -1480,6 +1495,33 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.normalize();
   d.html=c.innerHTML;
   if(!d.customTitle){const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
+/* Schriftgröße frei eingebbar, wie das Kombifeld in Word. Der Wert geht an
+   --fs; ein direktes style.fontSize würde die Zoomberechnung überschreiben. */
+const FS_MIN=4,FS_MAX=200;
+function setFontSize(v){
+  const roh=parseFloat(String(v).replace(",","."));
+  if(!isFinite(roh))return drawTools();
+  const n=Math.min(FS_MAX,Math.max(FS_MIN,Math.round(roh*2)/2));
+  doc().size=n;
+  const ed=$("#editor");
+  if(ed)ed.style.setProperty("--fs",n+"pt");
+  commit();drawTools();queuePaginate();
+  return n;
+}
+function sizeMenu(e){
+  closeMenu();
+  const akt=doc().size||S.settings.size;
+  const m=document.createElement("div");m.className="menu ctx";m.id="fsmenu";
+  m.style.minWidth="86px";
+  m.innerHTML=SIZES.map(x=>
+    `<button class="mi" data-fs="${x}"><span class="chk">${x==akt?"✓":""}</span>${x}</button>`).join("");
+  document.body.appendChild(m);
+  const r=e.currentTarget.getBoundingClientRect();
+  m.style.left=Math.min(r.left,innerWidth-m.offsetWidth-8)+"px";
+  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+"px";
+  m.onclick=ev=>{const b=ev.target.closest("[data-fs]");if(!b)return;
+    closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
+}
 function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus()}
 
 /* ---- Schriftfarbe und Texthervorhebung ----
@@ -4269,6 +4311,7 @@ window.addEventListener("beforeunload",()=>{flush();save()});
 /* ================= Ereignisse Werkzeugleiste ================= */
 $("#tools").addEventListener("click",e=>{
   const b=e.target.closest("[data-cmd]");if(b){cmd(b.dataset.cmd);return}
+  const fl=e.target.closest("#fSizeList");if(fl){sizeMenu({currentTarget:fl});return}
   const fb=e.target.closest("#foreBtn");if(fb){colorMenu({currentTarget:fb},"fore");return}
   const mb=e.target.closest("#markBtn");if(mb){colorMenu({currentTarget:mb},"hilite");return}
   if(e.target.closest("#imgBtn")){pickImage();return}
@@ -4297,9 +4340,18 @@ $("#tools").addEventListener("contextmenu",e=>{
 $("#tools").addEventListener("mousedown",e=>{
   if(e.target.closest("#foreBtn,#markBtn"))e.preventDefault();
 });
+$("#tools").addEventListener("keydown",e=>{
+  if(e.target.id!=="fSize")return;
+  if(e.key==="Enter"){e.preventDefault();setFontSize(e.target.value);const ed=$("#editor");ed&&ed.focus()}
+  if(e.key==="Escape"){e.preventDefault();drawTools()}
+  /* Pfeiltasten wie im Zahlenfeld, das Word ebenfalls bietet */
+  if(e.key==="ArrowUp"||e.key==="ArrowDown"){e.preventDefault();
+    setFontSize((parseFloat(e.target.value)||12)+(e.key==="ArrowUp"?1:-1));
+    const f=$("#fSize");if(f){f.focus();f.select()}}
+});
 $("#tools").addEventListener("change",e=>{
   if(e.target.id==="fFont"){doc().font=e.target.value;$("#editor").style.fontFamily=e.target.value+",serif";commit()}
-  if(e.target.id==="fSize"){doc().size=+e.target.value;$("#editor").style.fontSize=e.target.value+"pt";commit()}
+  if(e.target.id==="fSize")setFontSize(e.target.value);
   if(e.target.id==="fBlock"){document.execCommand("formatBlock",false,e.target.value);$("#editor").focus();dirty=true}
 });
 $("#tools").addEventListener("input",e=>{
