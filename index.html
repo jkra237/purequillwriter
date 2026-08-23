@@ -243,6 +243,7 @@ input,select,textarea{font:inherit;color:inherit}
 .modal input:disabled,.modal textarea:disabled,.modal select:disabled{
   background:var(--chrome-2);color:var(--ink-faint);cursor:not-allowed}
 .pill:disabled{opacity:.4;pointer-events:none}
+.gcolls{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center}
 /* Seitenvorschau im Formatdialog */
 .fmtwrap{display:flex;gap:15px;align-items:flex-start}
 .fmtfields{flex:1;min-width:0}
@@ -701,6 +702,8 @@ const EN={
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
+  "Neues Glossar anlegen":"Add a new glossary","Neues Glossar":"New glossary","Glossar löschen":"Delete glossary","Glossar gelöscht":"Glossary deleted",
+  "Verwenden":"Use",
   "CSV exportieren":"Export CSV",
   "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":
     "No notes yet.<br>Create one with <b>Alt+Shift+N</b> — this works even mid-writing, without switching views.<br>Click a note to open it, drag to move it.",
@@ -980,6 +983,7 @@ if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
 /* Schreibziel: standardmäßig aus; „base" ist der Wortstand beim Einschalten */
 if(!S.goal)S.goal={on:false,target:1000,base:0};
+ensureGlossaries();
 S.docs.forEach(d=>{
   if(d.html&&d.html.indexOf('class="pgbreak"')>=0&&d.html.indexOf("data-label=")<0)
     d.html=d.html.replace(/<div class="pgbreak" contenteditable="false">/g,
@@ -987,6 +991,7 @@ S.docs.forEach(d=>{
 });
 
 const doc=()=>S.docs.find(d=>d.id===S.active)||S.docs[0];
+const defaultGlossId=()=>doc().glossaryId||S.glossaries[0].id;
 let dirty=false,lastSaved=null;
 
 const $=s=>document.querySelector(s);
@@ -1013,7 +1018,7 @@ function closeDoc(id){
   const anker=anchorsInDocCount(d);
   const kill=()=>{
     S.docs.splice(i,1);
-    if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;S.docs.push(n)}
+    if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;n.glossaryId=d.glossaryId;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
     save();
     if(isTrulyEmpty()){clearShell();startupDialog();}else render();
@@ -1147,7 +1152,12 @@ function drawTools(){
       <button class="pill ${S.noteFilter==="doc"?"on":""}" data-nf="doc">${tr("In diesem Dokument")}</button>
       <button class="pill ${S.noteFilter==="free"?"on":""}" data-nf="free">${tr("Ohne Verknüpfung")}</button>`;
   } else {
-    T.innerHTML=`<button class="btn" id="addG">${tr("Neuer Eintrag")}</button>
+    const gid=doc().glossaryId;
+    T.innerHTML=`<div class="gcolls" id="gcolls">${S.glossaries.map(gl=>
+        `<button class="pill gcoll ${gl.id===gid?"on":""}" data-gc="${gl.id}" title="${esc(tr(gl.name))}">${esc(tr(gl.name))}</button>`).join("")}
+      <button class="pill" id="gcollAdd" title="${tr("Neues Glossar anlegen")}">+</button></div>
+      <div class="sep"></div>
+      <button class="btn" id="addG">${tr("Neuer Eintrag")}</button>
       <input type="text" id="gSearch" placeholder="${tr("Glossar durchsuchen")}" style="width:210px">
       <div class="sep"></div>
       <span style="color:var(--ink-soft)">${tr("Sortierung")}</span>
@@ -1320,7 +1330,8 @@ function indentBlocks(dir){
 function markTerms(){
   const ed=$("#editor");if(!ed)return;
   unmark();
-  const terms=S.glossary.map(g=>g.term).filter(Boolean).sort((a,b)=>b.length-a.length);
+  const entries=S.glossary.filter(g=>g.gid===doc().glossaryId);
+  const terms=entries.map(g=>g.term).filter(Boolean).sort((a,b)=>b.length-a.length);
   if(!terms.length)return;
   const rx=new RegExp("\\b("+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+")\\b","gi");
   const walk=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);
@@ -1331,7 +1342,7 @@ function markTerms(){
     const frag=document.createDocumentFragment();let last=0,m;rx.lastIndex=0;
     while(m=rx.exec(node.nodeValue)){
       frag.appendChild(document.createTextNode(node.nodeValue.slice(last,m.index)));
-      const g=S.glossary.find(x=>x.term.toLowerCase()===m[0].toLowerCase());
+      const g=entries.find(x=>x.term.toLowerCase()===m[0].toLowerCase());
       const sp=document.createElement("span");sp.className="glossterm";sp.textContent=m[0];
       sp.title=g?g.def:"";frag.appendChild(sp);last=m.index+m[0].length}
     frag.appendChild(document.createTextNode(node.nodeValue.slice(last)));
@@ -1467,6 +1478,89 @@ function setNoteFs(n,v,id){n.fs=Math.min(30,Math.max(10,v));
 function closeNote(){openNoteId=null;const s=$("#side");s.className="side";s.innerHTML="";drawNotes()}
 
 /* ================= Glossar ================= */
+/* Getrennte Glossare: jedes Dokument gehört zu genau einer Sammlung */
+function ensureGlossaries(){
+  if(!S.glossary)S.glossary=[];
+  if(!S.glossaries||!S.glossaries.length){
+    const gid=uid();
+    S.glossaries=[{id:gid,name:"Glossar"}];
+    S.glossary.forEach(g=>{if(!g.gid)g.gid=gid});
+  }
+  const known=new Set(S.glossaries.map(c=>c.id));
+  S.glossary.forEach(g=>{if(!g.gid||!known.has(g.gid))g.gid=S.glossaries[0].id});
+  S.docs.forEach(d=>{if(!d.glossaryId||!known.has(d.glossaryId))d.glossaryId=S.glossaries[0].id});
+}
+function newGlossColl(){
+  const id=uid();
+  S.glossaries.push({id,name:tr("Neues Glossar")});
+  doc().glossaryId=id;
+  commit();render();
+  renameGlossColl(id);
+}
+function renameGlossColl(id){
+  const c=S.glossaries.find(x=>x.id===id);if(!c)return;
+  const el=document.querySelector(`.gcoll[data-gc="${id}"]`);
+  if(!el)return;
+  const input=document.createElement("input");
+  input.value=c.name||"";input.maxLength=40;
+  input.style.cssText="width:100px;border:none;background:rgba(255,255,255,.6);font:inherit;color:inherit;outline:none;border-radius:2px;padding:0 2px";
+  el.replaceWith(input);input.focus();input.select();
+  let done=false;
+  const finish=()=>{
+    if(done)return;done=true;
+    const v=input.value.trim().slice(0,40);
+    c.name=v||"Glossar";
+    save();render();
+  };
+  input.addEventListener("blur",finish);
+  input.addEventListener("keydown",ev=>{
+    if(ev.key==="Enter"){ev.preventDefault();input.blur()}
+    if(ev.key==="Escape"){ev.preventDefault();done=true;render()}
+  });
+}
+function collContextMenu(e,id){
+  closeMenu();
+  const c=S.glossaries.find(x=>x.id===id);if(!c)return;
+  const m=document.createElement("div");m.className="menu ctx";m.id="collmenu";
+  m.innerHTML=`
+    <button class="mi" data-ca="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
+    ${S.glossaries.length>1?`<button class="mi" data-ca="del"><span class="chk"></span>${tr("Glossar löschen")}&hellip;</button>`:""}`;
+  document.body.appendChild(m);
+  const w=m.offsetWidth,h=m.offsetHeight;
+  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
+  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  m.onclick=ev=>{
+    const rb=ev.target.closest('[data-ca="rename"]');
+    if(rb){closeMenu();renameGlossColl(id);return}
+    const db=ev.target.closest('[data-ca="del"]');
+    if(db){closeMenu();delGlossColl(id);return}
+  };
+}
+function delGlossColl(id){
+  if(S.glossaries.length<2)return;
+  const c=S.glossaries.find(x=>x.id===id);if(!c)return;
+  const n=S.glossary.filter(g=>g.gid===id).length;
+  const wirkt=S.docs.filter(d=>d.glossaryId===id).length;
+  const weiter=()=>{
+    S.glossary=S.glossary.filter(g=>g.gid!==id);
+    S.glossaries=S.glossaries.filter(x=>x.id!==id);
+    const fallback=S.glossaries[0].id;
+    S.docs.forEach(d=>{if(d.glossaryId===id)d.glossaryId=fallback});
+    commit();render();toast(tr("Glossar gelöscht"));
+  };
+  if(!n&&wirkt<2){weiter();return}
+  const en=S.settings.uiLang==="en";
+  overlay(`<div class="modal"><h3>${tr("Glossar löschen")}</h3><div class="pad">
+    <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
+      ${en?`"${esc(c.name)}" contains ${n} ${n===1?"entry":"entries"}${wirkt>1?`, used by ${wirkt} documents`:""}. Deleting removes the entries; affected documents switch to another glossary.`
+        :`„${esc(c.name)}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.`}</p>
+    </div>
+    <div class="rowend">
+      <button class="btn" id="dgCancel">${tr("Abbrechen")}</button>
+      <button class="btn pri" id="dgOk">${tr("Löschen")}</button></div></div>`);
+  $("#dgCancel").onclick=closeOvl;
+  $("#dgOk").onclick=()=>{closeOvl();weiter()};
+}
 function sortG(a,b){
   if(S.gsort==="alpha")return a.term.localeCompare(b.term,"de");
   if(S.gsort==="date")return b.created-a.created;
@@ -1474,7 +1568,9 @@ function sortG(a,b){
 }
 function drawGloss(){
   const q=(window._gq||"").toLowerCase();
-  const list=S.glossary.filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
+  const gid=doc().glossaryId;
+  const list=S.glossary.filter(g=>g.gid===gid)
+    .filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
   $("#pane").innerHTML=`<div class="gwrap">
     <div class="gform" id="gform" style="display:none">
       <input id="gTerm" placeholder="${tr("Begriff")}">
@@ -1610,9 +1706,11 @@ function exportHtml(){flush();const d=doc();
     `<div style="max-width:660px;margin:40px auto;font-family:${d.font||S.settings.font},serif;`+
     `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}</div>`,"text/html")}
 function exportCsv(){
-  const rows=[[tr("Begriff"),tr("Definition"),tr("Kategorie"),tr("Angelegt")],...S.glossary.map(g=>
+  const gid=doc().glossaryId;
+  const coll=S.glossaries.find(x=>x.id===gid);
+  const rows=[[tr("Begriff"),tr("Definition"),tr("Kategorie"),tr("Angelegt")],...S.glossary.filter(g=>g.gid===gid).map(g=>
     [g.term,g.def||"",g.cat||"",new Date(g.created).toLocaleDateString(LOC())])];
-  download("glossar.csv","\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
+  download(safeName(tr(coll?coll.name:"Glossar"))+".csv","\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
 
 /* ---- Kommandopalette ---- */
 function commandList(){
@@ -1698,10 +1796,15 @@ function commandList(){
 
   add("Glossar","Nachschlagen","Alt ⇧ G",glossSearch);
   add("Glossar","Neuer Eintrag","",()=>{setMode("gloss");setTimeout(()=>openGForm(null),40)});
+  add("Glossar","Neues Glossar anlegen","",()=>{setMode("gloss");newGlossColl()});
   add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{
     S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}});
   add("Glossar","Als CSV exportieren","",exportCsv);
-  S.glossary.slice(0,14).forEach(g=>
+  S.glossaries.forEach(coll=>
+    add("Glossar",tr("Verwenden")+": "+tr(coll.name),"",()=>{
+      if(coll.id!==doc().glossaryId){doc().glossaryId=coll.id;commit()}
+      setMode("gloss")}));
+  S.glossary.filter(g=>g.gid===doc().glossaryId).slice(0,14).forEach(g=>
     add("Glossar",tr("Einfügen: ")+g.term,"",()=>{
       if(S.mode!=="write")setMode("write");
       const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,g.term);dirty=true;drawStatus()}}));
@@ -1880,6 +1983,7 @@ function importDocumentText(name,raw){
   const d=blankDoc(String(name).replace(/\.[^.]+$/,"").slice(0,60));
   d.customTitle=true;           /* Dateiname als Titel behalten */
   d.html=html;
+  d.glossaryId=defaultGlossId();
   S.docs.push(d);S.active=d.id;
   save();render();
   return true;
@@ -1904,7 +2008,7 @@ function saveBundle(kind){
     b={pqw:PQW,kind,saved:new Date().toISOString(),docs:[d],notes:notesOfDoc(d)};
     name=safeName(tr(d.title))+" + "+tr("Notizen")+" "+stamp+".json";
   }else if(kind==="notes"){
-    b={pqw:PQW,kind,saved:new Date().toISOString(),notes:S.notes,glossary:S.glossary};
+    b={pqw:PQW,kind,saved:new Date().toISOString(),notes:S.notes,glossary:S.glossary,glossaries:S.glossaries};
     name=tr("Notizen und Glossar")+" "+stamp+".json";
   }else{
     b=Object.assign({pqw:PQW,kind:"all",saved:new Date().toISOString()},JSON.parse(JSON.stringify(S)));
@@ -1930,6 +2034,7 @@ function applyBundle(b){
     confirmReplace(()=>{
       const neu={...b};delete neu.pqw;delete neu.kind;delete neu.saved;
       S=neu;
+      ensureGlossaries();
       lockedOvl=false;closeOvl();
       save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"));
     });
@@ -1938,6 +2043,8 @@ function applyBundle(b){
   let nD=0,nN=0,nG=0;
   const nIds=new Set(S.notes.map(n=>n.id));
   (b.notes||[]).forEach(n=>{if(n&&n.id&&!nIds.has(n.id)){S.notes.push(n);nIds.add(n.id);nN++}});
+  const cIds=new Set(S.glossaries.map(c=>c.id));
+  (b.glossaries||[]).forEach(c=>{if(c&&c.id&&!cIds.has(c.id)){S.glossaries.push(c);cIds.add(c.id)}});
   const gIds=new Set(S.glossary.map(g=>g.id));
   (b.glossary||[]).forEach(g=>{if(g&&g.id&&!gIds.has(g.id)){S.glossary.push(g);gIds.add(g.id);nG++}});
   const dIds=new Set(S.docs.map(d=>d.id));
@@ -1946,6 +2053,7 @@ function applyBundle(b){
     if(dIds.has(d.id))d.id=uid();      /* schon vorhanden: als Kopie einfügen */
     dIds.add(d.id);S.docs.push(d);S.active=d.id;nD++;
   });
+  ensureGlossaries();
   lockedOvl=false;closeOvl();
   save();applyTheme();applyStaticLabels();render();
   const teile=[];
@@ -2438,7 +2546,7 @@ function formatDialog(mode,onDone){
   $("#fHf").onclick=()=>{
     readM();const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key};
     closeOvl();
-    if(isNew){const d=blankDoc();d.fmt=val;d.lh=lh;S.docs.push(d);S.active=d.id;save();render()}
+    if(isNew){const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();S.docs.push(d);S.active=d.id;save();render()}
     else{doc().fmt=val;doc().lh=lh;commit();render()}
     hfDialog();};
   $("#fOk").onclick=()=>{
@@ -2450,7 +2558,7 @@ function formatDialog(mode,onDone){
 }
 function newDocument(){
   formatDialog("new",(val,lh)=>{
-    flush();const d=blankDoc();d.fmt=val;d.lh=lh;S.docs.push(d);S.active=d.id;save();render()});
+    flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();S.docs.push(d);S.active=d.id;save();render()});
 }
 function changeFormat(){
   formatDialog("change",(val,lh)=>{doc().fmt=val;doc().lh=lh;commit();render();toast(tr("Format geändert"))});
@@ -3299,12 +3407,15 @@ $("#imgbar").addEventListener("click",e=>{
   }
 });
 function glossSearch(){
+  const gid=doc().glossaryId;
+  const coll=S.glossaries.find(x=>x.id===gid);
   overlay(`<div class="modal"><h3>${tr("Glossar nachschlagen")}</h3>
+    <div class="pad" style="padding-bottom:0;padding-top:0;color:var(--ink-faint);font-size:12px">${esc(tr(coll?coll.name:"Glossar"))}</div>
     <div class="pad" style="padding-bottom:0"><input id="gsq" placeholder="${tr("Begriff eingeben")}" autocomplete="off"></div>
     <div id="gsr" style="max-height:280px;overflow:auto;margin-top:11px"></div></div>`);
   const q=$("#gsq"),r=$("#gsr");
   const run=()=>{const v=q.value.toLowerCase();
-    const hits=S.glossary.filter(g=>!v||g.term.toLowerCase().includes(v)||(g.def||"").toLowerCase().includes(v)).slice(0,25);
+    const hits=S.glossary.filter(g=>g.gid===gid).filter(g=>!v||g.term.toLowerCase().includes(v)||(g.def||"").toLowerCase().includes(v)).slice(0,25);
     r.innerHTML=hits.length?hits.map(g=>`<div class="hit" data-t="${esc(g.term)}"><b>${esc(g.term)}</b><p>${esc(g.def||"")}</p></div>`).join("")
       :`<div style="padding:13px 14px;color:var(--ink-faint)">${tr("Kein Treffer. Neue Einträge legst du mit Alt+3 an.")}</div>`};
   q.oninput=run;run();q.focus();
@@ -3589,9 +3700,18 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.id==="addNote"){const n=addNote("");render();openNote(n.id);return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
+  const gc=e.target.closest("[data-gc]");
+  if(gc){if(gc.dataset.gc!==doc().glossaryId){doc().glossaryId=gc.dataset.gc;commit();render();
+    const c=S.glossaries.find(x=>x.id===gc.dataset.gc);toast(tr("Glossar")+": "+tr(c?c.name:"Glossar"))}return}
+  if(e.target.id==="gcollAdd"){newGlossColl();return}
   if(e.target.id==="addG"){openGForm(null);return}
   if(e.target.id==="csvOut"){exportCsv();return}
   const s=e.target.closest("[data-sort]");if(s){S.gsort=s.dataset.sort;save();render()}
+});
+$("#tools").addEventListener("contextmenu",e=>{
+  const gc=e.target.closest("[data-gc]");
+  if(!gc)return;
+  e.preventDefault();collContextMenu(e,gc.dataset.gc);
 });
 $("#tools").addEventListener("change",e=>{
   if(e.target.id==="fFont"){doc().font=e.target.value;$("#editor").style.fontFamily=e.target.value+",serif";commit()}
@@ -3633,7 +3753,7 @@ $("#pane").addEventListener("click",e=>{
   if(e.target.id==="gSave"){
     const t=$("#gTerm").value.trim();if(!t){$("#gTerm").focus();return}
     if(editingG){editingG.term=t;editingG.def=$("#gDef").value.trim();editingG.cat=$("#gCat").value.trim();editingG.updated=Date.now()}
-    else S.glossary.push({id:uid(),term:t,def:$("#gDef").value.trim(),cat:$("#gCat").value.trim(),created:Date.now(),updated:Date.now()});
+    else S.glossary.push({id:uid(),term:t,def:$("#gDef").value.trim(),cat:$("#gCat").value.trim(),gid:doc().glossaryId,created:Date.now(),updated:Date.now()});
     editingG=null;commit();render();toast(tr("Eintrag gesichert"))}
 });
 $("#setBtn").onclick=settings;
