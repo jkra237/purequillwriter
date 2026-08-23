@@ -45,6 +45,21 @@
   --rule:#4C3712; --stamp:#FFD98A; --manila:#EBDFC4;
   --ok:#D9B24C; --pageedge:rgba(255,181,61,.32);
 }
+/* Kühles, sehr helles Systemgrau moderner Mac-Programme, heller Blauakzent */
+[data-theme="alabaster"]{
+  --paper:#FFFFFF; --chrome:#F2F2F7; --chrome-2:#FAFAFC; --canvas:#E5E5EA;
+  --ink:#1D1D1F; --ink-soft:#55555C; --ink-faint:#86868B;
+  --rule:#D6D6DC; --stamp:#0069D2; --manila:#EBDFC4;
+  --ok:#1D7A45; --pageedge:rgba(0,0,0,.2);
+}
+/* Neutralgrau der Windows-Textverarbeitung, kräftig abgesetzte Schreibfläche
+   und das dunkle Blau der Word-Menüleiste */
+[data-theme="azur"]{
+  --paper:#FFFFFF; --chrome:#E7ECF3; --chrome-2:#F3F6FA; --canvas:#7F858C;
+  --ink:#1B1B1B; --ink-soft:#4C5157; --ink-faint:#7A8087;
+  --rule:#C9D2DD; --stamp:#0F6CBD; --manila:#EBDFC4;
+  --ok:#107C41; --pageedge:rgba(0,0,0,.4);
+}
 [data-theme="tinte"]{
   --paper:#1A1B1D; --chrome:#232426; --chrome-2:#2A2B2E; --canvas:#121314;
   --ink:#E4E2DC; --ink-soft:#9C9E9F; --ink-faint:#6E7072;
@@ -73,21 +88,6 @@
   --rule:#9A9A9A; --stamp:#0B7580; --manila:#EBDFC4;
   --ok:#12708A; --pageedge:rgba(0,0,0,.45);
 }
-/* Graue Windows-Oberfläche der frühen Neunziger */
-[data-theme="werkbank"]{
-  --paper:#FFFFFF; --chrome:#C0C0C0; --chrome-2:#DCDCDC; --canvas:#6E6E6E;
-  --ink:#000000; --ink-soft:#3F3F3F; --ink-faint:#767676;
-  --rule:#9A9A9A; --stamp:#8B1A1A; --manila:#EBDFC4;
-  --ok:#00680E; --pageedge:rgba(0,0,0,.5);
-}
-/* Blauvioletter Heimcomputer-Bildschirm der Achtziger */
-[data-theme="brotkasten"]{
-  --on-stamp:#141414;
-  --paper:#3B33A6; --chrome:#2C2685; --chrome-2:#3F37B4; --canvas:#1B1758;
-  --ink:#DEDAFF; --ink-soft:#C3BDFF; --ink-faint:#A49DE6;
-  --rule:#564DCC; --stamp:#FFE97F; --manila:#EBDFC4;
-  --ok:#9BE8B0; --pageedge:rgba(255,255,255,.3);
-}
 /* Schwarzer Bildschirm mit Cyan, wie farbige Tabellenkalkulationen der DOS-Zeit */
 [data-theme="zyan"]{
   --on-stamp:#141414;
@@ -95,22 +95,6 @@
   --ink:#67E8F9; --ink-soft:#3EA9BD; --ink-faint:#256E80;
   --rule:#164E5B; --stamp:#FFD24A; --manila:#EBDFC4;
   --ok:#5FE3A1; --pageedge:rgba(103,232,249,.3);
-}
-/* Weiß auf Schwarz, wie frühe Monochromkarten */
-[data-theme="hercules"]{
-  --on-stamp:#141414;
-  --paper:#000000; --chrome:#0C0C0C; --chrome-2:#171717; --canvas:#000000;
-  --ink:#E9E9E9; --ink-soft:#A6A6A6; --ink-faint:#6B6B6B;
-  --rule:#2C2C2C; --stamp:#FFFFFF; --manila:#EBDFC4;
-  --ok:#B4B4B4; --pageedge:rgba(255,255,255,.25);
-}
-/* Gedämpftes Teal-Dunkelschema für lange Sitzungen */
-[data-theme="solar"]{
-  --on-stamp:#141414;
-  --paper:#002B36; --chrome:#073642; --chrome-2:#0B4453; --canvas:#001A21;
-  --ink:#EEE8D5; --ink-soft:#93A1A1; --ink-faint:#6A8085;
-  --rule:#14556A; --stamp:#B58900; --manila:#EBDFC4;
-  --ok:#859900; --pageedge:rgba(238,232,213,.25);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -802,15 +786,13 @@ const THEMES=[
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
-  {k:"werkbank", n:"Werkbank",   d:"Graue Windows-Oberfläche der frühen Neunziger — erinnert an Lotus Ami Pro", c:["#FFFFFF","#6E6E6E","#8B1A1A"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
-  {k:"brotkasten",n:"Brotkasten",d:"Blauvioletter Heimcomputer-Bildschirm der Achtziger",                  c:["#3B33A6","#1B1758","#FFE97F"]},
   {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
   {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]},
   {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
-  {k:"hercules", n:"Hercules",   d:"Weiß auf Schwarz — Monochrombildschirme unter WordStar",               c:["#000000","#000000","#FFFFFF"]},
+  {k:"alabaster",n:"Alabaster", d:"Helles Systemgrau moderner Mac-Programme — erinnert an Pages",      c:["#FFFFFF","#E5E5EA","#0069D2"]},
+  {k:"azur",     n:"Azur",       d:"Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word", c:["#FFFFFF","#7F858C","#0F6CBD"]},
   {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
-  {k:"solar",    n:"Solar",      d:"Gedämpftes Teal-Dunkelschema, inspiriert von Solarized",               c:["#002B36","#001A21","#B58900"]}
 ];
 const ICOSZ=(p,px,sw)=>`<svg viewBox="0 0 24 24" style="width:${px}px;height:${px}px;fill:none;stroke:currentColor;stroke-width:${sw};stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const ICO=p=>ICOSZ(p,16,1.6);
@@ -1012,19 +994,18 @@ const EN={
   "Speicherort":"Storage location","Dieser Browser":"This browser",
   "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Backup via <b>File &rarr; Save everything as file</b>.",
   "Warmes Naturweiß, Standard":"Warm natural white, standard",
+  "Azur":"Azure",
+  "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Light system grey of modern Mac apps — reminiscent of Pages",
+  "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Neutral off-white of current Windows word processors — reminiscent of Word",
   "Klassische Macintosh-Grautöne":"Classic Macintosh greys",
   "Graue Systemoberfläche der 90er":"Gray system interface from the 90s",
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era","Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
   "Phosphor":"Phosphor","Lagune":"Lagoon",
-  "Aquamarin":"Aquamarine","Werkbank":"Workbench","Brotkasten":"Breadbox","Zyan":"Cyan",
+  "Aquamarin":"Aquamarine","Zyan":"Cyan",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Gray Windows office with a teal infobox — reminiscent of Lotus Word Pro",
   "Hercules":"Hercules","Solar":"Solar",
-  "Graue Windows-Oberfläche der frühen Neunziger — erinnert an Lotus Ami Pro":"Gray Windows interface from the early nineties — reminiscent of Lotus Ami Pro",
-  "Blauvioletter Heimcomputer-Bildschirm der Achtziger":"Blue-violet home computer screen from the eighties",
   "Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe":"Black with cyan and yellow — reminiscent of Lotus 1-2-3 in colour",
-  "Weiß auf Schwarz — Monochrombildschirme unter WordStar":"White on black — monochrome screens under WordStar",
-  "Gedämpftes Teal-Dunkelschema, inspiriert von Solarized":"Muted teal dark scheme, inspired by Solarized",
   "Umbenennen":"Rename","Farbe":"Color","Keine Farbe":"No color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beige office interface with teal — reminiscent of Lotus SmartSuite '97",
@@ -1149,6 +1130,9 @@ if(S.settings&&S.settings.theme==="kobalt")S.settings.theme="enzian";
 if(S.settings&&S.settings.theme==="goldrand")S.settings.theme="aquamarin";
 if(S.settings&&S.settings.theme==="leinen")S.settings.theme="lagune";   /* beide: Naturweiß mit Türkisakzent */
 if(S.settings&&S.settings.theme==="sepia")S.settings.theme="papier";    /* beide: warmes Naturweiß */
+if(S.settings&&S.settings.theme==="werkbank")S.settings.theme="silber";  /* beide: graues 90er-Windows */
+if(S.settings&&S.settings.theme==="brotkasten")S.settings.theme="enzian";/* beide: blauer Bildschirm */
+if(S.settings&&(S.settings.theme==="hercules"||S.settings.theme==="solar"))S.settings.theme="tinte";
 /* Sicherheitsnetz: ein unbekanntes Schema hätte keine Farben, aber einen Namen */
 if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="silber";
 if(S.guides===undefined)S.guides=true;
