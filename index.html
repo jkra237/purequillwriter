@@ -370,11 +370,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .pane{flex:1;overflow:auto;position:relative}
 .notecanvas{position:relative;min-height:100%;padding:14px}
 .work{flex:1;display:flex;min-height:0;position:relative}
-.note{position:absolute;width:224px;background:#EBDFC4;color:#22242A;
+.note{position:absolute;width:224px;height:224px;background:#EBDFC4;color:#22242A;
   border:1px solid rgba(0,0,0,.16);border-radius:var(--radius-paper);cursor:move;
-  padding:13px 12px 28px;box-shadow:1px 1px 0 rgba(0,0,0,.13);max-height:230px;overflow:hidden}
+  padding:13px 12px 28px;box-shadow:1px 1px 0 rgba(0,0,0,.13);overflow:hidden}
 .note.sel{box-shadow:0 0 0 2px var(--stamp),1px 1px 0 rgba(0,0,0,.13)}
-.note.drag{z-index:9;box-shadow:0 8px 20px rgba(0,0,0,.26);opacity:.95}
+.note.drag{z-index:9;box-shadow:0 8px 20px rgba(0,0,0,.26);opacity:.95;pointer-events:none}
+/* Ziel beim Drag-Swap: eigener Ring, unterscheidbar vom Auswahlring (.sel) */
+.note.drop-target{outline:2px solid var(--ok);outline-offset:-2px}
 .note .grip{position:absolute;top:0;left:0;right:0;height:17px;cursor:move}
 .ntitle{font-family:Georgia,serif;font-size:16px;font-weight:600;line-height:1.3;margin:0 0 5px;
   padding-bottom:5px;border-bottom:1px solid rgba(0,0,0,.14)}
@@ -392,6 +394,25 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .note:hover .sw{display:flex}
 .sw button{width:11px;height:11px;border-radius:50%;border:1px solid rgba(0,0,0,.28);padding:0}
 .sw button:hover{transform:scale(1.28)}
+
+/* ---- Notizen: Listenansicht ---- */
+.notecanvas.list{display:flex;flex-direction:column;gap:8px}
+.note.nrow{position:static;width:100%;height:52px;display:flex;align-items:center;gap:12px;
+  padding:0 14px;cursor:grab}
+.note.nrow.drag{position:relative}
+.note.nrow .grip{display:none}
+.note.nrow .ntitle{border:0;padding:0;margin:0;flex:0 0 auto;max-width:220px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.note.nrow .nbody{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note.nrow .nbody p{display:inline;margin:0}
+.note.nrow .nbody ul,.note.nrow .nbody ol{display:inline;margin:0;padding:0}
+.note.nrow .nbody li{display:inline}
+.note.nrow .nbody li+li::before{content:" · "}
+.note.nrow .fade{display:none}
+.note.nrow .anchbadge,.note.nrow .src{position:static;flex:0 0 auto}
+.note.nrow .meta{position:static;opacity:.5;font-family:var(--mono);font-size:11px;flex:0 0 auto}
+.note.nrow .del{position:static;flex:0 0 auto}
+.note.nrow .sw{position:static;flex:0 0 auto}
 
 /* ---- Seitenleiste für die geöffnete Notiz ---- */
 .side{flex:0 0 388px;border-left:1px solid var(--rule);display:none;flex-direction:column;background:var(--chrome-2)}
@@ -852,6 +873,7 @@ const EN={
   "Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.":"Counts the words added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","Im ausgewählten Dokument":"In the selected document","Ohne Verknüpfung":"Unlinked",
+  "Rasteransicht (frei verschiebbar)":"Grid view (freely movable)","Listenansicht":"List view",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
   "Neues Glossar anlegen":"Add a new glossary","Neues Glossar":"New glossary","Glossar löschen":"Delete glossary","Glossar gelöscht":"Glossary deleted",
   "Glossar verwalten":"Manage glossary","wird von diesem Dokument benutzt":"used by this document",
@@ -1145,6 +1167,7 @@ if(!S.notes){
 }
 S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
+if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
 /* „Oberfläche ausblenden“ ist aus, bis der Benutzer es einschaltet. Die frühere
    Fassung war voreingestellt an und hat das auch so gespeichert — daher einmalig
@@ -1368,7 +1391,12 @@ function drawTools(){
       <div class="sep"></div>
       <button class="pill ${S.noteFilter==="all"?"on":""}" data-nf="all">${tr("Alle")}</button>
       <button class="pill ${S.noteFilter==="doc"?"on":""}" data-nf="doc">${tr("Im ausgewählten Dokument")}</button>
-      <button class="pill ${S.noteFilter==="free"?"on":""}" data-nf="free">${tr("Ohne Verknüpfung")}</button>`;
+      <button class="pill ${S.noteFilter==="free"?"on":""}" data-nf="free">${tr("Ohne Verknüpfung")}</button>
+      <div class="sep"></div>
+      <button class="tb ${S.noteView==="free"?"on":""}" data-nv="free" title="${tr("Rasteransicht (frei verschiebbar)")}"
+        aria-label="${tr("Rasteransicht (frei verschiebbar)")}">${ICO('<rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/>')}</button>
+      <button class="tb ${S.noteView==="list"?"on":""}" data-nv="list" title="${tr("Listenansicht")}"
+        aria-label="${tr("Listenansicht")}">${ICO('<path d="M4 6h.01M4 12h.01M4 18h.01M9 6h11M9 12h11M9 18h11"/>')}</button>`;
   } else {
     const gid=curGView();
     const inUse=doc().glossaryId;
@@ -1678,18 +1706,10 @@ function noteBody(n){
   return n.text?"<p>"+esc(n.text).replace(/\n/g,"<br>")+"</p>":"";
 }
 function noteText(n){const t=document.createElement("div");t.innerHTML=noteBody(n);return (n.title?n.title+" ":"")+(t.innerText||"")}
-function drawNotes(){
-  const list=
-    S.notes.map(n=>({...n,_here:anchorsInDoc(n.id)}));
-  const q=(window._nq||"").toLowerCase();
-  const vis=list.filter(n=>(!q||noteText(n).toLowerCase().includes(q))
-    &&(S.noteFilter==="all"
-      ||(S.noteFilter==="doc"&&n._here>0)
-      ||(S.noteFilter==="free"&&!anchorCount(n.id))));
-  $("#pane").innerHTML=`<div class="notecanvas" id="canvas" style="min-height:${Math.max(420,...vis.map(n=>n.y+250))}px">${
-    vis.length?vis.map(n=>`
-      <div class="note ${n.id===openNoteId?"sel":""}" data-id="${n.id}"
-        style="left:${n.x}px;top:${n.y}px;background:${n.color||NOTECOLORS[0].c};--nc:${n.color||NOTECOLORS[0].c}">
+/* Inneres Markup einer Notizkarte — identisch für Raster- und Listenansicht,
+   nur die Hülle (absolut positioniert vs. Zeile im Fluss) unterscheidet sich. */
+function noteCardInner(n){
+  return `
         <div class="grip"></div>
         ${anchorCount(n.id)?`<div class="anchbadge">${S.settings.uiLang==="en"
             ?anchorCount(n.id)+(anchorCount(n.id)>1?" spots in text":" spot in text")
@@ -1700,10 +1720,32 @@ function drawNotes(){
         <div class="fade"></div>
         <div class="meta">${new Date(n.created).toLocaleDateString(LOC())}</div>
         <div class="sw">${NOTECOLORS.map(x=>`<button data-color="${x.c}" data-nid="${n.id}" style="background:${x.c}" title="${tr(x.n)}"></button>`).join("")}</div>
-        <button class="del" data-del="${n.id}" title="${tr("Löschen")}">&times;</button>
-      </div>`).join("")
-    :`<div class="empty">${tr("Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.")}</div>`
-  }</div>`;
+        <button class="del" data-del="${n.id}" title="${tr("Löschen")}">&times;</button>`;
+}
+function drawNotes(){
+  const list=
+    S.notes.map(n=>({...n,_here:anchorsInDoc(n.id)}));
+  const q=(window._nq||"").toLowerCase();
+  const vis=list.filter(n=>(!q||noteText(n).toLowerCase().includes(q))
+    &&(S.noteFilter==="all"
+      ||(S.noteFilter==="doc"&&n._here>0)
+      ||(S.noteFilter==="free"&&!anchorCount(n.id))));
+  const leer=`<div class="empty">${tr("Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.")}</div>`;
+  if(S.noteView==="list"){
+    $("#pane").innerHTML=`<div class="notecanvas list" id="canvas">${
+      vis.length?vis.map(n=>`
+        <div class="note nrow ${n.id===openNoteId?"sel":""}" data-id="${n.id}"
+          style="background:${n.color||NOTECOLORS[0].c};--nc:${n.color||NOTECOLORS[0].c}">${noteCardInner(n)}</div>`).join("")
+      :leer
+    }</div>`;
+  } else {
+    $("#pane").innerHTML=`<div class="notecanvas" id="canvas" style="min-height:${Math.max(420,...vis.map(n=>n.y+NH+NPAD*2))}px">${
+      vis.length?vis.map(n=>`
+        <div class="note ${n.id===openNoteId?"sel":""}" data-id="${n.id}"
+          style="left:${n.x}px;top:${n.y}px;background:${n.color||NOTECOLORS[0].c};--nc:${n.color||NOTECOLORS[0].c}">${noteCardInner(n)}</div>`).join("")
+      :leer
+    }</div>`;
+  }
   enableDrag();
 }
 function findNote(id){return S.notes.find(x=>x.id===id)||null}
@@ -1713,7 +1755,7 @@ function anchorsInDoc(id,d){const t=document.createElement("div");t.innerHTML=(d
    Vorher wurde nach Array-Index gerechnet, wodurch die zwanzigste Notiz
    zwangsläufig ganz unten landete — auch wenn oben längst alles frei war,
    weil Notizen verschoben oder gelöscht wurden. */
-const NW=224,NH=230,NGAP=12,NPAD=16;
+const NW=224,NH=224,NGAP=12,NPAD=16;
 function freierNotizPlatz(){
   const canvas=$("#canvas");
   const breite=(canvas?canvas.clientWidth:0)||($("#pane")?$("#pane").clientWidth:0)||760;
@@ -1735,19 +1777,49 @@ function addNote(text,open){
   if(open){setMode("notes");openNote(n.id,"titel")}
   return n;
 }
+/* Zwei Notizen tauschen den Platz: in der Rasteransicht die Koordinaten,
+   in der Liste die Reihenfolge im Array (das ist dort die Anzeigereihenfolge). */
+function swapNotes(idA,idB){
+  if(S.noteView==="list"){
+    const ia=S.notes.findIndex(x=>x.id===idA),ib=S.notes.findIndex(x=>x.id===idB);
+    if(ia<0||ib<0)return;
+    [S.notes[ia],S.notes[ib]]=[S.notes[ib],S.notes[ia]];
+  } else {
+    const a=findNote(idA),b=findNote(idB);
+    if(!a||!b)return;
+    const tx=a.x,ty=a.y;a.x=b.x;a.y=b.y;b.x=tx;b.y=ty;
+  }
+  dirty=true;commit();
+}
 function enableDrag(){
   const pane=$("#pane"),canvas=$("#canvas");
   if(!canvas)return;
-  let cur=null,gx=0,gy=0,sx=0,sy=0,moved=false,lauf=null,letzteX=0,letzteY=0;
+  let cur=null,ziel=null,gx=0,gy=0,sx=0,sy=0,moved=false,lauf=null,letzteX=0,letzteY=0;
   const stopp=()=>{if(lauf){cancelAnimationFrame(lauf);lauf=null}};
   /* Position aus der Zeigerlage im Blatt, nicht aus einem Startversatz —
-     so bleibt die Notiz am Zeiger, auch wenn die Fläche mitscrollt. */
-  const setzen=()=>{
+     so bleibt die Notiz am Zeiger, auch wenn die Fläche mitscrollt. In der
+     Listenansicht gibt es kein x/y, dort hebt sich die Zeile per Transform. */
+  const bewegen=()=>{
     if(!cur)return;
-    const cr=canvas.getBoundingClientRect();
-    const maxX=Math.max(0,canvas.clientWidth-NW);
-    cur.style.left=Math.min(maxX,Math.max(0,letzteX-cr.left-gx))+"px";
-    cur.style.top=Math.max(0,letzteY-cr.top-gy)+"px";
+    if(S.noteView==="list"){
+      cur.style.transform=`translateY(${letzteY-sy}px)`;
+    } else {
+      const cr=canvas.getBoundingClientRect();
+      const maxX=Math.max(0,canvas.clientWidth-NW);
+      cur.style.left=Math.min(maxX,Math.max(0,letzteX-cr.left-gx))+"px";
+      cur.style.top=Math.max(0,letzteY-cr.top-gy)+"px";
+    }
+    /* Ablageziel ermitteln: welche andere Notiz liegt gerade unter dem Zeiger?
+       .drag hat pointer-events:none, daher trifft elementFromPoint die
+       darunterliegende Karte, nicht die gezogene selbst. */
+    const unter=document.elementFromPoint(letzteX,letzteY);
+    const treffer=unter&&unter.closest?unter.closest(".note"):null;
+    const neuesZiel=(treffer&&treffer!==cur)?treffer:null;
+    if(neuesZiel!==ziel){
+      if(ziel)ziel.classList.remove("drop-target");
+      ziel=neuesZiel;
+      if(ziel)ziel.classList.add("drop-target");
+    }
   };
   canvas.querySelectorAll(".note").forEach(el=>{
     el.onmousedown=e=>{
@@ -1761,14 +1833,14 @@ function enableDrag(){
     if(!moved&&Math.abs(e.clientX-sx)<=4&&Math.abs(e.clientY-sy)<=4)return;
     if(!moved){moved=true;cur.classList.add("drag")}
     letzteX=e.clientX;letzteY=e.clientY;
-    setzen();
+    bewegen();
     /* Am oberen und unteren Rand mitscrollen, sonst endet das Ziehen am Fensterrand */
     const pr=pane.getBoundingClientRect();
     const oben=letzteY-pr.top,unten=pr.bottom-letzteY;
     stopp();
     const schritt=oben<44?-Math.min(20,(44-oben)/2):unten<44?Math.min(20,(44-unten)/2):0;
     if(schritt){
-      const tick=()=>{pane.scrollTop+=schritt;setzen();lauf=requestAnimationFrame(tick)};
+      const tick=()=>{pane.scrollTop+=schritt;bewegen();lauf=requestAnimationFrame(tick)};
       lauf=requestAnimationFrame(tick);
     }
   };
@@ -1776,10 +1848,16 @@ function enableDrag(){
     if(!cur)return;
     stopp();
     cur.classList.remove("drag");
-    const el=cur;cur=null;
+    cur.style.transform="";
+    if(ziel)ziel.classList.remove("drop-target");
+    const el=cur,zielEl=ziel;cur=null;ziel=null;
     if(!moved){openNote(el.dataset.id);return}
-    const n=findNote(el.dataset.id);
-    if(n){n.x=parseInt(el.style.left)||0;n.y=parseInt(el.style.top)||0;dirty=true;commit()}
+    if(zielEl){
+      swapNotes(el.dataset.id,zielEl.dataset.id);
+    } else if(S.noteView!=="list"){
+      const n=findNote(el.dataset.id);
+      if(n){n.x=parseInt(el.style.left)||0;n.y=parseInt(el.style.top)||0;dirty=true;commit()}
+    }
     /* Neu zeichnen, damit die Fläche mitwächst — sonst bleibt eine weit unten
        abgelegte Notiz außerhalb des scrollbaren Bereichs. */
     drawNotes();
@@ -4562,6 +4640,8 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id,"titel");return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
+  const nv=e.target.closest("[data-nv]");
+  if(nv){S.noteView=nv.dataset.nv;save();render();return}
   const gc=e.target.closest("[data-gc]");
   if(gc){if(gc.dataset.gc!==curGView()){setGView(gc.dataset.gc);render()}return}
   if(e.target.closest("#gcollAdd")){newGlossColl();return}
