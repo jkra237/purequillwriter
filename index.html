@@ -352,12 +352,25 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   background:var(--chrome-2);color:var(--ink);
   font-family:Georgia,serif;font-size:14px;line-height:1.6}
 .side .memo::placeholder{color:var(--ink-faint)}
-/* Schreibziel: dezenter Balken, kein Alarm */
+/* Schreibziel: dezenter Balken, kein Alarm. Die Füllfarbe wandert in fünf
+   Phasen von kühlem Schieferblau zu warmem Gold - ein Fortschrittsgefühl,
+   nicht nur eine Prozentzahl. Bei 100% blinkt der Balken golden auf. */
 .goal{cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .goalbar{display:inline-block;width:58px;height:5px;border-radius:3px;
   background:var(--rule);overflow:hidden}
-.goalbar i{display:block;height:100%;background:var(--stamp);transition:width .25s}
-.goalbar.done i{background:var(--ok)}
+.goalbar i{display:block;height:100%;transition:width .25s,background-color .3s}
+.goalbar.phase1 i{background:#4A5568}
+.goalbar.phase2 i{background:#76A08A}
+.goalbar.phase3 i{background:#E2A049}
+.goalbar.phase4 i{background:#DD6B20}
+.goalbar.phase5 i{background:#D69E2E}
+.goalbar.done{box-shadow:0 0 6px rgba(214,158,46,.6);overflow:visible;border-radius:3px}
+.goalbar.done i{background:linear-gradient(90deg,#D69E2E,#F7E3A1,#D69E2E);
+  background-size:220% 100%;animation:goalshine 2.2s ease-in-out infinite}
+@keyframes goalshine{0%{background-position:220% 0}100%{background-position:-220% 0}}
+.goalcheck{width:12px;height:12px;flex:none;fill:none;stroke:#D69E2E;stroke-width:3;
+  stroke-linecap:round;stroke-linejoin:round;animation:goalpop .35s ease}
+@keyframes goalpop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
 .status .zoomctl{border:1px solid var(--rule);gap:0}
 .status .zoomctl button{width:24px;height:22px;font-size:16px;line-height:1}
 .status .zoomctl #zVal{width:auto;min-width:58px;font-variant-numeric:tabular-nums;font-size:12px;padding:0 7px}
@@ -868,9 +881,9 @@ const EN={
   "Dokument-Memo":"Document Memo",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Plot notes, open questions, research links…",
   "Gehört zu diesem Dokument und erscheint nicht im Text.":"Belongs to this document and never appears in the text.",
-  "Wörter in dieser Sitzung":"Words this session","Bereits geschafft":"Done so far",
+  "Ziel in dieser Sitzung":"Goal for this session","Bereits geschafft":"Done so far","Zähleinheit":"Unit",
   "Zurücksetzen":"Reset","Ausschalten":"Turn off",
-  "Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.":"Counts the words added since you switched the goal on or reset it — across all documents.",
+  "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Counts what's been added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","Im ausgewählten Dokument":"In the selected document","Ohne Verknüpfung":"Unlinked",
   "Rasteransicht (frei verschiebbar)":"Grid view (freely movable)","Listenansicht":"List view",
@@ -1191,8 +1204,9 @@ if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
 if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"};
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
-/* Schreibziel: standardmäßig aus; „base" ist der Wortstand beim Einschalten */
-if(!S.goal)S.goal={on:false,target:1000,base:0};
+/* Schreibziel: standardmäßig aus; „base" ist der Stand der gewählten Einheit beim Einschalten */
+if(!S.goal)S.goal={on:false,target:1000,base:0,unit:"words"};
+if(S.goal&&!S.goal.unit)S.goal.unit="words";
 ensureGlossaries();
 /* Der Abstand zur Papierkante saß früher an der Kopf-/Fußzeile, jetzt am
    Seitenformat — wie in Word unter „Layout“. Eigene Werte wandern mit. */
@@ -2176,14 +2190,45 @@ function openGForm(g){
   $("#gTerm").value=g?g.term:"";$("#gDef").value=g?g.def:"";$("#gCat").value=g?g.cat||"":"";$("#gTerm").focus()}
 
 /* ================= Statuszeile ================= */
-function goalHtml(words){
+/* Schreibziel: vier wählbare Zähleinheiten, alle aus einem countStats()-Durchlauf.
+   "pages" sind Normseiten (1500 Zeichen inkl. Leerzeichen = 1 Seite) - die für
+   Buchautoren übliche, motivierende Größe statt reiner Wortzahl. */
+const GOAL_UNITS=[
+  {k:"words",label:"Wörter"},
+  {k:"charsSp",label:"Zeichen (mit Leerzeichen)"},
+  {k:"charsNoSp",label:"Zeichen (ohne Leerzeichen)"},
+  {k:"pages",label:"Normseiten (1500 Z.)"}
+];
+function goalMetric(txt,unit){
+  const d=countStats(txt);
+  if(unit==="charsSp")return d.chars;
+  if(unit==="charsNoSp")return d.charsNoSp;
+  if(unit==="pages")return d.chars/1500;
+  return d.words;
+}
+function goalUnitAbbr(unit){
+  const en=S.settings.uiLang==="en";
+  if(unit==="charsSp")return en?"ch":"Z";
+  if(unit==="charsNoSp")return en?"ch⁻":"Z⁻";
+  if(unit==="pages")return en?"ms":"NS";
+  return en?"w":"W";
+}
+function goalFmtNum(v,unit){
+  if(unit==="pages"){const s=v.toFixed(1);return S.settings.uiLang==="en"?s:s.replace(".",",")}
+  return Math.round(v).toLocaleString(LOC());
+}
+function goalHtml(txt){
   const g=S.goal;
   if(!g||!g.on)return "";
-  const geschafft=Math.max(0,goalTotal(words)-(g.base||0));
+  const unit=g.unit||"words";
+  const geschafft=Math.max(0,goalTotal(goalMetric(txt,unit))-(g.base||0));
   const anteil=Math.min(100,Math.round(geschafft/g.target*100));
+  const done=geschafft>=g.target;
+  const phase=anteil<=20?1:anteil<=40?2:anteil<=60?3:anteil<=80?4:5;
   return `<span class="goal" id="goalBox" title="${tr("Schreibziel einstellen")}">
-    ${geschafft.toLocaleString(LOC())} / ${g.target.toLocaleString(LOC())}
-    <span class="goalbar ${geschafft>=g.target?"done":""}"><i style="width:${anteil}%"></i></span></span>`;
+    ${goalFmtNum(geschafft,unit)} / ${goalFmtNum(g.target,unit)} ${goalUnitAbbr(unit)}${done?
+      '<svg class="goalcheck" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>':""}
+    <span class="goalbar phase${phase} ${done?"done":""}"><i style="width:${anteil}%"></i></span></span>`;
 }
 function drawStatus(){
   const ed=$("#editor");const d=doc();
@@ -2194,7 +2239,7 @@ function drawStatus(){
   const en=S.settings.uiLang==="en";
   $("#status").innerHTML=`<span id="wcHint" style="cursor:pointer" title="${tr("Wörter zählen")}">${words.toLocaleString(LOC())} ${tr("Wörter")}</span>
     <span>${chars.toLocaleString(LOC())} ${tr("Zeichen")}</span>
-    ${goalHtml(words)}
+    ${goalHtml(txt)}
     <span>${S.mode==="write"?(en?pageCount+(pageCount>1?" pages":" page"):pageCount+" Seite"+(pageCount>1?"n":"")):pages+" "+tr("Normseiten")}</span>
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
     <span>${S.notes.length} ${en?"notes":"Notizen"}</span>
@@ -2223,16 +2268,28 @@ const stripHtml=h=>{
   return t.textContent||"";
 };
 const wordsOf=h=>{const t=stripHtml(h).trim();return t?t.split(/\s+/).length:0};
-/* Wörter der übrigen Dokumente werden zwischengespeichert, damit die Statuszeile
-   nicht bei jedem Tastendruck alle Dokumente neu auszählen muss. */
+/* Metrik der übrigen Dokumente (in der aktuell gewählten Zähleinheit) wird
+   zwischengespeichert, damit die Statuszeile nicht bei jedem Tastendruck
+   alle Dokumente neu auszählen muss. */
 let goalOthers=0;
 function recalcGoalOthers(){
-  goalOthers=S.docs.reduce((s,d)=>s+(d.id===S.active?0:wordsOf(d.html)),0);
+  const unit=(S.goal&&S.goal.unit)||"words";
+  goalOthers=S.docs.reduce((s,d)=>s+(d.id===S.active?0:goalMetric(stripHtml(d.html),unit)),0);
 }
-function goalTotal(words){return goalOthers+words}
-function setGoal(on,target){
-  S.goal=S.goal||{on:false,target:1000,base:0};
-  if(target!==undefined)S.goal.target=Math.max(1,Math.round(target));
+function goalTotal(m){return goalOthers+m}
+function setGoal(on,target,unit){
+  S.goal=S.goal||{on:false,target:1000,base:0,unit:"words"};
+  /* Ein Wechsel der Einheit macht den alten Wortstand als Basis unbrauchbar -
+     bei laufendem Ziel wird darum in der neuen Einheit neu geeicht. */
+  if(unit!==undefined&&unit!==S.goal.unit){
+    S.goal.unit=unit;
+    if(S.goal.on)goalReset();
+  }
+  if(target!==undefined){
+    S.goal.target=S.goal.unit==="pages"
+      ?Math.max(.5,Math.round(target*2)/2)
+      :Math.max(1,Math.round(target));
+  }
   if(on!==undefined&&on!==S.goal.on){
     S.goal.on=on;
     if(on)goalReset();
@@ -2241,8 +2298,8 @@ function setGoal(on,target){
 }
 function goalReset(){
   flush();recalcGoalOthers();
-  const ed=$("#editor");
-  S.goal.base=goalTotal(ed?wordsOf(ed.innerHTML):wordsOf(doc().html));
+  const unit=(S.goal&&S.goal.unit)||"words";
+  S.goal.base=goalTotal(goalMetric(stripHtml(doc().html),unit));
   save();drawStatus();
 }
 
@@ -3080,7 +3137,7 @@ function viewMenu(){
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
     <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">Alt ⇧ T</span></button>
     <button class="mi" data-v="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
-      S.goal&&S.goal.on?`<span class="k">${S.goal.target}</span>`:""}</button>
+      S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
     <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">Alt ⇧ V</span></button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
@@ -4503,20 +4560,27 @@ function drawMemo(){
   ta.addEventListener("blur",()=>{if(S.settings.autosave)commit()});
   $("#memoClose").onclick=()=>{S.memoOpen=false;save();drawMemo();const ed=$("#editor");ed&&ed.focus()};
 }
+const GOAL_DEFAULT_TARGET={words:1000,charsSp:6000,charsNoSp:5000,pages:2};
 function goalDialog(){
-  const g=S.goal;
+  flush();
+  const g=S.goal,unit=g.unit||"words",isPages=unit==="pages";
+  const geschafft=Math.max(0,goalTotal(goalMetric(stripHtml(doc().html),unit))-(g.base||0));
   overlay(`<div class="modal"><h3>${tr("Schreibziel")}</h3><div class="pad">
-    <div class="setrow"><label>${tr("Wörter in dieser Sitzung")}</label><div class="ctl">
-      <input type="number" id="glTarget" min="1" max="100000" value="${g.target}"></div></div>
+    <div class="setrow"><label>${tr("Zähleinheit")}</label><div class="ctl">
+      <select id="glUnit">${GOAL_UNITS.map(u=>
+        `<option value="${u.k}" ${unit===u.k?"selected":""}>${tr(u.label)}</option>`).join("")}</select></div></div>
+    <div class="setrow"><label>${tr("Ziel in dieser Sitzung")}</label><div class="ctl">
+      <input type="number" id="glTarget" min="${isPages?"0.5":"1"}" step="${isPages?"0.5":"1"}" max="100000" value="${g.target}"></div></div>
     <div class="setrow"><label>${tr("Bereits geschafft")}</label><div class="ctl">
-      <span style="font-family:var(--mono)">${Math.max(0,goalTotal(wordsOf(doc().html))-(g.base||0)).toLocaleString(LOC())}</span>
+      <span style="font-family:var(--mono)">${goalFmtNum(geschafft,unit)} ${goalUnitAbbr(unit)}</span>
       <button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div></div>
-    <div class="fmttip">${tr("Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.")}</div>
+    <div class="fmttip">${tr("Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.")}</div>
     </div>
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="glOff">${tr("Ausschalten")}</button>
       <button class="btn pri" id="glOk">${tr("Fertig")}</button></div></div>`);
-  const lies=()=>+$("#glTarget").value||1000;
+  const lies=()=>+$("#glTarget").value||GOAL_DEFAULT_TARGET[unit];
+  $("#glUnit").onchange=e=>{setGoal(undefined,GOAL_DEFAULT_TARGET[e.target.value],e.target.value);closeOvl();goalDialog()};
   $("#glTarget").onchange=()=>setGoal(undefined,lies());
   $("#glReset").onclick=()=>{goalReset();closeOvl();goalDialog()};
   $("#glOff").onclick=()=>{setGoal(false);closeOvl()};
