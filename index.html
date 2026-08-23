@@ -182,6 +182,16 @@ input,select,textarea{font:inherit;color:inherit}
 .tb{width:26px;height:24px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .tb:hover{background:var(--chrome-2);color:var(--ink)}
 .tb.on{background:var(--chrome);color:var(--stamp)}
+/* Farbknöpfe: Glyphe oben, darunter ein Streifen in der zuletzt gewählten Farbe */
+.tb.tbc{flex-direction:column;gap:2px;height:27px}
+.tb.tbc .gl{font-size:12px;font-weight:700;line-height:1;display:flex}
+.tb.tbc i{width:15px;height:3px;border-radius:1px;border:1px solid rgba(0,0,0,.22)}
+.swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:3px 9px 7px}
+.sw{height:21px;border-radius:var(--radius);border:1px solid rgba(0,0,0,.25)}
+.sw:hover{box-shadow:0 0 0 2px var(--ink-soft)}
+#colmenu{min-width:186px}
+#colPick{margin-left:auto;width:30px;height:21px;padding:0;border:1px solid var(--rule);
+  border-radius:var(--radius);background:none;cursor:pointer}
 .tb svg{pointer-events:none}
 .sep{width:1px;height:17px;background:var(--rule)}
 .pill{border:1px solid var(--rule);border-radius:var(--radius);padding:3px 9px;color:var(--ink-soft);font-size:12px}
@@ -701,6 +711,15 @@ const SIZES=[9,10,11,12,13,14,16,18,20,24];
 const NOTECOLORS=[
   {c:"#EBDFC4",n:"Manila"},{c:"#F3ECC6",n:"Zitrone"},{c:"#D9E7D6",n:"Salbei"},
   {c:"#D6E3EF",n:"Himmel"},{c:"#EFDCDB",n:"Rosé"},{c:"#E2DBEE",n:"Flieder"},{c:"#F5F3EC",n:"Papier"}];
+/* Schriftfarben: gedeckt, damit sie auf hellem wie dunklem Papier tragen */
+const TEXTCOLORS=[
+  {c:"#C0392B",n:"Rot"},{c:"#B9770E",n:"Ocker"},{c:"#1E7B4F",n:"Grün"},{c:"#1F6F8B",n:"Petrol"},
+  {c:"#2C3E9B",n:"Blau"},{c:"#6C3483",n:"Violett"},{c:"#7B5E3B",n:"Braun"},{c:"#5A5D61",n:"Grau"}];
+/* Hervorhebungen: hell, damit die mitgesetzte dunkle Schrift darauf lesbar bleibt */
+const MARKCOLORS=[
+  {c:"#FBEB9B",n:"Gelb"},{c:"#C6EFC6",n:"Grün"},{c:"#CBE4F9",n:"Blau"},
+  {c:"#F9D2E2",n:"Rosa"},{c:"#FBD6AE",n:"Orange"},{c:"#DEDBD3",n:"Grau"}];
+const MARKINK="#22242A";   /* wie bei den Notizen: dunkle Schrift auf Pastell */
 const FORMATS={
   a4:   {n:"DIN A4",           w:210, h:297, m:[25,20,25,25], d:"Standard für alles"},
   brief:{n:"Brief DIN 5008",   w:210, h:297, m:[45,20,25,25], d:"Anschriftfeld oben"},
@@ -782,6 +801,10 @@ const EN={
   "Zugeordnete Dokumente":"Assigned documents","Ohne Zuordnung":"Not assigned",
   "keine Definition":"no definition","Ohne Kategorie":"Uncategorised",
   "Rechtsbündig (Alt+⇧+R)":"Align right (Alt+⇧+R)",
+  "Schriftfarbe":"Text colour","Texthervorhebung":"Highlight","Eigene Farbe":"Custom colour",
+  "Farbe entfernen":"Remove colour","Hervorhebung entfernen":"Remove highlight",
+  "Rot":"Red","Ocker":"Ochre","Grün":"Green","Petrol":"Teal","Blau":"Blue",
+  "Violett":"Violet","Braun":"Brown","Grau":"Grey","Gelb":"Yellow","Rosa":"Pink","Orange":"Orange",
   "Dieses Dokument ist keinem Glossar zugeordnet.":"This document is not assigned to a glossary.",
   "Welche Dokumente benutzen dieses Glossar?":"Which documents use this glossary?",
   "Importieren / Exportieren":"Import / Export","Exportieren":"Export","Importieren":"Import",
@@ -1217,6 +1240,11 @@ function drawTools(){
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
       <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
       <button class="tb" data-cmd="strikeThrough" title="${tr("Durchgestrichen")}"><s>D</s></button>
+      <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
+        <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
+      <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
+        <span class="gl">${ICOSZ('<path d="M4 19h5l8.5-8.5a1.9 1.9 0 0 0-2.7-2.7L6.3 16z"/><path d="M13.6 7.7 16.3 10.4"/>',14,1.7)}</span>
+        <i style="background:${S.settings.markColor||MARKCOLORS[0].c}"></i></button>
       <div class="sep"></div>
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
@@ -1233,7 +1261,11 @@ function drawTools(){
       <button class="tb" data-cmd="justifyRight" title="${tr("Rechtsbündig (Alt+⇧+R)")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICO('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
       <div class="sep"></div>
-      <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
+      <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}"><svg viewBox="0 0 24 24"
+        style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">
+        <rect x="3" y="4.5" width="18" height="15" rx="2"/>
+        <circle cx="8.4" cy="9.4" r="1.7" fill="#A96C0C" stroke="none"/>
+        <path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6" stroke="#4E8C6A"/></svg></button>
       <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
       <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>`;
@@ -1388,6 +1420,76 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   d.html=c.innerHTML;
   if(!d.customTitle){const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
 function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus()}
+
+/* ---- Schriftfarbe und Texthervorhebung ----
+   Eine Hervorhebung setzt zusätzlich dunkle Schrift, sonst wäre in den
+   dunklen Schemata helle Schrift auf hellem Pastell unlesbar — dieselbe
+   Regel, nach der auch die Notizzettel arbeiten. */
+function farbeAnwenden(art,c){
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  document.execCommand("styleWithCSS",false,true);
+  if(art==="fore")document.execCommand("foreColor",false,c);
+  else{document.execCommand("hiliteColor",false,c);document.execCommand("foreColor",false,MARKINK)}
+  if(art==="fore")S.settings.foreColor=c; else S.settings.markColor=c;
+  dirty=true;commit();drawTools();queuePaginate();
+}
+/* Farbe entfernen: eine Kennfarbe setzen, danach genau die Elemente
+   aufräumen, die sie tragen. Ohne den Umweg gäbe es keinen verlässlichen
+   Weg, execCommand eine gesetzte Farbe wieder wegnehmen zu lassen. */
+function farbeEntfernen(art){
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  document.execCommand("styleWithCSS",false,true);
+  const kenn="#010203";
+  document.execCommand(art==="fore"?"foreColor":"hiliteColor",false,kenn);
+  if(art!=="fore")document.execCommand("foreColor",false,kenn);
+  const treffer=/rgb\(1,\s*2,\s*3\)|#010203/i;
+  ed.querySelectorAll("[style]").forEach(el=>{
+    let ran=false;
+    ["color","backgroundColor"].forEach(p=>{
+      if(el.style[p]&&treffer.test(el.style[p])){el.style[p]="";ran=true}
+    });
+    if(!ran)return;
+    if(!el.getAttribute("style"))el.removeAttribute("style");
+    if(el.tagName==="SPAN"&&!el.attributes.length){
+      while(el.firstChild)el.parentNode.insertBefore(el.firstChild,el);
+      el.remove();
+    }
+  });
+  ed.normalize();
+  dirty=true;commit();queuePaginate();
+}
+function colorMenu(e,art){
+  closeMenu();
+  const liste=art==="fore"?TEXTCOLORS:MARKCOLORS;
+  const aktuell=art==="fore"?(S.settings.foreColor||TEXTCOLORS[0].c):(S.settings.markColor||MARKCOLORS[0].c);
+  const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
+  m.innerHTML=`<div class="mlabel">${art==="fore"?tr("Schriftfarbe"):tr("Texthervorhebung")}</div>
+    <div class="swatches">${liste.map(x=>
+      `<button class="sw" data-col="${x.c}" title="${esc(tr(x.n))}" aria-label="${esc(tr(x.n))}"
+        style="background:${x.c}${x.c.toLowerCase()===String(aktuell).toLowerCase()?";box-shadow:0 0 0 2px var(--stamp)":""}"></button>`).join("")}
+    </div>
+    <label class="mi" id="colOwn">${tr("Eigene Farbe")}&hellip;
+      <input type="color" id="colPick" value="${aktuell}"></label>
+    <div class="msep"></div>
+    <button class="mi" data-col="none"><span class="chk"></span>${
+      art==="fore"?tr("Farbe entfernen"):tr("Hervorhebung entfernen")}</button>`;
+  document.body.appendChild(m);
+  const r=e.currentTarget?e.currentTarget.getBoundingClientRect():{left:e.clientX,bottom:e.clientY};
+  m.style.left=Math.min(r.left,innerWidth-m.offsetWidth-8)+"px";
+  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+"px";
+  /* Auswahl im Editor darf beim Klicken nicht verlorengehen */
+  m.addEventListener("mousedown",ev=>{if(ev.target.type!=="color")ev.preventDefault()});
+  m.onclick=ev=>{
+    const b=ev.target.closest("[data-col]");if(!b)return;
+    closeMenu();
+    if(b.dataset.col==="none")farbeEntfernen(art);else farbeAnwenden(art,b.dataset.col);
+  };
+  const pick=m.querySelector("#colPick");
+  pick.oninput=()=>{farbeAnwenden(art,pick.value)};
+  pick.onchange=()=>{closeMenu()};
+}
 
 /* ---- Einrücken / Ausrücken ---- */
 const IND_STEP=2,IND_MAX=12; /* em, also skaliert mit Schriftgröße und Zoom */
@@ -4051,6 +4153,8 @@ window.addEventListener("beforeunload",()=>{flush();save()});
 /* ================= Ereignisse Werkzeugleiste ================= */
 $("#tools").addEventListener("click",e=>{
   const b=e.target.closest("[data-cmd]");if(b){cmd(b.dataset.cmd);return}
+  const fb=e.target.closest("#foreBtn");if(fb){colorMenu({currentTarget:fb},"fore");return}
+  const mb=e.target.closest("#markBtn");if(mb){colorMenu({currentTarget:mb},"hilite");return}
   if(e.target.closest("#imgBtn")){pickImage();return}
   if(e.target.closest("#lnkBtn")){linkDialog();return}
   if(e.target.closest("#tblBtn")){tablePicker();return}
@@ -4071,6 +4175,11 @@ $("#tools").addEventListener("contextmenu",e=>{
   const gc=e.target.closest("[data-gc]");
   if(!gc)return;
   e.preventDefault();collContextMenu(e,gc.dataset.gc);
+});
+/* Die Farbknöpfe dürfen den Fokus nicht aus dem Editor ziehen, sonst
+   verliert execCommand die Textauswahl. */
+$("#tools").addEventListener("mousedown",e=>{
+  if(e.target.closest("#foreBtn,#markBtn"))e.preventDefault();
 });
 $("#tools").addEventListener("change",e=>{
   if(e.target.id==="fFont"){doc().font=e.target.value;$("#editor").style.fontFamily=e.target.value+",serif";commit()}
