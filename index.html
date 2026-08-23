@@ -532,7 +532,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   padding:6px 11px;font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:var(--ink-soft);
   opacity:.35;transition:opacity .25s}
 .rbar:hover{opacity:1}
-/* ---- Exportvorschau: das Dokument, wie es auf Papier aussieht ---- */
+/* ---- Druckvorschau: das Dokument, wie es auf Papier aussieht ---- */
 .pvwrap{position:fixed;inset:0;z-index:85;display:none;overflow:auto;background:var(--canvas)}
 .pvwrap.on{display:block}
 .pvbar{position:sticky;top:0;z-index:2;display:flex;gap:9px;align-items:center;
@@ -690,7 +690,7 @@ const EN={
   "Verkleinern (Alt+⇧+Minus)":"Zoom out (Alt+⇧+Minus)","Vergrößern (Alt+⇧+Plus)":"Zoom in (Alt+⇧+Plus)","Vorgaben":"Presets",
   "Zoomstufe eintippen und Eingabe drücken":"Type a zoom level and press Enter",
   "Zoomstufe wählen":"Choose zoom level","Eigene Größe&hellip;":"Custom size&hellip;",
-  "Leseansicht":"Reading view","Exportvorschau":"Print preview","Seiten":"pages",
+  "Leseansicht":"Reading view","Druckvorschau":"Print preview","Seiten":"pages",
   "Schreibziel":"Writing goal","Schreibziel einstellen":"Set the writing goal",
   "Dokumentnotizen":"Document notes",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Plot notes, open questions, research links…",
@@ -776,7 +776,7 @@ const EN={
   "Einstellungen&hellip;":"Settings&hellip;","Alle Befehle":"All commands",
   "Seite":"Page","Seitenränder":"Page margins","Seitenzahlen":"Page numbers","Notizen am Seitenrand":"Notes in margin",
   "Markierungen im Text":"Highlights in text","Darstellung":"Appearance","Glossarbegriffe markieren":"Highlight glossary terms",
-  "Oberfläche tritt zurück":"Interface fades while typing","Farbschema&hellip;":"Color scheme&hellip;",
+  "Oberfläche ausblenden":"Hide interface while typing","Farbschema&hellip;":"Color scheme&hellip;",
   "Ausschneiden":"Cut","Kopieren":"Copy","Einfügen":"Paste","Alles auswählen":"Select all",
   "Link bearbeiten":"Edit link","Link einfügen":"Insert link","Bild einfügen&hellip;":"Insert image&hellip;",
   "Notiz anheften":"Pin note","Notiz hervorheben":"Highlight note","Verknüpfung lösen":"Remove link",
@@ -1624,7 +1624,7 @@ function commandList(){
   add("Ansicht","Fokusmodus umschalten","Alt ⇧ Z",()=>{document.body.classList.toggle("focus")});
   add("Ansicht","Dokumentnotizen","Alt ⇧ T",toggleMemo);
   add("Ansicht","Leseansicht","Alt ⇧ B",readView);
-  add("Ansicht","Exportvorschau","Alt ⇧ V",printPreview);
+  add("Ansicht","Druckvorschau","Alt ⇧ V",printPreview);
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
   add("Ansicht","Farbschema wählen","",themeDialog);
   THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
@@ -2045,7 +2045,7 @@ function viewMenu(){
     <div class="msep"></div>
     <div class="mlabel">${tr("Darstellung")}</div>
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
-    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi!==false)}</span>${tr("Oberfläche tritt zurück")}</button>
+    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi!==false)}</span>${tr("Oberfläche ausblenden")}</button>
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
@@ -2053,7 +2053,7 @@ function viewMenu(){
     <button class="mi" data-v="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
       S.goal&&S.goal.on?`<span class="k">${S.goal.target}</span>`:""}</button>
     <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
-    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Exportvorschau")}<span class="k">Alt ⇧ V</span></button>`;
+    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">Alt ⇧ V</span></button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
@@ -3480,7 +3480,7 @@ function readClose(){
   readOn=false;const ed=$("#editor");ed&&ed.focus();
 }
 
-/* ================= Exportvorschau ================= */
+/* ================= Druckvorschau ================= */
 let pvOn=false;
 function printPreview(){
   if(S.mode!=="write"){setMode("write");setTimeout(printPreview,60);return}
@@ -3502,7 +3502,7 @@ function printPreview(){
   box.appendChild(klon);
   const w=$("#pvwrap");
   w.innerHTML=`<div class="pvbar">
-      <b style="color:var(--ink)">${tr("Exportvorschau")}</b>
+      <b style="color:var(--ink)">${tr("Druckvorschau")}</b>
       <span>${tr(fmtOf(doc()).n)} &middot; ${pageCount} ${tr(pageCount===1?"Seite":"Seiten")}</span>
       <div style="flex:1"></div>
       <button class="btn" id="pvPrint">${tr("Drucken")}&hellip;</button>
