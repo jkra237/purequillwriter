@@ -358,16 +358,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .goal{cursor:pointer;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .goalbar{display:inline-block;width:58px;height:5px;border-radius:3px;
   background:var(--rule);overflow:hidden}
-.goalbar i{display:block;height:100%;transition:width .25s,background-color .3s}
+.goalbar i{display:block;height:100%;border-radius:3px;overflow:hidden;position:relative;
+  transition:width .25s,background-color .3s}
 .goalbar.phase1 i{background:#4A5568}
 .goalbar.phase2 i{background:#76A08A}
 .goalbar.phase3 i{background:#E2A049}
 .goalbar.phase4 i{background:#DD6B20}
 .goalbar.phase5 i{background:#D69E2E}
-.goalbar.done{box-shadow:0 0 6px rgba(214,158,46,.6);overflow:visible;border-radius:3px}
-.goalbar.done i{background:linear-gradient(90deg,#D69E2E,#F7E3A1,#D69E2E);
-  background-size:220% 100%;animation:goalshine 2.2s ease-in-out infinite}
-@keyframes goalshine{0%{background-position:220% 0}100%{background-position:-220% 0}}
+/* Der Glanz läuft dreimal übers Ziel und bleibt dann stehen - ein endloses
+   CSS-Loop wurde nach ein paar Sekunden vom Browser gedrosselt und sah dann
+   wie ein Abbruch aus, statt bewusst in der satten Goldfarbe zu landen. */
+.goalbar.done{overflow:visible}
+.goalbar.done i{background:#D69E2E;box-shadow:0 0 6px rgba(214,158,46,.6)}
+.goalbar.done i::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
+  animation:goalshine 1.3s ease-in-out 3 forwards}
+@keyframes goalshine{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
 .goalcheck{width:12px;height:12px;flex:none;fill:none;stroke:#D69E2E;stroke-width:3;
   stroke-linecap:round;stroke-linejoin:round;animation:goalpop .35s ease}
 @keyframes goalpop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
