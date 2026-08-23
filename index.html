@@ -426,11 +426,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .ghead .gmore{flex:none;align-self:center;margin-left:auto;color:var(--ink-faint);font-size:16px;
   line-height:1;padding:3px 7px;border-radius:var(--radius)}
 .ghead .gmore:hover{color:var(--ink);background:var(--chrome-2)}
-.ghead .gmeta{margin:5px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.5}
-.ghead .guse{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
-  padding-top:11px;border-top:1px solid var(--rule)}
-.ghead .gulabel{font-size:12px;color:var(--ink-soft)}
-.ghead .gupick{display:inline-flex;align-items:center;gap:7px;max-width:260px}
+/* Umfang und Zuordnung teilen sich eine Zeile unter dem Namen */
+.ghead .gmeta{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.6;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.ghead .gdot{color:var(--ink-faint)}
+.ghead .gulabel{color:var(--ink-faint)}
+.ghead .gupick{display:inline-flex;align-items:center;gap:6px;max-width:240px;
+  font-size:12px;padding:2px 8px;border:1px solid var(--rule);border-radius:var(--radius);
+  background:var(--chrome-2);color:var(--ink)}
+.ghead .gupick:hover{border-color:var(--ink-soft)}
 .ghead .gupick span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ghead .gupick .caret{flex:none;width:0;height:0;border-left:4px solid transparent;
   border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.65}
@@ -854,9 +858,10 @@ const EN={
   "Für dieses Dokument verwenden":"Use for this document","Dieses Dokument benutzt jetzt":"This document now uses",
   "Nur dann werden diese Begriffe im Text markiert.":"Only then are these terms highlighted in the text.",
   "Eintrag":"entry","Einträge":"entries","noch keine Einträge":"no entries yet",
-  "benutzt von":"used by","Dokumenten":"documents","keinem Dokument zugeordnet":"not assigned to any document",
-  "benutzt von einem Dokument":"used by one document","ein Dokument":"one document",
-  "Zugeordnete Dokumente":"Assigned documents","Ohne Zuordnung":"Not assigned",
+  "Dokumenten":"documents",
+  "ein Dokument":"one document",
+  "Zugeordnete Dokumente":"Assigned documents",
+  "Zugeordnet":"Assigned","keinem Dokument":"no document","Ohne Zuordnung":"Not assigned",
   "keine Definition":"no definition","Ohne Kategorie":"Uncategorised",
   "Rechtsbündig (Alt+⇧+R)":"Align right (Alt+⇧+R)",
   "Kopf- und Fußzeile von der Papierkante":"Header and footer from the paper edge",
@@ -1973,7 +1978,7 @@ function delGlossColl(id){
    sonst die Anzahl — der Titel allein wäre bei mehreren irreführend. */
 function zuordnungText(gid){
   const d=S.docs.filter(x=>x.glossaryId===gid);
-  if(!d.length)return tr("Ohne Zuordnung");
+  if(!d.length)return tr("keinem Dokument");
   if(d.length===1)return tr(d[0].title||"Ohne Titel");
   return d.length+" "+tr("Dokumente");
 }
@@ -2026,24 +2031,25 @@ function drawGloss(){
   const en=S.settings.uiLang==="en";
   const nutzer=S.docs.filter(d=>d.glossaryId===gid).length;
   const zahl=n=>n.toLocaleString(LOC());
-  const meta=[
-    alle.length?`${zahl(alle.length)} ${tr(alle.length===1?"Eintrag":"Einträge")}`:tr("noch keine Einträge"),
-    nutzer===1?tr("benutzt von einem Dokument")
-      :nutzer?`${tr("benutzt von")} ${zahl(nutzer)} ${tr("Dokumenten")}`
-      :tr("keinem Dokument zugeordnet")
-  ].join(" · ");
+  /* Der Umfang steht als Text, die Zuordnung als Bedienelement in derselben
+     Zeile — „keinem Dokument zugeordnet“ und „Zugeordnet: Ohne Zuordnung“
+     hätten sonst dasselbe zweimal gesagt. */
+  const umfang=alle.length
+    ?`${zahl(alle.length)} ${tr(alle.length===1?"Eintrag":"Einträge")}`
+    :tr("noch keine Einträge");
   $("#pane").innerHTML=`<div class="gwrap">
     <div class="ghead">
       <div class="grow">
         <h2>${esc(tr(coll?coll.name:"Glossar"))}</h2>
         <button class="gmore" id="gMore" title="${tr("Glossar verwalten")}" aria-label="${tr("Glossar verwalten")}">&#8942;</button>
       </div>
-      <p class="gmeta">${meta}</p>
-      <div class="guse">
-        <span class="gulabel">${tr("Zugeordnete Dokumente")}</span>
-        <button class="btn gupick" id="gAssign" aria-haspopup="true">
+      <p class="gmeta">
+        <span>${umfang}</span>
+        <span class="gdot">&middot;</span>
+        <span class="gulabel">${tr("Zugeordnet")}:</span>
+        <button class="gupick" id="gAssign" aria-haspopup="true" title="${tr("Zugeordnete Dokumente")}">
           <span>${zuordnungText(gid)}</span><i class="caret"></i></button>
-      </div>
+      </p>
     </div>
     <div class="gform" id="gform" style="display:none">
       <p class="ghint">${en?`Entry in "${esc(tr(coll?coll.name:"Glossar"))}"`:`Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}"`}</p>
