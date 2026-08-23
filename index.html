@@ -2429,8 +2429,7 @@ function commandList(){
     if(S.mode==="write")paginate()});
   add("Ansicht","Vergrößern","Alt ⇧ +",()=>setZoom(S.zoom+.1));
   add("Ansicht","Verkleinern","Alt ⇧ −",()=>setZoom(S.zoom-.1));
-  add("Ansicht","Seitenbreite einpassen","Alt ⇧ 0",()=>{S.fitPage=true;save();
-    if(S.mode==="write"){fitZoom();render()}});
+  add("Ansicht","Seitenbreite einpassen","Alt ⇧ 0",toggleFitPage);
 
   const fmtCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
     if(S.mode!=="write")setMode("write");
@@ -3101,7 +3100,7 @@ function viewMenu(){
     if(a==="dim"){S.settings.dimUi=!S.settings.dimUi;save();
       if(!S.settings.dimUi)document.body.classList.remove("typing")}
     if(a==="marks"){S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark()}}
-    if(a==="fit"){S.fitPage=true;save();closeMenu();if(S.mode==="write"){fitZoom();render()}return}
+    if(a==="fit"){closeMenu();toggleFitPage();return}
     if(a==="focus"){closeMenu();document.body.classList.toggle("focus");return}
     if(stay){closeMenu();viewMenu()}
   };
@@ -4463,6 +4462,20 @@ function setZoom(z,keepFit){
   if($("#editor"))paginate();
   queueAnchors();drawStatus();   /* baut die Zoomanzeige neu auf */
 }
+/* Seitenbreite einpassen ist ein Schalter: ein zweiter Klick kehrt zur
+   Zoomstufe zurück, die galt bevor eingepasst wurde - nicht zu einem
+   festen Vorgabewert. */
+function toggleFitPage(){
+  if(S.fitPage===false){
+    S.zoomVorFit=S.zoom;
+    S.fitPage=true;save();
+    if(S.mode==="write"){fitZoom();render()}
+  }else{
+    S.fitPage=false;
+    if(typeof S.zoomVorFit==="number")S.zoom=S.zoomVorFit;
+    setZoom(S.zoom,true);
+  }
+}
 /* ================= Dokument-Memo ================= */
 function toggleMemo(){
   if(S.mode!=="write"){setMode("write");S.memoOpen=true;save();setTimeout(drawMemo,50);return}
@@ -4584,7 +4597,7 @@ function zoomPresets(){
   m.style.top=(r.top-m.offsetHeight-4>0?r.top-m.offsetHeight-4:r.bottom+4)+"px";
   m.onclick=e=>{const b=e.target.closest("[data-z]");if(!b)return;closeMenu();
     if(b.dataset.z==="custom"){zoomCustom();return}
-    if(b.dataset.z==="fit"){S.fitPage=true;save();fitZoom();render()}
+    if(b.dataset.z==="fit"){toggleFitPage();return}
     else setZoom(+b.dataset.z/100)};
 }
 
@@ -4610,8 +4623,7 @@ document.addEventListener("keydown",e=>{
   if(as&&e.key.toLowerCase()==="s"){e.preventDefault();commit();toast(tr("Gesichert"));return}
   if(as&&(e.key==="+"||e.key==="=")){e.preventDefault();setZoom(S.zoom+.1);return}
   if(as&&(e.key==="-"||e.key==="_")){e.preventDefault();setZoom(S.zoom-.1);return}
-  if(as&&e.key==="0"){e.preventDefault();S.fitPage=true;save();
-    if(S.mode==="write"){fitZoom();render()}return}
+  if(as&&e.key==="0"){e.preventDefault();toggleFitPage();return}
   if(as&&e.key.toLowerCase()==="z"){e.preventDefault();
     document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus();return}
   if(as&&e.key.toLowerCase()==="t"){e.preventDefault();toggleMemo();return}
