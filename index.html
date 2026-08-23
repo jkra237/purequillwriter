@@ -764,7 +764,7 @@ const EN={
   "Zurücksetzen":"Reset","Ausschalten":"Turn off",
   "Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.":"Counts the words added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
-  "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
+  "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","Im ausgewählten Dokument":"In the selected document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
   "Neues Glossar anlegen":"Add a new glossary","Neues Glossar":"New glossary","Glossar löschen":"Delete glossary","Glossar gelöscht":"Glossary deleted",
   "Glossar verwalten":"Manage glossary","wird von diesem Dokument benutzt":"used by this document",
@@ -1237,7 +1237,7 @@ function drawTools(){
       <input type="text" id="nSearch" placeholder="${tr("Notizen durchsuchen")}" style="width:210px">
       <div class="sep"></div>
       <button class="pill ${S.noteFilter==="all"?"on":""}" data-nf="all">${tr("Alle")}</button>
-      <button class="pill ${S.noteFilter==="doc"?"on":""}" data-nf="doc">${tr("In diesem Dokument")}</button>
+      <button class="pill ${S.noteFilter==="doc"?"on":""}" data-nf="doc">${tr("Im ausgewählten Dokument")}</button>
       <button class="pill ${S.noteFilter==="free"?"on":""}" data-nf="free">${tr("Ohne Verknüpfung")}</button>`;
   } else {
     const gid=curGView();
@@ -1482,10 +1482,28 @@ function drawNotes(){
 function findNote(id){return S.notes.find(x=>x.id===id)||null}
 function anchorsInDoc(id,d){const t=document.createElement("div");t.innerHTML=(d||doc()).html||"";
   return t.querySelectorAll('.anch[data-n="'+id+'"]').length}
+/* Platz für eine neue Notiz: das erste freie Rasterfeld von oben links.
+   Vorher wurde nach Array-Index gerechnet, wodurch die zwanzigste Notiz
+   zwangsläufig ganz unten landete — auch wenn oben längst alles frei war,
+   weil Notizen verschoben oder gelöscht wurden. */
+const NW=224,NH=230,NGAP=12,NPAD=16;
+function freierNotizPlatz(){
+  const canvas=$("#canvas");
+  const breite=(canvas?canvas.clientWidth:0)||($("#pane")?$("#pane").clientWidth:0)||760;
+  const spalten=Math.max(1,Math.floor((breite-NPAD)/(NW+NGAP)));
+  const belegt=S.notes.map(n=>({x:n.x||0,y:n.y||0}));
+  const frei=(x,y)=>!belegt.some(b=>Math.abs(b.x-x)<NW+NGAP*0.5&&Math.abs(b.y-y)<NH+NGAP*0.5);
+  for(let reihe=0;reihe<400;reihe++)
+    for(let sp=0;sp<spalten;sp++){
+      const x=NPAD+sp*(NW+NGAP),y=NPAD+reihe*(NH+NGAP);
+      if(frei(x,y))return{x,y};
+    }
+  return{x:NPAD,y:NPAD};
+}
 function addNote(text,open){
-  const k=S.notes.length;
+  const pos=freierNotizPlatz();
   const n={id:uid(),title:"",html:text?"<p>"+esc(text).replace(/\n/g,"<br>")+"</p>":"",
-    color:NOTECOLORS[0].c,fs:14,x:16+(k%3)*236,y:16+Math.floor(k/3)*246,created:Date.now()};
+    color:NOTECOLORS[0].c,fs:14,x:pos.x,y:pos.y,created:Date.now()};
   S.notes.push(n);dirty=true;commit();
   if(open){setMode("notes");openNote(n.id)}
   return n;
@@ -2121,7 +2139,7 @@ function commandList(){
     if(S.mode==="write")drawAnchors()});
   add("Notiz","Markierungen im Text umschalten","",()=>{S.showAnchMarks=S.showAnchMarks===false;save();
     if(S.mode==="write")drawAnchors()});
-  [["all","Alle"],["doc","In diesem Dokument"],["free","Ohne Verknüpfung"]].forEach(([k,n])=>
+  [["all","Alle"],["doc","Im ausgewählten Dokument"],["free","Ohne Verknüpfung"]].forEach(([k,n])=>
     add("Notiz",tr("Pinnwand filtern: ")+tr(n),"",()=>{S.noteFilter=k;save();setMode("notes")}));
   S.notes.slice(0,14).forEach(n=>{
     const raw=n.title||noteText(n).trim()||"Leere Notiz";
