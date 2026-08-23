@@ -320,8 +320,11 @@ input,select,textarea{font:inherit;color:inherit}
 .status{display:flex;align-items:center;gap:17px;padding:5px 13px;border-top:1px solid var(--rule);
   background:var(--chrome-2);font-family:Consolas,monospace;font-size:11.5px;color:var(--ink-soft);flex:0 0 auto}
 .status .grow{flex:1}
-.status .zoomctl{border:none}
-.status .zoomctl button{width:18px;height:18px}
+.status .zoomctl{border:1px solid var(--rule);gap:0}
+.status .zoomctl button{width:24px;height:22px;font-size:15px;line-height:1}
+.status .zoomctl #zVal{width:auto;min-width:58px;font-family:Consolas,monospace;font-size:12px;padding:0 7px}
+.status .zoomctl #zVal:hover{background:var(--chrome)}
+.status .zoomctl input{width:58px;font-size:12px;padding:2px 0}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
 .dot.dirty{background:var(--stamp)}
 
@@ -655,6 +658,8 @@ const EN={
   "Bild einfügen":"Insert image","Link einfügen (Alt+⇧+K)":"Insert link (Alt+⇧+K)","Tabelle einfügen":"Insert table",
   "Verkleinern (Alt+⇧+Minus)":"Zoom out (Alt+⇧+Minus)","Vergrößern (Alt+⇧+Plus)":"Zoom in (Alt+⇧+Plus)","Vorgaben":"Presets",
   "Zoomstufe eintippen und Eingabe drücken":"Type a zoom level and press Enter",
+  "Zoomstufe wählen":"Choose zoom level","Eigene Größe&hellip;":"Custom size&hellip;",
+  "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
   "CSV exportieren":"Export CSV",
@@ -1088,7 +1093,8 @@ function drawTools(){
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
       <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
-      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>`;
+      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
+      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="btn" id="addNote">${tr("Neue Notiz")}</button>
       <input type="text" id="nSearch" placeholder="${tr("Notizen durchsuchen")}" style="width:210px">
@@ -1470,8 +1476,7 @@ function drawStatus(){
     <span>${S.settings.autosave?"Autosave "+S.settings.interval+"s":"Autosave "+tr("aus")}</span>
     ${S.mode==="write"?`<span class="zoomctl" id="zoomctl">
       <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
-      <input id="zVal" value="${Math.round(S.zoom*100)}%" title="${tr("Zoomstufe eintippen und Eingabe drücken")}">
-      <button id="zPre" title="${tr("Vorgaben")}">&#9662;</button>
+      <button id="zVal" title="${tr("Zoomstufe wählen")}">${Math.round(S.zoom*100)} %</button>
       <button id="zIn" title="${tr("Vergrößern (Alt+⇧+Plus)")}">+</button>
     </span>`:`<span>${Math.round(S.zoom*100)}%</span>`}
     <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">Alt ⇧ P</span>`;
@@ -2173,24 +2178,29 @@ function drawAnchors(){
     prev=y+el.offsetHeight+9});
   col.style.height=Math.max(0,prev)+"px";
 }
-$("#status").addEventListener("keydown",e=>{
-  if(e.target.id!=="zVal")return;
-  if(e.key==="Enter"){e.preventDefault();applyZoomField();$("#editor")&&$("#editor").focus()}
-  if(e.key==="Escape"){e.target.value=Math.round(S.zoom*100)+"%";e.target.blur()}
-});
-$("#status").addEventListener("focusout",e=>{if(e.target.id==="zVal")applyZoomField()});
-$("#status").addEventListener("focusin",e=>{if(e.target.id==="zVal")e.target.select()});
 $("#status").addEventListener("click",e=>{
-  if(e.target.id==="zPre"){zoomPresets();return}
+  if(e.target.id==="zVal"){zoomPresets();return}
   if(e.target.id==="zIn"){setZoom(S.zoom+.1);return}
   if(e.target.id==="zOut"){setZoom(S.zoom-.1);return}
 });
-function applyZoomField(){
-  const v=$("#zVal");if(!v)return;
-  const n=parseFloat(String(v.value).replace(",","."));
-  if(isNaN(n)){v.value=Math.round(S.zoom*100)+"%";return}
-  setZoom(Math.min(400,Math.max(25,n))/100);
-  v.value=Math.round(S.zoom*100)+"%";
+/* Aus dem Zahlenknopf wird zum Eintippen kurzzeitig ein Eingabefeld */
+function zoomCustom(){
+  const b=$("#zVal");if(!b)return;
+  const inp=document.createElement("input");
+  inp.id="zVal";inp.value=Math.round(S.zoom*100);
+  inp.setAttribute("title",tr("Zoomstufe eintippen und Eingabe drücken"));
+  b.replaceWith(inp);inp.focus();inp.select();
+  let fertig=false;
+  const uebernehmen=()=>{
+    if(fertig)return;fertig=true;
+    const n=parseFloat(String(inp.value).replace(",","."));
+    if(!isNaN(n))setZoom(Math.min(400,Math.max(25,n))/100);else drawStatus();
+  };
+  inp.addEventListener("keydown",ev=>{
+    if(ev.key==="Enter"){ev.preventDefault();uebernehmen();const ed=$("#editor");ed&&ed.focus()}
+    if(ev.key==="Escape"){ev.preventDefault();fertig=true;drawStatus()}
+  });
+  inp.addEventListener("blur",uebernehmen);
 }
 $("#pane").addEventListener("input",e=>{
   const b=e.target.closest("[data-body]");
@@ -3301,29 +3311,30 @@ function fitZoom(){
   const avail=sh.clientWidth-36-(S.showCol&&anchoredIds().length?268:0);
   const z=Math.min(1.6,Math.max(.45,avail/MM(f.w)));
   S.zoom=Math.round(z*100)/100;save();
-  const v=$("#zVal");if(v)v.value=Math.round(S.zoom*100)+"%";
 }
 function setZoom(z,keepFit){
   S.zoom=Math.min(4,Math.max(.25,Math.round(z*100)/100));
   if(!keepFit)S.fitPage=false;
   save();
   const p=$("#paper");if(p)p.style.setProperty("--zoom",S.zoom);
-  const v=$("#zVal");if(v&&document.activeElement!==v)v.value=Math.round(S.zoom*100)+"%";
   if($("#editor"))paginate();
-  queueAnchors();drawStatus();
+  queueAnchors();drawStatus();   /* baut die Zoomanzeige neu auf */
 }
 function zoomPresets(){
   if($("#zmenu")){closeMenu();return}
   closeMenu();
   const vals=[50,75,100,125,150,200];
   const m=document.createElement("div");m.className="menu ctx";m.id="zmenu";
+  const istVorgabe=vals.includes(Math.round(S.zoom*100));
   m.innerHTML=vals.map(v=>`<button class="mi" data-z="${v}"><span class="chk">${Math.round(S.zoom*100)===v?"&#10003;":""}</span>${v} %</button>`).join("")
-    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>`;
+    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>`
+    +`<button class="mi" data-z="custom"><span class="chk">${(!istVorgabe&&S.fitPage===false)?"&#10003;":""}</span>${tr("Eigene Größe&hellip;")}</button>`;
   document.body.appendChild(m);
-  const r=$("#zPre").getBoundingClientRect();
-  m.style.left=Math.min(r.left-60,innerWidth-m.offsetWidth-8)+"px";
+  const r=$("#zVal").getBoundingClientRect();
+  m.style.left=Math.max(8,Math.min(r.left-40,innerWidth-m.offsetWidth-8))+"px";
   m.style.top=(r.top-m.offsetHeight-4>0?r.top-m.offsetHeight-4:r.bottom+4)+"px";
   m.onclick=e=>{const b=e.target.closest("[data-z]");if(!b)return;closeMenu();
+    if(b.dataset.z==="custom"){zoomCustom();return}
     if(b.dataset.z==="fit"){S.fitPage=true;save();fitZoom();render()}
     else setZoom(+b.dataset.z/100)};
 }
@@ -3369,6 +3380,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#imgBtn")){pickImage();return}
   if(e.target.closest("#lnkBtn")){linkDialog();return}
   if(e.target.closest("#tblBtn")){tablePicker();return}
+  if(e.target.closest("#pgbBtn")){insertPageBreak();return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
   if(e.target.id==="addNote"){const n=addNote("");render();openNote(n.id);return}
