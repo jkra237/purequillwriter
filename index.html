@@ -755,21 +755,46 @@ const MARKCOLORS=[
   {c:"#FBEB9B",n:"Gelb"},{c:"#C6EFC6",n:"Grün"},{c:"#CBE4F9",n:"Blau"},
   {c:"#F9D2E2",n:"Rosa"},{c:"#FBD6AE",n:"Orange"},{c:"#DEDBD3",n:"Grau"}];
 const MARKINK="#22242A";   /* wie bei den Notizen: dunkle Schrift auf Pastell */
+/* hd/fd: Abstand der Kopf- bzw. Fußzeile zur Papierkante, wie Word es unter
+   „Layout → Von Rand“ führt. Je Format vorbelegt, im Seitenformat änderbar. */
 const FORMATS={
-  a4:   {n:"DIN A4",           w:210, h:297, m:[25,20,25,25], d:"Standard für alles"},
-  brief:{n:"Brief DIN 5008",   w:210, h:297, m:[45,20,25,25], d:"Anschriftfeld oben"},
-  manu: {n:"Normseite",        w:210, h:297, m:[30,20,30,30], d:"Manuskript für Verlage"},
-  a5:   {n:"DIN A5",           w:148, h:210, m:[18,15,18,18], d:"Broschüre, Heft"},
-  tb:   {n:"Taschenbuch",      w:125, h:190, m:[16,13,18,15], d:"Buchsatz"},
-  letter:{n:"US Letter",       w:216, h:279, m:[25,25,25,25], d:"Nordamerika"}
+  a4:   {n:"DIN A4",           w:210, h:297, m:[25,20,25,25], hd:12, fd:12, d:"Standard für alles"},
+  brief:{n:"Brief DIN 5008",   w:210, h:297, m:[45,20,25,25], hd:12, fd:12, d:"Anschriftfeld oben"},
+  manu: {n:"Normseite",        w:210, h:297, m:[30,20,30,30], hd:15, fd:15, d:"Manuskript für Verlage"},
+  a5:   {n:"DIN A5",           w:148, h:210, m:[18,15,18,18], hd:10, fd:10, d:"Broschüre, Heft"},
+  tb:   {n:"Taschenbuch",      w:125, h:190, m:[16,13,18,15], hd:9,  fd:9,  d:"Buchsatz"},
+  letter:{n:"US Letter",       w:216, h:279, m:[25,25,25,25], hd:13, fd:13, d:"Nordamerika"}
 };
 const MM=mm=>mm*96/25.4;
 const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],["2",2]];
 const lhOf=d=>d.lh||S.settings.lh||1.62;
 function fmtOf(d){
   const f=d.fmt||S.settings.fmt||"a4";
-  if(typeof f==="object")return f;
-  return {...FORMATS[f]||FORMATS.a4,key:f};
+  const o=typeof f==="object"?f:{...FORMATS[f]||FORMATS.a4,key:f};
+  /* Ältere Dokumente kennen hd/fd noch nicht */
+  if(o.hd===undefined||o.fd===undefined){
+    const b=FORMATS[o.key]||FORMATS.a4;
+    return {...o,hd:o.hd!==undefined?o.hd:b.hd,fd:o.fd!==undefined?o.fd:b.fd};
+  }
+  return o;
+}
+/* Macht das Format zu einer eigenen Kopie des Dokuments, damit sich Ränder
+   ziehen lassen, ohne die Voreinstellung aller Dokumente zu verändern. */
+function ownFmt(d){
+  const f=fmtOf(d);
+  if(d.fmt!==f||typeof d.fmt!=="object")d.fmt={...f,m:[...f.m]};
+  return d.fmt;
+}
+/* Höhe des Kopf-/Fußzeilenbandes in px: Abstand zur Kante plus Textzeilen
+   plus etwas Luft. Word schiebt den Textkörper genauso nach unten, statt
+   ihn von der Kopfzeile überschreiben zu lassen. */
+function hfBand(d,which,z){
+  const v=hfOf(d,which);
+  if(!v.on)return 0;
+  const f=fmtOf(d);
+  const fs=(9*96/72)*z;
+  const zeilen=String(v.text||"").split("\n").length;
+  return MM(which==="hdr"?f.hd:f.fd)*z + fs*1.35*zeilen + MM(2)*z;
 }
 const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
@@ -834,6 +859,10 @@ const EN={
   "Zugeordnete Dokumente":"Assigned documents","Ohne Zuordnung":"Not assigned",
   "keine Definition":"no definition","Ohne Kategorie":"Uncategorised",
   "Rechtsbündig (Alt+⇧+R)":"Align right (Alt+⇧+R)",
+  "Kopf- und Fußzeile von der Papierkante":"Header and footer from the paper edge",
+  "Kopf / Fuß":"Header / footer","Von Rand":"From edge","Höhe":"Height",
+  "Bis hierher bleibt die Seite frei von Text":"The page stays free of text down to here",
+  "Kopf-/Fußzeilenbereich ziehen":"Drag the header/footer area",
   "Schriftfarbe":"Text colour","Texthervorhebung":"Highlight","Eigene Farbe":"Custom colour",
   "Farbe entfernen":"Remove colour","Hervorhebung entfernen":"Remove highlight",
   "Rot":"Red","Ocker":"Ochre","Grün":"Green","Petrol":"Teal","Blau":"Blue",
@@ -959,9 +988,6 @@ const EN={
   "Seitenzahl":"Page number","Gesamtseiten":"Total pages","Titel":"Title",
   "Seitenzahl einfügen":"Insert page number","Gesamtseiten einfügen":"Insert total pages",
   "Titel einfügen":"Insert title","Datum einfügen":"Insert date",
-  "Der obere Rand ist knapp für die Kopfzeile.":"The top margin is tight for the header.",
-  "Der untere Rand ist knapp für die Fußzeile.":"The bottom margin is tight for the footer.",
-  "Erhöhe den Rand im Seitenformat, sonst überlagern sich Zeile und Text.":"Increase the margin in the page format, otherwise the line and text will overlap.",
   "Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.":"Placeholders are replaced per page. These settings apply to this document.",
   "Fertig":"Done","Größe wählen":"Choose size","Erste Zeile als Kopfzeile":"First row as header",
   "Anzeigetext":"Display text","Text im Dokument":"Text in document","Ziel":"Target",
@@ -1132,6 +1158,16 @@ if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
 /* Schreibziel: standardmäßig aus; „base" ist der Wortstand beim Einschalten */
 if(!S.goal)S.goal={on:false,target:1000,base:0};
 ensureGlossaries();
+/* Der Abstand zur Papierkante saß früher an der Kopf-/Fußzeile, jetzt am
+   Seitenformat — wie in Word unter „Layout“. Eigene Werte wandern mit. */
+S.docs.forEach(d=>{
+  const hd=d.hdr&&d.hdr.dist,fd=d.ftr&&d.ftr.dist;
+  if(hd===undefined&&fd===undefined)return;
+  const f=fmtOf(d);
+  d.fmt={...f,m:[...f.m],hd:hd!==undefined?hd:f.hd,fd:fd!==undefined?fd:f.fd};
+  if(d.hdr)delete d.hdr.dist;
+  if(d.ftr)delete d.ftr.dist;
+});
 S.docs.forEach(d=>{
   if(d.html&&d.html.indexOf('class="pgbreak"')>=0&&d.html.indexOf("data-label=")<0)
     d.html=d.html.replace(/<div class="pgbreak" contenteditable="false">/g,
@@ -1346,7 +1382,7 @@ function drawWrite(){
         <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar"))}"></div>
         <div class="hfhint" id="hfhint"></div>
         <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
-        <div class="hfgrip" id="hfgrip" title="${esc(tr("Abstand zum Seitenrand ziehen"))}"></div>
+        <div class="hfgrip" id="hfgrip" title="${esc(tr("Kopf-/Fußzeilenbereich ziehen"))}"></div>
         <div class="figrsz" id="figrsz" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
       </div>
     </div>
@@ -2911,7 +2947,11 @@ function paginate(){
   if(!ed||!paper)return;
   const f=fmtOf(doc()),z=S.zoom;
   const pw=MM(f.w)*z, ph=MM(f.h)*z;
-  const mt=MM(f.m[0])*z, mr=MM(f.m[1])*z, mb=MM(f.m[2])*z, ml=MM(f.m[3])*z;
+  const mr=MM(f.m[1])*z, ml=MM(f.m[3])*z;
+  /* Der Textkörper beginnt am Rand — oder unterhalb der Kopfzeile, falls die
+     tiefer reicht. Vorher konnten sich beide überlagern. */
+  const mt=Math.max(MM(f.m[0])*z, hfBand(doc(),"hdr",z));
+  const mb=Math.max(MM(f.m[2])*z, hfBand(doc(),"ftr",z));
   const contentH=Math.max(60,ph-mt-mb), stride=ph+GAP;
   paper.style.width=pw+"px";
   ed.style.padding=`${mt}px ${mr}px ${mb}px ${ml}px`;
@@ -2963,7 +3003,9 @@ function formatDialog(mode,onDone){
   const cur=isNew?(S.settings.fmt||"a4"):(doc().fmt||S.settings.fmt||"a4");
   const start=typeof cur==="object"?{...cur}:{...FORMATS[cur]||FORMATS.a4,key:cur};
   let sel=start.key||"custom";
-  let cfg={n:start.n,w:start.w,h:start.h,m:[...start.m],key:sel};
+  let cfg={n:start.n,w:start.w,h:start.h,m:[...start.m],key:sel,
+    hd:start.hd!==undefined?start.hd:(FORMATS[sel]||FORMATS.a4).hd,
+    fd:start.fd!==undefined?start.fd:(FORMATS[sel]||FORMATS.a4).fd};
   let lh=isNew?(S.settings.lh||1.62):lhOf(doc());
   const quer=()=>cfg.w>cfg.h;
   const pagePreview=()=>{
@@ -3003,8 +3045,11 @@ function formatDialog(mode,onDone){
         <div class="mlabel" style="padding-left:0">${tr("Ränder in mm")}</div>
         <div class="mmrow"><label>${tr("Oben / Unten")}</label>
           <input type="number" id="c0" value="${cfg.m[0]}"><input type="number" id="c2" value="${cfg.m[2]}"></div>
-        <div class="mmrow" style="margin-bottom:0"><label>${tr("Links / Rechts")}</label>
+        <div class="mmrow"><label>${tr("Links / Rechts")}</label>
           <input type="number" id="c3" value="${cfg.m[3]}"><input type="number" id="c1" value="${cfg.m[1]}"></div>
+        <div class="mlabel" style="padding-left:0">${tr("Kopf- und Fußzeile von der Papierkante")}</div>
+        <div class="mmrow" style="margin-bottom:0"><label>${tr("Kopf / Fuß")}</label>
+          <input type="number" id="chd" value="${cfg.hd}"><input type="number" id="cfd" value="${cfg.fd}"></div>
       </div>
       ${pagePreview()}
     </div>
@@ -3020,6 +3065,8 @@ function formatDialog(mode,onDone){
       <button class="btn" id="fCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="fOk">${isNew?tr("Anlegen"):tr("Übernehmen")}</button></div></div>`);
   const readM=()=>{cfg.m=[+$("#c0").value||0,+$("#c1").value||0,+$("#c2").value||0,+$("#c3").value||0];
+    cfg.hd=Math.max(0,Math.min(cfg.h/3,+$("#chd").value||0));
+    cfg.fd=Math.max(0,Math.min(cfg.h/3,+$("#cfd").value||0));
     if(sel==="custom"){cfg.w=+$("#cw").value||210;cfg.h=+$("#ch").value||297}};
   const repaint=()=>{$("#fbody").innerHTML=body();bind()};
   const bind=()=>{
@@ -3027,7 +3074,7 @@ function formatDialog(mode,onDone){
       readM();const k=b.dataset.f;
       if(k==="custom"){sel="custom";cfg.n="Eigene Maße";cfg.key="custom"}
       else{const f=FORMATS[k];const war=quer();
-        sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k}}
+        sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k,hd:f.hd,fd:f.fd}}
       repaint()});
     $("#fbody").querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
       readM();const willQuer=b.dataset.o==="quer";
@@ -3039,14 +3086,14 @@ function formatDialog(mode,onDone){
   bind();
   $("#fCancel").onclick=closeOvl;
   $("#fHf").onclick=()=>{
-    readM();const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key};
+    readM();const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
     closeOvl();
     if(isNew){const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();S.docs.push(d);S.active=d.id;save();render()}
     else{doc().fmt=val;doc().lh=lh;commit();render()}
     hfDialog();};
   $("#fOk").onclick=()=>{
     readM();
-    const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key};
+    const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
     if($("#fDef").checked){S.settings.fmt=val;S.settings.lh=lh}
     closeOvl();onDone(val,lh);
   };
@@ -3191,8 +3238,8 @@ function wordCount(selText){
   $("#wcClose").onclick=closeOvl;
 }
 /* ================= Kopf- und Fußzeile ================= */
-const HF_DEF={hdr:{on:false,text:"{titel}",align:"center",dist:12},
-              ftr:{on:false,text:"Seite {seite} von {seiten}",align:"center",dist:12}};
+const HF_DEF={hdr:{on:false,text:"{titel}",align:"center"},
+              ftr:{on:false,text:"Seite {seite} von {seiten}",align:"center"}};
 function hfOf(d,which){return {...HF_DEF[which],...(d[which]||{})}}
 function hfText(tpl,page,total,forPrint){
   const t=esc(tpl||"")
@@ -3222,8 +3269,10 @@ function hfZoneAt(clientY){
 function hfRect(which,page){
   const f=fmtOf(doc()),z=S.zoom;
   const ph=MM(f.h)*z,stride=ph+GAP;
-  const fs=(9*96/72)*z,h=Math.max(fs*1.6,16);
-  const d=MM(hfOf(doc(),which).dist)*z;
+  const fs=(9*96/72)*z;
+  const zeilen=String(hfOf(doc(),which).text||"").split("\n").length;
+  const h=Math.max(fs*1.35*zeilen,16);
+  const d=MM(which==="hdr"?f.hd:f.fd)*z;
   return {top:which==="hdr"?page*stride+d:page*stride+ph-d-h,
     left:MM(f.m[3])*z,right:MM(f.m[1])*z,h,fs};
 }
@@ -3254,15 +3303,19 @@ function hfEditOpen(which,page){
   placeHfGrip();
   drawHfBar();
 }
-/* Griff sitzt an der zum Textkörper zeigenden Kante des Feldes */
+/* Der Griff liegt auf der Grenze zwischen Kopf-/Fußzeilenband und Textkörper —
+   also dort, wo der Text beginnt. Ihn zu ziehen ändert die Höhe des Bandes. */
 function placeHfGrip(){
-  const grip=$("#hfgrip"),box=$("#hfedit");
-  if(!hfEditing||!grip||!box){if(grip)grip.classList.remove("on");return}
-  const paper=$("#paper");if(!paper)return;
-  const pr=paper.getBoundingClientRect(),br=box.getBoundingClientRect();
-  grip.style.left=(br.left-pr.left)+"px";
-  grip.style.width=br.width+"px";
-  grip.style.top=(hfEditing.which==="hdr"?br.bottom-pr.top+1:br.top-pr.top-14)+"px";
+  const grip=$("#hfgrip");
+  if(!hfEditing||!grip){if(grip)grip.classList.remove("on");return}
+  const d=doc(),f=fmtOf(d),z=S.zoom;
+  const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page;
+  const mt=Math.max(MM(f.m[0])*z,hfBand(d,"hdr",z));
+  const mb=Math.max(MM(f.m[2])*z,hfBand(d,"ftr",z));
+  const y=hfEditing.which==="hdr"?pg*stride+mt:pg*stride+ph-mb;
+  grip.style.left=MM(f.m[3])*z+"px";
+  grip.style.width=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z+"px";
+  grip.style.top=(y-6)+"px";
   grip.classList.add("on");
 }
 function hfEditCommit(){
@@ -3296,8 +3349,9 @@ function drawHfBar(){
        ["{titel}","Titel einfügen"],["{datum}","Datum einfügen"]].map(([p,n])=>
       `<button class="pill" data-hfp="${p}" title="${tr(n)}">${p}</button>`).join("")}
     <div class="sep"></div>
-    <span style="color:var(--ink-soft);font-size:12px">${tr("Abstand")}</span>
-    <input type="number" id="hfDist" value="${v.dist}" style="width:50px;background:var(--paper);
+    <span style="color:var(--ink-soft);font-size:12px" title="${tr("Bis hierher bleibt die Seite frei von Text")}">${tr("Höhe")}</span>
+    <input type="number" id="hfHeight" value="${fmtOf(doc()).m[hfEditing.which==="hdr"?0:2]}"
+      title="${tr("Bis hierher bleibt die Seite frei von Text")}" style="width:50px;background:var(--paper);
       border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
     <span style="color:var(--ink-faint);font-size:11px">mm</span>
     <div class="sep"></div>
@@ -3311,28 +3365,30 @@ function drawHfBar(){
   bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bw-10))+"px";
   bar.style.top=(r.bottom+8+bh<innerHeight-8?r.bottom+8:Math.max(8,r.top-bh-8))+"px";
 }
-/* Abstand zum Seitenrand mit der Maus ziehen.
+/* Höhe des Kopf-/Fußzeilenbandes ziehen. Das verschiebt die Grenze, ab der
+   Text steht — also den Seitenrand dieses Dokuments. Vorher verschob der Griff
+   nur die Zeile selbst, was aussah, als ließe sich nichts vergrößern.
    Wird in drawWrite() gebunden, da #hfgrip bei jedem Render neu entsteht. */
 function hfGripDrag(e){
   if(!hfEditing)return;
   e.preventDefault();
   const grip=$("#hfgrip");grip.classList.add("drag");
   const k=hfEditing.which,pg=hfEditing.page,d=doc();
-  const f=fmtOf(d),z=S.zoom,ph=MM(f.h)*z,stride=ph+GAP;
+  const fm=ownFmt(d),idx=k==="hdr"?0:2;
+  const z=S.zoom,ph=MM(fm.h)*z,stride=ph+GAP;
   const paper=$("#paper");
   const move=ev=>{
     const y=ev.clientY-paper.getBoundingClientRect().top-pg*stride;
-    /* Abstand in mm, begrenzt auf den jeweiligen Seitenrand */
-    const maxMm=Math.max(0,(k==="hdr"?f.m[0]:f.m[2])-4);
     let mm=Math.round((k==="hdr"?y:ph-y)/(MM(1)*z));
-    mm=Math.min(maxMm,Math.max(0,mm));
-    if(mm===hfOf(d,k).dist)return;
-    d[k]={...hfOf(d,k),dist:mm};
-    paginate();
-    const r=hfRect(k,pg);
-    $("#hfedit").style.top=r.top+"px";
-    placeHfGrip();
-    const di=$("#hfDist");if(di)di.value=mm;
+    /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
+    const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
+    const maxMm=Math.max(minMm,fm.h-fm.m[k==="hdr"?2:0]-30);
+    mm=Math.min(maxMm,Math.max(minMm,mm));
+    if(mm===fm.m[idx])return;
+    fm.m[idx]=mm;
+    paginate();placeHfGrip();
+    const box=$("#hfedit");if(box)box.style.top=hfRect(k,pg).top+"px";
+    const di=$("#hfHeight");if(di)di.value=mm;
   };
   const up=()=>{
     document.removeEventListener("mousemove",move);
@@ -3360,21 +3416,24 @@ $("#hfbar").addEventListener("click",e=>{
   const ed=$("#editor");ed&&ed.focus();
 });
 $("#hfbar").addEventListener("change",e=>{
-  if(e.target.id!=="hfDist"||!hfEditing)return;
+  if(e.target.id!=="hfHeight"||!hfEditing)return;
   const d=doc(),k=hfEditing.which;
-  d[k]={...hfOf(d,k),dist:Math.max(0,+e.target.value||0)};
+  const fm=ownFmt(d),idx=k==="hdr"?0:2;
+  const minMm=Math.ceil(hfBand(d,k,S.zoom)/(MM(1)*S.zoom));
+  fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,+e.target.value||0));
+  e.target.value=fm.m[idx];
   commit();paginate();
   const r=hfRect(k,hfEditing.page);
   $("#hfedit").style.top=r.top+"px";
   drawHfBar();
 });
 function hfHtml(i,total,ml,mr,z){
-  const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr");
+  const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr"),fm=fmtOf(d);
   let out="";
   const fs=(9*96/72)*z;
-  if(h.on)out+=`<div class="hf" style="top:${MM(h.dist)*z}px;left:${ml}px;right:${mr}px;
+  if(h.on)out+=`<div class="hf" style="top:${MM(fm.hd)*z}px;left:${ml}px;right:${mr}px;
     text-align:${h.align};font-size:${fs}px">${hfText(h.text,i+1,total)}</div>`;
-  if(f.on)out+=`<div class="hf" style="bottom:${MM(f.dist)*z}px;left:${ml}px;right:${mr}px;
+  if(f.on)out+=`<div class="hf" style="bottom:${MM(fm.fd)*z}px;left:${ml}px;right:${mr}px;
     text-align:${f.align};font-size:${fs}px">${hfText(f.text,i+1,total)}</div>`;
   return out;
 }
@@ -3406,8 +3465,8 @@ function hfDialog(){
         ${["left","center","right"].map(a=>
           `<button class="pill ${v.align===a?"on":""}" data-al="${k}:${a}" style="flex:1" ${v.on?"":"disabled"}>
             ${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
-        <label style="flex:0 0 62px;text-align:right">${tr("Abstand")}</label>
-        <input type="number" data-di="${k}" value="${v.dist}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
+        <label style="flex:0 0 84px;text-align:right">${tr("Von Rand")}</label>
+        <input type="number" data-di="${k}" value="${fmtOf(d)[k==="hdr"?"hd":"fd"]}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
         <span style="color:var(--ink-faint)">mm</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
@@ -3415,15 +3474,9 @@ function hfDialog(){
           `<button class="pill" data-ph="${k}:${p}" ${v.on?"":"disabled"} title="${tr(n)}">${p}</button>`).join("")}
       </div></div>`;
   };
-  const warn=()=>{
-    const f=fmtOf(d),h=hfOf(d,"hdr"),ft=hfOf(d,"ftr");
-    const p=[];
-    if(h.on&&f.m[0]<h.dist+8)p.push(tr("Der obere Rand ist knapp für die Kopfzeile."));
-    if(ft.on&&f.m[2]<ft.dist+8)p.push(tr("Der untere Rand ist knapp für die Fußzeile."));
-    return p.length?`<div style="color:var(--stamp);font-size:12px;line-height:1.5">${p.join(" ")}
-      ${tr("Erhöhe den Rand im Seitenformat, sonst überlagern sich Zeile und Text.")}</div>`:"";
-  };
-  const body=()=>row("hdr",tr("Kopfzeile"))+row("ftr",tr("Fußzeile"))+warn()+
+  /* Eine Warnung wegen knapper Ränder braucht es nicht mehr: reicht die Zeile
+     tiefer als der Rand, rückt der Textkörper von selbst nach. */
+  const body=()=>row("hdr",tr("Kopfzeile"))+row("ftr",tr("Fußzeile"))+
     `<div style="color:var(--ink-faint);font-size:12px;line-height:1.5;margin-top:6px">
       ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}<br>
       ${tr("Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.")}<br>
@@ -3440,7 +3493,8 @@ function hfDialog(){
     b.querySelectorAll("[data-tx]").forEach(el=>el.oninput=()=>{
       const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value};apply()});
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
-      const k=el.dataset.di;d[k]={...hfOf(d,k),dist:Math.max(0,+el.value||0)};repaint()});
+      const k=el.dataset.di,fm=ownFmt(d);
+      fm[k==="hdr"?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,+el.value||0));repaint()});
     b.querySelectorAll("[data-al]").forEach(el=>el.onclick=()=>{
       const [k,a]=el.dataset.al.split(":");d[k]={...hfOf(d,k),align:a};repaint()});
     b.querySelectorAll("[data-ph]").forEach(el=>el.onclick=()=>{
