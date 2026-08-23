@@ -775,6 +775,7 @@ const EN={
   "benutzt von einem Dokument":"used by one document","ein Dokument":"one document",
   "Zugeordnete Dokumente":"Assigned documents","Ohne Zuordnung":"Not assigned",
   "keine Definition":"no definition","Ohne Kategorie":"Uncategorised",
+  "Rechtsbündig (Alt+⇧+R)":"Align right (Alt+⇧+R)",
   "Dieses Dokument ist keinem Glossar zugeordnet.":"This document is not assigned to a glossary.",
   "Welche Dokumente benutzen dieses Glossar?":"Which documents use this glossary?",
   "Importieren / Exportieren":"Import / Export","Exportieren":"Export","Importieren":"Import",
@@ -1205,6 +1206,7 @@ function drawTools(){
       <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>F</b></button>
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
       <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
+      <button class="tb" data-cmd="strikeThrough" title="${tr("Durchgestrichen")}"><s>D</s></button>
       <div class="sep"></div>
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
@@ -1218,6 +1220,7 @@ function drawTools(){
       <div class="sep"></div>
       <button class="tb" data-cmd="justifyLeft" title="${tr("Linksbündig")}">${ICO('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyCenter" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
+      <button class="tb" data-cmd="justifyRight" title="${tr("Rechtsbündig (Alt+⇧+R)")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICO('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
@@ -1225,7 +1228,8 @@ function drawTools(){
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
       <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>`;
   } else if(S.mode==="notes"){
-    T.innerHTML=`<button class="btn" id="addNote">${tr("Neue Notiz")}</button>
+    T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
+        ICOSZ('<path d="M4.5 4.5h15v10l-5 5h-10z"/><path d="M19.5 14.5h-5v5"/><path d="M9 9h6M9 12h4"/>',22,1.9)}</button>
       <input type="text" id="nSearch" placeholder="${tr("Notizen durchsuchen")}" style="width:210px">
       <div class="sep"></div>
       <button class="pill ${S.noteFilter==="all"?"on":""}" data-nf="all">${tr("Alle")}</button>
@@ -4025,7 +4029,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#pgbBtn")){insertPageBreak();return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
-  if(e.target.id==="addNote"){const n=addNote("");render();openNote(n.id);return}
+  if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id);return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
   const gc=e.target.closest("[data-gc]");
