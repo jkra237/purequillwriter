@@ -406,6 +406,14 @@ input,select,textarea{font:inherit;color:inherit}
 .card .foot button:hover{color:var(--stamp)}
 .gform{background:var(--chrome-2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;margin-bottom:16px}
 .gform .ghint{margin:0 0 8px;font-size:11.5px;color:var(--ink-faint)}
+/* Import/Export-Dialog */
+.iohead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.iohint{margin:4px 0 9px;font-size:12px;color:var(--ink-soft);line-height:1.5}
+.ioext{color:var(--ink-faint)}
+.iosep{height:1px;background:var(--rule);margin:17px 0 14px}
+.ioradio{display:flex;flex-direction:column;gap:7px;margin-top:2px}
+.ioradio label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer}
+.ioradio input{width:auto;margin:0;flex:none}
 .gform input,.gform textarea{width:100%;background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);
   padding:5px 7px;margin-bottom:7px;font-family:Georgia,serif}
 .gform textarea{resize:vertical;min-height:56px}
@@ -730,6 +738,13 @@ const EN={
   "Eintrag":"entry","Einträge":"entries","noch keine Einträge":"no entries yet",
   "benutzt von":"used by","Dokumenten":"documents","keinem Dokument zugeordnet":"not assigned to any document",
   "benutzt von einem Dokument":"used by one document","ein Dokument":"one document",
+  "Importieren / Exportieren":"Import / Export","Exportieren":"Export","Importieren":"Import",
+  "Als Tabelle":"As a table","Als Sicherung":"As a backup","Datei wählen":"Choose file",
+  "Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.":
+    "A table with term, definition and category per column — or a .json file backed up here.",
+  "Als neues Glossar anlegen":"Add as a new glossary",
+  "Keine Begriffe in dieser Datei gefunden":"No terms found in this file",
+  "hinzugefügt":"added","schon vorhanden":"already there",
   "CSV exportieren":"Export CSV",
   "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":
     "No notes yet.<br>Create one with <b>Alt+Shift+N</b> — this works even mid-writing, without switching views.<br>Click a note to open it, drag to move it.",
@@ -1196,7 +1211,7 @@ function drawTools(){
       <button class="pill ${S.gsort==="date"?"on":""}" data-sort="date">${tr("Datum")}</button>
       <button class="pill ${S.gsort==="cat"?"on":""}" data-sort="cat">${tr("Kategorie")}</button>
       <div style="flex:1"></div>
-      <button class="pill" id="csvOut">${tr("CSV exportieren")}</button>`;
+      <button class="pill" id="glossIO">${tr("Importieren / Exportieren")}</button>`;
   }
 }
 
@@ -1570,7 +1585,9 @@ function collContextMenu(e,id){
   const m=document.createElement("div");m.className="menu ctx";m.id="collmenu";
   m.innerHTML=`
     <button class="mi" data-ca="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
-    ${S.glossaries.length>1?`<button class="mi" data-ca="del"><span class="chk"></span>${tr("Glossar löschen")}&hellip;</button>`:""}`;
+    <button class="mi" data-ca="io"><span class="chk"></span>${tr("Importieren / Exportieren")}&hellip;</button>
+    <div class="msep"></div>
+    <button class="mi" data-ca="del"><span class="chk"></span>${tr("Glossar löschen")}&hellip;</button>`;
   document.body.appendChild(m);
   const w=m.offsetWidth,h=m.offsetHeight;
   m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
@@ -1578,29 +1595,38 @@ function collContextMenu(e,id){
   m.onclick=ev=>{
     const rb=ev.target.closest('[data-ca="rename"]');
     if(rb){closeMenu();renameGlossColl(id);return}
+    const ib=ev.target.closest('[data-ca="io"]');
+    if(ib){closeMenu();setGView(id);render();glossIO();return}
     const db=ev.target.closest('[data-ca="del"]');
     if(db){closeMenu();delGlossColl(id);return}
   };
 }
 function delGlossColl(id){
-  if(S.glossaries.length<2)return;
   const c=S.glossaries.find(x=>x.id===id);if(!c)return;
   const n=S.glossary.filter(g=>g.gid===id).length;
   const wirkt=S.docs.filter(d=>d.glossaryId===id).length;
+  const letzte=S.glossaries.length<2;
   const weiter=()=>{
     S.glossary=S.glossary.filter(g=>g.gid!==id);
     S.glossaries=S.glossaries.filter(x=>x.id!==id);
+    /* Wie beim letzten Dokument: es bleibt immer eines übrig, dann eben ein leeres */
+    if(!S.glossaries.length)S.glossaries=[{id:uid(),name:"Glossar"}];
     const fallback=S.glossaries[0].id;
     S.docs.forEach(d=>{if(d.glossaryId===id)d.glossaryId=fallback});
     if(gView===id)setGView(doc().glossaryId);
     commit();render();toast(tr("Glossar gelöscht"));
   };
-  if(!n&&wirkt<2){weiter();return}
+  if(!n&&(letzte||wirkt<2)){weiter();return}
   const en=S.settings.uiLang==="en";
+  const folge=letzte
+    ?(en?"Deleting removes the entries; one empty glossary remains."
+        :"Beim Löschen verschwinden die Einträge; es bleibt ein leeres Glossar übrig.")
+    :(en?"Deleting removes the entries; affected documents switch to another glossary."
+        :"Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.");
   overlay(`<div class="modal"><h3>${tr("Glossar löschen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-      ${en?`"${esc(c.name)}" contains ${n} ${n===1?"entry":"entries"}${wirkt>1?`, used by ${wirkt} documents`:""}. Deleting removes the entries; affected documents switch to another glossary.`
-        :`„${esc(c.name)}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.`}</p>
+      ${en?`"${esc(tr(c.name))}" contains ${n} ${n===1?"entry":"entries"}${wirkt>1?`, used by ${wirkt} documents`:""}. ${folge}`
+        :`„${esc(tr(c.name))}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. ${folge}`}</p>
     </div>
     <div class="rowend">
       <button class="btn" id="dgCancel">${tr("Abbrechen")}</button>
@@ -1784,6 +1810,126 @@ function exportCsv(){
   const rows=[[tr("Begriff"),tr("Definition"),tr("Kategorie"),tr("Angelegt")],...S.glossary.filter(g=>g.gid===gid).map(g=>
     [g.term,g.def||"",g.cat||"",new Date(g.created).toLocaleDateString(LOC())])];
   download(safeName(tr(coll?coll.name:"Glossar"))+".csv","\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\n"),"text/csv")}
+function exportGlossJson(){
+  const gid=S.mode==="gloss"?curGView():doc().glossaryId;
+  const coll=S.glossaries.find(x=>x.id===gid);
+  /* Als reguläres Bündel, damit die Datei auch über „Datei laden“ hereinkommt */
+  const b={pqw:PQW,kind:"glossary",saved:new Date().toISOString(),
+    glossaries:coll?[coll]:[],glossary:S.glossary.filter(g=>g.gid===gid)};
+  download(safeName(tr(coll?coll.name:"Glossar"))+".json",JSON.stringify(b,null,1),"application/json");
+  toast(tr("Gesichert"));
+}
+/* ---- Glossar importieren ----
+   Fremde Tabellen kommen mit Semikolon, Komma oder Tabulator; das Trennzeichen
+   wird aus der Kopfzeile geraten. Anführungszeichen nach RFC 4180. */
+function parseCsv(text){
+  text=text.replace(/^\uFEFF/,"");
+  const erste=text.split(/\r?\n/)[0]||"";
+  const ausserhalb=(zeile,z)=>{let n=0,q=false;
+    for(let i=0;i<zeile.length;i++){const ch=zeile[i];
+      if(ch==='"')q=!q;else if(ch===z&&!q)n++}
+    return n};
+  const sep=[";","\t",","].map(z=>[z,ausserhalb(erste,z)]).sort((a,b)=>b[1]-a[1])[0][0];
+  const zeilen=[];let feld="",zeile=[],inQ=false;
+  for(let i=0;i<text.length;i++){
+    const ch=text[i];
+    if(inQ){
+      if(ch==='"'){if(text[i+1]==='"'){feld+='"';i++}else inQ=false}
+      else feld+=ch;
+    }else if(ch==='"')inQ=true;
+    else if(ch===sep){zeile.push(feld);feld=""}
+    else if(ch==="\n"){zeile.push(feld);zeilen.push(zeile);zeile=[];feld=""}
+    else if(ch!=="\r")feld+=ch;
+  }
+  if(feld||zeile.length){zeile.push(feld);zeilen.push(zeile)}
+  return zeilen.filter(r=>r.some(c=>c.trim()));
+}
+function begriffeAusDatei(name,raw){
+  const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+  if(ext==="json"){
+    let b;try{b=JSON.parse(raw)}catch(e){return null}
+    const arr=Array.isArray(b)?b:(b&&b.glossary)||[];
+    return arr.filter(g=>g&&g.term).map(g=>({term:String(g.term),def:String(g.def||""),cat:String(g.cat||"")}));
+  }
+  const rows=parseCsv(raw);
+  if(!rows.length)return [];
+  /* Kopfzeile weglassen, wenn die erste Zelle wie eine Überschrift aussieht */
+  const kopf=["begriff","term","wort","stichwort","name","eintrag","entry"];
+  if(rows[0][0]&&kopf.includes(rows[0][0].trim().toLowerCase()))rows.shift();
+  return rows.filter(r=>r[0]&&r[0].trim())
+    .map(r=>({term:r[0].trim().slice(0,120),def:(r[1]||"").trim(),cat:(r[2]||"").trim()}));
+}
+function glossIO(){
+  const gid=curGView();
+  const coll=S.glossaries.find(c=>c.id===gid);
+  const nm=esc(tr(coll?coll.name:"Glossar"));
+  const n=S.glossary.filter(g=>g.gid===gid).length;
+  const en=S.settings.uiLang==="en";
+  overlay(`<div class="modal"><h3>${tr("Importieren / Exportieren")}</h3>
+    <div class="pad">
+      <div class="iohead">${tr("Exportieren")}</div>
+      <p class="iohint">${en?`"${nm}" · ${n} ${n===1?"entry":"entries"}`:`„${nm}" · ${n} ${n===1?"Eintrag":"Einträge"}`}</p>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="btn" id="ioCsv" ${n?"":"disabled"}>${tr("Als Tabelle")} <span class="ioext">.csv</span></button>
+        <button class="btn" id="ioJson" ${n?"":"disabled"}>${tr("Als Sicherung")} <span class="ioext">.json</span></button>
+      </div>
+      <div class="iosep"></div>
+      <div class="iohead">${tr("Importieren")}</div>
+      <p class="iohint">${tr("Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.")}</p>
+      <div class="ioradio">
+        <label><input type="radio" name="ioZiel" value="hier" checked>
+          <span>${en?`Add to "${nm}"`:`In „${nm}" einfügen`}</span></label>
+        <label><input type="radio" name="ioZiel" value="neu">
+          <span>${tr("Als neues Glossar anlegen")}</span></label>
+      </div>
+    </div>
+    <div class="rowend">
+      <button class="btn" id="ioClose">${tr("Schließen")}</button>
+      <button class="btn pri" id="ioPick">${tr("Datei wählen")}&hellip;</button></div></div>`);
+  $("#ioClose").onclick=closeOvl;
+  const cs=$("#ioCsv");if(cs)cs.onclick=exportCsv;
+  const js=$("#ioJson");if(js)js.onclick=exportGlossJson;
+  $("#ioPick").onclick=()=>{
+    const ziel=(document.querySelector('input[name="ioZiel"]:checked')||{}).value||"hier";
+    const i=document.createElement("input");i.type="file";
+    i.accept=".csv,.tsv,.txt,.json,text/csv,application/json";
+    i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();
+      r.onload=()=>{
+        const raw=String(r.result||"");
+        if(looksBinary(raw)){toast(tr("Datei nicht lesbar"));return}
+        const liste=begriffeAusDatei(f.name,raw);
+        if(liste===null){toast(tr("Datei nicht lesbar"));return}
+        if(!liste.length){toast(tr("Keine Begriffe in dieser Datei gefunden"));return}
+        importGloss(f.name,liste,ziel);
+      };
+      r.readAsText(f)};
+    i.click();
+  };
+}
+function importGloss(dateiname,liste,ziel){
+  let zielId=curGView();
+  if(ziel==="neu"){
+    zielId=uid();
+    S.glossaries.push({id:zielId,
+      name:String(dateiname).replace(/\.[^.]+$/,"").slice(0,40)||tr("Neues Glossar")});
+  }
+  /* Begriffe, die im Ziel schon stehen, nicht doppeln */
+  const da=new Set(S.glossary.filter(g=>g.gid===zielId).map(g=>g.term.toLowerCase()));
+  let neu=0,doppelt=0;
+  liste.forEach(e=>{
+    const k=e.term.toLowerCase();
+    if(da.has(k)){doppelt++;return}
+    da.add(k);
+    S.glossary.push({id:uid(),term:e.term,def:e.def,cat:e.cat,gid:zielId,
+      created:Date.now(),updated:Date.now()});
+    neu++;
+  });
+  setGView(zielId);
+  closeOvl();commit();render();
+  const teile=[neu+" "+tr(neu===1?"Eintrag":"Einträge")+" "+tr("hinzugefügt")];
+  if(doppelt)teile.push(doppelt+" "+tr("schon vorhanden"));
+  toast(teile.join(", "));
+}
 
 /* ---- Kommandopalette ---- */
 function commandList(){
@@ -1872,6 +2018,7 @@ function commandList(){
   add("Glossar","Neues Glossar anlegen","",()=>{setMode("gloss");newGlossColl()});
   add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{
     S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}});
+  add("Glossar","Importieren / Exportieren","",()=>{setMode("gloss");setTimeout(glossIO,40)});
   add("Glossar","Als CSV exportieren","",exportCsv);
   if(S.glossaries.length>1)S.glossaries.filter(c=>c.id!==doc().glossaryId).forEach(coll=>
     add("Glossar",tr("Für dieses Dokument verwenden")+": "+tr(coll.name),"",()=>{
@@ -3777,7 +3924,7 @@ $("#tools").addEventListener("click",e=>{
   if(gc){if(gc.dataset.gc!==curGView()){setGView(gc.dataset.gc);render()}return}
   if(e.target.closest("#gcollAdd")){newGlossColl();return}
   if(e.target.id==="addG"){openGForm(null);return}
-  if(e.target.id==="csvOut"){exportCsv();return}
+  if(e.target.id==="glossIO"){glossIO();return}
   const s=e.target.closest("[data-sort]");if(s){S.gsort=s.dataset.sort;save();render()}
 });
 $("#tools").addEventListener("contextmenu",e=>{
@@ -3827,7 +3974,8 @@ $("#pane").addEventListener("click",e=>{
   const ed=e.target.closest("[data-edit]");
   if(ed){openGForm(S.glossary.find(g=>g.id===ed.dataset.edit));return}
   const gd=e.target.closest("[data-gdel]");
-  if(gd){S.glossary=S.glossary.filter(g=>g.id!==gd.dataset.gdel);commit();render();return}
+  if(gd){if(editingG&&editingG.id===gd.dataset.gdel)editingG=null;   /* sonst zeigt das Formular auf einen entfernten Eintrag */
+    S.glossary=S.glossary.filter(g=>g.id!==gd.dataset.gdel);commit();render();return}
   if(e.target.id==="gCancel"){$("#gform").style.display="none";return}
   if(e.target.id==="gSave"){
     const t=$("#gTerm").value.trim();if(!t){$("#gTerm").focus();return}
