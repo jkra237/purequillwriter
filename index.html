@@ -386,8 +386,11 @@ input,select,textarea{font:inherit;color:inherit}
 .ghead .gmeta{margin:5px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.5}
 .ghead .guse{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   padding-top:11px;border-top:1px solid var(--rule)}
-.ghead .ghere{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft)}
-.ghead .ghere::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--stamp);flex:none}
+.ghead .gulabel{font-size:12px;color:var(--ink-soft)}
+.ghead .gupick{display:inline-flex;align-items:center;gap:7px;max-width:260px}
+.ghead .gupick span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ghead .gupick .caret{flex:none;width:0;height:0;border-left:4px solid transparent;
+  border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.65}
 /* Reiter der Sammlungen — bewusst anders als die Sortier-Pillen daneben */
 .gcolls{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center}
 .gcoll{display:inline-flex;align-items:center;gap:6px;max-width:190px}
@@ -412,8 +415,12 @@ input,select,textarea{font:inherit;color:inherit}
 .ioext{color:var(--ink-faint)}
 .iosep{height:1px;background:var(--rule);margin:17px 0 14px}
 .ioradio{display:flex;flex-direction:column;gap:7px;margin-top:2px}
-.ioradio label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer}
-.ioradio input{width:auto;margin:0;flex:none}
+/* min-width:0 lässt den Text im Flex-Label umbrechen statt aus dem Dialog zu laufen */
+.ioradio label{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--ink);cursor:pointer}
+.ioradio label span{min-width:0;overflow-wrap:anywhere}
+/* .modal input{width:100%} steht später und gewinnt sonst — die Radios
+   wären 100% breit und schöben den Text aus dem Dialog. */
+.modal .ioradio input{width:auto;margin:1px 0 0;flex:none}
 .gform input,.gform textarea{width:100%;background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);
   padding:5px 7px;margin-bottom:7px;font-family:Georgia,serif}
 .gform textarea{resize:vertical;min-height:56px}
@@ -443,6 +450,8 @@ input,select,textarea{font:inherit;color:inherit}
 .setrow .ctl{width:210px;display:flex;gap:6px;align-items:center;justify-content:flex-end}
 .setrow .ctl select,.setrow .ctl input[type=number]{width:auto;flex:1}
 .btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2)}
+.btn.ico{display:inline-flex;align-items:center;gap:6px;padding-left:8px}
+.btn.ico svg{flex:none;opacity:.75}
 .btn:hover{border-color:var(--ink-soft)}
 .btn.pri{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp,#fff)}
 .rowend{display:flex;gap:7px;justify-content:flex-end;padding:11px 14px;border-top:1px solid var(--rule);flex-wrap:wrap}
@@ -738,6 +747,9 @@ const EN={
   "Eintrag":"entry","Einträge":"entries","noch keine Einträge":"no entries yet",
   "benutzt von":"used by","Dokumenten":"documents","keinem Dokument zugeordnet":"not assigned to any document",
   "benutzt von einem Dokument":"used by one document","ein Dokument":"one document",
+  "Zugeordnete Dokumente":"Assigned documents","Ohne Zuordnung":"Not assigned",
+  "Dieses Dokument ist keinem Glossar zugeordnet.":"This document is not assigned to a glossary.",
+  "Welche Dokumente benutzen dieses Glossar?":"Which documents use this glossary?",
   "Importieren / Exportieren":"Import / Export","Exportieren":"Export","Importieren":"Import",
   "Als Tabelle":"As a table","Als Sicherung":"As a backup","Datei wählen":"Choose file",
   "Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.":
@@ -1203,7 +1215,7 @@ function drawTools(){
       <div class="sep"></div>`
       :`<button class="pill gcolladd" id="gcollAdd" title="${tr("Neues Glossar anlegen")}">+ ${tr("Glossar")}</button>
       <div class="sep"></div>`}
-      <button class="btn" id="addG">${tr("Neuer Eintrag")}</button>
+      <button class="btn ico" id="addG">${ICO('<path d="M12 5v14M5 12h14"/>')}${tr("Neuer Eintrag")}</button>
       <input type="text" id="gSearch" placeholder="${tr("Glossar durchsuchen")}" style="width:210px">
       <div class="sep"></div>
       <span style="color:var(--ink-soft)">${tr("Sortierung")}</span>
@@ -1534,7 +1546,12 @@ function ensureGlossaries(){
   }
   const known=new Set(S.glossaries.map(c=>c.id));
   S.glossary.forEach(g=>{if(!g.gid||!known.has(g.gid))g.gid=S.glossaries[0].id});
-  S.docs.forEach(d=>{if(!d.glossaryId||!known.has(d.glossaryId))d.glossaryId=S.glossaries[0].id});
+  /* null heißt „bewusst ohne Zuordnung“ und bleibt stehen; fehlend oder
+     verwaist bekommt die erste Sammlung. */
+  S.docs.forEach(d=>{
+    if(d.glossaryId===null)return;
+    if(!d.glossaryId||!known.has(d.glossaryId))d.glossaryId=S.glossaries[0].id;
+  });
 }
 /* Welche Sammlung gerade angesehen wird. Bewusst getrennt von der Zuordnung
    des Dokuments: Reiter wechseln zeigt nur an, es bindet nichts um. Nicht
@@ -1542,13 +1559,23 @@ function ensureGlossaries(){
 let gView=null,gViewFor=null;
 function curGView(){
   const d=doc();
-  if(gViewFor!==d.id||!gView||!S.glossaries.some(c=>c.id===gView)){gView=d.glossaryId;gViewFor=d.id}
+  if(gViewFor!==d.id||!gView||!S.glossaries.some(c=>c.id===gView)){
+    /* Ein Dokument ohne Zuordnung zeigt trotzdem etwas an — dann die erste Sammlung */
+    gView=(d.glossaryId&&S.glossaries.some(c=>c.id===d.glossaryId))?d.glossaryId:S.glossaries[0].id;
+    gViewFor=d.id;
+  }
   return gView;
 }
 function setGView(id){gView=id;gViewFor=doc().id}
+/* Zwei gleichnamige Reiter sind nicht auseinanderzuhalten, darum durchnummerieren */
+function freierCollName(basis){
+  const belegt=new Set(S.glossaries.map(c=>tr(c.name).trim().toLowerCase()));
+  if(!belegt.has(basis.trim().toLowerCase()))return basis;
+  for(let i=2;;i++){const k=basis+" "+i;if(!belegt.has(k.toLowerCase()))return k}
+}
 function newGlossColl(){
   const id=uid();
-  S.glossaries.push({id,name:tr("Neues Glossar")});
+  S.glossaries.push({id,name:freierCollName(tr("Ohne Titel"))});
   setGView(id);
   commit();render();
   renameGlossColl(id);
@@ -1570,7 +1597,13 @@ function renameGlossColl(id){
   const finish=()=>{
     if(done)return;done=true;
     const v=input.value.trim().slice(0,40);
-    c.name=v||"Glossar";
+    /* Beim Umbenennen ebenfalls entdoppeln — sonst stehen zwei gleiche Reiter da */
+    const andere=S.glossaries.filter(x=>x.id!==id).map(x=>tr(x.name).trim().toLowerCase());
+    let neu=v||tr("Ohne Titel");
+    if(andere.includes(neu.toLowerCase())){
+      for(let i=2;;i++){const k=neu+" "+i;if(!andere.includes(k.toLowerCase())){neu=k;break}}
+    }
+    c.name=neu;
     save();render();
   };
   input.addEventListener("blur",finish);
@@ -1634,6 +1667,35 @@ function delGlossColl(id){
   $("#dgCancel").onclick=closeOvl;
   $("#dgOk").onclick=()=>{closeOvl();weiter()};
 }
+/* Beschriftung der Zuordnungsliste: bei einem Dokument dessen Titel,
+   sonst die Anzahl — der Titel allein wäre bei mehreren irreführend. */
+function zuordnungText(gid){
+  const d=S.docs.filter(x=>x.glossaryId===gid);
+  if(!d.length)return tr("Ohne Zuordnung");
+  if(d.length===1)return tr(d[0].title||"Ohne Titel");
+  return d.length+" "+tr("Dokumente");
+}
+function assignMenu(e,gid){
+  closeMenu();
+  const m=document.createElement("div");m.className="menu ctx";m.id="assignmenu";
+  const c=b=>b?'<span class="chk">✓</span>':'<span class="chk"></span>';
+  const keine=!S.docs.some(d=>d.glossaryId===gid);
+  m.innerHTML=`<div class="mlabel">${tr("Welche Dokumente benutzen dieses Glossar?")}</div>
+    ${S.docs.map(d=>`<button class="mi" data-ad="${d.id}">${c(d.glossaryId===gid)}${esc(tr(d.title||"Ohne Titel"))}</button>`).join("")}
+    <div class="msep"></div>
+    <button class="mi" data-ad="none">${c(keine)}${tr("Ohne Zuordnung")}</button>`;
+  document.body.appendChild(m);
+  const w=m.offsetWidth,h=m.offsetHeight;
+  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
+  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  m.onclick=ev=>{
+    const b=ev.target.closest("[data-ad]");if(!b)return;
+    if(b.dataset.ad==="none")S.docs.forEach(d=>{if(d.glossaryId===gid)d.glossaryId=null});
+    else{const d=S.docs.find(x=>x.id===b.dataset.ad);
+      if(d)d.glossaryId=d.glossaryId===gid?null:gid}
+    closeMenu();commit();render();
+  };
+}
 function sortG(a,b){
   if(S.gsort==="alpha")return a.term.localeCompare(b.term,"de");
   if(S.gsort==="date")return b.created-a.created;
@@ -1662,10 +1724,12 @@ function drawGloss(){
         <button class="gmore" id="gMore" title="${tr("Glossar verwalten")}" aria-label="${tr("Glossar verwalten")}">&#8942;</button>
       </div>
       <p class="gmeta">${meta}</p>
-      <div class="guse">${hier
-        ? `<span class="ghere">${en?`Used by "${esc(tr(doc().title))}"`:`Wird von „${esc(tr(doc().title))}" benutzt`}</span>`
-        : `<button class="btn pri" id="gUse">${en?`Use for "${esc(tr(doc().title))}"`:`Für „${esc(tr(doc().title))}" verwenden`}</button>
-           <span style="font-size:11.5px;color:var(--ink-faint)">${tr("Nur dann werden diese Begriffe im Text markiert.")}</span>`}</div>
+      <div class="guse">
+        <span class="gulabel">${tr("Zugeordnete Dokumente")}</span>
+        <button class="btn gupick" id="gAssign" aria-haspopup="true">
+          <span>${zuordnungText(gid)}</span><i class="caret"></i></button>
+        ${hier?"":`<button class="btn pri" id="gUse">${en?"Use here":"Hier verwenden"}</button>`}
+      </div>
     </div>
     <div class="gform" id="gform" style="display:none">
       <p class="ghint">${en?`Entry in "${esc(tr(coll?coll.name:"Glossar"))}"`:`Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}"`}</p>
@@ -3630,7 +3694,8 @@ function glossSearch(){
   const gid=doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
   overlay(`<div class="modal"><h3>${tr("Glossar nachschlagen")}</h3>
-    <div class="pad" style="padding-bottom:0;padding-top:0;color:var(--ink-faint);font-size:12px">${esc(tr(coll?coll.name:"Glossar"))}</div>
+    <div class="pad" style="padding-bottom:0;padding-top:0;color:var(--ink-faint);font-size:12px">${
+      coll?esc(tr(coll.name)):tr("Dieses Dokument ist keinem Glossar zugeordnet.")}</div>
     <div class="pad" style="padding-bottom:0"><input id="gsq" placeholder="${tr("Begriff eingeben")}" autocomplete="off"></div>
     <div id="gsr" style="max-height:280px;overflow:auto;margin-top:11px"></div></div>`);
   const q=$("#gsq"),r=$("#gsr");
@@ -3968,6 +4033,9 @@ $("#pane").addEventListener("click",e=>{
     doc().glossaryId=curGView();commit();render();
     const c=S.glossaries.find(x=>x.id===curGView());
     toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(c?c.name:"Glossar")+"“");return}
+  const ga=e.target.closest("#gAssign");
+  if(ga){const r=ga.getBoundingClientRect();
+    assignMenu({clientX:r.left,clientY:r.bottom+4},curGView());return}
   const gm=e.target.closest("#gMore");
   if(gm){const r=gm.getBoundingClientRect();
     collContextMenu({clientX:r.left,clientY:r.bottom+4,preventDefault(){}},curGView());return}
