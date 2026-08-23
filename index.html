@@ -1065,7 +1065,13 @@ function applyStaticLabels(){
   $("#focusOut").textContent=tr("verlassen (Esc)");
   document.documentElement.lang=S.settings.uiLang==="en"?"en":"de";
 }
-function isTrulyEmpty(){return S.docs.every(d=>!stripHtmlSafe(d.html))}
+/* Nur ein wirklich frischer Start: genau ein leeres Dokument ohne eigenen Titel
+   und sonst nichts. Vorher genügte es, dass alle Dokumente leer sind — dadurch
+   erschien der Startdialog auch bei mehreren leeren Reitern. */
+function isTrulyEmpty(){
+  return S.docs.length===1&&!stripHtmlSafe(S.docs[0].html)&&!S.docs[0].customTitle
+    &&!(S.notes&&S.notes.length)&&!(S.glossary&&S.glossary.length);
+}
 function clearShell(){
   $("#tabbar").innerHTML="";$("#tools").innerHTML="";$("#pane").innerHTML="";$("#status").innerHTML="";
   document.title="PureQuill Writer";
@@ -1212,7 +1218,8 @@ function closeDoc(id){
     if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;n.glossaryId=d.glossaryId;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
     save();
-    if(isTrulyEmpty()){clearShell();startupDialog();}else render();
+    /* Nie der Startdialog: einen Reiter zu schließen ist kein frischer Start */
+    render();
     if(anker)toast(S.settings.uiLang==="en"
       ?anker+(anker>1?" linked notes remain":" linked note remains")
       :anker+(anker>1?" verknüpfte Notizen bleiben":" verknüpfte Notiz bleibt")+" erhalten");
