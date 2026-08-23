@@ -587,9 +587,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .ruler .tick{position:absolute;top:11px;bottom:2px;width:1px;background:var(--ink-faint);opacity:.5}
 .ruler .tick.big{top:6px}
 .ruler .hand{position:absolute;top:0;width:11px;height:19px;margin-left:-5px;cursor:ew-resize}
-.ruler .hand::after{content:"";position:absolute;left:3px;top:3px;width:5px;height:13px;
-  background:var(--paper);border:1px solid var(--ink-soft);border-radius:1px}
-.ruler .hand:hover::after,.ruler .hand.drag::after{background:var(--stamp);border-color:var(--stamp)}
+/* Dreieck statt Balken: eine vertraute Ziehform (Google Docs u.a.), ohne
+   dauerhafte Zahlen auf dem Lineal - die Millimeterangabe zeigt weiter nur
+   der Tooltip während des Ziehens, nicht permanent. */
+.ruler .hand::after{content:"";position:absolute;left:50%;top:1px;width:0;height:0;
+  transform:translateX(-50%);border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:7px solid var(--ink-soft)}
+.ruler .hand:hover::after,.ruler .hand.drag::after{border-top-color:var(--stamp)}
 .rulertip{position:absolute;top:22px;transform:translateX(-50%);background:var(--ink);color:var(--paper);
   font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:2px;display:none}
 .pagewrap{display:flex;align-items:flex-start;gap:16px;width:fit-content;margin:0 auto;position:relative}
