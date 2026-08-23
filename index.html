@@ -11,6 +11,9 @@
   --ink:#1E2023; --ink-soft:#6A6D71; --ink-faint:#9A9C9E;
   --rule:#D6D3C9; --stamp:#8C3B2E; --manila:#EBDFC4;
   --ok:#3F6B4A; --pageedge:rgba(0,0,0,.35);
+  /* Cascadia unter Windows 11, SF Mono auf dem Mac; Consolas bleibt Rückfall */
+  --mono:ui-monospace,"Cascadia Mono","Segoe UI Mono","SF Mono",Menlo,Consolas,monospace;
+  --ui:"Segoe UI",system-ui,sans-serif;
   --radius:6px;      /* Bedienelemente */
   --radius-lg:12px;  /* Dialoge */
   --radius-paper:3px;/* Papierobjekte bleiben kantig */
@@ -99,7 +102,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
-  font-family:"Segoe UI",system-ui,sans-serif;
+  font-family:var(--ui);
   background:var(--chrome); color:var(--ink);
   font-size:14px; overflow:hidden;
 }
@@ -143,10 +146,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor.nomark .anch{background:none;border-bottom:none}
 .mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:4px;text-align:left}
 .mi:hover{background:var(--chrome)}
-.mi .k{margin-left:auto;font-family:Consolas,monospace;font-size:11px;color:var(--ink-faint)}
+.mi .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .mi .chk{width:12px;flex:0 0 12px;color:var(--stamp)}
 .msep{height:1px;background:var(--rule);margin:4px 3px}
-.mlabel{padding:8px 8px 4px;font-family:Consolas,monospace;font-size:11px;letter-spacing:.06em;
+.mlabel{padding:8px 8px 4px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-faint)}
 .tabbar{display:flex;align-items:flex-end;gap:2px;padding:8px 8px 0;background:var(--chrome);flex:1;min-width:0;overflow:hidden}
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid transparent;border-bottom:none;
@@ -217,7 +220,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 /* Kopf-/Fußzeile direkt auf der Seite bearbeiten */
 .hfhint{position:absolute;z-index:2;pointer-events:none;display:none;
   align-items:center;justify-content:center;border:1px dashed var(--stamp);border-radius:2px;
-  font-family:"Segoe UI",system-ui,sans-serif;font-size:11px;color:var(--stamp);opacity:.65}
+  font-family:var(--ui);font-size:11px;color:var(--stamp);opacity:.65}
 .hfhint.on{display:flex}
 .hfedit{position:absolute;z-index:6;display:none;outline:none;padding:1px 3px;
   background:var(--paper);box-shadow:0 0 0 1px var(--stamp);border-radius:2px;
@@ -237,7 +240,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .figrsz.on{display:block}
 .hfedit.on{display:block}
 .printhf{display:none}
-.sheetpage .pn{position:absolute;bottom:5px;right:9px;font-family:Consolas,monospace;
+.sheetpage .pn{position:absolute;bottom:5px;right:9px;font-family:var(--mono);
   font-size:11px;color:var(--ink-faint)}
 #editor{
   position:relative;z-index:1;outline:none;
@@ -248,9 +251,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .zoomctl button{width:22px;height:22px;color:var(--ink-soft)}
 .zoomctl button:hover{color:var(--ink);background:var(--chrome-2)}
 .zoomctl input{width:48px;text-align:center;border:none;background:none;outline:none;
-  font-family:Consolas,monospace;font-size:11px;color:var(--ink);padding:2px 0}
+  font-family:var(--mono);font-size:11px;color:var(--ink);padding:2px 0}
 .zoomctl input:focus{background:var(--chrome-2);border-radius:2px}
-.zoomctl span{font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);min-width:40px;text-align:center}
+.zoomctl span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:40px;text-align:center}
 .fmtgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:11px}
 .fmtopt{border:1px solid var(--rule);border-radius:var(--radius);padding:8px 10px;text-align:left;background:var(--paper)}
 .fmtopt:hover{border-color:var(--ink-soft)}
@@ -290,12 +293,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .tgrid{display:grid;grid-template-columns:repeat(8,18px);gap:2px;padding:7px 7px 3px}
 .tgrid i{width:18px;height:15px;border:1px solid var(--rule);background:var(--paper);display:block;cursor:pointer}
 .tgrid i.on{background:var(--stamp);border-color:var(--stamp)}
-.tlabel{text-align:center;font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);padding:3px 0 7px}
+.tlabel{text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-soft);padding:3px 0 7px}
 #editor a{color:var(--stamp);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 #editor .pgbreak{position:relative;display:block;border-top:1px dashed var(--ink-faint);
   margin:0;padding:0;overflow:hidden}
 #editor .pgbreak::before{content:attr(data-label);position:absolute;left:0;top:2px;
-  font-family:"Segoe UI",system-ui,sans-serif;font-size:11px;color:var(--ink-faint)}
+  font-family:var(--ui);font-size:11px;color:var(--ink-faint)}
 .findbar{position:absolute;top:9px;right:16px;z-index:35;background:var(--paper);
   border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);
   padding:7px 9px;display:none;min-width:330px}
@@ -304,7 +307,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .findbar .fr:last-child{margin-bottom:0}
 .findbar input[type=text]{flex:1;background:var(--paper);border:1px solid var(--rule);
   border-radius:var(--radius);padding:4px 7px;min-width:0}
-.findbar .cnt{font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);
+.findbar .cnt{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   min-width:62px;text-align:right}
 .findbar .fb{width:24px;height:23px;border:1px solid var(--rule);border-radius:var(--radius);
   display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
@@ -314,7 +317,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
 #editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top}
-#editor figure.fig figcaption{font-family:"Segoe UI",system-ui,sans-serif;font-size:.72em;
+#editor figure.fig figcaption{font-family:var(--ui);font-size:.72em;
   color:var(--ink-soft);margin-top:.35em;line-height:1.4;text-align:inherit}
 #editor figure.fig.sel img{outline:2px solid var(--stamp);outline-offset:2px}
 .imgbar{position:absolute;z-index:45;background:var(--paper);border:1px solid var(--rule);
@@ -323,12 +326,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .imgbar.on{display:flex}
 #hfbar{flex-wrap:wrap;max-width:calc(100vw - 20px);row-gap:5px}
 .imgbar input[type=range]{width:96px}
-.imgbar .pct{font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);min-width:38px}
+.imgbar .pct{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:38px}
 .glossterm{border-bottom:1.5px dotted var(--stamp);cursor:help}
 
 /* ---- Statuszeile ---- */
 .status{display:flex;align-items:center;gap:17px;padding:5px 13px;border-top:1px solid var(--rule);
-  background:var(--chrome-2);font-family:Consolas,monospace;font-size:12px;color:var(--ink-soft);flex:0 0 auto}
+  background:var(--chrome-2);font-size:12px;color:var(--ink-soft);flex:0 0 auto;
+  /* Oberflächenschrift statt Programmierschrift; die Tabellenziffern halten
+     die Zahlen beim Tippen ruhig — dafür war die Festbreitenschrift da. */
+  font-family:var(--ui);font-variant-numeric:tabular-nums;letter-spacing:.01em}
 .status .grow{flex:1}
 /* Dokumentnotizen: Gedanken zum Dokument, nicht zum Text */
 .side .memo{flex:1;border:none;outline:none;resize:none;padding:14px 16px;
@@ -343,7 +349,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .goalbar.done i{background:var(--ok)}
 .status .zoomctl{border:1px solid var(--rule);gap:0}
 .status .zoomctl button{width:24px;height:22px;font-size:16px;line-height:1}
-.status .zoomctl #zVal{width:auto;min-width:58px;font-family:Consolas,monospace;font-size:12px;padding:0 7px}
+.status .zoomctl #zVal{width:auto;min-width:58px;font-variant-numeric:tabular-nums;font-size:12px;padding:0 7px}
 .status .zoomctl #zVal:hover{background:var(--chrome)}
 .status .zoomctl input{width:58px;font-size:12px;padding:2px 0}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
@@ -366,10 +372,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .nbody:empty::before{content:attr(data-hint);opacity:.45;font-style:italic}
 .note .fade{position:absolute;left:0;right:0;bottom:22px;height:34px;pointer-events:none;
   background:linear-gradient(to bottom,transparent,var(--nc,#EBDFC4))}
-.note .meta{position:absolute;left:12px;bottom:7px;font-family:Consolas,monospace;font-size:11px;opacity:.5}
+.note .meta{position:absolute;left:12px;bottom:7px;font-family:var(--mono);font-size:11px;opacity:.5}
 .note .del{position:absolute;right:7px;bottom:4px;color:inherit;opacity:.42;font-size:14px;line-height:1}
 .note .del:hover{opacity:1;color:#8C3B2E}
-.note .src{position:absolute;right:9px;top:7px;font-family:Consolas,monospace;font-size:11px;opacity:.5}
+.note .src{position:absolute;right:9px;top:7px;font-family:var(--mono);font-size:11px;opacity:.5}
 .sw{position:absolute;right:26px;bottom:6px;display:none;gap:4px}
 .note:hover .sw{display:flex}
 .sw button{width:11px;height:11px;border-radius:50%;border:1px solid rgba(0,0,0,.28);padding:0}
@@ -392,7 +398,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .side .nedit ul,.side .nedit ol{padding-left:1.35em;margin:0 0 .6em}
 .side .nedit p{margin:0 0 .6em}
 .side .foot{display:flex;align-items:center;gap:9px;padding:7px 11px;border-top:1px solid var(--rule);
-  font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft)}
+  font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .side .foot .sw2{display:flex;gap:5px}
 .side .foot .sw2 button{width:14px;height:14px;border-radius:50%;border:1px solid var(--rule);padding:0}
 .side .foot .sw2 button.on{box-shadow:0 0 0 2px var(--stamp)}
@@ -434,7 +440,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Eigene Papierfläche, sonst stünde der Text auf der Schreibtischfarbe. */
 .glist{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius)}
 .ggroup{position:sticky;top:0;z-index:1;background:var(--chrome-2);
-  padding:7px 13px;font-family:Consolas,monospace;font-size:11px;font-weight:600;
+  padding:7px 13px;font-family:var(--mono);font-size:11px;font-weight:600;
   letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);
   border-bottom:1px solid var(--rule)}
 .ggroup:first-child{border-radius:var(--radius) var(--radius) 0 0}
@@ -444,7 +450,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .gitem:last-child{border-bottom:none;border-radius:0 0 var(--radius) var(--radius)}
 .gitem:hover{background:var(--chrome-2)}
 .gitem .t{font-family:Georgia,serif;font-size:16px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
-.gitem .c{display:block;margin-top:3px;font-family:Consolas,monospace;font-size:11px;
+.gitem .c{display:block;margin-top:3px;font-family:var(--mono);font-size:11px;
   letter-spacing:.04em;color:var(--ink-soft);text-transform:uppercase}
 .gitem .d{font-family:Georgia,serif;font-size:14px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}
 .gitem .d .leer{color:var(--ink-soft);font-style:italic}
@@ -529,7 +535,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   background:var(--paper);border:1px solid var(--ink-soft);border-radius:1px}
 .ruler .hand:hover::after,.ruler .hand.drag::after{background:var(--stamp);border-color:var(--stamp)}
 .rulertip{position:absolute;top:22px;transform:translateX(-50%);background:var(--ink);color:var(--paper);
-  font-family:Consolas,monospace;font-size:11px;padding:2px 7px;border-radius:2px;display:none}
+  font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:2px;display:none}
 .pagewrap{display:flex;align-items:flex-start;gap:16px;width:fit-content;margin:0 auto;position:relative}
 .anch{background:var(--ab,rgba(140,59,46,.22));border-bottom:2px solid var(--ac,#8C3B2E);cursor:pointer;
   border-radius:2px;padding:0 1px}
@@ -548,12 +554,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .acard.hot{box-shadow:0 0 0 2px var(--stamp),0 4px 14px rgba(0,0,0,.28)}
 .acard .ab ul,.acard .ab ol{padding-left:1.2em;margin:0 0 .4em}
 .acard .ab p{margin:0 0 .4em}
-.acard .af{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:Consolas,monospace;
+.acard .af{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--mono);
   font-size:11px;opacity:.65}
 .acard .af button{color:inherit;padding:0 3px}
 .acard .af button:hover{color:#8C3B2E;opacity:1}
 .acard .nav{display:flex;align-items:center;gap:3px}
-.anchbadge{position:absolute;left:12px;top:-1px;font-family:Consolas,monospace;font-size:11px;
+.anchbadge{position:absolute;left:12px;top:-1px;font-family:var(--mono);font-size:11px;
   background:rgba(0,0,0,.14);border-radius:0 0 3px 3px;padding:1px 6px}
 .pickitem{padding:8px 13px;border-bottom:1px solid var(--rule);cursor:pointer;display:flex;gap:9px;align-items:center}
 .pickitem:last-child{border-bottom:none}
@@ -567,12 +573,12 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 #editor.isempty::before{
   content:attr(data-hint);
   position:absolute;left:var(--pl,0);top:var(--pt,0);pointer-events:none;
-  font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;line-height:1.5;
+  font-family:var(--ui);font-size:13px;line-height:1.5;
   color:var(--ink-faint);font-style:normal;white-space:nowrap}
 
 /* ---- Seitenanzeige beim Scrollen ---- */
 .pageflag{position:absolute;right:14px;top:14px;z-index:40;background:var(--ink);color:var(--paper);
-  font-family:Consolas,monospace;font-size:12px;padding:5px 11px;border-radius:var(--radius);
+  font-family:var(--mono);font-size:12px;padding:5px 11px;border-radius:var(--radius);
   opacity:0;transition:opacity .2s;pointer-events:none}
 .pageflag.on{opacity:.88}
 
@@ -618,7 +624,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .readview .pgbreak::before{content:""!important}
 .rbar{position:fixed;top:14px;right:18px;z-index:2;display:flex;gap:10px;align-items:center;
   background:var(--chrome);border:1px solid var(--rule);border-radius:var(--radius);
-  padding:6px 11px;font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:var(--ink-soft);
+  padding:6px 11px;font-family:var(--ui);font-size:12px;color:var(--ink-soft);
   opacity:.35;transition:opacity .25s}
 .rbar:hover{opacity:1}
 /* ---- Druckvorschau: das Dokument, wie es auf Papier aussieht ---- */
@@ -637,19 +643,19 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .cmd:last-child{border-bottom:none}
 .cmd.on{background:var(--chrome)}
 .cmd .lab{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cmd .grp{font-family:Consolas,monospace;font-size:11px;color:var(--ink-faint);
+.cmd .grp{font-family:var(--mono);font-size:11px;color:var(--ink-faint);
   letter-spacing:.06em;text-transform:uppercase;flex:0 0 62px}
-.kbd{font-family:Consolas,monospace;font-size:11px;color:var(--ink-soft);
+.kbd{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   border:1px solid var(--rule);border-radius:3px;padding:1px 6px;white-space:nowrap}
-.hintk{font-family:Consolas,monospace;font-size:11px;color:var(--ink-faint)}
+.hintk{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .hist{max-height:340px;overflow:auto}
 .hist div{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:1px solid var(--rule);
-  font-family:Consolas,monospace;font-size:12px;color:var(--ink-soft)}
+  font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
 
 /* ---- Fokusmodus ---- */
 .focusbar{position:fixed;top:12px;right:14px;z-index:55;display:none;align-items:center;gap:9px;
   background:var(--ink);color:var(--paper);padding:6px 12px;border-radius:var(--radius);
-  font-family:Consolas,monospace;font-size:12px;opacity:.3;transition:opacity .25s}
+  font-family:var(--mono);font-size:12px;opacity:.3;transition:opacity .25s}
 .focusbar:hover{opacity:1}
 body.focus .focusbar{display:flex}
 .focusbar button{color:inherit;text-decoration:underline;text-underline-offset:2px}
@@ -1106,7 +1112,7 @@ function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],fo
 
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
-  settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"silber"},
+  settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"},
   gsort:"alpha",marks:false,zoom:1.2,fitPage:false,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
@@ -1134,10 +1140,10 @@ if(S.settings&&S.settings.theme==="werkbank")S.settings.theme="silber";  /* beid
 if(S.settings&&S.settings.theme==="brotkasten")S.settings.theme="enzian";/* beide: blauer Bildschirm */
 if(S.settings&&(S.settings.theme==="hercules"||S.settings.theme==="solar"))S.settings.theme="tinte";
 /* Sicherheitsnetz: ein unbekanntes Schema hätte keine Farben, aber einen Namen */
-if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="silber";
+if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="azur";
 if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
-if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"silber"};
+if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"};
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
 /* Schreibziel: standardmäßig aus; „base" ist der Wortstand beim Einschalten */
 if(!S.goal)S.goal={on:false,target:1000,base:0};
@@ -3203,7 +3209,7 @@ function wordCount(selText){
   const en=S.settings.uiLang==="en";
   const nsp=en?(d.chars/1500).toFixed(1):(d.chars/1500).toFixed(1).replace(".",",");
   overlay(`<div class="modal"><h3>${tr("Wörter zählen")}</h3><div class="pad">
-    <table style="width:100%;border-collapse:collapse;font-family:Consolas,monospace;font-size:13px">
+    <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px">
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Wörter")}</td><td style="text-align:right">${d.words.toLocaleString(LOC())}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Zeichen (mit Leerzeichen)")}</td><td style="text-align:right">${d.chars.toLocaleString(LOC())}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Zeichen (ohne Leerzeichen)")}</td><td style="text-align:right">${d.charsNoSp.toLocaleString(LOC())}</td></tr>
@@ -3214,7 +3220,7 @@ function wordCount(selText){
     </table>
     ${s?`<div style="margin-top:11px;padding-top:9px;border-top:1px solid var(--rule)">
       <div class="mlabel" style="padding-left:0">${tr("Markierte Auswahl")}</div>
-      <table style="width:100%;border-collapse:collapse;font-family:Consolas,monospace;font-size:13px">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px">
         <tr><td style="padding:3px 0;color:var(--ink-soft)">${tr("Wörter")}</td><td style="text-align:right">${s.words.toLocaleString(LOC())}</td></tr>
         <tr><td style="padding:3px 0;color:var(--ink-soft)">${tr("Zeichen")}</td><td style="text-align:right">${s.chars.toLocaleString(LOC())}</td></tr>
       </table></div>`:""}
@@ -3323,7 +3329,7 @@ function drawHfBar(){
     center:'<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>',
     right:'<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>'};
   bar.innerHTML=
-    `<span style="font-family:Consolas,monospace;font-size:11px;letter-spacing:.06em;
+    `<span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;
       text-transform:uppercase;color:var(--ink-faint)">${tr(hfEditing.which==="hdr"?"Kopfzeile":"Fußzeile")}</span>
     <div class="sep"></div>
     ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
@@ -4001,7 +4007,7 @@ function settings(){
     <div class="setrow"><label>${tr("Farbschema")}</label><div class="ctl">
       <button class="btn" id="sThemeBtn">${tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button></div></div>
     <div class="setrow" style="align-items:flex-start"><label>${tr("Speicherort")}</label><div class="ctl" style="display:block;text-align:right">
-      <div style="font-family:Consolas,monospace;font-size:11px;color:var(--ink)">${tr("Dieser Browser")}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--ink)">${tr("Dieser Browser")}</div>
       <div style="color:var(--ink-faint);font-size:12px;line-height:1.45;margin-top:3px">
         ${S.settings.uiLang==="en"
           ?`${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`
@@ -4089,7 +4095,7 @@ function goalDialog(){
     <div class="setrow"><label>${tr("Wörter in dieser Sitzung")}</label><div class="ctl">
       <input type="number" id="glTarget" min="1" max="100000" value="${g.target}"></div></div>
     <div class="setrow"><label>${tr("Bereits geschafft")}</label><div class="ctl">
-      <span style="font-family:Consolas,monospace">${Math.max(0,goalTotal(wordsOf(doc().html))-(g.base||0)).toLocaleString(LOC())}</span>
+      <span style="font-family:var(--mono)">${Math.max(0,goalTotal(wordsOf(doc().html))-(g.base||0)).toLocaleString(LOC())}</span>
       <button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div></div>
     <div class="fmttip">${tr("Gezählt werden die Wörter, die seit dem Einschalten oder Zurücksetzen dazugekommen sind — über alle Dokumente hinweg.")}</div>
     </div>
