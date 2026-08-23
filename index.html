@@ -375,6 +375,26 @@ input,select,textarea{font:inherit;color:inherit}
 
 /* ---- Glossar ---- */
 .gwrap{max-width:680px;margin:0 auto;padding:18px 24px 50px}
+/* Kopf der Sammlung: Name, Umfang, Zuordnung */
+.ghead{margin:0 0 18px}
+.ghead .grow{display:flex;align-items:baseline;gap:9px}
+.ghead h2{margin:0;font-family:Georgia,serif;font-size:20px;font-weight:600;color:var(--ink);
+  letter-spacing:-.01em;overflow-wrap:anywhere}
+.ghead .gmore{flex:none;align-self:center;margin-left:auto;color:var(--ink-faint);font-size:15px;
+  line-height:1;padding:3px 7px;border-radius:var(--radius)}
+.ghead .gmore:hover{color:var(--ink);background:var(--chrome-2)}
+.ghead .gmeta{margin:5px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.5}
+.ghead .guse{margin-top:11px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+  padding-top:11px;border-top:1px solid var(--rule)}
+.ghead .ghere{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-soft)}
+.ghead .ghere::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--stamp);flex:none}
+/* Reiter der Sammlungen — bewusst anders als die Sortier-Pillen daneben */
+.gcolls{display:inline-flex;gap:4px;flex-wrap:wrap;align-items:center}
+.gcoll{display:inline-flex;align-items:center;gap:6px;max-width:190px}
+.gcoll span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gcoll .inuse{width:5px;height:5px;border-radius:50%;background:var(--stamp);flex:none}
+.gcoll.on .inuse{background:currentColor}
+.gcolladd{font-size:14px;line-height:1;padding:2px 9px 4px}
 .card{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);margin-bottom:9px;position:relative}
 .card .tabtop{position:absolute;top:-1px;left:14px;background:var(--chrome);border:1px solid var(--rule);border-top:none;
   border-radius:0 0 var(--radius) var(--radius);padding:1px 8px;font-family:Consolas,monospace;font-size:10px;color:var(--ink-soft)}
@@ -385,6 +405,7 @@ input,select,textarea{font:inherit;color:inherit}
 .card .foot button{color:var(--ink-faint)}
 .card .foot button:hover{color:var(--stamp)}
 .gform{background:var(--chrome-2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;margin-bottom:16px}
+.gform .ghint{margin:0 0 8px;font-size:11.5px;color:var(--ink-faint)}
 .gform input,.gform textarea{width:100%;background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);
   padding:5px 7px;margin-bottom:7px;font-family:Georgia,serif}
 .gform textarea{resize:vertical;min-height:56px}
@@ -703,7 +724,12 @@ const EN={
   "Neue Notiz":"New note","Notizen durchsuchen":"Search notes","In diesem Dokument":"In this document","Ohne Verknüpfung":"Unlinked",
   "Neuer Eintrag":"New entry","Glossar durchsuchen":"Search glossary","Sortierung":"Sort by","Datum":"Date","Kategorie":"Category",
   "Neues Glossar anlegen":"Add a new glossary","Neues Glossar":"New glossary","Glossar löschen":"Delete glossary","Glossar gelöscht":"Glossary deleted",
-  "Verwenden":"Use",
+  "Glossar verwalten":"Manage glossary","wird von diesem Dokument benutzt":"used by this document",
+  "Für dieses Dokument verwenden":"Use for this document","Dieses Dokument benutzt jetzt":"This document now uses",
+  "Nur dann werden diese Begriffe im Text markiert.":"Only then are these terms highlighted in the text.",
+  "Eintrag":"entry","Einträge":"entries","noch keine Einträge":"no entries yet",
+  "benutzt von":"used by","Dokumenten":"documents","keinem Dokument zugeordnet":"not assigned to any document",
+  "benutzt von einem Dokument":"used by one document","ein Dokument":"one document",
   "CSV exportieren":"Export CSV",
   "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":
     "No notes yet.<br>Create one with <b>Alt+Shift+N</b> — this works even mid-writing, without switching views.<br>Click a note to open it, drag to move it.",
@@ -1152,11 +1178,16 @@ function drawTools(){
       <button class="pill ${S.noteFilter==="doc"?"on":""}" data-nf="doc">${tr("In diesem Dokument")}</button>
       <button class="pill ${S.noteFilter==="free"?"on":""}" data-nf="free">${tr("Ohne Verknüpfung")}</button>`;
   } else {
-    const gid=doc().glossaryId;
-    T.innerHTML=`<div class="gcolls" id="gcolls">${S.glossaries.map(gl=>
-        `<button class="pill gcoll ${gl.id===gid?"on":""}" data-gc="${gl.id}" title="${esc(tr(gl.name))}">${esc(tr(gl.name))}</button>`).join("")}
-      <button class="pill" id="gcollAdd" title="${tr("Neues Glossar anlegen")}">+</button></div>
-      <div class="sep"></div>
+    const gid=curGView();
+    const inUse=doc().glossaryId;
+    T.innerHTML=`${S.glossaries.length>1?`<div class="gcolls" id="gcolls">${S.glossaries.map(gl=>
+        `<button class="pill gcoll ${gl.id===gid?"on":""}" data-gc="${gl.id}"
+          title="${esc(tr(gl.name))}${gl.id===inUse?" — "+tr("wird von diesem Dokument benutzt"):""}">
+          ${gl.id===inUse?`<i class="inuse"></i>`:""}<span>${esc(tr(gl.name))}</span></button>`).join("")}
+      <button class="pill gcolladd" id="gcollAdd" title="${tr("Neues Glossar anlegen")}" aria-label="${tr("Neues Glossar anlegen")}">+</button></div>
+      <div class="sep"></div>`
+      :`<button class="pill gcolladd" id="gcollAdd" title="${tr("Neues Glossar anlegen")}">+ ${tr("Glossar")}</button>
+      <div class="sep"></div>`}
       <button class="btn" id="addG">${tr("Neuer Eintrag")}</button>
       <input type="text" id="gSearch" placeholder="${tr("Glossar durchsuchen")}" style="width:210px">
       <div class="sep"></div>
@@ -1490,20 +1521,35 @@ function ensureGlossaries(){
   S.glossary.forEach(g=>{if(!g.gid||!known.has(g.gid))g.gid=S.glossaries[0].id});
   S.docs.forEach(d=>{if(!d.glossaryId||!known.has(d.glossaryId))d.glossaryId=S.glossaries[0].id});
 }
+/* Welche Sammlung gerade angesehen wird. Bewusst getrennt von der Zuordnung
+   des Dokuments: Reiter wechseln zeigt nur an, es bindet nichts um. Nicht
+   gespeichert — beim Dokumentwechsel fällt die Ansicht auf dessen Glossar. */
+let gView=null,gViewFor=null;
+function curGView(){
+  const d=doc();
+  if(gViewFor!==d.id||!gView||!S.glossaries.some(c=>c.id===gView)){gView=d.glossaryId;gViewFor=d.id}
+  return gView;
+}
+function setGView(id){gView=id;gViewFor=doc().id}
 function newGlossColl(){
   const id=uid();
   S.glossaries.push({id,name:tr("Neues Glossar")});
-  doc().glossaryId=id;
+  setGView(id);
   commit();render();
   renameGlossColl(id);
 }
 function renameGlossColl(id){
   const c=S.glossaries.find(x=>x.id===id);if(!c)return;
-  const el=document.querySelector(`.gcoll[data-gc="${id}"]`);
+  /* Die angesehene Sammlung im Kopf umbenennen — dort steht der Name groß und
+     ist auch dann da, wenn die Reiterleiste (bei nur einem Glossar) fehlt. */
+  const imKopf=id===curGView();
+  const el=imKopf?document.querySelector(".ghead h2"):document.querySelector(`.gcoll[data-gc="${id}"]`);
   if(!el)return;
   const input=document.createElement("input");
   input.value=c.name||"";input.maxLength=40;
-  input.style.cssText="width:100px;border:none;background:rgba(255,255,255,.6);font:inherit;color:inherit;outline:none;border-radius:2px;padding:0 2px";
+  input.style.cssText=imKopf
+    ?"width:min(100%,340px);border:1px solid var(--rule);background:var(--paper);font:inherit;font-family:Georgia,serif;font-size:20px;font-weight:600;color:var(--ink);outline:none;border-radius:var(--radius);padding:1px 6px"
+    :"width:100px;border:none;background:rgba(255,255,255,.6);font:inherit;color:inherit;outline:none;border-radius:2px;padding:0 2px";
   el.replaceWith(input);input.focus();input.select();
   let done=false;
   const finish=()=>{
@@ -1546,6 +1592,7 @@ function delGlossColl(id){
     S.glossaries=S.glossaries.filter(x=>x.id!==id);
     const fallback=S.glossaries[0].id;
     S.docs.forEach(d=>{if(d.glossaryId===id)d.glossaryId=fallback});
+    if(gView===id)setGView(doc().glossaryId);
     commit();render();toast(tr("Glossar gelöscht"));
   };
   if(!n&&wirkt<2){weiter();return}
@@ -1568,11 +1615,34 @@ function sortG(a,b){
 }
 function drawGloss(){
   const q=(window._gq||"").toLowerCase();
-  const gid=doc().glossaryId;
-  const list=S.glossary.filter(g=>g.gid===gid)
-    .filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
+  const gid=curGView();
+  const coll=S.glossaries.find(c=>c.id===gid);
+  const alle=S.glossary.filter(g=>g.gid===gid);
+  const list=alle.filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
+  const en=S.settings.uiLang==="en";
+  const hier=doc().glossaryId===gid;
+  const nutzer=S.docs.filter(d=>d.glossaryId===gid).length;
+  const zahl=n=>n.toLocaleString(LOC());
+  const meta=[
+    alle.length?`${zahl(alle.length)} ${tr(alle.length===1?"Eintrag":"Einträge")}`:tr("noch keine Einträge"),
+    nutzer===1?tr("benutzt von einem Dokument")
+      :nutzer?`${tr("benutzt von")} ${zahl(nutzer)} ${tr("Dokumenten")}`
+      :tr("keinem Dokument zugeordnet")
+  ].join(" · ");
   $("#pane").innerHTML=`<div class="gwrap">
+    <div class="ghead">
+      <div class="grow">
+        <h2>${esc(tr(coll?coll.name:"Glossar"))}</h2>
+        <button class="gmore" id="gMore" title="${tr("Glossar verwalten")}" aria-label="${tr("Glossar verwalten")}">&#8942;</button>
+      </div>
+      <p class="gmeta">${meta}</p>
+      <div class="guse">${hier
+        ? `<span class="ghere">${en?`Used by "${esc(tr(doc().title))}"`:`Wird von „${esc(tr(doc().title))}" benutzt`}</span>`
+        : `<button class="btn pri" id="gUse">${en?`Use for "${esc(tr(doc().title))}"`:`Für „${esc(tr(doc().title))}" verwenden`}</button>
+           <span style="font-size:11.5px;color:var(--ink-faint)">${tr("Nur dann werden diese Begriffe im Text markiert.")}</span>`}</div>
+    </div>
     <div class="gform" id="gform" style="display:none">
+      <p class="ghint">${en?`Entry in "${esc(tr(coll?coll.name:"Glossar"))}"`:`Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}"`}</p>
       <input id="gTerm" placeholder="${tr("Begriff")}">
       <textarea id="gDef" placeholder="${tr("Definition")}"></textarea>
       <input id="gCat" placeholder="${tr("Kategorie (optional)")}">
@@ -1590,7 +1660,10 @@ function drawGloss(){
             <button data-edit="${g.id}">${tr("bearbeiten")}</button><button data-gdel="${g.id}">${tr("löschen")}</button></div>
         </div>
       </div>`).join("")
-    :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.")}</div>`}
+    :alle.length
+      ?`<div class="empty">${en?`No entry in "${esc(tr(coll?coll.name:"Glossar"))}" matches "${esc(q)}".`
+         :`Kein Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}" passt zu „${esc(q)}".`}</div>`
+      :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.")}</div>`}
   </div>`;
 }
 let editingG=null;
@@ -1706,7 +1779,7 @@ function exportHtml(){flush();const d=doc();
     `<div style="max-width:660px;margin:40px auto;font-family:${d.font||S.settings.font},serif;`+
     `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}</div>`,"text/html")}
 function exportCsv(){
-  const gid=doc().glossaryId;
+  const gid=S.mode==="gloss"?curGView():doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
   const rows=[[tr("Begriff"),tr("Definition"),tr("Kategorie"),tr("Angelegt")],...S.glossary.filter(g=>g.gid===gid).map(g=>
     [g.term,g.def||"",g.cat||"",new Date(g.created).toLocaleDateString(LOC())])];
@@ -1800,10 +1873,10 @@ function commandList(){
   add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{
     S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}});
   add("Glossar","Als CSV exportieren","",exportCsv);
-  S.glossaries.forEach(coll=>
-    add("Glossar",tr("Verwenden")+": "+tr(coll.name),"",()=>{
-      if(coll.id!==doc().glossaryId){doc().glossaryId=coll.id;commit()}
-      setMode("gloss")}));
+  if(S.glossaries.length>1)S.glossaries.filter(c=>c.id!==doc().glossaryId).forEach(coll=>
+    add("Glossar",tr("Für dieses Dokument verwenden")+": "+tr(coll.name),"",()=>{
+      doc().glossaryId=coll.id;setGView(coll.id);commit();render();
+      toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(coll.name)+"“")}));
   S.glossary.filter(g=>g.gid===doc().glossaryId).slice(0,14).forEach(g=>
     add("Glossar",tr("Einfügen: ")+g.term,"",()=>{
       if(S.mode!=="write")setMode("write");
@@ -2057,7 +2130,7 @@ function applyBundle(b){
   lockedOvl=false;closeOvl();
   save();applyTheme();applyStaticLabels();render();
   const teile=[];
-  if(nD)teile.push(nD+" "+tr(nD===1?"Dokument":"Dokumente"));
+  if(nD)teile.push(nD===1?tr("ein Dokument"):nD+" "+tr("Dokumente"));
   if(nN)teile.push(nN+" "+tr(nN===1?"Notiz":"Notizen"));
   if(nG)teile.push(nG+" "+tr(nG===1?"Glossareintrag":"Glossareinträge"));
   toast(teile.length?tr("Hinzugefügt")+": "+teile.join(", "):tr("Nichts Neues in dieser Datei"));
@@ -3701,9 +3774,8 @@ $("#tools").addEventListener("click",e=>{
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
   const gc=e.target.closest("[data-gc]");
-  if(gc){if(gc.dataset.gc!==doc().glossaryId){doc().glossaryId=gc.dataset.gc;commit();render();
-    const c=S.glossaries.find(x=>x.id===gc.dataset.gc);toast(tr("Glossar")+": "+tr(c?c.name:"Glossar"))}return}
-  if(e.target.id==="gcollAdd"){newGlossColl();return}
+  if(gc){if(gc.dataset.gc!==curGView()){setGView(gc.dataset.gc);render()}return}
+  if(e.target.closest("#gcollAdd")){newGlossColl();return}
   if(e.target.id==="addG"){openGForm(null);return}
   if(e.target.id==="csvOut"){exportCsv();return}
   const s=e.target.closest("[data-sort]");if(s){S.gsort=s.dataset.sort;save();render()}
@@ -3745,6 +3817,13 @@ $("#pane").addEventListener("click",e=>{
   if(d){if(openNoteId===d.dataset.del)closeNote();
     S.notes=S.notes.filter(y=>y.id!==d.dataset.del);
     dropAnchorsFor(d.dataset.del);commit();render();return}
+  if(e.target.closest("#gUse")){
+    doc().glossaryId=curGView();commit();render();
+    const c=S.glossaries.find(x=>x.id===curGView());
+    toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(c?c.name:"Glossar")+"“");return}
+  const gm=e.target.closest("#gMore");
+  if(gm){const r=gm.getBoundingClientRect();
+    collContextMenu({clientX:r.left,clientY:r.bottom+4,preventDefault(){}},curGView());return}
   const ed=e.target.closest("[data-edit]");
   if(ed){openGForm(S.glossary.find(g=>g.id===ed.dataset.edit));return}
   const gd=e.target.closest("[data-gdel]");
@@ -3753,7 +3832,7 @@ $("#pane").addEventListener("click",e=>{
   if(e.target.id==="gSave"){
     const t=$("#gTerm").value.trim();if(!t){$("#gTerm").focus();return}
     if(editingG){editingG.term=t;editingG.def=$("#gDef").value.trim();editingG.cat=$("#gCat").value.trim();editingG.updated=Date.now()}
-    else S.glossary.push({id:uid(),term:t,def:$("#gDef").value.trim(),cat:$("#gCat").value.trim(),gid:doc().glossaryId,created:Date.now(),updated:Date.now()});
+    else S.glossary.push({id:uid(),term:t,def:$("#gDef").value.trim(),cat:$("#gCat").value.trim(),gid:curGView(),created:Date.now(),updated:Date.now()});
     editingG=null;commit();render();toast(tr("Eintrag gesichert"))}
 });
 $("#setBtn").onclick=settings;
