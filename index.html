@@ -1049,7 +1049,11 @@ if(!S.notes){
 S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
-if(S.settings&&S.settings.dimUi===undefined)S.settings.dimUi=true;
+/* „Oberfläche ausblenden“ ist aus, bis der Benutzer es einschaltet. Die frühere
+   Fassung war voreingestellt an und hat das auch so gespeichert — daher einmalig
+   abschalten; wer es danach anschaltet, behält es. */
+if(S.settings&&!S.dimUiAus){S.settings.dimUi=false;S.dimUiAus=true}
+if(S.settings)S.settings.dimUi=S.settings.dimUi===true;
 if(!S.zoom)S.zoom=1.2;
 if(S.settings&&(S.settings.theme==="hell"||!S.settings.theme))S.settings.theme="papier";
 if(S.settings&&S.settings.theme==="dunkel")S.settings.theme="tinte";
@@ -2145,9 +2149,9 @@ function commandList(){
   add("Einstellungen",S.settings.typewriter===false?"Schreibmaschinen-Scrollen einschalten":"Schreibmaschinen-Scrollen ausschalten","",
     ()=>{S.settings.typewriter=S.settings.typewriter===false;save();
       toast(tr(S.settings.typewriter?"Schreibmaschinen-Scrollen an":"aus"))});
-  add("Einstellungen",S.settings.dimUi===false?"Oberfläche beim Schreiben ausblenden":"Oberfläche immer sichtbar lassen","",
-    ()=>{S.settings.dimUi=S.settings.dimUi===false;save();
-      if(S.settings.dimUi===false)document.body.classList.remove("typing")});
+  add("Einstellungen",S.settings.dimUi?"Oberfläche immer sichtbar lassen":"Oberfläche beim Schreiben ausblenden","",
+    ()=>{S.settings.dimUi=!S.settings.dimUi;save();
+      if(!S.settings.dimUi)document.body.classList.remove("typing")});
   add("Einstellungen",S.settings.autosave?"Autosave ausschalten":"Autosave einschalten","",()=>{
     S.settings.autosave=!S.settings.autosave;save();resetTimer();drawStatus();
     toast(tr(S.settings.autosave?"Autosave an":"Autosave aus"))});
@@ -2484,7 +2488,7 @@ function viewMenu(){
     <div class="msep"></div>
     <div class="mlabel">${tr("Darstellung")}</div>
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
-    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi!==false)}</span>${tr("Oberfläche ausblenden")}</button>
+    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
@@ -2507,8 +2511,8 @@ function viewMenu(){
     if(a==="pnum"){S.pagenum=S.pagenum===false;save();if(S.mode==="write")paginate()}
     if(a==="col"){S.showCol=!S.showCol;save();if(S.mode==="write")drawAnchors()}
     if(a==="amark"){S.showAnchMarks=S.showAnchMarks===false;save();if(S.mode==="write")drawAnchors()}
-    if(a==="dim"){S.settings.dimUi=S.settings.dimUi===false;save();
-      if(S.settings.dimUi===false)document.body.classList.remove("typing")}
+    if(a==="dim"){S.settings.dimUi=!S.settings.dimUi;save();
+      if(!S.settings.dimUi)document.body.classList.remove("typing")}
     if(a==="marks"){S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark()}}
     if(a==="fit"){S.fitPage=true;save();closeMenu();if(S.mode==="write"){fitZoom();render()}return}
     if(a==="focus"){closeMenu();document.body.classList.toggle("focus");return}
@@ -2903,7 +2907,7 @@ function setLineHeight(v){
 /* ================= Schreibfluss-Verhalten ================= */
 let typTimer=null,flagTimer=null;
 function setTyping(){
-  if(S.settings.dimUi===false)return;
+  if(!S.settings.dimUi)return;
   document.body.classList.add("typing");
   clearTimeout(typTimer);typTimer=setTimeout(()=>document.body.classList.remove("typing"),4500);
 }
@@ -3794,7 +3798,7 @@ function settings(){
       <input type="checkbox" id="sTw" ${s.typewriter!==false?"checked":""} style="width:auto">
       <span style="color:var(--ink-faint);font-size:11.5px;flex:1;text-align:left">${tr("aktive Zeile bleibt mittig")}</span></div></div>
     <div class="setrow"><label>${tr("Oberfläche beim Schreiben")}</label><div class="ctl">
-      <input type="checkbox" id="sDim" ${s.dimUi!==false?"checked":""} style="width:auto">
+      <input type="checkbox" id="sDim" ${s.dimUi?"checked":""} style="width:auto">
       <span style="color:var(--ink-faint);font-size:11.5px;flex:1;text-align:left">${tr("tritt zurück")}</span></div></div>
     <div class="setrow"><label>${tr("Farbschema")}</label><div class="ctl">
       <button class="btn" id="sThemeBtn">${tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button></div></div>
