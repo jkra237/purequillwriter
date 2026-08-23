@@ -1214,11 +1214,15 @@ function closeDoc(id){
   const leer=!stripHtml(d.html).trim();
   const anker=anchorsInDocCount(d);
   const kill=()=>{
+    /* Das letzte Dokument zu schließen führt zum Startbildschirm zurück, wie in
+       Word. Bei mehreren Reitern wird nur neu gezeichnet — vorher entschied das
+       an dieser Stelle, ob zufällig alle Dokumente leer sind. */
+    const warLetztes=S.docs.length===1;
     S.docs.splice(i,1);
     if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;n.glossaryId=d.glossaryId;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
     save();
-    /* Nie der Startdialog: einen Reiter zu schließen ist kein frischer Start */
+    if(warLetztes){clearShell();startupDialog();return}
     render();
     if(anker)toast(S.settings.uiLang==="en"
       ?anker+(anker>1?" linked notes remain":" linked note remains")
