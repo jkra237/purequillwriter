@@ -1851,7 +1851,11 @@ function enableDrag(){
     cur.style.transform="";
     if(ziel)ziel.classList.remove("drop-target");
     const el=cur,zielEl=ziel;cur=null;ziel=null;
-    if(!moved){openNote(el.dataset.id);return}
+    if(!moved){
+      const n=findNote(el.dataset.id);
+      openNote(el.dataset.id,(n&&!n.title)?"titel":undefined);
+      return;
+    }
     if(zielEl){
       swapNotes(el.dataset.id,zielEl.dataset.id);
     } else if(S.noteView!=="list"){
