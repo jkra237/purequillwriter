@@ -1031,14 +1031,13 @@ const EN={
   "Begriffe im Text nicht markieren":"Don't highlight terms in text","Begriffe im Text markieren":"Highlight terms in text",
   "Als CSV exportieren":"Export as CSV","Einfügen: ":"Insert: ",
   "Einstellungen öffnen":"Open settings","Datei laden":"Load file",
-  "Exportieren — für andere Programme":"Export — for other programs",
+  "Weitere Formate":"More formats","Sicherung":"Backup",
+  "Sicherung erstellen":"Create backup","Teilsicherung":"Partial backup",
   "Dokument laden&hellip;":"Load a document&hellip;","Dokument geladen":"Document loaded","geladen":"loaded",
   "Diese Datei ließ sich nicht lesen":"This file could not be read",
-  "Sichern — später wieder einlesbar":"Back up — can be loaded again later",
   "Glossar als Tabelle":"Glossary as a table",
   "Dieses Dokument mit Notizen":"This document with its notes",
   "Nur Notizen und Glossar":"Notes and glossary only",
-  "Alles — Vollsicherung":"Everything — full backup",
   "Sicherung laden&hellip;":"Load a backup&hellip;",
   "Dieses Dokument mit Notizen sichern":"Back up this document with its notes",
   "Nur Notizen und Glossar sichern":"Back up notes and glossary only",
@@ -1050,7 +1049,7 @@ const EN={
   "Hinzugefügt":"Added","Nichts Neues in dieser Datei":"Nothing new in that file",
   "Dokumente":"documents","Glossareintrag":"glossary entry","Glossareinträge":"glossary entries",
   "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"In this browser's storage, kept separately per address — not a file on disk. Clearing browser data deletes it.",
-  "Sicherungskopie über <b>Datei &rarr; Alles — Vollsicherung</b>.":"Back up via <b>File &rarr; Everything — full backup</b>.",
+  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Back up via <b>File &rarr; Create backup</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Turn on typewriter scrolling","Schreibmaschinen-Scrollen ausschalten":"Turn off typewriter scrolling",
   "Schreibmaschinen-Scrollen an":"Typewriter scrolling on",
   "Oberfläche beim Schreiben ausblenden":"Hide interface while writing","Oberfläche immer sichtbar lassen":"Keep interface always visible",
@@ -3223,22 +3222,20 @@ function fileMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
-    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Dokument laden&hellip;")}<span class="k">.doc .html .md .txt</span></button>
+    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Dokument laden&hellip;")}</button>
+    <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${K} P</span></button>
+    <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
     <div class="msep"></div>
-    <div class="mlabel">${tr("Exportieren — für andere Programme")}</div>
+    <div class="mlabel">${tr("Exportieren")}</div>
     <button class="mi" data-act="docw"><span class="chk"></span>${tr("Word-Dokument")}<span class="k">.doc</span></button>
-    <button class="mi" data-act="html"><span class="chk"></span>${tr("Webseite")}<span class="k">.html</span></button>
-    <button class="mi" data-act="md"><span class="chk"></span>Markdown<span class="k">.md</span></button>
-    <button class="mi" data-act="txt"><span class="chk"></span>${tr("Nur Text")}<span class="k">.txt</span></button>
-    <button class="mi" data-act="csv"><span class="chk"></span>${tr("Glossar als Tabelle")}<span class="k">.csv</span></button>
+    <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Weitere Formate")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
-    <div class="mlabel">${tr("Sichern — später wieder einlesbar")}</div>
-    <button class="mi" data-act="bdoc"><span class="chk"></span>${tr("Dieses Dokument mit Notizen")}<span class="k">.json</span></button>
-    <button class="mi" data-act="bnotes"><span class="chk"></span>${tr("Nur Notizen und Glossar")}<span class="k">.json</span></button>
-    <button class="mi" data-act="ball"><span class="chk"></span>${tr("Alles — Vollsicherung")}<span class="k">.json</span></button>
+    <div class="mlabel">${tr("Sicherung")}</div>
+    <button class="mi" data-act="ball"><span class="chk"></span>${tr("Sicherung erstellen")}<span class="k">.json</span></button>
+    <button class="mi" data-act="bmore"><span class="chk"></span>${tr("Teilsicherung")}&hellip;<span class="k">&rsaquo;</span></button>
     <button class="mi" data-act="open"><span class="chk"></span>${tr("Sicherung laden&hellip;")}<span class="k">.json</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="save"><span class="chk"></span>${tr("Jetzt sichern")}<span class="k">Alt ⇧ S</span></button>
@@ -3250,26 +3247,52 @@ function fileMenu(){
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
     const a=b.dataset.act;
-    if(a!=="auto")closeMenu();
-    if(a==="new")newDocument();
-    if(a==="loaddoc")loadDocumentFile();
-    if(a==="fmt")changeFormat();
-    if(a==="open")importJson();
-    if(a==="save"){commit();toast(tr("Gesichert"))}
-    if(a==="bdoc")saveBundle("doc");
-    if(a==="bnotes")saveBundle("notes");
-    if(a==="ball")saveBundle("all");
-    if(a==="hist")history();
-    if(a==="print"){flush();setPrintPage();setTimeout(()=>window.print(),60)}
-    if(a==="txt")exportTxt();
-    if(a==="md")exportMd();
-    if(a==="html")exportHtml();
-    if(a==="docw")exportDoc();
-    if(a==="csv")exportCsv();
-    if(a==="set")settings();
-    if(a==="pal")palette();
-    if(a==="auto"){s.autosave=!s.autosave;save();resetTimer();drawStatus();closeMenu();fileMenu()}
+    /* Die Untermenüs bündeln die selteneren Formate: die Liste bleibt kurz,
+       ohne dass eine Möglichkeit verschwindet. */
+    if(a==="expmore")return openSubMenu(b,[
+      {a:"html",label:tr("Webseite"),k:".html"},
+      {a:"md",label:"Markdown",k:".md"},
+      {a:"txt",label:tr("Nur Text"),k:".txt"},
+      {a:"csv",label:tr("Glossar als Tabelle"),k:".csv"}]);
+    if(a==="bmore")return openSubMenu(b,[
+      {a:"bdoc",label:tr("Dieses Dokument mit Notizen"),k:".json"},
+      {a:"bnotes",label:tr("Nur Notizen und Glossar"),k:".json"}]);
+    if(a==="auto"){s.autosave=!s.autosave;save();resetTimer();drawStatus();closeMenu();fileMenu();return}
+    closeMenu();runFileAct(a);
   };
+}
+function openSubMenu(anchor,items){
+  const alt=document.getElementById("submenu");if(alt)alt.remove();
+  const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
+  m.innerHTML=items.map(it=>
+    `<button class="mi" data-sub="${it.a}"><span class="chk"></span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
+  document.body.appendChild(m);
+  const r=anchor.getBoundingClientRect();
+  m.style.left=Math.max(8,Math.min(r.right-6,innerWidth-m.offsetWidth-8))+"px";
+  m.style.top=Math.max(8,Math.min(r.top-4,innerHeight-m.offsetHeight-8))+"px";
+  m.onclick=e=>{const b=e.target.closest("[data-sub]");if(!b)return;
+    closeMenu();runFileAct(b.dataset.sub)};
+}
+function runFileAct(a){
+  if(a==="new")newDocument();
+  if(a==="loaddoc")loadDocumentFile();
+  if(a==="rename")renameTab(S.active);
+  if(a==="closedoc")closeDoc(S.active);
+  if(a==="fmt")changeFormat();
+  if(a==="open")importJson();
+  if(a==="save"){commit();toast(tr("Gesichert"))}
+  if(a==="bdoc")saveBundle("doc");
+  if(a==="bnotes")saveBundle("notes");
+  if(a==="ball")saveBundle("all");
+  if(a==="hist")history();
+  if(a==="print"){flush();setPrintPage();setTimeout(()=>window.print(),60)}
+  if(a==="txt")exportTxt();
+  if(a==="md")exportMd();
+  if(a==="html")exportHtml();
+  if(a==="docw")exportDoc();
+  if(a==="csv")exportCsv();
+  if(a==="set")settings();
+  if(a==="pal")palette();
 }
 function viewMenu(){
   if($("#vmenu")){closeMenu();return}
@@ -4983,7 +5006,7 @@ function settings(){
           ?`${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`
           :`${S.docs.length} Dokument${S.docs.length>1?"e":""}, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`}<br>
         ${tr("Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.")}<br>
-        ${tr("Sicherungskopie über <b>Datei &rarr; Alles — Vollsicherung</b>.")}</div></div></div>
+        ${tr("Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.")}</div></div></div>
     </div><div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
   const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.autosave=$("#sAuto").checked;
     s.interval=Math.max(5,+$("#sInt").value||30);s.lang=$("#sLang").value;
