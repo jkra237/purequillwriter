@@ -152,8 +152,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .mlabel{padding:8px 8px 4px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-faint)}
 .tabbar{display:flex;align-items:flex-end;gap:2px;padding:8px 8px 0;background:var(--chrome);flex:1;min-width:0;overflow:hidden}
+/* Reiter lassen sich umsortieren — beim Ziehen darf die Beschriftung nicht
+   markiert werden, sonst zieht man Text statt des Reiters. */
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid transparent;border-bottom:none;
-  border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px}
+  border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
+.tab.drag{opacity:.8;box-shadow:0 6px 16px rgba(0,0,0,.22);cursor:grabbing}
 .tab.on{background:var(--paper);border-color:var(--rule);color:var(--ink)}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px}
@@ -1157,17 +1160,24 @@ function applyStaticLabels(){
    und sonst nichts. Vorher genügte es, dass alle Dokumente leer sind — dadurch
    erschien der Startdialog auch bei mehreren leeren Reitern. */
 function isTrulyEmpty(){
-  return S.docs.length===1&&!stripHtmlSafe(S.docs[0].html)&&!S.docs[0].customTitle
+  return S.docs.length===1&&!hatInhalt(S.docs[0].html)&&!S.docs[0].customTitle
     &&!(S.notes&&S.notes.length)&&!(S.glossary&&S.glossary.length);
 }
 function clearShell(){
   $("#tabbar").innerHTML="";$("#tools").innerHTML="";$("#pane").innerHTML="";$("#status").innerHTML="";
   document.title="PureQuill Writer";
 }
-const stripHtmlSafe=h=>{const e=document.createElement("div");e.innerHTML=h||"";return (e.innerText||"").trim()};
+/* Ein Dokument kann auch ohne ein einziges Wort Inhalt haben: eine frei
+   platzierte Signatur, ein Bild oder eine Tabelle zählen genauso. Wer nur den
+   Text prüft, hält so ein Dokument für leer — und verwirft es beim Schließen
+   ohne Nachfrage oder zeigt beim Start den Willkommensbildschirm darüber. */
+const hatInhalt=h=>{
+  const e=document.createElement("div");e.innerHTML=h||"";
+  return !!((e.innerText||"").trim()||e.querySelector("figure,img,table"));
+};
 function startNew(){
   lockedOvl=false;closeOvl();
-  if(S.docs.length===1&&!stripHtmlSafe(S.docs[0].html)){
+  if(S.docs.length===1&&!hatInhalt(S.docs[0].html)){
     formatDialog("new",val=>{S.docs[0].fmt=val;save();render()});
   }else newDocument();
 }
@@ -1301,7 +1311,7 @@ function closeDoc(id){
   const i=S.docs.findIndex(d=>d.id===id);if(i<0)return;
   flush();
   const d=S.docs[i];
-  const leer=!stripHtml(d.html).trim();
+  const leer=!hatInhalt(d.html);
   const anker=anchorsInDocCount(d);
   const kill=()=>{
     /* Das letzte Dokument zu schließen führt zum Startbildschirm zurück, wie in
@@ -1322,8 +1332,8 @@ function closeDoc(id){
   const en=S.settings.uiLang==="en";
   overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-      ${en?`"${esc(d.title)}" contains text. Closing removes the document.`
-        :`„${esc(d.title)}" enthält Text. Beim Schließen wird das Dokument entfernt.`}</p>
+      ${en?`"${esc(d.title)}" is not empty. Closing removes the document.`
+        :`„${esc(d.title)}" ist nicht leer. Beim Schließen wird das Dokument entfernt.`}</p>
     ${anker?`<p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">
       ${en?`${anker} note${anker>1?"s are":" is"} linked to spots in this document.
         ${anker>1?"They remain":"It remains"} on the board and ${anker>1?"only lose":"only loses"} the link.`
@@ -1342,9 +1352,52 @@ $("#tabbar").onclick=e=>{
   const c=e.target.closest("[data-close]");
   if(c){closeDoc(c.dataset.close);return}
   if(e.target.id==="newdoc"||e.target.closest("#newdoc")){newDocument();return}
+  /* Nach dem Umsortieren nicht auch noch das Dokument wechseln: Reihenfolge
+     ändern und Dokument wählen sind zwei verschiedene Absichten. */
+  if(tabGezogen){tabGezogen=false;return}
   const t=e.target.closest(".tab");
   if(t&&t.dataset.id!==S.active){flush();S.active=t.dataset.id;save();render()}
 };
+/* ---- Reiter umsortieren ---- */
+/* Der gezogene Reiter wandert im DOM mit, sobald der Zeiger die Mitte eines
+   Nachbarn überschreitet; erst beim Loslassen wird die neue Folge nach
+   S.docs übernommen. So sieht man die Reihenfolge schon während des Ziehens. */
+let tabGezogen=false;
+$("#tabbar").addEventListener("mousedown",e=>{
+  /* Zu Beginn jedes Griffs zurücksetzen: nach dem Umsortieren zeichnet
+     drawTabs() die Reiter neu, der Klick erreicht das alte Element nicht mehr
+     und würde die Sperre sonst stehen lassen — der nächste Klick auf einen
+     Reiter ginge dann ins Leere. */
+  tabGezogen=false;
+  if(e.button!==0||e.target.closest("[data-close]"))return;
+  const el=e.target.closest(".tab");
+  const bar=$("#tabbar");
+  if(!el||bar.querySelectorAll(".tab").length<2)return;
+  const startX=e.clientX;let zieht=false;
+  const move=ev=>{
+    if(!zieht){
+      if(Math.abs(ev.clientX-startX)<=4)return;
+      zieht=true;el.classList.add("drag");
+    }
+    const andere=[...bar.querySelectorAll(".tab")].filter(t=>t!==el);
+    const vor=andere.find(t=>{
+      const r=t.getBoundingClientRect();return ev.clientX<r.left+r.width/2;
+    });
+    bar.insertBefore(el,vor||$("#newdoc"));
+  };
+  const up=()=>{
+    document.removeEventListener("mousemove",move);
+    document.removeEventListener("mouseup",up);
+    if(!zieht)return;
+    el.classList.remove("drag");
+    tabGezogen=true;
+    const folge=[...bar.querySelectorAll(".tab")].map(t=>t.dataset.id);
+    S.docs.sort((a,b)=>folge.indexOf(a.id)-folge.indexOf(b.id));
+    save();drawTabs();
+  };
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",up);
+});
 $("#tabbar").addEventListener("contextmenu",e=>{
   const t=e.target.closest(".tab");
   if(!t)return;
@@ -1607,7 +1660,9 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.normalize();
   d.html=c.innerHTML;
-  if(!d.customTitle){const t=(ed.innerText||"").trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
+  /* Titel aus dem bereinigten HTML, nicht aus dem lebenden Editor: dort steht
+     auch das Löschkreuz der Anfasser mit drin und wurde sonst zum Titel. */
+  if(!d.customTitle){const t=stripHtml(d.html).trim().split("\n")[0].slice(0,32);d.title=t||"Ohne Titel"}}}
 /* Schriftgröße frei eingebbar, wie das Kombifeld in Word. Der Wert geht an
    --fs; ein direktes style.fontSize würde die Zoomberechnung überschreiben. */
 const FS_MIN=4,FS_MAX=200;
@@ -3660,7 +3715,9 @@ function typewriter(){
 }
 function markEmpty(){
   const ed=$("#editor");if(!ed)return;
-  ed.classList.toggle("isempty",!ed.innerText.replace(/\u200b/g,"").trim());
+  /* Der Platzhaltertext darf nicht \u00fcber einer Signatur oder einem Bild stehen */
+  ed.classList.toggle("isempty",
+    !ed.innerText.replace(/\u200b/g,"").trim()&&!ed.querySelector("figure,img,table"));
 }
 function pageFlag(){
   const sh=$("#sheet"),fl=$("#pageflag");if(!sh||!fl)return;
