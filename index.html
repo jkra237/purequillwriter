@@ -2791,12 +2791,352 @@ function exportMd(){
     else out+=tx+"\n\n"});
   download(d.title+".md",out.trim()+"\n","text/markdown");
 }
-function exportDoc(){
+/* ================= DOCX-Export ================= */
+/* Echtes OOXML statt des alten HTML-in-.doc-Tricks, den Word zwar öffnet,
+   aber inzwischen mit einer Kompatibilitätswarnung quittiert, weil die Datei
+   strukturell kein Word-Dokument ist. Ein .docx ist im Kern nur ein ZIP mit
+   XML-Teilen darin - für die Kompression reicht CompressionStream, das
+   Gegenstück zu dem DecompressionStream, den zipEintrag() beim Import schon
+   zum Entpacken von .docx/.odt nutzt. */
+const mmToTwip=mm=>Math.round(mm*56.6929133858);
+const mmToEmu=mm=>Math.round(mm*36000);
+const CRC32_TABLE=(()=>{
+  const t=new Uint32Array(256);
+  for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0}
+  return t;
+})();
+function crc32(bytes){
+  let c=0xFFFFFFFF;
+  for(let i=0;i<bytes.length;i++)c=CRC32_TABLE[(c^bytes[i])&0xFF]^(c>>>8);
+  return (c^0xFFFFFFFF)>>>0;
+}
+async function deflateRaw(bytes){
+  const strom=new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(strom).arrayBuffer());
+}
+/* Nur was ein docx braucht: Deflate, keine Verzeichniseinträge, kein ZIP64 -
+   die Dateien hier bleiben weit unter dessen Grenzen. */
+async function zipSchreiben(eintraege){
+  const enc=new TextEncoder();
+  const lokal=[],zentral=[];let versatz=0;
+  for(const e of eintraege){
+    const nameBytes=enc.encode(e.name);
+    const komprimiert=await deflateRaw(e.bytes);
+    const crc=crc32(e.bytes);
+    const lh=new DataView(new ArrayBuffer(30));
+    lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0,true);
+    lh.setUint16(8,8,true);lh.setUint16(10,0,true);lh.setUint16(12,0,true);
+    lh.setUint32(14,crc,true);lh.setUint32(18,komprimiert.length,true);lh.setUint32(22,e.bytes.length,true);
+    lh.setUint16(26,nameBytes.length,true);lh.setUint16(28,0,true);
+    lokal.push(new Uint8Array(lh.buffer),nameBytes,komprimiert);
+    const ch=new DataView(new ArrayBuffer(46));
+    ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);
+    ch.setUint16(8,0,true);ch.setUint16(10,8,true);ch.setUint16(12,0,true);ch.setUint16(14,0,true);
+    ch.setUint32(16,crc,true);ch.setUint32(20,komprimiert.length,true);ch.setUint32(24,e.bytes.length,true);
+    ch.setUint16(28,nameBytes.length,true);ch.setUint16(30,0,true);ch.setUint16(32,0,true);
+    ch.setUint16(34,0,true);ch.setUint16(36,0,true);ch.setUint32(38,0,true);ch.setUint32(42,versatz,true);
+    zentral.push(new Uint8Array(ch.buffer),nameBytes);
+    versatz+=lh.byteLength+nameBytes.length+komprimiert.length;
+  }
+  const zentralStart=versatz;
+  const zentralGroesse=zentral.reduce((s,p)=>s+p.length,0);
+  const eocd=new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0,0x06054b50,true);eocd.setUint16(4,0,true);eocd.setUint16(6,0,true);
+  eocd.setUint16(8,eintraege.length,true);eocd.setUint16(10,eintraege.length,true);
+  eocd.setUint32(12,zentralGroesse,true);eocd.setUint32(16,zentralStart,true);eocd.setUint16(20,0,true);
+  return new Blob([...lokal,...zentral,new Uint8Array(eocd.buffer)]);
+}
+
+const DOCX_CONTENT_TYPES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Default Extension="png" ContentType="image/png"/>
+<Default Extension="jpeg" ContentType="image/jpeg"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
+<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
+</Types>`;
+const DOCX_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+/* Zwei Ebenen genügen für das, was der Editor an Listen erzeugen kann - ein
+   Aufzählungs- und ein Nummerierungs-abstractNum mit je vier Einzugsstufen. */
+function numberingXml(){
+  const stufe=(fmt,text)=>[0,1,2,3].map(i=>
+    `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${fmt}"/><w:lvlText w:val="${text(i)}"/>`+
+    `<w:pPr><w:ind w:left="${(i+1)*360}" w:hanging="360"/></w:pPr></w:lvl>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:abstractNum w:abstractNumId="0">${stufe("bullet",()=>"•")}</w:abstractNum>
+<w:abstractNum w:abstractNumId="1">${stufe("decimal",i=>"%"+(i+1)+".")}</w:abstractNum>
+<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>
+<w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num>
+</w:numbering>`;
+}
+function stylesXml(d){
+  const fs=Math.round((d.size||S.settings.size)*2),lh=Math.round(lhOf(d)*240);
+  const ueberschrift=(n,sz)=>`<w:style w:type="paragraph" w:styleId="Heading${n}"><w:name w:val="heading ${n}"/>
+    <w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+    <w:pPr><w:spacing w:before="240" w:after="80"/><w:outlineLvl w:val="${n-1}"/></w:pPr>
+    <w:rPr><w:b/><w:sz w:val="${sz}"/></w:rPr></w:style>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:docDefaults><w:rPrDefault><w:rPr>
+  <w:rFonts w:ascii="${d.font||S.settings.font}" w:hAnsi="${d.font||S.settings.font}"/>
+  <w:sz w:val="${fs}"/></w:rPr></w:rPrDefault>
+  <w:pPrDefault><w:pPr><w:spacing w:line="${lh}" w:lineRule="auto"/></w:pPr></w:pPrDefault>
+</w:docDefaults>
+<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
+${ueberschrift(1,36)}${ueberschrift(2,30)}${ueberschrift(3,26)}
+<w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>
+  <w:rPr><w:color w:val="0563C1"/><w:u w:val="single"/></w:rPr></w:style>
+</w:styles>`;
+}
+
+/* -- HTML-Baum ablaufen und in OOXML-Absätze verwandeln -- */
+/* Der Editor verschachtelt eine per execCommand erzeugte Liste manchmal in
+   ein <p> statt sie als eigenen Block zu erzeugen (Browser-Eigenheit, kein
+   Bug hier) - vor dem Ablaufen einmal geradeziehen, statt das an jeder
+   Stelle im Baum gesondert abfangen zu müssen. */
+function docxEinebnen(root){
+  root.querySelectorAll("p > ul, p > ol, p > table, p > figure").forEach(kind=>{
+    const p=kind.parentElement;p.parentNode.insertBefore(kind,p);
+    if(!p.textContent.trim()&&!p.querySelector("img"))p.remove();
+  });
+}
+function rPrXml(st){
+  let x="";
+  if(st.b)x+="<w:b/>";
+  if(st.i)x+="<w:i/>";
+  if(st.u)x+='<w:u w:val="single"/>';
+  if(st.strike)x+="<w:strike/>";
+  if(st.color)x+=`<w:color w:val="${st.color}"/>`;
+  if(st.hi)x+=`<w:shd w:val="clear" w:color="auto" w:fill="${st.hi}"/>`;
+  if(st.link)x+='<w:rStyle w:val="Hyperlink"/>';
+  return x?`<w:rPr>${x}</w:rPr>`:"";
+}
+function runeXml(text,st){
+  if(!text)return"";
+  const raum=/^\s|\s$/.test(text)?' xml:space="preserve"':"";
+  return `<w:r>${rPrXml(st)}<w:t${raum}>${xesc(text)}</w:t></w:r>`;
+}
+const HEX3=n=>n.toString(16).padStart(2,"0");
+function farbHex(css){
+  const m=css.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);
+  if(m)return(HEX3(+m[1])+HEX3(+m[2])+HEX3(+m[3])).toUpperCase();
+  if(/^#/.test(css))return css.slice(1).toUpperCase();
+  return null;
+}
+/* Läuft Inline-Inhalt eines Blocks ab und sammelt Läufe (Runs) auf - <br>
+   wird zum weichen Zeilenumbruch INNERHALB desselben Absatzes, nicht zu
+   einem neuen, weil das der optischen Wirkung im Editor entspricht. */
+function inlineAblaufen(node,st,runs,links){
+  node.childNodes.forEach(n=>{
+    if(n.nodeType===3){runs.push(runeXml(n.nodeValue,st));return}
+    if(n.nodeType!==1)return;
+    const tag=n.tagName.toLowerCase();
+    if(tag==="br"){runs.push("<w:r><w:br/></w:r>");return}
+    if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
+    const neu={...st};
+    if(tag==="b"||tag==="strong"||n.style?.fontWeight>="600")neu.b=true;
+    if(tag==="i"||tag==="em")neu.i=true;
+    if(tag==="u")neu.u=true;
+    if(tag==="s"||tag==="strike"||tag==="del")neu.strike=true;
+    if(tag==="font"&&n.getAttribute("color"))neu.color=n.getAttribute("color").replace("#","").toUpperCase();
+    if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+    if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
+    if(tag==="a"){neu.link=true;links.push({href:n.getAttribute("href")||"",start:runs.length})}
+    inlineAblaufen(n,neu,runs,links);
+    if(tag==="a")links[links.length-1].end=runs.length;
+  });
+}
+function absatzXml(el,pPrExtra){
+  const runs=[],links=[];
+  inlineAblaufen(el,{},runs,links);
+  /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
+     merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
+     und der Gesamtliste der Beziehungen hinzufügen kann. */
+  return {runs,links,pPr:pPrExtra||""};
+}
+function jcVon(el){
+  const a=(el.style&&el.style.textAlign)||"";
+  return {left:"left",center:"center",right:"right",justify:"both"}[a]||null;
+}
+async function bildInfo(img){
+  const m=/^data:([^;]+);base64,(.+)$/.exec(img.src||"");
+  if(!m)return null;
+  const ext=m[1]==="image/png"?"png":m[1]==="image/jpeg"?"jpeg":null;
+  if(!ext)return null;
+  const bin=atob(m[2]);const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  const groesse=await new Promise(res=>{
+    const im=new Image();im.onload=()=>res({w:im.naturalWidth,h:im.naturalHeight});
+    im.onerror=()=>res({w:100,h:100});im.src=img.src;
+  });
+  return {ext,bytes,...groesse};
+}
+/* Läuft die Blockebene (direkte Kinder von root, plus Zellinhalt in
+   Tabellen) ab und baut daraus die eigentliche <w:body>-XML zusammen. */
+async function walkBlocks(root,ctx){
+  let xml="";
+  for(const el of [...root.children]){
+    const tag=el.tagName.toLowerCase();
+    if(tag==="p"||tag==="div"||tag==="blockquote"){
+      const jc=jcVon(el);
+      const a=absatzXml(el,jc?`<w:jc w:val="${jc}"/>`:"");
+      xml+=absatzZuXml(a,ctx);
+    }else if(/^h[1-3]$/.test(tag)){
+      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`);
+      xml+=absatzZuXml(a,ctx);
+    }else if(tag==="ul"||tag==="ol"){
+      xml+=listeXml(el,tag==="ol"?2:1,0,ctx);
+    }else if(tag==="table"){
+      xml+=await tabelleXml(el,ctx);
+    }else if(tag==="figure"){
+      xml+=await figurXml(el,ctx);
+    }else if(el.querySelector&&(el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))){
+      xml+=await walkBlocks(el,ctx);   /* fremdes Wrapper-Element: einfach hindurchsehen */
+    }else{
+      const a=absatzXml(el,"");
+      xml+=absatzZuXml(a,ctx);
+    }
+  }
+  return xml;
+}
+function absatzZuXml(a,ctx){
+  let runs=a.runs;
+  a.links.forEach(l=>{
+    if(l.end===undefined)l.end=runs.length;
+    const id="rIdLink"+(ctx.linkId++);
+    ctx.links.push({id,href:l.href});
+    const innen=runs.slice(l.start,l.end).join("");
+    runs=[...runs.slice(0,l.start),`<w:hyperlink r:id="${id}">${innen}</w:hyperlink>`,...runs.slice(l.end)];
+  });
+  const pPr=a.pPr?`<w:pPr>${a.pPr}</w:pPr>`:"";
+  return `<w:p>${pPr}${runs.join("")}</w:p>`;
+}
+function listeXml(list,numId,ilvl,ctx){
+  let xml="";
+  [...list.children].forEach(li=>{
+    if(li.tagName.toLowerCase()!=="li")return;
+    const unterliste=li.querySelector(":scope > ul, :scope > ol");
+    const klon=li.cloneNode(true);
+    if(unterliste)klon.querySelector(":scope > ul, :scope > ol")?.remove();
+    const a=absatzXml(klon,`<w:numPr><w:ilvl w:val="${ilvl}"/><w:numId w:val="${numId}"/></w:numPr>`);
+    xml+=absatzZuXml(a,ctx);
+    if(unterliste)xml+=listeXml(unterliste,unterliste.tagName.toLowerCase()==="ol"?2:1,Math.min(3,ilvl+1),ctx);
+  });
+  return xml;
+}
+async function tabelleXml(table,ctx){
+  const spalten=table.rows[0]?table.rows[0].children.length:0;
+  const cg=table.querySelector(":scope > colgroup");
+  const breiten=cg
+    ?[...cg.children].map(c=>ctx.tableWidthTwip*parseFloat(c.style.width)/100)
+    :Array(spalten).fill(ctx.tableWidthTwip/Math.max(1,spalten));
+  const grid=breiten.map(w=>`<w:gridCol w:w="${Math.round(w)}"/>`).join("");
+  let zeilen="";
+  for(const tr of table.rows){
+    const hEm=parseFloat(tr.style.height);
+    const trHeight=hEm?`<w:trHeight w:val="${Math.round(hEm*(ctx.docSize)*20)}" w:hRule="atLeast"/>`:"";
+    let zellen="";
+    for(let i=0;i<tr.children.length;i++){
+      const td=tr.children[i];
+      const w=Math.round(breiten[i]||ctx.tableWidthTwip/spalten);
+      const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")
+        ?await walkBlocks(td,ctx)
+        :absatzZuXml(absatzXml(td,""),ctx);
+      zellen+=`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/></w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
+    }
+    zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
+  }
+  return `<w:tbl><w:tblPr><w:tblW w:w="${ctx.tableWidthTwip}" w:type="dxa"/>`+
+    `<w:tblBorders><w:top w:val="single" w:sz="4" w:color="999999"/><w:left w:val="single" w:sz="4" w:color="999999"/>`+
+    `<w:bottom w:val="single" w:sz="4" w:color="999999"/><w:right w:val="single" w:sz="4" w:color="999999"/>`+
+    `<w:insideH w:val="single" w:sz="4" w:color="999999"/><w:insideV w:val="single" w:sz="4" w:color="999999"/></w:tblBorders>`+
+    `</w:tblPr><w:tblGrid>${grid}</w:tblGrid>${zeilen}</w:tbl><w:p/>`;
+}
+async function figurXml(fig,ctx){
+  const img=fig.querySelector("img");if(!img)return"";
+  const info=await bildInfo(img);if(!info)return"";
+  const id="rIdImg"+(ctx.imgId++);
+  ctx.images.push({id,ext:info.ext,bytes:info.bytes});
+  const frei=fig.classList.contains("free");
+  let wEmu,hEmu;
+  if(frei){
+    wEmu=mmToEmu(+fig.dataset.fw||40);hEmu=mmToEmu(+fig.dataset.fh||16);
+  }else{
+    const proz=(+fig.dataset.w||70)/100;
+    wEmu=Math.round(ctx.contentWidthEmu*proz);
+    hEmu=Math.round(wEmu*(info.h/info.w));
+  }
+  const cx="cx"+ctx.imgId,name="Bild"+ctx.imgId;
+  const bildXml=`<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+    <pic:nvPicPr><pic:cNvPr id="${ctx.imgId}" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr>
+    <pic:blipFill><a:blip r:embed="${id}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>
+    <pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${wEmu}" cy="${hEmu}"/></a:xfrm>
+    <a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>`;
+  if(frei){
+    const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
+    return `<w:p><w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+      behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1" relativeHeight="${ctx.imgId}">
+      <wp:simplePos x="0" y="0"/>
+      <wp:positionH relativeFrom="margin"><wp:posOffset>${x}</wp:posOffset></wp:positionH>
+      <wp:positionV relativeFrom="margin"><wp:posOffset>${y}</wp:posOffset></wp:positionV>
+      <wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:wrapNone/>
+      <wp:docPr id="${ctx.imgId}" name="${name}"/>
+      <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+      ${bildXml}</a:graphicData></a:graphic></wp:anchor></w:drawing></w:r></w:p>`;
+  }
+  return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>
+    <wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">
+    <wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:docPr id="${ctx.imgId}" name="${name}"/>
+    <a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+    ${bildXml}</a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+}
+async function exportDoc(){
   flush();const d=doc();
-  const html=`<html xmlns:w="urn:schemas-microsoft-com:office:word"><meta charset="utf-8">`+
-    `<body style="font-family:${d.font||S.settings.font},serif;font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">`+
-    `${d.html}</body></html>`;
-  download(d.title+".doc",html,"application/msword");
+  const f=fmtOf(d);
+  const container=document.createElement("div");container.innerHTML=d.html||"";
+  docxEinebnen(container);
+  const ctx={imgId:0,linkId:0,images:[],links:[],
+    docSize:d.size||S.settings.size,
+    tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
+    contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3])};
+  const bodyXml=await walkBlocks(container,ctx);
+  const sectPr=`<w:sectPr><w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"/>`+
+    `<w:pgMar w:top="${mmToTwip(f.m[0])}" w:right="${mmToTwip(f.m[1])}" w:bottom="${mmToTwip(f.m[2])}" w:left="${mmToTwip(f.m[3])}" `+
+    `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/></w:sectPr>`;
+  const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+  xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+  xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+  xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+<w:body>${bodyXml||"<w:p/>"}${sectPr}</w:body></w:document>`;
+  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+<Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+${ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`).join("")}
+${ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`).join("")}
+</Relationships>`;
+  const enc=new TextEncoder();
+  const eintraege=[
+    {name:"[Content_Types].xml",bytes:enc.encode(DOCX_CONTENT_TYPES)},
+    {name:"_rels/.rels",bytes:enc.encode(DOCX_RELS)},
+    {name:"word/document.xml",bytes:enc.encode(documentXml)},
+    {name:"word/styles.xml",bytes:enc.encode(stylesXml(d))},
+    {name:"word/numbering.xml",bytes:enc.encode(numberingXml())},
+    {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
+    ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes}))
+  ];
+  const blob=await zipSchreiben(eintraege);
+  const u=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=u;a.download=d.title+".docx";a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),900);
 }
 /* Kein eigener PDF-Schreiber - der nutzt denselben Druckdialog wie
    "Drucken", nur unter einem Namen, unter dem Leute tatsächlich danach
@@ -3277,7 +3617,7 @@ function fileMenu(){
     <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Exportieren")}</div>
-    <button class="mi" data-act="docw"><span class="chk"></span>${tr("Word-Dokument")}<span class="k">.doc</span></button>
+    <button class="mi" data-act="docw"><span class="chk"></span>${tr("Word-Dokument")}<span class="k">.docx</span></button>
     <button class="mi" data-act="pdf"><span class="chk"></span>${tr("Als PDF exportieren")}<span class="k">.pdf</span></button>
     <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Weitere Formate")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
