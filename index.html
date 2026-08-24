@@ -1025,6 +1025,8 @@ const EN={
   "Wechseln zu: ":"Switch to: ","Jetzt sichern":"Save now","Versionsverlauf":"Version history","Drucken":"Print",
   "Als TXT exportieren":"Export as TXT","Als Markdown exportieren":"Export as Markdown",
   "Als Word-Dokument exportieren":"Export as Word document","Als HTML exportieren":"Export as HTML",
+  "Als PDF exportieren":"Export as PDF",
+  "Im Druckdialog Als PDF speichern als Ziel wählen":"In the print dialog, choose Save as PDF as the destination",
   "Markierte Stelle mit Notiz verknüpfen":"Link selected text to a note","Notizen am Seitenrand umschalten":"Toggle notes in margin",
   "Markierungen im Text umschalten":"Toggle highlights in text","Pinnwand filtern: ":"Filter board: ","Öffnen: ":"Open: ",
   "Nachschlagen":"Look up",
@@ -2691,6 +2693,7 @@ function commandList(){
   add("Dokument","Als TXT exportieren","",exportTxt);
   add("Dokument","Als Markdown exportieren","",exportMd);
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
+  add("Dokument","Als PDF exportieren","",exportPdf);
   add("Dokument","Als HTML exportieren","",exportHtml);
 
   add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
@@ -2794,6 +2797,16 @@ function exportDoc(){
     `<body style="font-family:${d.font||S.settings.font},serif;font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">`+
     `${d.html}</body></html>`;
   download(d.title+".doc",html,"application/msword");
+}
+/* Kein eigener PDF-Schreiber - der nutzt denselben Druckdialog wie
+   "Drucken", nur unter einem Namen, unter dem Leute tatsächlich danach
+   suchen. Chrome und Edge bieten dort "Als PDF speichern" als Ziel an;
+   der Hinweis-Toast erscheint vor dem Dialog, weil window.print() danach
+   blockiert, bis er geschlossen wird. */
+function exportPdf(){
+  flush();setPrintPage();
+  toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
+  setTimeout(()=>window.print(),500);
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -3265,6 +3278,7 @@ function fileMenu(){
     <div class="msep"></div>
     <div class="mlabel">${tr("Exportieren")}</div>
     <button class="mi" data-act="docw"><span class="chk"></span>${tr("Word-Dokument")}<span class="k">.doc</span></button>
+    <button class="mi" data-act="pdf"><span class="chk"></span>${tr("Als PDF exportieren")}<span class="k">.pdf</span></button>
     <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Weitere Formate")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Sicherung")}</div>
@@ -3320,6 +3334,7 @@ function runFileAct(a){
   if(a==="ball")saveBundle("all");
   if(a==="hist")history();
   if(a==="print"){flush();setPrintPage();setTimeout(()=>window.print(),60)}
+  if(a==="pdf")exportPdf();
   if(a==="txt")exportTxt();
   if(a==="md")exportMd();
   if(a==="html")exportHtml();
