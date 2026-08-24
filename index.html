@@ -131,14 +131,25 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Tinte, dunkelt also in hellen Schemata ab und hellt in dunklen auf — beides
    vergrößert den Abstand zum Hintergrund. Die erste Zeile trägt, falls ein
    Browser color-mix nicht kennt. */
-.filebtn{margin:0 4px 4px 8px;padding:6px 12px;border:1px solid var(--rule);border-radius:var(--radius);
-  background:var(--chrome-2);
-  background:color-mix(in srgb, var(--chrome) 84%, var(--ink));
-  color:var(--ink)}
+/* Menütitel wie in Word und Google Docs: im Ruhezustand reiner Text, ein
+   Hintergrund erst beim Überfahren oder wenn das Menü offen steht. Rahmen und
+   Füllung hätten sie dauerhaft betont — und damit kräftiger wirken lassen als
+   den aktiven Dokumentreiter daneben, der die Leiste anführen soll. Das
+   Dreieck bleibt: dass sich hier etwas aufklappt, ist im Web nicht gesetzt. */
+.filebtn{margin:0 2px 4px 6px;padding:6px 10px;border:1px solid transparent;
+  border-radius:var(--radius);background:transparent;
+  /* Gemessen statt geschätzt: reines --ink-soft bleibt auf „Papier" mit 4,24
+     unter dem Richtwert 4,5 für 14px. Ein Viertel --ink hebt den schlechtesten
+     Wert auf 5,65 und lässt die Titel trotzdem weicher als den aktiven Reiter. */
+  color:var(--ink-soft);
+  color:color-mix(in srgb, var(--ink-soft) 75%, var(--ink))}
+.filebtn+.filebtn{margin-left:0}
 .filebtn{display:inline-flex;align-items:center;gap:7px}
 .filebtn::after{content:"";width:0;height:0;border-left:4px solid transparent;
-  border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.6}
-.filebtn:hover,.filebtn.on{background:var(--paper);color:var(--ink)}
+  border-right:4px solid transparent;border-top:5px solid currentColor;opacity:.55}
+.filebtn:hover{background:var(--chrome-2);
+  background:color-mix(in srgb, var(--chrome) 84%, var(--ink));color:var(--ink)}
+.filebtn.on{background:var(--paper);border-color:var(--rule);color:var(--ink)}
 .menu{position:absolute;z-index:60;top:100%;left:8px;min-width:250px;background:var(--paper);
   border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 7px 22px rgba(0,0,0,.19);padding:4px}
 .menu.ctx{position:fixed;top:auto;min-width:212px}
@@ -781,8 +792,8 @@ body.focus .sheet{padding-top:9vh}
 <div class="app">
   <div class="topbar">
     <button class="filebtn" id="fileBtn">Datei</button>
-    <button class="filebtn" id="viewBtn" style="margin-left:0">Ansicht</button>
-    <button class="filebtn" id="toolsBtn" style="margin-left:0">Tools</button>
+    <button class="filebtn" id="viewBtn">Ansicht</button>
+    <button class="filebtn" id="toolsBtn">Tools</button>
     <div class="tabbar" id="tabbar"></div>
   </div>
   <div class="body">
