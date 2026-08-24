@@ -48,6 +48,24 @@
   --rule:#4C3712; --stamp:#FFD98A; --manila:#EBDFC4;
   --ok:#D9B24C; --pageedge:rgba(255,181,61,.32);
 }
+/* Weißes Papier, ein zartes Morgenrosa in der Leiste, die aufgehende Sonne
+   als Akzent */
+[data-theme="sonnenaufgang"]{
+  --on-stamp:#141414;
+  --paper:#FFFFFF; --chrome:#F6DCD3; --chrome-2:#FBEDE7; --canvas:#93899A;
+  --ink:#2A2422; --ink-soft:#746259; --ink-faint:#A6968D;
+  --rule:#EBD2C7; --stamp:#E8552F; --manila:#EBDFC4;
+  --ok:#6B8F71; --pageedge:rgba(0,0,0,.35);
+}
+/* Weißes Papier, Glutorange in der Leiste vor rostroter Umgebung - eine
+   Torii-Silhouette gegen den Abendhimmel */
+[data-theme="sonnenuntergang"]{
+  --on-stamp:#141414;
+  --paper:#FFFFFF; --chrome:#E1B787; --chrome-2:#EBCEA7; --canvas:#7A3C29;
+  --ink:#241812; --ink-soft:#6B5142; --ink-faint:#9C8571;
+  --rule:#BD8A59; --stamp:#CC983C; --manila:#EBDFC4;
+  --ok:#5C7A52; --pageedge:rgba(0,0,0,.4);
+}
 /* Kühles, sehr helles Systemgrau moderner Mac-Programme, heller Blauakzent */
 [data-theme="alabaster"]{
   --paper:#FFFFFF; --chrome:#F2F2F7; --chrome-2:#FAFAFC; --canvas:#E5E5EA;
@@ -928,7 +946,9 @@ const THEMES=[
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
+  {k:"sonnenaufgang",n:"Sonnenaufgang",d:"Weißes Papier mit zartem Morgenrosa — die aufgehende Sonne über Japan", c:["#FFFFFF","#93899A","#E8552F"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
+  {k:"sonnenuntergang",n:"Sonnenuntergang",d:"Weißes Papier vor Glutorange — die Torii-Silhouette im Abendlicht über Japan", c:["#FFFFFF","#7A3C29","#CC983C"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
   {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
   {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
@@ -1145,6 +1165,9 @@ const EN={
   "Speicherort":"Storage location","Dieser Browser":"This browser",
   "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Backup via <b>File &rarr; Save everything as file</b>.",
   "Warmes Naturweiß, Standard":"Warm natural white, standard",
+  "Sonnenaufgang":"Sunrise","Sonnenuntergang":"Sunset",
+  "Weißes Papier mit zartem Morgenrosa — die aufgehende Sonne über Japan":"White paper with a soft dawn pink — the rising sun over Japan",
+  "Weißes Papier vor Glutorange — die Torii-Silhouette im Abendlicht über Japan":"White paper against glowing orange — a torii silhouette in the evening light over Japan",
   "Azur":"Azure",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Light system grey of modern Mac apps — reminiscent of Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Neutral off-white of current Windows word processors — reminiscent of Word",
