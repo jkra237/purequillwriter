@@ -337,6 +337,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .fmtprev .pg i{position:absolute;border:1px dashed var(--stamp);opacity:.55}
 .fmtinfo{font-size:12px;color:var(--ink-soft);margin-top:11px}
 .fmttip{color:var(--ink-faint);font-size:12px;line-height:1.5;margin-top:4px}
+/* Aufklappbare Feineinstellungen: Zeilenabstand und die Millimeterfelder
+   füllen über die halbe Dialoghöhe, werden aber selten angefasst. Eingeklappt
+   rückt „Anlegen" dicht unter die Formatauswahl. Die Zeile trägt die aktuellen
+   Werte mit, damit hinter dem Zuklappen nichts Wichtiges verschwindet. */
+.fmtmore{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:11px;
+  padding:7px 10px;border:1px solid var(--rule);border-radius:var(--radius);
+  background:var(--chrome-2);color:var(--ink-soft);text-align:left}
+.fmtmore:hover{border-color:var(--ink-soft);color:var(--ink)}
+.fmtmore .sum{margin-left:auto;min-width:0;font-family:var(--mono);font-size:11px;
+  color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #editor h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
 #editor h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
@@ -1123,6 +1133,7 @@ const EN={
   "Hochformat":"Portrait","Querformat":"Landscape","Seitengröße in mm":"Page size in mm","Breite / Höhe":"Width / Height",
   "Ränder in mm":"Margins in mm","Oben / Unten":"Top / Bottom","Links / Rechts":"Left / Right","merken":"remember",
   "Zeilenabstand":"Line spacing","Standard":"default",
+  "Zeilenabstand und Maße":"Line spacing and dimensions",
   "Als Standard":"As default","Dieses Format für neue Dokumente voreinstellen":"Preset this format for new documents",
   "Nur bei „Eigene Maße“ änderbar":"Only editable with \"Custom size\"","Satzspiegel":"Text block",
   "Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.":"You can also drag the left and right margin in the ruler above the page.",
@@ -4074,7 +4085,14 @@ function formatDialog(mode,onDone){
     hd:start.hd!==undefined?start.hd:(FORMATS[sel]||FORMATS.a4).hd,
     fd:start.fd!==undefined?start.fd:(FORMATS[sel]||FORMATS.a4).fd};
   let lh=isNew?(S.settings.lh||1.62):lhOf(doc());
+  /* Eigene Maße lassen sich ohne die Felder nicht eingeben - dort von
+     vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
+  let offen=sel==="custom";
   const quer=()=>cfg.w>cfg.h;
+  const kurzfassung=()=>{
+    const z=S.settings.uiLang==="en"?String(lh):String(lh).replace(".",",");
+    return `${cfg.w}&times;${cfg.h} mm · ${cfg.m.join("/")} · ${z}`;
+  };
   const pagePreview=()=>{
     const sc=100/Math.max(cfg.w||1,cfg.h||1);
     const px=v=>Math.max(0,Math.round((v||0)*sc));
@@ -4095,6 +4113,12 @@ function formatDialog(mode,onDone){
       <button class="pill ${!quer()?"on":""}" data-o="hoch" style="flex:1">${tr("Hochformat")}</button>
       <button class="pill ${quer()?"on":""}" data-o="quer" style="flex:1">${tr("Querformat")}</button>
     </div>
+    <button class="fmtmore" id="fMore" aria-expanded="${offen}">
+      ${ICO(offen?'<path d="m6 9 6 6 6-6"/>':'<path d="m9 6 6 6-6 6"/>')}
+      <span>${tr("Zeilenabstand und Maße")}</span>
+      <span class="sum">${offen?"":kurzfassung()}</span>
+    </button>
+    ${offen?`
     <div class="mmrow" style="margin-bottom:11px">
       <label>${tr("Zeilenabstand")}</label>
       <select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
@@ -4121,7 +4145,7 @@ function formatDialog(mode,onDone){
       ${pagePreview()}
     </div>
     <div class="fmtinfo">${tr("Satzspiegel")} ${Math.max(0,cfg.w-cfg.m[1]-cfg.m[3])} &times; ${Math.max(0,cfg.h-cfg.m[0]-cfg.m[2])} mm</div>
-    <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`;
+    <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`:""}`;
   overlay(`<div class="modal wide"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
     <div class="pad" id="fbody">${body()}</div>
     <div class="rowend">
@@ -4131,7 +4155,11 @@ function formatDialog(mode,onDone){
         <input type="checkbox" id="fDef" style="width:auto"> ${tr("Als Standard")}</label>
       <button class="btn" id="fCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="fOk">${isNew?tr("Anlegen"):tr("Übernehmen")}</button></div></div>`);
-  const readM=()=>{cfg.m=[+$("#c0").value||0,+$("#c1").value||0,+$("#c2").value||0,+$("#c3").value||0];
+  const readM=()=>{
+    /* Eingeklappt gibt es keine Felder zum Auslesen - cfg gilt unverändert
+       weiter, sonst würden die Werte beim Zuklappen auf 0 fallen. */
+    if(!$("#c0"))return;
+    cfg.m=[+$("#c0").value||0,+$("#c1").value||0,+$("#c2").value||0,+$("#c3").value||0];
     cfg.hd=Math.max(0,Math.min(cfg.h/3,+$("#chd").value||0));
     cfg.fd=Math.max(0,Math.min(cfg.h/3,+$("#cfd").value||0));
     if(sel==="custom"){cfg.w=+$("#cw").value||210;cfg.h=+$("#ch").value||297}};
@@ -4139,7 +4167,8 @@ function formatDialog(mode,onDone){
   const bind=()=>{
     $("#fbody").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
       readM();const k=b.dataset.f;
-      if(k==="custom"){sel="custom";cfg.n="Eigene Maße";cfg.key="custom"}
+      /* „Eigene Maße" ohne sichtbare Felder wäre eine Sackgasse */
+      if(k==="custom"){sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true}
       else{const f=FORMATS[k];const war=quer();
         sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k,hd:f.hd,fd:f.fd}}
       repaint()});
@@ -4149,6 +4178,7 @@ function formatDialog(mode,onDone){
       repaint()});
     ["cw","ch","c0","c1","c2","c3"].forEach(id=>{const el=$("#"+id);if(el)el.onchange=()=>{readM();repaint()}});
     const lhSel=$("#cLh");if(lhSel)lhSel.onchange=()=>{lh=+lhSel.value||1.62};
+    const mehr=$("#fMore");if(mehr)mehr.onclick=()=>{readM();offen=!offen;repaint()};
   };
   bind();
   $("#fCancel").onclick=closeOvl;
