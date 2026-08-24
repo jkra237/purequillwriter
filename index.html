@@ -165,7 +165,15 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .tabbar{display:flex;align-items:flex-end;gap:2px;padding:8px 8px 0;background:var(--chrome);flex:1;min-width:0;overflow:hidden}
 /* Reiter lassen sich umsortieren — beim Ziehen darf die Beschriftung nicht
    markiert werden, sonst zieht man Text statt des Reiters. */
-.tab{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid transparent;border-bottom:none;
+/* Ein Umriss auch im Ruhezustand, sonst verschwimmen mehrere deaktivierte
+   Reiter nebeneinander zu einer Fläche ohne erkennbare Grenze - nur die 2px
+   Lücke der .tabbar trennt sie dann noch. Derselbe Ton wie beim aktiven
+   Reiter (der ihn ohnehin schon dezent hält): eine Abschwächung würde in
+   den hellen Schemata, wo --rule selbst kaum von --chrome absticht, zu
+   knapp über unsichtbar zurückfallen. Die Rangordnung bleibt über die
+   Füllfarbe erhalten - Papier gegen Chrome, nicht über den Rand. */
+.tab{display:flex;align-items:center;gap:8px;padding:6px 12px;
+  border:1px solid var(--rule);border-bottom:none;
   border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
 .tab.drag{opacity:.9;box-shadow:0 7px 18px rgba(0,0,0,.26);cursor:grabbing;
   position:relative;z-index:5}
