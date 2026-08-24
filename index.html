@@ -352,6 +352,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
 #editor p{margin:0 0 .82em}
 #editor ul,#editor ol{margin:0 0 .82em;padding-left:1.5em}
+#editor blockquote{margin:0 0 .82em;padding:.1em 0 .1em 1em;
+  border-left:3px solid var(--rule);color:var(--ink-soft);font-style:italic}
+#editor blockquote p{margin:0 0 .5em}
+#editor blockquote p:last-child{margin-bottom:0}
 /* Browser setzen die Schrift von <table> per UA-Stylesheet auf einen festen
    Wert zurück, statt sie vom Elternelement zu erben — betraf bisher jeden
    Tabellentext, der dadurch nie mit Zoom, Dokumentschrift oder -größe
@@ -1039,6 +1043,7 @@ const EN={
   "Überschrift":"Heading","Leere Notiz":"Empty note",
   "Verkleinern":"Zoom out","Maximieren":"Maximize",
   "Kleiner":"Smaller","Größer":"Larger","Durchgestrichen":"Strikethrough",
+  "Hochgestellt":"Superscript","Tiefgestellt":"Subscript","Zitat":"Quote",
   "Begriff":"Term","Definition":"Definition","Kategorie (optional)":"Category (optional)","Verwerfen":"Discard",
   "Eintrag sichern":"Save entry","angelegt":"created",
   "Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.":
@@ -1558,6 +1563,8 @@ function drawTools(){
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
       <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
       <button class="tb" data-cmd="strikeThrough" title="${tr("Durchgestrichen")}"><s>D</s></button>
+      <button class="tb" data-cmd="superscript" title="${tr("Hochgestellt")}">x²</button>
+      <button class="tb" data-cmd="subscript" title="${tr("Tiefgestellt")}">x₂</button>
       <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
         <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
@@ -1567,7 +1574,8 @@ function drawTools(){
       <div class="sep"></div>
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
-        <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option></select>
+        <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option>
+        <option value="blockquote">${tr("Zitat")}</option></select>
       <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICO('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
       <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICO('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.2 4.6 4.6 4v4M2.9 12.2c0-.7.6-1.2 1.3-1.2s1.2.5 1.2 1.1c0 1.1-2.5 1.5-2.5 2.9h2.6M2.9 16.6c.2-.5.7-.7 1.3-.7.7 0 1.2.4 1.2 1s-.5 1-1.1 1c.7 0 1.3.4 1.3 1.1 0 .7-.6 1.1-1.4 1.1-.6 0-1.1-.2-1.3-.7"/>')}</button>
       <span style="display:flex;gap:7px">
@@ -1623,6 +1631,7 @@ function drawTools(){
       <div style="flex:1"></div>
       <button class="pill" id="glossIO">${tr("Importieren / Exportieren")}</button>`;
   }
+  syncToolbarState();
 }
 
 /* ================= Schreiben ================= */
@@ -1650,7 +1659,7 @@ function drawWrite(){
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
   ed.addEventListener("input",()=>{dirty=true;setTyping();markEmpty();
-    drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck()});
+    drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
   ed.addEventListener("keydown",e=>{
     if(slashOn){
       if(e.key==="ArrowDown"){e.preventDefault();slashIdx=Math.min(slashIdx+1,slashHits.length-1);slashOpen(currentSlashQuery());return}
@@ -1783,7 +1792,36 @@ function sizeMenu(e){
   m.onclick=ev=>{const b=ev.target.closest("[data-fs]");if(!b)return;
     closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
 }
-function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus()}
+function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
+/* Die Werkzeugleiste zeigte nie, was an der Schreibmarke gerade gilt - der
+   Fett-Knopf blieb inaktiv, auch mitten in fettem Text, und "Absatzformat"
+   stand immer auf Fließtext, selbst in einer Überschrift. Die CSS-Klasse
+   .tb.on dafür gab es schon, nur setzte sie nie jemand. selectionchange
+   feuert auch bei reiner Cursorbewegung (Pfeiltasten), execCommand-Klicks
+   ändern die Selektion selbst oft nicht, darum ruft cmd() das hier zusätzlich
+   direkt auf. */
+const TOOLBAR_STATE_CMDS=["bold","italic","underline","strikeThrough","superscript","subscript",
+  "justifyLeft","justifyCenter","justifyRight","justifyFull","insertUnorderedList","insertOrderedList"];
+function syncToolbarState(){
+  if(S.mode!=="write")return;
+  const ed=$("#editor");if(!ed)return;
+  const sel=getSelection();
+  if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
+  TOOLBAR_STATE_CMDS.forEach(c=>{
+    const btn=document.querySelector(`.tools [data-cmd="${c}"]`);
+    if(!btn)return;
+    let aktiv=false;
+    try{aktiv=document.queryCommandState(c)}catch(e){}
+    btn.classList.toggle("on",aktiv);
+  });
+  const fb=$("#fBlock");
+  if(fb){
+    let n=sel.anchorNode;n=n.nodeType===1?n:n.parentElement;
+    const block=n&&n.closest("h1,h2,h3,blockquote");
+    fb.value=block?block.tagName.toLowerCase():"p";
+  }
+}
+document.addEventListener("selectionchange",syncToolbarState);
 
 /* ---- Schriftfarbe und Texthervorhebung ----
    Eine Hervorhebung setzt zusätzlich dunkle Schrift, sonst wäre in den
@@ -2956,6 +2994,7 @@ function rPrXml(st){
   if(st.strike)x+="<w:strike/>";
   if(st.color)x+=`<w:color w:val="${st.color}"/>`;
   if(st.hi)x+=`<w:shd w:val="clear" w:color="auto" w:fill="${st.hi}"/>`;
+  if(st.vert)x+=`<w:vertAlign w:val="${st.vert}"/>`;
   if(st.link)x+='<w:rStyle w:val="Hyperlink"/>';
   return x?`<w:rPr>${x}</w:rPr>`:"";
 }
@@ -2986,6 +3025,8 @@ function inlineAblaufen(node,st,runs,links){
     if(tag==="i"||tag==="em")neu.i=true;
     if(tag==="u")neu.u=true;
     if(tag==="s"||tag==="strike"||tag==="del")neu.strike=true;
+    if(tag==="sup")neu.vert="superscript";
+    if(tag==="sub")neu.vert="subscript";
     if(tag==="font"&&n.getAttribute("color"))neu.color=n.getAttribute("color").replace("#","").toUpperCase();
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
@@ -2994,9 +3035,9 @@ function inlineAblaufen(node,st,runs,links){
     if(tag==="a")links[links.length-1].end=runs.length;
   });
 }
-function absatzXml(el,pPrExtra){
+function absatzXml(el,pPrExtra,basisStil){
   const runs=[],links=[];
-  inlineAblaufen(el,{},runs,links);
+  inlineAblaufen(el,basisStil||{},runs,links);
   /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
      merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
      und der Gesamtliste der Beziehungen hinzufügen kann. */
@@ -3025,7 +3066,13 @@ async function walkBlocks(root,ctx){
   let xml="";
   for(const el of [...root.children]){
     const tag=el.tagName.toLowerCase();
-    if(tag==="p"||tag==="div"||tag==="blockquote"){
+    if(tag==="blockquote"){
+      /* Wie im Editor: eingerückt und kursiv, statt wie ein normaler Absatz */
+      const jc=jcVon(el);
+      const pPr=`<w:ind w:left="284"/>${jc?`<w:jc w:val="${jc}"/>`:""}`;
+      const a=absatzXml(el,pPr,{i:true});
+      xml+=absatzZuXml(a,ctx);
+    }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
       const a=absatzXml(el,jc?`<w:jc w:val="${jc}"/>`:"");
       xml+=absatzZuXml(a,ctx);
