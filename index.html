@@ -4410,20 +4410,49 @@ function placeFreeFigs(){
     fig.style.setProperty("--fph",h+"mm");
   });
 }
-function insertFreeFigure(src,wmm,hmm){
+/* Lage der Schreibmarke in Millimetern — dort wird eine neue Signatur
+   abgelegt. Gemessen wird die Grundlinie der Zeile, nicht die Oberkante:
+   die Unterschrift gehört unter die Zeile, in der man steht, nicht daneben. */
+function caretPunktMm(){
+  const ed=$("#editor");if(!ed)return null;
+  const sel=getSelection();
+  if(!sel||!sel.rangeCount)return null;
+  const r=sel.getRangeAt(0);
+  if(!ed.contains(r.startContainer))return null;
+  let rect=r.getBoundingClientRect();
+  /* In einer leeren Zeile hat der Bereich keine Ausdehnung — dann gilt der Absatz */
+  if(!rect.height){
+    const el=r.startContainer.nodeType===1?r.startContainer:r.startContainer.parentElement;
+    const b=el&&el.closest("#editor > *");
+    if(!b)return null;
+    rect=b.getBoundingClientRect();
+  }
+  if(!rect.height)return null;
+  const g=freeGeom(),er=ed.getBoundingClientRect();
+  const relY=rect.bottom-er.top;
+  const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor(relY/g.stride)));
+  return {pg, x:(rect.left-er.left-g.ml)/g.mmPx, y:(relY-pg*g.stride-g.mt)/g.mmPx};
+}
+function insertFreeFigure(src,wmm,hmm,anker){
   const ed=$("#editor");if(!ed)return null;
   const g=freeGeom();
   const w=Math.min(g.cw,wmm), h=Math.max(FREE_MIN_MM,Math.round(w*(hmm/wmm)));
   const fig=document.createElement("figure");
   fig.className="fig free";fig.setAttribute("contenteditable","false");
   fig.dataset.sig="1";fig.dataset.free="1";
-  /* Auf der Seite ablegen, die gerade in der Mitte des Fensters steht */
-  const pane=$("#pane"),er=ed.getBoundingClientRect();
-  const blick=pane?pane.getBoundingClientRect().top+pane.clientHeight/2:er.top;
-  fig.dataset.fpage=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((blick-er.top)/g.stride)));
   fig.dataset.fw=w;fig.dataset.fh=h;
-  fig.dataset.fx=Math.max(0,Math.round((g.cw-w)/2));
-  fig.dataset.fy=Math.max(0,Math.min(g.ch-h,Math.round(g.ch*.62)));
+  if(anker){
+    fig.dataset.fpage=anker.pg;
+    fig.dataset.fx=Math.round(Math.max(0,Math.min(g.cw-w,anker.x)));
+    fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-h,anker.y+2)));
+  }else{
+    /* Ohne Schreibmarke: auf der Seite ablegen, die gerade im Fenster steht */
+    const pane=$("#pane"),er=ed.getBoundingClientRect();
+    const blick=pane?pane.getBoundingClientRect().top+pane.clientHeight/2:er.top;
+    fig.dataset.fpage=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((blick-er.top)/g.stride)));
+    fig.dataset.fx=Math.max(0,Math.round((g.cw-w)/2));
+    fig.dataset.fy=Math.max(0,Math.min(g.ch-h,Math.round(g.ch*.62)));
+  }
   const im=document.createElement("img");
   im.src=src;im.alt="";im.draggable=false;
   fig.appendChild(im);ed.appendChild(fig);
@@ -4501,12 +4530,15 @@ function freeFigMouseDown(e){
   document.addEventListener("mouseup",up);
 }
 /* ================= Signatur ================= */
-/* ================= Signatur ================= */
+let sigAnker=null;
 /* Auf transparentem Grund gezeichnet (das weiße Papier ist nur die CSS-
    Hintergrundfarbe des Feldes) und beim Einfügen auf die tatsächlich
    gezeichnete Fläche zugeschnitten - sonst würde ein halb leeres Rechteck
    im Dokument landen statt einer knapp sitzenden Unterschrift. */
 function signatureDialog(){
+  /* Jetzt merken, solange die Schreibmarke sicher noch im Text steht — das
+     Öffnen des Dialogs kann sie kosten. */
+  sigAnker=caretPunktMm();
   overlay(`<div class="modal wide"><h3>${tr("Signatur erstellen")}</h3><div class="pad">
     <div class="sigwrap">
       <canvas id="sigCanvas" class="sigpad"></canvas>
@@ -4574,7 +4606,7 @@ function sigInit(){
     out.getContext("2d").drawImage(cv,Math.round(x*dpr),Math.round(y*dpr),out.width,out.height,0,0,out.width,out.height);
     const data=out.toDataURL("image/png");
     closeOvl();
-    insertFreeFigure(data,55,Math.max(1,Math.round(55*(h/w))));
+    insertFreeFigure(data,55,Math.max(1,Math.round(55*(h/w))),sigAnker);
   };
 }
 let selFig=null;
