@@ -231,7 +231,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 /* Gruppen trennt Abstand statt einer Linie: 7px Lücke innerhalb einer Gruppe,
    gut das Dreifache dazwischen. Das Element bleibt, nur unsichtbar. */
 .sep{width:12px;height:17px;background:none;flex:none}
-.pill{border:1px solid var(--rule);border-radius:var(--radius);padding:3px 9px;color:var(--ink-soft);font-size:12px}
+/* Knöpfe erben über `button{font:inherit}` die Schrift ihrer Umgebung — in
+   einer Monospace-Leiste wie der Notizfußzeile oder dem Versionsverlauf sah
+   derselbe Knopf darum anders aus als anderswo. Beschriftungen sind Fließtext
+   und gehören in die Oberflächenschrift, unabhängig davon, wo sie stehen. */
+.pill{border:1px solid var(--rule);border-radius:var(--radius);padding:3px 9px;color:var(--ink-soft);
+  font-family:var(--ui);font-size:12px}
 .pill:hover{color:var(--ink)}
 .pill.on{background:var(--chrome);color:var(--stamp);border-color:var(--stamp)}
 
@@ -603,7 +608,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .setrow label{color:var(--ink-soft)}
 .setrow .ctl{width:210px;display:flex;gap:6px;align-items:center;justify-content:flex-end}
 .setrow .ctl select,.setrow .ctl input[type=number]{width:auto;flex:1}
-.btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2)}
+.btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2);
+  font-family:var(--ui)}
 .btn:hover{border-color:var(--ink-soft)}
 .btn.pri{background:var(--stamp);border-color:var(--stamp);color:var(--on-stamp,#fff)}
 .rowend{display:flex;gap:8px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--rule);flex-wrap:wrap}
@@ -762,13 +768,16 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   border:1px solid var(--rule);border-radius:3px;padding:1px 6px;white-space:nowrap}
 .hintk{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .hist{max-height:340px;overflow:auto}
+/* Fließtext („wiederherstellen", „Noch keine gesicherten Stände.") in der
+   Oberflächenschrift, nur der Zeitstempel mit der Wortzahl bleibt monospace. */
 .hist div{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;border-bottom:1px solid var(--rule);
-  font-family:var(--mono);font-size:12px;color:var(--ink-soft)}
+  font-size:12px;color:var(--ink-soft)}
+.hist div span{font-family:var(--mono)}
 
 /* ---- Fokusmodus ---- */
 .focusbar{position:fixed;top:12px;right:14px;z-index:55;display:none;align-items:center;gap:9px;
   background:var(--ink);color:var(--paper);padding:6px 12px;border-radius:var(--radius);
-  font-family:var(--mono);font-size:12px;opacity:.3;transition:opacity .25s}
+  font-size:12px;opacity:.3;transition:opacity .25s}
 .focusbar:hover{opacity:1}
 body.focus .focusbar{display:flex}
 .focusbar button{color:inherit;text-decoration:underline;text-underline-offset:2px}
@@ -4873,7 +4882,7 @@ function settings(){
     <div class="setrow"><label>${tr("Farbschema")}</label><div class="ctl">
       <button class="btn" id="sThemeBtn">${tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button></div></div>
     <div class="setrow" style="align-items:flex-start"><label>${tr("Speicherort")}</label><div class="ctl" style="display:block;text-align:right">
-      <div style="font-family:var(--mono);font-size:11px;color:var(--ink)">${tr("Dieser Browser")}</div>
+      <div style="font-size:12px;color:var(--ink)">${tr("Dieser Browser")}</div>
       <div style="color:var(--ink-faint);font-size:12px;line-height:1.45;margin-top:3px">
         ${S.settings.uiLang==="en"
           ?`${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`
