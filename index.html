@@ -328,14 +328,34 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
 /* Bilder sind per Default nativ ziehbar - in einem contenteditable-Bereich
-   legt der Browser dabei gern eine zweite Kopie am Ablageort ab, statt nur
-   den Anfasser zum Resizen zuzulassen. Fürs Verschieben gibt es hier keine
-   Funktion, also ganz abschalten. */
+   legt der Browser dabei gern eine zweite Kopie am Ablageort ab. Das
+   Verschieben macht hier eigener Code, also die native Variante abschalten. */
 #editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top;
   -webkit-user-drag:none;user-drag:none}
 #editor figure.fig figcaption{font-family:var(--ui);font-size:.72em;
   color:var(--ink-soft);margin-top:.35em;line-height:1.4;text-align:inherit}
 #editor figure.fig.sel img{outline:2px solid var(--stamp);outline-offset:2px}
+/* Frei platziert: liegt wie in Word „vor dem Text", statt im Fluss zu hängen.
+   Die Maße kommen aus --fx/--fy/--fw/--fh, die placeFreeFigs() aus den
+   Millimeterwerten der data-Attribute rechnet. */
+#editor figure.fig.free{position:absolute;margin:0;z-index:3;cursor:move;
+  left:var(--fx,0px);top:var(--fy,0px);width:var(--fw,40mm);height:var(--fh,16mm)}
+#editor figure.fig.free img{display:block;width:100%;height:100%;max-width:none}
+#editor figure.fig.free.sel img{outline:none}
+#editor figure.fig.free.sel{outline:1px dashed var(--stamp);outline-offset:3px}
+.fhwrap{position:absolute;inset:0;pointer-events:none}
+.fh{position:absolute;width:9px;height:9px;background:var(--paper);border:1.5px solid var(--stamp);
+  border-radius:50%;pointer-events:auto}
+.fh.nw{left:-5px;top:-5px;cursor:nwse-resize}   .fh.se{right:-5px;bottom:-5px;cursor:nwse-resize}
+.fh.ne{right:-5px;top:-5px;cursor:nesw-resize}  .fh.sw{left:-5px;bottom:-5px;cursor:nesw-resize}
+.fh.n{left:50%;top:-5px;margin-left:-4.5px;cursor:ns-resize}
+.fh.s{left:50%;bottom:-5px;margin-left:-4.5px;cursor:ns-resize}
+.fh.w{left:-5px;top:50%;margin-top:-4.5px;cursor:ew-resize}
+.fh.e{right:-5px;top:50%;margin-top:-4.5px;cursor:ew-resize}
+.fdel{position:absolute;right:-11px;top:-24px;width:20px;height:20px;line-height:1;font-size:15px;
+  border-radius:50%;background:var(--paper);border:1px solid var(--rule);color:var(--ink-soft);
+  pointer-events:auto;display:flex;align-items:center;justify-content:center}
+.fdel:hover{color:#8C3B2E;border-color:#8C3B2E}
 .imgbar{position:absolute;z-index:45;background:var(--paper);border:1px solid var(--rule);
   border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);padding:6px 9px;
   display:none;align-items:center;gap:7px;white-space:nowrap}
@@ -669,6 +689,11 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #printftr{bottom:0}
   .pageno::after{content:counter(page)}
   .anch{background:none!important;border-bottom:none!important}
+  /* Im Druck gibt es keinen Seitenzwischenraum und keinen Zoom: dort gelten
+     die reinen Millimeterwerte, gemessen ab der bedruckbaren Fläche. */
+  #editor figure.fig.free{left:var(--fpx)!important;top:var(--fpy)!important;
+    width:var(--fpw)!important;height:var(--fph)!important}
+  .fhwrap{display:none!important}
   #editor .pgbreak{break-after:page;page-break-after:always;border:none!important;
     height:0!important;visibility:hidden!important}
   #editor td,#editor th{border:1px solid #000!important}
@@ -1554,6 +1579,7 @@ function drawWrite(){
     /* Klicks in der Leiste dürfen die Bearbeitung nicht beenden */
     setTimeout(()=>{if(hfEditing&&document.activeElement!==hb){hfEditCommit();hfEditClose()}},0);
   });
+  ed.addEventListener("mousedown",freeFigMouseDown);
   ed.addEventListener("click",e=>{
     const fig=e.target.closest("figure.fig");
     if(fig&&!e.target.closest("figcaption")){selectFig(fig);return}
@@ -1576,6 +1602,7 @@ function placeCaretEnd(el){const r=document.createRange();r.selectNodeContents(e
 function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const d=doc();
   const c=ed.cloneNode(true);
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
+  c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
   c.querySelectorAll(".hit,.glossterm").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.normalize();
@@ -3450,7 +3477,9 @@ function paginate(){
   ed.style.setProperty("--pl",ml+"px");
   ed.style.setProperty("--pt",mt+"px");
 
-  const blocks=[...ed.children];
+  /* Frei platzierte Bilder liegen außerhalb des Flusses — sie dürfen weder
+     umbrochen noch in die Seitenzahl eingerechnet werden. */
+  const blocks=[...ed.children].filter(b=>!b.classList.contains("free"));
   blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
   const edTop=ed.getBoundingClientRect().top;
   blocks.forEach(b=>{
@@ -3474,6 +3503,7 @@ function paginate(){
   if(bottom+mb>pageCount*stride-GAP)pageCount++;
   ed.style.minHeight=(pageCount*stride-GAP)+"px";
   paper.style.height=(pageCount*stride-GAP)+"px";
+  placeFreeFigs();
 
   let html="";
   const ftrOn=hfOf(doc(),"ftr").on;
@@ -4328,15 +4358,149 @@ function addImage(file){
   };
   r.readAsDataURL(file);
 }
-function insertFigure(src,alt,width,attrs){
+function insertFigure(src,alt){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
-  const w=width||70;
-  const html=`<figure class="fig" contenteditable="false" data-w="${w}"${attrs||""} style="text-align:center">`+
-    `<img src="${src}" alt="${esc(alt||"")}" draggable="false" style="width:${w}%"></figure><p><br></p>`;
+  const html=`<figure class="fig" contenteditable="false" data-w="70" style="text-align:center">`+
+    `<img src="${src}" alt="${esc(alt||"")}" draggable="false" style="width:70%"></figure><p><br></p>`;
   document.execCommand("insertHTML",false,html);
   flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
 }
+/* ================= Frei platzierte Bilder ================= */
+/* Anders als eingebettete Bilder hängen diese nicht im Textfluss, sondern
+   liegen wie in Word „vor dem Text": frei verschiebbar, an den Rändern
+   dehnbar. Maßgeblich sind die data-Attribute in Millimetern — fx/fy zählen
+   ab der linken oberen Ecke des Satzspiegels der Seite fpage. Daraus
+   entstehen Bildschirm- und Druckkoordinaten getrennt, damit weder Zoomstufe
+   noch der Zwischenraum zwischen den Seiten die Position verschiebt. */
+const FREE_MIN_MM=6, FREE_HANDLES=["nw","n","ne","e","se","s","sw","w"];
+function freeGeom(){
+  const f=fmtOf(doc()),z=S.zoom,ph=MM(f.h)*z;
+  return {f,z,ph,stride:ph+GAP,mmPx:MM(1)*z,
+    ml:MM(f.m[3])*z, mt:Math.max(MM(f.m[0])*z,hfBand(doc(),"hdr",z)),
+    cw:f.w-f.m[1]-f.m[3], ch:f.h-f.m[0]-f.m[2]};
+}
+function placeFreeFigs(){
+  const ed=$("#editor");if(!ed)return;
+  const g=freeGeom();
+  /* Signaturen aus früheren Fassungen lagen noch im Textfluss — einmalig
+     auf die freie Platzierung heben, mit ihrem echten Seitenverhältnis. */
+  ed.querySelectorAll("figure.fig[data-sig]:not(.free)").forEach(fig=>{
+    const im=fig.querySelector("img");
+    const w=Math.min(g.cw,55);
+    const seit=im&&im.naturalWidth?im.naturalHeight/im.naturalWidth:.4;
+    fig.classList.add("free");fig.dataset.free="1";
+    fig.dataset.fpage=0;fig.dataset.fw=w;
+    fig.dataset.fh=Math.max(FREE_MIN_MM,Math.round(w*seit));
+    fig.dataset.fx=Math.max(0,Math.round((g.cw-w)/2));
+    fig.dataset.fy=Math.round(g.ch*.62);
+    if(im){im.style.width="";im.style.height=""}
+  });
+  ed.querySelectorAll("figure.fig.free").forEach(fig=>{
+    const pg=+(fig.dataset.fpage||0);
+    const x=+(fig.dataset.fx||0), y=+(fig.dataset.fy||0);
+    const w=+(fig.dataset.fw||40), h=+(fig.dataset.fh||16);
+    fig.style.setProperty("--fx",(g.ml+MM(x)*g.z)+"px");
+    fig.style.setProperty("--fy",(pg*g.stride+g.mt+MM(y)*g.z)+"px");
+    fig.style.setProperty("--fw",MM(w)*g.z+"px");
+    fig.style.setProperty("--fh",MM(h)*g.z+"px");
+    fig.style.setProperty("--fpx",x+"mm");
+    fig.style.setProperty("--fpy",(pg*g.ch+y)+"mm");
+    fig.style.setProperty("--fpw",w+"mm");
+    fig.style.setProperty("--fph",h+"mm");
+  });
+}
+function insertFreeFigure(src,wmm,hmm){
+  const ed=$("#editor");if(!ed)return null;
+  const g=freeGeom();
+  const w=Math.min(g.cw,wmm), h=Math.max(FREE_MIN_MM,Math.round(w*(hmm/wmm)));
+  const fig=document.createElement("figure");
+  fig.className="fig free";fig.setAttribute("contenteditable","false");
+  fig.dataset.sig="1";fig.dataset.free="1";
+  /* Auf der Seite ablegen, die gerade in der Mitte des Fensters steht */
+  const pane=$("#pane"),er=ed.getBoundingClientRect();
+  const blick=pane?pane.getBoundingClientRect().top+pane.clientHeight/2:er.top;
+  fig.dataset.fpage=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((blick-er.top)/g.stride)));
+  fig.dataset.fw=w;fig.dataset.fh=h;
+  fig.dataset.fx=Math.max(0,Math.round((g.cw-w)/2));
+  fig.dataset.fy=Math.max(0,Math.min(g.ch-h,Math.round(g.ch*.62)));
+  const im=document.createElement("img");
+  im.src=src;im.alt="";im.draggable=false;
+  fig.appendChild(im);ed.appendChild(fig);
+  placeFreeFigs();
+  flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
+  selectFig(fig);
+  return fig;
+}
+function addFreeHandles(fig){
+  const wrap=document.createElement("div");
+  wrap.className="fhwrap";wrap.setAttribute("contenteditable","false");
+  wrap.innerHTML=FREE_HANDLES.map(k=>`<i class="fh ${k}" data-fdir="${k}"></i>`).join("")
+    +`<button class="fdel" data-fdel="1" title="${tr("Löschen")}">&times;</button>`;
+  fig.appendChild(wrap);
+}
+function freeFigMouseDown(e){
+  if(e.button!==0)return;
+  if(e.target.closest("[data-fdel]")){
+    e.preventDefault();
+    const f=e.target.closest("figure.fig.free");
+    selectFig(null);if(f)f.remove();
+    flush();dirty=true;commit();queuePaginate();drawStatus();return;
+  }
+  /* Richtung der Anfasser bewusst data-fdir, nicht data-fh: die Grafik selbst
+     trägt ihre Höhe in data-fh, und closest() würde sonst auf sie treffen. */
+  const griff=e.target.closest("[data-fdir]");
+  const fig=e.target.closest("figure.fig.free");
+  if(!fig)return;
+  e.preventDefault();
+  if(selFig!==fig)selectFig(fig);
+  const ed=$("#editor"),g=freeGeom(),modus=griff?griff.dataset.fdir:"move";
+  const fr=fig.getBoundingClientRect();
+  const greifX=(e.clientX-fr.left)/g.mmPx, greifY=(e.clientY-fr.top)/g.mmPx;
+  const a={x:+fig.dataset.fx,y:+fig.dataset.fy,w:+fig.dataset.fw,h:+fig.dataset.fh};
+  const seit=a.h/a.w;
+  const move=ev=>{
+    const er=ed.getBoundingClientRect();
+    if(modus==="move"){
+      const relY=ev.clientY-er.top;
+      const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor(relY/g.stride)));
+      const x=(ev.clientX-er.left-g.ml)/g.mmPx-greifX;
+      const y=(relY-pg*g.stride-g.mt)/g.mmPx-greifY;
+      fig.dataset.fpage=pg;
+      fig.dataset.fx=Math.round(Math.max(0,Math.min(g.cw-a.w,x)));
+      fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-a.h,y)));
+    }else{
+      const dx=(ev.clientX-e.clientX)/g.mmPx, dy=(ev.clientY-e.clientY)/g.mmPx;
+      let{x,y,w,h}=a;
+      if(modus.includes("e"))w=a.w+dx;
+      if(modus.includes("w")){w=a.w-dx;x=a.x+dx}
+      if(modus.includes("s"))h=a.h+dy;
+      if(modus.includes("n")){h=a.h-dy;y=a.y+dy}
+      /* Mit Umschalt bleibt das Seitenverhältnis erhalten, wie in Word */
+      if(ev.shiftKey&&modus.length===2){
+        if(w*seit>h){h=w*seit;if(modus.includes("n"))y=a.y+a.h-h}
+        else{w=h/seit;if(modus.includes("w"))x=a.x+a.w-w}
+      }
+      if(w<FREE_MIN_MM){if(modus.includes("w"))x=a.x+a.w-FREE_MIN_MM;w=FREE_MIN_MM}
+      if(h<FREE_MIN_MM){if(modus.includes("n"))y=a.y+a.h-FREE_MIN_MM;h=FREE_MIN_MM}
+      if(x<0){w+=x;x=0}
+      if(y<0){h+=y;y=0}
+      if(x+w>g.cw)w=g.cw-x;
+      if(y+h>g.ch)h=g.ch-y;
+      fig.dataset.fx=Math.round(x);fig.dataset.fy=Math.round(y);
+      fig.dataset.fw=Math.round(w);fig.dataset.fh=Math.round(h);
+    }
+    placeFreeFigs();
+  };
+  const up=()=>{
+    document.removeEventListener("mousemove",move);
+    document.removeEventListener("mouseup",up);
+    flush();dirty=true;commit();drawStatus();
+  };
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",up);
+}
+/* ================= Signatur ================= */
 /* ================= Signatur ================= */
 /* Auf transparentem Grund gezeichnet (das weiße Papier ist nur die CSS-
    Hintergrundfarbe des Feldes) und beim Einfügen auf die tatsächlich
@@ -4360,11 +4524,20 @@ function signatureDialog(){
 function sigInit(){
   const cv=$("#sigCanvas");
   const dpr=window.devicePixelRatio||1;
-  const rect=cv.getBoundingClientRect();
-  cv.width=Math.round(rect.width*dpr);cv.height=Math.round(rect.height*dpr);
   const ctx=cv.getContext("2d");
-  ctx.scale(dpr,dpr);ctx.lineWidth=2.4;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#1a1a1a";
   let drawing=false,lastX=0,lastY=0,bounds=null;
+  /* Über clientWidth messen, nicht über getBoundingClientRect: das Feld ist
+     erst nach dem Layout des Dialogs so breit wie dieser, und clientWidth
+     bleibt von etwaigen Transformationen unberührt. */
+  const flaeche=()=>({w:cv.clientWidth,h:cv.clientHeight});
+  const eichen=()=>{
+    const {w,h}=flaeche();
+    if(!w||!h||cv.width===Math.round(w*dpr))return;
+    cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.lineWidth=2.4;ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle="#1a1a1a";
+  };
+  eichen();requestAnimationFrame(eichen);
   const pos=e=>{const r=cv.getBoundingClientRect();return[e.clientX-r.left,e.clientY-r.top]};
   const extend=(x,y)=>{
     if(!bounds)bounds={minX:x,maxX:x,minY:y,maxY:y};
@@ -4392,25 +4565,36 @@ function sigInit(){
   $("#sigCancel").onclick=closeOvl;
   $("#sigInsert").onclick=()=>{
     if(!bounds)return;
-    const pad=8;
+    const pad=8,f=flaeche();
     const x=Math.max(0,bounds.minX-pad),y=Math.max(0,bounds.minY-pad);
-    const w=Math.min(rect.width,bounds.maxX+pad)-x,h=Math.min(rect.height,bounds.maxY+pad)-y;
+    const w=Math.min(f.w,bounds.maxX+pad)-x,h=Math.min(f.h,bounds.maxY+pad)-y;
+    if(w<=0||h<=0)return;
     const out=document.createElement("canvas");
     out.width=Math.round(w*dpr);out.height=Math.round(h*dpr);
     out.getContext("2d").drawImage(cv,Math.round(x*dpr),Math.round(y*dpr),out.width,out.height,0,0,out.width,out.height);
     const data=out.toDataURL("image/png");
     closeOvl();
-    insertFigure(data,"",28,' data-sig="1"');
+    insertFreeFigure(data,55,Math.max(1,Math.round(55*(h/w))));
   };
 }
 let selFig=null;
 function selectFig(f){
   const ed=$("#editor");
-  if(ed)ed.querySelectorAll("figure.fig").forEach(x=>x.classList.remove("sel"));
+  if(ed){
+    ed.querySelectorAll("figure.fig").forEach(x=>x.classList.remove("sel"));
+    ed.querySelectorAll(".fhwrap").forEach(w=>w.remove());
+  }
   selFig=f||null;
   const bar=$("#imgbar");
   if(!f){bar.classList.remove("on");placeFigHandle();return}
   f.classList.add("sel");
+  /* Frei platzierte Bilder tragen ihre Anfasser selbst — Ausrichtung und
+     Breitenregler wären dort sinnlos, also gar keine Leiste. */
+  if(f.classList.contains("free")){
+    bar.classList.remove("on");
+    const h=$("#figrsz");if(h)h.classList.remove("on");
+    addFreeHandles(f);return;
+  }
   drawImgBar();
 }
 /* Bei rechtsbündigen Bildern ist die rechte Kante fest — dort gehört der Anfasser nach links */
@@ -4460,7 +4644,6 @@ function drawImgBar(){
   const f=selFig,bar=$("#imgbar");if(!f){bar.classList.remove("on");return}
   const w=+(f.dataset.w||70), al=f.style.textAlign||"center";
   const hasCap=!!f.querySelector("figcaption");
-  const isSig=!!f.dataset.sig;
   bar.innerHTML=`
     <input type="range" id="ibW" min="10" max="100" step="5" value="${w}" title="${tr("Breite")}">
     <span class="pct" id="ibP">${w} %</span>
@@ -4469,8 +4652,8 @@ function drawImgBar(){
     <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
     <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
-    ${isSig?"":`<button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Unterschrift")}</button>
-    <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>`}
+    <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Unterschrift")}</button>
+    <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>
     <button class="pill" data-ic="del">${tr("Löschen")}</button>`;
   bar.classList.add("on");
   const r=f.getBoundingClientRect();
