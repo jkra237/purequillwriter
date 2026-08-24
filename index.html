@@ -172,13 +172,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    den hellen Schemata, wo --rule selbst kaum von --chrome absticht, zu
    knapp über unsichtbar zurückfallen. Die Rangordnung bleibt über die
    Füllfarbe erhalten - Papier gegen Chrome, nicht über den Rand. */
-/* Ohne eigene Füllung sahen inaktive Reiter genauso aus wie die Datei/
-   Ansicht/Tools-Knöpfe daneben - beide nur Rand auf --chrome. Ein Zwischenton
-   Richtung --paper hebt sie als eigene Fläche ab, ohne mit dem satten
-   Papier-Weiß des aktiven Reiters zu verwechseln. */
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;
-  background:var(--chrome-2);
-  background:color-mix(in srgb, var(--paper) 65%, var(--chrome));
   border:1px solid var(--rule);border-bottom:none;
   border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
 .tab.drag{opacity:.9;box-shadow:0 7px 18px rgba(0,0,0,.26);cursor:grabbing;
