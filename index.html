@@ -156,7 +156,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    markiert werden, sonst zieht man Text statt des Reiters. */
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid transparent;border-bottom:none;
   border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
-.tab.drag{opacity:.8;box-shadow:0 6px 16px rgba(0,0,0,.22);cursor:grabbing}
+.tab.drag{opacity:.9;box-shadow:0 7px 18px rgba(0,0,0,.26);cursor:grabbing;
+  position:relative;z-index:5}
 .tab.on{background:var(--paper);border-color:var(--rule);color:var(--ink)}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px}
@@ -1374,6 +1375,10 @@ $("#tabbar").addEventListener("mousedown",e=>{
   const bar=$("#tabbar");
   if(!el||bar.querySelectorAll(".tab").length<2)return;
   const startX=e.clientX;let zieht=false;
+  /* Wo innerhalb des Reiters angefasst wurde — genau dieser Punkt bleibt
+     unter dem Zeiger, sonst springt der Reiter beim Anfassen mit der Kante
+     an den Zeiger. */
+  const greif=e.clientX-el.getBoundingClientRect().left;
   const move=ev=>{
     if(!zieht){
       if(Math.abs(ev.clientX-startX)<=4)return;
@@ -1384,10 +1389,18 @@ $("#tabbar").addEventListener("mousedown",e=>{
       const r=t.getBoundingClientRect();return ev.clientX<r.left+r.width/2;
     });
     bar.insertBefore(el,vor||$("#newdoc"));
+    /* Der Reiter hängt am Zeiger, statt nur von Platz zu Platz zu springen.
+       Erst die Verschiebung aufheben, um die Ruhelage im neuen Platz zu
+       messen, dann von dort aus versetzen — sonst summiert sie sich auf. */
+    el.style.transform="";
+    const r=el.getBoundingClientRect(),br=bar.getBoundingClientRect();
+    const ziel=Math.min(br.right-r.width,Math.max(br.left,ev.clientX-greif));
+    el.style.transform="translateX("+(ziel-r.left)+"px)";
   };
   const up=()=>{
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
+    el.style.transform="";
     if(!zieht)return;
     el.classList.remove("drag");
     tabGezogen=true;
