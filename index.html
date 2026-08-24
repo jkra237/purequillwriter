@@ -1513,6 +1513,7 @@ function drawTools(){
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
         <span class="gl">${ICOSZ('<path d="M4 19h5l8.5-8.5a1.9 1.9 0 0 0-2.7-2.7L6.3 16z"/><path d="M13.6 7.7 16.3 10.4"/>',14,1.7)}</span>
         <i style="background:${S.settings.markColor||MARKCOLORS[0].c}"></i></button>
+      <button class="tb" data-cmd="removeFormat" title="${tr("Formatierung entfernen")}" aria-label="${tr("Formatierung entfernen")}">${ICO('<path d="M4 15 15 4l5 5-11 11H6z"/><path d="M11 9l4 4"/><path d="M3 21h8"/>')}</button>
       <div class="sep"></div>
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
