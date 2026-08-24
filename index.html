@@ -1032,6 +1032,9 @@ const EN={
   "Als CSV exportieren":"Export as CSV","Einfügen: ":"Insert: ",
   "Einstellungen öffnen":"Open settings","Datei laden":"Load file",
   "Weitere Formate":"More formats","Sicherung":"Backup",
+  "Alle unterstützten Dokumente":"All supported documents","Word-Dokumente":"Word documents",
+  "Text und Markdown":"Text and Markdown","Webseiten":"Web pages",
+  "OpenDocument und RTF":"OpenDocument and RTF",
   "Sicherung erstellen":"Create backup","Teilsicherung":"Partial backup",
   "Dokument laden&hellip;":"Load a document&hellip;","Dokument geladen":"Document loaded","geladen":"loaded",
   "Diese Datei ließ sich nicht lesen":"This file could not be read",
@@ -2859,27 +2862,58 @@ function looksBinary(s){
   for(let i=0;i<kopf.length;i++){const c=kopf.charCodeAt(i);if(c===0||c===0xFFFD)seltsam++}
   return seltsam>kopf.length*0.05;
 }
+/* Ein Eintrag je Zeile: Beschreibung für den Dateidialog, dazu die
+   Endungen. Beides speist sowohl die benannten Gruppen des neuen Dialogs
+   als auch die accept-Liste des alten — so kann die Liste der unterstützten
+   Formate nicht zwischen beiden Wegen auseinanderlaufen. */
+const DOKFORMATE=[
+  {n:"Word-Dokumente",   e:[".doc",".docx"]},
+  {n:"Text und Markdown",e:[".txt",".text",".md",".markdown"]},
+  {n:"Webseiten",        e:[".html",".htm"]},
+  {n:"OpenDocument und RTF",e:[".odt",".rtf"]}
+];
+const DOKENDUNGEN=DOKFORMATE.flatMap(f=>f.e);
+async function ladeDokumente(dateien){
+  if(!dateien.length)return;
+  let geladen=0,abgelehnt=0;
+  for(const f of dateien){
+    const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+    try{
+      if(ZIPFORMATE.includes(ext)){
+        const html=await zipDokument(f.name,await f.arrayBuffer());
+        if(neuesDokumentAus(f.name,html))geladen++;else abgelehnt++;
+      }else{
+        if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
+      }
+    }catch(e){abgelehnt++}
+  }
+  if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
+  else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
+}
 function loadDocumentFile(){
+  /* Chrome und Edge können benannte Formatgruppen im Dateidialog zeigen.
+     Firefox und Safari kennen showOpenFilePicker nicht, und ohne HTTPS
+     steht sie auch dort nicht bereit — dann der bisherige Weg mit einer
+     kombinierten Filterzeile. */
+  if(window.showOpenFilePicker&&window.isSecureContext){
+    const alle={description:tr("Alle unterstützten Dokumente"),
+      accept:{"application/octet-stream":DOKENDUNGEN}};
+    const gruppen=DOKFORMATE.map(f=>({description:tr(f.n),
+      accept:{"application/octet-stream":f.e}}));
+    window.showOpenFilePicker({multiple:true,types:[alle,...gruppen]})
+      .then(async handles=>ladeDokumente(await Promise.all(handles.map(h=>h.getFile()))))
+      /* Abbrechen wirft AbortError — das ist keine Störung, sondern die
+         Antwort des Nutzers, und darf keine Meldung auslösen. */
+      .catch(err=>{if(err&&err.name!=="AbortError")dateiEingabeDialog()});
+    return;
+  }
+  dateiEingabeDialog();
+}
+function dateiEingabeDialog(){
   const i=document.createElement("input");
   i.type="file";i.multiple=true;
-  i.accept=".txt,.text,.md,.markdown,.html,.htm,.doc,.docx,.odt,.rtf";
-  i.onchange=async()=>{
-    const dateien=[...i.files];if(!dateien.length)return;
-    let geladen=0,abgelehnt=0;
-    for(const f of dateien){
-      const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
-      try{
-        if(ZIPFORMATE.includes(ext)){
-          const html=await zipDokument(f.name,await f.arrayBuffer());
-          if(neuesDokumentAus(f.name,html))geladen++;else abgelehnt++;
-        }else{
-          if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
-        }
-      }catch(e){abgelehnt++}
-    }
-    if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
-    else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
-  };
+  i.accept=DOKENDUNGEN.join(",");
+  i.onchange=()=>ladeDokumente([...i.files]);
   i.click();
 }
 /* Gemeinsamer Abschluss für alle Formate */
