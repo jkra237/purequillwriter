@@ -1,4 +1,4 @@
-<meta charset="utf-8">
+﻿<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#EAE8E0">
 <meta name="description" content="Minimalistische Textverarbeitung mit Notizen und Glossar.">
@@ -11,6 +11,10 @@
   --ink:#1E2023; --ink-soft:#6A6D71; --ink-faint:#9A9C9E;
   --rule:#D6D3C9; --stamp:#8C3B2E; --manila:#EBDFC4;
   --ok:#3F6B4A; --pageedge:rgba(0,0,0,.35);
+  /* Wellenlinie der Rechtschreibprüfung. Die dunklen Schemata hellen sie auf,
+     ein sattes Rot verschwindet dort sonst im Untergrund — und brauchen dann
+     dunkle statt weißer Schrift auf der hervorgehobenen Stelle. */
+  --err:#C0392B; --on-err:#FFFFFF;
   /* Cascadia unter Windows 11, SF Mono auf dem Mac; Consolas bleibt Rückfall */
   --mono:ui-monospace,"Cascadia Mono","Segoe UI Mono","SF Mono",Menlo,Consolas,monospace;
   --ui:"Segoe UI",system-ui,sans-serif;
@@ -38,7 +42,7 @@
   --paper:#12256E; --chrome:#0B1A52; --chrome-2:#152C7C; --canvas:#050C33;
   --ink:#F3F5FF; --ink-soft:#B7C3EC; --ink-faint:#8593C9;
   --rule:#2E4AA0; --stamp:#FFC24A; --manila:#EBDFC4;
-  --ok:#7FE0A0; --pageedge:rgba(255,255,255,.28);
+  --ok:#7FE0A0; --pageedge:rgba(255,255,255,.28); --err:#FF8A8A; --on-err:#141414;
 }
 /* Bernsteinfarbene Monochrom-Bildschirme */
 [data-theme="bernstein"]{
@@ -46,7 +50,7 @@
   --paper:#171208; --chrome:#1D1709; --chrome-2:#272010; --canvas:#0A0804;
   --ink:#FFB53D; --ink-soft:#C98A19; --ink-faint:#8C6414;
   --rule:#4C3712; --stamp:#FFD98A; --manila:#EBDFC4;
-  --ok:#D9B24C; --pageedge:rgba(255,181,61,.32);
+  --ok:#D9B24C; --pageedge:rgba(255,181,61,.32); --err:#FF9A5A; --on-err:#141414;
 }
 /* Kühles, sehr helles Systemgrau moderner Mac-Programme, heller Blauakzent */
 [data-theme="alabaster"]{
@@ -67,7 +71,7 @@
   --paper:#1A1B1D; --chrome:#232426; --chrome-2:#2A2B2E; --canvas:#121314;
   --ink:#E4E2DC; --ink-soft:#9C9E9F; --ink-faint:#6E7072;
   --rule:#37383B; --stamp:#C2705F; --manila:#3A342A;
-  --ok:#7FAE8B; --pageedge:rgba(255,255,255,.22);
+  --ok:#7FAE8B; --pageedge:rgba(255,255,255,.22); --err:#E8776A; --on-err:#141414;
 }
 /* Grüner Röhrenbildschirm, wie frühe Tabellenkalkulationen und DOS-Editoren */
 [data-theme="phosphor"]{
@@ -75,7 +79,7 @@
   --paper:#02120A; --chrome:#051D10; --chrome-2:#092A18; --canvas:#010B06;
   --ink:#3CFF74; --ink-soft:#25BD56; --ink-faint:#166838;
   --rule:#124126; --stamp:#8CFFB0; --manila:#EBDFC4;
-  --ok:#4CFF88; --pageedge:rgba(60,255,116,.28);
+  --ok:#4CFF88; --pageedge:rgba(60,255,116,.28); --err:#FF6B6B; --on-err:#141414;
 }
 /* Beige Bürosoftware-Oberfläche mit türkisen Akzenten, Ende der Neunziger */
 [data-theme="lagune"]{
@@ -97,7 +101,7 @@
   --paper:#05161A; --chrome:#0A2228; --chrome-2:#0F2F37; --canvas:#02090B;
   --ink:#67E8F9; --ink-soft:#3EA9BD; --ink-faint:#256E80;
   --rule:#164E5B; --stamp:#FFD24A; --manila:#EBDFC4;
-  --ok:#5FE3A1; --pageedge:rgba(103,232,249,.3);
+  --ok:#5FE3A1; --pageedge:rgba(103,232,249,.3); --err:#FF7B7B; --on-err:#141414;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -435,6 +439,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .findbar .fopt{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:4px}
 #editor .hit{background:rgba(255,214,0,.42);border-radius:2px}
 #editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
+/* Rechtschreibfehler: dieselbe Wellenlinie, die der Browser selbst zeichnet —
+   sie ist so eingeführt, dass sie niemand erklären muss. skip-ink bleibt aus,
+   sonst reißt die Linie unter Unterlängen (g, p, j) auf. Kein eigener
+   Hintergrund, damit ein markierter Glossarbegriff darunter sichtbar bleibt. */
+#editor .spellerr{text-decoration:underline wavy var(--err);
+  text-decoration-skip-ink:none;text-underline-offset:2px;cursor:pointer}
+#editor .spellerr.cur{background:var(--err);color:var(--on-err,#fff);border-radius:2px;
+  text-decoration-color:transparent}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
 /* Bilder sind per Default nativ ziehbar - in einem contenteditable-Bereich
    legt der Browser dabei gern eine zweite Kopie am Ablageort ab. Das
@@ -731,6 +743,32 @@ body.focus .outline{display:none}
 .hit:hover{background:var(--chrome-2)}
 .hit b{font-family:Georgia,serif;font-size:14px;font-weight:600}
 .hit p{margin:2px 0 0;font-family:Georgia,serif;color:var(--ink-soft);font-size:13px}
+/* ---- Rechtschreibprüfung ---- */
+.spellbar{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+.spellbar label{color:var(--ink-soft);white-space:nowrap}
+.modal .spellbar select{width:auto;flex:1}
+.spellcount{font-family:var(--mono);font-size:11px;color:var(--ink-soft);white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+/* Der Satz drumherum in der Schrift des Dokuments: man erkennt die Stelle
+   schneller wieder, wenn sie aussieht wie im Text und nicht wie Oberfläche. */
+.spellctx{font-family:Georgia,serif;font-size:14px;line-height:1.6;color:var(--ink);
+  background:var(--chrome-2);border:1px solid var(--rule);border-radius:var(--radius);
+  padding:11px 13px;max-height:110px;overflow:auto;overflow-wrap:anywhere}
+.spellctx b{color:var(--err);font-weight:700;text-decoration:underline wavy var(--err);
+  text-decoration-skip-ink:none;text-underline-offset:2px}
+.spellsub{margin:14px 0 6px;font-size:11px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink-soft)}
+.spelllist{list-style:none;margin:0;padding:0;border:1px solid var(--rule);
+  border-radius:var(--radius);max-height:168px;overflow:auto;background:var(--paper)}
+.spelllist li{padding:7px 11px;font-family:Georgia,serif;font-size:14px;cursor:pointer;
+  border-bottom:1px solid var(--rule)}
+.spelllist li:last-child{border-bottom:none}
+.spelllist li:hover{background:var(--chrome-2)}
+.spelllist li.on{background:var(--stamp);color:var(--on-stamp,#fff)}
+.spellnone{padding:10px 11px;color:var(--ink-faint);font-family:Georgia,serif;font-size:13px}
+.spellprog{height:5px;background:var(--chrome);border-radius:3px;overflow:hidden;margin-top:12px}
+.spellprog i{display:block;height:100%;background:var(--stamp);width:0;transition:width .15s linear}
+.spellbig{font-family:Georgia,serif;font-size:15px;line-height:1.6;color:var(--ink);padding:6px 0 2px}
 .setrow{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--rule)}
 .setrow:last-child{border-bottom:none}
 .setrow label{color:var(--ink-soft)}
@@ -1252,7 +1290,27 @@ const EN={
   "wiederherstellen":"restore","Noch keine gesicherten Stände.":"No saved versions yet.",
   "Standardschrift":"Default font","Autosave":"Autosave","Sek.":"sec",
   "Sprache der Rechtschreibprüfung":"Spellcheck language",
-  "Deutsch":"German","Englisch":"English","Polnisch":"Polish","Französisch":"French",
+  "Deutsch":"German","Englisch":"English","Polnisch":"Polish","Französisch":"French","Spanisch":"Spanish",
+  /* ---- Rechtschreibprüfung ---- */
+  "Rechtschreibprüfung":"Spell check","Rechtschreibprüfung&hellip;":"Spell check&hellip;",
+  "Prüfung starten":"Start check","Vorschläge":"Suggestions",
+  "Ändern":"Change","Alle ändern":"Change all",
+  "Ignorieren":"Ignore","Alle ignorieren":"Ignore all",
+  "Ins Wörterbuch":"Add to dictionary","Ins Wörterbuch übernommen":"Added to your dictionary",
+  "Prüft den Text des Dokuments Wort für Wort.":"Checks the document's text word by word.",
+  "Gefundene Stellen werden im Text rot unterringelt. Du gehst sie dann einzeln durch.":
+    "Whatever it finds gets a red squiggle in the text. You then go through them one at a time.",
+  "Wörterbuch wird geladen&hellip;":"Loading the dictionary&hellip;",
+  "Das passiert einmal je Sprache. Danach liegt es bereit, solange das Programm offen bleibt.":
+    "This happens once per language. After that it stays ready for as long as the app is open.",
+  "Das Wörterbuch ließ sich nicht laden.":"The dictionary could not be loaded.",
+  "Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.":
+    "When the file is opened straight from disk, the browser blocks access to the “dict” folder. Opened through a web address — or in the Windows app — it works.",
+  "Keine Fehler gefunden.":"No mistakes found.",
+  "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":
+    "The running text was checked. Tables of contents, headers and footers are left out.",
+  "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":
+    "No suggestion — change it by hand, or keep it as it is.",
   "Schreibmaschinen-Scrollen":"Typewriter scrolling","aktive Zeile bleibt mittig":"active line stays centered",
   "Oberfläche beim Schreiben":"Interface while writing","tritt zurück":"fades away",
   "Speicherort":"Storage location","Dieser Browser":"This browser",
@@ -1460,6 +1518,8 @@ if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
 /* Schreibziel: standardmäßig aus; „base" ist der Stand der gewählten Einheit beim Einschalten */
 if(!S.goal)S.goal={on:false,target:1000,base:0,unit:"words"};
 if(S.goal&&!S.goal.unit)S.goal.unit="words";
+/* Eigene Wörter der Rechtschreibprüfung — gelten über alle Dokumente hinweg */
+if(!Array.isArray(S.userDict))S.userDict=[];
 ensureGlossaries();
 /* Der Abstand zur Papierkante saß früher an der Kopf-/Fußzeile, jetzt am
    Seitenformat — wie in Word unter „Layout“. Eigene Werte wandern mit. */
@@ -1914,7 +1974,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
   c.querySelectorAll(".toc").forEach(t=>t.classList.remove("sel"));
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
-  c.querySelectorAll(".hit,.glossterm").forEach(s=>{
+  c.querySelectorAll(".hit,.glossterm,.spellerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.normalize();
   d.html=c.innerHTML;
@@ -2715,7 +2775,12 @@ function resetTimer(){clearInterval(timer);
 
 /* ================= Overlays ================= */
 let lockedOvl=false;
-function closeOvl(){if(lockedOvl)return;$("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
+function closeOvl(){if(lockedOvl)return;
+  /* Der Rechtschreibdialog hinterlässt Markierungen im Text. Sie müssen auch
+     dann verschwinden, wenn er über Escape oder einen Klick daneben zugeht —
+     beide Wege kommen hier vorbei, der Knopf im Dialog nicht allein. */
+  if($("#spBody"))spellDone();
+  $("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
 function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
 
@@ -4045,6 +4110,7 @@ function toolsMenu(){
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
+    <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Signatur erstellen&hellip;")}</button>
     <div class="msep"></div>
     <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
@@ -4057,6 +4123,7 @@ function toolsMenu(){
     const a=b.dataset.t;
     if(a==="goal"){if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}}
     if(a==="find")fdOpen(true);
+    if(a==="spell"){spellState="idle";spellDialog()}
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
     if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
@@ -5745,6 +5812,652 @@ function bindOutlineDrag(){
     };
   });
 }
+/* ================= Rechtschreibprüfung ================= */
+/* Ein eigener Hunspell-Kern statt der Browserprüfung: die des Browsers zeichnet
+   zwar Wellenlinien, gibt aber keine Liste ihrer Funde heraus — man kann also
+   weder „12 Fehler“ anzeigen noch von einem zum nächsten springen. Gelesen
+   werden dieselben .aff/.dic-Dateien wie in LibreOffice (Ordner dict/).
+   Geladen wird erst beim ersten Prüfen: die Wörterbücher wiegen je nach
+   Sprache 0,5 bis 4,5 MB und haben im Startweg der App nichts verloren. */
+const SPELL_LANGS=[["de","Deutsch"],["en","Englisch"],["fr","Französisch"],
+                   ["es","Spanisch"],["pl","Polnisch"]];
+
+function spFlagSplit(s,mode){
+  if(!s)return[];
+  if(mode==="long"){const o=[];for(let i=0;i<s.length;i+=2)o.push(s.slice(i,i+2));return o}
+  if(mode==="num")return s.split(",").filter(Boolean);
+  return Array.from(s);
+}
+function spHasFlag(str,flag,mode){
+  if(!flag||!str)return false;
+  if(mode==="long"){for(let i=0;i<str.length;i+=2)if(str.slice(i,i+2)===flag)return true;return false}
+  if(mode==="num")return str.split(",").indexOf(flag)>=0;
+  return str.indexOf(flag)>=0;
+}
+function spCond(cond,isSuffix){
+  if(!cond||cond===".")return null;
+  try{return new RegExp(isSuffix?"(?:"+cond+")$":"^(?:"+cond+")")}catch(e){return null}
+}
+function spParseAff(text){
+  const A={flagMode:"single",tryChars:"",rep:[],iconv:[],breaks:[],
+    pfx:new Map(),sfx:new Map(),needAffix:null,forbidden:null,onlyInCompound:null,
+    keepCase:null,circumfix:null,noSuggest:null,compoundBegin:null,compoundMiddle:null,
+    compoundEnd:null,compoundFlag:null,compoundPermit:null,compoundMin:3,hasBreak:false};
+  const lines=text.split(/\r?\n/);
+  for(const ln of lines){const m=/^FLAG\s+(\S+)/.exec(ln);
+    if(m){A.flagMode=m[1]==="long"?"long":m[1]==="num"?"num":"single";break}}
+  const one=s=>spFlagSplit(s,A.flagMode)[0]||null;
+  let pend=null;            /* offener PFX/SFX-Block: so viele Folgezeilen sind Regeln */
+  for(let i=0;i<lines.length;i++){
+    const raw=lines[i];if(!raw)continue;
+    const ln=raw.replace(/\s+$/,"");if(!ln||ln[0]==="#")continue;
+    const p=ln.split(/\s+/),k=p[0];
+    if(pend&&k===pend.kind){
+      const strip=p[2]==="0"?"":(p[2]||"");
+      let add=p[3]==="0"?"":(p[3]||""),addFlags=null;
+      const sl=add.indexOf("/");
+      if(sl>=0){addFlags=add.slice(sl+1);add=add.slice(0,sl)}
+      if(add==="0")add="";
+      pend.ent.rules.push({strip,add,flags:addFlags,rx:spCond(p[4]||".",pend.kind==="SFX")});
+      if(--pend.left<=0)pend=null;
+      continue;
+    }
+    switch(k){
+      case "TRY":A.tryChars=p[1]||"";break;
+      case "NEEDAFFIX":case "PSEUDOROOT":A.needAffix=one(p[1]);break;
+      case "FORBIDDENWORD":A.forbidden=one(p[1]);break;
+      case "ONLYINCOMPOUND":A.onlyInCompound=one(p[1]);break;
+      case "KEEPCASE":A.keepCase=one(p[1]);break;
+      case "CIRCUMFIX":A.circumfix=one(p[1]);break;
+      case "NOSUGGEST":A.noSuggest=one(p[1]);break;
+      case "COMPOUNDBEGIN":A.compoundBegin=one(p[1]);break;
+      case "COMPOUNDMIDDLE":A.compoundMiddle=one(p[1]);break;
+      case "COMPOUNDEND":A.compoundEnd=one(p[1]);break;
+      case "COMPOUNDFLAG":A.compoundFlag=one(p[1]);break;
+      case "COMPOUNDPERMITFLAG":A.compoundPermit=one(p[1]);break;
+      case "COMPOUNDMIN":A.compoundMin=Math.max(1,parseInt(p[1],10)||3);break;
+      case "REP":if(p.length>=3&&!/^\d+$/.test(p[1]))A.rep.push([p[1],p[2]]);break;
+      case "ICONV":if(p.length>=3&&!/^\d+$/.test(p[1]))A.iconv.push([p[1],p[2]]);break;
+      case "BREAK":A.hasBreak=true;if(p.length>=2&&!/^\d+$/.test(p[1]))A.breaks.push(p[1]);break;
+      case "PFX":case "SFX":{
+        if(p.length>=4&&/^[YN]$/.test(p[2])&&/^\d+$/.test(p[3])){
+          const fl=one(p[1]),tbl=k==="PFX"?A.pfx:A.sfx;
+          let ent=tbl.get(fl);
+          if(!ent){ent={flag:fl,cross:p[2]==="Y",rules:[]};tbl.set(fl,ent)}
+          const n=parseInt(p[3],10)||0;
+          if(n>0)pend={kind:k,ent,left:n};
+        }
+        break;
+      }
+    }
+  }
+  if(!A.hasBreak)A.breaks=["-"];
+  return A;
+}
+function spParseDic(words,lines,from,count){
+  const end=Math.min(lines.length,from+count);
+  for(let i=from;i<end;i++){
+    let ln=lines[i];if(!ln)continue;
+    const tab=ln.indexOf("\t");if(tab>=0)ln=ln.slice(0,tab);
+    ln=ln.trim();if(!ln)continue;
+    let slash=-1;
+    for(let j=0;j<ln.length;j++){
+      if(ln.charCodeAt(j)===92){j++;continue}
+      if(ln.charCodeAt(j)===47){slash=j;break}
+    }
+    let w,f="";
+    if(slash>=0){w=ln.slice(0,slash);f=ln.slice(slash+1)}else w=ln;
+    if(w.indexOf("\\")>=0)w=w.replace(/\\\//g,"/");
+    if(!w)continue;
+    const sp=f.indexOf(" ");if(sp>=0)f=f.slice(0,sp);
+    const prev=words.get(w);
+    /* Gleichlautende Einträge mit verschiedenen Kennungen bleiben getrennt —
+       zusammengeklebt wären sie im Modus „long“ nicht mehr auseinanderzuhalten. */
+    words.set(w,prev===undefined?f:prev+" "+f);
+  }
+  return end;
+}
+function spIndex(A){
+  const sByChar=new Map(),sEmpty=[],pByChar=new Map(),pEmpty=[];
+  const add=(m,k,v)=>{let a=m.get(k);if(!a){a=[];m.set(k,a)}a.push(v)};
+  for(const ent of A.sfx.values())for(const rule of ent.rules){
+    const v={ent,rule};
+    if(rule.add)add(sByChar,rule.add[rule.add.length-1],v);else sEmpty.push(v)}
+  for(const ent of A.pfx.values())for(const rule of ent.rules){
+    const v={ent,rule};
+    if(rule.add)add(pByChar,rule.add[0],v);else pEmpty.push(v)}
+  return {sByChar,sEmpty,pByChar,pEmpty};
+}
+/* Akzente abtragen. NFD zerlegt die meisten, aber nicht alle: ł, ø, ß und die
+   Ligaturen haben keine Zerlegung und brauchen die Tabelle. */
+const SP_FOLD={"ł":"l","ø":"o","đ":"d","ß":"ss","æ":"ae","œ":"oe","þ":"th","ð":"d"};
+function spFold(s){
+  return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+          .replace(/[łøđßæœþð]/g,c=>SP_FOLD[c]||c);
+}
+function spMake(A,words,idx){
+  const mode=A.flagMode,memo=new Map(),user=new Set();
+  const isBad=f=>spHasFlag(f,A.forbidden,mode);
+  const onlyComp=f=>spHasFlag(f,A.onlyInCompound,mode);
+
+  function sfxOf(word,needCross){
+    const res=[];
+    const scan=arr=>{
+      if(!arr)return;
+      for(let i=0;i<arr.length;i++){
+        const ent=arr[i].ent,rule=arr[i].rule;
+        if(needCross&&!ent.cross)continue;
+        if(rule.add){
+          /* Gleich lang ist erlaubt: Regeln wie „être -> était“ ersetzen die
+             ganze Form, das Grundwort kommt dann allein aus `strip`. */
+          if(word.length<rule.add.length)continue;
+          if(!word.endsWith(rule.add))continue;
+        }
+        const stem=word.slice(0,word.length-rule.add.length)+rule.strip;
+        if(!stem)continue;
+        if(rule.rx&&!rule.rx.test(stem))continue;
+        const se=words.get(stem);if(se===undefined)continue;
+        for(const f of se.split(" ")){
+          if(!spHasFlag(f,ent.flag,mode))continue;
+          res.push({stem,ent,rule,stemFlags:f});
+        }
+      }
+    };
+    scan(idx.sByChar.get(word[word.length-1]));scan(idx.sEmpty);
+    return res;
+  }
+  function pfxOf(word){
+    const res=[];
+    const scan=arr=>{
+      if(!arr)return;
+      for(let i=0;i<arr.length;i++){
+        const ent=arr[i].ent,rule=arr[i].rule;
+        if(rule.add){
+          if(word.length<rule.add.length)continue;
+          if(!word.startsWith(rule.add))continue;
+        }
+        const inner=rule.strip+word.slice(rule.add.length);
+        if(!inner)continue;
+        if(rule.rx&&!rule.rx.test(inner))continue;
+        res.push({ent,rule,inner});
+      }
+    };
+    scan(idx.pByChar.get(word[0]));scan(idx.pEmpty);
+    return res;
+  }
+  /* Alle Zerlegungen, die im Wörterbuch aufgehen; null heißt „ausdrücklich
+     als falsch verzeichnet“ und schlägt jeden anderen Treffer. */
+  function analyze(word,inCompound){
+    const out=[];
+    const e=words.get(word);
+    if(e!==undefined)for(const f of e.split(" ")){
+      if(spHasFlag(f,A.needAffix,mode))continue;
+      if(isBad(f))return null;
+      if(!inCompound&&onlyComp(f))continue;
+      out.push(f);
+    }
+    for(const c of sfxOf(word,false)){
+      if(isBad(c.stemFlags))return null;
+      if(!inCompound&&onlyComp(c.stemFlags))continue;
+      out.push(c.stemFlags+(c.rule.flags||""));
+    }
+    for(const pc of pfxOf(word)){
+      const pe=words.get(pc.inner);
+      if(pe!==undefined)for(const f of pe.split(" ")){
+        if(!spHasFlag(f,pc.ent.flag,mode))continue;
+        if(isBad(f))return null;
+        if(!inCompound&&onlyComp(f))continue;
+        out.push(f);
+      }
+      if(!pc.ent.cross)continue;
+      for(const c of sfxOf(pc.inner,true)){
+        if(!spHasFlag(c.stemFlags,pc.ent.flag,mode))continue;
+        if(isBad(c.stemFlags))return null;
+        if(!inCompound&&onlyComp(c.stemFlags))continue;
+        out.push(c.stemFlags+(c.rule.flags||""));
+      }
+    }
+    return out;
+  }
+  /* Zusammensetzungen — im Deutschen der Normalfall („Seitenzahlformat“).
+     Jeder Teil muss die Kennung seines Platzes im Wort tragen. */
+  function partOk(part,pos){
+    const want=pos==="begin"?A.compoundBegin:pos==="middle"?A.compoundMiddle:A.compoundEnd;
+    const cands=[part];
+    /* Im Wortinneren stehen deutsche Nomen klein, im Wörterbuch groß */
+    if(part[0]&&part[0]!==part[0].toUpperCase())cands.push(part[0].toUpperCase()+part.slice(1));
+    for(const c of cands){
+      const fl=analyze(c,true);
+      if(fl===null||!fl.length)continue;
+      if(!want)return A.compoundFlag?fl.some(f=>spHasFlag(f,A.compoundFlag,mode)):true;
+      if(fl.some(f=>spHasFlag(f,want,mode)))return true;
+    }
+    return false;
+  }
+  function compoundOk(word,depth){
+    if(!A.compoundBegin&&!A.compoundFlag)return false;
+    const min=A.compoundMin;
+    if(word.length<min*2)return false;
+    for(let i=min;i<=word.length-min;i++){
+      const head=word.slice(0,i),tail=word.slice(i);
+      const heads=[head];
+      /* Fugen-s: „Arbeitszeit“ = Arbeit + s + Zeit */
+      if(head.endsWith("s")&&head.length-1>=min)heads.push(head.slice(0,-1));
+      for(const h of heads){
+        if(!partOk(h,depth===0?"begin":"middle"))continue;
+        if(partOk(tail,"end"))return true;
+        if(depth<2&&compoundOk(tail,depth+1))return true;
+      }
+    }
+    return false;
+  }
+  function iconv(s){for(const [a,b] of A.iconv)if(s.indexOf(a)>=0)s=s.split(a).join(b);return s}
+  function caseOf(w){
+    if(w===w.toLowerCase())return "lower";
+    if(w===w.toUpperCase()&&w.length>1)return "upper";
+    if(w[0]===w[0].toUpperCase()&&w.slice(1)===w.slice(1).toLowerCase())return "title";
+    return "mixed";
+  }
+  const plain=w=>{const fl=analyze(w,false);return fl!==null&&fl.length>0};
+  /* Steht das Wort so (oder gebeugt) im Wörterbuch — ohne Zusammensetzen? */
+  function directOk(word){
+    if(plain(word))return true;
+    const c=caseOf(word);
+    if(c==="title"||c==="upper"){
+      if(plain(word.toLowerCase()))return true;
+      if(c==="upper"&&plain(word[0]+word.slice(1).toLowerCase()))return true;
+    }
+    return false;
+  }
+  function checkOne(word){
+    if(directOk(word))return true;
+    if(compoundOk(word,0))return true;
+    const c=caseOf(word);
+    if((c==="title"||c==="upper")&&compoundOk(word.toLowerCase(),0))return true;
+    return false;
+  }
+  function check(raw){
+    if(!raw)return true;
+    const word=iconv(String(raw).trim());
+    if(!word)return true;
+    if(memo.has(word))return memo.get(word);
+    let ok;
+    if(user.has(word)||user.has(word.toLowerCase()))ok=true;
+    else if(/\d/.test(word))ok=true;                    /* Zahlen prüft niemand */
+    else{
+      ok=checkOne(word);
+      if(!ok)for(const b of A.breaks){                  /* an Bindestrich & Co. zerlegen */
+        if(!b||word.indexOf(b)<0)continue;
+        const parts=word.split(b).filter(Boolean);
+        if(parts.length>1&&parts.every(p=>checkOne(p)||user.has(p))){ok=true;break}
+      }
+      if(!ok&&/['’]/.test(word)){
+        const parts=word.split(/['’]/).filter(Boolean);
+        if(parts.length>1&&parts.every(p=>checkOne(p)))ok=true;
+      }
+    }
+    memo.set(word,ok);
+    return ok;
+  }
+  /* Wer „ksiazka“ statt „książka“ tippt, ist kein Zeichen daneben, sondern hat
+     die Akzente weggelassen — über Buchstabenabstände findet man das nie.
+     Darum ein zweiter Index über die akzentfreie Form, aufgebaut erst beim
+     ersten Vorschlag und nur für Wörter, die überhaupt Akzente tragen. */
+  let foldIdx=null;
+  function buildFold(){
+    foldIdx=new Map();
+    for(const w of words.keys()){
+      const f=spFold(w);
+      if(f===w.toLowerCase())continue;
+      let a=foldIdx.get(f);
+      if(!a){a=[];foldIdx.set(f,a)}
+      if(a.length<6)a.push(w);
+    }
+  }
+  function suggest(raw,limit){
+    const word=iconv(String(raw).trim());
+    if(!word)return[];
+    if(!foldIdx)buildFold();
+    const isTitle=caseOf(word)==="title";
+    const seen=new Set([word]),scored=[];
+    /* Ein Wort, das nur als Zusammensetzung aufgeht („Tipp“+„Hehler“), ist als
+       Vorschlag deutlich unwahrscheinlicher als ein Wörterbucheintrag. Im
+       Deutschen darf man alles zusammensetzen — ohne diesen Abschlag stünden
+       gebastelte Wortpaare vor dem, was der Schreibende gemeint hat. */
+    const rank=(cand,score)=>score+(directOk(cand)?0:2);
+    const fromFold=(w,score)=>{
+      if(!foldIdx.size)return;
+      const alt=foldIdx.get(spFold(w));
+      if(!alt)return;
+      for(const a of alt){
+        if(seen.has(a))continue;
+        seen.add(a);
+        if(check(a))scored.push([a,rank(a,score)]);
+      }
+    };
+    const take=(cand,score)=>{
+      if(!cand||seen.has(cand))return;
+      seen.add(cand);
+      if(check(cand)){scored.push([cand,rank(cand,score)]);return}
+      fromFold(cand,score+1);       /* kein Treffer — vielleicht fehlen nur Akzente */
+    };
+    /* Die Gewichte liegen bewusst dicht beieinander. Weit gespreizt gewinnt
+       immer die Ersetzungstabelle, und die rät phonetisch (f/ph, i/y) — sie
+       darf eine schlichte Ein-Zeichen-Korrektur nicht überholen. */
+    fromFold(word,0);                                        /* nur falsch akzentuiert */
+    take(word[0].toUpperCase()+word.slice(1),0);             /* nur groß/klein daneben */
+    take(word.toLowerCase(),0);
+    for(let i=0;i<word.length-1;i++)                         /* zwei Zeichen vertauscht */
+      take(word.slice(0,i)+word[i+1]+word[i]+word.slice(i+2),1);
+    for(const [a,b] of A.rep){                               /* typische Vertipper der Sprache */
+      let i=word.indexOf(a);
+      while(i>=0){take(word.slice(0,i)+b+word.slice(i+a.length),2);i=word.indexOf(a,i+1)}
+    }
+    const alpha=Array.from(new Set(Array.from(A.tryChars||"").filter(c=>/\p{L}/u.test(c))));
+    for(let i=0;i<word.length;i++)take(word.slice(0,i)+word.slice(i+1),2);          /* Zeichen zuviel */
+    for(let i=0;i<=word.length;i++)for(const ch of alpha)                            /* Zeichen fehlt */
+      take(word.slice(0,i)+ch+word.slice(i),2);
+    for(let i=0;i<word.length;i++)for(const ch of alpha){                            /* falsches Zeichen */
+      if(ch===word[i])continue;
+      take(word.slice(0,i)+ch+word.slice(i+1),3);
+    }
+    for(let i=2;i<word.length-1;i++){                        /* zwei Wörter statt einem */
+      const a=word.slice(0,i),b=word.slice(i);
+      if(check(a)&&check(b)&&!seen.has(a+" "+b)){seen.add(a+" "+b);scored.push([a+" "+b,7])}
+    }
+    /* Den Wortanfang vertippt man selten. Wer „Tipfehler“ schreibt, meint eher
+       „Tippfehler“ als „Typfehler“ — beides ist ein Zeichen daneben, aber nur
+       das erste teilt den Anfang. Vier Zeichen reichen als Nachweis dafür. */
+    const lw=word.toLowerCase();
+    const pref=s=>{const t=s.toLowerCase();let i=0;while(i<t.length&&i<lw.length&&t[i]===lw[i])i++;return i};
+    const rk=s=>s[1]-Math.min(pref(s[0]),4)*0.5;
+    scored.sort((x,y)=>rk(x)-rk(y)
+      ||Math.abs(x[0].length-word.length)-Math.abs(y[0].length-word.length)
+      ||x[0].localeCompare(y[0]));
+    let out=scored.map(s=>s[0]);
+    if(isTitle)out=out.map(s=>s[0]===s[0].toUpperCase()?s:s[0].toUpperCase()+s.slice(1));
+    return Array.from(new Set(out)).slice(0,limit||7);
+  }
+  return {check,suggest,addWord(w){user.add(w);memo.delete(w)},
+          size:words.size};
+}
+/* Aufbau in Häppchen: die polnische .dic hat 300.000 Zeilen, am Stück
+   geparst stünde die Oberfläche eine Sekunde lang still und der
+   Fortschrittsbalken bliebe eingefroren. */
+function spBuild(affText,dicText,onProg){
+  return new Promise(resolve=>{
+    const A=spParseAff(affText);
+    const lines=dicText.split(/\r?\n/),words=new Map();
+    let i=1;
+    (function step(){
+      const t=Date.now();
+      while(i<lines.length&&Date.now()-t<24)i=spParseDic(words,lines,i,20000);
+      if(onProg)onProg(i/lines.length);
+      if(i<lines.length)setTimeout(step,0);
+      else resolve(spMake(A,words,spIndex(A)));
+    })();
+  });
+}
+
+let SPELL=null;                 /* {lang, eng} — das geladene Wörterbuch */
+let spellHits=[],spellIdx=0,spellSug=0,spellIgnore=new Set(),spellState="idle",spellProg=0;
+
+function spellLangName(k){
+  const e=SPELL_LANGS.find(l=>l[0]===k);
+  return e?tr(e[1]):k;
+}
+async function spellLoad(lang,onProg){
+  const base="dict/"+lang;
+  const [aff,dic]=await Promise.all([
+    fetch(base+".aff").then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}),
+    fetch(base+".dic").then(r=>{if(!r.ok)throw new Error(r.status);return r.text()})
+  ]);
+  const eng=await spBuild(aff,dic,onProg);
+  (S.userDict||[]).forEach(w=>eng.addWord(w));
+  return eng;
+}
+function spellClear(){
+  const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll(".spellerr").forEach(unwrap);
+  spellHits=[];
+}
+/* Prüfung beenden: Markierungen weg und den bereinigten Stand sichern. */
+function spellDone(){
+  const hatte=spellHits.length>0;
+  spellClear();spellState="idle";
+  if(hatte){flush();dirty=true;commit();queuePaginate()}
+}
+/* Der eigentliche Durchlauf. Übersprungen wird, was der Benutzer nicht selbst
+   getippt hat: Inhalts- und Abbildungsverzeichnis bauen sich aus Überschriften
+   auf, dort wäre eine Korrektur beim nächsten Aktualisieren wieder weg. */
+function spellScan(){
+  const ed=$("#editor");if(!ed||!SPELL)return 0;
+  spellClear();
+  const eng=SPELL.eng;
+  const rx=/\p{L}[\p{L}\p{M}]*(?:['’’-][\p{L}][\p{L}\p{M}]*)*/gu;
+  const walk=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);
+  const jobs=[];let n;
+  while(n=walk.nextNode()){
+    const v=n.nodeValue;
+    if(!v||!v.trim())continue;
+    const par=n.parentElement;
+    if(!par||par.closest(".toc,.fhwrap,sup.fn"))continue;
+    const hits=[];let m;rx.lastIndex=0;
+    while(m=rx.exec(v)){
+      const w=m[0];
+      if(w.length<2||spellIgnore.has(w))continue;
+      if(eng.check(w))continue;
+      hits.push([m.index,w]);
+    }
+    if(hits.length)jobs.push([n,hits]);
+  }
+  jobs.forEach(([node,hits])=>{
+    const frag=document.createDocumentFragment();const v=node.nodeValue;let last=0;
+    hits.forEach(([at,w])=>{
+      if(at>last)frag.appendChild(document.createTextNode(v.slice(last,at)));
+      const sp=document.createElement("span");sp.className="spellerr";sp.textContent=w;
+      frag.appendChild(sp);last=at+w.length;
+    });
+    frag.appendChild(document.createTextNode(v.slice(last)));
+    node.parentNode.replaceChild(frag,node);
+  });
+  spellHits=[...ed.querySelectorAll(".spellerr")];
+  if(spellIdx>=spellHits.length)spellIdx=Math.max(0,spellHits.length-1);
+  return spellHits.length;
+}
+/* Genug Text links und rechts, um die Stelle wiederzuerkennen, aber nie so
+   viel, dass der Dialog wächst. Angeschnitten wird an der Wortgrenze. */
+function spellContext(el){
+  const block=el.closest("p,h1,h2,h3,h4,h5,h6,li,td,th,blockquote")||el.parentElement;
+  const word=el.textContent||"";
+  if(!block)return{pre:"",word,post:""};
+  const txt=block.textContent||"";
+  let off=0,n,found=false;
+  const w=document.createTreeWalker(block,NodeFilter.SHOW_TEXT);
+  while(n=w.nextNode()){if(el.contains(n)){found=true;break}off+=n.nodeValue.length}
+  if(!found)return{pre:"",word,post:""};
+  const a=Math.max(0,off-58),b=Math.min(txt.length,off+word.length+58);
+  let pre=txt.slice(a,off),post=txt.slice(off+word.length,b);
+  if(a>0){const s=pre.indexOf(" ");pre="…"+(s>=0?pre.slice(s):pre)}
+  if(b<txt.length){const s=post.lastIndexOf(" ");post=(s>=0?post.slice(0,s):post)+"…"}
+  return{pre,word,post};
+}
+function spellFocus(){
+  spellHits.forEach((h,i)=>h.classList.toggle("cur",i===spellIdx));
+  const cur=spellHits[spellIdx];
+  if(cur)cur.scrollIntoView({block:"center",behavior:"auto"});
+}
+function spellCurrentWord(){
+  const cur=spellHits[spellIdx];
+  return cur?(cur.textContent||""):"";
+}
+function spellDialog(startAt){
+  if(S.mode!=="write")setMode("write");
+  const lang=S.settings.lang;
+  if(typeof startAt==="number")spellIdx=startAt;
+
+  const body=()=>{
+    const sel=`<div class="spellbar">
+        <label>${tr("Sprache")}</label>
+        <select id="spLang">${SPELL_LANGS.map(([v,n])=>
+          `<option value="${v}" ${S.settings.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select>
+        <span class="spellcount" id="spCount"></span>
+      </div>`;
+    if(spellState==="load")
+      return sel+`<div class="spellbig">${tr("Wörterbuch wird geladen&hellip;")}</div>
+        <div class="fmttip">${tr("Das passiert einmal je Sprache. Danach liegt es bereit, solange das Programm offen bleibt.")}</div>
+        <div class="spellprog"><i id="spProg" style="width:${Math.round(spellProg*100)}%"></i></div>`;
+    if(spellState==="fail")
+      return sel+`<div class="spellbig">${tr("Das Wörterbuch ließ sich nicht laden.")}</div>
+        <div class="fmttip">${tr("Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.")}</div>`;
+    if(spellState==="clean")
+      return sel+`<div class="spellbig">${tr("Keine Fehler gefunden.")}</div>
+        <div class="fmttip">${tr("Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.")}</div>`;
+    if(spellState!=="run"||!spellHits.length)
+      return sel+`<div class="spellbig">${tr("Prüft den Text des Dokuments Wort für Wort.")}</div>
+        <div class="fmttip">${tr("Gefundene Stellen werden im Text rot unterringelt. Du gehst sie dann einzeln durch.")}</div>`;
+    const c=spellContext(spellHits[spellIdx]);
+    const sug=SPELL.eng.suggest(c.word,7);
+    spellSug=Math.min(spellSug,Math.max(0,sug.length-1));
+    return sel+`
+      <div class="spellctx">${esc(c.pre)}<b>${esc(c.word)}</b>${esc(c.post)}</div>
+      <div class="spellsub">${tr("Vorschläge")}</div>
+      ${sug.length
+        ?`<ul class="spelllist" id="spList">${sug.map((s,i)=>
+            `<li data-i="${i}" class="${i===spellSug?"on":""}">${esc(s)}</li>`).join("")}</ul>`
+        :`<div class="spelllist"><div class="spellnone">${tr("Kein Vorschlag — bitte von Hand ändern oder übernehmen.")}</div></div>`}`;
+  };
+  const foot=()=>{
+    if(spellState==="load")
+      return `<button class="btn" id="spClose">${tr("Abbrechen")}</button>`;
+    if(spellState==="fail"||spellState==="clean")
+      return `<button class="btn pri" id="spClose">${tr("Fertig")}</button>`;
+    if(spellState!=="run"||!spellHits.length)
+      return `<button class="btn" id="spClose">${tr("Abbrechen")}</button>
+        <button class="btn pri" id="spStart">${tr("Prüfung starten")}</button>`;
+    return `<button class="btn" id="spAdd" style="margin-right:auto">${tr("Ins Wörterbuch")}</button>
+      <button class="btn" id="spSkipAll">${tr("Alle ignorieren")}</button>
+      <button class="btn" id="spSkip">${tr("Ignorieren")}</button>
+      <button class="btn" id="spFixAll">${tr("Alle ändern")}</button>
+      <button class="btn pri" id="spFix">${tr("Ändern")}</button>`;
+  };
+  const paint=()=>{
+    $("#spBody").innerHTML=body();
+    $("#spFoot").innerHTML=foot();
+    const cnt=$("#spCount");
+    if(cnt)cnt.textContent=spellState==="run"&&spellHits.length
+      ?`${spellIdx+1} ${S.settings.uiLang==="en"?"of":"von"} ${spellHits.length}`:"";
+    bind();
+  };
+
+  const start=async()=>{
+    spellState="load";spellProg=0;paint();
+    try{
+      if(!SPELL||SPELL.lang!==S.settings.lang){
+        const eng=await spellLoad(S.settings.lang,p=>{
+          spellProg=p;const b=$("#spProg");if(b)b.style.width=Math.round(p*100)+"%";
+        });
+        SPELL={lang:S.settings.lang,eng};
+      }
+    }catch(e){spellState="fail";paint();return}
+    spellIgnore=new Set();spellIdx=0;spellSug=0;
+    const n=spellScan();
+    spellState=n?"run":"clean";
+    if(n)spellFocus();
+    paint();
+  };
+  /* Nach jedem Eingriff bleibt der Zeiger stehen: die Stelle danach rückt an
+     seine Position nach. Ein erneuter Durchlauf wäre unnötig und würde die
+     Stelle im Text verlieren. */
+  const drop=el=>{
+    const i=spellHits.indexOf(el);
+    if(i>=0)spellHits.splice(i,1);
+    unwrap(el);
+  };
+  const after=()=>{
+    flush();dirty=true;commit();queuePaginate();
+    if(spellIdx>=spellHits.length)spellIdx=Math.max(0,spellHits.length-1);
+    spellSug=0;
+    if(!spellHits.length){spellState="clean";paint();return}
+    spellFocus();paint();
+  };
+  const replaceCur=(txt,all)=>{
+    const cur=spellHits[spellIdx];if(!cur)return;
+    const word=cur.textContent;
+    const targets=all?spellHits.filter(h=>h.textContent===word):[cur];
+    targets.forEach(t=>{
+      const i=spellHits.indexOf(t);if(i>=0)spellHits.splice(i,1);
+      t.replaceWith(document.createTextNode(txt));
+    });
+    after();
+  };
+  const bind=()=>{
+    const cl=$("#spClose");if(cl)cl.onclick=()=>closeOvl();   /* räumt über spellDone auf */
+    const st=$("#spStart");if(st)st.onclick=start;
+    const ls=$("#spLang");if(ls)ls.onchange=e=>{
+      S.settings.lang=e.target.value;save();
+      const ed=$("#editor");if(ed)ed.setAttribute("lang",S.settings.lang);
+      spellClear();spellState="idle";paint();
+    };
+    const list=$("#spList");
+    if(list){
+      list.onclick=e=>{
+        const li=e.target.closest("li[data-i]");if(!li)return;
+        spellSug=+li.dataset.i;
+        list.querySelectorAll("li").forEach(x=>x.classList.toggle("on",x===li));
+      };
+      list.ondblclick=e=>{
+        const li=e.target.closest("li[data-i]");if(!li)return;
+        replaceCur(li.textContent);
+      };
+    }
+    const fix=$("#spFix");
+    if(fix)fix.onclick=()=>{
+      const li=$("#spList")?$("#spList").querySelector("li.on"):null;
+      if(!li)return;replaceCur(li.textContent);
+    };
+    const fixAll=$("#spFixAll");
+    if(fixAll)fixAll.onclick=()=>{
+      const li=$("#spList")?$("#spList").querySelector("li.on"):null;
+      if(!li)return;replaceCur(li.textContent,true);
+    };
+    const sk=$("#spSkip");
+    if(sk)sk.onclick=()=>{
+      if(!spellHits.length)return;
+      spellIdx=(spellIdx+1)%spellHits.length;spellSug=0;spellFocus();paint();
+    };
+    const skAll=$("#spSkipAll");
+    if(skAll)skAll.onclick=()=>{
+      const w=spellCurrentWord();if(!w)return;
+      spellIgnore.add(w);
+      spellHits.filter(h=>h.textContent===w).forEach(drop);
+      after();
+    };
+    const add=$("#spAdd");
+    if(add)add.onclick=()=>{
+      const w=spellCurrentWord();if(!w)return;
+      if(!S.userDict)S.userDict=[];
+      if(!S.userDict.includes(w))S.userDict.push(w);
+      save();SPELL.eng.addWord(w);spellIgnore.add(w);
+      spellHits.filter(h=>h.textContent===w).forEach(drop);
+      toast(tr("Ins Wörterbuch übernommen"));
+      after();
+    };
+  };
+
+  /* Breite Ausführung: die fünf Schaltflächen brauchen zusammen 514px und
+     brächen im 520er-Dialog immer um — die Hauptaktion „Ändern“ stünde dann
+     allein in einer zweiten Zeile. */
+  overlay(`<div class="modal wide"><h3>${tr("Rechtschreibprüfung")}</h3>
+    <div class="pad" id="spBody"></div>
+    <div class="rowend" id="spFoot"></div></div>`);
+  paint();
+  /* Sind die Fehler schon markiert (Klick auf ein rot unterringeltes Wort),
+     springt der Dialog gleich dorthin, statt wieder von vorn anzufangen. */
+  if(spellState==="run"&&spellHits.length)spellFocus();
+  else if(SPELL&&SPELL.lang===S.settings.lang&&spellState==="idle")start();
+}
+
 /* ================= Suchen und Ersetzen ================= */
 let fdIdx=0,fdHits=[];
 function fdClear(){
@@ -6357,7 +7070,7 @@ function settings(){
       <input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
       <input type="number" id="sInt" value="${s.interval}" min="5" max="600" style="flex:0 0 74px"><span style="color:var(--ink-faint)">${tr("Sek.")}</span></div></div>
     <div class="setrow"><label>${tr("Sprache der Rechtschreibprüfung")}</label><div class="ctl">
-      <select id="sLang">${[["de","Deutsch"],["en","Englisch"],["pl","Polnisch"],["fr","Französisch"]].map(([v,n])=>`<option value="${v}" ${s.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select></div></div>
+      <select id="sLang">${SPELL_LANGS.map(([v,n])=>`<option value="${v}" ${s.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select></div></div>
     <div class="setrow"><label>${tr("Schreibmaschinen-Scrollen")}</label><div class="ctl">
       <input type="checkbox" id="sTw" ${s.typewriter!==false?"checked":""} style="width:auto">
       <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("aktive Zeile bleibt mittig")}</span></div></div>
@@ -6586,6 +7299,9 @@ document.addEventListener("keydown",e=>{
   if(as&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
   if(as&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
   if(as&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
+  /* F7 statt Alt+Umschalt: die Taste ist für die Rechtschreibprüfung seit
+     Jahrzehnten gesetzt und wird vom Browser nicht beansprucht. */
+  if(e.key==="F7"&&!c&&!e.altKey){e.preventDefault();spellState="idle";spellDialog();return}
   if(as&&e.key.toLowerCase()==="l"){e.preventDefault();cmd("justifyLeft");return}
   if(as&&e.key.toLowerCase()==="e"){e.preventDefault();cmd("justifyCenter");return}
   if(as&&e.key.toLowerCase()==="r"){e.preventDefault();cmd("justifyRight");return}
@@ -6672,6 +7388,13 @@ $("#tools").addEventListener("input",e=>{
     const f=$("#gSearch");f&&f.focus()}
 });
 $("#pane").addEventListener("click",e=>{
+  /* Ein rot unterringeltes Wort anklicken führt direkt zu seiner Stelle im
+     Dialog — der übliche Weg, wenn man beim Lesen darüber stolpert. */
+  const se=e.target.closest(".spellerr");
+  if(se&&spellHits.length){
+    const i=spellHits.indexOf(se);
+    if(i>=0){spellState="run";spellSug=0;spellDialog(i);return}
+  }
   const pv=e.target.closest("[data-prev]");
   if(pv){jumpTo(pv.dataset.prev,(curOcc[pv.dataset.prev]||0)-1);return}
   const nx=e.target.closest("[data-next]");

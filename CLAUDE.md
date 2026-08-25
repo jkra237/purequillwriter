@@ -2,6 +2,8 @@
 
 Ein einziges HTML-File (`index.html`) als vollständige Textverarbeitung — kein Build-Schritt, keine Abhängigkeiten, kein Framework. CSS und JS stecken inline im selben File. Gehostet über GitHub Pages: https://jkra237.github.io/purequillwriter/
 
+Einzige Ausnahme vom Ein-File-Prinzip ist `dict/` — die Hunspell-Wörterbücher der Rechtschreibprüfung (je Sprache `.dic` + `.aff` + Lizenztext, zusammen ~8,6 MB). Das sind Daten, kein Code: die Prüf-Engine selbst steckt wie alles andere inline in `index.html`, und geladen werden die Dateien erst beim ersten Prüfen. `fetch()` auf `dict/` scheitert beim direkten Öffnen per `file://` — die Rechtschreibprüfung braucht eine echte Adresse (GitHub Pages, lokaler Server, Tauri).
+
 Kommunikation mit dem Nutzer läuft auf Deutsch. Commit-Nachrichten sind bewusst auf Englisch und ausführlich — sie tragen die Begründung hinter jeder Entscheidung, nicht nur das Diff. Bei Unklarheiten zu einer vergangenen Änderung: `git log` und die jeweilige Commit-Message lesen, bevor man rät.
 
 ## Architektur
@@ -12,6 +14,7 @@ Kommunikation mit dem Nutzer läuft auf Deutsch. Commit-Nachrichten sind bewusst
 - **`doc()`** liefert das aktive Dokument, `fmtOf(d)` sein Seitenformat (inkl. `hd`/`fd` für Kopf-/Fußzeilenabstand).
 - **Glossare**: mehrere benannte Sammlungen (`S.glossaries`), jedes Dokument hat eine `glossaryId` (auch `null` = bewusst ohne Zuordnung). Ansehen (`curGView()`) und Zuordnen sind getrennte Konzepte — ein Reiterklick zeigt nur an, bindet nichts um.
 - **Kopf-/Fußzeile**: Der Textkörper weicht ihr aus (`hfBand()`), Überlappung ist strukturell ausgeschlossen. Der Ziehgriff ändert die Bandhöhe (= Seitenrand), nicht die Position der Zeile.
+- **Rechtschreibprüfung**: eigener Hunspell-Kern (`spParseAff`/`spParseDic`/`spMake`), weil die Browserprüfung zwar unterringelt, ihre Funde aber nicht herausgibt — ohne Liste kein „12 Fehler" und kein Weiterspringen. Gefundene Stellen werden als `<span class="spellerr">` in den Text gehängt; `flush()` streift sie beim Speichern ab (dieselbe Liste wie `.hit`/`.glossterm`), im Dokument landen sie nie. `closeOvl()` räumt sie auf, damit auch Escape und der Klick neben den Dialog sauber beenden.
 
 ## Design-Tokens
 

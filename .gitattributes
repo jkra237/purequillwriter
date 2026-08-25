@@ -1,0 +1,5 @@
+# Die Hunspell-Wörterbücher bleiben Byte für Byte so, wie sie von upstream
+# kommen: keine Zeilenende-Umschreibung. Sie sind unveränderte Fremddaten unter
+# eigener Lizenz (siehe dict/*.LICENSE.txt) und sollen auch so nachweisbar sein.
+dict/*.dic -text
+dict/*.aff -text
