@@ -1456,7 +1456,12 @@ function startupDialog(){
       <span style="flex:.6;background:${t.c[2]}"></span>`;
   };
   paintSwatch(S.settings.theme);
-  $("#stLang").onchange=()=>{S.settings.uiLang=$("#stLang").value;save();applyStaticLabels();startupDialog()};
+  /* Die Prüfsprache zieht mit: wer die Oberfläche auf Deutsch stellt, schreibt
+     mit großer Wahrscheinlichkeit auch deutsch. Vorher blieb sie auf Englisch
+     stehen, und die Rechtschreibprüfung schlug beim ersten Öffnen die falsche
+     Sprache vor. Im Prüfdialog selbst lässt sie sich weiterhin umstellen. */
+  $("#stLang").onchange=()=>{S.settings.uiLang=$("#stLang").value;
+    S.settings.lang=S.settings.uiLang;save();applyStaticLabels();startupDialog()};
   $("#stTheme").onchange=()=>{
     S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
   $("#stNew").onclick=startNew;
@@ -1515,6 +1520,11 @@ if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
 if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"};
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
+/* Die Prüfsprache lief früher unabhängig von der Oberfläche und blieb dadurch
+   auf Englisch stehen, auch wenn die Oberfläche längst auf Deutsch lief — die
+   Rechtschreibprüfung schlug dann die falsche Sprache vor. Einmalig
+   angleichen; wer sie danach umstellt, behält seine Wahl. */
+if(S.settings&&!S.langAngeglichen){S.settings.lang=S.settings.uiLang;S.langAngeglichen=true}
 /* Schreibziel: standardmäßig aus; „base" ist der Stand der gewählten Einheit beim Einschalten */
 if(!S.goal)S.goal={on:false,target:1000,base:0,unit:"words"};
 if(S.goal&&!S.goal.unit)S.goal.unit="words";
@@ -7093,7 +7103,11 @@ function settings(){
     </div><div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
   const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.autosave=$("#sAuto").checked;
     s.interval=Math.max(5,+$("#sInt").value||30);s.lang=$("#sLang").value;
-    const langChanged=s.uiLang!==$("#sUiLang").value;s.uiLang=$("#sUiLang").value;
+    const uiNeu=$("#sUiLang").value,langChanged=s.uiLang!==uiNeu;s.uiLang=uiNeu;
+    /* Die Oberflächensprache umzustellen zieht die Prüfsprache mit — sonst
+       schlüge die Rechtschreibprüfung weiter die alte vor. Wer nur das
+       Sprachfeld darunter ändert, behält seine Wahl. */
+    if(langChanged)s.lang=uiNeu;
     s.typewriter=$("#sTw").checked;s.dimUi=$("#sDim").checked;s.tofEnabled=$("#sTof").checked;
     if(!s.dimUi)document.body.classList.remove("typing");
     save();resetTimer();applyTheme();applyStaticLabels();render();
