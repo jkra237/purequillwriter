@@ -455,6 +455,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   text-decoration-skip-ink:none;text-underline-offset:2px;cursor:pointer}
 #editor .spellerr.cur{background:var(--err);color:var(--on-err,#fff);border-radius:2px;
   text-decoration-color:transparent}
+/* Textbereinigung: eigene Farbe (Akzent statt Rot), damit ein Fund hier nicht
+   wie ein Rechtschreibfehler aussieht — es ist ja keiner. white-space:pre nur
+   im Kontext-Ausschnitt des Dialogs (siehe .cleanctx b), nicht hier: im echten
+   Dokument soll der Text weiterfließen wie zuvor, nur markiert. */
+#editor .cleanerr{background:color-mix(in srgb, var(--stamp) 24%, transparent);
+  border-radius:2px;cursor:pointer}
+#editor .cleanerr.cur{background:var(--stamp);color:var(--on-stamp,#fff);border-radius:2px}
+#editor p.cleanp{outline:1px dashed var(--stamp);outline-offset:-1px;border-radius:2px}
+#editor p.cleanp.cur{background:color-mix(in srgb, var(--stamp) 16%, transparent)}
+.cleanctx b{white-space:pre;background:color-mix(in srgb, var(--stamp) 24%, transparent);
+  border-radius:2px;color:var(--ink)}
 #editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
 /* Bilder sind per Default nativ ziehbar - in einem contenteditable-Bereich
    legt der Browser dabei gern eine zweite Kopie am Ablageort ab. Das
@@ -1559,6 +1570,12 @@ en:{
   "Keine Fehler gefunden.":"No mistakes found.",
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"The running text was checked. Tables of contents, headers and footers are left out.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"No suggestion — change it by hand, or keep it as it is.",
+  "Text bereinigen":"Clean up text","Text bereinigen&hellip;":"Clean up text&hellip;",
+  "Doppeltes Leerzeichen":"Double space","Leerzeichen am Zeilenende":"Trailing space",
+  "Geschütztes Leerzeichen":"Non-breaking space","Mehrere leere Absätze":"Repeated empty paragraphs",
+  "Nichts zu bereinigen gefunden.":"Nothing to clean up.",
+  "Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.":
+    "Checked for double and non-breaking spaces, trailing spaces, and repeated empty paragraphs.",
   "Schreibmaschinen-Scrollen":"Typewriter scrolling",
   "aktive Zeile bleibt mittig":"active line stays centered",
   "Oberfläche beim Schreiben":"Interface while writing",
@@ -2118,6 +2135,12 @@ fr:{
   "Keine Fehler gefunden.":"Aucune erreur trouvée.",
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Le texte courant a été vérifié. Les tables des matières, en-têtes et pieds de page sont exclus.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Aucune suggestion — modifiez à la main ou conservez tel quel.",
+  "Text bereinigen":"Nettoyer le texte","Text bereinigen&hellip;":"Nettoyer le texte&hellip;",
+  "Doppeltes Leerzeichen":"Espace double","Leerzeichen am Zeilenende":"Espace en fin de ligne",
+  "Geschütztes Leerzeichen":"Espace insécable","Mehrere leere Absätze":"Paragraphes vides répétés",
+  "Nichts zu bereinigen gefunden.":"Rien à nettoyer.",
+  "Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.":
+    "Vérifié : espaces doubles et insécables, espaces en fin de ligne, et paragraphes vides répétés.",
   "Schreibmaschinen-Scrollen":"Défilement machine à écrire",
   "aktive Zeile bleibt mittig":"la ligne active reste centrée",
   "Oberfläche beim Schreiben":"Interface pendant l'écriture",
@@ -2677,6 +2700,12 @@ es:{
   "Keine Fehler gefunden.":"No se encontraron errores.",
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Se revisó el texto principal. Los índices, encabezados y pies de página quedan excluidos.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Sin sugerencia — modifícalo a mano o consérvalo tal cual.",
+  "Text bereinigen":"Limpiar texto","Text bereinigen&hellip;":"Limpiar texto&hellip;",
+  "Doppeltes Leerzeichen":"Espacio doble","Leerzeichen am Zeilenende":"Espacio al final de línea",
+  "Geschütztes Leerzeichen":"Espacio de no separación","Mehrere leere Absätze":"Párrafos vacíos repetidos",
+  "Nichts zu bereinigen gefunden.":"Nada que limpiar.",
+  "Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.":
+    "Se comprobaron espacios dobles y de no separación, espacios al final de línea, y párrafos vacíos repetidos.",
   "Schreibmaschinen-Scrollen":"Desplazamiento de máquina de escribir",
   "aktive Zeile bleibt mittig":"la línea activa permanece centrada",
   "Oberfläche beim Schreiben":"Interfaz al escribir",
@@ -3236,6 +3265,12 @@ pt:{
   "Keine Fehler gefunden.":"Nenhum erro encontrado.",
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"O texto principal foi verificado. Sumários, cabeçalhos e rodapés ficam de fora.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Nenhuma sugestão — altere manualmente ou mantenha como está.",
+  "Text bereinigen":"Limpar texto","Text bereinigen&hellip;":"Limpar texto&hellip;",
+  "Doppeltes Leerzeichen":"Espaço duplo","Leerzeichen am Zeilenende":"Espaço no fim da linha",
+  "Geschütztes Leerzeichen":"Espaço não separável","Mehrere leere Absätze":"Parágrafos vazios repetidos",
+  "Nichts zu bereinigen gefunden.":"Nada para limpar.",
+  "Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.":
+    "Verificados espaços duplos e não separáveis, espaços no fim da linha, e parágrafos vazios repetidos.",
   "Schreibmaschinen-Scrollen":"Rolagem de máquina de escrever",
   "aktive Zeile bleibt mittig":"a linha ativa permanece centralizada",
   "Oberfläche beim Schreiben":"Interface ao escrever",
@@ -4052,8 +4087,9 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
   c.querySelectorAll(".toc").forEach(t=>t.classList.remove("sel"));
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
-  c.querySelectorAll(".hit,.glossterm,.spellerr").forEach(s=>{
+  c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
+  c.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
   c.normalize();
   d.html=c.innerHTML;
   /* Titel aus dem bereinigten HTML, nicht aus dem lebenden Editor: dort steht
@@ -4880,6 +4916,7 @@ function closeOvl(){if(lockedOvl)return;
      dann verschwinden, wenn er über Escape oder einen Klick daneben zugeht —
      beide Wege kommen hier vorbei, der Knopf im Dialog nicht allein. */
   if($("#spBody"))spellDone();
+  if($("#clBody"))cleanDone();
   $("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
 function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
@@ -6459,6 +6496,7 @@ function toolsMenu(){
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
+    <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>
     <div class="msep"></div>
     <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
@@ -6472,6 +6510,7 @@ function toolsMenu(){
     if(a==="goal"){if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}}
     if(a==="find")fdOpen(true);
     if(a==="spell"){spellState="idle";spellDialog()}
+    if(a==="clean")cleanDialog();
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
     if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
@@ -8811,6 +8850,248 @@ function spellDialog(startAt){
      springt der Dialog gleich dorthin, statt wieder von vorn anzufangen. */
   if(spellState==="run"&&spellHits.length)spellFocus();
   else if(SPELL&&SPELL.lang===S.settings.lang&&spellState==="idle")start();
+}
+
+/* ================= Text bereinigen ================= */
+/* Vier stille Übeltäter, die man beim Schreiben kaum sieht: doppelte
+   Leerzeichen (im Editor unsichtbar, weil der Browser sie zusammenzieht —
+   aber TXT/Markdown/Word-Export zeigen sie ungeschönt), geschützte Leerzeichen
+   aus eingefügtem Web-/Word-Text, Leerzeichen direkt vor einem Zeilenumbruch
+   oder Absatzende, und mehrfach leere Absätze vom versehentlichen
+   Mehrfach-Enter. Läuft nach demselben Muster wie die Rechtschreibprüfung:
+   scannen, markieren, einzeln durchgehen — hier aber ohne Wörterbuch, also
+   ohne Ladezeit, deshalb startet der Scan sofort beim Öffnen. */
+const CLEAN_SKIP=".toc,.fhwrap,sup.fn";
+const CLEAN_BLOCKSEL="p,h1,h2,h3,h4,h5,h6,li,td,th,blockquote,figcaption";
+let cleanHits=[],cleanIdx=0,cleanState="idle";
+
+function cleanClear(){
+  const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll(".cleanerr").forEach(unwrap);
+  ed.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
+  cleanHits=[];
+}
+function cleanDone(){
+  const hatte=cleanHits.length>0;
+  cleanClear();cleanState="idle";
+  if(hatte){flush();dirty=true;commit();queuePaginate()}
+}
+/* Innerhalb eines Textknotens: Leerzeichen am Blockende zuerst (das Ende
+   „gewinnt“ gegen die anderen beiden), dann Mehrfach-Leerzeichen, dann
+   geschützte Leerzeichen — jeweils nur, was noch nicht beansprucht ist, damit
+   sich die drei Funde nie überlappen. */
+function cleanScanNode(v,boundary){
+  const claimed=new Array(v.length).fill(false);
+  const runs=[];
+  if(boundary){
+    const m=/[ \t ]+$/.exec(v);
+    if(m){runs.push({at:m.index,len:m[0].length,kind:"trail"});
+      for(let i=m.index;i<v.length;i++)claimed[i]=true}
+  }
+  let rx=/ {2,}/g,m;
+  while(m=rx.exec(v)){
+    if(claimed[m.index])continue;
+    runs.push({at:m.index,len:m[0].length,kind:"dbl"});
+    for(let i=m.index;i<m.index+m[0].length;i++)claimed[i]=true;
+  }
+  rx=/ +/g;
+  while(m=rx.exec(v)){
+    if(claimed[m.index])continue;
+    runs.push({at:m.index,len:m[0].length,kind:"nbsp"});
+  }
+  runs.sort((a,b)=>a.at-b.at);
+  return runs;
+}
+/* Blockweise statt über den ganzen Editor auf einmal: nur so lässt sich
+   sauber feststellen, welcher Textknoten der letzte vor einem <br> oder dem
+   Blockende ist — das Kriterium für „steht am Zeilenende“. Verschachtelte
+   Blöcke (kommen in diesem Dokumentmodell praktisch nicht vor) werden
+   übersprungen, weil ihr TreeWalker sie ohnehin schon mit erfasst. */
+function cleanFindTextRuns(ed){
+  const all=[...ed.querySelectorAll(CLEAN_BLOCKSEL)];
+  const blocks=all.filter(b=>!b.parentElement.closest(CLEAN_BLOCKSEL));
+  const jobs=[];
+  blocks.forEach(block=>{
+    if(block.closest(CLEAN_SKIP))return;
+    const seq=[];
+    const walk=document.createTreeWalker(block,NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT,{
+      acceptNode(node){
+        if(node.nodeType===3)return NodeFilter.FILTER_ACCEPT;
+        if(node.nodeType===1&&node.tagName==="BR")return NodeFilter.FILTER_ACCEPT;
+        return NodeFilter.FILTER_SKIP;
+      }});
+    let x;while(x=walk.nextNode())seq.push(x);
+    const boundary=new Set();let lastText=null;
+    for(const item of seq){
+      if(item.nodeType===3)lastText=item;
+      else{if(lastText)boundary.add(lastText);lastText=null}
+    }
+    if(lastText)boundary.add(lastText);
+    seq.forEach(tn=>{
+      if(tn.nodeType!==3||!tn.nodeValue)return;
+      const runs=cleanScanNode(tn.nodeValue,boundary.has(tn));
+      if(runs.length)jobs.push([tn,runs]);
+    });
+  });
+  return jobs;
+}
+/* Läufe aus mehr als einer leeren Zeile hintereinander — auf oberster Ebene,
+   eine tiefer verschachtelte Leerstelle (in einer Tabellenzelle etwa) ist
+   etwas anderes als ein versehentliches Mehrfach-Enter im Fließtext. */
+function cleanFindEmptyParaRuns(ed){
+  const isEmpty=el=>{
+    if(el.tagName!=="P"||el.closest(CLEAN_SKIP))return false;
+    const t=(el.textContent||"").replace(/​/g,"").trim();
+    return !t&&!el.querySelector("figure,img,table");
+  };
+  /* Bis zu zwei leere Absätze hintereinander gelten als bewusster Abstand
+     (z. B. zwischen Abschnitten) und werden nicht angerührt — erst ab drei
+     ist es der typische Unfall durch mehrfaches Enter. */
+  const groups=[];let run=[];
+  [...ed.children].forEach(el=>{
+    if(isEmpty(el))run.push(el);
+    else{if(run.length>2)groups.push(run.slice());run=[]}
+  });
+  if(run.length>2)groups.push(run.slice());
+  return groups;
+}
+function cleanScan(){
+  const ed=$("#editor");if(!ed)return 0;
+  cleanClear();
+  cleanFindTextRuns(ed).forEach(([node,runs])=>{
+    const frag=document.createDocumentFragment();const v=node.nodeValue;let last=0;
+    runs.forEach(r=>{
+      if(r.at>last)frag.appendChild(document.createTextNode(v.slice(last,r.at)));
+      const sp=document.createElement("span");
+      sp.className="cleanerr";sp.dataset.kind=r.kind;
+      sp.textContent=v.slice(r.at,r.at+r.len);
+      frag.appendChild(sp);last=r.at+r.len;
+    });
+    frag.appendChild(document.createTextNode(v.slice(last)));
+    node.parentNode.replaceChild(frag,node);
+  });
+  const groups=cleanFindEmptyParaRuns(ed);
+  groups.forEach(g=>g.slice(2).forEach(p=>p.classList.add("cleanp")));
+  cleanHits=[
+    ...[...ed.querySelectorAll(".cleanerr")].map(el=>({kind:el.dataset.kind,el})),
+    ...groups.map(g=>({kind:"para",el:g[2],group:g}))
+  ];
+  /* Nach Position im Dokument sortieren, damit „Weiter“ sich wie Lesen anfühlt
+     — .cleanerr kommt schon in DOM-Reihenfolge aus querySelectorAll, die
+     Absatz-Funde müssen erst eingemischt werden. */
+  cleanHits.sort((a,b)=>{
+    const p=a.el.compareDocumentPosition(b.el);
+    return(p&Node.DOCUMENT_POSITION_FOLLOWING)?-1:(p&Node.DOCUMENT_POSITION_PRECEDING)?1:0;
+  });
+  return cleanHits.length;
+}
+function cleanFocus(){
+  cleanHits.forEach((h,i)=>{
+    const els=h.kind==="para"?h.group.slice(2):[h.el];
+    els.forEach(el=>el.classList.toggle("cur",i===cleanIdx));
+  });
+  const cur=cleanHits[cleanIdx];
+  const target=cur&&(cur.kind==="para"?cur.group[1]:cur.el);
+  if(target)target.scrollIntoView({block:"center",behavior:"auto"});
+}
+/* Anwenden: „dbl“ auf ein Leerzeichen kürzen, „trail“ ganz entfernen, „nbsp“
+   in ebenso viele normale Leerzeichen umwandeln (nicht zu einem — geschützte
+   Leerzeichen stehen manchmal absichtlich für mehrere Zeichen Abstand),
+   „para“ entfernt die übrigen Absätze eines Laufs und lässt genau einen stehen. */
+function cleanApply(h){
+  if(h.kind==="para"){h.group.slice(2).forEach(p=>p.remove());return}
+  let rep="";
+  if(h.kind==="dbl")rep=" ";
+  else if(h.kind==="nbsp")rep=" ".repeat(h.el.textContent.length);
+  h.el.replaceWith(document.createTextNode(rep));
+}
+/* Ignorieren heißt: Markierung weg, Text bleibt exakt wie er war. */
+function cleanIgnoreMark(h){
+  if(h.kind==="para")h.group.slice(2).forEach(p=>p.classList.remove("cleanp"));
+  else unwrap(h.el);
+}
+function cleanContextText(h){
+  const c=spellContext(h.el);
+  const mid=h.kind==="nbsp"?"·".repeat(c.word.length):c.word;
+  return{pre:c.pre,mid,post:c.post};
+}
+function cleanDialog(){
+  if(S.mode!=="write")setMode("write");
+  const KIND={
+    dbl:()=>tr("Doppeltes Leerzeichen"),
+    trail:()=>tr("Leerzeichen am Zeilenende"),
+    nbsp:()=>tr("Geschütztes Leerzeichen"),
+    para:()=>tr("Mehrere leere Absätze")
+  };
+  const body=()=>{
+    if(cleanState==="clean")
+      return`<div class="spellbig">${tr("Nichts zu bereinigen gefunden.")}</div>
+        <div class="fmttip">${tr("Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.")}</div>`;
+    if(cleanState!=="run"||!cleanHits.length)return"";
+    const h=cleanHits[cleanIdx];
+    if(h.kind==="para"){
+      const n=h.group.length;   /* die Gesamtlänge des Laufs — zwei davon bleiben stehen */
+      return`<div class="spellsub">${KIND.para()}</div>
+        <div class="spellctx">${PL(
+          `${n} aufeinanderfolgende leere Absätze werden auf zwei gekürzt.`,
+          `${n} consecutive empty paragraphs will be reduced to two.`,
+          `${n} paragraphes vides consécutifs seront réduits à deux.`,
+          `${n} párrafos vacíos consecutivos se reducirán a dos.`,
+          `${n} parágrafos vazios consecutivos serão reduzidos a dois.`)}</div>`;
+    }
+    const c=cleanContextText(h);
+    return`<div class="spellsub">${KIND[h.kind]()}</div>
+      <div class="spellctx cleanctx">${esc(c.pre)}<b>${esc(c.mid)}</b>${esc(c.post)}</div>`;
+  };
+  const foot=()=>{
+    if(cleanState==="clean")return`<button class="btn pri" id="clClose">${tr("Fertig")}</button>`;
+    if(cleanState!=="run"||!cleanHits.length)
+      return`<button class="btn" id="clClose">${tr("Abbrechen")}</button>`;
+    return`<button class="btn" id="clSkipAll">${tr("Alle ignorieren")}</button>
+      <button class="btn" id="clSkip">${tr("Ignorieren")}</button>
+      <button class="btn" id="clFixAll">${tr("Alle ändern")}</button>
+      <button class="btn pri" id="clFix">${tr("Ändern")}</button>`;
+  };
+  const paint=()=>{
+    $("#clBody").innerHTML=body();
+    $("#clFoot").innerHTML=foot();
+    const cnt=$("#clCount");
+    if(cnt)cnt.textContent=cleanState==="run"&&cleanHits.length
+      ?`${cleanIdx+1} ${OFWORD()} ${cleanHits.length}`:"";
+    bind();
+  };
+  const after=()=>{
+    flush();dirty=true;commit();queuePaginate();
+    if(cleanIdx>=cleanHits.length)cleanIdx=Math.max(0,cleanHits.length-1);
+    if(!cleanHits.length){cleanState="clean";paint();return}
+    cleanFocus();paint();
+  };
+  const bind=()=>{
+    const cl=$("#clClose");if(cl)cl.onclick=()=>closeOvl();   /* räumt über cleanDone auf */
+    const fix=$("#clFix");if(fix)fix.onclick=()=>{
+      const h=cleanHits[cleanIdx];if(!h)return;
+      cleanApply(h);cleanHits.splice(cleanIdx,1);after();
+    };
+    const fixAll=$("#clFixAll");if(fixAll)fixAll.onclick=()=>{
+      cleanHits.slice().forEach(cleanApply);cleanHits=[];after();
+    };
+    const sk=$("#clSkip");if(sk)sk.onclick=()=>{
+      if(!cleanHits.length)return;
+      cleanIdx=(cleanIdx+1)%cleanHits.length;cleanFocus();paint();
+    };
+    const skAll=$("#clSkipAll");if(skAll)skAll.onclick=()=>{
+      cleanHits.forEach(cleanIgnoreMark);cleanHits=[];
+      flush();dirty=true;commit();queuePaginate();
+      cleanState="clean";paint();
+    };
+  };
+  overlay(`<div class="modal"><h3>${tr("Text bereinigen")}</h3>
+    <div class="pad" id="clBody"></div>
+    <div class="rowend" id="clFoot"></div></div>`);
+  const n=cleanScan();
+  cleanIdx=0;cleanState=n?"run":"clean";
+  if(n)cleanFocus();
+  paint();
 }
 
 /* ================= Suchen und Ersetzen ================= */
