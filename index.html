@@ -250,6 +250,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 
 /* ---- Schreibfläche ---- */
 .sheet{flex:1;overflow-y:auto;padding:26px 18px 90px;background:var(--canvas)}
+/* Ohne Dokument bleibt .sheet leer und damit nur so hoch wie sein Padding -
+   .pane ist kein Flex-Container, also greift obiges flex:1 dort nicht. Darunter
+   schimmert sonst .body{background:var(--paper)} (das Papierweiß) durch. */
+.sheet:empty{min-height:100%}
 .paper{position:relative;flex:0 0 auto}
 .sheetpage{position:absolute;left:0;right:0;background:var(--paper);
   border:1px solid var(--pageedge);box-shadow:0 2px 9px rgba(0,0,0,.22)}
@@ -1304,11 +1308,11 @@ const EN={
   "Breite ziehen":"Drag to resize",
   "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":
     "Every heading in the document appears here. No headings in the document yet.",
-  "Gilt nur, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.":
-    "Only works when you don't have a custom footer turned on. With a custom footer, add the page number there yourself using {page}.",
+  "Wichtig: Die hier eingestellte Seitenzahl wird nur angezeigt, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.":
+    "Important: page numbers set here only appear when no custom footer is turned on. With a custom footer, add the page number there yourself using {page}.",
   "Anzeigen ab Seite":"Show starting from page","Erste Nummer":"First number",
-  "Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt. Bei „Erste Nummer“ gibst du die Zahl ein, mit der die erste sichtbare Seite beginnen soll.":
-    "Pages before this won't show a number — handy for a cover page. Whatever you enter under “First number” is the number that first visible page will show."
+  "Erste Nummer: Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt. Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":
+    "First number: pages before this won't show a number — handy for a cover page. What you enter here is the number the first visible page will display."
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -4901,8 +4905,8 @@ function pageNumDialog(){
       <label>${tr("Erste Nummer")}</label>
       <input type="number" id="pnStart" value="${S.pageNumStart||1}" min="1" style="flex:0 0 62px" ${off?"disabled":""}>
     </div>
-    <div class="fmttip" style="margin-top:10px">${tr("Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt. Bei „Erste Nummer“ gibst du die Zahl ein, mit der die erste sichtbare Seite beginnen soll.")}</div>
-    <div class="fmttip" style="margin-top:6px">${tr("Gilt nur, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.")}</div>`;
+    <div class="fmttip" style="margin-top:10px">${tr("Erste Nummer: Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt. Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.")}</div>
+    <div class="fmttip" style="margin-top:6px">${tr("Wichtig: Die hier eingestellte Seitenzahl wird nur angezeigt, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.")}</div>`;
   };
   overlay(`<div class="modal"><h3>${tr("Seitenzahlen")}</h3>
     <div class="pad" id="pnBody">${body()}</div>
