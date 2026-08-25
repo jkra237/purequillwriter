@@ -1106,7 +1106,8 @@ const KEY="lw.v1";
 let mem=null;
 
 /* ================= Übersetzung ================= */
-const EN={
+const I18N={
+en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
   "Datei":"File","Ansicht":"View","Format":"Format","Dokument":"Document","Notiz":"Note","Glossar":"Glossary","Einstellungen":"Settings",
@@ -1390,9 +1391,1135 @@ const EN={
     "Pages before this won't show a number — handy for a cover page.",
   "Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":
     "What you enter here is the number the first visible page will display."
+},
+fr:{
+  "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
+  "Seitenumbruch":"Saut de page",
+  "Datei":"Fichier",
+  "Ansicht":"Affichage",
+  "Format":"Format",
+  "Dokument":"Document",
+  "Notiz":"Note",
+  "Glossar":"Glossaire",
+  "Einstellungen":"Paramètres",
+  "Schreiben (Alt+1)":"Écrire (Alt+1)",
+  "Notizen (Alt+2)":"Notes (Alt+2)",
+  "Glossar (Alt+3)":"Glossaire (Alt+3)",
+  "Suchen":"Rechercher",
+  "Vorheriger Treffer":"Occurrence précédente",
+  "Nächster Treffer (Enter)":"Occurrence suivante (Entrée)",
+  "Schließen (Esc)":"Fermer (Échap)",
+  "Ersetzen durch":"Remplacer par",
+  "Ersetzen":"Remplacer",
+  "Alle":"Tout",
+  "Groß-/Kleinschreibung":"Respecter la casse",
+  "Ganzes Wort":"Mot entier",
+  "Fokusmodus":"Mode focus",
+  "verlassen (Esc)":"quitter (Échap)",
+  "Neues Dokument":"Nouveau document",
+  "Dokument schließen":"Fermer le document",
+  "Vorher exportieren":"Exporter d'abord",
+  "Abbrechen":"Annuler",
+  "Schließen":"Fermer",
+  "Schriftart":"Police",
+  "Schriftgröße":"Taille de police",
+  "Fett (Strg+B)":"Gras (Ctrl+B)",
+  "Kursiv (Strg+I)":"Italique (Ctrl+I)",
+  "Unterstrichen (Strg+U)":"Souligné (Ctrl+U)",
+  "Absatzformat":"Style de paragraphe",
+  "Fließtext":"Texte courant",
+  "Überschrift 1":"Titre 1",
+  "Überschrift 2":"Titre 2",
+  "Überschrift 3":"Titre 3",
+  "Aufzählung":"Liste à puces",
+  "Nummerierung":"Liste numérotée",
+  "Linksbündig":"Aligné à gauche",
+  "Zentriert":"Centré",
+  "Blocksatz":"Justifié",
+  "Einrücken":"Augmenter le retrait",
+  "Ausrücken":"Réduire le retrait",
+  "Einrücken (Tab)":"Augmenter le retrait (Tab)",
+  "Ausrücken (⇧ Tab)":"Réduire le retrait (⇧ Tab)",
+  "Bild einfügen":"Insérer une image",
+  "Link einfügen (Alt+⇧+K)":"Insérer un lien (Alt+⇧+K)",
+  "Tabelle einfügen":"Insérer un tableau",
+  "Verkleinern (Alt+⇧+Minus)":"Réduire (Alt+⇧+Moins)",
+  "Vergrößern (Alt+⇧+Plus)":"Agrandir (Alt+⇧+Plus)",
+  "Vorgaben":"Préréglages",
+  "Zoomstufe eintippen und Eingabe drücken":"Saisir un niveau de zoom et appuyer sur Entrée",
+  "Zoomstufe wählen":"Choisir le niveau de zoom",
+  "Eigene Größe&hellip;":"Taille personnalisée&hellip;",
+  "Leseansicht":"Vue de lecture",
+  "Druckvorschau":"Aperçu avant impression",
+  "Seiten":"Pages",
+  "Schreibziel":"Objectif d'écriture",
+  "Schreibziel einstellen":"Définir l'objectif d'écriture",
+  "Dokument-Memo":"Mémo du document",
+  "Handlungsnotizen, offene Fragen, Recherche-Links …":"Notes d'intrigue, questions ouvertes, liens de recherche…",
+  "Gehört zu diesem Dokument und erscheint nicht im Text.":"Appartient à ce document et n'apparaît pas dans le texte.",
+  "Ziel in dieser Sitzung":"Objectif pour cette session",
+  "Bereits geschafft":"Déjà atteint",
+  "Zähleinheit":"Unité de comptage",
+  "Zurücksetzen":"Réinitialiser",
+  "Ausschalten":"Désactiver",
+  "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Est compté ce qui s'est ajouté depuis l'activation ou la réinitialisation — tous documents confondus.",
+  "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insérer un saut de page (Alt+⇧+Entrée)",
+  "Neue Notiz":"Nouvelle note",
+  "Notizen durchsuchen":"Rechercher dans les notes",
+  "Im ausgewählten Dokument":"Dans le document sélectionné",
+  "Ohne Verknüpfung":"Sans lien",
+  "Rasteransicht (frei verschiebbar)":"Vue en grille (déplaçable librement)",
+  "Listenansicht":"Vue en liste",
+  "Neuer Eintrag":"Nouvelle entrée",
+  "Glossar durchsuchen":"Rechercher dans le glossaire",
+  "Sortierung":"Trier par",
+  "Datum":"Date",
+  "Kategorie":"Catégorie",
+  "Neues Glossar anlegen":"Créer un nouveau glossaire",
+  "Neues Glossar":"Nouveau glossaire",
+  "Glossar löschen":"Supprimer le glossaire",
+  "Glossar gelöscht":"Glossaire supprimé",
+  "Glossar verwalten":"Gérer le glossaire",
+  "wird von diesem Dokument benutzt":"utilisé par ce document",
+  "Für dieses Dokument verwenden":"Utiliser pour ce document",
+  "Dieses Dokument benutzt jetzt":"Ce document utilise maintenant",
+  "Nur dann werden diese Begriffe im Text markiert.":"Ce n'est qu'alors que ces termes sont mis en évidence dans le texte.",
+  "Eintrag":"entrée",
+  "Einträge":"entrées",
+  "noch keine Einträge":"aucune entrée pour l'instant",
+  "Dokumenten":"documents",
+  "ein Dokument":"un document",
+  "Zugeordnete Dokumente":"Documents associés",
+  "Zugeordnet":"Associé",
+  "keinem Dokument":"aucun document",
+  "Ohne Zuordnung":"Non associé",
+  "keine Definition":"aucune définition",
+  "Ohne Kategorie":"Sans catégorie",
+  "Rechtsbündig (Alt+⇧+R)":"Aligné à droite (Alt+⇧+R)",
+  "Kopf- und Fußzeile von der Papierkante":"En-tête et pied de page depuis le bord de la page",
+  "Kopf / Fuß":"En-tête / Pied",
+  "Von Rand":"Depuis le bord",
+  "Höhe":"Hauteur",
+  "Bis hierher bleibt die Seite frei von Text":"Jusqu'ici, la page reste libre de texte",
+  "Kopf-/Fußzeilenbereich ziehen":"Faire glisser la zone d'en-tête/pied de page",
+  "Schriftfarbe":"Couleur du texte",
+  "Texthervorhebung":"Surlignage",
+  "Eigene Farbe":"Couleur personnalisée",
+  "Farbe entfernen":"Supprimer la couleur",
+  "Hervorhebung entfernen":"Supprimer le surlignage",
+  "Rot":"Rouge",
+  "Ocker":"Ocre",
+  "Grün":"Vert",
+  "Petrol":"Bleu pétrole",
+  "Blau":"Bleu",
+  "Violett":"Violet",
+  "Braun":"Marron",
+  "Grau":"Gris",
+  "Gelb":"Jaune",
+  "Rosa":"Rose",
+  "Orange":"Orange",
+  "Dieses Dokument ist keinem Glossar zugeordnet.":"Ce document n'est associé à aucun glossaire.",
+  "Welche Dokumente benutzen dieses Glossar?":"Quels documents utilisent ce glossaire ?",
+  "Importieren / Exportieren":"Importer / Exporter",
+  "Exportieren":"Exporter",
+  "Importieren":"Importer",
+  "Als Tabelle":"Comme tableau",
+  "Als Sicherung":"Comme sauvegarde",
+  "Datei wählen":"Choisir un fichier",
+  "Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.":"Un tableau avec terme, définition et catégorie par colonne — ou un fichier .json sauvegardé ici.",
+  "Als neues Glossar anlegen":"Créer comme nouveau glossaire",
+  "Keine Begriffe in dieser Datei gefunden":"Aucun terme trouvé dans ce fichier",
+  "hinzugefügt":"ajouté",
+  "schon vorhanden":"déjà présent",
+  "CSV exportieren":"Exporter en CSV",
+  "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":"Pas encore de notes.<br>Créez-en une avec <b>Alt+Maj+N</b> — cela fonctionne même en pleine écriture, sans changer de vue.<br>Un clic ouvre une note pour la modifier, un glisser la déplace.",
+  "hier":"ici",
+  "Löschen":"Supprimer",
+  "löschen":"supprimer",
+  "bearbeiten":"modifier",
+  "Manila":"Manille",
+  "Zitrone":"Citron",
+  "Salbei":"Sauge",
+  "Himmel":"Ciel",
+  "Rosé":"Rosé",
+  "Flieder":"Lilas",
+  "Papier":"Papier",
+  "Überschrift":"Titre",
+  "Leere Notiz":"Note vide",
+  "Verkleinern":"Réduire",
+  "Maximieren":"Agrandir",
+  "Kleiner":"Plus petit",
+  "Größer":"Plus grand",
+  "Durchgestrichen":"Barré",
+  "Hochgestellt":"Exposant",
+  "Tiefgestellt":"Indice",
+  "Zitat":"Citation",
+  "Begriff":"Terme",
+  "Definition":"Définition",
+  "Kategorie (optional)":"Catégorie (facultatif)",
+  "Verwerfen":"Annuler",
+  "Eintrag sichern":"Enregistrer l'entrée",
+  "angelegt":"créé",
+  "Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.":"Le glossaire est vide.<br>Créez des termes qui reviennent dans vos textes — ils pourront ensuite être mis en évidence dans le texte et consultés à tout moment avec <b>Alt+⇧+G</b>.",
+  "Wörter zählen":"Compter les mots",
+  "Seitenformat ändern":"Modifier le format de page",
+  "Wörter":"mots",
+  "Zeichen":"caractères",
+  "Nicht gesichert":"Non enregistré",
+  "Gesichert ":"Enregistré ",
+  "Bereit":"Prêt",
+  "aus":"désactivé",
+  "an":"activé",
+  "Kommandopalette öffnen":"Ouvrir la palette de commandes",
+  "Angelegt":"Créé",
+  "Unterschrift hinzufügen":"Ajouter une signature",
+  "Unterschrift hinzufügen&hellip;":"Ajouter une signature&hellip;",
+  "Unterschrift einfügen":"Insérer la signature",
+  "Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.":"Signez en maintenant le bouton de la souris enfoncé. Seule la signature elle-même est insérée, sans la marge blanche autour.",
+  "Ansicht ":"Affichage ",
+  "Fokusmodus umschalten":"Basculer le mode focus",
+  "Seitenränder umschalten":"Basculer les marges de page",
+  "Farbschema wählen":"Choisir un thème de couleurs",
+  "Schema: ":"Thème : ",
+  "Wörter zählen&hellip;":"Compter les mots&hellip;",
+  "Seitenzahlen umschalten":"Basculer les numéros de page",
+  "Seitenbreite einpassen":"Ajuster à la largeur de page",
+  "Silberton":"Ton argenté",
+  "Platin":"Platine",
+  "Enzian":"Gentiane",
+  "Bernstein":"Ambre",
+  "Tinte":"Encre",
+  "Suchen und ersetzen":"Rechercher et remplacer",
+  "Rechtsbündig":"Aligné à droite",
+  "Link einfügen oder bearbeiten…":"Insérer ou modifier un lien…",
+  "Seitenumbruch einfügen":"Insérer un saut de page",
+  "Formatierung entfernen":"Effacer la mise en forme",
+  "Rückgängig":"Annuler",
+  "Wiederholen":"Rétablir",
+  "Neues Dokument mit Format":"Nouveau document avec format",
+  "Kopf- und Fußzeile":"En-tête et pied de page",
+  "Wechseln zu: ":"Passer à : ",
+  "Jetzt sichern":"Enregistrer maintenant",
+  "Versionsverlauf":"Historique des versions",
+  "Drucken":"Imprimer",
+  "Als TXT exportieren":"Exporter en TXT",
+  "Als Markdown exportieren":"Exporter en Markdown",
+  "Als Word-Dokument exportieren":"Exporter en document Word",
+  "Als HTML exportieren":"Exporter en HTML",
+  "Als PDF exportieren":"Exporter en PDF",
+  "Im Druckdialog Als PDF speichern als Ziel wählen":"Dans la boîte de dialogue d'impression, choisir Enregistrer au format PDF comme destination",
+  "Markierte Stelle mit Notiz verknüpfen":"Lier la sélection à une note",
+  "Notizen am Seitenrand umschalten":"Basculer les notes en marge",
+  "Markierungen im Text umschalten":"Basculer les surlignages dans le texte",
+  "Pinnwand filtern: ":"Filtrer le tableau : ",
+  "Öffnen: ":"Ouvrir : ",
+  "Nachschlagen":"Consulter",
+  "Begriffe im Text nicht markieren":"Ne pas surligner les termes dans le texte",
+  "Begriffe im Text markieren":"Surligner les termes dans le texte",
+  "Als CSV exportieren":"Exporter en CSV",
+  "Einfügen: ":"Insérer : ",
+  "Einstellungen öffnen":"Ouvrir les paramètres",
+  "Datei laden":"Charger un fichier",
+  "Weitere Formate":"Autres formats",
+  "Sicherung":"Sauvegarde",
+  "Alle unterstützten Dokumente":"Tous les documents pris en charge",
+  "Word-Dokumente":"Documents Word",
+  "Text und Markdown":"Texte et Markdown",
+  "Webseiten":"Pages web",
+  "OpenDocument und RTF":"OpenDocument et RTF",
+  "Sicherung erstellen":"Créer une sauvegarde",
+  "Teilsicherung":"Sauvegarde partielle",
+  "Dokument laden&hellip;":"Charger un document&hellip;",
+  "Dokument geladen":"Document chargé",
+  "geladen":"chargé",
+  "Diese Datei ließ sich nicht lesen":"Ce fichier n'a pas pu être lu",
+  "Glossar als Tabelle":"Glossaire en tableau",
+  "Dieses Dokument mit Notizen":"Ce document avec ses notes",
+  "Nur Notizen und Glossar":"Notes et glossaire uniquement",
+  "Sicherung laden&hellip;":"Charger une sauvegarde&hellip;",
+  "Dieses Dokument mit Notizen sichern":"Sauvegarder ce document avec ses notes",
+  "Nur Notizen und Glossar sichern":"Sauvegarder uniquement notes et glossaire",
+  "Alles sichern — Vollsicherung":"Tout sauvegarder — sauvegarde complète",
+  "Notizen und Glossar":"Notes et glossaire",
+  "Vollsicherung":"Sauvegarde complète",
+  "Vollsicherung laden":"Charger la sauvegarde complète",
+  "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Une sauvegarde complète remplace tous les documents, notes et entrées de glossaire actuellement enregistrés ici.",
+  "Diese Datei passt nicht zu PureQuill Writer":"Ce fichier ne correspond pas à PureQuill Writer",
+  "Hinzugefügt":"Ajouté",
+  "Nichts Neues in dieser Datei":"Rien de nouveau dans ce fichier",
+  "Dokumente":"documents",
+  "Glossareintrag":"entrée de glossaire",
+  "Glossareinträge":"entrées de glossaire",
+  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"Dans le stockage de ce navigateur, séparé par adresse — pas un fichier sur le disque. La suppression des données du navigateur efface tout.",
+  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Copie de sauvegarde via <b>Fichier &rarr; Créer une sauvegarde</b>.",
+  "Schreibmaschinen-Scrollen einschalten":"Activer le défilement machine à écrire",
+  "Schreibmaschinen-Scrollen ausschalten":"Désactiver le défilement machine à écrire",
+  "Schreibmaschinen-Scrollen an":"Défilement machine à écrire activé",
+  "Oberfläche beim Schreiben ausblenden":"Masquer l'interface pendant l'écriture",
+  "Oberfläche immer sichtbar lassen":"Toujours garder l'interface visible",
+  "Autosave ausschalten":"Désactiver l'Autosave",
+  "Autosave einschalten":"Activer l'Autosave",
+  "Autosave an":"Autosave activé",
+  "Autosave aus":"Autosave désactivé",
+  "Alles als Datei sichern":"Tout enregistrer en fichier",
+  "Gesichert":"Enregistré",
+  "Geladen":"Chargé",
+  "Datei nicht lesbar":"Fichier illisible",
+  "Verknüpft":"Lié",
+  "Verknüpfung gelöst":"Lien supprimé",
+  "Nur im Schreibmodus":"Uniquement en mode écriture",
+  "Erst eine Textstelle markieren":"Sélectionnez d'abord du texte",
+  "Notiz gesichert":"Note enregistrée",
+  "Eintrag gesichert":"Entrée enregistrée",
+  "Stand wiederhergestellt":"Version restaurée",
+  "Format geändert":"Format modifié",
+  "Einfügen bitte mit Strg+V":"Veuillez coller avec Ctrl+V",
+  "Keine Bilddatei":"Pas un fichier image",
+  "Bild konnte nicht gelesen werden":"Impossible de lire l'image",
+  "Großes Bild — der Browser-Speicher ist begrenzt":"Image volumineuse — le stockage du navigateur est limité",
+  "Speicher voll — bitte über Datei → Alles sichern als Datei auslagern":"Stockage plein — veuillez exporter via Fichier → Tout enregistrer en fichier",
+  "Browser-Speicher nicht verfügbar — bitte regelmäßig als Datei sichern":"Stockage du navigateur indisponible — veuillez sauvegarder régulièrement en fichier",
+  "Befehl oder Suche":"Commande ou recherche",
+  "Tippen, um zu filtern":"Tapez pour filtrer",
+  "Kein passender Befehl.":"Aucune commande correspondante.",
+  "Neues Dokument&hellip;":"Nouveau document&hellip;",
+  "Seitenformat&hellip;":"Format de page&hellip;",
+  "Kopf- und Fußzeile&hellip;":"En-tête et pied de page&hellip;",
+  "Alles sichern als Datei":"Tout enregistrer en fichier",
+  "Versionsverlauf&hellip;":"Historique des versions&hellip;",
+  "Dokument exportieren":"Exporter le document",
+  "Nur Text":"Texte brut",
+  "Webseite":"Page web",
+  "Word-Dokument":"Document Word",
+  "Automatisch sichern":"Enregistrement automatique",
+  "Einstellungen&hellip;":"Paramètres&hellip;",
+  "Alle Befehle":"Toutes les commandes",
+  "Seite":"Page",
+  "Seitenränder":"Marges de page",
+  "Seitenzahlen":"Numéros de page",
+  "Notizen am Seitenrand":"Notes en marge",
+  "Markierungen im Text":"Surlignages dans le texte",
+  "Darstellung":"Affichage",
+  "Glossarbegriffe markieren":"Surligner les termes du glossaire",
+  "Oberfläche ausblenden":"Masquer l'interface pendant la frappe",
+  "Farbschema&hellip;":"Thème de couleurs&hellip;",
+  "Ausschneiden":"Couper",
+  "Kopieren":"Copier",
+  "Einfügen":"Coller",
+  "Alles auswählen":"Tout sélectionner",
+  "Link bearbeiten":"Modifier le lien",
+  "Link einfügen":"Insérer un lien",
+  "Bild einfügen&hellip;":"Insérer une image&hellip;",
+  "Notiz anheften":"Épingler la note",
+  "Notiz hervorheben":"Mettre la note en évidence",
+  "Verknüpfung lösen":"Supprimer le lien",
+  "Im Glossar nachschlagen":"Consulter le glossaire",
+  "Als Glossareintrag anlegen":"Créer comme entrée de glossaire",
+  "Tabelle":"Tableau",
+  "Zeile darüber einfügen":"Insérer une ligne au-dessus",
+  "Zeile darunter einfügen":"Insérer une ligne en dessous",
+  "Spalte links einfügen":"Insérer une colonne à gauche",
+  "Spalte rechts einfügen":"Insérer une colonne à droite",
+  "Kopfzeile umschalten":"Basculer la ligne d'en-tête",
+  "Zeile löschen":"Supprimer la ligne",
+  "Spalte löschen":"Supprimer la colonne",
+  "Tabelle löschen":"Supprimer le tableau",
+  "Tabelle einfügen&hellip;":"Insérer un tableau&hellip;",
+  "Notiz mit dieser Stelle verknüpfen":"Lier une note à cet endroit",
+  "Notiz suchen oder neue anlegen":"Rechercher une note ou en créer une",
+  "neu":"nouveau",
+  "Seitenformat":"Format de page",
+  "Standard für alles":"Standard pour tout",
+  "Anschriftfeld oben":"Zone d'adresse en haut",
+  "Manuskript für Verlage":"Manuscrit pour éditeurs",
+  "Broschüre, Heft":"Brochure, cahier",
+  "Buchsatz":"Composition de livre",
+  "Nordamerika":"Amérique du Nord",
+  "Brief DIN 5008":"Lettre DIN 5008",
+  "Normseite":"Page manuscrit standard",
+  "Taschenbuch":"Livre de poche",
+  "Eigene Maße":"Dimensions personnalisées",
+  "Breite und Höhe frei wählen":"Choisir librement largeur et hauteur",
+  "Ausrichtung":"Orientation",
+  "Hochformat":"Portrait",
+  "Querformat":"Paysage",
+  "Seitengröße in mm":"Taille de la page en mm",
+  "Breite / Höhe":"Largeur / Hauteur",
+  "Ränder in mm":"Marges en mm",
+  "Oben / Unten":"Haut / Bas",
+  "Links / Rechts":"Gauche / Droite",
+  "merken":"mémoriser",
+  "Zeilenabstand":"Interligne",
+  "Standard":"par défaut",
+  "Zeilenabstand und Maße":"Interligne et dimensions",
+  "Als Standard":"Par défaut",
+  "Dieses Format für neue Dokumente voreinstellen":"Prédéfinir ce format pour les nouveaux documents",
+  "Nur bei „Eigene Maße“ änderbar":"Modifiable uniquement avec « Dimensions personnalisées »",
+  "Satzspiegel":"Zone de texte",
+  "Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.":"Vous pouvez aussi faire glisser les marges gauche et droite dans la règle au-dessus de la page.",
+  "Anlegen":"Créer",
+  "Übernehmen":"Appliquer",
+  "Zeichen (mit Leerzeichen)":"Caractères (avec espaces)",
+  "Zeichen (ohne Leerzeichen)":"Caractères (sans espaces)",
+  "Absätze":"Paragraphes",
+  "Normseiten (1500 Z.)":"Pages manuscrit (1500 car.)",
+  "Lesedauer (≈ 180 W/min)":"Durée de lecture (≈ 180 mots/min)",
+  "Markierte Auswahl":"Sélection",
+  "Kopfzeile":"En-tête",
+  "Fußzeile":"Pied de page",
+  "Text oder Platzhalter":"Texte ou espace réservé",
+  "Doppelklick: Kopfzeile":"Double-clic : en-tête",
+  "Doppelklick: Fußzeile":"Double-clic : pied de page",
+  "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Astuce : un double-clic sur la marge supérieure ou inférieure modifie l'en-tête et le pied de page directement dans le document.",
+  "Kopfzeile entfernt":"En-tête supprimé",
+  "Fußzeile entfernt":"Pied de page supprimé",
+  "Entfernen":"Supprimer",
+  "Abstand zum Seitenrand ziehen":"Faire glisser la distance au bord de la page",
+  "Ziehen, um die Bildgröße zu ändern":"Faire glisser pour redimensionner l'image",
+  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Plusieurs lignes sont possibles ; dans le document, Maj+Entrée ajoute une ligne.",
+  "Links":"Gauche",
+  "Mitte":"Centre",
+  "Rechts":"Droite",
+  "Abstand":"Espacement",
+  "Seitenzahl":"Numéro de page",
+  "Gesamtseiten":"Total des pages",
+  "Titel":"Titre",
+  "Seitenzahl einfügen":"Insérer le numéro de page",
+  "Gesamtseiten einfügen":"Insérer le total des pages",
+  "Titel einfügen":"Insérer le titre",
+  "Datum einfügen":"Insérer la date",
+  "Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.":"Les espaces réservés sont remplacés page par page. Les réglages s'appliquent à ce document.",
+  "Fertig":"Terminé",
+  "Größe wählen":"Choisir la taille",
+  "Erste Zeile als Kopfzeile":"Première ligne comme en-tête",
+  "Anzeigetext":"Texte affiché",
+  "Text im Dokument":"Texte dans le document",
+  "Ziel":"Cible",
+  "Ohne Vorsatz wird <b>https://</b> ergänzt. Im Dokument öffnest du einen Link mit Strg&nbsp;+&nbsp;Klick.":"Sans préfixe, <b>https://</b> est ajouté. Dans le document, ouvrez un lien avec Ctrl&nbsp;+&nbsp;clic.",
+  "Link entfernen":"Supprimer le lien",
+  "kein Treffer":"aucun résultat",
+  "Bild":"Image",
+  "Unterschrift":"Légende",
+  "Alternativtext":"Texte alternatif",
+  "Bildunterschrift":"Légende de l'image",
+  "Beschreibung des Bildes":"Description de l'image",
+  "Wird angezeigt, wenn das Bild fehlt, und von Vorlesesoftware verwendet.":"Affiché si l'image est manquante, et utilisé par les lecteurs d'écran.",
+  "Glossar nachschlagen":"Consulter le glossaire",
+  "Begriff eingeben":"Saisir un terme",
+  "Kein Treffer. Neue Einträge legst du mit Alt+3 an.":"Aucun résultat. Créez de nouvelles entrées avec Alt+3.",
+  "Notiz anlegen":"Créer une note",
+  "Gedanke, Recherchelücke, Umbauidee …":"Idée, lacune de recherche, piste de réécriture…",
+  "Notiz sichern":"Enregistrer la note",
+  "wiederherstellen":"restaurer",
+  "Noch keine gesicherten Stände.":"Pas encore de versions enregistrées.",
+  "Standardschrift":"Police par défaut",
+  "Autosave":"Autosave",
+  "Sek.":"s",
+  "Sprache der Rechtschreibprüfung":"Langue de la vérification orthographique",
+  "Deutsch":"Allemand",
+  "Englisch":"Anglais",
+  "Polnisch":"Polonais",
+  "Französisch":"Français",
+  "Spanisch":"Espagnol",
+  "Ohne Formatierung eingefügt":"Collé sans mise en forme",
+  "Nur Text übernehmen":"Conserver le texte seul",
+  "Rechtschreibprüfung":"Vérification orthographique",
+  "Rechtschreibprüfung&hellip;":"Vérification orthographique&hellip;",
+  "Prüfung starten":"Démarrer la vérification",
+  "Vorschläge":"Suggestions",
+  "Ändern":"Modifier",
+  "Alle ändern":"Tout modifier",
+  "Ignorieren":"Ignorer",
+  "Alle ignorieren":"Tout ignorer",
+  "Ins Wörterbuch":"Ajouter au dictionnaire",
+  "Ins Wörterbuch übernommen":"Ajouté au dictionnaire",
+  "Prüft den Text des Dokuments Wort für Wort.":"Vérifie le texte du document mot par mot.",
+  "Gefundene Stellen werden im Text rot unterringelt. Du gehst sie dann einzeln durch.":"Les endroits trouvés sont soulignés en rouge dans le texte. Vous les parcourez ensuite un par un.",
+  "Wörterbuch wird geladen&hellip;":"Chargement du dictionnaire&hellip;",
+  "Das passiert einmal je Sprache. Danach liegt es bereit, solange das Programm offen bleibt.":"Cela se produit une fois par langue. Ensuite, il reste prêt tant que le programme est ouvert.",
+  "Das Wörterbuch ließ sich nicht laden.":"Le dictionnaire n'a pas pu être chargé.",
+  "Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.":"En ouvrant le fichier directement depuis le disque, le navigateur bloque l'accès au dossier « dict ». Ouvert via une adresse web — ou dans l'application Windows — cela fonctionne.",
+  "Keine Fehler gefunden.":"Aucune erreur trouvée.",
+  "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Le texte courant a été vérifié. Les tables des matières, en-têtes et pieds de page sont exclus.",
+  "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Aucune suggestion — modifiez à la main ou conservez tel quel.",
+  "Schreibmaschinen-Scrollen":"Défilement machine à écrire",
+  "aktive Zeile bleibt mittig":"la ligne active reste centrée",
+  "Oberfläche beim Schreiben":"Interface pendant l'écriture",
+  "tritt zurück":"s'estompe",
+  "Speicherort":"Emplacement de stockage",
+  "Dieser Browser":"Ce navigateur",
+  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Copie de sauvegarde via <b>Fichier &rarr; Tout enregistrer en fichier</b>.",
+  "Warmes Naturweiß, Standard":"Blanc naturel chaud, standard",
+  "Azur":"Azur",
+  "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris système clair des applications Mac modernes — rappelle Pages",
+  "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Gris-blanc neutre des traitements de texte Windows actuels — rappelle Word",
+  "Klassische Macintosh-Grautöne":"Tons de gris classiques du Macintosh",
+  "Graue Systemoberfläche der 90er":"Interface système grise des années 90",
+  "Blauer Textmodus der DOS-Zeit":"Mode texte bleu de l'ère DOS",
+  "Monochromer Bernsteinbildschirm":"Écran ambre monochrome",
+  "Dunkelmodus":"Mode sombre",
+  "Phosphor":"Phosphore",
+  "Lagune":"Lagune",
+  "Aquamarin":"Aigue-marine",
+  "Zyan":"Cyan",
+  "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Bureau Windows gris avec encadré turquoise — rappelle Lotus Word Pro",
+  "Hercules":"Hercules",
+  "Solar":"Solar",
+  "Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe":"Noir avec cyan et jaune — rappelle Lotus 1-2-3 en couleur",
+  "Umbenennen":"Renommer",
+  "Farbe":"Couleur",
+  "Keine Farbe":"Aucune couleur",
+  "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Écran cathodique vert — rappelle Lotus 1-2-3 et les premiers éditeurs DOS",
+  "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interface de bureau beige avec turquoise — rappelle Lotus SmartSuite '97",
+  "Sprache der Benutzeroberfläche":"Langue de l'interface",
+  "Willkommen":"Bienvenue",
+  "Sprache":"Langue",
+  "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "Ohne Titel":"Sans titre",
+  "Notizen":"Notes",
+  "Strg":"Ctrl",
+  "Schreiben":"Écrire",
+  "Fett":"Gras",
+  "Kursiv":"Italique",
+  "Unterstrichen":"Souligné",
+  "Vergrößern":"Agrandir",
+  "Normseiten":"pages manuscrit",
+  "Farbschema":"Thème de couleurs",
+  "Vorige Stelle":"Emplacement précédent",
+  "Nächste Stelle":"Emplacement suivant",
+  "1 Stelle":"1 emplacement",
+  "Diese Verknüpfung lösen":"Supprimer ce lien",
+  "lösen":"supprimer",
+  "Notiz und alle Verknüpfungen löschen":"Supprimer la note et tous ses liens",
+  "Linker Rand":"Marge gauche",
+  "Rechter Rand":"Marge droite",
+  "Breite":"Largeur",
+  "Fußnote":"Note de bas de page",
+  "Fußnote ohne Text":"Note de bas de page sans texte",
+  "Fußnotentext":"Texte de la note",
+  "Fußnote löschen":"Supprimer la note",
+  "Fußnote einfügen":"Insérer une note de bas de page",
+  "Fußnoten":"Notes de bas de page",
+  "Inhaltsverzeichnis":"Table des matières",
+  "Inhaltsverzeichnis einfügen":"Insérer une table des matières",
+  "Aktualisieren":"Actualiser",
+  "Noch keine Überschriften im Dokument.":"Pas encore de titres dans le document.",
+  "Im Dokument gibt es bereits ein Inhaltsverzeichnis.":"Le document contient déjà une table des matières.",
+  "Inhaltsverzeichnis anpassen":"Personnaliser la table des matières",
+  "Stil":"Style",
+  "Klassisch":"Classique",
+  "Punktlinie und Seitenzahl, wie in Word":"Ligne de points et numéro de page, comme dans Word",
+  "Einfach":"Simple",
+  "Nur die Überschriften, ohne Seitenzahl":"Juste les titres, sans numéro de page",
+  "Modern":"Moderne",
+  "Farbiger Rand, Seitenzahl als Chip":"Bordure colorée, numéro de page en pastille",
+  "Nummeriert":"Numéroté",
+  "Mit Gliederungsnummern wie 1.2":"Avec des numéros de plan comme 1.2",
+  "Ebenen":"Niveaux",
+  "Nur Ebene 1":"Niveau 1 seulement",
+  "Bis Ebene 2":"Jusqu'au niveau 2",
+  "Bis Ebene 3":"Jusqu'au niveau 3",
+  "Seitenzahlen anzeigen":"Afficher les numéros de page",
+  "Trennlinie":"Ligne de séparation",
+  "Punkte":"Points",
+  "Striche":"Tirets",
+  "Linie":"Ligne",
+  "Ohne":"Aucune",
+  "Gesamtes Verzeichnis aktualisieren":"Actualiser toute la table",
+  "(ohne Text)":"(sans texte)",
+  "Eintragstext lässt sich direkt im Verzeichnis anklicken und umschreiben. „Gesamtes Verzeichnis aktualisieren“ verwirft solche Änderungen wieder und liest die Überschriften neu ein.":"Le texte d'une entrée peut être cliqué et réécrit directement dans la table. « Actualiser toute la table » annule ces modifications et relit les titres.",
+  "Im Inhaltsverzeichnis einblenden":"Afficher dans la table des matières",
+  "Im Inhaltsverzeichnis ausblenden":"Masquer de la table des matières",
+  "Im Inhaltsverzeichnis eingeblendet":"Affiché dans la table des matières",
+  "Im Inhaltsverzeichnis ausgeblendet":"Masqué de la table des matières",
+  "Abbildungsverzeichnis":"Table des illustrations",
+  "Abbildungsverzeichnis einfügen":"Insérer une table des illustrations",
+  "Abb.":"Fig.",
+  "Noch keine Abbildungen mit Bildunterschrift.":"Pas encore d'illustrations avec légende.",
+  "Im Dokument gibt es bereits ein Abbildungsverzeichnis.":"Le document contient déjà une table des illustrations.",
+  "als Einfügeoption anbieten":"proposer comme option d'insertion",
+  "Struktur":"Structure",
+  "Gliederung":"Plan",
+  "Ziehen zum Verschieben":"Glisser pour déplacer",
+  "Breite ziehen":"Glisser pour redimensionner",
+  "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":"Tous les titres du document apparaissent ici. Pas encore de titres dans le document.",
+  "Die hier definierte Seitenzahl wird nur angezeigt, wenn keine Fußzeile eingeschaltet ist. Wenn du die Fußzeile einschaltest, fügst du die Seitenzahl dort ein.":"Le numéro de page défini ici ne s'affiche que si aucun pied de page n'est activé. Si vous activez le pied de page, insérez-y vous-même le numéro de page.",
+  "Anzeigen ab Seite":"Afficher à partir de la page",
+  "Erste Zahl":"Premier numéro",
+  "Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.":"Les pages précédentes ne reçoivent pas de numéro — pratique pour une page de couverture.",
+  "Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":"Le nombre que vous saisissez ici est celui par lequel commence la première page visible."
+},
+es:{
+  "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
+  "Seitenumbruch":"Salto de página",
+  "Datei":"Archivo",
+  "Ansicht":"Vista",
+  "Format":"Formato",
+  "Dokument":"Documento",
+  "Notiz":"Nota",
+  "Glossar":"Glosario",
+  "Einstellungen":"Configuración",
+  "Schreiben (Alt+1)":"Escribir (Alt+1)",
+  "Notizen (Alt+2)":"Notas (Alt+2)",
+  "Glossar (Alt+3)":"Glosario (Alt+3)",
+  "Suchen":"Buscar",
+  "Vorheriger Treffer":"Resultado anterior",
+  "Nächster Treffer (Enter)":"Siguiente resultado (Intro)",
+  "Schließen (Esc)":"Cerrar (Esc)",
+  "Ersetzen durch":"Reemplazar por",
+  "Ersetzen":"Reemplazar",
+  "Alle":"Todo",
+  "Groß-/Kleinschreibung":"Distinguir mayúsculas",
+  "Ganzes Wort":"Palabra completa",
+  "Fokusmodus":"Modo enfoque",
+  "verlassen (Esc)":"salir (Esc)",
+  "Neues Dokument":"Nuevo documento",
+  "Dokument schließen":"Cerrar documento",
+  "Vorher exportieren":"Exportar antes",
+  "Abbrechen":"Cancelar",
+  "Schließen":"Cerrar",
+  "Schriftart":"Fuente",
+  "Schriftgröße":"Tamaño de fuente",
+  "Fett (Strg+B)":"Negrita (Ctrl+B)",
+  "Kursiv (Strg+I)":"Cursiva (Ctrl+I)",
+  "Unterstrichen (Strg+U)":"Subrayado (Ctrl+U)",
+  "Absatzformat":"Estilo de párrafo",
+  "Fließtext":"Texto normal",
+  "Überschrift 1":"Título 1",
+  "Überschrift 2":"Título 2",
+  "Überschrift 3":"Título 3",
+  "Aufzählung":"Lista con viñetas",
+  "Nummerierung":"Lista numerada",
+  "Linksbündig":"Alinear a la izquierda",
+  "Zentriert":"Centrado",
+  "Blocksatz":"Justificado",
+  "Einrücken":"Aumentar sangría",
+  "Ausrücken":"Reducir sangría",
+  "Einrücken (Tab)":"Aumentar sangría (Tab)",
+  "Ausrücken (⇧ Tab)":"Reducir sangría (⇧ Tab)",
+  "Bild einfügen":"Insertar imagen",
+  "Link einfügen (Alt+⇧+K)":"Insertar enlace (Alt+⇧+K)",
+  "Tabelle einfügen":"Insertar tabla",
+  "Verkleinern (Alt+⇧+Minus)":"Reducir (Alt+⇧+Menos)",
+  "Vergrößern (Alt+⇧+Plus)":"Ampliar (Alt+⇧+Más)",
+  "Vorgaben":"Valores predefinidos",
+  "Zoomstufe eintippen und Eingabe drücken":"Escribe un nivel de zoom y pulsa Intro",
+  "Zoomstufe wählen":"Elegir nivel de zoom",
+  "Eigene Größe&hellip;":"Tamaño personalizado&hellip;",
+  "Leseansicht":"Vista de lectura",
+  "Druckvorschau":"Vista previa de impresión",
+  "Seiten":"Páginas",
+  "Schreibziel":"Objetivo de escritura",
+  "Schreibziel einstellen":"Definir el objetivo de escritura",
+  "Dokument-Memo":"Memo del documento",
+  "Handlungsnotizen, offene Fragen, Recherche-Links …":"Notas de trama, preguntas abiertas, enlaces de investigación…",
+  "Gehört zu diesem Dokument und erscheint nicht im Text.":"Pertenece a este documento y no aparece en el texto.",
+  "Ziel in dieser Sitzung":"Objetivo para esta sesión",
+  "Bereits geschafft":"Ya conseguido",
+  "Zähleinheit":"Unidad de recuento",
+  "Zurücksetzen":"Restablecer",
+  "Ausschalten":"Desactivar",
+  "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Se cuenta lo que se ha añadido desde que se activó o se restableció — en todos los documentos.",
+  "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insertar salto de página (Alt+⇧+Intro)",
+  "Neue Notiz":"Nueva nota",
+  "Notizen durchsuchen":"Buscar en las notas",
+  "Im ausgewählten Dokument":"En el documento seleccionado",
+  "Ohne Verknüpfung":"Sin vínculo",
+  "Rasteransicht (frei verschiebbar)":"Vista de cuadrícula (movible libremente)",
+  "Listenansicht":"Vista de lista",
+  "Neuer Eintrag":"Nueva entrada",
+  "Glossar durchsuchen":"Buscar en el glosario",
+  "Sortierung":"Ordenar por",
+  "Datum":"Fecha",
+  "Kategorie":"Categoría",
+  "Neues Glossar anlegen":"Crear nuevo glosario",
+  "Neues Glossar":"Nuevo glosario",
+  "Glossar löschen":"Eliminar glosario",
+  "Glossar gelöscht":"Glosario eliminado",
+  "Glossar verwalten":"Administrar glosario",
+  "wird von diesem Dokument benutzt":"usado por este documento",
+  "Für dieses Dokument verwenden":"Usar para este documento",
+  "Dieses Dokument benutzt jetzt":"Este documento ahora usa",
+  "Nur dann werden diese Begriffe im Text markiert.":"Solo entonces se resaltan estos términos en el texto.",
+  "Eintrag":"entrada",
+  "Einträge":"entradas",
+  "noch keine Einträge":"aún sin entradas",
+  "Dokumenten":"documentos",
+  "ein Dokument":"un documento",
+  "Zugeordnete Dokumente":"Documentos asignados",
+  "Zugeordnet":"Asignado",
+  "keinem Dokument":"ningún documento",
+  "Ohne Zuordnung":"Sin asignar",
+  "keine Definition":"sin definición",
+  "Ohne Kategorie":"Sin categoría",
+  "Rechtsbündig (Alt+⇧+R)":"Alinear a la derecha (Alt+⇧+R)",
+  "Kopf- und Fußzeile von der Papierkante":"Encabezado y pie de página desde el borde de la página",
+  "Kopf / Fuß":"Encab. / Pie",
+  "Von Rand":"Desde el borde",
+  "Höhe":"Altura",
+  "Bis hierher bleibt die Seite frei von Text":"Hasta aquí, la página permanece libre de texto",
+  "Kopf-/Fußzeilenbereich ziehen":"Arrastrar la zona de encabezado/pie de página",
+  "Schriftfarbe":"Color de texto",
+  "Texthervorhebung":"Resaltado",
+  "Eigene Farbe":"Color personalizado",
+  "Farbe entfernen":"Quitar color",
+  "Hervorhebung entfernen":"Quitar resaltado",
+  "Rot":"Rojo",
+  "Ocker":"Ocre",
+  "Grün":"Verde",
+  "Petrol":"Petróleo",
+  "Blau":"Azul",
+  "Violett":"Violeta",
+  "Braun":"Marrón",
+  "Grau":"Gris",
+  "Gelb":"Amarillo",
+  "Rosa":"Rosa",
+  "Orange":"Naranja",
+  "Dieses Dokument ist keinem Glossar zugeordnet.":"Este documento no está asignado a ningún glosario.",
+  "Welche Dokumente benutzen dieses Glossar?":"¿Qué documentos usan este glosario?",
+  "Importieren / Exportieren":"Importar / Exportar",
+  "Exportieren":"Exportar",
+  "Importieren":"Importar",
+  "Als Tabelle":"Como tabla",
+  "Als Sicherung":"Como copia de seguridad",
+  "Datei wählen":"Elegir archivo",
+  "Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.":"Una tabla con término, definición y categoría por columna — o un archivo .json guardado aquí.",
+  "Als neues Glossar anlegen":"Crear como nuevo glosario",
+  "Keine Begriffe in dieser Datei gefunden":"No se encontraron términos en este archivo",
+  "hinzugefügt":"añadido",
+  "schon vorhanden":"ya existente",
+  "CSV exportieren":"Exportar CSV",
+  "Noch keine Notizen.<br>Neue Notiz anlegen mit <b>Alt+Umschalt+N</b> — das geht auch mitten im Schreiben, ohne die Ansicht zu wechseln.<br>Ein Klick öffnet eine Notiz zum Bearbeiten, Ziehen verschiebt sie.":"Aún no hay notas.<br>Crea una con <b>Alt+Mayús+N</b> — funciona incluso en medio de la escritura, sin cambiar de vista.<br>Un clic abre una nota para editarla, arrastrar la mueve.",
+  "hier":"aquí",
+  "Löschen":"Eliminar",
+  "löschen":"eliminar",
+  "bearbeiten":"editar",
+  "Manila":"Manila",
+  "Zitrone":"Limón",
+  "Salbei":"Salvia",
+  "Himmel":"Cielo",
+  "Rosé":"Rosado",
+  "Flieder":"Lila",
+  "Papier":"Papel",
+  "Überschrift":"Título",
+  "Leere Notiz":"Nota vacía",
+  "Verkleinern":"Reducir",
+  "Maximieren":"Maximizar",
+  "Kleiner":"Más pequeño",
+  "Größer":"Más grande",
+  "Durchgestrichen":"Tachado",
+  "Hochgestellt":"Superíndice",
+  "Tiefgestellt":"Subíndice",
+  "Zitat":"Cita",
+  "Begriff":"Término",
+  "Definition":"Definición",
+  "Kategorie (optional)":"Categoría (opcional)",
+  "Verwerfen":"Descartar",
+  "Eintrag sichern":"Guardar entrada",
+  "angelegt":"creado",
+  "Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.":"El glosario está vacío.<br>Crea términos que se repitan en tus textos — luego podrán resaltarse en el texto y consultarse en cualquier momento con <b>Alt+⇧+G</b>.",
+  "Wörter zählen":"Contar palabras",
+  "Seitenformat ändern":"Cambiar formato de página",
+  "Wörter":"palabras",
+  "Zeichen":"caracteres",
+  "Nicht gesichert":"Sin guardar",
+  "Gesichert ":"Guardado ",
+  "Bereit":"Listo",
+  "aus":"desactivado",
+  "an":"activado",
+  "Kommandopalette öffnen":"Abrir paleta de comandos",
+  "Angelegt":"Creado",
+  "Unterschrift hinzufügen":"Añadir firma",
+  "Unterschrift hinzufügen&hellip;":"Añadir firma&hellip;",
+  "Unterschrift einfügen":"Insertar firma",
+  "Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.":"Firma manteniendo pulsado el botón del ratón. Solo se inserta la firma en sí, sin el margen blanco alrededor.",
+  "Ansicht ":"Vista ",
+  "Fokusmodus umschalten":"Alternar modo enfoque",
+  "Seitenränder umschalten":"Alternar márgenes de página",
+  "Farbschema wählen":"Elegir esquema de color",
+  "Schema: ":"Esquema: ",
+  "Wörter zählen&hellip;":"Contar palabras&hellip;",
+  "Seitenzahlen umschalten":"Alternar números de página",
+  "Seitenbreite einpassen":"Ajustar al ancho de página",
+  "Silberton":"Tono plateado",
+  "Platin":"Platino",
+  "Enzian":"Genciana",
+  "Bernstein":"Ámbar",
+  "Tinte":"Tinta",
+  "Suchen und ersetzen":"Buscar y reemplazar",
+  "Rechtsbündig":"Alinear a la derecha",
+  "Link einfügen oder bearbeiten…":"Insertar o editar enlace…",
+  "Seitenumbruch einfügen":"Insertar salto de página",
+  "Formatierung entfernen":"Borrar formato",
+  "Rückgängig":"Deshacer",
+  "Wiederholen":"Rehacer",
+  "Neues Dokument mit Format":"Nuevo documento con formato",
+  "Kopf- und Fußzeile":"Encabezado y pie de página",
+  "Wechseln zu: ":"Cambiar a: ",
+  "Jetzt sichern":"Guardar ahora",
+  "Versionsverlauf":"Historial de versiones",
+  "Drucken":"Imprimir",
+  "Als TXT exportieren":"Exportar como TXT",
+  "Als Markdown exportieren":"Exportar como Markdown",
+  "Als Word-Dokument exportieren":"Exportar como documento Word",
+  "Als HTML exportieren":"Exportar como HTML",
+  "Als PDF exportieren":"Exportar como PDF",
+  "Im Druckdialog Als PDF speichern als Ziel wählen":"En el diálogo de impresión, elige Guardar como PDF como destino",
+  "Markierte Stelle mit Notiz verknüpfen":"Vincular selección a una nota",
+  "Notizen am Seitenrand umschalten":"Alternar notas al margen",
+  "Markierungen im Text umschalten":"Alternar resaltados en el texto",
+  "Pinnwand filtern: ":"Filtrar panel: ",
+  "Öffnen: ":"Abrir: ",
+  "Nachschlagen":"Consultar",
+  "Begriffe im Text nicht markieren":"No resaltar términos en el texto",
+  "Begriffe im Text markieren":"Resaltar términos en el texto",
+  "Als CSV exportieren":"Exportar como CSV",
+  "Einfügen: ":"Insertar: ",
+  "Einstellungen öffnen":"Abrir configuración",
+  "Datei laden":"Cargar archivo",
+  "Weitere Formate":"Más formatos",
+  "Sicherung":"Copia de seguridad",
+  "Alle unterstützten Dokumente":"Todos los documentos admitidos",
+  "Word-Dokumente":"Documentos Word",
+  "Text und Markdown":"Texto y Markdown",
+  "Webseiten":"Páginas web",
+  "OpenDocument und RTF":"OpenDocument y RTF",
+  "Sicherung erstellen":"Crear copia de seguridad",
+  "Teilsicherung":"Copia de seguridad parcial",
+  "Dokument laden&hellip;":"Cargar documento&hellip;",
+  "Dokument geladen":"Documento cargado",
+  "geladen":"cargado",
+  "Diese Datei ließ sich nicht lesen":"Este archivo no se pudo leer",
+  "Glossar als Tabelle":"Glosario como tabla",
+  "Dieses Dokument mit Notizen":"Este documento con sus notas",
+  "Nur Notizen und Glossar":"Solo notas y glosario",
+  "Sicherung laden&hellip;":"Cargar copia de seguridad&hellip;",
+  "Dieses Dokument mit Notizen sichern":"Guardar este documento con sus notas",
+  "Nur Notizen und Glossar sichern":"Guardar solo notas y glosario",
+  "Alles sichern — Vollsicherung":"Guardar todo — copia completa",
+  "Notizen und Glossar":"Notas y glosario",
+  "Vollsicherung":"Copia de seguridad completa",
+  "Vollsicherung laden":"Cargar copia completa",
+  "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Una copia completa reemplaza todos los documentos, notas y entradas de glosario guardados aquí.",
+  "Diese Datei passt nicht zu PureQuill Writer":"Este archivo no corresponde a PureQuill Writer",
+  "Hinzugefügt":"Añadido",
+  "Nichts Neues in dieser Datei":"Nada nuevo en este archivo",
+  "Dokumente":"documentos",
+  "Glossareintrag":"entrada de glosario",
+  "Glossareinträge":"entradas de glosario",
+  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"En el almacenamiento de este navegador, separado por dirección — no es un archivo en el disco. Al borrar los datos del navegador se pierde todo.",
+  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Copia de seguridad mediante <b>Archivo &rarr; Crear copia de seguridad</b>.",
+  "Schreibmaschinen-Scrollen einschalten":"Activar desplazamiento de máquina de escribir",
+  "Schreibmaschinen-Scrollen ausschalten":"Desactivar desplazamiento de máquina de escribir",
+  "Schreibmaschinen-Scrollen an":"Desplazamiento de máquina de escribir activado",
+  "Oberfläche beim Schreiben ausblenden":"Ocultar interfaz al escribir",
+  "Oberfläche immer sichtbar lassen":"Mantener la interfaz siempre visible",
+  "Autosave ausschalten":"Desactivar Autosave",
+  "Autosave einschalten":"Activar Autosave",
+  "Autosave an":"Autosave activado",
+  "Autosave aus":"Autosave desactivado",
+  "Alles als Datei sichern":"Guardar todo como archivo",
+  "Gesichert":"Guardado",
+  "Geladen":"Cargado",
+  "Datei nicht lesbar":"Archivo no legible",
+  "Verknüpft":"Vinculado",
+  "Verknüpfung gelöst":"Vínculo eliminado",
+  "Nur im Schreibmodus":"Solo en modo escritura",
+  "Erst eine Textstelle markieren":"Selecciona primero un texto",
+  "Notiz gesichert":"Nota guardada",
+  "Eintrag gesichert":"Entrada guardada",
+  "Stand wiederhergestellt":"Versión restaurada",
+  "Format geändert":"Formato cambiado",
+  "Einfügen bitte mit Strg+V":"Pega con Ctrl+V",
+  "Keine Bilddatei":"No es un archivo de imagen",
+  "Bild konnte nicht gelesen werden":"No se pudo leer la imagen",
+  "Großes Bild — der Browser-Speicher ist begrenzt":"Imagen grande — el almacenamiento del navegador es limitado",
+  "Speicher voll — bitte über Datei → Alles sichern als Datei auslagern":"Almacenamiento lleno — exporta mediante Archivo → Guardar todo como archivo",
+  "Browser-Speicher nicht verfügbar — bitte regelmäßig als Datei sichern":"Almacenamiento del navegador no disponible — guarda regularmente como archivo",
+  "Befehl oder Suche":"Comando o búsqueda",
+  "Tippen, um zu filtern":"Escribe para filtrar",
+  "Kein passender Befehl.":"Ningún comando coincide.",
+  "Neues Dokument&hellip;":"Nuevo documento&hellip;",
+  "Seitenformat&hellip;":"Formato de página&hellip;",
+  "Kopf- und Fußzeile&hellip;":"Encabezado y pie de página&hellip;",
+  "Alles sichern als Datei":"Guardar todo como archivo",
+  "Versionsverlauf&hellip;":"Historial de versiones&hellip;",
+  "Dokument exportieren":"Exportar documento",
+  "Nur Text":"Solo texto",
+  "Webseite":"Página web",
+  "Word-Dokument":"Documento Word",
+  "Automatisch sichern":"Guardado automático",
+  "Einstellungen&hellip;":"Configuración&hellip;",
+  "Alle Befehle":"Todos los comandos",
+  "Seite":"Página",
+  "Seitenränder":"Márgenes de página",
+  "Seitenzahlen":"Números de página",
+  "Notizen am Seitenrand":"Notas al margen",
+  "Markierungen im Text":"Resaltados en el texto",
+  "Darstellung":"Apariencia",
+  "Glossarbegriffe markieren":"Resaltar términos del glosario",
+  "Oberfläche ausblenden":"Ocultar interfaz al escribir",
+  "Farbschema&hellip;":"Esquema de color&hellip;",
+  "Ausschneiden":"Cortar",
+  "Kopieren":"Copiar",
+  "Einfügen":"Pegar",
+  "Alles auswählen":"Seleccionar todo",
+  "Link bearbeiten":"Editar enlace",
+  "Link einfügen":"Insertar enlace",
+  "Bild einfügen&hellip;":"Insertar imagen&hellip;",
+  "Notiz anheften":"Anclar nota",
+  "Notiz hervorheben":"Destacar nota",
+  "Verknüpfung lösen":"Eliminar vínculo",
+  "Im Glossar nachschlagen":"Consultar en el glosario",
+  "Als Glossareintrag anlegen":"Crear como entrada de glosario",
+  "Tabelle":"Tabla",
+  "Zeile darüber einfügen":"Insertar fila arriba",
+  "Zeile darunter einfügen":"Insertar fila abajo",
+  "Spalte links einfügen":"Insertar columna a la izquierda",
+  "Spalte rechts einfügen":"Insertar columna a la derecha",
+  "Kopfzeile umschalten":"Alternar fila de encabezado",
+  "Zeile löschen":"Eliminar fila",
+  "Spalte löschen":"Eliminar columna",
+  "Tabelle löschen":"Eliminar tabla",
+  "Tabelle einfügen&hellip;":"Insertar tabla&hellip;",
+  "Notiz mit dieser Stelle verknüpfen":"Vincular una nota a este punto",
+  "Notiz suchen oder neue anlegen":"Buscar nota o crear una nueva",
+  "neu":"nuevo",
+  "Seitenformat":"Formato de página",
+  "Standard für alles":"Estándar para todo",
+  "Anschriftfeld oben":"Campo de dirección arriba",
+  "Manuskript für Verlage":"Manuscrito para editoriales",
+  "Broschüre, Heft":"Folleto, cuadernillo",
+  "Buchsatz":"Maquetación de libro",
+  "Nordamerika":"Norteamérica",
+  "Brief DIN 5008":"Carta DIN 5008",
+  "Normseite":"Página manuscrito estándar",
+  "Taschenbuch":"Libro de bolsillo",
+  "Eigene Maße":"Medidas personalizadas",
+  "Breite und Höhe frei wählen":"Elegir libremente ancho y alto",
+  "Ausrichtung":"Orientación",
+  "Hochformat":"Vertical",
+  "Querformat":"Horizontal",
+  "Seitengröße in mm":"Tamaño de página en mm",
+  "Breite / Höhe":"Ancho / Alto",
+  "Ränder in mm":"Márgenes en mm",
+  "Oben / Unten":"Arriba / Abajo",
+  "Links / Rechts":"Izquierda / Derecha",
+  "merken":"recordar",
+  "Zeilenabstand":"Interlineado",
+  "Standard":"predeterminado",
+  "Zeilenabstand und Maße":"Interlineado y medidas",
+  "Als Standard":"Como predeterminado",
+  "Dieses Format für neue Dokumente voreinstellen":"Preestablecer este formato para nuevos documentos",
+  "Nur bei „Eigene Maße“ änderbar":"Solo se puede modificar con «Medidas personalizadas»",
+  "Satzspiegel":"Caja de texto",
+  "Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.":"También puedes arrastrar los márgenes izquierdo y derecho en la regla sobre la página.",
+  "Anlegen":"Crear",
+  "Übernehmen":"Aplicar",
+  "Zeichen (mit Leerzeichen)":"Caracteres (con espacios)",
+  "Zeichen (ohne Leerzeichen)":"Caracteres (sin espacios)",
+  "Absätze":"Párrafos",
+  "Normseiten (1500 Z.)":"Páginas manuscrito (1500 car.)",
+  "Lesedauer (≈ 180 W/min)":"Tiempo de lectura (≈ 180 pal./min)",
+  "Markierte Auswahl":"Selección",
+  "Kopfzeile":"Encabezado",
+  "Fußzeile":"Pie de página",
+  "Text oder Platzhalter":"Texto o marcador de posición",
+  "Doppelklick: Kopfzeile":"Doble clic: encabezado",
+  "Doppelklick: Fußzeile":"Doble clic: pie de página",
+  "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Consejo: un doble clic en el margen superior o inferior edita el encabezado y el pie de página directamente en el documento.",
+  "Kopfzeile entfernt":"Encabezado eliminado",
+  "Fußzeile entfernt":"Pie de página eliminado",
+  "Entfernen":"Eliminar",
+  "Abstand zum Seitenrand ziehen":"Arrastrar la distancia al borde de la página",
+  "Ziehen, um die Bildgröße zu ändern":"Arrastra para cambiar el tamaño de la imagen",
+  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Varias líneas son posibles; en el documento, Mayús+Intro añade una línea.",
+  "Links":"Izquierda",
+  "Mitte":"Centro",
+  "Rechts":"Derecha",
+  "Abstand":"Espaciado",
+  "Seitenzahl":"Número de página",
+  "Gesamtseiten":"Total de páginas",
+  "Titel":"Título",
+  "Seitenzahl einfügen":"Insertar número de página",
+  "Gesamtseiten einfügen":"Insertar total de páginas",
+  "Titel einfügen":"Insertar título",
+  "Datum einfügen":"Insertar fecha",
+  "Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.":"Los marcadores se sustituyen por página. Los ajustes se aplican a este documento.",
+  "Fertig":"Listo",
+  "Größe wählen":"Elegir tamaño",
+  "Erste Zeile als Kopfzeile":"Primera fila como encabezado",
+  "Anzeigetext":"Texto mostrado",
+  "Text im Dokument":"Texto en el documento",
+  "Ziel":"Destino",
+  "Ohne Vorsatz wird <b>https://</b> ergänzt. Im Dokument öffnest du einen Link mit Strg&nbsp;+&nbsp;Klick.":"Sin prefijo, se añade <b>https://</b>. En el documento, abre un enlace con Ctrl&nbsp;+&nbsp;clic.",
+  "Link entfernen":"Eliminar enlace",
+  "kein Treffer":"sin resultados",
+  "Bild":"Imagen",
+  "Unterschrift":"Leyenda",
+  "Alternativtext":"Texto alternativo",
+  "Bildunterschrift":"Leyenda de la imagen",
+  "Beschreibung des Bildes":"Descripción de la imagen",
+  "Wird angezeigt, wenn das Bild fehlt, und von Vorlesesoftware verwendet.":"Se muestra si falta la imagen, y lo usan los lectores de pantalla.",
+  "Glossar nachschlagen":"Consultar glosario",
+  "Begriff eingeben":"Escribe un término",
+  "Kein Treffer. Neue Einträge legst du mit Alt+3 an.":"Sin resultados. Crea nuevas entradas con Alt+3.",
+  "Notiz anlegen":"Crear nota",
+  "Gedanke, Recherchelücke, Umbauidee …":"Idea, laguna de investigación, posible reestructuración…",
+  "Notiz sichern":"Guardar nota",
+  "wiederherstellen":"restaurar",
+  "Noch keine gesicherten Stände.":"Aún no hay versiones guardadas.",
+  "Standardschrift":"Fuente predeterminada",
+  "Autosave":"Autosave",
+  "Sek.":"s",
+  "Sprache der Rechtschreibprüfung":"Idioma de la revisión ortográfica",
+  "Deutsch":"Alemán",
+  "Englisch":"Inglés",
+  "Polnisch":"Polaco",
+  "Französisch":"Francés",
+  "Spanisch":"Español",
+  "Ohne Formatierung eingefügt":"Pegado sin formato",
+  "Nur Text übernehmen":"Mantener solo el texto",
+  "Rechtschreibprüfung":"Revisión ortográfica",
+  "Rechtschreibprüfung&hellip;":"Revisión ortográfica&hellip;",
+  "Prüfung starten":"Iniciar revisión",
+  "Vorschläge":"Sugerencias",
+  "Ändern":"Cambiar",
+  "Alle ändern":"Cambiar todo",
+  "Ignorieren":"Ignorar",
+  "Alle ignorieren":"Ignorar todo",
+  "Ins Wörterbuch":"Añadir al diccionario",
+  "Ins Wörterbuch übernommen":"Añadido al diccionario",
+  "Prüft den Text des Dokuments Wort für Wort.":"Revisa el texto del documento palabra por palabra.",
+  "Gefundene Stellen werden im Text rot unterringelt. Du gehst sie dann einzeln durch.":"Los lugares encontrados se subrayan en rojo en el texto. Luego los recorres uno por uno.",
+  "Wörterbuch wird geladen&hellip;":"Cargando el diccionario&hellip;",
+  "Das passiert einmal je Sprache. Danach liegt es bereit, solange das Programm offen bleibt.":"Esto ocurre una vez por idioma. Después queda listo mientras el programa permanezca abierto.",
+  "Das Wörterbuch ließ sich nicht laden.":"El diccionario no se pudo cargar.",
+  "Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.":"Al abrir el archivo directamente desde el disco, el navegador bloquea el acceso a la carpeta «dict». Abierto mediante una dirección web — o en la aplicación de Windows — funciona.",
+  "Keine Fehler gefunden.":"No se encontraron errores.",
+  "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Se revisó el texto principal. Los índices, encabezados y pies de página quedan excluidos.",
+  "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Sin sugerencia — modifícalo a mano o consérvalo tal cual.",
+  "Schreibmaschinen-Scrollen":"Desplazamiento de máquina de escribir",
+  "aktive Zeile bleibt mittig":"la línea activa permanece centrada",
+  "Oberfläche beim Schreiben":"Interfaz al escribir",
+  "tritt zurück":"se atenúa",
+  "Speicherort":"Ubicación de almacenamiento",
+  "Dieser Browser":"Este navegador",
+  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Copia de seguridad mediante <b>Archivo &rarr; Guardar todo como archivo</b>.",
+  "Warmes Naturweiß, Standard":"Blanco natural cálido, estándar",
+  "Azur":"Azur",
+  "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris de sistema claro de las apps Mac modernas — recuerda a Pages",
+  "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Gris blanquecino neutro de los procesadores de texto Windows actuales — recuerda a Word",
+  "Klassische Macintosh-Grautöne":"Tonos de gris clásicos de Macintosh",
+  "Graue Systemoberfläche der 90er":"Interfaz de sistema gris de los 90",
+  "Blauer Textmodus der DOS-Zeit":"Modo texto azul de la era DOS",
+  "Monochromer Bernsteinbildschirm":"Pantalla ámbar monocromo",
+  "Dunkelmodus":"Modo oscuro",
+  "Phosphor":"Fósforo",
+  "Lagune":"Laguna",
+  "Aquamarin":"Aguamarina",
+  "Zyan":"Cian",
+  "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Oficina Windows gris con recuadro turquesa — recuerda a Lotus Word Pro",
+  "Hercules":"Hercules",
+  "Solar":"Solar",
+  "Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe":"Negro con cian y amarillo — recuerda a Lotus 1-2-3 en color",
+  "Umbenennen":"Renombrar",
+  "Farbe":"Color",
+  "Keine Farbe":"Sin color",
+  "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Pantalla verde de tubo — recuerda a Lotus 1-2-3 y los primeros editores DOS",
+  "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interfaz de oficina beige con turquesa — recuerda a Lotus SmartSuite '97",
+  "Sprache der Benutzeroberfläche":"Idioma de la interfaz",
+  "Willkommen":"Bienvenido",
+  "Sprache":"Idioma",
+  "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "Ohne Titel":"Sin título",
+  "Notizen":"Notas",
+  "Strg":"Ctrl",
+  "Schreiben":"Escribir",
+  "Fett":"Negrita",
+  "Kursiv":"Cursiva",
+  "Unterstrichen":"Subrayado",
+  "Vergrößern":"Ampliar",
+  "Normseiten":"páginas manuscrito",
+  "Farbschema":"Esquema de color",
+  "Vorige Stelle":"Lugar anterior",
+  "Nächste Stelle":"Lugar siguiente",
+  "1 Stelle":"1 lugar",
+  "Diese Verknüpfung lösen":"Eliminar este vínculo",
+  "lösen":"eliminar",
+  "Notiz und alle Verknüpfungen löschen":"Eliminar la nota y todos sus vínculos",
+  "Linker Rand":"Margen izquierdo",
+  "Rechter Rand":"Margen derecho",
+  "Breite":"Ancho",
+  "Fußnote":"Nota al pie",
+  "Fußnote ohne Text":"Nota al pie sin texto",
+  "Fußnotentext":"Texto de la nota",
+  "Fußnote löschen":"Eliminar nota al pie",
+  "Fußnote einfügen":"Insertar nota al pie",
+  "Fußnoten":"Notas al pie",
+  "Inhaltsverzeichnis":"Índice",
+  "Inhaltsverzeichnis einfügen":"Insertar índice",
+  "Aktualisieren":"Actualizar",
+  "Noch keine Überschriften im Dokument.":"Aún no hay títulos en el documento.",
+  "Im Dokument gibt es bereits ein Inhaltsverzeichnis.":"El documento ya tiene un índice.",
+  "Inhaltsverzeichnis anpassen":"Personalizar índice",
+  "Stil":"Estilo",
+  "Klassisch":"Clásico",
+  "Punktlinie und Seitenzahl, wie in Word":"Línea de puntos y número de página, como en Word",
+  "Einfach":"Simple",
+  "Nur die Überschriften, ohne Seitenzahl":"Solo los títulos, sin número de página",
+  "Modern":"Moderno",
+  "Farbiger Rand, Seitenzahl als Chip":"Borde de color, número de página como chip",
+  "Nummeriert":"Numerado",
+  "Mit Gliederungsnummern wie 1.2":"Con numeración de esquema como 1.2",
+  "Ebenen":"Niveles",
+  "Nur Ebene 1":"Solo nivel 1",
+  "Bis Ebene 2":"Hasta el nivel 2",
+  "Bis Ebene 3":"Hasta el nivel 3",
+  "Seitenzahlen anzeigen":"Mostrar números de página",
+  "Trennlinie":"Línea guía",
+  "Punkte":"Puntos",
+  "Striche":"Guiones",
+  "Linie":"Línea",
+  "Ohne":"Ninguna",
+  "Gesamtes Verzeichnis aktualisieren":"Actualizar todo el índice",
+  "(ohne Text)":"(sin texto)",
+  "Eintragstext lässt sich direkt im Verzeichnis anklicken und umschreiben. „Gesamtes Verzeichnis aktualisieren“ verwirft solche Änderungen wieder und liest die Überschriften neu ein.":"El texto de una entrada se puede hacer clic y reescribir directamente en el índice. «Actualizar todo el índice» descarta esos cambios y vuelve a leer los títulos.",
+  "Im Inhaltsverzeichnis einblenden":"Mostrar en el índice",
+  "Im Inhaltsverzeichnis ausblenden":"Ocultar del índice",
+  "Im Inhaltsverzeichnis eingeblendet":"Mostrado en el índice",
+  "Im Inhaltsverzeichnis ausgeblendet":"Oculto del índice",
+  "Abbildungsverzeichnis":"Índice de figuras",
+  "Abbildungsverzeichnis einfügen":"Insertar índice de figuras",
+  "Abb.":"Fig.",
+  "Noch keine Abbildungen mit Bildunterschrift.":"Aún no hay figuras con leyenda.",
+  "Im Dokument gibt es bereits ein Abbildungsverzeichnis.":"El documento ya tiene un índice de figuras.",
+  "als Einfügeoption anbieten":"ofrecer como opción de inserción",
+  "Struktur":"Estructura",
+  "Gliederung":"Esquema",
+  "Ziehen zum Verschieben":"Arrastrar para mover",
+  "Breite ziehen":"Arrastrar para ajustar el ancho",
+  "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":"Aquí aparecen todos los títulos del documento. Aún no hay títulos en el documento.",
+  "Die hier definierte Seitenzahl wird nur angezeigt, wenn keine Fußzeile eingeschaltet ist. Wenn du die Fußzeile einschaltest, fügst du die Seitenzahl dort ein.":"El número de página definido aquí solo se muestra si no hay pie de página activado. Si activas el pie de página, inserta allí el número de página.",
+  "Anzeigen ab Seite":"Mostrar a partir de la página",
+  "Erste Zahl":"Primer número",
+  "Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.":"Las páginas anteriores no reciben número — práctico para una portada.",
+  "Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":"El número que introduces aquí es el número por el que empieza la primera página visible."
+}
 };
-function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
-const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
+/* Vier Oberflächensprachen. Deutsch ist der Sonderfall: die Quelltexte selbst
+   sind deutsch, für Deutsch gibt es also kein eigenes Wörterbuch — tr() gibt
+   dann unverändert zurück, was hereinkam. */
+const UI_LANGS=[["de","Deutsch"],["en","English"],["fr","Français"],["es","Español"]];
+function tr(s){const d=I18N[S.settings.uiLang];return d&&d[s]!==undefined?d[s]:s}
+const LOC=()=>({en:"en-US",fr:"fr-FR",es:"es-ES"}[S.settings.uiLang]||"de-DE");
+/* Kurzauswahl für Stellen, die tr() nicht abdeckt: zusammengesetzte Sätze mit
+   Pluralformen oder eingebetteten Zahlen, wo eine feste Wörterbuchzeile nicht
+   ausreicht. Fällt auf Deutsch zurück, wenn eine Sprache fehlt. */
+function PL(de,en,fr,es){const m={de,en,fr,es};const v=m[S.settings.uiLang];return v===undefined?de:v}
+/* Das wiederkehrende „3 von 12“ / „3 of 12“ — eigene Funktion, weil es an
+   sieben Stellen im Code vorkommt. */
+const OFWORD=()=>PL("von","of","sur","de");
 function applyStaticLabels(){
   $("#fileBtn").textContent=tr("Datei");
   $("#viewBtn").textContent=tr("Ansicht");
@@ -1412,7 +2539,7 @@ function applyStaticLabels(){
   $("#fdToggleRep").innerHTML=`${tr("Ersetzen")} &#9662;`;
   $("#focusLabel").textContent=tr("Fokusmodus");
   $("#focusOut").textContent=tr("verlassen (Esc)");
-  document.documentElement.lang=S.settings.uiLang==="en"?"en":"de";
+  document.documentElement.lang=S.settings.uiLang||"de";
 }
 /* Nur ein wirklich frischer Start: genau ein leeres Dokument ohne eigenen Titel
    und sonst nichts. Vorher genügte es, dass alle Dokumente leer sind — dadurch
@@ -1449,10 +2576,8 @@ function startupDialog(){
   overlay(`<div class="modal"><h3>${tr("Willkommen")}</h3><div class="pad">
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
       <label>${tr("Sprache")}</label><div class="ctl">
-        <select id="stLang">
-          <option value="en" ${S.settings.uiLang==="en"?"selected":""}>English</option>
-          <option value="de" ${S.settings.uiLang!=="en"?"selected":""}>Deutsch</option>
-        </select></div></div>
+        <select id="stLang">${UI_LANGS.map(([v,n])=>
+          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></div></div>
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:14px">
       <label>${tr("Farbschema")}</label><div class="ctl">
         <span id="stSwatch" style="flex:0 0 30px;height:22px;border:1px solid var(--rule);border-radius:2px;overflow:hidden;display:flex"></span>
@@ -1611,21 +2736,28 @@ function closeDoc(id){
     save();
     if(warLetztes){clearShell();startupDialog();return}
     render();
-    if(anker)toast(S.settings.uiLang==="en"
-      ?anker+(anker>1?" linked notes remain":" linked note remains")
-      :anker+(anker>1?" verknüpfte Notizen bleiben":" verknüpfte Notiz bleibt")+" erhalten");
+    if(anker)toast(PL(
+      anker+(anker>1?" verknüpfte Notizen bleiben":" verknüpfte Notiz bleibt")+" erhalten",
+      anker+(anker>1?" linked notes remain":" linked note remains"),
+      anker+(anker>1?" notes liées restent":" note liée reste"),
+      anker+(anker>1?" notas vinculadas permanecen":" nota vinculada permanece")));
   };
   if(leer){kill();return}
-  const en=S.settings.uiLang==="en";
   overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-      ${en?`"${esc(d.title)}" is not empty. Closing removes the document.`
-        :`„${esc(d.title)}" ist nicht leer. Beim Schließen wird das Dokument entfernt.`}</p>
+      ${PL(`„${esc(d.title)}" ist nicht leer. Beim Schließen wird das Dokument entfernt.`,
+        `"${esc(d.title)}" is not empty. Closing removes the document.`,
+        `« ${esc(d.title)} » n'est pas vide. La fermeture supprime le document.`,
+        `"${esc(d.title)}" no está vacío. Al cerrarlo se elimina el documento.`)}</p>
     ${anker?`<p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">
-      ${en?`${anker} note${anker>1?"s are":" is"} linked to spots in this document.
-        ${anker>1?"They remain":"It remains"} on the board and ${anker>1?"only lose":"only loses"} the link.`
-      :`${anker}&nbsp;Notiz${anker>1?"en sind":" ist"} mit Stellen darin verknüpft.
-      ${anker>1?"Sie bleiben":"Sie bleibt"} auf der Pinnwand erhalten und ${anker>1?"verlieren":"verliert"} nur die Verknüpfung.`}</p>`:""}
+      ${PL(`${anker}&nbsp;Notiz${anker>1?"en sind":" ist"} mit Stellen darin verknüpft.
+      ${anker>1?"Sie bleiben":"Sie bleibt"} auf der Pinnwand erhalten und ${anker>1?"verlieren":"verliert"} nur die Verknüpfung.`,
+        `${anker} note${anker>1?"s are":" is"} linked to spots in this document.
+        ${anker>1?"They remain":"It remains"} on the board and ${anker>1?"only lose":"only loses"} the link.`,
+        `${anker}&nbsp;note${anker>1?"s sont liées":" est liée"} à des passages de ce document.
+        ${anker>1?"Elles restent":"Elle reste"} sur le tableau et ${anker>1?"perdent":"perd"} seulement le lien.`,
+        `${anker} nota${anker>1?"s están vinculadas":" está vinculada"} a pasajes de este documento.
+        ${anker>1?"Permanecen":"Permanece"} en el panel y ${anker>1?"solo pierden":"solo pierde"} el vínculo.`)}</p>`:""}
     </div>
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="cdSave">${tr("Vorher exportieren")}</button>
@@ -2279,9 +3411,11 @@ function noteText(n){const t=document.createElement("div");t.innerHTML=noteBody(
 function noteCardInner(n){
   return `
         <div class="grip"></div>
-        ${anchorCount(n.id)?`<div class="anchbadge">${S.settings.uiLang==="en"
-            ?anchorCount(n.id)+(anchorCount(n.id)>1?" spots in text":" spot in text")
-            :anchorCount(n.id)+" Stelle"+(anchorCount(n.id)>1?"n":"")+" im Text"}</div>`:""}
+        ${anchorCount(n.id)?`<div class="anchbadge">${PL(
+            anchorCount(n.id)+" Stelle"+(anchorCount(n.id)>1?"n":"")+" im Text",
+            anchorCount(n.id)+(anchorCount(n.id)>1?" spots in text":" spot in text"),
+            anchorCount(n.id)+(anchorCount(n.id)>1?" passages dans le texte":" passage dans le texte"),
+            anchorCount(n.id)+(anchorCount(n.id)>1?" lugares en el texto":" lugar en el texto"))}</div>`:""}
         ${n._here?`<div class="src">${n._here}&times; ${tr("hier")}</div>`:""}
         ${n.title?`<div class="ntitle">${esc(n.title)}</div>`:""}
         <div class="nbody" data-hint="${esc(tr("Leere Notiz — anklicken zum Öffnen"))}">${noteBody(n)}</div>
@@ -2620,16 +3754,21 @@ function delGlossColl(id){
     commit();render();toast(tr("Glossar gelöscht"));
   };
   if(!n&&(letzte||wirkt<2)){weiter();return}
-  const en=S.settings.uiLang==="en";
   const folge=letzte
-    ?(en?"Deleting removes the entries; one empty glossary remains."
-        :"Beim Löschen verschwinden die Einträge; es bleibt ein leeres Glossar übrig.")
-    :(en?"Deleting removes the entries; affected documents switch to another glossary."
-        :"Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.");
+    ?PL("Beim Löschen verschwinden die Einträge; es bleibt ein leeres Glossar übrig.",
+        "Deleting removes the entries; one empty glossary remains.",
+        "La suppression retire les entrées ; un glossaire vide subsiste.",
+        "Al eliminar desaparecen las entradas; queda un glosario vacío.")
+    :PL("Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.",
+        "Deleting removes the entries; affected documents switch to another glossary.",
+        "La suppression retire les entrées ; les documents concernés passent à un autre glossaire.",
+        "Al eliminar desaparecen las entradas; los documentos afectados pasan a otro glosario.");
   overlay(`<div class="modal"><h3>${tr("Glossar löschen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-      ${en?`"${esc(tr(c.name))}" contains ${n} ${n===1?"entry":"entries"}${wirkt>1?`, used by ${wirkt} documents`:""}. ${folge}`
-        :`„${esc(tr(c.name))}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. ${folge}`}</p>
+      ${PL(`„${esc(tr(c.name))}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. ${folge}`,
+        `"${esc(tr(c.name))}" contains ${n} ${n===1?"entry":"entries"}${wirkt>1?`, used by ${wirkt} documents`:""}. ${folge}`,
+        `« ${esc(tr(c.name))} » contient ${n} ${n===1?"entrée":"entrées"}${wirkt>1?`, utilisé par ${wirkt} documents`:""}. ${folge}`,
+        `"${esc(tr(c.name))}" contiene ${n} ${n===1?"entrada":"entradas"}${wirkt>1?`, usado por ${wirkt} documentos`:""}. ${folge}`)}</p>
     </div>
     <div class="rowend">
       <button class="btn" id="dgCancel">${tr("Abbrechen")}</button>
@@ -2691,7 +3830,6 @@ function drawGloss(){
   const coll=S.glossaries.find(c=>c.id===gid);
   const alle=S.glossary.filter(g=>g.gid===gid);
   const list=alle.filter(g=>!q||g.term.toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q)).sort(sortG);
-  const en=S.settings.uiLang==="en";
   const nutzer=S.docs.filter(d=>d.glossaryId===gid).length;
   const zahl=n=>n.toLocaleString(LOC());
   /* Der Umfang steht als Text, die Zuordnung als Bedienelement in derselben
@@ -2715,7 +3853,10 @@ function drawGloss(){
       </p>
     </div>
     <div class="gform" id="gform" style="display:none">
-      <p class="ghint">${en?`Entry in "${esc(tr(coll?coll.name:"Glossar"))}"`:`Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}"`}</p>
+      <p class="ghint">${PL(`Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}"`,
+        `Entry in "${esc(tr(coll?coll.name:"Glossar"))}"`,
+        `Entrée dans « ${esc(tr(coll?coll.name:"Glossar"))} »`,
+        `Entrada en "${esc(tr(coll?coll.name:"Glossar"))}"`)}</p>
       <input id="gTerm" placeholder="${tr("Begriff")}">
       <textarea id="gDef" placeholder="${tr("Definition")}"></textarea>
       <input id="gCat" placeholder="${tr("Kategorie (optional)")}">
@@ -2735,8 +3876,10 @@ function drawGloss(){
           </div>
         </div>`).join("")).join("")}</div>`
     :alle.length
-      ?`<div class="empty">${en?`No entry in "${esc(tr(coll?coll.name:"Glossar"))}" matches "${esc(q)}".`
-         :`Kein Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}" passt zu „${esc(q)}".`}</div>`
+      ?`<div class="empty">${PL(`Kein Eintrag in „${esc(tr(coll?coll.name:"Glossar"))}" passt zu „${esc(q)}".`,
+         `No entry in "${esc(tr(coll?coll.name:"Glossar"))}" matches "${esc(q)}".`,
+         `Aucune entrée dans « ${esc(tr(coll?coll.name:"Glossar"))} » ne correspond à « ${esc(q)} ».`,
+         `Ninguna entrada en "${esc(tr(coll?coll.name:"Glossar"))}" coincide con "${esc(q)}".`)}</div>`
       :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.")}</div>`}
   </div>`;
 }
@@ -2763,11 +3906,14 @@ function goalMetric(txt,unit){
   return d.words;
 }
 function goalUnitAbbr(unit){
-  const en=S.settings.uiLang==="en";
-  if(unit==="charsSp")return en?"ch":"Z";
-  if(unit==="charsNoSp")return en?"ch⁻":"Z⁻";
-  if(unit==="pages")return en?"ms":"NS";
-  return en?"w":"W";
+  const T=PL({charsSp:"Z",charsNoSp:"Z⁻",pages:"NS",words:"W"},
+             {charsSp:"ch",charsNoSp:"ch⁻",pages:"ms",words:"w"},
+             {charsSp:"car",charsNoSp:"car⁻",pages:"ms",words:"m"},
+             {charsSp:"car",charsNoSp:"car⁻",pages:"ms",words:"p"});
+  if(unit==="charsSp")return T.charsSp;
+  if(unit==="charsNoSp")return T.charsNoSp;
+  if(unit==="pages")return T.pages;
+  return T.words;
 }
 function goalFmtNum(v,unit){
   if(unit==="pages"){const s=v.toFixed(1);return S.settings.uiLang==="en"?s:s.replace(".",",")}
@@ -2792,13 +3938,13 @@ function drawStatus(){
   const words=txt.trim()?txt.trim().split(/\s+/).length:0;
   const chars=txt.length;
   const pages=S.settings.uiLang==="en"?(chars/1500).toFixed(1):(chars/1500).toFixed(1).replace(".",",");
-  const en=S.settings.uiLang==="en";
   $("#status").innerHTML=`<span id="wcHint" style="cursor:pointer" title="${tr("Wörter zählen")}">${words.toLocaleString(LOC())} ${tr("Wörter")}</span>
     <span>${chars.toLocaleString(LOC())} ${tr("Zeichen")}</span>
     ${goalHtml(txt)}
-    <span>${S.mode==="write"?(en?pageCount+(pageCount>1?" pages":" page"):pageCount+" Seite"+(pageCount>1?"n":"")):pages+" "+tr("Normseiten")}</span>
+    <span>${S.mode==="write"?(pageCount+" "+PL("Seite"+(pageCount>1?"n":""),
+      pageCount>1?"pages":"page",pageCount>1?"pages":"page",pageCount>1?"páginas":"página")):pages+" "+tr("Normseiten")}</span>
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
-    <span>${S.notes.length} ${en?"notes":"Notizen"}</span>
+    <span>${S.notes.length} ${PL("Notizen","notes","notes","notas")}</span>
     <span class="grow"></span>
     <span><span class="dot ${dirty?"dirty":""}"></span>${dirty?tr("Nicht gesichert"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Bereit"))}</span>
     <span>${S.settings.autosave?"Autosave "+S.settings.interval+"s":"Autosave "+tr("aus")}</span>
@@ -2966,11 +4112,13 @@ function glossIO(){
   const coll=S.glossaries.find(c=>c.id===gid);
   const nm=esc(tr(coll?coll.name:"Glossar"));
   const n=S.glossary.filter(g=>g.gid===gid).length;
-  const en=S.settings.uiLang==="en";
   overlay(`<div class="modal"><h3>${tr("Importieren / Exportieren")}</h3>
     <div class="pad">
       <div class="iohead">${tr("Exportieren")}</div>
-      <p class="iohint">${en?`"${nm}" · ${n} ${n===1?"entry":"entries"}`:`„${nm}" · ${n} ${n===1?"Eintrag":"Einträge"}`}</p>
+      <p class="iohint">${PL(`„${nm}" · ${n} ${n===1?"Eintrag":"Einträge"}`,
+        `"${nm}" · ${n} ${n===1?"entry":"entries"}`,
+        `« ${nm} » · ${n} ${n===1?"entrée":"entrées"}`,
+        `"${nm}" · ${n} ${n===1?"entrada":"entradas"}`)}</p>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn" id="ioCsv" ${n?"":"disabled"}>${tr("Als Tabelle")} <span class="ioext">.csv</span></button>
         <button class="btn" id="ioJson" ${n?"":"disabled"}>${tr("Als Sicherung")} <span class="ioext">.json</span></button>
@@ -4293,13 +5441,14 @@ function applyBundle(b){
   toast(teile.length?tr("Hinzugefügt")+": "+teile.join(", "):tr("Nichts Neues in dieser Datei"));
 }
 function confirmReplace(onOk){
-  const en=S.settings.uiLang==="en";
   overlay(`<div class="modal"><h3>${tr("Vollsicherung laden")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
       ${tr("Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.")}</p>
-    <div class="fmttip">${en
-      ?`Currently here: ${S.docs.length} documents, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`
-      :`Aktuell hier: ${S.docs.length} Dokumente, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`}</div>
+    <div class="fmttip">${PL(
+      `Aktuell hier: ${S.docs.length} Dokumente, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`,
+      `Currently here: ${S.docs.length} documents, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`,
+      `Actuellement ici : ${S.docs.length} documents, ${S.notes.length} notes, ${S.glossary.length} entrées de glossaire.`,
+      `Actualmente aquí: ${S.docs.length} documentos, ${S.notes.length} notas, ${S.glossary.length} entradas de glosario.`)}</div>
     </div>
     <div class="rowend">
       <button class="btn" id="crCancel">${tr("Abbrechen")}</button>
@@ -4587,7 +5736,6 @@ function linkSelection(){
   if(!sel.rangeCount||sel.isCollapsed){toast(tr("Erst eine Textstelle markieren"));return}
   const range=sel.getRangeAt(0).cloneRange();
   const notes=S.notes;
-  const en=S.settings.uiLang==="en";
   overlay(`<div class="modal"><h3>${tr("Notiz mit dieser Stelle verknüpfen")}</h3>
     <div class="pad" style="padding-bottom:9px"><input id="lq" placeholder="${tr("Notiz suchen oder neue anlegen")}" autocomplete="off"></div>
     <div class="cmdlist" id="ll"></div></div>`);
@@ -4596,14 +5744,17 @@ function linkSelection(){
     const v=q.value.trim().toLowerCase();
     const found=notes.filter(n=>!v||noteText(n).toLowerCase().includes(v));
     hits=[{neu:true,label:v
-        ?(en?`New note "${v.slice(0,30)}" at this spot`:`Neue Notiz „${v.slice(0,30)}" an dieser Stelle`)
-        :(en?"New note at this spot":"Neue Notiz an dieser Stelle")},
+        ?PL(`Neue Notiz „${v.slice(0,30)}" an dieser Stelle`,`New note "${v.slice(0,30)}" at this spot`,
+            `Nouvelle note « ${v.slice(0,30)} » à cet endroit`,`Nueva nota "${v.slice(0,30)}" en este punto`)
+        :PL("Neue Notiz an dieser Stelle","New note at this spot",
+            "Nouvelle note à cet endroit","Nueva nota en este punto")},
       ...found.map(n=>({n,label:((n.title||noteText(n).trim())||tr("Leere Notiz")).slice(0,52)}))];
     idx=Math.min(idx,hits.length-1);
     l.innerHTML=hits.map((h,i)=>`<div class="pickitem ${i===idx?"on":""}" data-i="${i}">
       <span class="dotc" style="background:${h.neu?"transparent":(h.n.color||NOTECOLORS[0].c)};${h.neu?"border-style:dashed":""}"></span>
       <span style="flex:1">${esc(h.label)}</span>
-      ${h.neu?`<span class="kbd">${tr("neu")}</span>`:(anchorCount(h.n.id)?`<span class="kbd">${anchorCount(h.n.id)} ${en?"spots":"Stellen"}</span>`:"")}</div>`).join("");
+      ${h.neu?`<span class="kbd">${tr("neu")}</span>`:(anchorCount(h.n.id)?`<span class="kbd">${anchorCount(h.n.id)} ${
+        PL("Stellen","spots","passages","lugares")}</span>`:"")}</div>`).join("");
     const on=l.querySelector(".pickitem.on");if(on)on.scrollIntoView({block:"nearest"})};
   const go=()=>{const h=hits[idx];if(!h)return;
     const title=q.value.trim();closeOvl();
@@ -4661,7 +5812,7 @@ function drawAnchors(){
       <div class="ab" contenteditable="true" data-body="${id}">${noteBody(n)||"<p><br></p>"}</div>
       <div class="af">
         ${tot>1?`<span class="nav"><button data-prev="${id}" title="${tr("Vorige Stelle")}">&lsaquo;</button>
-          ${k+1} ${S.settings.uiLang==="en"?"of":"von"} ${tot}<button data-next="${id}" title="${tr("Nächste Stelle")}">&rsaquo;</button></span>`
+          ${k+1} ${OFWORD()} ${tot}<button data-next="${id}" title="${tr("Nächste Stelle")}">&rsaquo;</button></span>`
         :`<span>${tr("1 Stelle")}</span>`}
         <div style="flex:1"></div>
         <button data-unlink="${id}" title="${tr("Diese Verknüpfung lösen")}">${tr("lösen")}</button>
@@ -4977,7 +6128,8 @@ function pageFlag(){
   const sh=$("#sheet"),fl=$("#pageflag");if(!sh||!fl)return;
   const f=fmtOf(doc()),stride=MM(f.h)*S.zoom+GAP;
   const p=Math.min(pageCount,Math.max(1,Math.floor((sh.scrollTop+sh.clientHeight*.4)/stride)+1));
-  fl.textContent=S.settings.uiLang==="en"?`Page ${p} of ${pageCount}`:`Seite ${p} von ${pageCount}`;
+  fl.textContent=PL(`Seite ${p} von ${pageCount}`,`Page ${p} of ${pageCount}`,
+    `Page ${p} sur ${pageCount}`,`Página ${p} de ${pageCount}`);
   fl.classList.add("on");clearTimeout(flagTimer);
   flagTimer=setTimeout(()=>fl.classList.remove("on"),1100);
 }
@@ -5049,8 +6201,7 @@ function wordCount(selText){
   const d=countStats(full);
   const s=selText?countStats(selText):null;
   const mins=Math.max(1,Math.round(d.words/180));
-  const en=S.settings.uiLang==="en";
-  const nsp=en?(d.chars/1500).toFixed(1):(d.chars/1500).toFixed(1).replace(".",",");
+  const nsp=S.settings.uiLang==="en"?(d.chars/1500).toFixed(1):(d.chars/1500).toFixed(1).replace(".",",");
   overlay(`<div class="modal"><h3>${tr("Wörter zählen")}</h3><div class="pad">
     <table style="width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px">
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Wörter")}</td><td style="text-align:right">${d.words.toLocaleString(LOC())}</td></tr>
@@ -5059,7 +6210,7 @@ function wordCount(selText){
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Absätze")}</td><td style="text-align:right">${d.paras.toLocaleString(LOC())}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Seiten")}</td><td style="text-align:right">${pageCount}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Normseiten (1500 Z.)")}</td><td style="text-align:right">${nsp}</td></tr>
-      <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Lesedauer (≈ 180 W/min)")}</td><td style="text-align:right">${mins} ${en?"min":"Min."}</td></tr>
+      <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Lesedauer (≈ 180 W/min)")}</td><td style="text-align:right">${mins} ${PL("Min.","min","min","min")}</td></tr>
     </table>
     ${s?`<div style="margin-top:11px;padding-top:9px;border-top:1px solid var(--rule)">
       <div class="mlabel" style="padding-left:0">${tr("Markierte Auswahl")}</div>
@@ -6686,7 +7837,7 @@ function spellDialog(startAt){
     $("#spFoot").innerHTML=foot();
     const cnt=$("#spCount");
     if(cnt)cnt.textContent=spellState==="run"&&spellHits.length
-      ?`${spellIdx+1} ${S.settings.uiLang==="en"?"of":"von"} ${spellHits.length}`:"";
+      ?`${spellIdx+1} ${OFWORD()} ${spellHits.length}`:"";
     bind();
   };
 
@@ -6834,7 +7985,7 @@ function fdRun(keepIdx){
 }
 function fdMark(scroll){
   fdHits.forEach((h,i)=>h.classList.toggle("cur",i===fdIdx));
-  $("#fdCnt").textContent=fdHits.length?`${fdIdx+1} ${S.settings.uiLang==="en"?"of":"von"} ${fdHits.length}`:tr("kein Treffer");
+  $("#fdCnt").textContent=fdHits.length?`${fdIdx+1} ${OFWORD()} ${fdHits.length}`:tr("kein Treffer");
   if(scroll!==false&&fdHits[fdIdx])fdHits[fdIdx].scrollIntoView({block:"center",behavior:"smooth"});
 }
 function fdStep(d){
@@ -6869,9 +8020,11 @@ function fdReplaceAll(){
   fdHits.forEach(h=>h.replaceWith(document.createTextNode(txt)));
   fdHits=[];
   flush();dirty=true;commit();
-  fdRun();queuePaginate();toast(S.settings.uiLang==="en"
-    ?n+(n===1?" match replaced":" matches replaced")
-    :n+(n===1?" Stelle ersetzt":" Stellen ersetzt"));
+  fdRun();queuePaginate();toast(PL(
+    n+(n===1?" Stelle ersetzt":" Stellen ersetzt"),
+    n+(n===1?" match replaced":" matches replaced"),
+    n+(n===1?" occurrence remplacée":" occurrences remplacées"),
+    n+(n===1?" coincidencia reemplazada":" coincidencias reemplazadas")));
 }
 $("#fdQ").addEventListener("input",()=>fdRun());
 $("#fdQ").addEventListener("keydown",e=>{
@@ -6935,7 +8088,7 @@ function slashOpen(q){
   let m=$("#smenu");
   if(!m){m=document.createElement("div");m.className="menu ctx";m.id="smenu";
     m.style.minWidth="216px";document.body.appendChild(m);slashIdx=0}
-  m.innerHTML=`<div class="mlabel">${S.settings.uiLang==="en"?"Insert":"Einfügen"}</div>`+slashHits.map((x,i)=>
+  m.innerHTML=`<div class="mlabel">${PL("Einfügen","Insert","Insérer","Insertar")}</div>`+slashHits.map((x,i)=>
     `<button class="mi ${i===slashIdx?"on":""}" data-s="${i}" style="${i===slashIdx?"background:var(--chrome)":""}">
       <span class="chk"></span>${tr(x.n)}</button>`).join("");
   const r=slashBlock.getBoundingClientRect();
@@ -7026,11 +8179,15 @@ async function embedRemoteImages(bilder){
     }catch(e){fehl++}
   }
   if(ok){flush();dirty=true;commit();queuePaginate()}
-  if(fehl)toast(S.settings.uiLang==="en"
-    ?(fehl===1?"1 image could not be embedded and stays linked to its source."
-              :fehl+" images could not be embedded and stay linked to their source.")
-    :(fehl===1?"1 Bild ließ sich nicht einbetten und bleibt mit der Quelle verknüpft."
-              :fehl+" Bilder ließen sich nicht einbetten und bleiben mit der Quelle verknüpft."));
+  if(fehl)toast(PL(
+    fehl===1?"1 Bild ließ sich nicht einbetten und bleibt mit der Quelle verknüpft."
+            :fehl+" Bilder ließen sich nicht einbetten und bleiben mit der Quelle verknüpft.",
+    fehl===1?"1 image could not be embedded and stays linked to its source."
+            :fehl+" images could not be embedded and stay linked to their source.",
+    fehl===1?"1 image n'a pas pu être intégrée et reste liée à sa source."
+            :fehl+" images n'ont pas pu être intégrées et restent liées à leur source.",
+    fehl===1?"1 imagen no se pudo incrustar y permanece vinculada a su origen."
+            :fehl+" imágenes no se pudieron incrustar y permanecen vinculadas a su origen."));
 }
 function insertFigure(src,alt){
   const ed=$("#editor");if(!ed)return;
@@ -7475,10 +8632,8 @@ function settings(){
   const s=S.settings;
   overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3><div class="pad">
     <div class="setrow"><label>${tr("Sprache der Benutzeroberfläche")}</label><div class="ctl">
-      <select id="sUiLang">
-        <option value="en" ${s.uiLang==="en"?"selected":""}>English</option>
-        <option value="de" ${s.uiLang!=="en"?"selected":""}>Deutsch</option>
-      </select></div></div>
+      <select id="sUiLang">${UI_LANGS.map(([v,n])=>
+        `<option value="${v}" ${s.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></div></div>
     <div class="setrow"><label>${tr("Standardschrift")}</label><div class="ctl">
       <select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
       <select id="sSize" style="flex:0 0 62px">${SIZES.map(x=>`<option ${s.size==x?"selected":""}>${x}</option>`).join("")}</select></div></div>
@@ -7501,9 +8656,10 @@ function settings(){
     <div class="setrow" style="align-items:flex-start"><label>${tr("Speicherort")}</label><div class="ctl" style="display:block;text-align:right">
       <div style="font-size:12px;color:var(--ink)">${tr("Dieser Browser")}</div>
       <div style="color:var(--ink-faint);font-size:12px;line-height:1.45;margin-top:3px">
-        ${S.settings.uiLang==="en"
-          ?`${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`
-          :`${S.docs.length} Dokument${S.docs.length>1?"e":""}, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`}<br>
+        ${PL(`${S.docs.length} Dokument${S.docs.length>1?"e":""}, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`,
+          `${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`,
+          `${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} entrées de glossaire.`,
+          `${S.docs.length} documento${S.docs.length>1?"s":""}, ${S.notes.length} notas, ${S.glossary.length} entradas de glosario.`)}<br>
         ${tr("Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.")}<br>
         ${tr("Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.")}</div></div></div>
     </div><div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
