@@ -555,9 +555,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .note.nrow .sw{position:static;flex:0 0 auto}
 
 /* ---- Seitenleiste für die geöffnete Notiz ---- */
-.side{flex:0 0 388px;border-left:1px solid var(--rule);display:none;flex-direction:column;background:var(--chrome-2)}
+.side{flex:0 0 var(--side-w,388px);border-left:1px solid var(--rule);display:none;flex-direction:column;
+  background:var(--chrome-2);position:relative}
+.side-resize{position:absolute;top:0;left:-3px;width:6px;height:100%;cursor:col-resize;z-index:5}
+.side-resize:hover,.side-resize.active{background:var(--stamp);opacity:.5}
 .side.on{display:flex}
 .side.max{position:absolute;inset:0;flex:1 1 auto;z-index:30;border-left:none}
+.side.max .side-resize{display:none}
 .side .head{display:flex;align-items:center;gap:7px;padding:9px 11px;border-bottom:1px solid var(--rule)}
 .side .head input{flex:1;background:none;border:none;outline:none;font-family:Georgia,serif;
   font-size:16px;font-weight:600;color:var(--ink)}
@@ -580,7 +584,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    von .side (rechts, ein Slot pro Modus) und von .anchcol (innerhalb der
    scrollenden Seite, zentriert mit dem Papier). So kann sie unabhängig vom
    Dokument-Memo offen bleiben und blockiert dessen Slot nicht. */
-.outline{flex:0 0 240px;border-right:1px solid var(--rule);display:none;flex-direction:column;background:var(--chrome-2)}
+.outline{flex:0 0 var(--outline-w,240px);border-right:1px solid var(--rule);display:none;flex-direction:column;
+  background:var(--chrome-2);position:relative}
+.outline-resize{position:absolute;top:0;right:-3px;width:6px;height:100%;cursor:col-resize;z-index:5}
+.outline-resize:hover,.outline-resize.active{background:var(--stamp);opacity:.5}
 .outline.on{display:flex}
 .outline .ohead{display:flex;align-items:center;justify-content:space-between;gap:7px;padding:9px 11px;
   border-bottom:1px solid var(--rule);font-family:Georgia,serif;font-size:14px;color:var(--ink)}
@@ -1292,7 +1299,8 @@ const EN={
   "Abb.":"Fig.","Noch keine Abbildungen mit Bildunterschrift.":"No figures with a caption yet.",
   "Im Dokument gibt es bereits ein Abbildungsverzeichnis.":"The document already has a table of figures.",
   "als Einfügeoption anbieten":"offer as an insert option",
-  "Struktur":"Structure","Gliederung":"Outline","Ziehen zum Verschieben":"Drag to move"
+  "Struktur":"Structure","Gliederung":"Outline","Ziehen zum Verschieben":"Drag to move",
+  "Breite ziehen":"Drag to resize"
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -1452,6 +1460,8 @@ S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
 S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
 if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 if(S.outlineOpen===undefined)S.outlineOpen=false;
+if(!S.outlineWidth)S.outlineWidth=240;
+if(!S.sideWidth)S.sideWidth=388;
 
 const doc=()=>S.docs.find(d=>d.id===S.active)||S.docs[0];
 const defaultGlossId=()=>doc().glossaryId||S.glossaries[0].id;
@@ -2253,6 +2263,7 @@ function openNote(id,fokus){
   const side=$("#side"),col=n.color||NOTECOLORS[0].c;
   side.className="side on"+(S.sideMax?" max":"");
   side.innerHTML=`
+    <div class="side-resize" id="sideResize" title="${tr("Breite ziehen")}"></div>
     <div class="head">
       <input id="nTitle" placeholder="${tr("Überschrift")}" value="${esc(n.title||"")}">
       <button class="hb" id="nMax" title="${S.sideMax?tr("Verkleinern"):tr("Maximieren")}">
@@ -2302,6 +2313,7 @@ function openNote(id,fokus){
     n.color=b.dataset.ncolor;commit();openNote(id,imTitel?"titel":"text");drawNotes()});
   $("#nFsUp").onclick=()=>setNoteFs(n,(n.fs||14)+1,id);
   $("#nFsDown").onclick=()=>setNoteFs(n,(n.fs||14)-1,id);
+  if(!S.sideMax)bindPanelResize($("#sideResize"),side,"--side-w",260,640,"left",persistSideWidth);
   drawNotes();
   /* Eine frisch angelegte Notiz hat noch keine Überschrift — dort beginnt man */
   const tt=$("#nTitle");
@@ -5445,6 +5457,43 @@ function outlineSections(ed){
     return {h,lvl,id:h.id,run};
   });
 }
+/* Ziehbare Breite für Gliederung und Seitenleiste (Memo/Notiz) - beide
+   Panels sind Flex-Geschwister von #pane, ihre Breite geht also direkt in
+   den für die Seite verfügbaren Platz ein (siehe fitZoom()). Die Breite
+   selbst liegt als CSS-Variable am Wurzelelement, nicht am Panel-Element,
+   weil #side bei jedem Öffnen komplett neu aufgebaut wird (innerHTML) und
+   ein inline style dabei verloren ginge, eine CSS-Variable am <html> aber
+   nicht. */
+function bindPanelResize(handle,panel,cssVar,minW,maxW,edge,onDone){
+  if(!handle||!panel)return;
+  handle.onmousedown=e=>{
+    if(e.button!==0)return;
+    e.preventDefault();
+    const startX=e.clientX,startW=panel.getBoundingClientRect().width;
+    handle.classList.add("active");
+    const move=ev=>{
+      const dx=ev.clientX-startX;
+      const w=Math.min(maxW,Math.max(minW,startW+(edge==="right"?dx:-dx)));
+      document.documentElement.style.setProperty(cssVar,w+"px");
+    };
+    const up=()=>{
+      document.removeEventListener("mousemove",move);
+      document.removeEventListener("mouseup",up);
+      handle.classList.remove("active");
+      onDone(parseFloat(document.documentElement.style.getPropertyValue(cssVar))||minW);
+    };
+    document.addEventListener("mousemove",move);
+    document.addEventListener("mouseup",up);
+  };
+}
+function persistOutlineWidth(w){
+  S.outlineWidth=Math.round(w);save();
+  if(S.mode==="write"&&S.fitPage!==false){fitZoom();paginate()}
+}
+function persistSideWidth(w){
+  S.sideWidth=Math.round(w);save();
+  if(S.mode==="write"&&S.fitPage!==false){fitZoom();paginate()}
+}
 function toggleOutline(){
   S.outlineOpen=!S.outlineOpen;save();
   drawOutline();
@@ -5456,7 +5505,8 @@ function drawOutline(){
   if(S.mode!=="write"||!S.outlineOpen||!ed){box.className="outline";box.innerHTML="";return}
   box.className="outline on";
   const secs=outlineSections(ed);
-  box.innerHTML=`<div class="ohead"><b>${tr("Gliederung")}</b>
+  box.innerHTML=`<div class="outline-resize" id="outlineResize" title="${tr("Breite ziehen")}"></div>
+    <div class="ohead"><b>${tr("Gliederung")}</b>
       <button class="obtn" id="outlineClose" title="${tr("Schließen")}">${ICO('<path d="M6 6l12 12M18 6 6 18"/>')}</button></div>
     <div class="outline-list" id="outlineList">${secs.length?secs.map(s=>`
       <div class="outline-item ol${s.lvl}" data-oid="${s.id}">
@@ -5466,6 +5516,7 @@ function drawOutline(){
     </div>`;
   $("#outlineClose").onclick=()=>toggleOutline();
   bindOutlineDrag();
+  bindPanelResize($("#outlineResize"),box,"--outline-w",160,480,"right",persistOutlineWidth);
   updateOutlineActive();
 }
 /* Welcher Abschnitt gerade "aktiv" ist, richtet sich danach, welche
@@ -6209,7 +6260,10 @@ function themeDialog(){
     $("#ovl").querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b))});
   $("#tClose").onclick=closeOvl;
 }
-function applyTheme(){document.documentElement.dataset.theme=S.settings.theme}
+function applyTheme(){document.documentElement.dataset.theme=S.settings.theme;
+  document.documentElement.style.setProperty("--outline-w",(S.outlineWidth||240)+"px");
+  document.documentElement.style.setProperty("--side-w",(S.sideWidth||388)+"px");
+}
 function fitZoom(){
   const sh=$("#sheet");if(!sh)return;
   const f=fmtOf(doc());
@@ -6253,6 +6307,7 @@ function drawMemo(){
   const d=doc();
   side.className="side on";
   side.innerHTML=`
+    <div class="side-resize" id="sideResize" title="${tr("Breite ziehen")}"></div>
     <div class="head">
       <span style="flex:1;font-family:Georgia,serif;font-size:16px;font-weight:600">${tr("Dokument-Memo")}</span>
       <button class="hb" id="memoClose" title="${tr("Schließen (Esc)")}">
@@ -6265,6 +6320,7 @@ function drawMemo(){
   ta.addEventListener("input",()=>{doc().memo=ta.value;dirty=true;drawStatus()});
   ta.addEventListener("blur",()=>{if(S.settings.autosave)commit()});
   $("#memoClose").onclick=()=>{S.memoOpen=false;save();drawMemo();const ed=$("#editor");ed&&ed.focus()};
+  bindPanelResize($("#sideResize"),side,"--side-w",260,640,"left",persistSideWidth);
 }
 const GOAL_DEFAULT_TARGET={words:1000,charsSp:6000,charsNoSp:5000,pages:2};
 function goalDialog(){
