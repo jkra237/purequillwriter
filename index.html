@@ -289,8 +289,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .figrsz.on{display:block}
 .hfedit.on{display:block}
 .printhf{display:none}
-.sheetpage .pn{position:absolute;bottom:5px;right:9px;font-family:var(--mono);
-  font-size:11px;color:var(--ink-faint)}
+.sheetpage .pn{position:absolute;font-family:var(--mono);color:var(--ink-faint)}
 #editor{
   position:relative;z-index:1;outline:none;
   font-family:Georgia,serif;line-height:var(--lh,1.62);color:var(--ink);
@@ -1304,7 +1303,12 @@ const EN={
   "Struktur":"Structure","Gliederung":"Outline","Ziehen zum Verschieben":"Drag to move",
   "Breite ziehen":"Drag to resize",
   "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":
-    "Every heading in the document appears here. No headings in the document yet."
+    "Every heading in the document appears here. No headings in the document yet.",
+  "Gilt nur, solange keine eigene Fußzeile eingeschaltet ist — die kann die Seitenzahl über {seite} selbst enthalten.":
+    "Only applies while no custom footer is on — that can already include the page number via {seite}.",
+  "Text":"Text",
+  "Platzhalter: {seite} und {seiten}. Nur „{seite}“ eingeben für die reine Zahl ohne Text davor oder danach.":
+    "Placeholders: {seite} and {seiten}. Enter just “{seite}” for the bare number with no text before or after."
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -1470,6 +1474,9 @@ S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
 S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
 if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 if(S.outlineOpen===undefined)S.outlineOpen=false;
+if(!S.pageNumPos)S.pageNumPos="right";
+if(!S.pageNumText)S.pageNumText="{seite}";
+if(!S.pageNumSize)S.pageNumSize=9;
 if(!S.outlineWidth)S.outlineWidth=240;
 if(!S.sideWidth)S.sideWidth=388;
 
@@ -3982,7 +3989,7 @@ function viewMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Seite")}</div>
     <button class="mi" data-v="guides"><span class="chk">${c(S.guides)}</span>${tr("Seitenränder")}</button>
-    <button class="mi" data-v="pnum"><span class="chk">${c(S.pagenum!==false)}</span>${tr("Seitenzahlen")}</button>
+    <button class="mi" data-v="pnum"><span class="chk">${c(S.pagenum!==false)}</span>${tr("Seitenzahlen")}&hellip;</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Struktur")}</div>
     <button class="mi" data-v="outline"><span class="chk">${c(S.outlineOpen)}</span>${tr("Gliederung")}<span class="k">Alt ⇧ O</span></button>
@@ -4003,13 +4010,13 @@ function viewMenu(){
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
-    const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo"].includes(a);
+    const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo","pnum"].includes(a);
     if(a==="memo"){closeMenu();toggleMemo();return}
+    if(a==="pnum"){closeMenu();pageNumDialog();return}
     if(a==="theme"){closeMenu();themeDialog();return}
     if(a==="read"){closeMenu();readView();return}
     if(a==="pv"){closeMenu();printPreview();return}
     if(a==="guides"){S.guides=!S.guides;save();if(S.mode==="write")paginate()}
-    if(a==="pnum"){S.pagenum=S.pagenum===false;save();if(S.mode==="write")paginate()}
     if(a==="outline")toggleOutline();
     if(a==="col"){S.showCol=!S.showCol;save();if(S.mode==="write")drawAnchors()}
     if(a==="amark"){S.showAnchMarks=S.showAnchMarks===false;save();if(S.mode==="write")drawAnchors()}
@@ -4380,7 +4387,7 @@ function paginate(){
       ${S.guides?`<div class="mg" style="left:${ml}px"></div><div class="mg" style="right:${mr}px;left:auto"></div>`:""}
       ${hfHtml(i,pageCount,ml,mr,z)}
       ${fnIds.length?`<div class="fnband" style="bottom:${mb}px;left:${ml}px;right:${mr}px;font-size:${(8.5*96/72)*z}px">${fnBandHtml(fnIds)}</div>`:""}
-      ${(S.pagenum!==false&&!ftrOn)?`<div class="pn">${i+1}</div>`:""}
+      ${(S.pagenum!==false&&!ftrOn)?pnHtml(i,pageCount,ml,mr,z,f):""}
     </div>`;
   }
   layer.innerHTML=html;
@@ -4848,6 +4855,55 @@ function hfHtml(i,total,ml,mr,z){
   if(f.on)out+=`<div class="hf" style="bottom:${MM(fm.fd)*z}px;left:${ml}px;right:${mr}px;
     text-align:${f.align};font-size:${fs}px">${hfText(f.text,i+1,total)}</div>`;
   return out;
+}
+/* Automatische Seitenzahl (nur ohne eigene Fußzeile - deren Text kann {seite}
+   längst selbst enthalten). Stand am selben Abstand zur Papierkante wie eine
+   echte Fußzeile (MM(fm.fd)), nicht an einem festen Pixelwert - der lag der
+   Kante zu nah und verschob sich mit dem Zoom nicht mit. */
+function pnHtml(i,total,ml,mr,z,fm){
+  const fs=((S.pageNumSize||9)*96/72)*z;
+  return `<div class="pn" style="bottom:${MM(fm.fd)*z}px;left:${ml}px;right:${mr}px;
+    text-align:${S.pageNumPos||"right"};font-size:${fs}px">${hfText(S.pageNumText||"{seite}",i+1,total)}</div>`;
+}
+function pageNumDialog(){
+  const body=()=>{
+    const off=S.pagenum===false;
+    return `
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;margin-bottom:14px">
+      <input type="checkbox" id="pnOn" ${off?"":"checked"} style="width:auto">${tr("Seitenzahlen anzeigen")}
+    </label>
+    <div class="mmrow">
+      <label>${tr("Text")}</label>
+      <input type="text" id="pnText" value="${esc(S.pageNumText||"{seite}")}" placeholder="{seite}" style="flex:1" ${off?"disabled":""}>
+    </div>
+    <div class="fmttip" style="margin:-4px 0 11px">${tr("Platzhalter: {seite} und {seiten}. Nur „{seite}“ eingeben für die reine Zahl ohne Text davor oder danach.")}</div>
+    <div class="mmrow">
+      <label>${tr("Ausrichtung")}</label>
+      ${["left","center","right"].map(a=>
+        `<button class="pill ${(S.pageNumPos||"right")===a?"on":""}" data-pnpos="${a}" style="flex:1"
+          ${off?"disabled":""}>${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
+    </div>
+    <div class="mmrow" style="margin-bottom:0">
+      <label>${tr("Schriftgröße")}</label>
+      <input type="number" id="pnSize" value="${S.pageNumSize||9}" min="6" max="24" style="flex:0 0 62px" ${off?"disabled":""}>
+      <span style="color:var(--ink-faint)">pt</span>
+    </div>
+    <div class="fmttip" style="margin-top:10px">${tr("Gilt nur, solange keine eigene Fußzeile eingeschaltet ist — die kann die Seitenzahl über {seite} selbst enthalten.")}</div>`;
+  };
+  overlay(`<div class="modal"><h3>${tr("Seitenzahlen")}</h3>
+    <div class="pad" id="pnBody">${body()}</div>
+    <div class="rowend"><button class="btn pri" id="pnDone">${tr("Fertig")}</button></div></div>`);
+  const apply=()=>{save();if(S.mode==="write")paginate()};
+  const bind=()=>{
+    $("#pnOn").onchange=e=>{S.pagenum=e.target.checked;apply();repaint()};
+    $("#pnText").onchange=e=>{S.pageNumText=e.target.value.trim()||"{seite}";apply()};
+    $("#pnSize").onchange=e=>{S.pageNumSize=Math.min(24,Math.max(6,+e.target.value||9));apply()};
+    $("#pnBody").querySelectorAll("[data-pnpos]").forEach(b=>b.onclick=()=>{
+      S.pageNumPos=b.dataset.pnpos;apply();repaint()});
+  };
+  const repaint=()=>{$("#pnBody").innerHTML=body();bind()};
+  bind();
+  $("#pnDone").onclick=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
 }
 function setPrintHF(){
   const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr");
