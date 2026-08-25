@@ -1928,9 +1928,15 @@ function drawWrite(){
     e.preventDefault();
     const eigen=html.indexOf(PQW_MARK)>=0;
     const sauber=eigen?cleanPasteOwn(html):cleanPasteForeign(html);
+    /* Vorher merken, welche Fernbilder schon dastanden: nachgeladen werden
+       sollen nur die neuen, sonst klopfte jedes Einfügen erneut bei allen
+       Quellservern früherer Einfügungen an. */
+    const vorher=new Set([...ed.querySelectorAll('img[src^="http"]')]);
     if(sauber)document.execCommand("insertHTML",false,sauber);
     pasteTidy();
     flush();dirty=true;commit();queuePaginate();
+    if(!eigen)embedRemoteImages([...ed.querySelectorAll('img[src^="http"]')]
+      .filter(i=>!vorher.has(i)));
   });
   ed.addEventListener("dragover",e=>{
     if(e.dataTransfer&&[...e.dataTransfer.types].includes("Files"))e.preventDefault()});
@@ -6814,26 +6820,72 @@ function pickImage(){
   const i=document.createElement("input");i.type="file";i.accept="image/*";
   i.onchange=()=>{const f=i.files[0];if(f)addImage(f)};i.click();
 }
-function addImage(file){
-  if(!file.type.startsWith("image/")){toast(tr("Keine Bilddatei"));return}
-  const r=new FileReader();
-  r.onload=()=>{
+/* Herunterrechnen und neu kodieren. Eigener Baustein, weil dieselbe Strecke
+   für selbst gewählte wie für eingefügte Bilder gilt — ein Bild aus der
+   Zwischenablage darf so wenig in Originalgröße im Browserspeicher landen wie
+   eines von der Festplatte. */
+function scaleToDataUrl(src,alsPng){
+  return new Promise((resolve,reject)=>{
     const im=new Image();
     im.onload=()=>{
       let w=im.width,h=im.height;
+      if(!w||!h){reject(new Error("leer"));return}
       const sc=Math.min(1,IMG_MAXPX/Math.max(w,h));
       w=Math.round(w*sc);h=Math.round(h*sc);
       const cv=document.createElement("canvas");cv.width=w;cv.height=h;
       cv.getContext("2d").drawImage(im,0,0,w,h);
-      const png=/png|gif|webp/i.test(file.type);
-      const data=cv.toDataURL(png?"image/png":"image/jpeg",IMG_Q);
+      try{resolve(cv.toDataURL(alsPng?"image/png":"image/jpeg",IMG_Q))}
+      catch(e){reject(e)}          /* fremdes Bild ohne CORS: Canvas ist gesperrt */
+    };
+    im.onerror=()=>reject(new Error("laden"));
+    im.src=src;
+  });
+}
+const blobToDataUrl=b=>new Promise((res,rej)=>{
+  const fr=new FileReader();fr.onload=()=>res(fr.result);fr.onerror=rej;fr.readAsDataURL(b)});
+/* Alles mit möglicher Transparenz muss als PNG heraus. JPEG kennt keine und
+   füllt durchsichtige Flächen schwarz — ein freigestelltes Logo käme sonst auf
+   schwarzem Grund heraus. SVG gehört ausdrücklich dazu. */
+const magPng=t=>/png|gif|webp|svg/i.test(t||"");
+function addImage(file){
+  if(!file.type.startsWith("image/")){toast(tr("Keine Bilddatei"));return}
+  blobToDataUrl(file)
+    .then(roh=>scaleToDataUrl(roh,magPng(file.type)))
+    .then(data=>{
       insertFigure(data,file.name.replace(/\.[^.]+$/,""));
       if(data.length>1.2e6)toast(tr("Großes Bild — der Browser-Speicher ist begrenzt"));
-    };
-    im.onerror=()=>toast(tr("Bild konnte nicht gelesen werden"));
-    im.src=r.result;
-  };
-  r.readAsDataURL(file);
+    })
+    .catch(()=>toast(tr("Bild konnte nicht gelesen werden")));
+}
+/* Aus einer Webseite eingefügte Bilder hängen zunächst an ihrer Herkunfts-
+   adresse. So wären sie offline weg, brächen in jedem Export und meldeten der
+   Quellseite jedes Öffnen des Dokuments. Sie werden deshalb nachgeladen und
+   eingebettet — wie in Word und Google Docs, wo ein Fernverweis gar nicht erst
+   entsteht. Nachladen darf der Browser aber nur, wo der fremde Server es per
+   CORS erlaubt; sonst bleibt der Verweis stehen und der Benutzer erfährt es. */
+async function embedRemoteImages(bilder){
+  const ed=$("#editor");
+  if(!ed||!bilder||!bilder.length)return;
+  let ok=0,fehl=0;
+  for(const img of bilder){
+    const url=img.getAttribute("src");
+    if(!url||!/^https?:/i.test(url))continue;
+    try{
+      const r=await fetch(url,{mode:"cors",credentials:"omit"});
+      if(!r.ok)throw new Error(r.status);
+      const blob=await r.blob();
+      if(!/^image\//.test(blob.type))throw new Error("kein Bild");
+      const data=await scaleToDataUrl(await blobToDataUrl(blob),magPng(blob.type));
+      if(!ed.contains(img))continue;      /* zwischenzeitlich gelöscht */
+      img.setAttribute("src",data);ok++;
+    }catch(e){fehl++}
+  }
+  if(ok){flush();dirty=true;commit();queuePaginate()}
+  if(fehl)toast(S.settings.uiLang==="en"
+    ?(fehl===1?"1 image could not be embedded and stays linked to its source."
+              :fehl+" images could not be embedded and stay linked to their source.")
+    :(fehl===1?"1 Bild ließ sich nicht einbetten und bleibt mit der Quelle verknüpft."
+              :fehl+" Bilder ließen sich nicht einbetten und bleiben mit der Quelle verknüpft."));
 }
 function insertFigure(src,alt){
   const ed=$("#editor");if(!ed)return;
