@@ -256,6 +256,16 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .sheetpage .mg{position:absolute;top:0;bottom:0;border-left:1px dashed var(--rule)}
 .hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
   pointer-events:none;white-space:pre-wrap;line-height:1.3}
+/* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
+   kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
+   der ganz normalen Fußzeilen-Reserve (bottom:mb) - dieselbe Höhe, die auch
+   für eine Fußzeile Platz macht, siehe hfBand(). Wächst je Seite
+   unterschiedlich, je nachdem wie viele Fußnoten dort landen (paginate()
+   misst das vorab an #fnMeasure und schiebt Inhalt entsprechend hoch). */
+.fnband{position:absolute;pointer-events:none;font-family:Georgia,serif;color:var(--ink-soft);line-height:1.35}
+.fnband .fnline{border-top:1px solid var(--ink-faint);width:35%;margin-bottom:.4em}
+.fnband .fnrow{margin-bottom:.3em}
+.fnband .fnrow sup{margin-right:.35em;font-weight:600}
 /* Kopf-/Fußzeile direkt auf der Seite bearbeiten */
 .hfhint{position:absolute;z-index:2;pointer-events:none;display:none;
   align-items:center;justify-content:center;border:1px dashed var(--stamp);border-radius:2px;
@@ -4286,7 +4296,7 @@ function paginate(){
      tiefer reicht. Vorher konnten sich beide überlagern. */
   const mt=Math.max(MM(f.m[0])*z, hfBand(doc(),"hdr",z));
   const mb=Math.max(MM(f.m[2])*z, hfBand(doc(),"ftr",z));
-  const contentH=Math.max(60,ph-mt-mb), stride=ph+GAP;
+  const stride=ph+GAP;
   lastStride=stride;
   paper.style.width=pw+"px";
   ed.style.padding=`${mt}px ${mr}px ${mb}px ${ml}px`;
@@ -4296,29 +4306,62 @@ function paginate(){
   /* Frei platzierte Bilder liegen außerhalb des Flusses — sie dürfen weder
      umbrochen noch in die Seitenzahl eingerechnet werden. */
   const blocks=[...ed.children].filter(b=>!b.classList.contains("free"));
-  blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
-  const edTop=ed.getBoundingClientRect().top;
-  blocks.forEach(b=>{
-    const r=b.getBoundingClientRect();
-    const top=r.top-edTop, h=r.height;
-    const p=Math.max(0,Math.floor(top/stride));
-    if(b.classList.contains("pgbreak")){
-      const nextStart=(p+1)*stride+mt;
-      b.style.height=Math.max(14,nextStart-top-1)+"px";
-      return;
-    }
-    const limit=p*stride+mt+contentH;
-    if(top+h>limit+1&&h<=contentH){
-      const base=parseFloat(getComputedStyle(b).marginTop)||0;
-      b.style.marginTop=(base+((p+1)*stride+mt-top))+"px";
-    }
-  });
+  const hasFn=doc().footnotes&&doc().footnotes.length&&ed.querySelector(".fn[data-fn]");
+  /* Ein Durchlauf des Umbruchs: contentHOf(seite) legt fest, wie viel Platz
+     auf jeder Seite für Text bleibt (unten reduziert um die dort benötigte
+     Fußnotenfläche) - gibt zurück, welche Fußnoten-IDs auf welcher Seite
+     landen, damit sie danach an genau dieser Stelle gerendert werden. */
+  function reflow(contentHOf){
+    blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
+    const edTop=ed.getBoundingClientRect().top;
+    const fnByPage=[];
+    blocks.forEach(b=>{
+      const r=b.getBoundingClientRect();
+      const top=r.top-edTop, h=r.height;
+      let p=Math.max(0,Math.floor(top/stride));
+      const contentH=contentHOf(p);
+      if(b.classList.contains("pgbreak")){
+        const nextStart=(p+1)*stride+mt;
+        b.style.height=Math.max(14,nextStart-top-1)+"px";
+        return;
+      }
+      const limit=p*stride+mt+contentH;
+      if(top+h>limit+1&&h<=contentH){
+        const base=parseFloat(getComputedStyle(b).marginTop)||0;
+        b.style.marginTop=(base+((p+1)*stride+mt-top))+"px";
+        p++;
+      }
+      if(hasFn)b.querySelectorAll&&b.querySelectorAll(".fn[data-fn]").forEach(m=>{
+        (fnByPage[p]=fnByPage[p]||[]).push(m.dataset.fn);
+      });
+    });
+    return fnByPage;
+  }
+  const contentH=Math.max(60,ph-mt-mb);
+  let fnByPage=reflow(()=>contentH),fnHeights=[];
+  if(hasFn){
+    /* Wie viel Höhe die Fußnoten je Seite tatsächlich brauchen, an einem
+       unsichtbaren Messelement mit derselben Breite und Schrift ablesen -
+       eine Formel wie bei hfBand() würde beim Zeilenumbruch beliebig
+       langer Fußnotentexte danebenliegen. */
+    const meas=ensureFnMeasurer();
+    meas.style.width=(pw-ml-mr)+"px";
+    meas.style.fontSize=((8.5*96/72)*z)+"px";
+    fnHeights=fnByPage.map(ids=>{
+      const uniq=ids?[...new Set(ids)]:[];
+      if(!uniq.length)return 0;
+      meas.innerHTML=fnBandHtml(uniq);
+      return meas.offsetHeight+MM(2)*z;
+    });
+    fnByPage=reflow(p=>Math.max(60,contentH-(fnHeights[p]||0)));
+  }
   ed.querySelectorAll(".toc").forEach(t=>tocUpdatePageNumbers(ed,t));
   if(S.outlineOpen)drawOutline();
+  const edTop=ed.getBoundingClientRect().top;
   const last=blocks.length?blocks[blocks.length-1].getBoundingClientRect():null;
   const bottom=last?last.bottom-edTop:0;
   pageCount=Math.max(1,Math.ceil((bottom+mb)/stride));
-  if(bottom+mb>pageCount*stride-GAP)pageCount++;
+  if(bottom+mb+(fnHeights[pageCount-1]||0)>pageCount*stride-GAP)pageCount++;
   ed.style.minHeight=(pageCount*stride-GAP)+"px";
   paper.style.height=(pageCount*stride-GAP)+"px";
   placeFreeFigs();
@@ -4326,9 +4369,11 @@ function paginate(){
   let html="";
   const ftrOn=hfOf(doc(),"ftr").on;
   for(let i=0;i<pageCount;i++){
+    const fnIds=fnByPage[i]?[...new Set(fnByPage[i])]:[];
     html+=`<div class="sheetpage" style="top:${i*stride}px;height:${ph}px">
       ${S.guides?`<div class="mg" style="left:${ml}px"></div><div class="mg" style="right:${mr}px;left:auto"></div>`:""}
       ${hfHtml(i,pageCount,ml,mr,z)}
+      ${fnIds.length?`<div class="fnband" style="bottom:${mb}px;left:${ml}px;right:${mr}px;font-size:${(8.5*96/72)*z}px">${fnBandHtml(fnIds)}</div>`:""}
       ${(S.pagenum!==false&&!ftrOn)?`<div class="pn">${i+1}</div>`:""}
     </div>`;
   }
@@ -5113,6 +5158,31 @@ function renumberFootnotes(ed){
     s.textContent=seen.get(s.dataset.fn);
   });
 }
+/* ---- Fußnoten am Seitenfuß (nur die Bildschirmansicht, siehe paginate()) ----
+   Word/WordPerfect/Lotus Word Pro zeigen Fußnoten seit jeher direkt am Fuß
+   der Seite, auf der sie stehen, nicht gesammelt am Dokumentende - die
+   Fläche wächst dafür je Seite unterschiedlich. Drucken/PDF können das mit
+   reinem CSS nicht (siehe withPrintFootnotes weiter unten): dort bleibt es
+   bei der Sammelliste am Ende. Die Druckvorschau dagegen klont #pagelayer
+   unverändert und zeigt die echte Seitenfläche mit. */
+function fnBandHtml(ids){
+  const ed=$("#editor"),d=doc();if(!ed)return"";
+  return `<div class="fnline"></div>`+ids.map(id=>{
+    const marker=ed.querySelector(`.fn[data-fn="${id}"]`);
+    const num=marker?marker.textContent:"";
+    const fn=(d.footnotes||[]).find(f=>f.id===id);
+    return `<div class="fnrow"><sup>${esc(num)}</sup>${esc((fn&&fn.text)||"")}</div>`;
+  }).join("");
+}
+let fnMeasureEl=null;
+function ensureFnMeasurer(){
+  if(fnMeasureEl&&fnMeasureEl.isConnected)return fnMeasureEl;
+  fnMeasureEl=document.createElement("div");
+  fnMeasureEl.id="fnMeasure";fnMeasureEl.className="fnband";
+  fnMeasureEl.style.cssText="position:absolute;visibility:hidden;pointer-events:none;left:-9999px;top:0";
+  document.body.appendChild(fnMeasureEl);
+  return fnMeasureEl;
+}
 function updateFootnoteTitles(){
   const ed=$("#editor");if(!ed)return;
   const d=doc();
@@ -5157,7 +5227,8 @@ function editFootnote(id){
     </div></div>`);
   const ta=$("#fnText");ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
   const finish=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
-  $("#fnOk").onclick=()=>{fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();finish()};
+  $("#fnOk").onclick=()=>{fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();
+    if(S.mode==="write")paginate();finish()};
   $("#fnDel").onclick=()=>{deleteFootnote(id);finish()};
   ta.addEventListener("keydown",e=>{
     if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#fnOk").click()}
