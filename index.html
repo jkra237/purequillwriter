@@ -1336,8 +1336,14 @@ function isTrulyEmpty(){
   return S.docs.length===1&&!hatInhalt(S.docs[0].html)&&!S.docs[0].customTitle
     &&!(S.notes&&S.notes.length)&&!(S.glossary&&S.glossary.length);
 }
+/* Hinter dem Startdialog liegt bewusst kein Dokument (kein Reiter, keine
+   Werkzeugleiste) - nur die graue Arbeitsfläche, dieselbe Farbe wie hinter
+   dem Papier beim eigentlichen Schreiben (.sheet{background:var(--canvas)}),
+   damit es nicht wie ein andersartiger, leerer Bildschirm wirkt. */
 function clearShell(){
-  $("#tabbar").innerHTML="";$("#tools").innerHTML="";$("#pane").innerHTML="";$("#status").innerHTML="";
+  $("#tabbar").innerHTML="";$("#tools").innerHTML="";
+  $("#pane").innerHTML='<div class="sheet"></div>';
+  $("#status").innerHTML="";
   document.title="PureQuill Writer";
 }
 /* Ein Dokument kann auch ohne ein einziges Wort Inhalt haben: eine frei
