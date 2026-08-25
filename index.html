@@ -798,13 +798,6 @@ body.focus .outline{display:none}
 .topbar,.rail,.tools,.status{transition:opacity .35s}
 body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opacity:.34}
 
-/* ---- Hinweis im leeren Dokument ---- */
-#editor.isempty::before{
-  content:attr(data-hint);
-  position:absolute;left:var(--pl,0);top:var(--pt,0);pointer-events:none;
-  font-family:var(--ui);font-size:13px;line-height:1.5;
-  color:var(--ink-faint);font-style:normal;white-space:nowrap}
-
 /* ---- Seitenanzeige beim Scrollen ---- */
 .pageflag{position:absolute;right:14px;top:14px;z-index:40;background:var(--ink);color:var(--paper);
   font-family:var(--mono);font-size:12px;padding:5px 11px;border-radius:var(--radius);
@@ -1048,7 +1041,6 @@ let mem=null;
 
 /* ================= Übersetzung ================= */
 const EN={
-  "Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar":"Tip: Alt ⇧ P for commands · Alt 2 for notes · Alt 3 for glossary",
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
   "Datei":"File","Ansicht":"View","Format":"Format","Dokument":"Document","Notiz":"Note","Glossar":"Glossary","Einstellungen":"Settings",
@@ -1300,7 +1292,9 @@ const EN={
   "Im Dokument gibt es bereits ein Abbildungsverzeichnis.":"The document already has a table of figures.",
   "als Einfügeoption anbieten":"offer as an insert option",
   "Struktur":"Structure","Gliederung":"Outline","Ziehen zum Verschieben":"Drag to move",
-  "Breite ziehen":"Drag to resize"
+  "Breite ziehen":"Drag to resize",
+  "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":
+    "Every heading in the document appears here. No headings in the document yet."
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -1742,7 +1736,7 @@ function drawWrite(){
       <div class="ruler" id="ruler"></div>
       <div class="paper" id="paper">
         <div id="pagelayer"></div>
-        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}" data-hint="${esc(tr("Tipp: Alt ⇧ P für Befehle · Alt 2 für Notizen · Alt 3 für Glossar"))}"></div>
+        <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}"></div>
         <div class="hfhint" id="hfhint"></div>
         <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
         <div class="hfgrip" id="hfgrip" title="${esc(tr("Kopf-/Fußzeilenbereich ziehen"))}"></div>
@@ -3982,14 +3976,14 @@ function viewMenu(){
     <button class="mi" data-v="amark"><span class="chk">${c(S.showAnchMarks!==false)}</span>${tr("Markierungen im Text")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Darstellung")}</div>
-    <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
-    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>
-    <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
-    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
-    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">Alt ⇧ T</span></button>
+    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
     <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
-    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">Alt ⇧ V</span></button>`;
+    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">Alt ⇧ V</span></button>
+    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">Alt ⇧ T</span></button>
+    <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
+    <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
+    <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
@@ -5512,7 +5506,7 @@ function drawOutline(){
       <div class="outline-item ol${s.lvl}" data-oid="${s.id}">
         <span class="outline-drag" title="${tr("Ziehen zum Verschieben")}">${ICO('<circle cx="8" cy="6" r="1.3"/><circle cx="8" cy="12" r="1.3"/><circle cx="8" cy="18" r="1.3"/><circle cx="14" cy="6" r="1.3"/><circle cx="14" cy="12" r="1.3"/><circle cx="14" cy="18" r="1.3"/>')}</span>
         <span class="outline-t">${esc(s.h.textContent.trim())||tr("(ohne Text)")}</span>
-      </div>`).join(""):`<div class="outline-empty">${tr("Noch keine Überschriften im Dokument.")}</div>`}
+      </div>`).join(""):`<div class="outline-empty">${tr("Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.")}</div>`}
     </div>`;
   $("#outlineClose").onclick=()=>toggleOutline();
   bindOutlineDrag();
