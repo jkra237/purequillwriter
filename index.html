@@ -360,6 +360,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Tabellentext, der dadurch nie mit Zoom, Dokumentschrift oder -größe
    mitwuchs. font:inherit stellt die normale Vererbung wieder her. */
 #editor table{border-collapse:collapse;width:100%;table-layout:fixed;margin:0 0 .82em;font:inherit}
+/* Sicherheitsnetz gegen Eingefügtes. Die Bildregeln weiter unten greifen nur
+   für Bilder in einer figure.fig, also für die, die durch addImage() gegangen
+   sind — ein aus einer Webseite kopiertes <img> hat keine und stand vorher in
+   Originalgröße weit über dem Satzspiegel. Der Filter beim Einfügen nimmt die
+   Breitenangaben zwar heraus, aber hier darf nichts durchrutschen. */
+#editor img{max-width:100%;height:auto}
+#editor pre{white-space:pre-wrap;overflow-wrap:anywhere}
+#editor blockquote,#editor p,#editor li,#editor h1,#editor h2,#editor h3{overflow-wrap:break-word}
 #editor td,#editor th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
 #editor th{background:var(--chrome-2);font-weight:600;text-align:left}
@@ -1880,9 +1888,49 @@ function drawWrite(){
     if(i<0)return;
     putCaret(cells[i]);
   });
+  /* Kopiertes bekommt eine Herkunftsmarke mit — beim Einfügen ist sonst nicht
+     zu unterscheiden, ob der Inhalt aus diesem Dokument stammt oder von einer
+     fremden Seite (siehe cleanPasteForeign). Suchtreffer und Prüfmarkierungen
+     sind Anzeige, kein Inhalt, und bleiben wie beim Speichern draußen. */
+  const stempeln=e=>{
+    const sel=getSelection();
+    if(!sel.rangeCount||sel.isCollapsed||!e.clipboardData)return false;
+    const box=document.createElement("div");
+    box.setAttribute(PQW_MARK,"1");
+    box.appendChild(sel.getRangeAt(0).cloneContents());
+    box.querySelectorAll(".hit,.spellerr,.glossterm").forEach(unwrap);
+    box.querySelectorAll(".fhwrap").forEach(n=>n.remove());
+    e.clipboardData.setData("text/html",box.outerHTML);
+    e.clipboardData.setData("text/plain",sel.toString());
+    e.preventDefault();
+    return true;
+  };
+  ed.addEventListener("copy",stempeln);
+  ed.addEventListener("cut",e=>{
+    if(!stempeln(e))return;
+    /* Nach preventDefault entfernt der Browser die Auswahl nicht mehr selbst.
+       execCommand statt eigenem Löschen: es kennt die Blockgrenzen und hängt
+       sich in dieselbe Rückgängig-Kette wie alles andere. */
+    document.execCommand("delete");
+    flush();dirty=true;commit();queuePaginate();
+  });
   ed.addEventListener("paste",e=>{
-    const it=[...(e.clipboardData?e.clipboardData.items:[])].find(x=>x.type.startsWith("image/"));
-    if(it){e.preventDefault();const f=it.getAsFile();if(f)addImage(f)}
+    const cd=e.clipboardData;
+    if(!cd)return;
+    const html=cd.getData("text/html");
+    /* Ein Bild ohne begleitendes HTML ist ein Screenshot o. ä. — der wird
+       eingebettet. Liegt HTML daneben, ist es kopierter Seiteninhalt. */
+    if(!html){
+      const it=[...cd.items].find(x=>x.type.startsWith("image/"));
+      if(it){e.preventDefault();const f=it.getAsFile();if(f)addImage(f)}
+      return;                       /* reiner Text: der Browser macht das richtig */
+    }
+    e.preventDefault();
+    const eigen=html.indexOf(PQW_MARK)>=0;
+    const sauber=eigen?cleanPasteOwn(html):cleanPasteForeign(html);
+    if(sauber)document.execCommand("insertHTML",false,sauber);
+    pasteTidy();
+    flush();dirty=true;commit();queuePaginate();
   });
   ed.addEventListener("dragover",e=>{
     if(e.dataTransfer&&[...e.dataTransfer.types].includes("Files"))e.preventDefault()});
@@ -3585,6 +3633,137 @@ function cleanHtml(src){
     body.removeChild(w);w=body.firstElementChild;
   }
   return body.innerHTML.trim()||"<p><br></p>";
+}
+/* ================= Einfügen aus der Zwischenablage ================= */
+/* Beim Kopieren von einer Webseite kommt deren ganzes Layout mit: feste
+   Pixelbreiten, Floats, fremde Klassen. Ungefiltert eingesetzt läuft der
+   Inhalt über den Satzspiegel hinaus — und schlimmer, fremde Namen treffen
+   auf unsere eigenen: ein <div class="toc" data-toc> von irgendeiner Seite
+   gälte der App als das Inhaltsverzeichnis dieses Dokuments, und Chrome
+   rechnet ein fremdes class="hit" in ein fest eingebranntes gelbes
+   background-color um — die Farbe unserer Suchtreffer als Dauerzustand.
+
+   Ein einziger Filter für alles ginge nicht, denn die App setzt selbst
+   Inline-Stile, die von außen unerwünscht wären: margin-left fürs Einrücken,
+   color/background-color für Farben, position/left/top für frei gesetzte
+   Bilder. Was aus dem eigenen Dokument stammt, muss also erkennbar sein —
+   deshalb bekommt Kopiertes hier eine Marke mit. */
+const PQW_MARK="data-pqw-src";
+/* Elemente ohne Textinhalt: sie tragen nichts bei und bringen nur Ärger */
+const PASTE_WEG="script,style,link,meta,base,title,iframe,object,embed,noscript,"+
+                "form,input,button,select,textarea,canvas,video,audio,svg,template";
+/* Reine Layoutschachteln: Inhalt behalten, Hülle auflösen */
+const PASTE_HUELLE=new Set(["DIV","SECTION","ARTICLE","HEADER","FOOTER","ASIDE","NAV",
+                            "MAIN","CENTER","FONT","PICTURE","TIME","ABBR","LABEL"]);
+/* Auszeichnung, die etwas bedeutet — nicht, wie die Quelle aussah */
+const PASTE_STIL=new Set(["font-weight","font-style","text-decoration",
+                          "text-decoration-line","text-align"]);
+const PASTE_TAGS=new Set(["P","H1","H2","H3","H4","H5","H6","UL","OL","LI","TABLE",
+  "THEAD","TBODY","TFOOT","TR","TD","TH","BLOCKQUOTE","PRE","CODE","B","STRONG","I",
+  "EM","U","S","STRIKE","DEL","INS","SUP","SUB","A","IMG","FIGURE","FIGCAPTION","BR","HR","SPAN"]);
+
+function pasteKeepStyle(el,erlaubt){
+  const st=el.style,behalten=[];
+  for(let i=0;i<st.length;i++){
+    const p=st[i];
+    if(erlaubt.has(p))behalten.push(p+":"+st.getPropertyValue(p));
+  }
+  if(behalten.length)el.setAttribute("style",behalten.join(";"));
+  else el.removeAttribute("style");
+}
+/* Aus dem eigenen Dokument: alles bleibt, bis auf das, was sich nicht
+   verdoppeln darf. Ein zweites Inhaltsverzeichnis wäre keins mehr, und
+   doppelte Überschriften-Kennungen brächten die Gliederung durcheinander. */
+function cleanPasteOwn(src){
+  const b=new DOMParser().parseFromString(String(src),"text/html").body;
+  const box=b.querySelector("["+PQW_MARK+"]")||b;
+  box.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));
+  box.querySelectorAll("[data-toc],[data-tof]").forEach(e=>e.remove());
+  return box.innerHTML;
+}
+/* Von außen: die Gliederung wird übernommen, die Gestaltung der Quelle nicht.
+   Überschrift bleibt Überschrift, Liste bleibt Liste — aber Breiten, Floats,
+   Schriftgrößen und Farben der fremden Seite bleiben draußen, damit sich der
+   Text in dieses Dokument einfügt statt sein altes Layout mitzuschleppen. */
+function cleanPasteForeign(src){
+  const dom=new DOMParser().parseFromString(String(src),"text/html");
+  const b=dom.body;
+  b.querySelectorAll(PASTE_WEG).forEach(n=>n.remove());
+  const w=dom.createTreeWalker(b,NodeFilter.SHOW_COMMENT);
+  const komm=[];let k;while(k=w.nextNode())komm.push(k);
+  komm.forEach(n=>n.remove());
+
+  b.querySelectorAll("*").forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      const n=a.name.toLowerCase();
+      if(n==="colspan"||n==="rowspan")return;
+      if(n==="alt"&&el.tagName==="IMG")return;
+      if(n==="style"){pasteKeepStyle(el,PASTE_STIL);return}
+      if(n==="href"&&el.tagName==="A"){
+        if(/^\s*(javascript|data|vbscript):/i.test(a.value))el.removeAttribute("href");
+        return;
+      }
+      if(n==="src"&&el.tagName==="IMG"){
+        /* http(s) und eingebettete Bilder ja, alles andere nein */
+        if(!/^\s*(https?:|data:image\/)/i.test(a.value))el.removeAttribute("src");
+        return;
+      }
+      el.removeAttribute(a.name);      /* class, id, data-*, width, height, … */
+    });
+    if(el.tagName==="A"&&el.getAttribute("href")){
+      el.setAttribute("target","_blank");el.setAttribute("rel","noopener");
+    }
+  });
+  /* Hüllen auflösen. Von hinten nach vorn, damit verschachtelte Schachteln in
+     einem Durchgang verschwinden und die Liste dabei gültig bleibt. */
+  const alle=[...b.querySelectorAll("*")].reverse();
+  alle.forEach(el=>{
+    const t=el.tagName;
+    if(t==="SPAN"&&!el.getAttribute("style")){unwrap(el);return}
+    if(PASTE_HUELLE.has(t)||!PASTE_TAGS.has(t)){
+      /* Eine Schachtel mit eigenem Text darf nicht spurlos verschwinden, sonst
+         klebt ihr Text am vorigen Absatz. Sie wird dann selbst zum Absatz.
+         Rein inline gedachte Hüllen (font, time, abbr …) lösen sich dagegen
+         auf, die standen ohnehin mitten im Satz. */
+      const inline=t==="FONT"||t==="SPAN"||t==="TIME"||t==="ABBR"||t==="LABEL";
+      if(PASTE_HUELLE.has(t)&&!inline&&el.textContent.trim()
+         &&!el.querySelector("p,h1,h2,h3,h4,h5,h6,li,tr,figure,blockquote,pre")){
+        const p=dom.createElement("p");
+        while(el.firstChild)p.appendChild(el.firstChild);
+        el.replaceWith(p);return;
+      }
+      unwrap(el);
+    }
+  });
+  b.querySelectorAll("img:not([src])").forEach(n=>n.remove());
+  /* Ein Bild, das allein in seinem Block steht, wird zu einem Dokumentbild —
+     dann greifen Werkzeugleiste und Ziehgriff darauf wie auf jedes andere. */
+  b.querySelectorAll("img").forEach(img=>{
+    if(img.closest("figure"))return;
+    const p=img.parentNode;
+    const allein=p===b||(p.children.length===1&&!(p.textContent||"").trim());
+    if(!allein)return;
+    const fig=dom.createElement("figure");fig.className="fig";
+    (p===b?img:p).replaceWith(fig);fig.appendChild(img);
+  });
+  b.querySelectorAll("figure").forEach(f=>f.className="fig");
+  return b.innerHTML.trim();
+}
+/* Steht der Cursor in einem Absatz, verschmilzt der Browser den ersten
+   eingefügten Absatz damit — richtig so, ein Absatz kann nur eine Ausrichtung
+   haben. Dabei rechnet Chrome dessen Blockeigenschaften aber in Inline-Spans
+   um, wo sie nichts bewirken. Die tragen nichts und werden hier abgeräumt. */
+function pasteTidy(){
+  const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll("span[style],b[style],i[style],em[style],strong[style],u[style],a[style]")
+    .forEach(el=>{
+      el.style.removeProperty("text-align");
+      el.style.removeProperty("margin-left");
+      el.style.removeProperty("text-indent");
+      if(el.getAttribute("style"))return;
+      el.removeAttribute("style");
+      if(el.tagName==="SPAN")unwrap(el);
+    });
 }
 /* ZIP (.docx/.odt) und OLE (.doc) sind Binärformate und lassen sich hier nicht lesen */
 function looksBinary(s){
