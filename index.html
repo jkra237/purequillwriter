@@ -977,7 +977,7 @@ body.focus .sheet{padding-top:9vh}
   <div class="topbar">
     <button class="filebtn" id="fileBtn">Datei</button>
     <button class="filebtn" id="viewBtn">Ansicht</button>
-    <button class="filebtn" id="toolsBtn">Tools</button>
+    <button class="filebtn" id="toolsBtn">Werkzeuge</button>
     <div class="tabbar" id="tabbar"></div>
   </div>
   <div class="body">
@@ -1112,6 +1112,7 @@ en:{
   "Seitenumbruch":"Page break",
   "Datei":"File",
   "Ansicht":"View",
+  "Werkzeuge":"Tools",
   "Format":"Format",
   "Dokument":"Document",
   "Notiz":"Note",
@@ -1670,6 +1671,7 @@ fr:{
   "Seitenumbruch":"Saut de page",
   "Datei":"Fichier",
   "Ansicht":"Affichage",
+  "Werkzeuge":"Outils",
   "Format":"Format",
   "Dokument":"Document",
   "Notiz":"Note",
@@ -2228,6 +2230,7 @@ es:{
   "Seitenumbruch":"Salto de página",
   "Datei":"Archivo",
   "Ansicht":"Vista",
+  "Werkzeuge":"Herramientas",
   "Format":"Formato",
   "Dokument":"Documento",
   "Notiz":"Nota",
@@ -2786,6 +2789,7 @@ pt:{
   "Seitenumbruch":"Quebra de página",
   "Datei":"Arquivo",
   "Ansicht":"Exibir",
+  "Werkzeuge":"Ferramentas",
   "Format":"Formato",
   "Dokument":"Documento",
   "Notiz":"Nota",
@@ -3356,6 +3360,7 @@ const OFWORD=()=>PL("von","of","sur","de","de");
 function applyStaticLabels(){
   $("#fileBtn").textContent=tr("Datei");
   $("#viewBtn").textContent=tr("Ansicht");
+  $("#toolsBtn").textContent=tr("Werkzeuge");
   const rw=document.querySelector('.rb[data-mode="write"]');if(rw)rw.title=tr("Schreiben (Alt+1)");
   const rn=document.querySelector('.rb[data-mode="notes"]');if(rn)rn.title=tr("Notizen (Alt+2)");
   const rg=document.querySelector('.rb[data-mode="gloss"]');if(rg)rg.title=tr("Glossar (Alt+3)");
