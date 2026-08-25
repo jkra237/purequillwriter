@@ -374,6 +374,56 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   margin:0;padding:0;overflow:hidden}
 #editor .pgbreak::before{content:attr(data-label);position:absolute;left:0;top:2px;
   font-family:var(--ui);font-size:11px;color:var(--ink-faint)}
+#editor .fn,.readview .fn,.pvinner .fn{color:var(--stamp);cursor:pointer;font-weight:600}
+#editor .fn:hover{text-decoration:underline}
+.toc{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 14px 6px;
+  margin:0 0 .82em;background:var(--chrome-2)}
+.toc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;
+  font-family:Georgia,serif;font-size:15px;color:var(--ink)}
+.toc-headbtns{display:flex;gap:2px;flex:none;opacity:0;transition:opacity .12s}
+.toc:hover .toc-headbtns,.toc.sel .toc-headbtns{opacity:1}
+.toc-refresh,.toc-settings{width:24px;height:24px;border-radius:var(--radius);display:flex;align-items:center;
+  justify-content:center;color:var(--ink-soft);flex:none}
+.toc-refresh:hover,.toc-settings:hover{background:var(--chrome);color:var(--ink)}
+#editor .toc-list a,.toc-list a{display:flex;align-items:baseline;gap:6px;padding:3px 0;color:var(--ink);
+  text-decoration:none;cursor:pointer}
+#editor .toc-list a:hover,.toc-list a:hover{color:var(--stamp)}
+/* Ebene bestimmt Einrückung UND Schriftgröße - wie die eingebauten
+   Verzeichnisformate in Word, wo tiefere Ebenen kleiner und weiter
+   eingerückt erscheinen, nicht nur eingerückt. */
+#editor .toc-list a.toc-l1,.toc-list a.toc-l1{font-size:1em}
+#editor .toc-list a.toc-l2,.toc-list a.toc-l2{padding-left:1.3em;font-size:.93em}
+#editor .toc-list a.toc-l3,.toc-list a.toc-l3{padding-left:2.6em;font-size:.86em}
+.toc-leader{flex:1;margin-bottom:3px}
+.toc[data-leader="dots"] .toc-leader{border-bottom:1px dotted var(--ink-faint)}
+.toc[data-leader="dash"] .toc-leader{border-bottom:1px dashed var(--ink-faint)}
+.toc[data-leader="line"] .toc-leader{border-bottom:1px solid var(--ink-faint)}
+.toc-num{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
+.toc-pg{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
+.toc-empty{color:var(--ink-faint);font-style:italic;font-size:13px;padding:4px 0}
+/* .toc-t ist die einzige editierbare Insel im sonst gesperrten Block (siehe
+   Klick-Behandlung in drawWrite) - ein zarter Fokusring statt keinem
+   Feedback, sonst wirkt ein Umbenennen wie ein Bug statt einer Funktion. */
+.toc-t{min-width:1em;border-radius:2px;outline:none}
+.toc-t:focus{box-shadow:0 0 0 2px var(--stamp)}
+.toc-entrylist{max-height:180px;overflow-y:auto;border:1px solid var(--rule);border-radius:var(--radius)}
+.toc-entryrow{display:flex;align-items:center;gap:8px;padding:6px 9px;font-size:13px;color:var(--ink);cursor:pointer}
+.toc-entryrow:hover{background:var(--chrome-2)}
+.toc-entryrow.off{color:var(--ink-faint)}
+.toc-entryrow.off .toc-entrytext{text-decoration:line-through}
+.toc-entrylvl{font-family:var(--mono);font-size:10px;color:var(--ink-faint);flex:none;
+  border:1px solid var(--rule);border-radius:3px;padding:0 3px}
+.toc-entrytext{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* -- Stile: Klassisch ist die Grundausstattung oben, der Rest weicht gezielt ab -- */
+#editor .toc[data-style="simple"] .toc-list a,.toc[data-style="simple"] .toc-list a{padding:5px 0}
+.toc[data-style="modern"]{background:var(--paper);border:none;border-left:3px solid var(--stamp);
+  border-radius:0 var(--radius) var(--radius) 0}
+.toc[data-style="modern"] .toc-head{border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:8px}
+#editor .toc[data-style="modern"] .toc-list a,.toc[data-style="modern"] .toc-list a{padding:5px 0}
+#editor .toc[data-style="modern"] .toc-list a.toc-l1{font-weight:700}
+.toc[data-style="modern"] .toc-pg{background:var(--stamp);color:var(--on-stamp,#fff);
+  border-radius:9px;padding:1px 8px}
+.toc[data-style="numbered"] .toc-num{color:var(--ink);font-weight:600;min-width:2.6em}
 .findbar{position:absolute;top:9px;right:16px;z-index:35;background:var(--paper);
   border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);
   padding:7px 9px;display:none;min-width:330px}
@@ -764,6 +814,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor td,#editor th{border:1px solid #000!important}
   #editor th{background:none!important}
   .glossterm{border-bottom:none!important}
+  .toc-refresh,.toc-settings{display:none!important}
   .pageflag,.menu,.veil,.toast,.ruler,.focusbar,.readview,.pvwrap{display:none!important}
 }
 /* ---- Leseansicht: nur der Text, ohne jede Bedienoberfläche ---- */
@@ -785,6 +836,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .readview .glossterm{border-bottom:none!important}
 .readview .pgbreak{border-top:1px solid var(--rule);margin:2.2em 0;height:0}
 .readview .pgbreak::before{content:""!important}
+.readview .toc-refresh,.pvinner .toc-refresh,.readview .toc-settings,.pvinner .toc-settings{display:none}
 .rbar{position:fixed;top:14px;right:18px;z-index:2;display:flex;gap:10px;align-items:center;
   background:var(--chrome);border:1px solid var(--rule);border-radius:var(--radius);
   padding:6px 11px;font-family:var(--ui);font-size:12px;color:var(--ink-soft);
@@ -1207,7 +1259,29 @@ const EN={
   "Vorige Stelle":"Previous spot","Nächste Stelle":"Next spot","1 Stelle":"1 spot",
   "Diese Verknüpfung lösen":"Remove this link","lösen":"unlink",
   "Notiz und alle Verknüpfungen löschen":"Delete note and all links",
-  "Linker Rand":"Left margin","Rechter Rand":"Right margin","Breite":"Width"
+  "Linker Rand":"Left margin","Rechter Rand":"Right margin","Breite":"Width",
+  "Fußnote":"Footnote","Fußnote ohne Text":"Footnote with no text","Fußnotentext":"Footnote text",
+  "Fußnote löschen":"Delete footnote","Fußnote einfügen":"Insert footnote","Fußnoten":"Footnotes",
+  "Inhaltsverzeichnis":"Table of contents","Inhaltsverzeichnis einfügen":"Insert table of contents",
+  "Aktualisieren":"Refresh","Noch keine Überschriften im Dokument.":"No headings in the document yet.",
+  "Im Dokument gibt es bereits ein Inhaltsverzeichnis.":"The document already has a table of contents.",
+  "Inhaltsverzeichnis anpassen":"Customize table of contents","Stil":"Style",
+  "Klassisch":"Classic","Punktlinie und Seitenzahl, wie in Word":"Dotted leader and page number, like Word",
+  "Einfach":"Simple","Nur die Überschriften, ohne Seitenzahl":"Just the headings, no page number",
+  "Modern":"Modern","Farbiger Rand, Seitenzahl als Chip":"Colored rule, page number as a chip",
+  "Nummeriert":"Numbered","Mit Gliederungsnummern wie 1.2":"With outline numbers like 1.2",
+  "Ebenen":"Levels","Nur Ebene 1":"Level 1 only","Bis Ebene 2":"Up to level 2","Bis Ebene 3":"Up to level 3",
+  "Seitenzahlen anzeigen":"Show page numbers",
+  "Trennlinie":"Tab leader","Punkte":"Dots","Striche":"Dashes","Linie":"Line","Ohne":"None",
+  "Gesamtes Verzeichnis aktualisieren":"Update entire table","Einträge":"Entries","(ohne Text)":"(no text)",
+  "Eintragstext lässt sich direkt im Verzeichnis anklicken und umschreiben. „Gesamtes Verzeichnis aktualisieren“ verwirft solche Änderungen wieder und liest die Überschriften neu ein.":
+    "Entry text can be clicked and rewritten directly in the table. “Update entire table” discards such changes again and re-reads the headings.",
+  "Im Inhaltsverzeichnis einblenden":"Show in table of contents","Im Inhaltsverzeichnis ausblenden":"Hide from table of contents",
+  "Im Inhaltsverzeichnis eingeblendet":"Shown in table of contents","Im Inhaltsverzeichnis ausgeblendet":"Hidden from table of contents",
+  "Abbildungsverzeichnis":"Table of figures","Abbildungsverzeichnis einfügen":"Insert table of figures",
+  "Abb.":"Fig.","Noch keine Abbildungen mit Bildunterschrift.":"No figures with a caption yet.",
+  "Im Dokument gibt es bereits ein Abbildungsverzeichnis.":"The document already has a table of figures.",
+  "als Einfügeoption anbieten":"offer as an insert option"
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -1362,6 +1436,9 @@ S.docs.forEach(d=>{
     d.html=d.html.replace(/<div class="pgbreak" contenteditable="false">/g,
       '<div class="pgbreak" contenteditable="false" data-label="Seitenumbruch">');
 });
+S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
+S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
+if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 
 const doc=()=>S.docs.find(d=>d.id===S.active)||S.docs[0];
 const defaultGlossId=()=>doc().glossaryId||S.glossaries[0].id;
@@ -1736,15 +1813,39 @@ function drawWrite(){
     freeFigMouseDown(e);
   });
   ed.addEventListener("click",e=>{
+    /* Zahnrad/Aktualisieren sollen nicht dauerhaft im Text stehen - erst ein
+       Klick auf den Block blendet sie ein (zusätzlich zum reinen Hover per
+       CSS), ein Klick daneben blendet sie wieder aus. */
+    const tocHit=e.target.closest(".toc");
+    ed.querySelectorAll(".toc.sel").forEach(t=>{if(t!==tocHit)t.classList.remove("sel")});
+    if(tocHit)tocHit.classList.add("sel");
     const fig=e.target.closest("figure.fig");
     if(fig&&!e.target.closest("figcaption")){selectFig(fig);return}
     if(!fig)selectFig(null);
     const lk=e.target.closest("a");
-    if(lk&&(e.ctrlKey||e.metaKey)){e.preventDefault();
+    if(lk&&!lk.closest(".toc")&&(e.ctrlKey||e.metaKey)){e.preventDefault();
       window.open(lk.getAttribute("href"),"_blank","noopener");return}
     const a=e.target.closest(".anch");
     if(a){const id=a.dataset.n;hotNote=id;
-      const list=spansOf(id);curOcc[id]=Math.max(0,list.indexOf(a));drawAnchors()}});
+      const list=spansOf(id);curOcc[id]=Math.max(0,list.indexOf(a));drawAnchors();return}
+    const fn=e.target.closest(".fn");
+    if(fn){e.preventDefault();editFootnote(fn.dataset.fn);return}
+    const tocRefresh=e.target.closest(".toc-refresh");
+    if(tocRefresh){e.preventDefault();refreshToc(tocRefresh.closest(".toc"));return}
+    const tocSettings=e.target.closest(".toc-settings");
+    if(tocSettings){e.preventDefault();tocSettingsDialog(tocSettings.closest(".toc"));return}
+    /* Der Eintragstext (.toc-t) ist die einzige editierbare Insel im sonst
+       gesperrten Verzeichnis-Block - ein normaler Klick setzt dort die
+       Schreibmarke zum Umbenennen, erst Strg-Klick springt zur Überschrift.
+       Ein Klick daneben (Leader/Seitenzahl) springt immer, wie gehabt. */
+    const tocTitle=e.target.closest(".toc-t");
+    if(tocTitle){
+      if(e.ctrlKey||e.metaKey){e.preventDefault();jumpToHeading(tocTitle.closest("a").getAttribute("href"))}
+      return;
+    }
+    const tocLink=e.target.closest(".toc a");
+    if(tocLink){e.preventDefault();jumpToHeading(tocLink.getAttribute("href"));return}
+  });
   ed.focus();
   placeCaretEnd(ed);
   if(S.marks)markTerms();
@@ -1757,6 +1858,7 @@ function placeCaretEnd(el){const r=document.createRange();r.selectNodeContents(e
 function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const d=doc();
   const c=ed.cloneNode(true);
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
+  c.querySelectorAll(".toc").forEach(t=>t.classList.remove("sel"));
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
   c.querySelectorAll(".hit,.glossterm").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
@@ -2570,16 +2672,22 @@ function exportTxt(){
   t.querySelectorAll("br").forEach(b=>b.replaceWith("\n"));
   const bloecke=[];
   [...t.children].forEach(el=>{
+    if(el.classList&&el.classList.contains("toc"))return;
     if(/^(UL|OL)$/.test(el.tagName))
       el.querySelectorAll("li").forEach(li=>{const s=(li.textContent||"").trim();if(s)bloecke.push(s)});
     else{const s=(el.textContent||"").replace(/\n{2,}/g,"\n").trim();if(s)bloecke.push(s)}
   });
+  const fnOrder=footnoteOrderFromHtml(d.html);
+  if(fnOrder.length){
+    bloecke.push(tr("Fußnoten")+":");
+    fnOrder.forEach((id,i)=>{const f=(d.footnotes||[]).find(x=>x.id===id);bloecke.push((i+1)+". "+((f&&f.text)||""))});
+  }
   download(d.title+".txt",(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n");
 }
 function exportHtml(){flush();const d=doc();
   download(d.title+".html",`<meta charset="utf-8"><title>${esc(d.title)}</title>`+
     `<div style="max-width:660px;margin:40px auto;font-family:${d.font||S.settings.font},serif;`+
-    `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}</div>`,"text/html")}
+    `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}${footnoteListHtml(d)}</div>`,"text/html")}
 function exportCsv(){
   const gid=S.mode==="gloss"?curGView():doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
@@ -2753,6 +2861,9 @@ function commandList(){
   fmtCmd("Blocksatz","",()=>document.execCommand("justifyFull"));
   fmtCmd("Link einfügen oder bearbeiten…","Alt ⇧ K",linkDialog);
   fmtCmd("Seitenumbruch einfügen","Alt ⇧ ⏎",insertPageBreak);
+  fmtCmd("Fußnote einfügen","",insertFootnote);
+  fmtCmd("Inhaltsverzeichnis einfügen","Alt ⇧ I",insertToc);
+  if(S.settings.tofEnabled)fmtCmd("Abbildungsverzeichnis einfügen","",insertTof);
   fmtCmd("Formatierung entfernen","",()=>document.execCommand("removeFormat"));
   fmtCmd("Rückgängig","Strg Z",()=>document.execCommand("undo"));
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
@@ -2769,7 +2880,7 @@ function commandList(){
     add("Dokument",tr("Wechseln zu: ")+tr(d.title),"",()=>{flush();S.active=d.id;save();render()}));
   add("Dokument","Jetzt sichern","Alt ⇧ S",()=>{commit();toast(tr("Gesichert"))});
   add("Dokument","Versionsverlauf","",history);
-  add("Dokument","Drucken","Strg P",()=>{flush();setPrintPage();setTimeout(()=>window.print(),60)});
+  add("Dokument","Drucken","Strg P",()=>{flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})});
   add("Dokument","Als TXT exportieren","",exportTxt);
   add("Dokument","Als Markdown exportieren","",exportMd);
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
@@ -2861,6 +2972,7 @@ function exportMd(){
   let out="";
   t.childNodes.forEach(n=>{
     if(n.nodeType===3){out+=n.textContent+"\n\n";return}
+    if(n.nodeType===1&&n.classList&&n.classList.contains("toc"))return;
     const tag=(n.tagName||"").toLowerCase(),tx=(n.innerText||"").trim();
     if(!tx&&tag!=="br")return;
     if(tag==="h1")out+="# "+tx+"\n\n";
@@ -2869,6 +2981,11 @@ function exportMd(){
     else if(tag==="ul")n.querySelectorAll("li").forEach(li=>out+="- "+li.innerText.trim()+"\n"),out+="\n";
     else if(tag==="ol"){let i=1;n.querySelectorAll("li").forEach(li=>out+=(i++)+". "+li.innerText.trim()+"\n");out+="\n"}
     else out+=tx+"\n\n"});
+  const fnOrder=footnoteOrderFromHtml(d.html);
+  if(fnOrder.length){
+    out+="---\n\n";
+    fnOrder.forEach((id,i)=>{const f=(d.footnotes||[]).find(x=>x.id===id);out+="["+(i+1)+"] "+((f&&f.text)||"")+"\n"});
+  }
   download(d.title+".md",out.trim()+"\n","text/markdown");
 }
 /* ================= DOCX-Export ================= */
@@ -2972,7 +3089,25 @@ function stylesXml(d){
 ${ueberschrift(1,36)}${ueberschrift(2,30)}${ueberschrift(3,26)}
 <w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>
   <w:rPr><w:color w:val="0563C1"/><w:u w:val="single"/></w:rPr></w:style>
+<w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/>
+  <w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/>
+  <w:rPr><w:sz w:val="20"/></w:rPr></w:style>
 </w:styles>`;
+}
+/* Zwei Pflicht-Einträge (Trennlinie/Fortsetzungstrennlinie mit den festen
+   IDs -1/0) gehen jedem echten Eintrag voraus - ohne sie öffnet Word die
+   Datei zwar noch, meldet aber eine Reparatur beim Öffnen. */
+function footnotesXml(list){
+  const body=list.map(f=>`<w:footnote w:id="${f.id}"><w:p><w:pPr><w:pStyle w:val="FootnoteText"/></w:pPr>
+    <w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteRef/></w:r>
+    <w:r><w:t xml:space="preserve"> ${xesc(f.text||"")}</w:t></w:r></w:p></w:footnote>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:footnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:footnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:footnote>
+<w:footnote w:type="continuationSeparator" w:id="0"><w:p><w:r><w:continuationSeparator/></w:r></w:p></w:footnote>
+${body}
+</w:footnotes>`;
 }
 
 /* -- HTML-Baum ablaufen und in OOXML-Absätze verwandeln -- */
@@ -3013,11 +3148,19 @@ function farbHex(css){
 /* Läuft Inline-Inhalt eines Blocks ab und sammelt Läufe (Runs) auf - <br>
    wird zum weichen Zeilenumbruch INNERHALB desselben Absatzes, nicht zu
    einem neuen, weil das der optischen Wirkung im Editor entspricht. */
-function inlineAblaufen(node,st,runs,links){
+function inlineAblaufen(node,st,runs,links,ctx){
   node.childNodes.forEach(n=>{
     if(n.nodeType===3){runs.push(runeXml(n.nodeValue,st));return}
     if(n.nodeType!==1)return;
     const tag=n.tagName.toLowerCase();
+    /* Eine echte Fußnote statt der generischen sup-Behandlung weiter unten -
+       Word verwaltet Nummerierung und Seitenzuordnung dann selbst. */
+    if(tag==="sup"&&n.classList.contains("fn")&&ctx&&ctx.footnotes){
+      const fid=ctx.footnoteId++;
+      ctx.footnotes.push({id:fid,text:(ctx.footnoteLookup&&ctx.footnoteLookup.get(n.dataset.fn))||""});
+      runs.push(`<w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="${fid}"/></w:r>`);
+      return;
+    }
     if(tag==="br"){runs.push("<w:r><w:br/></w:r>");return}
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
@@ -3031,13 +3174,13 @@ function inlineAblaufen(node,st,runs,links){
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
     if(tag==="a"){neu.link=true;links.push({href:n.getAttribute("href")||"",start:runs.length})}
-    inlineAblaufen(n,neu,runs,links);
+    inlineAblaufen(n,neu,runs,links,ctx);
     if(tag==="a")links[links.length-1].end=runs.length;
   });
 }
-function absatzXml(el,pPrExtra,basisStil){
+function absatzXml(el,pPrExtra,basisStil,ctx){
   const runs=[],links=[];
-  inlineAblaufen(el,basisStil||{},runs,links);
+  inlineAblaufen(el,basisStil||{},runs,links,ctx);
   /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
      merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
      und der Gesamtliste der Beziehungen hinzufügen kann. */
@@ -3066,18 +3209,24 @@ async function walkBlocks(root,ctx){
   let xml="";
   for(const el of [...root.children]){
     const tag=el.tagName.toLowerCase();
+    if(el.classList&&el.classList.contains("toc")){
+      /* Kein exportierter Text - stattdessen ist an den Überschriften bereits
+         outlineLvl gesetzt (siehe stylesXml), Word kann darüber sein eigenes,
+         seitenzahlgenaues Inhaltsverzeichnis einfügen (Referenzen-Menüband). */
+      continue;
+    }
     if(tag==="blockquote"){
       /* Wie im Editor: eingerückt und kursiv, statt wie ein normaler Absatz */
       const jc=jcVon(el);
       const pPr=`<w:ind w:left="284"/>${jc?`<w:jc w:val="${jc}"/>`:""}`;
-      const a=absatzXml(el,pPr,{i:true});
+      const a=absatzXml(el,pPr,{i:true},ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
-      const a=absatzXml(el,jc?`<w:jc w:val="${jc}"/>`:"");
+      const a=absatzXml(el,jc?`<w:jc w:val="${jc}"/>`:"",null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(/^h[1-3]$/.test(tag)){
-      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`);
+      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`,null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="ul"||tag==="ol"){
       xml+=listeXml(el,tag==="ol"?2:1,0,ctx);
@@ -3088,7 +3237,7 @@ async function walkBlocks(root,ctx){
     }else if(el.querySelector&&(el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))){
       xml+=await walkBlocks(el,ctx);   /* fremdes Wrapper-Element: einfach hindurchsehen */
     }else{
-      const a=absatzXml(el,"");
+      const a=absatzXml(el,"",null,ctx);
       xml+=absatzZuXml(a,ctx);
     }
   }
@@ -3113,7 +3262,7 @@ function listeXml(list,numId,ilvl,ctx){
     const unterliste=li.querySelector(":scope > ul, :scope > ol");
     const klon=li.cloneNode(true);
     if(unterliste)klon.querySelector(":scope > ul, :scope > ol")?.remove();
-    const a=absatzXml(klon,`<w:numPr><w:ilvl w:val="${ilvl}"/><w:numId w:val="${numId}"/></w:numPr>`);
+    const a=absatzXml(klon,`<w:numPr><w:ilvl w:val="${ilvl}"/><w:numId w:val="${numId}"/></w:numPr>`,null,ctx);
     xml+=absatzZuXml(a,ctx);
     if(unterliste)xml+=listeXml(unterliste,unterliste.tagName.toLowerCase()==="ol"?2:1,Math.min(3,ilvl+1),ctx);
   });
@@ -3136,7 +3285,7 @@ async function tabelleXml(table,ctx){
       const w=Math.round(breiten[i]||ctx.tableWidthTwip/spalten);
       const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")
         ?await walkBlocks(td,ctx)
-        :absatzZuXml(absatzXml(td,""),ctx);
+        :absatzZuXml(absatzXml(td,"",null,ctx),ctx);
       zellen+=`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/></w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
     }
     zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
@@ -3193,7 +3342,8 @@ async function exportDoc(){
   const ctx={imgId:0,linkId:0,images:[],links:[],
     docSize:d.size||S.settings.size,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
-    contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3])};
+    contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
+    footnoteId:1,footnotes:[],footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text]))};
   const bodyXml=await walkBlocks(container,ctx);
   const sectPr=`<w:sectPr><w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"/>`+
     `<w:pgMar w:top="${mmToTwip(f.m[0])}" w:right="${mmToTwip(f.m[1])}" w:bottom="${mmToTwip(f.m[2])}" w:left="${mmToTwip(f.m[3])}" `+
@@ -3205,22 +3355,28 @@ async function exportDoc(){
   xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
   xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
 <w:body>${bodyXml||"<w:p/>"}${sectPr}</w:body></w:document>`;
+  const hatFussnoten=ctx.footnotes.length>0;
   const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 <Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+${hatFussnoten?'<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>':""}
 ${ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`).join("")}
 ${ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`).join("")}
 </Relationships>`;
+  const contentTypes=hatFussnoten
+    ?DOCX_CONTENT_TYPES.replace("</Types>",'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/></Types>')
+    :DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
   const eintraege=[
-    {name:"[Content_Types].xml",bytes:enc.encode(DOCX_CONTENT_TYPES)},
+    {name:"[Content_Types].xml",bytes:enc.encode(contentTypes)},
     {name:"_rels/.rels",bytes:enc.encode(DOCX_RELS)},
     {name:"word/document.xml",bytes:enc.encode(documentXml)},
     {name:"word/styles.xml",bytes:enc.encode(stylesXml(d))},
     {name:"word/numbering.xml",bytes:enc.encode(numberingXml())},
     {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
-    ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes}))
+    ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
+    ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[])
   ];
   const blob=await zipSchreiben(eintraege);
   const u=URL.createObjectURL(blob);
@@ -3233,9 +3389,12 @@ ${ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlforma
    der Hinweis-Toast erscheint vor dem Dialog, weil window.print() danach
    blockiert, bis er geschlossen wird. */
 function exportPdf(){
-  flush();setPrintPage();
-  toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
-  setTimeout(()=>window.print(),500);
+  flush();
+  withPrintFootnotes(()=>{
+    setPrintPage();
+    toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
+    setTimeout(()=>window.print(),500);
+  });
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -3275,7 +3434,7 @@ function cleanHtml(src){
   const body=new DOMParser().parseFromString(String(src),"text/html").body;
   body.querySelectorAll("script,style,link,meta,base,title,iframe,object,embed,noscript,form,input,button,select,textarea")
     .forEach(n=>n.remove());
-  const erlaubt=new Set(["href","src","alt","style","class","colspan","rowspan","data-w","data-label","data-n","contenteditable"]);
+  const erlaubt=new Set(["href","src","alt","style","class","colspan","rowspan","data-w","data-label","data-n","data-fn","data-toc","data-tof","data-style","data-levels","data-pagenums","data-leader","title","contenteditable"]);
   body.querySelectorAll("*").forEach(el=>{
     [...el.attributes].forEach(a=>{
       const n=a.name.toLowerCase(),v=String(a.value||"");
@@ -3762,7 +3921,7 @@ function runFileAct(a){
   if(a==="bnotes")saveBundle("notes");
   if(a==="ball")saveBundle("all");
   if(a==="hist")history();
-  if(a==="print"){flush();setPrintPage();setTimeout(()=>window.print(),60)}
+  if(a==="print"){flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})}
   if(a==="pdf")exportPdf();
   if(a==="txt")exportTxt();
   if(a==="md")exportMd();
@@ -3826,7 +3985,11 @@ function toolsMenu(){
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
-    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Signatur erstellen&hellip;")}</button>`;
+    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Signatur erstellen&hellip;")}</button>
+    <div class="msep"></div>
+    <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
+    ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
+    <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-t]");if(!b)return;
@@ -3835,6 +3998,9 @@ function toolsMenu(){
     if(a==="goal"){if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}}
     if(a==="find")fdOpen(true);
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
+    if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
+    if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
+    if(a==="fn"){if(S.mode!=="write")setMode("write");setTimeout(insertFootnote,40)}
   };
 }
 
@@ -3846,6 +4012,9 @@ function contextMenu(e){
   const sel=getSelection(),hasSel=sel.rangeCount&&!sel.isCollapsed;
   const onAnch=e.target.closest(".anch");
   const cell=e.target.closest("td,th");
+  const onHeading=e.target.closest("#editor h1,#editor h2,#editor h3");
+  if(onHeading&&!onHeading.id)onHeading.id="h_"+uid();
+  const headingHidden=onHeading&&(doc().tocHidden||[]).includes(onHeading.id);
   const m=document.createElement("div");m.className="menu ctx";m.id="cmenu";
   const K=tr("Strg");
   m.innerHTML=`
@@ -3860,6 +4029,9 @@ function contextMenu(e){
     <button class="mi" data-c="link2"><span class="chk"></span>${e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen")}&hellip;<span class="k">Alt ⇧ K</span></button>
     <button class="mi" data-c="img"><span class="chk"></span>${tr("Bild einfügen&hellip;")}</button>
     <button class="mi" data-c="pgbr"><span class="chk"></span>${tr("Seitenumbruch einfügen")}<span class="k">Alt ⇧ ⏎</span></button>
+    <button class="mi" data-c="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
+    ${onHeading?`<button class="mi" data-c="tocvis"><span class="chk"></span>${headingHidden
+      ?tr("Im Inhaltsverzeichnis einblenden"):tr("Im Inhaltsverzeichnis ausblenden")}</button>`:""}
     <div class="msep"></div>
     <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">Alt ⇧ M</span></button>
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
@@ -3903,6 +4075,15 @@ function contextMenu(e){
     if(a==="link2")linkDialog();
     if(a==="img")pickImage();
     if(a==="pgbr")insertPageBreak();
+    if(a==="fn")insertFootnote();
+    if(a==="tocvis"&&onHeading){
+      const d=doc();d.tocHidden=d.tocHidden||[];
+      const i=d.tocHidden.indexOf(onHeading.id);
+      if(i>=0)d.tocHidden.splice(i,1);else d.tocHidden.push(onHeading.id);
+      const tocBlock=ed.querySelector("[data-toc]");
+      if(tocBlock)refreshToc(tocBlock);else{flush();dirty=true;commit()}
+      toast(i>=0?tr("Im Inhaltsverzeichnis eingeblendet"):tr("Im Inhaltsverzeichnis ausgeblendet"));
+    }
     if(a==="link")linkSelection();
     if(a==="goto"&&anchId)jumpTo(anchId,curOcc[anchId]||0);
     if(a==="unlink"&&onAnch){unwrap(onAnch);flush();commit();drawAnchors();toast(tr("Verknüpfung gelöst"))}
@@ -4067,6 +4248,7 @@ function queuePaginate(){clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate(
 function paginate(){
   const ed=$("#editor"),paper=$("#paper"),layer=$("#pagelayer");
   if(!ed||!paper)return;
+  renumberFootnotes(ed);
   const f=fmtOf(doc()),z=S.zoom;
   const pw=MM(f.w)*z, ph=MM(f.h)*z;
   const mr=MM(f.m[1])*z, ml=MM(f.m[3])*z;
@@ -4075,6 +4257,7 @@ function paginate(){
   const mt=Math.max(MM(f.m[0])*z, hfBand(doc(),"hdr",z));
   const mb=Math.max(MM(f.m[2])*z, hfBand(doc(),"ftr",z));
   const contentH=Math.max(60,ph-mt-mb), stride=ph+GAP;
+  lastStride=stride;
   paper.style.width=pw+"px";
   ed.style.padding=`${mt}px ${mr}px ${mb}px ${ml}px`;
   ed.style.setProperty("--pl",ml+"px");
@@ -4100,6 +4283,7 @@ function paginate(){
       b.style.marginTop=(base+((p+1)*stride+mt-top))+"px";
     }
   });
+  ed.querySelectorAll(".toc").forEach(t=>tocUpdatePageNumbers(ed,t));
   const last=blocks.length?blocks[blocks.length-1].getBoundingClientRect():null;
   const bottom=last?last.bottom-edTop:0;
   pageCount=Math.max(1,Math.ceil((bottom+mb)/stride));
@@ -4879,6 +5063,344 @@ function insertPageBreak(){
   document.execCommand("insertHTML",false,'<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div><p><br></p>');
   flush();dirty=true;commit();paginate();typewriter();
 }
+/* ================= Fußnoten =================
+   Die Nummer im Marker ist reine Anzeige, keine Kennung - dieselbe
+   Fußnote kann so beim Umsortieren des Textes die Nummer wechseln, ohne
+   dass Marker und Eintrag je auseinanderlaufen (Kennung ist data-fn).
+   Der eigentliche Text hängt am Dokument (d.footnotes), analog zu S.notes,
+   nicht am Marker selbst - so bleibt der Marker ein einzelnes <sup>. */
+function footnoteOrderFromHtml(html){
+  const t=document.createElement("div");t.innerHTML=html||"";
+  const ids=[];
+  t.querySelectorAll(".fn[data-fn]").forEach(s=>{if(!ids.includes(s.dataset.fn))ids.push(s.dataset.fn)});
+  return ids;
+}
+function renumberFootnotes(ed){
+  const seen=new Map();
+  [...ed.querySelectorAll(".fn[data-fn]")].forEach(s=>{
+    if(!seen.has(s.dataset.fn))seen.set(s.dataset.fn,seen.size+1);
+    s.textContent=seen.get(s.dataset.fn);
+  });
+}
+function updateFootnoteTitles(){
+  const ed=$("#editor");if(!ed)return;
+  const d=doc();
+  ed.querySelectorAll(".fn[data-fn]").forEach(s=>{
+    const fn=(d.footnotes||[]).find(f=>f.id===s.dataset.fn);
+    s.title=(fn&&fn.text)?fn.text:tr("Fußnote ohne Text");
+  });
+}
+function insertFootnote(){
+  const ed=$("#editor");if(S.mode!=="write"||!ed)return;
+  ed.focus();
+  const id=uid();
+  (doc().footnotes=doc().footnotes||[]).push({id,text:""});
+  /* Kein contenteditable="false": Chrome hebt ein so markiertes Inline-Element
+     beim insertHTML aus dem umgebenden Absatz heraus und hängt es dahinter als
+     eigenen Block an (anders als bei Block-Elementen wie dem Seitenumbruch).
+     Der sichtbare Ziffertext ist ohnehin nur Anzeige - renumberFootnotes()
+     schreibt ihn bei jedem paginate() neu, ein versehentlicher Tastendruck
+     darin heilt sich also von selbst aus. */
+  document.execCommand("insertHTML",false,
+    `<sup class="fn" data-fn="${id}" title="${esc(tr("Fußnote ohne Text"))}">*</sup>`);
+  flush();dirty=true;commit();queuePaginate();
+  setTimeout(()=>editFootnote(id),30);
+}
+function deleteFootnote(id){
+  const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll(`.fn[data-fn="${id}"]`).forEach(s=>s.remove());
+  const d=doc();d.footnotes=(d.footnotes||[]).filter(f=>f.id!==id);
+  flush();dirty=true;commit();queuePaginate();
+}
+function editFootnote(id){
+  const d=doc();const fn=(d.footnotes||[]).find(f=>f.id===id);
+  if(!fn)return;
+  overlay(`<div class="modal"><h3>${tr("Fußnote")}</h3>
+    <div class="pad"><textarea id="fnText" rows="4" placeholder="${tr("Fußnotentext")}"
+      style="width:100%;resize:vertical;font:inherit;background:var(--paper);color:var(--ink);
+      border:1px solid var(--rule);border-radius:var(--radius);padding:7px 9px">${esc(fn.text||"")}</textarea></div>
+    <div class="rowend">
+      <button class="btn" id="fnDel" style="margin-right:auto">${tr("Fußnote löschen")}</button>
+      <button class="btn" id="fnClose">${tr("Schließen")}</button>
+      <button class="btn pri" id="fnOk">${tr("Übernehmen")}</button>
+    </div></div>`);
+  const ta=$("#fnText");ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  const finish=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
+  $("#fnOk").onclick=()=>{fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();finish()};
+  $("#fnDel").onclick=()=>{deleteFootnote(id);finish()};
+  ta.addEventListener("keydown",e=>{
+    if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#fnOk").click()}
+  });
+}
+/* Drucken/PDF und die textbasierten Exporte kennen keine Seiten, auf denen
+   eine Fußnote "unten" sitzen könnte (siehe paginate(): das ist ein reiner
+   Editor-Begriff, dem window.print() nicht folgt) - dort erscheinen die
+   Fußnoten darum gesammelt am Dokumentende, wie Endnoten. */
+function footnoteListHtml(d,cls){
+  const order=footnoteOrderFromHtml(d.html);
+  if(!order.length)return"";
+  const items=order.map((id,i)=>{
+    const f=(d.footnotes||[]).find(x=>x.id===id);
+    return `<p style="margin:0 0 .4em;font-size:.85em"><sup>${i+1}</sup> ${esc((f&&f.text)||"")}</p>`;
+  }).join("");
+  return `<div class="${cls||""}" style="margin-top:2em;padding-top:.6em;border-top:1px solid #999">
+    <b style="font-size:.85em">${tr("Fußnoten")}</b>${items}</div>`;
+}
+function withPrintFootnotes(fn){
+  const d=doc(),ed=$("#editor");
+  const html=footnoteListHtml(d,"fnprint");
+  let node=null;
+  if(html&&ed){const wrap=document.createElement("div");wrap.innerHTML=html;node=wrap.firstElementChild;ed.appendChild(node)}
+  fn();
+  if(node)setTimeout(()=>node.remove(),1200);
+}
+/* ================= Inhaltsverzeichnis =================
+   Ein echter, aber größtenteils nicht bearbeitbarer Block im Text (wie eine
+   Tabelle oder ein Bild), keine separate Ansicht. Zwei Ebenen der Aktualität:
+   - Seitenzahlen laufen bei jedem paginate() automatisch mit (tocUpdatePageNumbers) -
+     entspricht Words "Nur Seitenzahlen aktualisieren", nur ohne Knopfdruck nötig.
+   - Der Aktualisieren-Knopf baut die Liste komplett neu aus den Überschriften auf
+     (tocEntriesHtml) - das ist "Gesamtes Verzeichnis aktualisieren": neue/gelöschte
+     Überschriften erscheinen/verschwinden, von Hand geänderter Eintragstext (siehe
+     .toc-t unten) geht dabei verloren, weil er wieder vom Original überschrieben wird.
+   Stil/Ebenen/Trennlinie/Seitenzahlen hängen als data-Attribute am Block selbst,
+   nicht am Dokument - wie die Spaltenbreiten einer Tabelle. Welche Überschriften
+   ausgeblendet sind, steht dagegen am Dokument (d.tocHidden, Liste von Überschrift-
+   IDs) - das gilt für jedes Inhaltsverzeichnis im Dokument gleichermaßen, nicht nur
+   für eines, falls es später mehrere geben sollte. */
+let lastStride=1;
+const TOC_STYLES=[
+  {k:"classic", n:"Klassisch",  d:"Punktlinie und Seitenzahl, wie in Word", leader:"dots",pagenums:true},
+  {k:"simple",  n:"Einfach",    d:"Nur die Überschriften, ohne Seitenzahl", leader:"none",pagenums:false},
+  {k:"modern",  n:"Modern",     d:"Farbiger Rand, Seitenzahl als Chip",     leader:"none",pagenums:true},
+  {k:"numbered",n:"Nummeriert", d:"Mit Gliederungsnummern wie 1.2",         leader:"dots",pagenums:true}
+];
+const TOC_LEADERS=[
+  {k:"dots",n:"Punkte"},{k:"dash",n:"Striche"},{k:"line",n:"Linie"},{k:"none",n:"Ohne"}
+];
+const ICO_REFRESH='<path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/>';
+const ICO_GEAR='<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="12" r="6.3"/><path d="M18.3 12h2.4M16.5 16.5l1.7 1.7M12 18.3v2.4M7.5 16.5l-1.7 1.7M5.7 12H3.3M7.5 7.5 5.8 5.8M12 5.7V3.3M16.5 7.5l1.7-1.7"/>';
+function tocHeadings(ed){
+  return [...ed.querySelectorAll("h1,h2,h3")].filter(h=>(h.textContent||"").trim());
+}
+function ensureHeadingIds(ed){
+  tocHeadings(ed).forEach(h=>{if(!h.id)h.id="h_"+uid()});
+}
+function tocCfgOf(block){
+  const style=TOC_STYLES.some(s=>s.k===block?.dataset.style)?block.dataset.style:"classic";
+  const levels=[1,2,3].includes(+block?.dataset.levels)?+block.dataset.levels:3;
+  const pagenums=block?.dataset.pagenums!=="0";
+  const leader=TOC_LEADERS.some(l=>l.k===block?.dataset.leader)
+    ?block.dataset.leader:TOC_STYLES.find(s=>s.k===style).leader;
+  return {style,levels,pagenums,leader};
+}
+/* Gliederungsnummern (1, 1.1, 1.2, 2 …) laufen ausschließlich über die
+   tatsächlich angezeigten Einträge, nicht über alle Überschriften des
+   Dokuments - eine ausgeblendete Überschrift reißt sonst eine Lücke in die
+   Zählung (1, 3, 4 …), was für eine reine Leseliste seltsam wirkt. */
+function tocNumbering(shown){
+  const counter=[0,0,0],out=[];
+  shown.forEach(h=>{
+    const lvl=+h.tagName[1];
+    /* Eine übersprungene Zwischenebene (z.B. h1 direkt gefolgt von h3) zählt
+       als 1, statt eine "2.0.1" mit einer Null darin zu erzeugen. */
+    for(let i=0;i<lvl-1;i++)if(counter[i]===0)counter[i]=1;
+    counter[lvl-1]++;
+    for(let i=lvl;i<3;i++)counter[i]=0;
+    out.push(counter.slice(0,lvl).join("."));
+  });
+  return out;
+}
+function tocEntriesHtml(ed,cfg){
+  cfg=cfg||{style:"classic",levels:3,pagenums:true,leader:"dots"};
+  ensureHeadingIds(ed);
+  const hidden=doc().tocHidden||[];
+  const edTop=ed.getBoundingClientRect().top;
+  const hs=tocHeadings(ed).filter(h=>!hidden.includes(h.id)&&+h.tagName[1]<=cfg.levels);
+  if(!hs.length)return `<div class="toc-empty">${tr("Noch keine Überschriften im Dokument.")}</div>`;
+  const nums=cfg.style==="numbered"?tocNumbering(hs):null;
+  return hs.map((h,i)=>{
+    const lvl=+h.tagName[1];
+    const top=h.getBoundingClientRect().top-edTop;
+    const page=Math.max(1,Math.floor(top/lastStride)+1);
+    return `<a class="toc-l${lvl}" href="#${h.id}">
+      ${nums?`<span class="toc-num">${nums[i]}</span>`:""}
+      <span class="toc-t" contenteditable="true">${esc(h.textContent.trim())}</span>
+      <span class="toc-leader"></span>
+      ${cfg.pagenums?`<span class="toc-pg">${page}</span>`:""}</a>`;
+  }).join("");
+}
+function tocBlockHtml(ed,cfg){
+  cfg=cfg||{style:"classic",levels:3,pagenums:true,leader:"dots"};
+  return `<div class="toc" data-toc="1" contenteditable="false"
+      data-style="${cfg.style}" data-levels="${cfg.levels}" data-pagenums="${cfg.pagenums?1:0}" data-leader="${cfg.leader}">
+    <div class="toc-head"><b>${tr("Inhaltsverzeichnis")}</b>
+      <span class="toc-headbtns">
+        <button class="toc-settings" type="button" title="${tr("Inhaltsverzeichnis anpassen")}">${ICO(ICO_GEAR)}</button>
+        <button class="toc-refresh" type="button" title="${tr("Gesamtes Verzeichnis aktualisieren")}">${ICO(ICO_REFRESH)}</button>
+      </span></div>
+    <div class="toc-list">${tocEntriesHtml(ed,cfg)}</div></div>`;
+}
+function insertToc(){
+  const ed=$("#editor");if(S.mode!=="write"||!ed)return;
+  if(ed.querySelector("[data-toc]")){toast(tr("Im Dokument gibt es bereits ein Inhaltsverzeichnis."));return}
+  ed.focus();paginate();
+  document.execCommand("insertHTML",false,tocBlockHtml(ed)+"<p><br></p>");
+  flush();dirty=true;commit();queuePaginate();
+}
+/* Läuft bei jedem paginate() über JEDES Verzeichnis (TOC wie Abbildungen) -
+   nur Seitenzahlen der bestehenden Zeilen nachführen, Text/Reihenfolge/
+   Ausblendungen bleiben unangetastet. Eine Überschrift, die währenddessen
+   gelöscht wurde, lässt ihre Zeile verwaist zurück - die wird hier entfernt,
+   statt eine falsche Seitenzahl stehen zu lassen. */
+function tocUpdatePageNumbers(ed,block){
+  const edTop=ed.getBoundingClientRect().top;
+  block.querySelectorAll(":scope > .toc-list > a[href]").forEach(a=>{
+    let target=null;try{target=ed.querySelector(a.getAttribute("href"))}catch(e){}
+    if(!target){a.remove();return}
+    const pg=a.querySelector(".toc-pg");
+    if(pg)pg.textContent=Math.max(1,Math.floor(target.getBoundingClientRect().top-edTop)/lastStride+1|0);
+  });
+}
+function refreshToc(block){
+  if(!block)return;
+  const ed=$("#editor"),list=block.querySelector(".toc-list");
+  paginate();
+  if(list)list.innerHTML=block.classList.contains("tof")?tofEntriesHtml(ed):tocEntriesHtml(ed,tocCfgOf(block));
+  flush();dirty=true;commit();
+}
+function jumpToHeading(href){
+  const ed=$("#editor");if(!ed||!href)return;
+  let target=null;try{target=ed.querySelector(href)}catch(e){}
+  if(target)target.scrollIntoView({behavior:"smooth",block:"start"});
+}
+function tocSettingsDialog(block){
+  if(!block)return;
+  const ed=$("#editor");
+  const cfg=tocCfgOf(block);
+  ensureHeadingIds(ed);
+  const body=()=>{
+    const hidden=new Set(doc().tocHidden||[]);
+    const allHeadings=tocHeadings(ed);
+    return `
+    <div class="mlabel" style="padding-left:0">${tr("Stil")}</div>
+    <div class="fmtgrid" style="margin-bottom:11px">
+      ${TOC_STYLES.map(s=>`<button class="fmtopt ${cfg.style===s.k?"on":""}" data-tocstyle="${s.k}">
+        <b>${tr(s.n)}</b><span>${tr(s.d)}</span></button>`).join("")}
+    </div>
+    <div class="mmrow" style="margin-bottom:11px">
+      <label>${tr("Ebenen")}</label>
+      <button class="pill ${cfg.levels===1?"on":""}" data-toclvl="1" style="flex:1">${tr("Nur Ebene 1")}</button>
+      <button class="pill ${cfg.levels===2?"on":""}" data-toclvl="2" style="flex:1">${tr("Bis Ebene 2")}</button>
+      <button class="pill ${cfg.levels===3?"on":""}" data-toclvl="3" style="flex:1">${tr("Bis Ebene 3")}</button>
+    </div>
+    <div class="mmrow" style="margin-bottom:11px">
+      <label>${tr("Trennlinie")}</label>
+      ${TOC_LEADERS.map(l=>`<button class="pill ${cfg.leader===l.k?"on":""}" data-tocleader="${l.k}" style="flex:1">${tr(l.n)}</button>`).join("")}
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);cursor:pointer;margin-bottom:14px">
+      <input type="checkbox" id="tocPg" ${cfg.pagenums?"checked":""}>${tr("Seitenzahlen anzeigen")}
+    </label>
+    <div class="mlabel" style="padding-left:0">${tr("Einträge")}</div>
+    <div class="toc-entrylist">
+      ${allHeadings.length?allHeadings.map(h=>`<label class="toc-entryrow">
+        <input type="checkbox" data-tocentry="${h.id}" ${hidden.has(h.id)?"":"checked"}>
+        <span class="toc-entrylvl">H${h.tagName[1]}</span>
+        <span class="toc-entrytext">${esc(h.textContent.trim())||tr("(ohne Text)")}</span>
+      </label>`).join(""):`<div class="toc-empty">${tr("Noch keine Überschriften im Dokument.")}</div>`}
+    </div>
+    <div class="fmttip" style="margin-top:8px">${tr("Eintragstext lässt sich direkt im Verzeichnis anklicken und umschreiben. „Gesamtes Verzeichnis aktualisieren“ verwirft solche Änderungen wieder und liest die Überschriften neu ein.")}</div>`;
+  };
+  overlay(`<div class="modal wide"><h3>${tr("Inhaltsverzeichnis anpassen")}</h3>
+    <div class="pad" id="tocBody">${body()}</div>
+    <div class="rowend">
+      <button class="btn" id="tocDel" style="margin-right:auto">${tr("Entfernen")}</button>
+      <button class="btn" id="tocFull">${tr("Gesamtes Verzeichnis aktualisieren")}</button>
+      <button class="btn pri" id="tocDone">${tr("Fertig")}</button>
+    </div></div>`);
+  const apply=(full)=>{
+    block.dataset.style=cfg.style;block.dataset.levels=cfg.levels;block.dataset.pagenums=cfg.pagenums?1:0;
+    block.dataset.leader=cfg.leader;
+    if(full)refreshToc(block);else{paginate();flush();dirty=true;commit()}
+  };
+  const bind=()=>{
+    $("#tocBody").querySelectorAll("[data-tocstyle]").forEach(b=>b.onclick=()=>{
+      /* Der Stil setzt Trennlinie und Seitenzahlen sinnvoll voreingestellt,
+         danach bleiben beide frei wählbar - wie eine Word-Vorlage, die man
+         anschließend noch anpassen kann. */
+      const preset=TOC_STYLES.find(s=>s.k===b.dataset.tocstyle);
+      cfg.style=preset.k;cfg.leader=preset.leader;cfg.pagenums=preset.pagenums;apply(true);repaint()});
+    $("#tocBody").querySelectorAll("[data-toclvl]").forEach(b=>b.onclick=()=>{
+      cfg.levels=+b.dataset.toclvl;apply(true);repaint()});
+    $("#tocBody").querySelectorAll("[data-tocleader]").forEach(b=>b.onclick=()=>{
+      cfg.leader=b.dataset.tocleader;apply(true);repaint()});
+    $("#tocPg").onchange=e=>{cfg.pagenums=e.target.checked;apply(true)};
+    $("#tocBody").querySelectorAll("[data-tocentry]").forEach(cb=>cb.onchange=e=>{
+      const d=doc();d.tocHidden=d.tocHidden||[];
+      const id=cb.dataset.tocentry,i=d.tocHidden.indexOf(id);
+      if(e.target.checked){if(i>=0)d.tocHidden.splice(i,1)}else if(i<0)d.tocHidden.push(id);
+      apply(true);
+      /* Nur die betroffene Zeile abblenden statt die ganze Liste (mit
+         Scrollposition und Fokus) neu zu zeichnen. */
+      cb.closest(".toc-entryrow").classList.toggle("off",!e.target.checked);
+    });
+  };
+  const repaint=()=>{$("#tocBody").innerHTML=body();bind()};
+  bind();
+  $("#tocFull").onclick=()=>{apply(true);repaint()};
+  $("#tocDone").onclick=()=>{closeOvl();ed&&ed.focus()};
+  $("#tocDel").onclick=()=>{
+    block.remove();flush();dirty=true;commit();queuePaginate();
+    closeOvl();ed&&ed.focus();
+  };
+}
+/* ================= Abbildungsverzeichnis =================
+   Deutlich schmaler als das Inhaltsverzeichnis gehalten: keine Stile, keine
+   Ebenen - jede Abbildung mit Bildunterschrift ist ein Eintrag, fortlaufend
+   nummeriert ("Abb. 1", "Abb. 2" …), mit Punktlinie und Seitenzahl. Teilt
+   sich Aktualisierungs- und Seitenzahl-Logik mit dem Inhaltsverzeichnis
+   (tocUpdatePageNumbers, refreshToc) über die gemeinsame .toc-list-Struktur. */
+function tofItems(ed){
+  return [...ed.querySelectorAll("figure.fig")].filter(f=>{
+    const cap=f.querySelector("figcaption");
+    return cap&&cap.textContent.trim();
+  });
+}
+function ensureFigureIds(ed){
+  tofItems(ed).forEach(f=>{if(!f.id)f.id="fig_"+uid()});
+}
+function tofEntriesHtml(ed){
+  ensureFigureIds(ed);
+  const edTop=ed.getBoundingClientRect().top;
+  const items=tofItems(ed);
+  if(!items.length)return `<div class="toc-empty">${tr("Noch keine Abbildungen mit Bildunterschrift.")}</div>`;
+  return items.map((f,i)=>{
+    const top=f.getBoundingClientRect().top-edTop;
+    const page=Math.max(1,Math.floor(top/lastStride)+1);
+    const cap=f.querySelector("figcaption").textContent.trim();
+    return `<a href="#${f.id}">
+      <span class="toc-num">${tr("Abb.")} ${i+1}</span>
+      <span class="toc-t" contenteditable="true">${esc(cap)}</span>
+      <span class="toc-leader"></span>
+      <span class="toc-pg">${page}</span></a>`;
+  }).join("");
+}
+function tofBlockHtml(ed){
+  return `<div class="toc tof" data-tof="1" contenteditable="false" data-leader="dots">
+    <div class="toc-head"><b>${tr("Abbildungsverzeichnis")}</b>
+      <span class="toc-headbtns">
+        <button class="toc-refresh" type="button" title="${tr("Gesamtes Verzeichnis aktualisieren")}">${ICO(ICO_REFRESH)}</button>
+      </span></div>
+    <div class="toc-list">${tofEntriesHtml(ed)}</div></div>`;
+}
+function insertTof(){
+  if(!S.settings.tofEnabled)return;
+  const ed=$("#editor");if(S.mode!=="write"||!ed)return;
+  if(ed.querySelector(".tof")){toast(tr("Im Dokument gibt es bereits ein Abbildungsverzeichnis."));return}
+  ed.focus();paginate();
+  document.execCommand("insertHTML",false,tofBlockHtml(ed)+"<p><br></p>");
+  flush();dirty=true;commit();queuePaginate();
+}
 /* ================= Suchen und Ersetzen ================= */
 let fdIdx=0,fdHits=[];
 function fdClear(){
@@ -4986,6 +5508,9 @@ const SLASH=[
   {n:"Bild",k:"bild foto grafik image picture",f:pickImage},
   {n:"Link",k:"link url verweis",f:()=>setTimeout(linkDialog,20)},
   {n:"Notiz anheften",k:"notiz kommentar anker note pin",f:()=>setTimeout(linkSelection,20)},
+  {n:"Fußnote",k:"fussnote fußnote footnote referenz reference",f:insertFootnote},
+  {n:"Inhaltsverzeichnis",k:"inhaltsverzeichnis toc gliederung index",f:insertToc},
+  {n:"Abbildungsverzeichnis",k:"abbildungsverzeichnis bilder figures tof",f:insertTof},
   {n:"Datum",k:"datum heute date",f:()=>document.execCommand("insertText",false,new Date().toLocaleDateString(LOC()))}
 ];
 let slashOn=false,slashIdx=0,slashHits=[],slashBlock=null;
@@ -5006,7 +5531,8 @@ function slashCheck(){
 }
 function slashOpen(q){
   const ql=q.toLowerCase();
-  slashHits=SLASH.filter(x=>!ql||x.n.toLowerCase().includes(ql)||x.k.includes(ql));
+  slashHits=SLASH.filter(x=>x.f!==insertTof||S.settings.tofEnabled)
+    .filter(x=>!ql||x.n.toLowerCase().includes(ql)||x.k.includes(ql));
   if(!slashHits.length){slashClose();return}
   slashIdx=Math.min(slashIdx,slashHits.length-1);
   let m=$("#smenu");
@@ -5494,6 +6020,9 @@ function settings(){
     <div class="setrow"><label>${tr("Oberfläche beim Schreiben")}</label><div class="ctl">
       <input type="checkbox" id="sDim" ${s.dimUi?"checked":""} style="width:auto">
       <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("tritt zurück")}</span></div></div>
+    <div class="setrow"><label>${tr("Abbildungsverzeichnis")}</label><div class="ctl">
+      <input type="checkbox" id="sTof" ${s.tofEnabled?"checked":""} style="width:auto">
+      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("als Einfügeoption anbieten")}</span></div></div>
     <div class="setrow"><label>${tr("Farbschema")}</label><div class="ctl">
       <button class="btn" id="sThemeBtn">${tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button></div></div>
     <div class="setrow" style="align-items:flex-start"><label>${tr("Speicherort")}</label><div class="ctl" style="display:block;text-align:right">
@@ -5508,11 +6037,11 @@ function settings(){
   const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.autosave=$("#sAuto").checked;
     s.interval=Math.max(5,+$("#sInt").value||30);s.lang=$("#sLang").value;
     const langChanged=s.uiLang!==$("#sUiLang").value;s.uiLang=$("#sUiLang").value;
-    s.typewriter=$("#sTw").checked;s.dimUi=$("#sDim").checked;
+    s.typewriter=$("#sTw").checked;s.dimUi=$("#sDim").checked;s.tofEnabled=$("#sTof").checked;
     if(!s.dimUi)document.body.classList.remove("typing");
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sAuto","sInt","sLang","sUiLang","sTw","sDim"].forEach(id=>$("#"+id).onchange=app);
+  ["sFont","sSize","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof"].forEach(id=>$("#"+id).onchange=app);
   $("#sThemeBtn").onclick=themeDialog;
   $("#setClose").onclick=closeOvl;
 }
@@ -5716,7 +6245,8 @@ document.addEventListener("keydown",e=>{
   if(e.altKey&&!e.shiftKey&&!c&&["1","2","3"].includes(e.key)){e.preventDefault();setMode({1:"write",2:"notes",3:"gloss"}[e.key]);return}
   if(as&&e.key==="Enter"){e.preventDefault();insertPageBreak();return}
   if(as&&e.key.toLowerCase()==="g"){e.preventDefault();glossSearch();return}
-  if(c&&e.key.toLowerCase()==="p"){flush();setPrintPage();return}
+  if(as&&e.key.toLowerCase()==="i"){e.preventDefault();insertToc();return}
+  if(c&&e.key.toLowerCase()==="p"){flush();withPrintFootnotes(setPrintPage);return}
   if(as&&e.key.toLowerCase()==="s"){e.preventDefault();commit();toast(tr("Gesichert"));return}
   if(as&&(e.key==="+"||e.key==="=")){e.preventDefault();setZoom(S.zoom+.1);return}
   if(as&&(e.key==="-"||e.key==="_")){e.preventDefault();setZoom(S.zoom-.1);return}
