@@ -1182,8 +1182,8 @@ const EN={
   "Nicht gesichert":"Not saved","Gesichert ":"Saved ","Bereit":"Ready","aus":"off","an":"on",
   "Kommandopalette öffnen":"Open command palette",
   "Angelegt":"Created",
-  "Signatur erstellen":"Create signature","Signatur erstellen&hellip;":"Create signature&hellip;",
-  "Signatur einfügen":"Insert signature",
+  "Unterschrift hinzufügen":"Add signature","Unterschrift hinzufügen&hellip;":"Add signature&hellip;",
+  "Unterschrift einfügen":"Insert signature",
   "Mit gedrückter Maustaste unterschreiben. Eingefügt wird nur die Unterschrift selbst, ohne den weißen Rand drumherum.":
     "Sign with the mouse button held down. Only the signature itself is inserted, without the white space around it.",
   "Ansicht ":"View ",
@@ -4451,7 +4451,7 @@ function toolsMenu(){
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
-    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Signatur erstellen&hellip;")}</button>
+    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>
     <div class="msep"></div>
     <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
     ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
@@ -7087,12 +7087,34 @@ function placeFreeFigs(){
 /* Lage der Schreibmarke in Millimetern — dort wird eine neue Signatur
    abgelegt. Gemessen wird die Grundlinie der Zeile, nicht die Oberkante:
    die Unterschrift gehört unter die Zeile, in der man steht, nicht daneben. */
+/* Die zuletzt bekannte Schreibstelle im Text. Ein Klick auf einen Menütitel
+   oder in einen Dialog kann die Auswahl kosten — ohne dieses Gedächtnis fehlte
+   der Unterschrift dann der Bezug, und sie landete über den Rückfall
+   irgendwo statt dort, wo geschrieben wurde. Genau das war das „mal hier, mal
+   unten"-Verhalten. */
+let letzteEdRange=null;
+document.addEventListener("selectionchange",()=>{
+  const ed=$("#editor"),s=getSelection();
+  if(!ed||!s||!s.rangeCount)return;
+  const r=s.getRangeAt(0);
+  if(ed.contains(r.startContainer))letzteEdRange=r.cloneRange();
+});
+/* Nach dem Einfügen muss das Ergebnis im Blick sein, sonst fragt man sich, ob
+   überhaupt etwas passiert ist. Gescrollt wird nur, wenn es nötig ist. */
+function inSichtBringen(el){
+  const pane=$("#pane");
+  if(!pane||!el)return;
+  const p=pane.getBoundingClientRect(),r=el.getBoundingClientRect();
+  if(!r.height)return;
+  if(r.top>=p.top+4&&r.bottom<=p.bottom-4)return;
+  pane.scrollTop=Math.max(0,pane.scrollTop+(r.top-p.top)-Math.max(0,(pane.clientHeight-r.height)/2));
+}
 function caretPunktMm(){
   const ed=$("#editor");if(!ed)return null;
   const sel=getSelection();
-  if(!sel||!sel.rangeCount)return null;
-  const r=sel.getRangeAt(0);
-  if(!ed.contains(r.startContainer))return null;
+  let r=(sel&&sel.rangeCount)?sel.getRangeAt(0):null;
+  if(!r||!ed.contains(r.startContainer))r=letzteEdRange;
+  if(!r||!ed.contains(r.startContainer))return null;
   let rect=r.getBoundingClientRect();
   /* In einer leeren Zeile hat der Bereich keine Ausdehnung — dann gilt der Absatz */
   if(!rect.height){
@@ -7120,12 +7142,17 @@ function insertFreeFigure(src,wmm,hmm,anker){
     fig.dataset.fx=Math.round(Math.max(0,Math.min(g.cw-w,anker.x)));
     fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-h,anker.y+2)));
   }else{
-    /* Ohne Schreibmarke: auf der Seite ablegen, die gerade im Fenster steht */
+    /* Ohne Schreibmarke: dorthin, wo der Blick gerade ist. Eine feste Höhe der
+       Seite (früher 62 %) trifft nur zufällig den sichtbaren Ausschnitt — bei
+       einer Seite, von der man gerade den oberen Teil sieht, landete die
+       Unterschrift darunter und schien zu verschwinden. */
     const pane=$("#pane"),er=ed.getBoundingClientRect();
-    const blick=pane?pane.getBoundingClientRect().top+pane.clientHeight/2:er.top;
-    fig.dataset.fpage=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((blick-er.top)/g.stride)));
+    const blick=pane?pane.getBoundingClientRect().top+pane.clientHeight*0.45:er.top;
+    const relY=Math.max(0,blick-er.top);
+    const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor(relY/g.stride)));
+    fig.dataset.fpage=pg;
     fig.dataset.fx=Math.max(0,Math.round((g.cw-w)/2));
-    fig.dataset.fy=Math.max(0,Math.min(g.ch-h,Math.round(g.ch*.62)));
+    fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-h,(relY-pg*g.stride-g.mt)/g.mmPx)));
   }
   const im=document.createElement("img");
   im.src=src;im.alt="";im.draggable=false;
@@ -7133,6 +7160,9 @@ function insertFreeFigure(src,wmm,hmm,anker){
   placeFreeFigs();
   flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
   selectFig(fig);
+  /* Erst nach dem Umbruch messen: vorher steht die Figur noch nicht an ihrem
+     endgültigen Platz, und ein Scrollen liefe ins Leere. */
+  requestAnimationFrame(()=>inSichtBringen(fig));
   return fig;
 }
 function addFreeHandles(fig){
@@ -7213,7 +7243,7 @@ function signatureDialog(){
   /* Jetzt merken, solange die Schreibmarke sicher noch im Text steht — das
      Öffnen des Dialogs kann sie kosten. */
   sigAnker=caretPunktMm();
-  overlay(`<div class="modal wide"><h3>${tr("Signatur erstellen")}</h3><div class="pad">
+  overlay(`<div class="modal wide"><h3>${tr("Unterschrift hinzufügen")}</h3><div class="pad">
     <div class="sigwrap">
       <canvas id="sigCanvas" class="sigpad"></canvas>
       <div class="sigline"></div>
@@ -7223,7 +7253,7 @@ function signatureDialog(){
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="sigClear">${tr("Löschen")}</button>
       <button class="btn" id="sigCancel">${tr("Abbrechen")}</button>
-      <button class="btn pri" id="sigInsert" disabled>${tr("Signatur einfügen")}</button>
+      <button class="btn pri" id="sigInsert" disabled>${tr("Unterschrift einfügen")}</button>
     </div></div>`);
   sigInit();
 }
@@ -7358,7 +7388,7 @@ function drawImgBar(){
     <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
     <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
-    <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Unterschrift")}</button>
+    <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Bildunterschrift")}</button>
     <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>
     <button class="pill" data-ic="del">${tr("Löschen")}</button>`;
   bar.classList.add("on");
