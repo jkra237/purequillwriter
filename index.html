@@ -1536,6 +1536,7 @@ en:{
   "Polnisch":"Polish",
   "Französisch":"French",
   "Spanisch":"Spanish",
+  "Portugiesisch":"Portuguese",
   "Ohne Formatierung eingefügt":"Pasted without formatting",
   "Nur Text übernehmen":"Keep text only",
   "Rechtschreibprüfung":"Spell check",
@@ -2093,6 +2094,7 @@ fr:{
   "Polnisch":"Polonais",
   "Französisch":"Français",
   "Spanisch":"Espagnol",
+  "Portugiesisch":"Portugais",
   "Ohne Formatierung eingefügt":"Collé sans mise en forme",
   "Nur Text übernehmen":"Conserver le texte seul",
   "Rechtschreibprüfung":"Vérification orthographique",
@@ -2650,6 +2652,7 @@ es:{
   "Polnisch":"Polaco",
   "Französisch":"Francés",
   "Spanisch":"Español",
+  "Portugiesisch":"Portugués",
   "Ohne Formatierung eingefügt":"Pegado sin formato",
   "Nur Text übernehmen":"Mantener solo el texto",
   "Rechtschreibprüfung":"Revisión ortográfica",
@@ -3207,6 +3210,7 @@ pt:{
   "Polnisch":"Polonês",
   "Französisch":"Francês",
   "Spanisch":"Espanhol",
+  "Portugiesisch":"Português",
   "Ohne Formatierung eingefügt":"Colado sem formatação",
   "Nur Text übernehmen":"Manter somente o texto",
   "Rechtschreibprüfung":"Verificação ortográfica",
@@ -8162,10 +8166,10 @@ function bindOutlineDrag(){
    Geladen wird erst beim ersten Prüfen: die Wörterbücher wiegen je nach
    Sprache 0,5 bis 4,5 MB und haben im Startweg der App nichts verloren. */
 const SPELL_LANGS=[["de","Deutsch"],["en","Englisch"],["fr","Französisch"],
-                   ["es","Spanisch"],["pl","Polnisch"]];
-/* Nicht jede Oberflächensprache hat ein Rechtschreib-Wörterbuch — Portugiesisch
-   zum Beispiel (noch) nicht. Die Kopplung unten darf die Prüfsprache dann
-   nicht auf einen Code stellen, für den es gar kein dict/*.aff gibt. */
+                   ["es","Spanisch"],["pt","Portugiesisch"],["pl","Polnisch"]];
+/* Nicht jede Oberflächensprache hat ein Rechtschreib-Wörterbuch. Die Kopplung
+   unten darf die Prüfsprache dann nicht auf einen Code stellen, für den es
+   gar kein dict/*.aff gibt. */
 const hasSpellDict=lang=>SPELL_LANGS.some(l=>l[0]===lang);
 
 function spFlagSplit(s,mode){
