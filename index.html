@@ -1308,13 +1308,13 @@ const EN={
   "Breite ziehen":"Drag to resize",
   "Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.":
     "Every heading in the document appears here. No headings in the document yet.",
-  "Wichtig: Die hier eingestellte Seitenzahl wird nur angezeigt, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.":
-    "Important: page numbers set here only appear when no custom footer is turned on. With a custom footer, add the page number there yourself using {page}.",
+  "Die hier definierte Seitenzahl wird nur angezeigt, wenn keine Fußzeile eingeschaltet ist. Wenn du die Fußzeile einschaltest, fügst du die Seitenzahl dort ein.":
+    "The page number set here only appears when no footer is turned on. If you turn on the footer, add the page number there yourself.",
   "Anzeigen ab Seite":"Show starting from page","Erste Zahl":"First number",
-  "Anzeigen ab Seite: Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.":
-    "Show starting from page: pages before this won't show a number — handy for a cover page.",
-  "Erste Zahl: Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":
-    "First number: what you enter here is the number the first visible page will display."
+  "Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.":
+    "Pages before this won't show a number — handy for a cover page.",
+  "Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.":
+    "What you enter here is the number the first visible page will display."
 };
 function tr(s){return S.settings.uiLang==="en"?(EN[s]!==undefined?EN[s]:s):s}
 const LOC=()=>S.settings.uiLang==="en"?"en-US":"de-DE";
@@ -4901,15 +4901,15 @@ function pageNumDialog(){
     </div>
     <div class="mmrow">
       <label>${tr("Anzeigen ab Seite")}</label>
-      <input type="number" id="pnFrom" value="${S.pageNumFrom||1}" min="1" style="flex:0 0 62px" ${off?"disabled":""}>
+      <input type="number" id="pnFrom" value="${S.pageNumFrom||1}" min="1" style="flex:0 0 62px" ${off?"disabled":""}
+        title="${tr("Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.")}">
     </div>
     <div class="mmrow" style="margin-bottom:0">
       <label>${tr("Erste Zahl")}</label>
-      <input type="number" id="pnStart" value="${S.pageNumStart||1}" min="1" style="flex:0 0 62px" ${off?"disabled":""}>
+      <input type="number" id="pnStart" value="${S.pageNumStart||1}" min="1" style="flex:0 0 62px" ${off?"disabled":""}
+        title="${tr("Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.")}">
     </div>
-    <div class="fmttip" style="margin-top:10px">${tr("Anzeigen ab Seite: Seiten davor bekommen keine Seitenzahl — praktisch für ein Deckblatt.")}</div>
-    <div class="fmttip" style="margin-top:6px">${tr("Erste Zahl: Die Zahl, die du hier einträgst, ist die Nummer, mit der die erste sichtbare Seite beginnt.")}</div>
-    <div class="fmttip" style="margin-top:6px">${tr("Wichtig: Die hier eingestellte Seitenzahl wird nur angezeigt, wenn keine eigene Fußzeile eingeschaltet ist. Mit eigener Fußzeile fügst du die Seitenzahl dort selbst über {page} ein.")}</div>`;
+    <div class="fmttip" style="margin-top:10px">${tr("Die hier definierte Seitenzahl wird nur angezeigt, wenn keine Fußzeile eingeschaltet ist. Wenn du die Fußzeile einschaltest, fügst du die Seitenzahl dort ein.")}</div>`;
   };
   overlay(`<div class="modal"><h3>${tr("Seitenzahlen")}</h3>
     <div class="pad" id="pnBody">${body()}</div>
