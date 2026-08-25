@@ -1571,6 +1571,7 @@ en:{
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"The running text was checked. Tables of contents, headers and footers are left out.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"No suggestion — change it by hand, or keep it as it is.",
   "Text bereinigen":"Clean up text","Text bereinigen&hellip;":"Clean up text&hellip;",
+  "Bereinigen":"Clean up","Alles bereinigen":"Clean up all",
   "Doppeltes Leerzeichen":"Double space","Leerzeichen am Zeilenende":"Trailing space",
   "Geschütztes Leerzeichen":"Non-breaking space","Mehrere leere Absätze":"Repeated empty paragraphs",
   "Nichts zu bereinigen gefunden.":"Nothing to clean up.",
@@ -2136,6 +2137,7 @@ fr:{
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Le texte courant a été vérifié. Les tables des matières, en-têtes et pieds de page sont exclus.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Aucune suggestion — modifiez à la main ou conservez tel quel.",
   "Text bereinigen":"Nettoyer le texte","Text bereinigen&hellip;":"Nettoyer le texte&hellip;",
+  "Bereinigen":"Nettoyer","Alles bereinigen":"Tout nettoyer",
   "Doppeltes Leerzeichen":"Espace double","Leerzeichen am Zeilenende":"Espace en fin de ligne",
   "Geschütztes Leerzeichen":"Espace insécable","Mehrere leere Absätze":"Paragraphes vides répétés",
   "Nichts zu bereinigen gefunden.":"Rien à nettoyer.",
@@ -2701,6 +2703,7 @@ es:{
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"Se revisó el texto principal. Los índices, encabezados y pies de página quedan excluidos.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Sin sugerencia — modifícalo a mano o consérvalo tal cual.",
   "Text bereinigen":"Limpiar texto","Text bereinigen&hellip;":"Limpiar texto&hellip;",
+  "Bereinigen":"Limpiar","Alles bereinigen":"Limpiar todo",
   "Doppeltes Leerzeichen":"Espacio doble","Leerzeichen am Zeilenende":"Espacio al final de línea",
   "Geschütztes Leerzeichen":"Espacio de no separación","Mehrere leere Absätze":"Párrafos vacíos repetidos",
   "Nichts zu bereinigen gefunden.":"Nada que limpiar.",
@@ -3266,6 +3269,7 @@ pt:{
   "Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.":"O texto principal foi verificado. Sumários, cabeçalhos e rodapés ficam de fora.",
   "Kein Vorschlag — bitte von Hand ändern oder übernehmen.":"Nenhuma sugestão — altere manualmente ou mantenha como está.",
   "Text bereinigen":"Limpar texto","Text bereinigen&hellip;":"Limpar texto&hellip;",
+  "Bereinigen":"Limpar","Alles bereinigen":"Limpar tudo",
   "Doppeltes Leerzeichen":"Espaço duplo","Leerzeichen am Zeilenende":"Espaço no fim da linha",
   "Geschütztes Leerzeichen":"Espaço não separável","Mehrere leere Absätze":"Parágrafos vazios repetidos",
   "Nichts zu bereinigen gefunden.":"Nada para limpar.",
@@ -9049,8 +9053,8 @@ function cleanDialog(){
       return`<button class="btn" id="clClose">${tr("Abbrechen")}</button>`;
     return`<button class="btn" id="clSkipAll">${tr("Alle ignorieren")}</button>
       <button class="btn" id="clSkip">${tr("Ignorieren")}</button>
-      <button class="btn" id="clFixAll">${tr("Alle ändern")}</button>
-      <button class="btn pri" id="clFix">${tr("Ändern")}</button>`;
+      <button class="btn" id="clFixAll">${tr("Alles bereinigen")}</button>
+      <button class="btn pri" id="clFix">${tr("Bereinigen")}</button>`;
   };
   const paint=()=>{
     $("#clBody").innerHTML=body();
