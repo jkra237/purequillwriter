@@ -1300,6 +1300,7 @@ const EN={
   "Sprache der Rechtschreibprüfung":"Spellcheck language",
   "Deutsch":"German","Englisch":"English","Polnisch":"Polish","Französisch":"French","Spanisch":"Spanish",
   /* ---- Rechtschreibprüfung ---- */
+  "Ohne Formatierung eingefügt":"Pasted without formatting",
   "Rechtschreibprüfung":"Spell check","Rechtschreibprüfung&hellip;":"Spell check&hellip;",
   "Prüfung starten":"Start check","Vorschläge":"Suggestions",
   "Ändern":"Change","Alle ändern":"Change all",
@@ -1917,6 +1918,21 @@ function drawWrite(){
   ed.addEventListener("paste",e=>{
     const cd=e.clipboardData;
     if(!cd)return;
+    /* Strg+Umschalt+V: Gliederung und Auszeichnung der Quelle bleiben ganz
+       draußen, es kommt nur der Text an — gedacht fürs Zitieren mitten in den
+       eigenen Fließtext. Eine einzelne Zeile wird an der Cursorstelle
+       eingesetzt, statt dort einen Absatz aufzureißen. */
+    if(plainPaste){
+      plainPaste=false;
+      const text=cd.getData("text/plain");
+      if(!text)return;
+      e.preventDefault();
+      if(text.indexOf("\n")<0)document.execCommand("insertText",false,text);
+      else document.execCommand("insertHTML",false,plainToHtml(text));
+      flush();dirty=true;commit();queuePaginate();
+      toast(tr("Ohne Formatierung eingefügt"));
+      return;
+    }
     const html=cd.getData("text/html");
     /* Ein Bild ohne begleitendes HTML ist ein Screenshot o. ä. — der wird
        eingebettet. Liegt HTML daneben, ist es kopierter Seiteninhalt. */
@@ -3655,6 +3671,16 @@ function cleanHtml(src){
    Bilder. Was aus dem eigenen Dokument stammt, muss also erkennbar sein —
    deshalb bekommt Kopiertes hier eine Marke mit. */
 const PQW_MARK="data-pqw-src";
+/* Strg+Umschalt+V soll nur den nackten Text einsetzen. Die Absicht lässt sich
+   nur über die Tastatur festhalten — das paste-Ereignis selbst verrät nicht,
+   welche Tasten es ausgelöst haben. */
+let plainPaste=false;
+/* Leerzeilen trennen Absätze, einzelne Umbrüche bleiben Umbrüche. */
+function plainToHtml(t){
+  const e=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(t).replace(/\r\n?/g,"\n").split(/\n{2,}/)
+    .map(p=>"<p>"+(e(p).split("\n").join("<br>")||"<br>")+"</p>").join("");
+}
 /* Elemente ohne Textinhalt: sie tragen nichts bei und bringen nur Ärger */
 const PASTE_WEG="script,style,link,meta,base,title,iframe,object,embed,noscript,"+
                 "form,input,button,select,textarea,canvas,video,audio,svg,template";
@@ -7544,6 +7570,14 @@ document.addEventListener("keydown",e=>{
   if(as&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
   if(as&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
   if(as&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
+  /* Nur die Absicht merken, nicht abfangen: das Einfügen macht danach der
+     Browser, und erst der paste-Handler wertet die Marke aus. Mit
+     preventDefault käme gar kein paste-Ereignis mehr, und die Zwischenablage
+     ließe sich nur noch über die asynchrone Berechtigungs-API lesen.
+     Der Rückfall nach kurzer Zeit fängt den Fall ab, dass gar nichts folgt. */
+  if(c&&e.shiftKey&&e.key.toLowerCase()==="v"){
+    plainPaste=true;setTimeout(()=>{plainPaste=false},900);
+  }
   /* F7 statt Alt+Umschalt: die Taste ist für die Rechtschreibprüfung seit
      Jahrzehnten gesetzt und wird vom Browser nicht beansprucht. */
   if(e.key==="F7"&&!c&&!e.altKey){e.preventDefault();spellState="idle";spellDialog();return}
