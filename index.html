@@ -195,16 +195,26 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    --ink hebt den Kontrast zur Werkzeugleiste in jedem Schema um 45-70%
    relativ an (z. B. Azur 1,29 → 1,91), bleibt aber deutlich unter einem
    vollen --ink-Rahmen, der die Reiter zu sehr betonen würde. */
+/* overflow:hidden hier ist kein Zufall: ein Flex-Kind ohne eigenes
+   overflow bekommt als automatisches min-width den Inhalt in voller
+   Breite (min-content), egal was flex-shrink sagt - Reiter würden also
+   nie schmaler als ihr Titel, sondern bei zu vielen Dokumenten einfach
+   aus der sichtbaren .tabbar herausgeschoben (der gemeldete Fehler).
+   Erst overflow:hidden setzt das automatische Minimum auf 0 und lässt
+   flex-shrink (Standardwert 1, bereits aktiv) tatsächlich greifen - wie
+   bei den Tableisten in Firefox/Chrome. min-width als harte Untergrenze,
+   damit ein Reiter nicht auf Null zusammenschnurrt. */
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;
   border:1px solid color-mix(in srgb, var(--rule) 80%, var(--ink));border-bottom:none;
-  border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
+  border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);
+  max-width:210px;min-width:88px;overflow:hidden;user-select:none}
 .tab.drag{opacity:.9;box-shadow:0 7px 18px rgba(0,0,0,.26);cursor:grabbing;
   position:relative;z-index:5}
 .tab.on{background:var(--paper);border-color:color-mix(in srgb, var(--rule) 80%, var(--ink));color:var(--ink)}
-.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px}
+.tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto}
 .tab .x:hover{color:var(--stamp)}
-.tabadd{padding:6px 9px;color:var(--ink-faint);font-size:16px}
+.tabadd{padding:6px 9px;color:var(--ink-faint);font-size:16px;flex:0 0 auto}
 
 /* ---- Rahmen ---- */
 .body{flex:1;display:flex;min-height:0;background:var(--paper);border-top:1px solid var(--rule)}
