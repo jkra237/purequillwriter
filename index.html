@@ -1000,6 +1000,7 @@ body.focus .sheet{padding-top:9vh}
   <div class="topbar">
     <button class="filebtn" id="fileBtn">Datei</button>
     <button class="filebtn" id="viewBtn">Ansicht</button>
+    <button class="filebtn" id="formatBtn">Format</button>
     <button class="filebtn" id="toolsBtn">Werkzeuge</button>
     <div class="tabbar" id="tabbar"></div>
   </div>
@@ -1167,6 +1168,9 @@ en:{
   "Kursiv (Strg+I)":"Italic (Ctrl+I)",
   "Unterstrichen (Strg+U)":"Underline (Ctrl+U)",
   "Absatzformat":"Paragraph style",
+  "Text":"Text",
+  "Ausrichten und einrücken":"Align and indent",
+  "Aufzählungszeichen und Nummerierung":"Bullets and numbering",
   "Fließtext":"Body text",
   "Überschrift 1":"Heading 1",
   "Überschrift 2":"Heading 2",
@@ -1738,6 +1742,9 @@ fr:{
   "Kursiv (Strg+I)":"Italique (Ctrl+I)",
   "Unterstrichen (Strg+U)":"Souligné (Ctrl+U)",
   "Absatzformat":"Style de paragraphe",
+  "Text":"Texte",
+  "Ausrichten und einrücken":"Aligner et mettre en retrait",
+  "Aufzählungszeichen und Nummerierung":"Puces et numérotation",
   "Fließtext":"Texte courant",
   "Überschrift 1":"Titre 1",
   "Überschrift 2":"Titre 2",
@@ -2309,6 +2316,9 @@ es:{
   "Kursiv (Strg+I)":"Cursiva (Ctrl+I)",
   "Unterstrichen (Strg+U)":"Subrayado (Ctrl+U)",
   "Absatzformat":"Estilo de párrafo",
+  "Text":"Texto",
+  "Ausrichten und einrücken":"Alinear y sangrar",
+  "Aufzählungszeichen und Nummerierung":"Viñetas y numeración",
   "Fließtext":"Texto normal",
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
@@ -2880,6 +2890,9 @@ pt:{
   "Kursiv (Strg+I)":"Itálico (Ctrl+I)",
   "Unterstrichen (Strg+U)":"Sublinhado (Ctrl+U)",
   "Absatzformat":"Estilo de parágrafo",
+  "Text":"Texto",
+  "Ausrichten und einrücken":"Alinhar e recuar",
+  "Aufzählungszeichen und Nummerierung":"Marcadores e numeração",
   "Fließtext":"Texto normal",
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
@@ -3432,6 +3445,7 @@ const OFWORD=()=>PL("von","of","sur","de","de");
 function applyStaticLabels(){
   $("#fileBtn").textContent=tr("Datei");
   $("#viewBtn").textContent=tr("Ansicht");
+  $("#formatBtn").textContent=tr("Format");
   $("#toolsBtn").textContent=tr("Werkzeuge");
   const rw=document.querySelector('.rb[data-mode="write"]');if(rw)rw.title=tr("Schreiben (Alt+1)");
   const rn=document.querySelector('.rb[data-mode="notes"]');if(rn)rn.title=tr("Notizen (Alt+2)");
@@ -3827,8 +3841,6 @@ function drawTools(){
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
       <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
       <button class="tb" data-cmd="strikeThrough" title="${tr("Durchgestrichen")}"><s>D</s></button>
-      <button class="tb" data-cmd="superscript" title="${tr("Hochgestellt")}">x²</button>
-      <button class="tb" data-cmd="subscript" title="${tr("Tiefgestellt")}">x₂</button>
       <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
         <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
@@ -4171,7 +4183,7 @@ function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").fo
    feuert auch bei reiner Cursorbewegung (Pfeiltasten), execCommand-Klicks
    ändern die Selektion selbst oft nicht, darum ruft cmd() das hier zusätzlich
    direkt auf. */
-const TOOLBAR_STATE_CMDS=["bold","italic","underline","strikeThrough","superscript","subscript",
+const TOOLBAR_STATE_CMDS=["bold","italic","underline","strikeThrough",
   "justifyLeft","justifyCenter","justifyRight","justifyFull","insertUnorderedList","insertOrderedList"];
 function syncToolbarState(){
   if(S.mode!=="write")return;
@@ -6524,6 +6536,71 @@ function viewMenu(){
     if(a==="fit"){closeMenu();toggleFitPage();return}
     if(a==="focus"){closeMenu();document.body.classList.toggle("focus");return}
     if(stay){closeMenu();viewMenu()}
+  };
+}
+function formatAct(fn){
+  if(S.mode!=="write")setMode("write");
+  const ed=$("#editor");if(ed)ed.focus();
+  fn();dirty=true;queuePaginate();drawStatus();syncToolbarState();
+}
+function formatMenu(){
+  if($("#fmtmenu")){closeMenu();return}
+  closeMenu();
+  const m=document.createElement("div");m.className="menu";m.id="fmtmenu";
+  m.style.left=$("#formatBtn").offsetLeft+"px";
+  m.innerHTML=`
+    <button class="mi" data-f="text"><span class="chk"></span>${tr("Text")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="block"><span class="chk"></span>${tr("Absatzformat")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="align"><span class="chk"></span>${tr("Ausrichten und einrücken")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilenabstand")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="list"><span class="chk"></span>${tr("Aufzählungszeichen und Nummerierung")}<span class="k">&rsaquo;</span></button>
+    <div class="msep"></div>
+    <button class="mi" data-f="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}&hellip;</button>
+    <button class="mi" data-f="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>
+    <div class="msep"></div>
+    <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
+  $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");
+  m.onclick=e=>{
+    const b=e.target.closest("[data-f]");if(!b)return;
+    const a=b.dataset.f;
+    if(a==="text")return openSubMenu(b,[
+      {a:"bold",label:tr("Fett"),k:"Strg B"},
+      {a:"italic",label:tr("Kursiv"),k:"Strg I"},
+      {a:"underline",label:tr("Unterstrichen"),k:"Strg U"},
+      {a:"strikeThrough",label:tr("Durchgestrichen")},
+      {a:"superscript",label:tr("Hochgestellt")},
+      {a:"subscript",label:tr("Tiefgestellt")}
+    ],sub=>formatAct(()=>document.execCommand(sub)));
+    if(a==="block")return openSubMenu(b,[
+      {a:"p",label:tr("Fließtext")},
+      {a:"h1",label:tr("Überschrift 1")},
+      {a:"h2",label:tr("Überschrift 2")},
+      {a:"h3",label:tr("Überschrift 3")},
+      {a:"blockquote",label:tr("Zitat")}
+    ],sub=>formatAct(()=>document.execCommand("formatBlock",false,sub)));
+    if(a==="align")return openSubMenu(b,[
+      {a:"justifyLeft",label:tr("Linksbündig"),k:"Alt ⇧ L"},
+      {a:"justifyCenter",label:tr("Zentriert"),k:"Alt ⇧ E"},
+      {a:"justifyRight",label:tr("Rechtsbündig"),k:"Alt ⇧ R"},
+      {a:"justifyFull",label:tr("Blocksatz")},
+      {a:"indent",label:tr("Einrücken"),k:"Tab"},
+      {a:"outdent",label:tr("Ausrücken"),k:"⇧ Tab"}
+    ],sub=>{
+      if(sub==="indent")return formatAct(()=>indentBlocks(1));
+      if(sub==="outdent")return formatAct(()=>indentBlocks(-1));
+      formatAct(()=>document.execCommand(sub));
+    });
+    if(a==="lh")return openSubMenu(b,LINEHEIGHTS.map(([lab,v])=>
+      ({a:String(v),label:tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab)})),
+      sub=>formatAct(()=>setLineHeight(parseFloat(sub))));
+    if(a==="list")return openSubMenu(b,[
+      {a:"insertUnorderedList",label:tr("Aufzählung")},
+      {a:"insertOrderedList",label:tr("Nummerierung")}
+    ],sub=>formatAct(()=>document.execCommand(sub)));
+    closeMenu();
+    if(a==="hf")hfDialog();
+    if(a==="pnum")pageNumDialog();
+    if(a==="clear")formatAct(()=>document.execCommand("removeFormat"));
   };
 }
 function toolsMenu(){
@@ -10236,6 +10313,7 @@ $("#pane").addEventListener("click",e=>{
 $("#setBtn").onclick=settings;
 $("#fileBtn").onclick=fileMenu;
 $("#viewBtn").onclick=viewMenu;
+$("#formatBtn").onclick=formatMenu;
 $("#toolsBtn").onclick=toolsMenu;
 $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
   const ed=$("#editor");ed&&ed.focus()};
