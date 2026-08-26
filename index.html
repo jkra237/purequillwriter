@@ -4707,6 +4707,11 @@ function drawWrite(){
     <div class="anchcol" id="anchcol"></div>
   </div><div class="pageflag" id="pageflag"></div></div>`;
   const ed=$("#editor");
+  /* Ohne das hier fällt Chrome beim Verlassen einer Überschrift (Enter am
+     Ende von h1/h2/h3) auf ein bloßes <div> zurück statt auf <p> - das div
+     bekommt dann #editor p{margin:...var(--ps)} nicht mit und fällt auch aus
+     jedem Selektor, der gezielt "p" statt "div" listet (Bereinigen, Export). */
+  document.execCommand("defaultParagraphSeparator",false,"p");
   ed.innerHTML=d.html||"<p><br></p>";
   ed.style.fontFamily=(d.font||S.settings.font)+",serif";
   ed.style.setProperty("--fs",(d.size||S.settings.size)+"pt");
@@ -4722,6 +4727,28 @@ function drawWrite(){
       if(e.key==="ArrowUp"){e.preventDefault();slashIdx=Math.max(slashIdx-1,0);slashOpen(currentSlashQuery());return}
       if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();slashRun(slashIdx);return}
       if(e.key==="Escape"){e.preventDefault();slashClose();return}
+    }
+    /* Zweimal Enter auf einer bereits leeren Zitatzeile verlässt das Zitat -
+       genau wie der Browser es bei Aufzählungen/Nummerierungen schon von
+       selbst tut. Ohne diesen Sonderfall setzt formatBlock("blockquote")
+       sich endlos fort: jedes weitere Enter erzeugt nur ein weiteres leeres
+       <blockquote> statt zur normalen Absatzformatierung zurückzukehren. */
+    if(e.key==="Enter"&&!e.shiftKey){
+      const sel=getSelection();
+      if(sel.rangeCount&&sel.isCollapsed){
+        let n=sel.getRangeAt(0).startContainer;
+        if(n.nodeType!==1)n=n.parentElement;
+        const bq=n&&ed.contains(n)?n.closest("blockquote"):null;
+        if(bq&&!bq.textContent.trim()){
+          e.preventDefault();
+          const p=document.createElement("p");p.innerHTML="<br>";
+          bq.replaceWith(p);
+          const r=document.createRange();r.selectNodeContents(p);r.collapse(true);
+          sel.removeAllRanges();sel.addRange(r);
+          dirty=true;drawStatus();queuePaginate();syncToolbarState();
+          return;
+        }
+      }
     }
     if(e.key!=="Tab")return;
     const cell=curCell();
