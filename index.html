@@ -1461,6 +1461,7 @@ en:{
   "Spalte löschen":"Delete column",
   "Tabelle löschen":"Delete table",
   "Tabelle einfügen&hellip;":"Insert table&hellip;",
+  "Element einfügen":"Insert element",
   "Notiz mit dieser Stelle verknüpfen":"Link a note to this spot",
   "Notiz suchen oder neue anlegen":"Search notes or create new",
   "neu":"new",
@@ -2029,6 +2030,7 @@ fr:{
   "Spalte löschen":"Supprimer la colonne",
   "Tabelle löschen":"Supprimer le tableau",
   "Tabelle einfügen&hellip;":"Insérer un tableau&hellip;",
+  "Element einfügen":"Insérer un élément",
   "Notiz mit dieser Stelle verknüpfen":"Lier une note à cet endroit",
   "Notiz suchen oder neue anlegen":"Rechercher une note ou en créer une",
   "neu":"nouveau",
@@ -2597,6 +2599,7 @@ es:{
   "Spalte löschen":"Eliminar columna",
   "Tabelle löschen":"Eliminar tabla",
   "Tabelle einfügen&hellip;":"Insertar tabla&hellip;",
+  "Element einfügen":"Insertar elemento",
   "Notiz mit dieser Stelle verknüpfen":"Vincular una nota a este punto",
   "Notiz suchen oder neue anlegen":"Buscar nota o crear una nueva",
   "neu":"nuevo",
@@ -3165,6 +3168,7 @@ pt:{
   "Spalte löschen":"Excluir coluna",
   "Tabelle löschen":"Excluir tabela",
   "Tabelle einfügen&hellip;":"Inserir tabela&hellip;",
+  "Element einfügen":"Inserir elemento",
   "Notiz mit dieser Stelle verknüpfen":"Vincular uma nota a este trecho",
   "Notiz suchen oder neue anlegen":"Buscar nota ou criar uma nova",
   "neu":"novo",
@@ -6423,7 +6427,7 @@ function fileMenu(){
     closeMenu();runFileAct(a);
   };
 }
-function openSubMenu(anchor,items){
+function openSubMenu(anchor,items,cb=runFileAct){
   const alt=document.getElementById("submenu");if(alt)alt.remove();
   const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
   m.innerHTML=items.map(it=>
@@ -6433,7 +6437,7 @@ function openSubMenu(anchor,items){
   m.style.left=Math.max(8,Math.min(r.right-6,innerWidth-m.offsetWidth-8))+"px";
   m.style.top=Math.max(8,Math.min(r.top-4,innerHeight-m.offsetHeight-8))+"px";
   m.onclick=e=>{const b=e.target.closest("[data-sub]");if(!b)return;
-    closeMenu();runFileAct(b.dataset.sub)};
+    closeMenu();cb(b.dataset.sub)};
 }
 function runFileAct(a){
   if(a==="new")newDocument();
@@ -6560,10 +6564,7 @@ function contextMenu(e){
     <button class="mi" data-c="paste"><span class="chk"></span>${tr("Einfügen")}<span class="k">${K} V</span></button>
     <button class="mi" data-c="selall"><span class="chk"></span>${tr("Alles auswählen")}<span class="k">${K} A</span></button>
     <div class="msep"></div>
-    <button class="mi" data-c="link2"><span class="chk"></span>${e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen")}&hellip;<span class="k">Alt ⇧ K</span></button>
-    <button class="mi" data-c="img"><span class="chk"></span>${tr("Bild einfügen&hellip;")}</button>
-    <button class="mi" data-c="pgbr"><span class="chk"></span>${tr("Seitenumbruch einfügen")}<span class="k">Alt ⇧ ⏎</span></button>
-    <button class="mi" data-c="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
+    <button class="mi" data-c="insmore"><span class="chk"></span>${tr("Element einfügen")}<span class="k">&rsaquo;</span></button>
     ${onHeading?`<button class="mi" data-c="tocvis"><span class="chk"></span>${headingHidden
       ?tr("Im Inhaltsverzeichnis einblenden"):tr("Im Inhaltsverzeichnis ausblenden")}</button>`:""}
     <div class="msep"></div>
@@ -6584,8 +6585,7 @@ function contextMenu(e){
     <button class="mi" data-c="colDel"><span class="chk"></span>${tr("Spalte löschen")}</button>
     <button class="mi" data-c="tblDel"><span class="chk"></span>${tr("Tabelle löschen")}</button>
     <div class="msep"></div>`
-    :`<button class="mi" data-c="tblNew"><span class="chk"></span>${tr("Tabelle einfügen&hellip;")}</button>
-    <div class="msep"></div>`}
+    :""}
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen&hellip;")}</button>`;
   document.body.appendChild(m);
   const w=m.offsetWidth,h=m.offsetHeight;
@@ -6595,7 +6595,19 @@ function contextMenu(e){
   const selText=hasSel?sel.toString().trim():"";
   m.onclick=ev=>{
     const b=ev.target.closest("[data-c]");if(!b)return;
-    const a=b.dataset.c;closeMenu();ed.focus();
+    const a=b.dataset.c;
+    if(a==="insmore"){
+      const items=[
+        {a:"link2",label:e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen"),k:"Alt ⇧ K"},
+        {a:"img",label:tr("Bild einfügen")},
+        ...(cell?[]:[{a:"tblNew",label:tr("Tabelle einfügen")}]),
+        {a:"pgbr",label:tr("Seitenumbruch einfügen"),k:"Alt ⇧ ⏎"},
+        {a:"fn",label:tr("Fußnote einfügen")}
+      ];
+      openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
+      return;
+    }
+    closeMenu();ed.focus();
     if(a==="undo"){document.execCommand("undo");dirty=true;queuePaginate();queueAnchors()}
     if(a==="redo"){document.execCommand("redo");dirty=true;queuePaginate();queueAnchors()}
     if(a==="selall"){const r=document.createRange();r.selectNodeContents(ed);
@@ -6606,10 +6618,6 @@ function contextMenu(e){
         navigator.clipboard.readText().then(t=>{document.execCommand("insertText",false,t);
           dirty=true;queuePaginate()}).catch(()=>toast(tr("Einfügen bitte mit Strg+V")));
       else toast(tr("Einfügen bitte mit Strg+V"))}
-    if(a==="link2")linkDialog();
-    if(a==="img")pickImage();
-    if(a==="pgbr")insertPageBreak();
-    if(a==="fn")insertFootnote();
     if(a==="tocvis"&&onHeading){
       const d=doc();d.tocHidden=d.tocHidden||[];
       const i=d.tocHidden.indexOf(onHeading.id);
@@ -6625,10 +6633,16 @@ function contextMenu(e){
     if(a==="newg"&&selText){setMode("gloss");
       setTimeout(()=>{openGForm(null);const t=$("#gTerm");if(t){t.value=selText.slice(0,60);$("#gDef").focus()}},50)}
     if(a==="count")wordCount(selText);
-    if(a==="tblNew"){setTimeout(tablePicker,10)}
     if(["rowAbove","rowBelow","colLeft","colRight","rowDel","colDel","tblDel","headToggle"].includes(a))
       tableCmd(a,cell);
   };
+}
+function insertAct(a){
+  if(a==="link2")linkDialog();
+  if(a==="img")pickImage();
+  if(a==="tblNew")setTimeout(tablePicker,10);
+  if(a==="pgbr")insertPageBreak();
+  if(a==="fn")insertFootnote();
 }
 document.addEventListener("contextmenu",contextMenu);
 document.addEventListener("mousedown",e=>{
