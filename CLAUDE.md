@@ -24,7 +24,7 @@ Kommunikation mit dem Nutzer läuft auf Deutsch. Commit-Nachrichten sind bewusst
 - `--radius: 6px` (Bedienelemente), `--radius-lg: 12px` (Dialoge), `--radius-paper: 3px` (Notizzettel, Seiten — bewusst kantig)
 - `--mono`: moderner Mono-Stack (Cascadia Mono etc., Consolas nur Rückfall), `--ui`: Systemschrift
 - Farbübergänge bei Hover/Fokus: 140ms, nur auf Farbe/Schatten, nie Layout (Flacker-Gefahr). `prefers-reduced-motion` schaltet alles ab.
-- 12 Farbschemata, Reihenfolge fest: Azur, Alabaster, Silberton, Lagune, dann Rest nach gemessener Helligkeit (nicht geschätzt — relative Luminanz von Papier/Leiste/Umgebung). Azur ist Standard für neue Nutzer.
+- 13 Farbschemata, Reihenfolge fest: Azur, Alabaster, Silberton, Lagune, dann Rest nach gemessener Helligkeit (nicht geschätzt — relative Luminanz von Papier/Leiste/Umgebung). Azur ist Standard für neue Nutzer.
 - Ein Fokusring (`:focus-visible`) deckt alle interaktiven Elemente ab.
 
 ## Tastaturschema

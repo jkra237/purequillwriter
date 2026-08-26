@@ -88,6 +88,13 @@
   --rule:#B8B2A4; --stamp:#0F7C82; --manila:#EBDFC4;
   --ok:#1F8A5D; --pageedge:rgba(0,0,0,.4);
 }
+/* Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung */
+[data-theme="wolke"]{
+  --paper:#FFFFFF; --chrome:#F8F9FA; --chrome-2:#F1F3F4; --canvas:#EEF1F4;
+  --ink:#202124; --ink-soft:#5F6368; --ink-faint:#80868B;
+  --rule:#DADCE0; --stamp:#1A73E8; --manila:#EBDFC4;
+  --ok:#188038; --pageedge:rgba(0,0,0,.25);
+}
 /* Graues Windows-Büro mit türkiser Infobox, späte Neunziger */
 [data-theme="aquamarin"]{
   --paper:#FFFFFF; --chrome:#C3C3C3; --chrome-2:#DEDEDE; --canvas:#7E8C8C;
@@ -1102,6 +1109,7 @@ const THEMES=[
   {k:"alabaster",n:"Alabaster",  d:"Helles Systemgrau moderner Mac-Programme — erinnert an Pages",      c:["#FFFFFF","#E5E5EA","#0069D2"]},
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
+  {k:"wolke",    n:"Wolke",      d:"Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung", c:["#FFFFFF","#EEF1F4","#1A73E8"]},
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
@@ -1312,6 +1320,7 @@ en:{
   "Seitenzahlen umschalten":"Toggle page numbers",
   "Seitenbreite einpassen":"Fit to page width",
   "Silberton":"Silver tone",
+  "Wolke":"Cloud",
   "Platin":"Platinum",
   "Enzian":"Gentian",
   "Bernstein":"Amber",
@@ -1606,6 +1615,7 @@ en:{
   "Keine Farbe":"No color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beige office interface with teal — reminiscent of Lotus SmartSuite '97",
+  "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Pure white with a clear blue accent, like modern cloud word processors",
   "Sprache der Benutzeroberfläche":"Interface language",
   "Willkommen":"Welcome",
   "Sprache":"Language",
@@ -1878,6 +1888,7 @@ fr:{
   "Seitenzahlen umschalten":"Basculer les numéros de page",
   "Seitenbreite einpassen":"Ajuster à la largeur de page",
   "Silberton":"Ton argenté",
+  "Wolke":"Nuage",
   "Platin":"Platine",
   "Enzian":"Gentiane",
   "Bernstein":"Ambre",
@@ -2172,6 +2183,7 @@ fr:{
   "Keine Farbe":"Aucune couleur",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Écran cathodique vert — rappelle Lotus 1-2-3 et les premiers éditeurs DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interface de bureau beige avec turquoise — rappelle Lotus SmartSuite '97",
+  "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Blanc pur avec un accent bleu net, comme les traitements de texte en ligne modernes",
   "Sprache der Benutzeroberfläche":"Langue de l'interface",
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
@@ -2444,6 +2456,7 @@ es:{
   "Seitenzahlen umschalten":"Alternar números de página",
   "Seitenbreite einpassen":"Ajustar al ancho de página",
   "Silberton":"Tono plateado",
+  "Wolke":"Nube",
   "Platin":"Platino",
   "Enzian":"Genciana",
   "Bernstein":"Ámbar",
@@ -2738,6 +2751,7 @@ es:{
   "Keine Farbe":"Sin color",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Pantalla verde de tubo — recuerda a Lotus 1-2-3 y los primeros editores DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interfaz de oficina beige con turquesa — recuerda a Lotus SmartSuite '97",
+  "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Blanco puro con un acento azul nítido, como los procesadores de texto en la nube modernos",
   "Sprache der Benutzeroberfläche":"Idioma de la interfaz",
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
@@ -3010,6 +3024,7 @@ pt:{
   "Seitenzahlen umschalten":"Alternar números de página",
   "Seitenbreite einpassen":"Ajustar à largura da página",
   "Silberton":"Tom prateado",
+  "Wolke":"Nuvem",
   "Platin":"Platina",
   "Enzian":"Genciana",
   "Bernstein":"Âmbar",
@@ -3304,6 +3319,7 @@ pt:{
   "Keine Farbe":"Sem cor",
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Tela CRT verde — lembra o Lotus 1-2-3 e os primeiros editores DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interface de escritório bege com turquesa — lembra o Lotus SmartSuite '97",
+  "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Branco puro com um toque de azul nítido, como os processadores de texto na nuvem modernos",
   "Sprache der Benutzeroberfläche":"Idioma da interface",
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
