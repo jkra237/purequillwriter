@@ -128,9 +128,9 @@ input,select,textarea{font:inherit;color:inherit}
    Browser-Standardrahmen, der in dunklen Schemata kaum zu sehen ist.
    Schreibflächen sind ausgenommen, dort zeigt der Cursor die Stelle. */
 button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,
-.mi:focus-visible,.sw:focus-visible{
+.mi:focus-visible,.sw:focus-visible,.csw:focus-visible{
   outline:2px solid var(--stamp);outline-offset:2px;border-radius:var(--radius)}
-.tb,.pill,.rb,.filebtn,.btn,.mi,.tab,.tab .x,.tabadd,.sw,.addg,.gmore,.gitem,.hit,
+.tb,.pill,.rb,.filebtn,.btn,.mi,.tab,.tab .x,.tabadd,.sw,.csw,.addg,.gmore,.gitem,.hit,
 .tools select,.tools input[type=text],.modal select,.setrow select{
   transition:background-color .14s ease-out,color .14s ease-out,
              border-color .14s ease-out,box-shadow .14s ease-out}
@@ -253,8 +253,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .tb.tbc .gl{font-size:12px;font-weight:700;line-height:1;display:flex}
 .tb.tbc i{width:15px;height:3px;border-radius:1px;border:1px solid rgba(0,0,0,.22)}
 .swatches{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:3px 9px 7px}
-.sw{height:21px;border-radius:var(--radius);border:1px solid rgba(0,0,0,.25)}
-.sw:hover{box-shadow:0 0 0 2px var(--ink-soft)}
+/* Eigener Klassenname .csw statt .sw: .sw ist schon für die Notiz-
+   Farbpunkte im Notizen-Modus vergeben (display:none dort, nur bei Hover
+   sichtbar) - unter demselben Namen hätten diese Farbfelder hier das
+   Popup unsichtbar gemacht. */
+.csw{height:21px;border-radius:var(--radius);border:1px solid rgba(0,0,0,.25)}
+.csw:hover{box-shadow:0 0 0 2px var(--ink-soft)}
 #colmenu{min-width:186px}
 #colPick{margin-left:auto;width:30px;height:21px;padding:0;border:1px solid var(--rule);
   border-radius:var(--radius);background:none;cursor:pointer}
@@ -4282,7 +4286,7 @@ function colorMenu(e,art){
   const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
   m.innerHTML=`<div class="mlabel">${art==="fore"?tr("Schriftfarbe"):tr("Texthervorhebung")}</div>
     <div class="swatches">${liste.map(x=>
-      `<button class="sw" data-col="${x.c}" title="${esc(tr(x.n))}" aria-label="${esc(tr(x.n))}"
+      `<button class="csw" data-col="${x.c}" title="${esc(tr(x.n))}" aria-label="${esc(tr(x.n))}"
         style="background:${x.c}${x.c.toLowerCase()===String(aktuell).toLowerCase()?";box-shadow:0 0 0 2px var(--stamp)":""}"></button>`).join("")}
     </div>
     <label class="mi" id="colOwn">${tr("Eigene Farbe")}&hellip;
