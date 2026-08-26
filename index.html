@@ -1544,6 +1544,9 @@ en:{
   "Taschenbuch":"Paperback",
   "Eigene Maße":"Custom size",
   "Breite und Höhe frei wählen":"Choose width and height freely",
+  "Eigenes Format speichern":"Save custom format",
+  "Name des Formats":"Format name",
+  "Format gespeichert":"Format saved",
   "Ausrichtung":"Orientation",
   "Hochformat":"Portrait",
   "Querformat":"Landscape",
@@ -2130,6 +2133,9 @@ fr:{
   "Taschenbuch":"Livre de poche",
   "Eigene Maße":"Dimensions personnalisées",
   "Breite und Höhe frei wählen":"Choisir librement largeur et hauteur",
+  "Eigenes Format speichern":"Enregistrer le format personnalisé",
+  "Name des Formats":"Nom du format",
+  "Format gespeichert":"Format enregistré",
   "Ausrichtung":"Orientation",
   "Hochformat":"Portrait",
   "Querformat":"Paysage",
@@ -2716,6 +2722,9 @@ es:{
   "Taschenbuch":"Libro de bolsillo",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Elegir libremente ancho y alto",
+  "Eigenes Format speichern":"Guardar formato personalizado",
+  "Name des Formats":"Nombre del formato",
+  "Format gespeichert":"Formato guardado",
   "Ausrichtung":"Orientación",
   "Hochformat":"Vertical",
   "Querformat":"Horizontal",
@@ -3302,6 +3311,9 @@ pt:{
   "Taschenbuch":"Livro de bolso",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Escolher largura e altura livremente",
+  "Eigenes Format speichern":"Salvar formato personalizado",
+  "Name des Formats":"Nome do formato",
+  "Format gespeichert":"Formato salvo",
   "Ausrichtung":"Orientação",
   "Hochformat":"Retrato",
   "Querformat":"Paisagem",
@@ -3888,6 +3900,9 @@ pl:{
   "Taschenbuch":"Książka kieszonkowa",
   "Eigene Maße":"Własne wymiary",
   "Breite und Höhe frei wählen":"Dowolnie wybierz szerokość i wysokość",
+  "Eigenes Format speichern":"Zapisz własny format",
+  "Name des Formats":"Nazwa formatu",
+  "Format gespeichert":"Format zapisany",
   "Ausrichtung":"Orientacja",
   "Hochformat":"Pionowa",
   "Querformat":"Pozioma",
@@ -4310,6 +4325,7 @@ S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
 S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
 if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 if(S.settings&&!S.settings.unit)S.settings.unit="mm";
+if(!S.customFormats)S.customFormats=[];
 if(S.outlineOpen===undefined)S.outlineOpen=false;
 if(!S.pageNumPos)S.pageNumPos="right";
 if(!S.pageNumSize)S.pageNumSize=9;
@@ -7187,7 +7203,7 @@ function openSubMenu(anchor,items,cb=runFileAct){
   const alt=document.getElementById("submenu");if(alt)alt.remove();
   const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
   m.innerHTML=items.map(it=>
-    `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk"></span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
+    `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk">${it.cur?"&#10003;":""}</span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
   const r=anchor.getBoundingClientRect();
   /* Knapp anschließend statt tief überlappend, wie bei Google Docs -
@@ -7291,29 +7307,40 @@ function formatMenu(){
     <div class="msep"></div>
     <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
   $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");armHoverSubs(m);
+  /* Zustand fürs Häkchen im Menü: dieselbe queryCommandState()-Abfrage, die
+     schon die Symbolleiste synchron hält (syncToolbarState) - hier nur
+     zusätzlich fürs Format-Menü ausgelesen, statt nur für die Toolbar. */
+  const qState=cmd=>{try{return document.queryCommandState(cmd)}catch(e){return false}};
+  const curBlockTag=()=>{
+    const sel=getSelection();if(!sel.rangeCount)return "p";
+    let n=sel.anchorNode;n=n&&n.nodeType===1?n:(n&&n.parentElement);
+    const ed=$("#editor");
+    const block=n&&ed&&ed.contains(n)&&n.closest&&n.closest("h1,h2,h3,blockquote");
+    return block?block.tagName.toLowerCase():"p";
+  };
   m.onclick=e=>{
     const b=e.target.closest("[data-f]");if(!b)return;
     const a=b.dataset.f;
     if(a==="text")return openSubMenu(b,[
-      {a:"bold",label:tr("Fett"),k:"Strg B"},
-      {a:"italic",label:tr("Kursiv"),k:"Strg I"},
-      {a:"underline",label:tr("Unterstrichen"),k:"Strg U"},
-      {a:"strikeThrough",label:tr("Durchgestrichen")},
-      {a:"superscript",label:tr("Hochgestellt")},
-      {a:"subscript",label:tr("Tiefgestellt")}
+      {a:"bold",label:tr("Fett"),k:"Strg B",cur:qState("bold")},
+      {a:"italic",label:tr("Kursiv"),k:"Strg I",cur:qState("italic")},
+      {a:"underline",label:tr("Unterstrichen"),k:"Strg U",cur:qState("underline")},
+      {a:"strikeThrough",label:tr("Durchgestrichen"),cur:qState("strikeThrough")},
+      {a:"superscript",label:tr("Hochgestellt"),cur:qState("superscript")},
+      {a:"subscript",label:tr("Tiefgestellt"),cur:qState("subscript")}
     ],sub=>formatAct(()=>document.execCommand(sub)));
-    if(a==="block")return openSubMenu(b,[
-      {a:"p",label:tr("Fließtext")},
-      {a:"h1",label:tr("Überschrift 1")},
-      {a:"h2",label:tr("Überschrift 2")},
-      {a:"h3",label:tr("Überschrift 3")},
-      {a:"blockquote",label:tr("Zitat")}
-    ],sub=>formatAct(()=>document.execCommand("formatBlock",false,sub)));
+    if(a==="block"){const cb=curBlockTag();return openSubMenu(b,[
+      {a:"p",label:tr("Fließtext"),cur:cb==="p"},
+      {a:"h1",label:tr("Überschrift 1"),cur:cb==="h1"},
+      {a:"h2",label:tr("Überschrift 2"),cur:cb==="h2"},
+      {a:"h3",label:tr("Überschrift 3"),cur:cb==="h3"},
+      {a:"blockquote",label:tr("Zitat"),cur:cb==="blockquote"}
+    ],sub=>formatAct(()=>document.execCommand("formatBlock",false,sub)));}
     if(a==="align")return openSubMenu(b,[
-      {a:"justifyLeft",label:tr("Linksbündig"),k:"Alt ⇧ L"},
-      {a:"justifyCenter",label:tr("Zentriert"),k:"Alt ⇧ E"},
-      {a:"justifyRight",label:tr("Rechtsbündig"),k:"Alt ⇧ R"},
-      {a:"justifyFull",label:tr("Blocksatz")},
+      {a:"justifyLeft",label:tr("Linksbündig"),k:"Alt ⇧ L",cur:qState("justifyLeft")},
+      {a:"justifyCenter",label:tr("Zentriert"),k:"Alt ⇧ E",cur:qState("justifyCenter")},
+      {a:"justifyRight",label:tr("Rechtsbündig"),k:"Alt ⇧ R",cur:qState("justifyRight")},
+      {a:"justifyFull",label:tr("Blocksatz"),cur:qState("justifyFull")},
       {a:"indent",label:tr("Einrücken"),k:"Tab"},
       {a:"outdent",label:tr("Ausrücken"),k:"⇧ Tab"}
     ],sub=>{
@@ -7321,15 +7348,15 @@ function formatMenu(){
       if(sub==="outdent")return formatAct(()=>indentBlocks(-1));
       formatAct(()=>document.execCommand(sub));
     });
-    if(a==="lh")return openSubMenu(b,LINEHEIGHTS.map(([lab,v])=>
-      ({a:String(v),label:tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab)})),
-      sub=>formatAct(()=>setLineHeight(parseFloat(sub))));
-    if(a==="ps")return openSubMenu(b,PARSPACES.map(([lab,v])=>
-      ({a:String(v),label:tr(lab)})),
-      sub=>formatAct(()=>setParSpace(parseFloat(sub))));
+    if(a==="lh"){const cl=lhOf(doc());return openSubMenu(b,LINEHEIGHTS.map(([lab,v])=>
+      ({a:String(v),label:tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),cur:Math.abs(cl-v)<0.001})),
+      sub=>formatAct(()=>setLineHeight(parseFloat(sub))));}
+    if(a==="ps"){const cp=psOf(doc());return openSubMenu(b,PARSPACES.map(([lab,v])=>
+      ({a:String(v),label:tr(lab),cur:Math.abs(cp-v)<0.001})),
+      sub=>formatAct(()=>setParSpace(parseFloat(sub))));}
     if(a==="list")return openSubMenu(b,[
-      {a:"insertUnorderedList",label:tr("Aufzählung")},
-      {a:"insertOrderedList",label:tr("Nummerierung")}
+      {a:"insertUnorderedList",label:tr("Aufzählung"),cur:qState("insertUnorderedList")},
+      {a:"insertOrderedList",label:tr("Nummerierung"),cur:qState("insertOrderedList")}
     ],sub=>formatAct(()=>document.execCommand(sub)));
     if(a==="fore"||a==="hilite"){
       /* colorMenu() ruft selbst zuerst closeMenu() auf, das würde b (den
@@ -7749,6 +7776,7 @@ function formatDialog(mode,onDone){
   /* Eigene Maße lassen sich ohne die Felder nicht eingeben - dort von
      vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
   let offen=sel==="custom";
+  let savingName=false;
   const quer=()=>cfg.w>cfg.h;
   const unit=unitOf,toDisp=toUnit,fromDisp=fromUnit;
   const kurzfassung=()=>{
@@ -7767,9 +7795,24 @@ function formatDialog(mode,onDone){
     <div class="fmtgrid">${Object.entries(FORMATS).map(([k,f])=>
       `<button class="fmtopt ${sel===k?"on":""}" data-f="${k}">
         <b>${tr(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()} &middot; ${tr(f.d)}</span></button>`).join("")}
+      ${S.customFormats.map(f=>
+      `<div style="position:relative">
+        <button class="fmtopt ${sel==="cf:"+f.id?"on":""}" data-f="cf:${f.id}" style="width:100%">
+          <b>${esc(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()}</span></button>
+        <button data-delcf="${f.id}" title="${tr("Löschen")}" aria-label="${tr("Löschen")}"
+          style="position:absolute;top:3px;right:3px;width:20px;height:20px;line-height:1;border:none;
+          border-radius:50%;background:transparent;color:var(--ink-faint);font-size:15px;cursor:pointer">&times;</button>
+      </div>`).join("")}
       <button class="fmtopt ${sel==="custom"?"on":""}" data-f="custom" style="grid-column:1/3">
         <b>${tr("Eigene Maße")}</b><span>${tr("Breite und Höhe frei wählen")}</span></button>
     </div>
+    ${sel==="custom"?(savingName?`
+    <div class="mmrow" style="margin-bottom:7px">
+      <input type="text" id="cfName" maxlength="40" placeholder="${tr("Name des Formats")}" style="flex:1">
+      <button class="btn pri" id="cfSaveOk">${tr("Anlegen")}</button>
+      <button class="btn" id="cfSaveCancel">${tr("Abbrechen")}</button>
+    </div>`:`
+    <button class="btn" id="cfSaveStart" style="margin-bottom:7px;width:100%">${tr("Eigenes Format speichern")}</button>`):""}
     <div class="mmrow" style="margin-bottom:7px">
       <label>${tr("Ausrichtung")}</label>
       <button class="pill ${!quer()?"on":""}" data-o="hoch" style="flex:1">${tr("Hochformat")}</button>
@@ -7825,23 +7868,40 @@ function formatDialog(mode,onDone){
         <input type="checkbox" id="fDef" style="width:auto"> ${tr("Als Standard")}</label>
       <button class="btn" id="fCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="fOk">${isNew?tr("Anlegen"):tr("Übernehmen")}</button></div></div>`);
+  /* Ein Rand darf nie mehr als die Hälfte der Seite minus 5mm Mindest-
+     Satzspiegel beanspruchen - sonst ließen sich negative oder verschwindend
+     kleine Textbereiche eintippen, die readM() bis hierher klaglos
+     durchgereicht hatte. */
+  const clampMargin=(v,dim)=>Math.max(0,Math.min(dim/2-5,fromDisp(v)));
   const readM=()=>{
     /* Eingeklappt gibt es keine Felder zum Auslesen - cfg gilt unverändert
        weiter, sonst würden die Werte beim Zuklappen auf 0 fallen. */
     if(!$("#c0"))return;
-    cfg.m=[fromDisp($("#c0").value),fromDisp($("#c1").value),fromDisp($("#c2").value),fromDisp($("#c3").value)];
+    cfg.m=[clampMargin($("#c0").value,cfg.h),clampMargin($("#c1").value,cfg.w),
+      clampMargin($("#c2").value,cfg.h),clampMargin($("#c3").value,cfg.w)];
     cfg.hd=Math.max(0,Math.min(cfg.h/3,fromDisp($("#chd").value)));
     cfg.fd=Math.max(0,Math.min(cfg.h/3,fromDisp($("#cfd").value)));
     if(sel==="custom"){cfg.w=fromDisp($("#cw").value)||210;cfg.h=fromDisp($("#ch").value)||297}};
   const repaint=()=>{$("#fbody").innerHTML=body();bind()};
   const bind=()=>{
     $("#fbody").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
-      readM();const k=b.dataset.f;
+      readM();const k=b.dataset.f;savingName=false;
       /* „Eigene Maße" ohne sichtbare Felder wäre eine Sackgasse */
       if(k==="custom"){sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true}
+      else if(k.startsWith("cf:")){
+        const f=S.customFormats.find(x=>x.id===k.slice(3));if(!f)return;
+        const war=quer();
+        sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k,hd:f.hd,fd:f.fd};
+      }
       else{const f=FORMATS[k];const war=quer();
         sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k,hd:f.hd,fd:f.fd}}
       repaint()});
+    $("#fbody").querySelectorAll("[data-delcf]").forEach(b=>b.onclick=e=>{
+      e.stopPropagation();const id=b.dataset.delcf;
+      S.customFormats=S.customFormats.filter(x=>x.id!==id);
+      if(sel==="cf:"+id){sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true}
+      save();repaint();
+    });
     $("#fbody").querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
       readM();const willQuer=b.dataset.o==="quer";
       if(willQuer!==quer()){const w=cfg.w;cfg.w=cfg.h;cfg.h=w}
@@ -7851,6 +7911,21 @@ function formatDialog(mode,onDone){
     ["cw","ch","c0","c1","c2","c3"].forEach(id=>{const el=$("#"+id);if(el)el.onchange=()=>{readM();repaint()}});
     const lhSel=$("#cLh");if(lhSel)lhSel.onchange=()=>{lh=+lhSel.value||1.62};
     const mehr=$("#fMore");if(mehr)mehr.onclick=()=>{readM();offen=!offen;repaint()};
+    const cfStart=$("#cfSaveStart");if(cfStart)cfStart.onclick=()=>{readM();savingName=true;repaint();
+      const inp=$("#cfName");if(inp)inp.focus()};
+    const cfCancel=$("#cfSaveCancel");if(cfCancel)cfCancel.onclick=()=>{savingName=false;repaint()};
+    const cfOk=$("#cfSaveOk");if(cfOk)cfOk.onclick=()=>{
+      readM();
+      const name=($("#cfName").value||"").trim().slice(0,40)||tr("Eigene Maße");
+      const f={id:uid(),n:name,w:cfg.w,h:cfg.h,m:[...cfg.m],hd:cfg.hd,fd:cfg.fd};
+      S.customFormats.push(f);save();
+      sel="cf:"+f.id;cfg={n:f.n,w:f.w,h:f.h,m:[...f.m],key:sel,hd:f.hd,fd:f.fd};
+      savingName=false;repaint();toast(tr("Format gespeichert"));
+    };
+    const cfName=$("#cfName");if(cfName)cfName.addEventListener("keydown",ev=>{
+      if(ev.key==="Enter"){ev.preventDefault();$("#cfSaveOk").click()}
+      if(ev.key==="Escape"){ev.preventDefault();$("#cfSaveCancel").click()}
+    });
   };
   bind();
   $("#fCancel").onclick=closeOvl;
@@ -8307,8 +8382,8 @@ function hfDialog(){
           `<button class="pill ${v.align===a?"on":""}" data-al="${k}:${a}" style="flex:1" ${v.on?"":"disabled"}>
             ${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
         <label style="flex:0 0 84px;text-align:right">${tr("Von Rand")}</label>
-        <input type="number" data-di="${k}" value="${fmtOf(d)[k==="hdr"?"hd":"fd"]}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
-        <span style="color:var(--ink-faint)">mm</span>
+        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-di="${k}" value="${toUnit(fmtOf(d)[k==="hdr"?"hd":"fd"])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
+        <span style="color:var(--ink-faint)">${unitAbbr()}</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
         ${[["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
@@ -8335,7 +8410,7 @@ function hfDialog(){
       const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value};apply()});
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.di,fm=ownFmt(d);
-      fm[k==="hdr"?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,+el.value||0));repaint()});
+      fm[k==="hdr"?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
     b.querySelectorAll("[data-al]").forEach(el=>el.onclick=()=>{
       const [k,a]=el.dataset.al.split(":");d[k]={...hfOf(d,k),align:a};repaint()});
     b.querySelectorAll("[data-ph]").forEach(el=>el.onclick=()=>{
