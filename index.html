@@ -1332,6 +1332,8 @@ en:{
   "Formatierung entfernen":"Clear formatting",
   "Rückgängig":"Undo",
   "Wiederholen":"Redo",
+  "Rückgängig (Strg+Z)":"Undo (Ctrl+Z)",
+  "Wiederholen (Strg+Y)":"Redo (Ctrl+Y)",
   "Neues Dokument mit Format":"New document with format",
   "Kopf- und Fußzeile":"Header and footer",
   "Wechseln zu: ":"Switch to: ",
@@ -1901,6 +1903,8 @@ fr:{
   "Formatierung entfernen":"Effacer la mise en forme",
   "Rückgängig":"Annuler",
   "Wiederholen":"Rétablir",
+  "Rückgängig (Strg+Z)":"Annuler (Ctrl+Z)",
+  "Wiederholen (Strg+Y)":"Rétablir (Ctrl+Y)",
   "Neues Dokument mit Format":"Nouveau document avec format",
   "Kopf- und Fußzeile":"En-tête et pied de page",
   "Wechseln zu: ":"Passer à : ",
@@ -2470,6 +2474,8 @@ es:{
   "Formatierung entfernen":"Borrar formato",
   "Rückgängig":"Deshacer",
   "Wiederholen":"Rehacer",
+  "Rückgängig (Strg+Z)":"Deshacer (Ctrl+Z)",
+  "Wiederholen (Strg+Y)":"Rehacer (Ctrl+Y)",
   "Neues Dokument mit Format":"Nuevo documento con formato",
   "Kopf- und Fußzeile":"Encabezado y pie de página",
   "Wechseln zu: ":"Cambiar a: ",
@@ -3039,6 +3045,8 @@ pt:{
   "Formatierung entfernen":"Limpar formatação",
   "Rückgängig":"Desfazer",
   "Wiederholen":"Refazer",
+  "Rückgängig (Strg+Z)":"Desfazer (Ctrl+Z)",
+  "Wiederholen (Strg+Y)":"Refazer (Ctrl+Y)",
   "Neues Dokument mit Format":"Novo documento com formato",
   "Kopf- und Fußzeile":"Cabeçalho e rodapé",
   "Wechseln zu: ":"Mudar para: ",
@@ -3846,7 +3854,11 @@ function drawTools(){
         <path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6" stroke="#4E8C6A"/></svg></button>
       <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
-      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>`;
+      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>
+      <span style="display:flex;gap:7px;margin-left:auto">
+        <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICO('<path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/>')}</button>
+        <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICO('<path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/>')}</button>
+      </span>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
         ICOSZ('<path d="M4.5 4.5h15v10l-5 5h-10z"/><path d="M19.5 14.5h-5v5"/><path d="M9 9h6M9 12h4"/>',22,1.9)}</button>
@@ -6431,7 +6443,7 @@ function openSubMenu(anchor,items,cb=runFileAct){
   const alt=document.getElementById("submenu");if(alt)alt.remove();
   const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
   m.innerHTML=items.map(it=>
-    `<button class="mi" data-sub="${it.a}"><span class="chk"></span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
+    `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk"></span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
   const r=anchor.getBoundingClientRect();
   m.style.left=Math.max(8,Math.min(r.right-6,innerWidth-m.offsetWidth-8))+"px";
@@ -6572,8 +6584,7 @@ function contextMenu(e){
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
       <button class="mi" data-c="unlink"><span class="chk"></span>${tr("Verknüpfung lösen")}</button>`:""}
     <div class="msep"></div>
-    <button class="mi" data-c="look"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">Alt ⇧ G</span></button>
-    <button class="mi" data-c="newg" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Als Glossareintrag anlegen")}</button>
+    <button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     ${cell?`<div class="mlabel">${tr("Tabelle")}</div>
     <button class="mi" data-c="rowAbove"><span class="chk"></span>${tr("Zeile darüber einfügen")}</button>
@@ -6607,9 +6618,16 @@ function contextMenu(e){
       openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
       return;
     }
+    if(a==="glomore"){
+      const items=[
+        {a:"look",label:tr("Im Glossar nachschlagen"),k:"Alt ⇧ G"},
+        {a:"newg",label:tr("Als Glossareintrag anlegen"),dis:!hasSel}
+      ];
+      openSubMenu(b,items,sub=>{ed.focus();glossAct(sub,selText)});
+      return;
+    }
     closeMenu();ed.focus();
-    if(a==="undo"){document.execCommand("undo");dirty=true;queuePaginate();queueAnchors()}
-    if(a==="redo"){document.execCommand("redo");dirty=true;queuePaginate();queueAnchors()}
+    if(a==="undo"||a==="redo")undoRedo(a);
     if(a==="selall"){const r=document.createRange();r.selectNodeContents(ed);
       const s=getSelection();s.removeAllRanges();s.addRange(r)}
     if(a==="cut"||a==="copy"){document.execCommand(a);if(a==="cut"){dirty=true;queuePaginate()}}
@@ -6629,20 +6647,23 @@ function contextMenu(e){
     if(a==="link")linkSelection();
     if(a==="goto"&&anchId)jumpTo(anchId,curOcc[anchId]||0);
     if(a==="unlink"&&onAnch){unwrap(onAnch);flush();commit();drawAnchors();toast(tr("Verknüpfung gelöst"))}
-    if(a==="look")glossSearch();
-    if(a==="newg"&&selText){setMode("gloss");
-      setTimeout(()=>{openGForm(null);const t=$("#gTerm");if(t){t.value=selText.slice(0,60);$("#gDef").focus()}},50)}
     if(a==="count")wordCount(selText);
     if(["rowAbove","rowBelow","colLeft","colRight","rowDel","colDel","tblDel","headToggle"].includes(a))
       tableCmd(a,cell);
   };
 }
+function undoRedo(which){document.execCommand(which);dirty=true;queuePaginate();queueAnchors()}
 function insertAct(a){
   if(a==="link2")linkDialog();
   if(a==="img")pickImage();
   if(a==="tblNew")setTimeout(tablePicker,10);
   if(a==="pgbr")insertPageBreak();
   if(a==="fn")insertFootnote();
+}
+function glossAct(a,selText){
+  if(a==="look")glossSearch();
+  if(a==="newg"&&selText){setMode("gloss");
+    setTimeout(()=>{openGForm(null);const t=$("#gTerm");if(t){t.value=selText.slice(0,60);$("#gDef").focus()}},50)}
 }
 document.addEventListener("contextmenu",contextMenu);
 document.addEventListener("mousedown",e=>{
@@ -10117,6 +10138,8 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#pgbBtn")){insertPageBreak();return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
+  if(e.target.closest("#undoBtn")){undoRedo("undo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
+  if(e.target.closest("#redoBtn")){undoRedo("redo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
   if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id,"titel");return}
   const nf=e.target.closest("[data-nf]");
   if(nf){S.noteFilter=nf.dataset.nf;save();render();return}
