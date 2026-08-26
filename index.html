@@ -95,6 +95,34 @@
   --rule:#DADCE0; --stamp:#1A73E8; --manila:#EBDFC4;
   --ok:#188038; --pageedge:rgba(0,0,0,.25);
 }
+/* Blasses, warmes Pastellgelb wie frühes Sonnenlicht über einer Wiese */
+[data-theme="morgensonne"]{
+  --paper:#FBF8EF; --chrome:#F3ECD5; --chrome-2:#F8F3E4; --canvas:#E6D9AD;
+  --ink:#4A3F1E; --ink-soft:#7A6A3D; --ink-faint:#A69868;
+  --rule:#E2D6AE; --stamp:#9C6410; --manila:#EBDFC4;
+  --ok:#6E8A2A; --pageedge:rgba(0,0,0,.28);
+}
+/* Noch blasser und diesiger als Morgensonne, fast khakifarbenes Gelb im Nebel */
+[data-theme="sonnennebel"]{
+  --paper:#FAF9F3; --chrome:#F0EEE0; --chrome-2:#F6F4EA; --canvas:#DBD6BC;
+  --ink:#46442F; --ink-soft:#726F55; --ink-faint:#A19D80;
+  --rule:#E0DCC8; --stamp:#85661F; --manila:#EBDFC4;
+  --ok:#6E8A2A; --pageedge:rgba(0,0,0,.26);
+}
+/* Sehr helles, entsättigtes Salbeigrün, wie eine Wiese im Morgennebel */
+[data-theme="salbei"]{
+  --paper:#F6F8F3; --chrome:#E7EDE3; --chrome-2:#F0F4EC; --canvas:#C9D4C3;
+  --ink:#33402F; --ink-soft:#5E6B57; --ink-faint:#8B9584;
+  --rule:#D3DBCC; --stamp:#4F7A52; --manila:#EBDFC4;
+  --ok:#3F7A4A; --pageedge:rgba(0,0,0,.28);
+}
+/* Dasselbe helle Salbeigrün, aber mit lavendelfarbenem statt grünem Akzent */
+[data-theme="lavendelfeld"]{
+  --paper:#F7F8F3; --chrome:#E8EBE0; --chrome-2:#F1F2EB; --canvas:#C7CDBE;
+  --ink:#3C4238; --ink-soft:#666F5E; --ink-faint:#96A08C;
+  --rule:#D6DACD; --stamp:#6E5A96; --manila:#EBDFC4;
+  --ok:#3F7A4A; --pageedge:rgba(0,0,0,.28);
+}
 /* Graues Windows-Büro mit türkiser Infobox, späte Neunziger */
 [data-theme="aquamarin"]{
   --paper:#FFFFFF; --chrome:#C3C3C3; --chrome-2:#DEDEDE; --canvas:#7E8C8C;
@@ -1169,6 +1197,10 @@ const THEMES=[
   {k:"silber",   n:"Silberton",  d:"Graue Systemoberfläche der 90er",   c:["#FFFFFF","#808080","#000080"]},
   {k:"lagune",   n:"Lagune",     d:"Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97",   c:["#FBFBF8","#8FA8A6","#0F7C82"]},
   {k:"wolke",    n:"Wolke",      d:"Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung", c:["#FFFFFF","#EEF1F4","#1A73E8"]},
+  {k:"morgensonne",n:"Morgensonne",d:"Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese", c:["#FBF8EF","#E6D9AD","#9C6410"]},
+  {k:"sonnennebel",n:"Sonnennebel",d:"Noch blasseres, diesiges Gelb wie Sonne im Morgennebel", c:["#FAF9F3","#DBD6BC","#85661F"]},
+  {k:"salbei",   n:"Salbei",     d:"Pastellgrünes Salbei, wie eine Wiese im Morgennebel", c:["#F6F8F3","#C9D4C3","#4F7A52"]},
+  {k:"lavendelfeld",n:"Lavendelfeld",d:"Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet", c:["#F7F8F3","#C7CDBE","#6E5A96"]},
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
@@ -1386,6 +1418,13 @@ en:{
   "Seitenbreite einpassen":"Fit to page width",
   "Silberton":"Silver tone",
   "Wolke":"Cloud",
+  "Morgensonne":"Morning sun",
+  "Sonnennebel":"Sun haze",
+  "Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese":"Pale pastel yellow, like early sunlight over a meadow",
+  "Noch blasseres, diesiges Gelb wie Sonne im Morgennebel":"An even paler, hazier yellow, like sun through morning fog",
+  "Lavendelfeld":"Lavender field",
+  "Pastellgrünes Salbei, wie eine Wiese im Morgennebel":"Pastel sage green, like a meadow in morning mist",
+  "Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet":"Sage green with a lavender accent, like lavender in an herb bed",
   "Platin":"Platinum",
   "Enzian":"Gentian",
   "Bernstein":"Amber",
@@ -1975,6 +2014,13 @@ fr:{
   "Seitenbreite einpassen":"Ajuster à la largeur de page",
   "Silberton":"Ton argenté",
   "Wolke":"Nuage",
+  "Morgensonne":"Soleil du matin",
+  "Sonnennebel":"Brume ensoleillée",
+  "Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese":"Jaune pastel pâle, comme la lumière matinale sur une prairie",
+  "Noch blasseres, diesiges Gelb wie Sonne im Morgennebel":"Un jaune encore plus pâle et brumeux, comme le soleil dans la brume matinale",
+  "Lavendelfeld":"Champ de lavande",
+  "Pastellgrünes Salbei, wie eine Wiese im Morgennebel":"Vert sauge pastel, comme une prairie dans la brume matinale",
+  "Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet":"Vert sauge avec un accent lavande, comme la lavande dans un jardin d'herbes",
   "Platin":"Platine",
   "Enzian":"Gentiane",
   "Bernstein":"Ambre",
@@ -2564,6 +2610,13 @@ es:{
   "Seitenbreite einpassen":"Ajustar al ancho de página",
   "Silberton":"Tono plateado",
   "Wolke":"Nube",
+  "Morgensonne":"Sol matutino",
+  "Sonnennebel":"Neblina soleada",
+  "Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese":"Amarillo pastel pálido, como la luz temprana del sol sobre un prado",
+  "Noch blasseres, diesiges Gelb wie Sonne im Morgennebel":"Un amarillo aún más pálido y brumoso, como el sol entre la niebla matutina",
+  "Lavendelfeld":"Campo de lavanda",
+  "Pastellgrünes Salbei, wie eine Wiese im Morgennebel":"Verde salvia pastel, como un prado entre la niebla matutina",
+  "Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet":"Verde salvia con un acento lavanda, como la lavanda en un huerto de hierbas",
   "Platin":"Platino",
   "Enzian":"Genciana",
   "Bernstein":"Ámbar",
@@ -3153,6 +3206,13 @@ pt:{
   "Seitenbreite einpassen":"Ajustar à largura da página",
   "Silberton":"Tom prateado",
   "Wolke":"Nuvem",
+  "Morgensonne":"Sol da manhã",
+  "Sonnennebel":"Neblina ensolarada",
+  "Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese":"Amarelo pastel pálido, como a luz do sol da manhã sobre um prado",
+  "Noch blasseres, diesiges Gelb wie Sonne im Morgennebel":"Um amarelo ainda mais pálido e enevoado, como o sol na neblina matinal",
+  "Lavendelfeld":"Campo de lavanda",
+  "Pastellgrünes Salbei, wie eine Wiese im Morgennebel":"Verde sálvia pastel, como um prado na neblina matinal",
+  "Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet":"Verde sálvia com um toque lavanda, como a lavanda em um canteiro de ervas",
   "Platin":"Platina",
   "Enzian":"Genciana",
   "Bernstein":"Âmbar",
@@ -3742,6 +3802,13 @@ pl:{
   "Seitenbreite einpassen":"Dopasuj do szerokości strony",
   "Silberton":"Srebrny odcień",
   "Wolke":"Chmura",
+  "Morgensonne":"Poranne słońce",
+  "Sonnennebel":"Słoneczna mgła",
+  "Blasses Pastellgelb wie frühes Sonnenlicht über einer Wiese":"Blady pastelowy żółty, jak wczesne światło słońca nad łąką",
+  "Noch blasseres, diesiges Gelb wie Sonne im Morgennebel":"Jeszcze bledszy, mglisty żółty, jak słońce w porannej mgle",
+  "Lavendelfeld":"Pole lawendy",
+  "Pastellgrünes Salbei, wie eine Wiese im Morgennebel":"Pastelowa zieleń szałwiowa, jak łąka we mgle porannej",
+  "Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet":"Zieleń szałwiowa z lawendowym akcentem, jak lawenda na grządce ziół",
   "Platin":"Platyna",
   "Enzian":"Goryczka",
   "Bernstein":"Bursztyn",
