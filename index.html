@@ -1123,6 +1123,14 @@ const FORMATS={
   letter:{n:"US Letter",       w:216, h:279, m:[25,25,25,25], hd:13, fd:13, d:"Nordamerika"}
 };
 const MM=mm=>mm*96/25.4;
+/* Alle Maße liegen intern durchgehend in mm vor (FORMATS, doc().fmt, Lineal-
+   Drag) - diese drei Helfer sind der einzige Ort, an dem für die Anzeige ins
+   gewählte Maßsystem umgerechnet wird, damit Seitenformat-Dialog, Lineal und
+   jede künftige Stelle dieselbe Rundung verwenden. */
+const unitOf=()=>S.settings.unit||"mm";
+const toUnit=mm=>unitOf()==="in"?Math.round((mm||0)/25.4*100)/100:Math.round(mm||0);
+const fromUnit=v=>unitOf()==="in"?Math.round((+v||0)*25.4):Math.round(+v||0);
+const unitAbbr=()=>unitOf()==="in"?"in":"mm";
 const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],["2",2]];
 const lhOf=d=>d.lh||S.settings.lh||1.62;
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
@@ -1539,9 +1547,13 @@ en:{
   "Ausrichtung":"Orientation",
   "Hochformat":"Portrait",
   "Querformat":"Landscape",
+  "Maßsystem":"Unit system",
+  "Zoll":"Inches",
   "Seitengröße in mm":"Page size in mm",
+  "Seitengröße in Zoll":"Page size in inches",
   "Breite / Höhe":"Width / Height",
   "Ränder in mm":"Margins in mm",
+  "Ränder in Zoll":"Margins in inches",
   "Oben / Unten":"Top / Bottom",
   "Links / Rechts":"Left / Right",
   "merken":"remember",
@@ -2121,9 +2133,13 @@ fr:{
   "Ausrichtung":"Orientation",
   "Hochformat":"Portrait",
   "Querformat":"Paysage",
+  "Maßsystem":"Système de mesure",
+  "Zoll":"Pouces",
   "Seitengröße in mm":"Taille de la page en mm",
+  "Seitengröße in Zoll":"Taille de la page en pouces",
   "Breite / Höhe":"Largeur / Hauteur",
   "Ränder in mm":"Marges en mm",
+  "Ränder in Zoll":"Marges en pouces",
   "Oben / Unten":"Haut / Bas",
   "Links / Rechts":"Gauche / Droite",
   "merken":"mémoriser",
@@ -2703,9 +2719,13 @@ es:{
   "Ausrichtung":"Orientación",
   "Hochformat":"Vertical",
   "Querformat":"Horizontal",
+  "Maßsystem":"Sistema de medida",
+  "Zoll":"Pulgadas",
   "Seitengröße in mm":"Tamaño de página en mm",
+  "Seitengröße in Zoll":"Tamaño de página en pulgadas",
   "Breite / Höhe":"Ancho / Alto",
   "Ränder in mm":"Márgenes en mm",
+  "Ränder in Zoll":"Márgenes en pulgadas",
   "Oben / Unten":"Arriba / Abajo",
   "Links / Rechts":"Izquierda / Derecha",
   "merken":"recordar",
@@ -3285,9 +3305,13 @@ pt:{
   "Ausrichtung":"Orientação",
   "Hochformat":"Retrato",
   "Querformat":"Paisagem",
+  "Maßsystem":"Sistema de medida",
+  "Zoll":"Polegadas",
   "Seitengröße in mm":"Tamanho da página em mm",
+  "Seitengröße in Zoll":"Tamanho da página em polegadas",
   "Breite / Höhe":"Largura / Altura",
   "Ränder in mm":"Margens em mm",
+  "Ränder in Zoll":"Margens em polegadas",
   "Oben / Unten":"Cima / Baixo",
   "Links / Rechts":"Esquerda / Direita",
   "merken":"lembrar",
@@ -3699,6 +3723,7 @@ S.docs.forEach(d=>{
 S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
 S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
 if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
+if(S.settings&&!S.settings.unit)S.settings.unit="mm";
 if(S.outlineOpen===undefined)S.outlineOpen=false;
 if(!S.pageNumPos)S.pageNumPos="right";
 if(!S.pageNumSize)S.pageNumSize=9;
@@ -7126,9 +7151,10 @@ function formatDialog(mode,onDone){
      vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
   let offen=sel==="custom";
   const quer=()=>cfg.w>cfg.h;
+  const unit=unitOf,toDisp=toUnit,fromDisp=fromUnit;
   const kurzfassung=()=>{
     const z=S.settings.uiLang==="en"?String(lh):String(lh).replace(".",",");
-    return `${cfg.w}&times;${cfg.h} mm · ${cfg.m.join("/")} · ${z}`;
+    return `${toDisp(cfg.w)}&times;${toDisp(cfg.h)} ${unitAbbr()} · ${cfg.m.map(toDisp).join("/")} · ${z}`;
   };
   const pagePreview=()=>{
     const sc=100/Math.max(cfg.w||1,cfg.h||1);
@@ -7141,7 +7167,7 @@ function formatDialog(mode,onDone){
   const body=()=>`
     <div class="fmtgrid">${Object.entries(FORMATS).map(([k,f])=>
       `<button class="fmtopt ${sel===k?"on":""}" data-f="${k}">
-        <b>${tr(f.n)}</b><span>${f.w} &times; ${f.h} mm &middot; ${tr(f.d)}</span></button>`).join("")}
+        <b>${tr(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()} &middot; ${tr(f.d)}</span></button>`).join("")}
       <button class="fmtopt ${sel==="custom"?"on":""}" data-f="custom" style="grid-column:1/3">
         <b>${tr("Eigene Maße")}</b><span>${tr("Breite und Höhe frei wählen")}</span></button>
     </div>
@@ -7162,26 +7188,34 @@ function formatDialog(mode,onDone){
         `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
           S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===1.62?" · "+tr("Standard"):""}</option>`).join("")}</select>
     </div>
+    <div class="mmrow" style="margin-bottom:11px">
+      <label>${tr("Maßsystem")}</label>
+      <button class="pill ${unit()!=="in"?"on":""}" data-u="mm" style="flex:1">mm</button>
+      <button class="pill ${unit()==="in"?"on":""}" data-u="in" style="flex:1">${tr("Zoll")}</button>
+    </div>
     <div class="fmtwrap">
       <div class="fmtfields">
-        <div class="mlabel" style="padding-left:0">${tr("Seitengröße in mm")}</div>
+        <div class="mlabel" style="padding-left:0">${unit()==="in"?tr("Seitengröße in Zoll"):tr("Seitengröße in mm")}</div>
         <div class="mmrow"><label>${tr("Breite / Höhe")}</label>
-          <input type="number" id="cw" value="${cfg.w}" ${sel==="custom"?"":"disabled"}
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="cw" value="${toDisp(cfg.w)}" ${sel==="custom"?"":"disabled"}
             title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}">
-          <input type="number" id="ch" value="${cfg.h}" ${sel==="custom"?"":"disabled"}
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="ch" value="${toDisp(cfg.h)}" ${sel==="custom"?"":"disabled"}
             title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}"></div>
-        <div class="mlabel" style="padding-left:0">${tr("Ränder in mm")}</div>
+        <div class="mlabel" style="padding-left:0">${unit()==="in"?tr("Ränder in Zoll"):tr("Ränder in mm")}</div>
         <div class="mmrow"><label>${tr("Oben / Unten")}</label>
-          <input type="number" id="c0" value="${cfg.m[0]}"><input type="number" id="c2" value="${cfg.m[2]}"></div>
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="c0" value="${toDisp(cfg.m[0])}">
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="c2" value="${toDisp(cfg.m[2])}"></div>
         <div class="mmrow"><label>${tr("Links / Rechts")}</label>
-          <input type="number" id="c3" value="${cfg.m[3]}"><input type="number" id="c1" value="${cfg.m[1]}"></div>
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="c3" value="${toDisp(cfg.m[3])}">
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="c1" value="${toDisp(cfg.m[1])}"></div>
         <div class="mlabel" style="padding-left:0">${tr("Kopf- und Fußzeile von der Papierkante")}</div>
         <div class="mmrow" style="margin-bottom:0"><label>${tr("Kopf / Fuß")}</label>
-          <input type="number" id="chd" value="${cfg.hd}"><input type="number" id="cfd" value="${cfg.fd}"></div>
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="chd" value="${toDisp(cfg.hd)}">
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="cfd" value="${toDisp(cfg.fd)}"></div>
       </div>
       ${pagePreview()}
     </div>
-    <div class="fmtinfo">${tr("Satzspiegel")} ${Math.max(0,cfg.w-cfg.m[1]-cfg.m[3])} &times; ${Math.max(0,cfg.h-cfg.m[0]-cfg.m[2])} mm</div>
+    <div class="fmtinfo">${tr("Satzspiegel")} ${toDisp(Math.max(0,cfg.w-cfg.m[1]-cfg.m[3]))} &times; ${toDisp(Math.max(0,cfg.h-cfg.m[0]-cfg.m[2]))} ${unitAbbr()}</div>
     <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`:""}`;
   overlay(`<div class="modal wide"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
     <div class="pad" id="fbody">${body()}</div>
@@ -7196,10 +7230,10 @@ function formatDialog(mode,onDone){
     /* Eingeklappt gibt es keine Felder zum Auslesen - cfg gilt unverändert
        weiter, sonst würden die Werte beim Zuklappen auf 0 fallen. */
     if(!$("#c0"))return;
-    cfg.m=[+$("#c0").value||0,+$("#c1").value||0,+$("#c2").value||0,+$("#c3").value||0];
-    cfg.hd=Math.max(0,Math.min(cfg.h/3,+$("#chd").value||0));
-    cfg.fd=Math.max(0,Math.min(cfg.h/3,+$("#cfd").value||0));
-    if(sel==="custom"){cfg.w=+$("#cw").value||210;cfg.h=+$("#ch").value||297}};
+    cfg.m=[fromDisp($("#c0").value),fromDisp($("#c1").value),fromDisp($("#c2").value),fromDisp($("#c3").value)];
+    cfg.hd=Math.max(0,Math.min(cfg.h/3,fromDisp($("#chd").value)));
+    cfg.fd=Math.max(0,Math.min(cfg.h/3,fromDisp($("#cfd").value)));
+    if(sel==="custom"){cfg.w=fromDisp($("#cw").value)||210;cfg.h=fromDisp($("#ch").value)||297}};
   const repaint=()=>{$("#fbody").innerHTML=body();bind()};
   const bind=()=>{
     $("#fbody").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
@@ -7213,6 +7247,8 @@ function formatDialog(mode,onDone){
       readM();const willQuer=b.dataset.o==="quer";
       if(willQuer!==quer()){const w=cfg.w;cfg.w=cfg.h;cfg.h=w}
       repaint()});
+    $("#fbody").querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{
+      readM();S.settings.unit=b.dataset.u;save();repaint()});
     ["cw","ch","c0","c1","c2","c3"].forEach(id=>{const el=$("#"+id);if(el)el.onchange=()=>{readM();repaint()}});
     const lhSel=$("#cLh");if(lhSel)lhSel.onchange=()=>{lh=+lhSel.value||1.62};
     const mehr=$("#fMore");if(mehr)mehr.onclick=()=>{readM();offen=!offen;repaint()};
@@ -7331,11 +7367,11 @@ function drawRuler(){
       const val=typeof doc().fmt==="object"?doc().fmt:{...fmt};
       val.m=[...fmt.m];val.m[side==="l"?3:1]=mm;
       doc().fmt=val;
-      tip.textContent=mm+" mm";
+      tip.textContent=toUnit(mm)+" "+unitAbbr();
       tip.style.left=(side==="l"?MM(mm)*z:MM(fmt.w-mm)*z)+"px";
       drawRuler();paginate();
       const nh=$("#ruler").querySelector(`[data-h="${side}"]`);if(nh)nh.classList.add("drag");
-      $("#rtip").style.display="block";$("#rtip").textContent=mm+" mm";
+      $("#rtip").style.display="block";$("#rtip").textContent=toUnit(mm)+" "+unitAbbr();
       $("#rtip").style.left=tip.style.left;
     };
     const up=()=>{document.removeEventListener("mousemove",move);
@@ -10044,6 +10080,9 @@ function settings(){
     <div class="setrow"><label>${tr("Standardschrift")}</label><div class="ctl">
       <select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
       <select id="sSize" style="flex:0 0 62px">${SIZES.map(x=>`<option ${s.size==x?"selected":""}>${x}</option>`).join("")}</select></div></div>
+    <div class="setrow"><label>${tr("Maßsystem")}</label><div class="ctl">
+      <select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
+        <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select></div></div>
     <div class="setrow"><label>${tr("Autosave")}</label><div class="ctl">
       <input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
       <input type="number" id="sInt" value="${s.interval}" min="5" max="600" style="flex:0 0 74px"><span style="color:var(--ink-faint)">${tr("Sek.")}</span></div></div>
@@ -10071,7 +10110,7 @@ function settings(){
         ${tr("Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.")}<br>
         ${tr("Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.")}</div></div></div>
     </div><div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
-  const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.autosave=$("#sAuto").checked;
+  const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.unit=$("#sUnit").value;s.autosave=$("#sAuto").checked;
     s.interval=Math.max(5,+$("#sInt").value||30);s.lang=$("#sLang").value;
     const uiNeu=$("#sUiLang").value,langChanged=s.uiLang!==uiNeu;s.uiLang=uiNeu;
     /* Die Oberflächensprache umzustellen zieht die Prüfsprache mit — sonst
@@ -10085,7 +10124,7 @@ function settings(){
     if(!s.dimUi)document.body.classList.remove("typing");
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof"].forEach(id=>$("#"+id).onchange=app);
+  ["sFont","sSize","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof"].forEach(id=>$("#"+id).onchange=app);
   $("#sThemeBtn").onclick=themeDialog;
   $("#setClose").onclick=closeOvl;
 }
