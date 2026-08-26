@@ -269,7 +269,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Popup unsichtbar gemacht. */
 .csw{height:21px;border-radius:var(--radius);border:1px solid rgba(0,0,0,.25)}
 .csw:hover{box-shadow:0 0 0 2px var(--ink-soft)}
+/* Volles Farbraster wie bei Google Docs, für Schriftfarbe UND
+   Hervorhebung gleichermaßen: feste, schmale Spalten statt 1fr, sonst
+   würden zehn Kreise das Menü unnötig aufblähen. */
+.swatches.grid{grid-template-columns:repeat(10,18px);gap:4px;padding:6px 9px}
+.swatches.grid .csw{height:18px;border-radius:50%}
 #colmenu{min-width:186px}
+#colmenu:has(.swatches.grid){min-width:auto}
 #colPick{margin-left:auto;width:30px;height:21px;padding:0;border:1px solid var(--rule);
   border-radius:var(--radius);background:none;cursor:pointer}
 .tb svg{pointer-events:none}
@@ -1081,10 +1087,26 @@ const SIZES=[9,10,11,12,13,14,16,18,20,24];
 const NOTECOLORS=[
   {c:"#EBDFC4",n:"Manila"},{c:"#F3ECC6",n:"Zitrone"},{c:"#D9E7D6",n:"Salbei"},
   {c:"#D6E3EF",n:"Himmel"},{c:"#EFDCDB",n:"Rosé"},{c:"#E2DBEE",n:"Flieder"},{c:"#F5F3EC",n:"Papier"}];
-/* Schriftfarben: gedeckt, damit sie auf hellem wie dunklem Papier tragen */
-const TEXTCOLORS=[
-  {c:"#C0392B",n:"Rot"},{c:"#B9770E",n:"Ocker"},{c:"#1E7B4F",n:"Grün"},{c:"#1F6F8B",n:"Petrol"},
-  {c:"#2C3E9B",n:"Blau"},{c:"#6C3483",n:"Violett"},{c:"#7B5E3B",n:"Braun"},{c:"#5A5D61",n:"Grau"}];
+/* Schriftfarbe: volles Raster wie bei Google Docs statt einer schmalen
+   Auswahl - eine Graustufenzeile plus zehn Farbtöne über fünf
+   Helligkeitsstufen (kräftig/hell/pastell/mittel/dunkel), aus HSL
+   errechnet statt Wert für Wert gepflegt. TEXTCOLORS bleibt als kurze
+   Liste für den Standardwert (Schwarz) bestehen. */
+function hsl2hex(h,s,l){
+  s/=100;l/=100;
+  const k=n=>(n+h/30)%12;
+  const a=s*Math.min(l,1-l);
+  const f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));
+  const hx=x=>Math.round(x*255).toString(16).padStart(2,"0");
+  return "#"+hx(f(0))+hx(f(8))+hx(f(4));
+}
+const PALETTE_HUES=[4,16,32,48,130,174,211,231,271,303];
+const PALETTE_TIERS=[[88,50],[45,88],[55,75],[62,58],[70,35]];
+const TEXTGRID=[
+  Array.from({length:10},(_,i)=>hsl2hex(0,0,Math.round(i*100/9))),
+  ...PALETTE_TIERS.map(([s,l])=>PALETTE_HUES.map(h=>hsl2hex(h,s,l)))
+];
+const TEXTCOLORS=[{c:"#000000",n:"Schwarz"},{c:"#FFFFFF",n:"Weiß"}];
 /* Hervorhebungen: hell, damit die mitgesetzte dunkle Schrift darauf lesbar bleibt */
 const MARKCOLORS=[
   {c:"#FBEB9B",n:"Gelb"},{c:"#C6EFC6",n:"Grün"},{c:"#CBE4F9",n:"Blau"},
@@ -1220,6 +1242,7 @@ en:{
   "Druckvorschau":"Print preview",
   "Seiten":"Pages",
   "Schreibziel":"Writing goal",
+  "Schreibziel festlegen":"Set writing goal",
   "Schreibziel einstellen":"Set the writing goal",
   "Dokument-Memo":"Document Memo",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Plot notes, open questions, research links…",
@@ -1274,6 +1297,8 @@ en:{
   "Eigene Farbe":"Custom colour",
   "Farbe entfernen":"Remove colour",
   "Hervorhebung entfernen":"Remove highlight",
+  "Schwarz":"Black",
+  "Weiß":"White",
   "Rot":"Red",
   "Ocker":"Ochre",
   "Grün":"Green",
@@ -1799,6 +1824,7 @@ fr:{
   "Druckvorschau":"Aperçu avant impression",
   "Seiten":"Pages",
   "Schreibziel":"Objectif d'écriture",
+  "Schreibziel festlegen":"Définir un objectif d'écriture",
   "Schreibziel einstellen":"Définir l'objectif d'écriture",
   "Dokument-Memo":"Mémo du document",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Notes d'intrigue, questions ouvertes, liens de recherche…",
@@ -1853,6 +1879,8 @@ fr:{
   "Eigene Farbe":"Couleur personnalisée",
   "Farbe entfernen":"Supprimer la couleur",
   "Hervorhebung entfernen":"Supprimer le surlignage",
+  "Schwarz":"Noir",
+  "Weiß":"Blanc",
   "Rot":"Rouge",
   "Ocker":"Ocre",
   "Grün":"Vert",
@@ -2378,6 +2406,7 @@ es:{
   "Druckvorschau":"Vista previa de impresión",
   "Seiten":"Páginas",
   "Schreibziel":"Objetivo de escritura",
+  "Schreibziel festlegen":"Definir objetivo de escritura",
   "Schreibziel einstellen":"Definir el objetivo de escritura",
   "Dokument-Memo":"Memo del documento",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Notas de trama, preguntas abiertas, enlaces de investigación…",
@@ -2432,6 +2461,8 @@ es:{
   "Eigene Farbe":"Color personalizado",
   "Farbe entfernen":"Quitar color",
   "Hervorhebung entfernen":"Quitar resaltado",
+  "Schwarz":"Negro",
+  "Weiß":"Blanco",
   "Rot":"Rojo",
   "Ocker":"Ocre",
   "Grün":"Verde",
@@ -2957,6 +2988,7 @@ pt:{
   "Druckvorschau":"Visualização de impressão",
   "Seiten":"Páginas",
   "Schreibziel":"Meta de escrita",
+  "Schreibziel festlegen":"Definir meta de escrita",
   "Schreibziel einstellen":"Definir meta de escrita",
   "Dokument-Memo":"Memorando do documento",
   "Handlungsnotizen, offene Fragen, Recherche-Links …":"Notas de enredo, perguntas em aberto, links de pesquisa…",
@@ -3011,6 +3043,8 @@ pt:{
   "Eigene Farbe":"Cor personalizada",
   "Farbe entfernen":"Remover cor",
   "Hervorhebung entfernen":"Remover destaque",
+  "Schwarz":"Preto",
+  "Weiß":"Branco",
   "Rot":"Vermelho",
   "Ocker":"Ocre",
   "Grün":"Verde",
@@ -4251,15 +4285,26 @@ function syncToolbarState(){
 document.addEventListener("selectionchange",syncToolbarState);
 
 /* ---- Schriftfarbe und Texthervorhebung ----
-   Eine Hervorhebung setzt zusätzlich dunkle Schrift, sonst wäre in den
-   dunklen Schemata helle Schrift auf hellem Pastell unlesbar — dieselbe
-   Regel, nach der auch die Notizzettel arbeiten. */
+   Eine Hervorhebung setzt zusätzlich passende Schrift, sonst wäre helle
+   Schrift auf hellem Pastell oder dunkle Schrift auf einem der dunklen
+   Töne im vollen Raster unlesbar — dieselbe Regel, nach der auch die
+   Notizzettel arbeiten. War früher immer MARKINK (dunkel), reicht aber
+   nicht mehr, seit die Hervorhebung dasselbe 60-Farben-Raster wie die
+   Schriftfarbe nutzt und damit auch dunkle Felder anbietet. Kontrast
+   gegen Schwarz und gegen Weiß gemessen, nicht die Helligkeit geschätzt. */
+function bestInk(hex){
+  const rgb=hex.replace("#","").match(/.{2}/g).map(x=>parseInt(x,16));
+  const f=c=>{c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)};
+  const L=0.2126*f(rgb[0])+0.7152*f(rgb[1])+0.0722*f(rgb[2]);
+  const kontrast=l2=>{const [a,b]=L>l2?[L,l2]:[l2,L];return (a+0.05)/(b+0.05)};
+  return kontrast(1)>kontrast(0)?"#FFFFFF":MARKINK;
+}
 function farbeAnwenden(art,c){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   document.execCommand("styleWithCSS",false,true);
   if(art==="fore")document.execCommand("foreColor",false,c);
-  else{document.execCommand("hiliteColor",false,c);document.execCommand("foreColor",false,MARKINK)}
+  else{document.execCommand("hiliteColor",false,c);document.execCommand("foreColor",false,bestInk(c))}
   if(art==="fore")S.settings.foreColor=c; else S.settings.markColor=c;
   dirty=true;commit();drawTools();queuePaginate();
 }
@@ -4291,14 +4336,13 @@ function farbeEntfernen(art){
 }
 function colorMenu(e,art){
   closeMenu();
-  const liste=art==="fore"?TEXTCOLORS:MARKCOLORS;
   const aktuell=art==="fore"?(S.settings.foreColor||TEXTCOLORS[0].c):(S.settings.markColor||MARKCOLORS[0].c);
+  const swatchHtml=x=>`<button class="csw" data-col="${x.c}" title="${esc(x.n)}" aria-label="${esc(x.n)}"
+        style="background:${x.c}${x.c.toLowerCase()===String(aktuell).toLowerCase()?";box-shadow:0 0 0 2px var(--stamp)":""}"></button>`;
+  const grid=`<div class="swatches grid">${TEXTGRID.map(row=>row.map(c=>swatchHtml({c,n:c})).join("")).join("")}</div>`;
   const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
   m.innerHTML=`<div class="mlabel">${art==="fore"?tr("Schriftfarbe"):tr("Texthervorhebung")}</div>
-    <div class="swatches">${liste.map(x=>
-      `<button class="csw" data-col="${x.c}" title="${esc(tr(x.n))}" aria-label="${esc(tr(x.n))}"
-        style="background:${x.c}${x.c.toLowerCase()===String(aktuell).toLowerCase()?";box-shadow:0 0 0 2px var(--stamp)":""}"></button>`).join("")}
-    </div>
+    ${grid}
     <label class="mi" id="colOwn">${tr("Eigene Farbe")}&hellip;
       <input type="color" id="colPick" value="${aktuell}"></label>
     <div class="msep"></div>
@@ -6682,16 +6726,16 @@ function toolsMenu(){
   m.style.left=$("#toolsBtn").offsetLeft+"px";
   const c=v=>v?"&#10003;":"";
   m.innerHTML=`
-    <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel")}${
-      S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
-    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>
+    <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
+      S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
+    <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
     <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
     ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
-    <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>`;
+    <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-t]");if(!b)return;
