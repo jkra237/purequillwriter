@@ -364,7 +364,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
 #editor h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
-#editor p{margin:0 0 .82em}
+#editor p{margin:0 0 var(--ps,.82em)}
 #editor ul,#editor ol{margin:0 0 .82em;padding-left:1.5em}
 #editor blockquote{margin:0 0 .82em;padding:.1em 0 .1em 1em;
   border-left:3px solid var(--rule);color:var(--ink-soft);font-style:italic}
@@ -1085,6 +1085,8 @@ const FORMATS={
 const MM=mm=>mm*96/25.4;
 const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],["2",2]];
 const lhOf=d=>d.lh||S.settings.lh||1.62;
+const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
+const psOf=d=>d.ps||S.settings.ps||.82;
 function fmtOf(d){
   const f=d.fmt||S.settings.fmt||"a4";
   const o=typeof f==="object"?f:{...FORMATS[f]||FORMATS.a4,key:f};
@@ -1501,6 +1503,11 @@ en:{
   "Links / Rechts":"Left / Right",
   "merken":"remember",
   "Zeilenabstand":"Line spacing",
+  "Absatzabstand":"Paragraph spacing",
+  "Kompakt":"Compact",
+  "Normal":"Normal",
+  "Weit":"Wide",
+  "Sehr weit":"Extra wide",
   "Standard":"default",
   "Zeilenabstand und Maße":"Line spacing and dimensions",
   "Als Standard":"As default",
@@ -2075,6 +2082,11 @@ fr:{
   "Links / Rechts":"Gauche / Droite",
   "merken":"mémoriser",
   "Zeilenabstand":"Interligne",
+  "Absatzabstand":"Espacement des paragraphes",
+  "Kompakt":"Compact",
+  "Normal":"Normal",
+  "Weit":"Large",
+  "Sehr weit":"Très large",
   "Standard":"par défaut",
   "Zeilenabstand und Maße":"Interligne et dimensions",
   "Als Standard":"Par défaut",
@@ -2649,6 +2661,11 @@ es:{
   "Links / Rechts":"Izquierda / Derecha",
   "merken":"recordar",
   "Zeilenabstand":"Interlineado",
+  "Absatzabstand":"Espaciado de párrafo",
+  "Kompakt":"Compacto",
+  "Normal":"Normal",
+  "Weit":"Amplio",
+  "Sehr weit":"Muy amplio",
   "Standard":"predeterminado",
   "Zeilenabstand und Maße":"Interlineado y medidas",
   "Als Standard":"Como predeterminado",
@@ -3223,6 +3240,11 @@ pt:{
   "Links / Rechts":"Esquerda / Direita",
   "merken":"lembrar",
   "Zeilenabstand":"Espaçamento entre linhas",
+  "Absatzabstand":"Espaçamento de parágrafo",
+  "Kompakt":"Compacto",
+  "Normal":"Normal",
+  "Weit":"Amplo",
+  "Sehr weit":"Muito amplo",
   "Standard":"padrão",
   "Zeilenabstand und Maße":"Espaçamento entre linhas e medidas",
   "Als Standard":"Como padrão",
@@ -3939,6 +3961,7 @@ function drawWrite(){
   ed.style.fontFamily=(d.font||S.settings.font)+",serif";
   ed.style.setProperty("--fs",(d.size||S.settings.size)+"pt");
   ed.style.setProperty("--lh",lhOf(d));
+  ed.style.setProperty("--ps",psOf(d)+"em");
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
   ed.addEventListener("input",()=>{dirty=true;setTyping();markEmpty();
@@ -5190,6 +5213,8 @@ function commandList(){
   add("Dokument","Seitenformat ändern","",changeFormat);
   LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
     tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),"",()=>setLineHeight(v)));
+  PARSPACES.forEach(([lab,v])=>add("Dokument",
+    tr("Absatzabstand")+" "+tr(lab).toLowerCase(),"",()=>setParSpace(v)));
   add("Dokument","Tabelle einfügen","",()=>{if(S.mode!=="write")setMode("write");setTimeout(tablePicker,40)});
   add("Dokument","Kopf- und Fußzeile","",hfDialog);
   add("Dokument","Dokument schließen","",()=>closeDoc(S.active));
@@ -5391,6 +5416,7 @@ function numberingXml(){
 }
 function stylesXml(d){
   const fs=Math.round((d.size||S.settings.size)*2),lh=Math.round(lhOf(d)*240);
+  const after=Math.round(psOf(d)*(d.size||S.settings.size)*20);
   const ueberschrift=(n,sz)=>`<w:style w:type="paragraph" w:styleId="Heading${n}"><w:name w:val="heading ${n}"/>
     <w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
     <w:pPr><w:spacing w:before="240" w:after="80"/><w:outlineLvl w:val="${n-1}"/></w:pPr>
@@ -5400,7 +5426,7 @@ function stylesXml(d){
 <w:docDefaults><w:rPrDefault><w:rPr>
   <w:rFonts w:ascii="${d.font||S.settings.font}" w:hAnsi="${d.font||S.settings.font}"/>
   <w:sz w:val="${fs}"/></w:rPr></w:rPrDefault>
-  <w:pPrDefault><w:pPr><w:spacing w:line="${lh}" w:lineRule="auto"/></w:pPr></w:pPrDefault>
+  <w:pPrDefault><w:pPr><w:spacing w:line="${lh}" w:lineRule="auto" w:after="${after}"/></w:pPr></w:pPrDefault>
 </w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
 ${ueberschrift(1,36)}${ueberschrift(2,30)}${ueberschrift(3,26)}
@@ -6410,6 +6436,18 @@ function confirmReplace(onOk){
 }
 function closeMenu(){document.querySelectorAll(".menu").forEach(m=>m.remove());
   document.querySelectorAll(".filebtn").forEach(b=>b.classList.remove("on"))}
+/* Untermenüs eines bereits offenen Menüs klappen bei Hover auf, nicht erst
+   beim Klick — wie bei nativen Menüs (Word, macOS-Menüleiste). Das
+   Erstöffnen von Datei/Ansicht/Format/Werkzeuge selbst bleibt Klick, nur
+   die Pfeil-Einträge (rsaquo) innerhalb eines offenen Menüs reagieren auf
+   mouseenter. Erkennung über das rsaquo-Zeichen statt eigenem Attribut,
+   damit kein Aufrufort vergessen werden kann. */
+function armHoverSubs(m){
+  m.querySelectorAll(".mi").forEach(b=>{
+    const k=b.querySelector(".k");
+    if(k&&k.textContent.trim()==="›")b.addEventListener("mouseenter",()=>b.click());
+  });
+}
 function fileMenu(){
   if($("#fmenu")){closeMenu();return}
   closeMenu();
@@ -6441,7 +6479,7 @@ function fileMenu(){
       <span class="k">${s.autosave?s.interval+" s":tr("aus")}</span></button>
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
     <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>`;
-  $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");
+  $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
     const a=b.dataset.act;
@@ -6553,16 +6591,19 @@ function formatMenu(){
   m.style.left=$("#formatBtn").offsetLeft+"px";
   m.innerHTML=`
     <button class="mi" data-f="text"><span class="chk"></span>${tr("Text")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="fore"><span class="chk"></span>${tr("Schriftfarbe")}&hellip;</button>
+    <button class="mi" data-f="hilite"><span class="chk"></span>${tr("Texthervorhebung")}&hellip;</button>
     <button class="mi" data-f="block"><span class="chk"></span>${tr("Absatzformat")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="align"><span class="chk"></span>${tr("Ausrichten und einrücken")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilenabstand")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="ps"><span class="chk"></span>${tr("Absatzabstand")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="list"><span class="chk"></span>${tr("Aufzählungszeichen und Nummerierung")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     <button class="mi" data-f="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}&hellip;</button>
     <button class="mi" data-f="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>
     <div class="msep"></div>
     <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
-  $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");
+  $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");armHoverSubs(m);
   m.onclick=e=>{
     const b=e.target.closest("[data-f]");if(!b)return;
     const a=b.dataset.f;
@@ -6596,10 +6637,19 @@ function formatMenu(){
     if(a==="lh")return openSubMenu(b,LINEHEIGHTS.map(([lab,v])=>
       ({a:String(v),label:tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab)})),
       sub=>formatAct(()=>setLineHeight(parseFloat(sub))));
+    if(a==="ps")return openSubMenu(b,PARSPACES.map(([lab,v])=>
+      ({a:String(v),label:tr(lab)})),
+      sub=>formatAct(()=>setParSpace(parseFloat(sub))));
     if(a==="list")return openSubMenu(b,[
       {a:"insertUnorderedList",label:tr("Aufzählung")},
       {a:"insertOrderedList",label:tr("Nummerierung")}
     ],sub=>formatAct(()=>document.execCommand(sub)));
+    if(a==="fore"||a==="hilite"){
+      /* colorMenu() ruft selbst zuerst closeMenu() auf, das würde b (den
+         Format-Menü-Knopf) sofort aus dem DOM lösen - Rect vorher sichern. */
+      const r=b.getBoundingClientRect();
+      return colorMenu({currentTarget:{getBoundingClientRect:()=>r}},a);
+    }
     closeMenu();
     if(a==="hf")hfDialog();
     if(a==="pnum")pageNumDialog();
@@ -6683,7 +6733,7 @@ function contextMenu(e){
     <div class="msep"></div>`
     :""}
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen&hellip;")}</button>`;
-  document.body.appendChild(m);
+  document.body.appendChild(m);armHoverSubs(m);
   const w=m.offsetWidth,h=m.offsetHeight;
   m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
   m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
@@ -7130,6 +7180,12 @@ function setLineHeight(v){
   if(S.mode!=="write")setMode("write");
   doc().lh=v;commit();render();
   toast(tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?String(v):String(v).replace(".",",")));
+}
+function setParSpace(v){
+  if(S.mode!=="write")setMode("write");
+  doc().ps=v;commit();render();
+  const tier=PARSPACES.find(([,n])=>n===v);
+  toast(tr("Absatzabstand")+": "+tr(tier?tier[0]:"Normal"));
 }
 
 /* ================= Schreibfluss-Verhalten ================= */
