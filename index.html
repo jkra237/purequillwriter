@@ -147,8 +147,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Füllung hätten sie dauerhaft betont — und damit kräftiger wirken lassen als
    den aktiven Dokumentreiter daneben, der die Leiste anführen soll. Das
    Dreieck bleibt: dass sich hier etwas aufklappt, ist im Web nicht gesetzt. */
-.filebtn{margin:0 2px 4px 6px;padding:6px 10px;border:1px solid transparent;
-  border-radius:var(--radius);background:transparent;
+.filebtn{margin:0 0 4px 6px;padding:6px 7px;border:1px solid transparent;
+  border-radius:var(--radius);background:transparent;font-weight:500;
   /* Gemessen statt geschätzt: reines --ink-soft bleibt auf „Papier" mit 4,24
      unter dem Richtwert 4,5 für 14px. Ein Viertel --ink hebt den schlechtesten
      Wert auf 5,65 und lässt die Titel trotzdem weicher als den aktiven Reiter. */
@@ -183,12 +183,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    den hellen Schemata, wo --rule selbst kaum von --chrome absticht, zu
    knapp über unsichtbar zurückfallen. Die Rangordnung bleibt über die
    Füllfarbe erhalten - Papier gegen Chrome, nicht über den Rand. */
+/* Etwas kräftiger als reines --rule, sonst geht der Umriss neben der
+   nachgeschärften Menüleiste optisch unter. Gemessen: 80%/20%-Mischung mit
+   --ink hebt den Kontrast zur Werkzeugleiste in jedem Schema um 45-70%
+   relativ an (z. B. Azur 1,29 → 1,91), bleibt aber deutlich unter einem
+   vollen --ink-Rahmen, der die Reiter zu sehr betonen würde. */
 .tab{display:flex;align-items:center;gap:8px;padding:6px 12px;
-  border:1px solid var(--rule);border-bottom:none;
+  border:1px solid color-mix(in srgb, var(--rule) 80%, var(--ink));border-bottom:none;
   border-radius:var(--radius) var(--radius) 0 0;color:var(--ink-soft);max-width:210px;user-select:none}
 .tab.drag{opacity:.9;box-shadow:0 7px 18px rgba(0,0,0,.26);cursor:grabbing;
   position:relative;z-index:5}
-.tab.on{background:var(--paper);border-color:var(--rule);color:var(--ink)}
+.tab.on{background:var(--paper);border-color:color-mix(in srgb, var(--rule) 80%, var(--ink));color:var(--ink)}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px}
 .tab .x:hover{color:var(--stamp)}
