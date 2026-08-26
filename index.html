@@ -164,8 +164,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .filebtn:hover{background:var(--chrome-2);
   background:color-mix(in srgb, var(--chrome) 84%, var(--ink));color:var(--ink)}
 .filebtn.on{background:var(--paper);border-color:var(--rule);color:var(--ink)}
+/* Zweischichtiger Schatten wie bei Google Docs/Material - eng und knapp
+   statt weit ausgestrahlt, damit das Menü flach auf der Fläche wirkt statt
+   zu schweben. */
 .menu{position:absolute;z-index:60;top:100%;left:8px;min-width:250px;background:var(--paper);
-  border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 7px 22px rgba(0,0,0,.19);padding:4px}
+  border:1px solid var(--rule);border-radius:var(--radius);
+  box-shadow:0 1px 3px rgba(0,0,0,.16),0 4px 10px rgba(0,0,0,.12);padding:4px}
 .menu.ctx{position:fixed;top:auto;min-width:212px}
 .mi[disabled]{opacity:.38;pointer-events:none}
 #editor.nomark .anch{background:none;border-bottom:none}
@@ -6504,7 +6508,10 @@ function openSubMenu(anchor,items,cb=runFileAct){
     `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk"></span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
   const r=anchor.getBoundingClientRect();
-  m.style.left=Math.max(8,Math.min(r.right-6,innerWidth-m.offsetWidth-8))+"px";
+  /* Knapp anschließend statt tief überlappend, wie bei Google Docs -
+     nur 1px Überdeckung, damit sich die Ränder ohne sichtbare Lücke oder
+     Doppelkante treffen. */
+  m.style.left=Math.max(8,Math.min(r.right-1,innerWidth-m.offsetWidth-8))+"px";
   m.style.top=Math.max(8,Math.min(r.top-4,innerHeight-m.offsetHeight-8))+"px";
   m.onclick=e=>{const b=e.target.closest("[data-sub]");if(!b)return;
     closeMenu();cb(b.dataset.sub)};
@@ -6540,7 +6547,6 @@ function viewMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Seite")}</div>
     <button class="mi" data-v="guides"><span class="chk">${c(S.guides)}</span>${tr("Seitenränder")}</button>
-    <button class="mi" data-v="pnum"><span class="chk">${c(S.pagenum!==false)}</span>${tr("Seitenzahlen")}&hellip;</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Struktur")}</div>
     <button class="mi" data-v="outline"><span class="chk">${c(S.outlineOpen)}</span>${tr("Gliederung")}<span class="k">Alt ⇧ O</span></button>
@@ -6561,9 +6567,8 @@ function viewMenu(){
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
-    const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo","pnum"].includes(a);
+    const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo"].includes(a);
     if(a==="memo"){closeMenu();toggleMemo();return}
-    if(a==="pnum"){closeMenu();pageNumDialog();return}
     if(a==="theme"){closeMenu();themeDialog();return}
     if(a==="read"){closeMenu();readView();return}
     if(a==="pv"){closeMenu();printPreview();return}
