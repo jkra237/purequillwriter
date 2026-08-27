@@ -1105,6 +1105,22 @@ body.focus .sheet{padding-top:9vh}
   padding:7px 15px;border-radius:var(--radius);font-size:12px;z-index:70;opacity:0;transition:opacity .18s}
 .toast.on{opacity:1}
 
+/* Safari auf iOS zoomt beim Antippen eines Eingabefeldes selbsttätig hinein,
+   sobald dessen Schrift kleiner als 16px ist — und zoomt danach nicht wieder
+   heraus. Ein Tippen ins Suchfeld reicht, und die Ansicht sitzt verschoben
+   fest. Auf Geräten, die mit dem Finger bedient werden, bekommt deshalb jedes
+   Bedienfeld mindestens 16px; auf Maus-Geräten greift die Regel nicht, das
+   Aussehen am Schreibtisch bleibt unverändert.
+   Die Schreibfläche selbst steht bewusst nicht hier: ihre Schriftgröße ist
+   Teil des Dokuments (Seitenlayout, Zoomstufe) und darf sich nicht nach dem
+   Gerät richten.
+   user-scalable=no in der Viewport-Zeile wäre der kürzere Weg, aber der
+   falsche — Pinch-Zoom ist für Menschen mit schwachem Sehvermögen die einzige
+   Möglichkeit, den Text überhaupt zu lesen. */
+@media (pointer:coarse){
+  input,select,textarea,.tools select,.tools input[type=text],
+  .modal select,.modal input,.modal textarea,.setrow select,.setrow input{font-size:16px}
+}
 /* Wer im Betriebssystem weniger Bewegung eingestellt hat, bekommt keine.
    Ganz am Ende, damit die Regel jede vorherige übersteuert. */
 @media (prefers-reduced-motion:reduce){
