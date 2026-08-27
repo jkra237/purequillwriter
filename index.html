@@ -229,6 +229,41 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .lprev b{flex:0 0 16px;text-align:right;font:normal 9px/1 Georgia,serif;
   color:var(--ink-soft);letter-spacing:-.02em}
 .lprev i{flex:1;height:2px;border-radius:1px;background:var(--ink-faint);opacity:.5}
+/* Farbschema-Auswahl: jede Karte zeigt eine Miniatur des Programms in ihrem
+   eigenen Schema — Menüleiste, Arbeitsfläche, Papier, Akzentfarbe. Drei
+   Farbstreifen sagten vorher wenig darüber, wie das Schema wirklich aussieht.
+   Das data-theme sitzt auf der Miniatur selbst: die [data-theme=…]-Regeln ganz
+   oben sind reine Attributselektoren, gelten also auf jedem Element, und ihre
+   Variablen erben an alles darin. Dadurch braucht die Vorschau keine einzige
+   eigene Farbangabe, und ein künftiges Schema stimmt von allein. */
+/* Vier Spalten statt drei: bei 17 Schemata spart das zwei Reihen und der
+   Dialog passt damit auf einen üblichen Bildschirm, ohne zu scrollen. */
+.thgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.thsec{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 7px}
+.thsec.spaeter{margin-top:15px}
+.thopt{border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;
+  background:var(--chrome-2);padding:0;display:block;text-align:left}
+.thopt:hover{border-color:var(--ink-faint)}
+.thopt.on{border-color:var(--stamp);box-shadow:inset 0 0 0 1px var(--stamp)}
+.thprev{display:block;height:62px;background:var(--canvas);position:relative}
+.thbar{display:flex;align-items:center;gap:4px;height:15px;padding:0 5px;
+  background:var(--chrome);border-bottom:1px solid var(--rule)}
+.thbar i{display:block;height:3px;border-radius:1px;background:var(--ink-soft);opacity:.55}
+/* Das Papier liegt wie im Programm auf der Arbeitsfläche und läuft unten aus dem Bild */
+.thpaper{display:block;position:absolute;left:9px;right:9px;top:22px;bottom:0;
+  background:var(--paper);border-radius:2px 2px 0 0;padding:7px 7px 0;
+  box-shadow:0 1px 4px rgba(0,0,0,.22)}
+.thpaper i{display:block;height:3px;border-radius:1px;margin-bottom:5px;
+  background:var(--ink);opacity:.5}
+.thpaper i.a{background:var(--stamp);opacity:1;width:54%;height:4px;margin-bottom:7px}
+/* Name und Beschreibung stehen bewusst außerhalb der Miniatur — sie sollen in
+   den Farben des gerade eingestellten Schemas lesbar bleiben, nicht in denen
+   der Karte. */
+.thname{display:block;padding:6px 8px 7px;font-size:12px;font-weight:600;
+  color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.thinfo{padding:11px 16px 0;font-size:12px;line-height:1.5;color:var(--ink-soft);min-height:3.2em}
+.thinfo b{color:var(--ink);font-weight:600}
 .msep{height:1px;background:var(--rule);margin:4px 3px}
 .mlabel{padding:8px 8px 4px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-faint)}
@@ -1824,6 +1859,7 @@ en:{
   "Blauer Textmodus der DOS-Zeit":"Blue text mode from the DOS era",
   "Monochromer Bernsteinbildschirm":"Monochrome amber screen",
   "Dunkelmodus":"Dark mode",
+  "Hell":"Light","Dunkel":"Dark",
   "Phosphor":"Phosphor",
   "Lagune":"Lagoon",
   "Aquamarin":"Aquamarine",
@@ -2425,6 +2461,7 @@ fr:{
   "Blauer Textmodus der DOS-Zeit":"Mode texte bleu de l'ère DOS",
   "Monochromer Bernsteinbildschirm":"Écran ambre monochrome",
   "Dunkelmodus":"Mode sombre",
+  "Hell":"Clair","Dunkel":"Sombre",
   "Phosphor":"Phosphore",
   "Lagune":"Lagune",
   "Aquamarin":"Aigue-marine",
@@ -3026,6 +3063,7 @@ es:{
   "Blauer Textmodus der DOS-Zeit":"Modo texto azul de la era DOS",
   "Monochromer Bernsteinbildschirm":"Pantalla ámbar monocromo",
   "Dunkelmodus":"Modo oscuro",
+  "Hell":"Claro","Dunkel":"Oscuro",
   "Phosphor":"Fósforo",
   "Lagune":"Laguna",
   "Aquamarin":"Aguamarina",
@@ -3627,6 +3665,7 @@ pt:{
   "Blauer Textmodus der DOS-Zeit":"Modo texto azul da era DOS",
   "Monochromer Bernsteinbildschirm":"Tela âmbar monocromática",
   "Dunkelmodus":"Modo escuro",
+  "Hell":"Claro","Dunkel":"Escuro",
   "Phosphor":"Fósforo",
   "Lagune":"Laguna",
   "Aquamarin":"Água-marinha",
@@ -4228,6 +4267,7 @@ pl:{
   "Blauer Textmodus der DOS-Zeit":"Niebieski tryb tekstowy z ery DOS",
   "Monochromer Bernsteinbildschirm":"Monochromatyczny ekran bursztynowy",
   "Dunkelmodus":"Tryb ciemny",
+  "Hell":"Jasne","Dunkel":"Ciemne",
   "Phosphor":"Fosfor",
   "Lagune":"Laguna",
   "Aquamarin":"Akwamaryna",
@@ -5919,6 +5959,12 @@ function closeOvl(){if(lockedOvl)return;
      beide Wege kommen hier vorbei, der Knopf im Dialog nicht allein. */
   if($("#spBody"))spellDone();
   if($("#clBody"))cleanDone();
+  /* Die Schemawahl zeigt beim Überfahren ein Schema nur vorübergehend an.
+     Escape und der Klick daneben kommen hier vorbei, ohne dass ein
+     mouseleave feuert — ohne diese Zeile bliebe das zuletzt überfahrene
+     Schema stehen, obwohl gespeichert ein anderes ist. Der Handler an #ovl
+     muss mit weg: das Element selbst bleibt bestehen, nur sein Inhalt geht. */
+  if($("#thInfo")){applyTheme();$("#ovl").onmouseleave=null}
   $("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
 function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
@@ -11165,22 +11211,61 @@ function settings(){
 function download(name,text,mime){
   const b=new Blob([text],{type:mime||"text/plain"});const u=URL.createObjectURL(b);
   const a=document.createElement("a");a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),900)}
+/* Hell oder dunkel? Nicht als Feld in THEMES gepflegt, sondern an der
+   Papierfarbe gemessen — so ordnet sich ein neu hinzugefügtes Schema von
+   selbst richtig ein, statt dass jemand daran denken muss. */
+function themeIsDark(k){
+  const probe=document.createElement("div");
+  probe.style.cssText="position:absolute;left:-9999px;top:0";
+  probe.dataset.theme=k;
+  document.body.appendChild(probe);
+  probe.style.color=getComputedStyle(probe).getPropertyValue("--paper").trim();
+  const m=(getComputedStyle(probe).color.match(/[\d.]+/g)||["255","255","255"]).map(Number);
+  probe.remove();
+  const f=v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};
+  return 0.2126*f(m[0])+0.7152*f(m[1])+0.0722*f(m[2])<0.5;
+}
 function themeDialog(){
   const cur=S.settings.theme;
-  overlay(`<div class="modal"><h3>${tr("Farbschema")}</h3><div class="pad">
-    <div class="fmtgrid">${THEMES.map(t=>
-      `<button class="fmtopt ${cur===t.k?"on":""}" data-t="${t.k}" style="display:flex;gap:9px;align-items:center">
-        <span style="flex:0 0 34px;height:26px;border:1px solid var(--rule);border-radius:2px;overflow:hidden;display:flex">
-          <span style="flex:2;background:${t.c[0]}"></span>
-          <span style="flex:1;background:${t.c[1]}"></span>
-          <span style="flex:.6;background:${t.c[2]}"></span></span>
-        <span style="flex:1;min-width:0"><b>${tr(t.n)}</b><span>${tr(t.d)}</span></span>
-      </button>`).join("")}</div></div>
+  /* Was beim Öffnen eingestellt war: das Überfahren zeigt ein Schema nur
+     vorübergehend, ohne es zu speichern — hierauf wird zurückgestellt. */
+  let gewaehlt=cur;
+  const karte=t=>`<button class="thopt ${cur===t.k?"on":""}" data-t="${t.k}">
+      <span class="thprev" data-theme="${t.k}">
+        <span class="thbar"><i style="width:9px"></i><i style="width:14px"></i><i style="width:8px"></i></span>
+        <span class="thpaper"><i class="a"></i><i></i><i style="width:74%"></i></span>
+      </span>
+      <span class="thname">${tr(t.n)}</span></button>`;
+  const hell=THEMES.filter(t=>!themeIsDark(t.k)),dunkel=THEMES.filter(t=>themeIsDark(t.k));
+  const block=(titel,liste,abstand)=>liste.length
+    ?`<div class="thsec ${abstand?"spaeter":""}">${titel}</div>
+      <div class="thgrid">${liste.map(karte).join("")}</div>`:"";
+  overlay(`<div class="modal wide"><h3>${tr("Farbschema")}</h3><div class="pad">
+    ${block(tr("Hell"),hell,false)}${block(tr("Dunkel"),dunkel,true)}</div>
+    <div class="thinfo" id="thInfo"></div>
     <div class="rowend"><button class="btn" id="tClose">${tr("Schließen")}</button></div></div>`);
-  $("#ovl").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
-    S.settings.theme=b.dataset.t;save();applyTheme();
-    $("#ovl").querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b))});
-  $("#tClose").onclick=closeOvl;
+  /* Läuft auch noch, nachdem der Dialog weg ist — #ovl bleibt als Element
+     bestehen, sein mouseleave feuert also weiter. Ohne diese Prüfung greift
+     es ins Leere. */
+  const info=k=>{const el=$("#thInfo");if(!el)return;
+    const t=THEMES.find(x=>x.k===k)||THEMES[0];
+    el.innerHTML=`<b>${tr(t.n)}</b> · ${tr(t.d)}`};
+  info(gewaehlt);
+  const zeige=k=>{document.documentElement.dataset.theme=k};
+  $("#ovl").querySelectorAll("[data-t]").forEach(b=>{
+    /* Überfahren zeigt das Schema sofort im ganzen Programm — ohne Klick,
+       ohne Speichern. Man sieht es, statt es sich vorstellen zu müssen. */
+    b.onmouseenter=()=>{zeige(b.dataset.t);info(b.dataset.t)};
+    b.onmouseleave=()=>{zeige(gewaehlt);info(gewaehlt)};
+    b.onfocus=b.onmouseenter;b.onblur=b.onmouseleave;
+    b.onclick=()=>{
+      gewaehlt=b.dataset.t;S.settings.theme=gewaehlt;save();applyTheme();info(gewaehlt);
+      $("#ovl").querySelectorAll("[data-t]").forEach(x=>x.classList.toggle("on",x===b))};
+  });
+  /* Sicherheitsnetz: verlässt der Zeiger den Dialog zwischen zwei Karten
+     hindurch, bleibt sonst die zuletzt überfahrene Vorschau stehen. */
+  $("#ovl").onmouseleave=()=>{zeige(gewaehlt);info(gewaehlt)};
+  $("#tClose").onclick=()=>{zeige(gewaehlt);closeOvl()};
 }
 function applyTheme(){document.documentElement.dataset.theme=S.settings.theme;
   document.documentElement.style.setProperty("--outline-w",(S.outlineWidth||240)+"px");
