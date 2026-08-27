@@ -11626,7 +11626,7 @@ function settings(){
      Der zweite Durchlauf findet nichts mehr zu ändern und hört auf. */
   if(hatDateien()&&doc()&&doc().file)(async()=>{
     const d=doc();const ok=await fileOk(await handleGet(d.id),false);
-    if(!!d.file.lose!==!ok)return;
+    if(!!d.file.lose===!ok)return;
     d.file.lose=!ok;save();drawStatus();
     if($("#sBackup"))settings();
   })();
