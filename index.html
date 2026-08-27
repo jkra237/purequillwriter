@@ -966,6 +966,37 @@ body.focus .outline{display:none}
 .setrow label{color:var(--ink-soft)}
 .setrow .ctl{width:210px;display:flex;gap:6px;align-items:center;justify-content:flex-end}
 .setrow .ctl select,.setrow .ctl input[type=number]{width:auto;flex:1}
+/* Der Speicherort ist kein „Beschriftung + ein Bedienelement"-Fall wie die
+   übrigen Zeilen: dort stehen ein Ort, eine Bestandszahl, eine Warnung und
+   eine Handlung. Rechtsbündig in eine .setrow gequetscht ergab das einen
+   Textklumpen. Deshalb ein eigener Block über die volle Breite, linksbündig
+   und mit echtem Knopf statt der Aufforderung, das Menü zu suchen. */
+.setblock{border-top:1px solid var(--rule);margin-top:6px;padding-top:13px}
+.setblock h4,.setsec{margin:0 0 9px;font-family:var(--mono);font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+/* Abschnitt innerhalb eines Reiters. Der erste braucht keinen Abstand nach
+   oben, die folgenden schon — sonst kleben sie an der Zeile darüber. */
+.setsec{margin-top:17px}
+.pad>.setsec:first-child{margin-top:0}
+/* Zwei Reiter: „Allgemein" und „Speichern". Der Speicherteil ist mit den
+   beiden Karten inzwischen fast so groß wie alles andere zusammen und wird
+   gezielt aufgesucht („wo liegt mein Text?") — der Rest ist eine Liste, die
+   man einmal durchsieht. Genau diese Trennung machen die Reiter sichtbar. */
+.settabs{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--rule)}
+.settab{padding:8px 13px;font-size:13px;color:var(--ink-soft);
+  border-bottom:2px solid transparent;margin-bottom:-1px}
+.settab:hover{color:var(--ink)}
+.settab.on{color:var(--stamp);border-bottom-color:var(--stamp);font-weight:600}
+.storecard{border:1px solid var(--rule);border-radius:var(--radius);
+  background:var(--chrome-2);padding:11px 13px}
+.storehead{display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.storehead b{font-size:13px;color:var(--ink)}
+.storeicon{flex:0 0 26px;height:26px;border-radius:var(--radius);display:flex;
+  align-items:center;justify-content:center;background:var(--paper);
+  border:1px solid var(--rule);color:var(--ink-soft)}
+.storecount{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.storenote{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:8px 0 0}
+.storeact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 .btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2);
   font-family:var(--ui)}
 .btn:hover{border-color:var(--ink-soft)}
@@ -1277,6 +1308,10 @@ const fromUnit=v=>unitOf()==="in"?Math.round((+v||0)*25.4):Math.round(+v||0);
 const unitAbbr=()=>unitOf()==="in"?"in":"mm";
 const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],["2",2]];
 const lhOf=d=>d.lh||S.settings.lh||1.62;
+/* Abstände für die Zwischenstände des Versionsverlaufs. Vorher ein nacktes
+   Zahlenfeld von 5 bis 600 Sekunden — 5 Sekunden ist sinnlos, 600 wäre eine
+   Falle. Eine kurze Liste sinnvoller Werte nimmt die Entscheidung ab. */
+const SNAPSHOTS=[["alle 30 Sekunden",30],["jede Minute",60],["alle 2 Minuten",120],["alle 5 Minuten",300]];
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
 const psOf=d=>d.ps||S.settings.ps||.82;
 /* Zitatstile in der Reihenfolge „Zitat 1/2/3". Der leere Schlüssel ist der
@@ -1532,9 +1567,7 @@ en:{
   "Seitenformat ändern":"Change page format",
   "Wörter":"words",
   "Zeichen":"characters",
-  "Nicht gesichert":"Not saved",
   "Gesichert ":"Saved ",
-  "Bereit":"Ready",
   "aus":"off",
   "an":"on",
   "Kommandopalette öffnen":"Open command palette",
@@ -1627,17 +1660,11 @@ en:{
   "Dokumente":"documents",
   "Glossareintrag":"glossary entry",
   "Glossareinträge":"glossary entries",
-  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"In this browser's storage, kept separately per address — not a file on disk. Clearing browser data deletes it.",
-  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Back up via <b>File &rarr; Create backup</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Turn on typewriter scrolling",
   "Schreibmaschinen-Scrollen ausschalten":"Turn off typewriter scrolling",
   "Schreibmaschinen-Scrollen an":"Typewriter scrolling on",
   "Oberfläche beim Schreiben ausblenden":"Hide interface while writing",
   "Oberfläche immer sichtbar lassen":"Keep interface always visible",
-  "Autosave ausschalten":"Turn off autosave",
-  "Autosave einschalten":"Turn on autosave",
-  "Autosave an":"Autosave on",
-  "Autosave aus":"Autosave off",
   "Alles als Datei sichern":"Save everything as file",
   "Gesichert":"Saved",
   "Geladen":"Loaded",
@@ -1668,7 +1695,6 @@ en:{
   "Nur Text":"Plain text",
   "Webseite":"Web page",
   "Word-Dokument":"Word document",
-  "Automatisch sichern":"Autosave",
   "Einstellungen&hellip;":"Settings&hellip;",
   "Alle Befehle":"All commands",
   "Seite":"Page",
@@ -1806,9 +1832,23 @@ en:{
   "wiederherstellen":"restore",
   "Noch keine gesicherten Stände.":"No saved versions yet.",
   "Standardschrift":"Default font",
-  "Autosave":"Autosave",
-  "Sek.":"sec",
-  "Sprache der Rechtschreibprüfung":"Spellcheck language",
+  "Zwischenstände":"Snapshots",
+  "Zwischenstand":"Snapshot",
+  "Zwischenstände an":"Snapshots on",
+  "Zwischenstände aus":"Snapshots off",
+  "Zwischenstände ausschalten":"Turn off snapshots",
+  "Zwischenstände einschalten":"Turn on snapshots",
+  "Zwischenstände: aus.":"Snapshots: off.",
+  "alle 30 Sekunden":"every 30 seconds",
+  "jede Minute":"every minute",
+  "alle 2 Minuten":"every 2 minutes",
+  "alle 5 Minuten":"every 5 minutes",
+  "Wird gesichert…":"Saving…",
+  "Alles gesichert":"All saved",
+  "Im Speicher dieses Browsers.":"In this browser's storage.",
+  "Dok.":"docs",
+  "Sicherung laden":"Load backup",
+  "Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.":"For the version history. Your text is saved continuously regardless.",
   "Deutsch":"German",
   "Englisch":"English",
   "Polnisch":"Polish",
@@ -1849,7 +1889,28 @@ en:{
   "tritt zurück":"fades away",
   "Speicherort":"Storage location",
   "Dieser Browser":"This browser",
-  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Backup via <b>File &rarr; Save everything as file</b>.",
+  "Datei auf der Festplatte":"File on disk",
+  "Datei öffnen":"Open file",
+  "In Datei speichern":"Save to file",
+  "An anderem Ort speichern":"Save to another place",
+  "In Datei gespeichert":"Saved to file",
+  "Verbinden":"Connect",
+  "Verbunden":"Connected",
+  "verbunden":"connected",
+  "nicht verbunden":"not connected",
+  "Zugriff abgelaufen":"access expired",
+  "Verbindung lösen":"Disconnect",
+  "Verbindung gelöst":"Disconnected",
+  "Der Zugriff wurde nicht erteilt.":"Access was not granted.",
+  "Dieser Browser kann keine Dateien öffnen.":"This browser cannot open files.",
+  "in diesem Browser nicht möglich":"not available in this browser",
+  "Datei getrennt:":"File disconnected:",
+  "Und in der Datei:":"And in the file:",
+  "Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.":"The working copy always lives here — kept separately per address, not as a file on disk. Clearing browser data loses it.",
+  "Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome and Edge can open and save documents as files. Here it stays with “Create backup”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"The browser reset access after the restart. Connect once and writing resumes.",
+  "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"This document is also written to the file on every save.",
+  "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Keep this document as a file as well. From then on every save writes to it too — including into a folder that Dropbox or OneDrive syncs.",
   "Warmes Naturweiß, Standard":"Warm natural white, standard",
   "Azur":"Azure",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Light system grey of modern Mac apps — reminiscent of Pages",
@@ -1874,7 +1935,9 @@ en:{
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Green CRT screen — reminiscent of Lotus 1-2-3 and early DOS editors",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beige office interface with teal — reminiscent of Lotus SmartSuite '97",
   "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Pure white with a clear blue accent, like modern cloud word processors",
-  "Sprache der Benutzeroberfläche":"Interface language",
+  "Benutzeroberfläche":"Interface",
+  "Allgemein":"General",
+  "Speichern":"Saving",
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
@@ -2134,9 +2197,7 @@ fr:{
   "Seitenformat ändern":"Modifier le format de page",
   "Wörter":"mots",
   "Zeichen":"caractères",
-  "Nicht gesichert":"Non enregistré",
   "Gesichert ":"Enregistré ",
-  "Bereit":"Prêt",
   "aus":"désactivé",
   "an":"activé",
   "Kommandopalette öffnen":"Ouvrir la palette de commandes",
@@ -2229,17 +2290,11 @@ fr:{
   "Dokumente":"documents",
   "Glossareintrag":"entrée de glossaire",
   "Glossareinträge":"entrées de glossaire",
-  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"Dans le stockage de ce navigateur, séparé par adresse — pas un fichier sur le disque. La suppression des données du navigateur efface tout.",
-  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Copie de sauvegarde via <b>Fichier &rarr; Créer une sauvegarde</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Activer le défilement machine à écrire",
   "Schreibmaschinen-Scrollen ausschalten":"Désactiver le défilement machine à écrire",
   "Schreibmaschinen-Scrollen an":"Défilement machine à écrire activé",
   "Oberfläche beim Schreiben ausblenden":"Masquer l'interface pendant l'écriture",
   "Oberfläche immer sichtbar lassen":"Toujours garder l'interface visible",
-  "Autosave ausschalten":"Désactiver l'Autosave",
-  "Autosave einschalten":"Activer l'Autosave",
-  "Autosave an":"Autosave activé",
-  "Autosave aus":"Autosave désactivé",
   "Alles als Datei sichern":"Tout enregistrer en fichier",
   "Gesichert":"Enregistré",
   "Geladen":"Chargé",
@@ -2270,7 +2325,6 @@ fr:{
   "Nur Text":"Texte brut",
   "Webseite":"Page web",
   "Word-Dokument":"Document Word",
-  "Automatisch sichern":"Enregistrement automatique",
   "Einstellungen&hellip;":"Paramètres&hellip;",
   "Alle Befehle":"Toutes les commandes",
   "Seite":"Page",
@@ -2408,9 +2462,23 @@ fr:{
   "wiederherstellen":"restaurer",
   "Noch keine gesicherten Stände.":"Pas encore de versions enregistrées.",
   "Standardschrift":"Police par défaut",
-  "Autosave":"Autosave",
-  "Sek.":"s",
-  "Sprache der Rechtschreibprüfung":"Langue de la vérification orthographique",
+  "Zwischenstände":"Points de restauration",
+  "Zwischenstand":"Point de restauration",
+  "Zwischenstände an":"Points de restauration activés",
+  "Zwischenstände aus":"Points de restauration désactivés",
+  "Zwischenstände ausschalten":"Désactiver les points de restauration",
+  "Zwischenstände einschalten":"Activer les points de restauration",
+  "Zwischenstände: aus.":"Points de restauration : désactivés.",
+  "alle 30 Sekunden":"toutes les 30 secondes",
+  "jede Minute":"chaque minute",
+  "alle 2 Minuten":"toutes les 2 minutes",
+  "alle 5 Minuten":"toutes les 5 minutes",
+  "Wird gesichert…":"Enregistrement…",
+  "Alles gesichert":"Tout est enregistré",
+  "Im Speicher dieses Browsers.":"Dans la mémoire de ce navigateur.",
+  "Dok.":"doc.",
+  "Sicherung laden":"Charger une sauvegarde",
+  "Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.":"Pour l'historique des versions. Votre texte est enregistré en continu indépendamment.",
   "Deutsch":"Allemand",
   "Englisch":"Anglais",
   "Polnisch":"Polonais",
@@ -2451,7 +2519,28 @@ fr:{
   "tritt zurück":"s'estompe",
   "Speicherort":"Emplacement de stockage",
   "Dieser Browser":"Ce navigateur",
-  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Copie de sauvegarde via <b>Fichier &rarr; Tout enregistrer en fichier</b>.",
+  "Datei auf der Festplatte":"Fichier sur le disque",
+  "Datei öffnen":"Ouvrir un fichier",
+  "In Datei speichern":"Enregistrer dans un fichier",
+  "An anderem Ort speichern":"Enregistrer ailleurs",
+  "In Datei gespeichert":"Enregistré dans le fichier",
+  "Verbinden":"Connecter",
+  "Verbunden":"Connecté",
+  "verbunden":"connecté",
+  "nicht verbunden":"non connecté",
+  "Zugriff abgelaufen":"accès expiré",
+  "Verbindung lösen":"Déconnecter",
+  "Verbindung gelöst":"Déconnecté",
+  "Der Zugriff wurde nicht erteilt.":"L'accès n'a pas été accordé.",
+  "Dieser Browser kann keine Dateien öffnen.":"Ce navigateur ne peut pas ouvrir de fichiers.",
+  "in diesem Browser nicht möglich":"impossible dans ce navigateur",
+  "Datei getrennt:":"Fichier déconnecté :",
+  "Und in der Datei:":"Et dans le fichier :",
+  "Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.":"L'état de travail se trouve toujours ici — séparément par adresse, pas sous forme de fichier sur le disque. Effacer les données du navigateur le supprime.",
+  "Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome et Edge peuvent ouvrir et enregistrer des documents en tant que fichiers. Ici, cela reste « Créer une sauvegarde ».",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"Le navigateur a réinitialisé l'accès après le redémarrage. Connectez-vous une fois et l'écriture reprend.",
+  "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Ce document est aussi écrit dans le fichier à chaque enregistrement.",
+  "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Conserver aussi ce document sous forme de fichier. Dès lors, chaque enregistrement y écrit également — y compris dans un dossier synchronisé par Dropbox ou OneDrive.",
   "Warmes Naturweiß, Standard":"Blanc naturel chaud, standard",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris système clair des applications Mac modernes — rappelle Pages",
@@ -2476,7 +2565,9 @@ fr:{
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Écran cathodique vert — rappelle Lotus 1-2-3 et les premiers éditeurs DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interface de bureau beige avec turquoise — rappelle Lotus SmartSuite '97",
   "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Blanc pur avec un accent bleu net, comme les traitements de texte en ligne modernes",
-  "Sprache der Benutzeroberfläche":"Langue de l'interface",
+  "Benutzeroberfläche":"Interface",
+  "Allgemein":"Général",
+  "Speichern":"Enregistrement",
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
@@ -2736,9 +2827,7 @@ es:{
   "Seitenformat ändern":"Cambiar formato de página",
   "Wörter":"palabras",
   "Zeichen":"caracteres",
-  "Nicht gesichert":"Sin guardar",
   "Gesichert ":"Guardado ",
-  "Bereit":"Listo",
   "aus":"desactivado",
   "an":"activado",
   "Kommandopalette öffnen":"Abrir paleta de comandos",
@@ -2831,17 +2920,11 @@ es:{
   "Dokumente":"documentos",
   "Glossareintrag":"entrada de glosario",
   "Glossareinträge":"entradas de glosario",
-  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"En el almacenamiento de este navegador, separado por dirección — no es un archivo en el disco. Al borrar los datos del navegador se pierde todo.",
-  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Copia de seguridad mediante <b>Archivo &rarr; Crear copia de seguridad</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Activar desplazamiento de máquina de escribir",
   "Schreibmaschinen-Scrollen ausschalten":"Desactivar desplazamiento de máquina de escribir",
   "Schreibmaschinen-Scrollen an":"Desplazamiento de máquina de escribir activado",
   "Oberfläche beim Schreiben ausblenden":"Ocultar interfaz al escribir",
   "Oberfläche immer sichtbar lassen":"Mantener la interfaz siempre visible",
-  "Autosave ausschalten":"Desactivar Autosave",
-  "Autosave einschalten":"Activar Autosave",
-  "Autosave an":"Autosave activado",
-  "Autosave aus":"Autosave desactivado",
   "Alles als Datei sichern":"Guardar todo como archivo",
   "Gesichert":"Guardado",
   "Geladen":"Cargado",
@@ -2872,7 +2955,6 @@ es:{
   "Nur Text":"Solo texto",
   "Webseite":"Página web",
   "Word-Dokument":"Documento Word",
-  "Automatisch sichern":"Guardado automático",
   "Einstellungen&hellip;":"Configuración&hellip;",
   "Alle Befehle":"Todos los comandos",
   "Seite":"Página",
@@ -3010,9 +3092,23 @@ es:{
   "wiederherstellen":"restaurar",
   "Noch keine gesicherten Stände.":"Aún no hay versiones guardadas.",
   "Standardschrift":"Fuente predeterminada",
-  "Autosave":"Autosave",
-  "Sek.":"s",
-  "Sprache der Rechtschreibprüfung":"Idioma de la revisión ortográfica",
+  "Zwischenstände":"Puntos de restauración",
+  "Zwischenstand":"Punto de restauración",
+  "Zwischenstände an":"Puntos de restauración activados",
+  "Zwischenstände aus":"Puntos de restauración desactivados",
+  "Zwischenstände ausschalten":"Desactivar puntos de restauración",
+  "Zwischenstände einschalten":"Activar puntos de restauración",
+  "Zwischenstände: aus.":"Puntos de restauración: desactivados.",
+  "alle 30 Sekunden":"cada 30 segundos",
+  "jede Minute":"cada minuto",
+  "alle 2 Minuten":"cada 2 minutos",
+  "alle 5 Minuten":"cada 5 minutos",
+  "Wird gesichert…":"Guardando…",
+  "Alles gesichert":"Todo guardado",
+  "Im Speicher dieses Browsers.":"En el almacenamiento de este navegador.",
+  "Dok.":"doc.",
+  "Sicherung laden":"Cargar copia de seguridad",
+  "Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.":"Para el historial de versiones. Tu texto se guarda continuamente de todos modos.",
   "Deutsch":"Alemán",
   "Englisch":"Inglés",
   "Polnisch":"Polaco",
@@ -3053,7 +3149,28 @@ es:{
   "tritt zurück":"se atenúa",
   "Speicherort":"Ubicación de almacenamiento",
   "Dieser Browser":"Este navegador",
-  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Copia de seguridad mediante <b>Archivo &rarr; Guardar todo como archivo</b>.",
+  "Datei auf der Festplatte":"Archivo en el disco",
+  "Datei öffnen":"Abrir archivo",
+  "In Datei speichern":"Guardar en archivo",
+  "An anderem Ort speichern":"Guardar en otro lugar",
+  "In Datei gespeichert":"Guardado en el archivo",
+  "Verbinden":"Conectar",
+  "Verbunden":"Conectado",
+  "verbunden":"conectado",
+  "nicht verbunden":"no conectado",
+  "Zugriff abgelaufen":"acceso caducado",
+  "Verbindung lösen":"Desconectar",
+  "Verbindung gelöst":"Desconectado",
+  "Der Zugriff wurde nicht erteilt.":"No se concedió el acceso.",
+  "Dieser Browser kann keine Dateien öffnen.":"Este navegador no puede abrir archivos.",
+  "in diesem Browser nicht möglich":"no disponible en este navegador",
+  "Datei getrennt:":"Archivo desconectado:",
+  "Und in der Datei:":"Y en el archivo:",
+  "Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.":"Aquí está siempre la copia de trabajo — separada por dirección, no como archivo en el disco. Al borrar los datos del navegador se pierde.",
+  "Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome y Edge pueden abrir y guardar documentos como archivos. Aquí queda en «Crear copia de seguridad».",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"El navegador restableció el acceso tras el reinicio. Conecta una vez y se sigue escribiendo.",
+  "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Este documento también se escribe en el archivo cada vez que se guarda.",
+  "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Guardar este documento también como archivo. A partir de entonces cada guardado escribe en él — también en una carpeta que Dropbox u OneDrive sincroniza.",
   "Warmes Naturweiß, Standard":"Blanco natural cálido, estándar",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris de sistema claro de las apps Mac modernas — recuerda a Pages",
@@ -3078,7 +3195,9 @@ es:{
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Pantalla verde de tubo — recuerda a Lotus 1-2-3 y los primeros editores DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interfaz de oficina beige con turquesa — recuerda a Lotus SmartSuite '97",
   "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Blanco puro con un acento azul nítido, como los procesadores de texto en la nube modernos",
-  "Sprache der Benutzeroberfläche":"Idioma de la interfaz",
+  "Benutzeroberfläche":"Interfaz",
+  "Allgemein":"General",
+  "Speichern":"Guardado",
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
@@ -3338,9 +3457,7 @@ pt:{
   "Seitenformat ändern":"Alterar formato de página",
   "Wörter":"palavras",
   "Zeichen":"caracteres",
-  "Nicht gesichert":"Não salvo",
   "Gesichert ":"Salvo ",
-  "Bereit":"Pronto",
   "aus":"desativado",
   "an":"ativado",
   "Kommandopalette öffnen":"Abrir paleta de comandos",
@@ -3433,17 +3550,11 @@ pt:{
   "Dokumente":"documentos",
   "Glossareintrag":"entrada de glossário",
   "Glossareinträge":"entradas de glossário",
-  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"No armazenamento deste navegador, separado por endereço — não é um arquivo no disco. Ao apagar os dados do navegador, tudo se perde.",
-  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Cópia de backup em <b>Arquivo &rarr; Criar backup</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Ativar rolagem de máquina de escrever",
   "Schreibmaschinen-Scrollen ausschalten":"Desativar rolagem de máquina de escrever",
   "Schreibmaschinen-Scrollen an":"Rolagem de máquina de escrever ativada",
   "Oberfläche beim Schreiben ausblenden":"Ocultar interface ao escrever",
   "Oberfläche immer sichtbar lassen":"Manter a interface sempre visível",
-  "Autosave ausschalten":"Desativar Autosave",
-  "Autosave einschalten":"Ativar Autosave",
-  "Autosave an":"Autosave ativado",
-  "Autosave aus":"Autosave desativado",
   "Alles als Datei sichern":"Salvar tudo como arquivo",
   "Gesichert":"Salvo",
   "Geladen":"Carregado",
@@ -3474,7 +3585,6 @@ pt:{
   "Nur Text":"Somente texto",
   "Webseite":"Página da web",
   "Word-Dokument":"Documento Word",
-  "Automatisch sichern":"Salvamento automático",
   "Einstellungen&hellip;":"Configurações&hellip;",
   "Alle Befehle":"Todos os comandos",
   "Seite":"Página",
@@ -3612,9 +3722,23 @@ pt:{
   "wiederherstellen":"restaurar",
   "Noch keine gesicherten Stände.":"Ainda não há versões salvas.",
   "Standardschrift":"Fonte padrão",
-  "Autosave":"Autosave",
-  "Sek.":"s",
-  "Sprache der Rechtschreibprüfung":"Idioma da verificação ortográfica",
+  "Zwischenstände":"Pontos de restauração",
+  "Zwischenstand":"Ponto de restauração",
+  "Zwischenstände an":"Pontos de restauração ativados",
+  "Zwischenstände aus":"Pontos de restauração desativados",
+  "Zwischenstände ausschalten":"Desativar pontos de restauração",
+  "Zwischenstände einschalten":"Ativar pontos de restauração",
+  "Zwischenstände: aus.":"Pontos de restauração: desativados.",
+  "alle 30 Sekunden":"a cada 30 segundos",
+  "jede Minute":"a cada minuto",
+  "alle 2 Minuten":"a cada 2 minutos",
+  "alle 5 Minuten":"a cada 5 minutos",
+  "Wird gesichert…":"Salvando…",
+  "Alles gesichert":"Tudo salvo",
+  "Im Speicher dieses Browsers.":"No armazenamento deste navegador.",
+  "Dok.":"doc.",
+  "Sicherung laden":"Carregar backup",
+  "Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.":"Para o histórico de versões. Seu texto é salvo continuamente de qualquer forma.",
   "Deutsch":"Alemão",
   "Englisch":"Inglês",
   "Polnisch":"Polonês",
@@ -3655,7 +3779,28 @@ pt:{
   "tritt zurück":"recua",
   "Speicherort":"Local de armazenamento",
   "Dieser Browser":"Este navegador",
-  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Cópia de backup em <b>Arquivo &rarr; Salvar tudo como arquivo</b>.",
+  "Datei auf der Festplatte":"Arquivo no disco",
+  "Datei öffnen":"Abrir arquivo",
+  "In Datei speichern":"Salvar em arquivo",
+  "An anderem Ort speichern":"Salvar em outro local",
+  "In Datei gespeichert":"Salvo no arquivo",
+  "Verbinden":"Conectar",
+  "Verbunden":"Conectado",
+  "verbunden":"conectado",
+  "nicht verbunden":"não conectado",
+  "Zugriff abgelaufen":"acesso expirado",
+  "Verbindung lösen":"Desconectar",
+  "Verbindung gelöst":"Desconectado",
+  "Der Zugriff wurde nicht erteilt.":"O acesso não foi concedido.",
+  "Dieser Browser kann keine Dateien öffnen.":"Este navegador não consegue abrir arquivos.",
+  "in diesem Browser nicht möglich":"não disponível neste navegador",
+  "Datei getrennt:":"Arquivo desconectado:",
+  "Und in der Datei:":"E no arquivo:",
+  "Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.":"A cópia de trabalho fica sempre aqui — separada por endereço, não como arquivo no disco. Apagar os dados do navegador a perde.",
+  "Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome e Edge podem abrir e salvar documentos como arquivos. Aqui fica em “Criar backup”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"O navegador redefiniu o acesso após reiniciar. Conecte uma vez e a gravação continua.",
+  "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Este documento também é gravado no arquivo a cada salvamento.",
+  "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Manter este documento também como arquivo. A partir daí, cada salvamento grava nele — inclusive numa pasta que o Dropbox ou o OneDrive sincroniza.",
   "Warmes Naturweiß, Standard":"Branco natural quente, padrão",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Cinza de sistema claro dos apps Mac modernos — lembra o Pages",
@@ -3680,7 +3825,9 @@ pt:{
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Tela CRT verde — lembra o Lotus 1-2-3 e os primeiros editores DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Interface de escritório bege com turquesa — lembra o Lotus SmartSuite '97",
   "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Branco puro com um toque de azul nítido, como os processadores de texto na nuvem modernos",
-  "Sprache der Benutzeroberfläche":"Idioma da interface",
+  "Benutzeroberfläche":"Interface",
+  "Allgemein":"Geral",
+  "Speichern":"Salvamento",
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
@@ -3940,9 +4087,7 @@ pl:{
   "Seitenformat ändern":"Zmień format strony",
   "Wörter":"słowa",
   "Zeichen":"znaki",
-  "Nicht gesichert":"Niezapisano",
   "Gesichert ":"Zapisano ",
-  "Bereit":"Gotowe",
   "aus":"wył.",
   "an":"wł.",
   "Kommandopalette öffnen":"Otwórz paletę poleceń",
@@ -4035,17 +4180,11 @@ pl:{
   "Dokumente":"dokumenty",
   "Glossareintrag":"wpis słowniczka",
   "Glossareinträge":"wpisy słowniczka",
-  "Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.":"W pamięci tej przeglądarki, oddzielnie dla każdego adresu — nie jest to plik na dysku. Usunięcie danych przeglądarki usuwa całą zawartość.",
-  "Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.":"Kopię zapasową utworzysz przez <b>Plik &rarr; Utwórz kopię zapasową</b>.",
   "Schreibmaschinen-Scrollen einschalten":"Włącz przewijanie jak w maszynie do pisania",
   "Schreibmaschinen-Scrollen ausschalten":"Wyłącz przewijanie jak w maszynie do pisania",
   "Schreibmaschinen-Scrollen an":"Przewijanie jak w maszynie do pisania: wł.",
   "Oberfläche beim Schreiben ausblenden":"Ukryj interfejs podczas pisania",
   "Oberfläche immer sichtbar lassen":"Zawsze pokazuj interfejs",
-  "Autosave ausschalten":"Wyłącz autozapis",
-  "Autosave einschalten":"Włącz autozapis",
-  "Autosave an":"Autozapis: wł.",
-  "Autosave aus":"Autozapis: wył.",
   "Alles als Datei sichern":"Zapisz wszystko jako plik",
   "Gesichert":"Zapisano",
   "Geladen":"Wczytano",
@@ -4076,7 +4215,6 @@ pl:{
   "Nur Text":"Sam tekst",
   "Webseite":"Strona internetowa",
   "Word-Dokument":"Dokument Word",
-  "Automatisch sichern":"Autozapis",
   "Einstellungen&hellip;":"Ustawienia&hellip;",
   "Alle Befehle":"Wszystkie polecenia",
   "Seite":"Strona",
@@ -4214,9 +4352,23 @@ pl:{
   "wiederherstellen":"przywróć",
   "Noch keine gesicherten Stände.":"Brak zapisanych wersji.",
   "Standardschrift":"Domyślna czcionka",
-  "Autosave":"Autozapis",
-  "Sek.":"sek.",
-  "Sprache der Rechtschreibprüfung":"Język sprawdzania pisowni",
+  "Zwischenstände":"Punkty przywracania",
+  "Zwischenstand":"Punkt przywracania",
+  "Zwischenstände an":"Punkty przywracania włączone",
+  "Zwischenstände aus":"Punkty przywracania wyłączone",
+  "Zwischenstände ausschalten":"Wyłącz punkty przywracania",
+  "Zwischenstände einschalten":"Włącz punkty przywracania",
+  "Zwischenstände: aus.":"Punkty przywracania: wyłączone.",
+  "alle 30 Sekunden":"co 30 sekund",
+  "jede Minute":"co minutę",
+  "alle 2 Minuten":"co 2 minuty",
+  "alle 5 Minuten":"co 5 minut",
+  "Wird gesichert…":"Zapisywanie…",
+  "Alles gesichert":"Wszystko zapisane",
+  "Im Speicher dieses Browsers.":"W pamięci tej przeglądarki.",
+  "Dok.":"dok.",
+  "Sicherung laden":"Wczytaj kopię zapasową",
+  "Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.":"Do historii wersji. Twój tekst i tak jest zapisywany na bieżąco.",
   "Deutsch":"Niemiecki",
   "Englisch":"Angielski",
   "Polnisch":"Polski",
@@ -4257,7 +4409,28 @@ pl:{
   "tritt zurück":"wycofuje się",
   "Speicherort":"Miejsce zapisu",
   "Dieser Browser":"Ta przeglądarka",
-  "Sicherungskopie über <b>Datei &rarr; Alles sichern als Datei</b>.":"Kopię zapasową utworzysz przez <b>Plik &rarr; Zapisz wszystko jako plik</b>.",
+  "Datei auf der Festplatte":"Plik na dysku",
+  "Datei öffnen":"Otwórz plik",
+  "In Datei speichern":"Zapisz do pliku",
+  "An anderem Ort speichern":"Zapisz w innym miejscu",
+  "In Datei gespeichert":"Zapisano do pliku",
+  "Verbinden":"Połącz",
+  "Verbunden":"Połączono",
+  "verbunden":"połączony",
+  "nicht verbunden":"niepołączony",
+  "Zugriff abgelaufen":"dostęp wygasł",
+  "Verbindung lösen":"Rozłącz",
+  "Verbindung gelöst":"Rozłączono",
+  "Der Zugriff wurde nicht erteilt.":"Nie udzielono dostępu.",
+  "Dieser Browser kann keine Dateien öffnen.":"Ta przeglądarka nie może otwierać plików.",
+  "in diesem Browser nicht möglich":"niedostępne w tej przeglądarce",
+  "Datei getrennt:":"Plik rozłączony:",
+  "Und in der Datei:":"Oraz w pliku:",
+  "Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.":"Tutaj zawsze znajduje się kopia robocza — oddzielnie dla każdego adresu, nie jako plik na dysku. Usunięcie danych przeglądarki ją kasuje.",
+  "Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome i Edge mogą otwierać i zapisywać dokumenty jako pliki. Tutaj pozostaje „Utwórz kopię zapasową”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"Przeglądarka zresetowała dostęp po ponownym uruchomieniu. Połącz raz, a zapis będzie kontynuowany.",
+  "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Ten dokument jest zapisywany także do pliku przy każdym zapisie.",
+  "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Zachowaj ten dokument także jako plik. Od tej pory każdy zapis trafia również tam — także do folderu synchronizowanego przez Dropbox lub OneDrive.",
   "Warmes Naturweiß, Standard":"Ciepła naturalna biel, standard",
   "Azur":"Lazur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Jasny systemowy szary nowoczesnych aplikacji Mac — przypomina Pages",
@@ -4282,7 +4455,9 @@ pl:{
   "Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren":"Zielony ekran kineskopowy — przypomina Lotus 1-2-3 i wczesne edytory DOS",
   "Beige Bürooberfläche mit Türkis — erinnert an Lotus SmartSuite '97":"Beżowy interfejs biurowy z turkusem — przypomina Lotus SmartSuite '97",
   "Reines Weiß mit klarem Blauakzent, wie moderne Cloud-Textverarbeitung":"Czysta biel z wyraźnym niebieskim akcentem, jak nowoczesne edytory w chmurze",
-  "Sprache der Benutzeroberfläche":"Język interfejsu",
+  "Benutzeroberfläche":"Interfejs",
+  "Allgemein":"Ogólne",
+  "Speichern":"Zapisywanie",
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
@@ -4555,6 +4730,16 @@ S.docs.forEach(d=>{if(!d.footnotes)d.footnotes=[]});
 S.docs.forEach(d=>{if(!d.tocHidden)d.tocHidden=[]});
 if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 if(S.settings&&!S.settings.unit)S.settings.unit="mm";
+/* Das Intervall war früher frei eintippbar (5–600 s) und ist jetzt eine feste
+   Auswahl — ein alter Zwischenwert wie 45 s hätte im Feld sonst gar keinen
+   Eintrag getroffen und beim Öffnen still auf den ersten gesprungen. Deshalb
+   einmalig auf den nächstgelegenen der angebotenen Werte runden. */
+if(S.settings&&!S.intervallAngeglichen){
+  const erlaubt=[30,60,120,300];
+  const i=+S.settings.interval||30;
+  S.settings.interval=erlaubt.reduce((a,b)=>Math.abs(b-i)<Math.abs(a-i)?b:a);
+  S.intervallAngeglichen=true;
+}
 if(!S.customFormats)S.customFormats=[];
 if(S.outlineOpen===undefined)S.outlineOpen=false;
 if(!S.pageNumPos)S.pageNumPos="right";
@@ -4883,7 +5068,7 @@ function drawWrite(){
   ed.style.setProperty("--ps",psOf(d)+"em");
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
-  ed.addEventListener("input",()=>{dirty=true;setTyping();markEmpty();
+  ed.addEventListener("input",()=>{dirty=true;queueSave();setTyping();markEmpty();
     drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
   ed.addEventListener("keydown",e=>{
     if(slashOn){
@@ -5022,7 +5207,9 @@ function drawWrite(){
      binden ist billig und deckt beide Fälle ab, ohne das bestehende
      Bildlauf-Verhalten (Seitenflagge, Kopf-/Fußzeilen-Leiste) anzutasten. */
   $("#pane").addEventListener("scroll",()=>updateOutlineActive());
-  ed.addEventListener("blur",()=>{flush();if(S.settings.autosave)commit()});
+  /* Beim Verlassen der Schreibfläche sofort sichern, nicht erst nach der
+     Wartezeit — und ohne Rücksicht auf die Zwischenstand-Einstellung. */
+  ed.addEventListener("blur",()=>{clearTimeout(saveTimer);flush();save();merkeGesichert()});
   /* Kopf-/Fußzeile: Hinweis beim Überfahren, Doppelklick öffnet sie */
   $("#sheet").addEventListener("mousemove",e=>hfHintAt(e.clientY));
   $("#sheet").addEventListener("mouseleave",()=>{const h=$("#hfhint");if(h)h.classList.remove("on")});
@@ -5533,9 +5720,10 @@ function openNote(id,fokus){
     </div>`;
   const ed=$("#nEdit");
   ed.innerHTML=noteBody(n)||"<p><br></p>";
-  ed.addEventListener("input",()=>{n.html=ed.innerHTML;dirty=true;drawStatus()});
-  ed.addEventListener("blur",()=>{if(S.settings.autosave)commit();drawNotes()});
-  $("#nTitle").addEventListener("input",e=>{n.title=e.target.value;dirty=true});
+  /* Notizen werden genauso bedingungslos gesichert wie der Haupttext */
+  ed.addEventListener("input",()=>{n.html=ed.innerHTML;dirty=true;queueSave();drawStatus()});
+  ed.addEventListener("blur",()=>{clearTimeout(saveTimer);flush();save();merkeGesichert();drawNotes()});
+  $("#nTitle").addEventListener("input",e=>{n.title=e.target.value;dirty=true;queueSave()});
   $("#nTitle").addEventListener("blur",()=>{commit();drawNotes()});
   $("#nClose").onclick=closeNote;
   $("#nMax").onclick=()=>{const imTitel=document.activeElement===$("#nTitle");
@@ -5881,8 +6069,9 @@ function drawStatus(){
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
     <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki")}</span>
     <span class="grow"></span>
-    <span><span class="dot ${dirty?"dirty":""}"></span>${dirty?tr("Nicht gesichert"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Bereit"))}</span>
-    <span>${S.settings.autosave?"Autosave "+S.settings.interval+"s":"Autosave "+tr("aus")}</span>
+    <span title="${esc(saveHint())}">
+      <span class="dot ${dirty?"dirty":""}"></span>${
+      dirty?tr("Wird gesichert…"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Alles gesichert"))}</span>
     ${S.mode==="write"?`<span class="zoomctl" id="zoomctl">
       <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
       <button id="zVal" title="${tr("Zoomstufe wählen")}">${Math.round(S.zoom*100)} %</button>
@@ -5940,14 +6129,56 @@ function goalReset(){
   save();drawStatus();
 }
 
-/* ================= Sichern + Verlauf ================= */
+/* ================= Sichern + Verlauf =================
+   Zwei Dinge, die früher an einem Schalter hingen und deshalb verwechselbar
+   waren:
+   1. Der Text sichern. Passiert jetzt bedingungslos und kurz nach dem Tippen
+      (queueSave). Kein Schalter, keine Einstellung — an einem Schreibprogramm
+      darf Text nicht deshalb verloren gehen, weil jemand ein Häkchen falsch
+      verstanden hat. Vorher wurde reines Tippen erst festgeschrieben, wenn
+      zufällig eine andere Aktion dazwischenkam oder das Fenster normal zuging;
+      ein Absturz kostete die Sitzung.
+   2. Ein Zwischenstand für den Versionsverlauf. Das ist das, was commit()
+      zusätzlich tut, und nur das steuert die Einstellung noch. */
+/* Erklärt die Anzeige in der Statusleiste beim Überfahren: wo der Text liegt
+   und wie oft zusätzlich ein Zwischenstand entsteht. Steht bewusst im
+   Hilfetext statt als zweite Zelle daneben — es ist eine Antwort auf eine
+   Frage, die man selten stellt, und nahm vorher dauerhaft Platz weg. */
+function saveHint(){
+  const d=doc(),f=d&&d.file;
+  let wo=tr("Im Speicher dieses Browsers.");
+  if(f)wo+=" "+(f.lose?tr("Datei getrennt:"):tr("Und in der Datei:"))+" "+f.name+".";
+  if(!S.settings.autosave)return wo+" "+tr("Zwischenstände: aus.");
+  /* Dieselbe Beschriftung wie in der Auswahlliste, statt aus Zahl und
+     Abkürzung einen Satz zusammenzusetzen — „alle 1 Min." wäre holpriges
+     Deutsch, und jede Sprache kürzt Einheiten anders ab. */
+  const t=SNAPSHOTS.find(([,v])=>v===S.settings.interval)||SNAPSHOTS[1];
+  return wo+" "+tr("Zwischenstand")+": "+tr(t[0])+".";
+}
+function merkeGesichert(){
+  dirty=false;
+  lastSaved=new Date().toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
+  /* Ist eine Datei verbunden, wird sie mitgeschrieben — der Browserspeicher
+     ist zu diesem Zeitpunkt schon geschrieben und bleibt die Zusage. */
+  queueFileWrite();
+  drawStatus();
+}
+let saveTimer=null;
+/* Nach dem letzten Tastendruck kurz warten, statt bei jedem Zeichen zu
+   schreiben — localStorage ist synchron, das würde beim Tippen bremsen. */
+function queueSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{flush();save();merkeGesichert()},1200);
+}
 function commit(){
+  clearTimeout(saveTimer);
   flush();const d=doc();
   const last=d.history[d.history.length-1];
   if(!last||last.html!==d.html){d.history.push({ts:Date.now(),html:d.html});if(d.history.length>12)d.history.shift()}
-  save();dirty=false;lastSaved=new Date().toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});drawStatus();
+  save();merkeGesichert();
 }
 let timer=null;
+/* Nur noch die Zwischenstände; gesichert wird unabhängig davon. */
 function resetTimer(){clearInterval(timer);
   if(S.settings.autosave)timer=setInterval(()=>{if(dirty)commit()},S.settings.interval*1000)}
 
@@ -6020,10 +6251,12 @@ function exportCsv(){
 function exportGlossJson(){
   const gid=S.mode==="gloss"?curGView():doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
-  /* Als reguläres Bündel, damit die Datei auch über „Datei laden“ hereinkommt */
+  /* Als reguläres Bündel, damit die Datei über „Sicherung laden“ und über den
+     Glossar-Import wieder hereinkommt. Über „Dokument laden“ ausdrücklich
+     nicht: dort stehen Fremdformate wie docx und odt, keine eigenen Bündel. */
   const b={pqw:PQW,kind:"glossary",saved:new Date().toISOString(),
     glossaries:coll?[coll]:[],glossary:S.glossary.filter(g=>g.gid===gid)};
-  download(safeName(tr(coll?coll.name:"Glossar"))+".json",JSON.stringify(b,null,1),"application/json");
+  download(safeName(tr(coll?coll.name:"Glossar"))+PQWEXT,JSON.stringify(b,null,1),"application/json");
   toast(tr("Gesichert"));
 }
 /* ---- Glossar importieren ----
@@ -6103,7 +6336,7 @@ function glossIO(){
   $("#ioPick").onclick=()=>{
     const ziel=(document.querySelector('input[name="ioZiel"]:checked')||{}).value||"hier";
     const i=document.createElement("input");i.type="file";
-    i.accept=".csv,.tsv,.txt,.json,text/csv,application/json";
+    i.accept=".csv,.tsv,.txt,"+PQWLESEN.join(",")+",text/csv,application/json";
     i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();
       r.onload=()=>{
         const raw=String(r.result||"");
@@ -6253,9 +6486,9 @@ function commandList(){
   add("Einstellungen",S.settings.dimUi?"Oberfläche immer sichtbar lassen":"Oberfläche beim Schreiben ausblenden","",
     ()=>{S.settings.dimUi=!S.settings.dimUi;save();
       if(!S.settings.dimUi)document.body.classList.remove("typing")});
-  add("Einstellungen",S.settings.autosave?"Autosave ausschalten":"Autosave einschalten","",()=>{
+  add("Einstellungen",S.settings.autosave?"Zwischenstände ausschalten":"Zwischenstände einschalten","",()=>{
     S.settings.autosave=!S.settings.autosave;save();resetTimer();drawStatus();
-    toast(tr(S.settings.autosave?"Autosave an":"Autosave aus"))});
+    toast(tr(S.settings.autosave?"Zwischenstände an":"Zwischenstände aus"))});
   add("Dokument","Dieses Dokument mit Notizen sichern","",()=>saveBundle("doc"));
   add("Einstellungen","Nur Notizen und Glossar sichern","",()=>saveBundle("notes"));
   add("Einstellungen","Alles sichern — Vollsicherung","",()=>saveBundle("all"));
@@ -7360,6 +7593,14 @@ async function zipDokument(name,buf){
    Sicherungen sind im Gegensatz zu Exporten wieder einlesbar. Eine Vollsicherung
    ersetzt den Bestand, Teilsicherungen werden hinzugefügt. */
 const PQW=1;
+/* Dokument, Notizen, Glossar und Vollsicherung sind alle dasselbe Bündelformat
+   — nur „kind" unterscheidet sie. Sie tragen deshalb auch dieselbe Endung.
+   Vorher schrieb die Dateiablage .pqw und alles andere .json, obwohl der
+   Inhalt Zeichen für Zeichen gleich aufgebaut ist; eine so gespeicherte Datei
+   ließ sich dann über „Sicherung laden" nicht einmal auswählen.
+   Gelesen wird weiterhin auch .json — frühere Sicherungen heißen so. */
+const PQWEXT=".pqw";
+const PQWLESEN=[".pqw",".json"];
 const safeName=s=>String(s||"").replace(/[\\/:*?"<>|\n]/g,"-").trim().slice(0,60)||"PureQuill";
 function notesOfDoc(d){
   const t=document.createElement("div");t.innerHTML=d.html||"";
@@ -7373,19 +7614,122 @@ function saveBundle(kind){
   if(kind==="doc"){
     const d=doc();
     b={pqw:PQW,kind,saved:new Date().toISOString(),docs:[d],notes:notesOfDoc(d)};
-    name=safeName(tr(d.title))+" + "+tr("Notizen")+" "+stamp+".json";
+    name=safeName(tr(d.title))+" + "+tr("Notizen")+" "+stamp+PQWEXT;
   }else if(kind==="notes"){
     b={pqw:PQW,kind,saved:new Date().toISOString(),notes:S.notes,glossary:S.glossary,glossaries:S.glossaries};
-    name=tr("Notizen und Glossar")+" "+stamp+".json";
+    name=tr("Notizen und Glossar")+" "+stamp+PQWEXT;
   }else{
     b=Object.assign({pqw:PQW,kind:"all",saved:new Date().toISOString()},JSON.parse(JSON.stringify(S)));
-    name="PureQuill "+tr("Vollsicherung")+" "+stamp+".json";
+    name="PureQuill "+tr("Vollsicherung")+" "+stamp+PQWEXT;
   }
   download(name,JSON.stringify(b,null,1),"application/json");
   toast(tr("Gesichert"));
 }
+/* ---- Echte Dateien auf der Festplatte ----
+   Über die File System Access API. Der Browserspeicher bleibt dabei immer der
+   Arbeitsstand — die Datei ist ein Spiegel, der bei jedem Sichern mitgeschrieben
+   wird. Umgekehrt wäre es fahrlässig: verweigert der Browser den Zugriff, wäre
+   der Text sonst nirgends.
+   Firefox und Safari können das nicht; dort bleibt es beim Herunterladen, das
+   es ohnehin gibt. Deshalb überall erst fragen, nie voraussetzen. */
+const hatDateien=()=>typeof window.showSaveFilePicker==="function";
+/* Ein Dateizeiger ist nicht in Text umwandelbar und kann deshalb nicht in
+   localStorage neben dem übrigen Bestand liegen — dafür ein eigener, winziger
+   IndexedDB-Speicher. In S steht nur der Name, damit die Oberfläche ihn ohne
+   Warten anzeigen kann. */
+const FSDB="pqw.files";
+function idb(){return new Promise((ok,fail)=>{
+  const r=indexedDB.open(FSDB,1);
+  r.onupgradeneeded=()=>r.result.createObjectStore("handles");
+  r.onsuccess=()=>ok(r.result);r.onerror=()=>fail(r.error);
+})}
+async function handleSet(id,h){const db=await idb();return new Promise((ok,fail)=>{
+  const t=db.transaction("handles","readwrite");t.objectStore("handles").put(h,id);
+  t.oncomplete=()=>ok();t.onerror=()=>fail(t.error)})}
+async function handleGet(id){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("handles","readonly");const q=t.objectStore("handles").get(id);
+  q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}}
+async function handleDel(id){try{const db=await idb();await new Promise(ok=>{
+  const t=db.transaction("handles","readwrite");t.objectStore("handles").delete(id);
+  t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+/* fragen=false prüft nur nach; fragen=true darf den Browser fragen und ist
+   deshalb ausschließlich direkt aus einem Klick heraus erlaubt — ungefragt
+   aufpoppende Berechtigungsfragen sind genau das, was misstrauisch macht. */
+async function fileOk(h,fragen){
+  if(!h||!h.queryPermission)return false;
+  const o={mode:"readwrite"};
+  try{
+    if(await h.queryPermission(o)==="granted")return true;
+    if(!fragen)return false;
+    return await h.requestPermission(o)==="granted";
+  }catch(e){return false}
+}
+function docBundle(d){
+  return {pqw:PQW,kind:"doc",saved:new Date().toISOString(),docs:[d],notes:notesOfDoc(d)};
+}
+async function fileWrite(d,h){
+  const w=await h.createWritable();
+  await w.write(JSON.stringify(docBundle(d),null,1));
+  await w.close();
+}
+/* Beim Sichern mitschreiben. Absichtlich ohne Nachfrage: ist der Zugriff
+   abgelaufen, wird die Datei still als getrennt vermerkt und die Oberfläche
+   bietet „Verbinden" an, statt mitten im Schreiben einen Dialog aufzuwerfen. */
+let fileTimer=null;
+function queueFileWrite(){
+  const d=doc();if(!d||!d.file||!hatDateien())return;
+  clearTimeout(fileTimer);
+  fileTimer=setTimeout(async()=>{
+    const h=await handleGet(d.id);
+    if(!await fileOk(h,false)){d.file.lose=true;save();drawStatus();return}
+    try{await fileWrite(d,h);d.file.lose=false;d.file.at=Date.now();save();drawStatus()}
+    catch(e){d.file.lose=true;save();drawStatus()}
+  },900);
+}
+async function fileSaveAs(){
+  if(!hatDateien()){toast(tr("Dieser Browser kann keine Dateien öffnen."));return}
+  flush();const d=doc();
+  try{
+    const h=await showSaveFilePicker({suggestedName:safeName(tr(d.title))+".pqw",
+      types:[{description:"PureQuill",accept:{"application/json":PQWLESEN}}]});
+    await fileWrite(d,h);
+    await handleSet(d.id,h);
+    d.file={name:h.name,lose:false,at:Date.now()};
+    save();drawStatus();toast(tr("In Datei gespeichert"));
+  }catch(e){/* Abbruch im Dateidialog ist kein Fehler */}
+}
+async function fileOpen(){
+  if(!hatDateien()){toast(tr("Dieser Browser kann keine Dateien öffnen."));return}
+  try{
+    const [h]=await showOpenFilePicker({types:[{description:"PureQuill",
+      accept:{"application/json":PQWLESEN}}]});
+    const txt=await (await h.getFile()).text();
+    let b;try{b=JSON.parse(txt)}catch(e){toast(tr("Datei nicht lesbar"));return}
+    const vorher=new Set(S.docs.map(x=>x.id));
+    applyBundle(b);
+    /* applyBundle vergibt bei Namensgleichheit eine neue Kennung — das gerade
+       hinzugekommene Dokument ist das aktive. */
+    const d=doc();
+    if(d&&!vorher.has(d.id)){
+      await handleSet(d.id,h);
+      d.file={name:h.name,lose:false,at:Date.now()};
+      save();drawStatus();
+    }
+  }catch(e){}
+}
+async function fileReconnect(){
+  const d=doc();if(!d||!d.file)return;
+  const h=await handleGet(d.id);
+  if(await fileOk(h,true)){d.file.lose=false;save();drawStatus();toast(tr("Verbunden"));settings()}
+  else toast(tr("Der Zugriff wurde nicht erteilt."));
+}
+async function fileDetach(){
+  const d=doc();if(!d)return;
+  await handleDel(d.id);delete d.file;save();drawStatus();toast(tr("Verbindung gelöst"));settings();
+}
 function importJson(){
-  const i=document.createElement("input");i.type="file";i.accept=".json,application/json";
+  const i=document.createElement("input");i.type="file";
+  i.accept=PQWLESEN.join(",")+",application/json";
   i.onchange=()=>{const f=i.files[0];if(!f)return;const r=new FileReader();
     r.onload=()=>{let b;
       try{b=JSON.parse(r.result)}catch(e){toast(tr("Datei nicht lesbar"));return}
@@ -7474,6 +7818,11 @@ function fileMenu(){
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
+    ${hatDateien()?`
+    <button class="mi" data-act="fileopen"><span class="chk"></span>${tr("Datei öffnen")}&hellip;</button>
+    <button class="mi" data-act="fileas"><span class="chk">${doc().file?"&#10003;":""}</span>${
+      doc().file?tr("An anderem Ort speichern"):tr("In Datei speichern")}&hellip;<span class="k">${
+      doc().file?esc(doc().file.name):""}</span></button>`:""}
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${K} P</span></button>
     <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
     <div class="msep"></div>
@@ -7488,8 +7837,8 @@ function fileMenu(){
     <button class="mi" data-act="open"><span class="chk"></span>${tr("Sicherung laden&hellip;")}<span class="k">.json</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="save"><span class="chk"></span>${tr("Jetzt sichern")}<span class="k">Alt ⇧ S</span></button>
-    <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch sichern")}
-      <span class="k">${s.autosave?s.interval+" s":tr("aus")}</span></button>
+    <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Zwischenstände")}
+      <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}</span></button>
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
     <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>`;
   $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
@@ -7531,6 +7880,8 @@ function runFileAct(a){
   if(a==="rename")renameTab(S.active);
   if(a==="closedoc")closeDoc(S.active);
   if(a==="fmt")changeFormat();
+  if(a==="fileopen")fileOpen();
+  if(a==="fileas")fileSaveAs();
   if(a==="open")importJson();
   if(a==="save"){commit();toast(tr("Gesichert"))}
   if(a==="bdoc")saveBundle("doc");
@@ -11150,49 +11501,75 @@ function history(){
   $("#ovl").querySelectorAll("[data-rest]").forEach(b=>b.onclick=()=>{
     doc().html=doc().history[+b.dataset.rest].html;save();closeOvl();render();toast(tr("Stand wiederhergestellt"))});
 }
+/* Welcher Reiter zuletzt offen war. Steht außerhalb, weil settings() sich beim
+   Sprachwechsel selbst neu aufruft — sonst spränge man dabei zurück. */
+let setTab="allg";
 function settings(){
   const s=S.settings;
-  overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3><div class="pad">
-    <div class="setrow"><label>${tr("Sprache der Benutzeroberfläche")}</label><div class="ctl">
-      <select id="sUiLang">${UI_LANGS.map(([v,n])=>
-        `<option value="${v}" ${s.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></div></div>
-    <div class="setrow"><label>${tr("Standardschrift")}</label><div class="ctl">
-      <select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
-      <select id="sSize" style="flex:0 0 62px">${SIZES.map(x=>`<option ${s.size==x?"selected":""}>${x}</option>`).join("")}</select></div></div>
-    <div class="setrow"><label>${tr("Maßsystem")}</label><div class="ctl">
-      <select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
-        <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select></div></div>
-    <div class="setrow"><label>${tr("Autosave")}</label><div class="ctl">
-      <input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
-      <input type="number" id="sInt" value="${s.interval}" min="5" max="600" style="flex:0 0 74px"><span style="color:var(--ink-faint)">${tr("Sek.")}</span></div></div>
-    <div class="setrow"><label>${tr("Sprache der Rechtschreibprüfung")}</label><div class="ctl">
-      <select id="sLang">${SPELL_LANGS.map(([v,n])=>`<option value="${v}" ${s.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select></div></div>
-    <div class="setrow"><label>${tr("Schreibmaschinen-Scrollen")}</label><div class="ctl">
-      <input type="checkbox" id="sTw" ${s.typewriter!==false?"checked":""} style="width:auto">
-      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("aktive Zeile bleibt mittig")}</span></div></div>
-    <div class="setrow"><label>${tr("Oberfläche beim Schreiben")}</label><div class="ctl">
-      <input type="checkbox" id="sDim" ${s.dimUi?"checked":""} style="width:auto">
-      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("tritt zurück")}</span></div></div>
-    <div class="setrow"><label>${tr("Abbildungsverzeichnis")}</label><div class="ctl">
-      <input type="checkbox" id="sTof" ${s.tofEnabled?"checked":""} style="width:auto">
-      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${tr("als Einfügeoption anbieten")}</span></div></div>
-    <div class="setrow"><label>${tr("Farbschema")}</label><div class="ctl">
-      <button class="btn" id="sThemeBtn">${tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button></div></div>
-    <div class="setrow" style="align-items:flex-start"><label>${tr("Speicherort")}</label><div class="ctl" style="display:block;text-align:right">
-      <div style="font-size:12px;color:var(--ink)">${tr("Dieser Browser")}</div>
-      <div style="color:var(--ink-faint);font-size:12px;line-height:1.45;margin-top:3px">
-        ${PL(`${S.docs.length} Dokument${S.docs.length>1?"e":""}, ${S.notes.length} Notizen, ${S.glossary.length} Glossareinträge.`,
-          `${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} glossary entries.`,
-          `${S.docs.length} document${S.docs.length>1?"s":""}, ${S.notes.length} notes, ${S.glossary.length} entrées de glossaire.`,
-          `${S.docs.length} documento${S.docs.length>1?"s":""}, ${S.notes.length} notas, ${S.glossary.length} entradas de glosario.`,
-          `${S.docs.length} documento${S.docs.length>1?"s":""}, ${S.notes.length} notas, ${S.glossary.length} entradas de glossário.`,
-          `${S.docs.length} dokument${S.docs.length>1?"y":""}, ${S.notes.length} notatek, ${S.glossary.length} wpisów w słowniczku.`)}<br>
-        ${tr("Im Speicher dieses Browsers, getrennt nach Adresse — keine Datei auf der Festplatte. Beim Löschen der Browserdaten geht der Bestand verloren.")}<br>
-        ${tr("Sicherungskopie über <b>Datei &rarr; Sicherung erstellen</b>.")}</div></div></div>
-    </div><div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
-  const app=()=>{s.font=$("#sFont").value;s.size=+$("#sSize").value;s.unit=$("#sUnit").value;s.autosave=$("#sAuto").checked;
-    s.interval=Math.max(5,+$("#sInt").value||30);s.lang=$("#sLang").value;
-    const uiNeu=$("#sUiLang").value,langChanged=s.uiLang!==uiNeu;s.uiLang=uiNeu;
+  const reiter=[["allg","Allgemein"],["save","Speichern"]];
+  const zeile=(titel,inhalt)=>`<div class="setrow"><label>${titel}</label><div class="ctl">${inhalt}</div></div>`;
+  const haken=(id,an,text)=>`<input type="checkbox" id="${id}" ${an?"checked":""} style="width:auto">
+      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${text}</span>`;
+  const allg=`
+    <div class="setsec">${tr("Sprache")}</div>
+    ${zeile(tr("Benutzeroberfläche"),`<select id="sUiLang">${UI_LANGS.map(([v,n])=>
+      `<option value="${v}" ${s.uiLang===v?"selected":""}>${n}</option>`).join("")}</select>`)}
+    ${zeile(tr("Rechtschreibprüfung"),`<select id="sLang">${SPELL_LANGS.map(([v,n])=>
+      `<option value="${v}" ${s.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select>`)}
+    <div class="setsec">${tr("Darstellung")}</div>
+    ${zeile(tr("Farbschema"),`<button class="btn" id="sThemeBtn">${
+      tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button>`)}
+    <div class="setsec">${tr("Schreiben")}</div>
+    ${zeile(tr("Schreibmaschinen-Scrollen"),haken("sTw",s.typewriter!==false,tr("aktive Zeile bleibt mittig")))}
+    ${zeile(tr("Oberfläche beim Schreiben"),haken("sDim",s.dimUi,tr("tritt zurück")))}
+    <div class="setsec">${tr("Dokument")}</div>
+    ${zeile(tr("Standardschrift"),
+      `<select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
+       <select id="sSize" style="flex:0 0 62px">${SIZES.map(x=>`<option ${s.size==x?"selected":""}>${x}</option>`).join("")}</select>`)}
+    ${zeile(tr("Maßsystem"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
+      <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
+    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("als Einfügeoption anbieten")))}`;
+  const spei=`
+    <div class="setsec">${tr("Zwischenstände")}</div>
+    ${zeile(tr("Anlegen"),`<input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
+      <select id="sInt" ${s.autosave?"":"disabled"}>${SNAPSHOTS.map(([lab,v])=>
+        `<option value="${v}" ${s.interval==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
+    <div class="setrow" style="border-bottom:none;padding-top:2px">
+      <label style="font-size:12px;color:var(--ink-faint);line-height:1.45">
+        ${tr("Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.")}</label></div>
+    <div class="setsec">${tr("Speicherort")}</div>
+      <div class="storecard">
+        <div class="storehead">
+          <span class="storeicon">${ICO('<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 10h16"/><circle cx="7.5" cy="7.6" r=".6"/>')}</span>
+          <span style="min-width:0">
+            <b>${tr("Dieser Browser")}</b><br>
+            <span class="storecount">${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")}</span>
+          </span>
+        </div>
+        <p class="storenote">${tr("Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.")}</p>
+        <div class="storeact">
+          <button class="btn" id="sBackup">${tr("Sicherung erstellen")}&hellip;</button>
+          <button class="btn" id="sRestore">${tr("Sicherung laden")}&hellip;</button>
+        </div>
+      </div>
+      ${dateiKarte()}`;
+  overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3>
+    <div class="settabs">${reiter.map(([k,n])=>
+      `<button class="settab ${setTab===k?"on":""}" data-tab="${k}">${tr(n)}</button>`).join("")}</div>
+    <div class="pad">${setTab==="save"?spei:allg}</div>
+    <div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
+  /* Je Reiter ist nur ein Teil der Felder im Dokument — deshalb überall erst
+     nachsehen, ob es das Feld gerade gibt, statt es vorauszusetzen. */
+  const v=(id,rueck)=>{const e=$("#"+id);
+    return e?(e.type==="checkbox"?e.checked:e.value):rueck};
+  const app=()=>{
+    s.font=v("sFont",s.font);s.size=+v("sSize",s.size);s.unit=v("sUnit",s.unit);
+    s.autosave=v("sAuto",s.autosave);
+    s.interval=+v("sInt",s.interval)||60;s.lang=v("sLang",s.lang);
+    /* Ohne Zwischenstände ist der Abstand gegenstandslos — das Feld wird grau,
+       statt einen Wert anzubieten, der nichts bewirkt. */
+    if($("#sInt"))$("#sInt").disabled=!s.autosave;
+    const uiNeu=v("sUiLang",s.uiLang),langChanged=s.uiLang!==uiNeu;s.uiLang=uiNeu;
     /* Die Oberflächensprache umzustellen zieht die Prüfsprache mit — sonst
        schlüge die Rechtschreibprüfung weiter die alte vor. Wer nur das
        Sprachfeld darunter ändert, behält seine Wahl. Nur wenn es für die neue
@@ -11200,12 +11577,36 @@ function settings(){
        (noch) nicht, dort bliebe sonst die Prüfsprache auf einem Code stehen,
        den dict/ gar nicht bedient. */
     if(langChanged&&hasSpellDict(uiNeu))s.lang=uiNeu;
-    s.typewriter=$("#sTw").checked;s.dimUi=$("#sDim").checked;s.tofEnabled=$("#sTof").checked;
+    s.typewriter=v("sTw",s.typewriter);s.dimUi=v("sDim",s.dimUi);s.tofEnabled=v("sTof",s.tofEnabled);
     if(!s.dimUi)document.body.classList.remove("typing");
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof"].forEach(id=>$("#"+id).onchange=app);
-  $("#sThemeBtn").onclick=themeDialog;
+  ["sFont","sSize","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof"]
+    .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
+  $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
+    setTab=b.dataset.tab;settings()});
+  const anTh=$("#sThemeBtn");if(anTh)anTh.onclick=themeDialog;
+  /* Die Sicherung war vorher nur als Satz beschrieben („über Datei → …"). Ein
+     Knopf an der Stelle, an der man über den Speicherort nachdenkt, erspart
+     das Suchen im Menü. Beide Wege führen zu denselben Funktionen. */
+  const anBtn=(id,fn)=>{const b=$("#"+id);if(b)b.onclick=fn};
+  anBtn("sBackup",()=>{closeOvl();saveBundle("all")});
+  anBtn("sRestore",()=>{closeOvl();importJson()});
+  /* Die Berechtigungsfrage des Browsers kommt so immer direkt nach einem
+     Klick — nie beim Start, nie im Hintergrund. */
+  anBtn("sFileAs",()=>{closeOvl();fileSaveAs()});
+  anBtn("sFileOpen",()=>{closeOvl();fileOpen()});
+  anBtn("sFileRe",fileReconnect);
+  anBtn("sFileOff",fileDetach);
+  /* Ob der Zugriff noch gilt, weiß nur der Browser. Nachträglich nachsehen —
+     ohne zu fragen — und die Karte berichtigen, falls sie das Falsche behauptet.
+     Der zweite Durchlauf findet nichts mehr zu ändern und hört auf. */
+  if(hatDateien()&&doc()&&doc().file)(async()=>{
+    const d=doc();const ok=await fileOk(await handleGet(d.id),false);
+    if(!!d.file.lose!==!ok)return;
+    d.file.lose=!ok;save();drawStatus();
+    if($("#sBackup"))settings();
+  })();
   $("#setClose").onclick=closeOvl;
 }
 function download(name,text,mime){
@@ -11214,6 +11615,36 @@ function download(name,text,mime){
 /* Hell oder dunkel? Nicht als Feld in THEMES gepflegt, sondern an der
    Papierfarbe gemessen — so ordnet sich ein neu hinzugefügtes Schema von
    selbst richtig ein, statt dass jemand daran denken muss. */
+/* Die zweite Karte im Speicherort-Block: das aktive Dokument zusätzlich als
+   Datei auf der Festplatte. Bewusst als eigene Karte neben dem Browserspeicher
+   und nicht als Ersatz — beides gilt gleichzeitig, und genau das soll man
+   sehen. Wer in seinen Dropbox-Ordner speichert, hat damit auch Dropbox. */
+function dateiKarte(){
+  const d=doc();
+  if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
+    <div class="storehead"><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
+      <span><b>${tr("Datei auf der Festplatte")}</b><br>
+      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span></div>
+    <p class="storenote">${tr("Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.")}</p></div>`;
+  const f=d&&d.file;
+  return `<div class="storecard" style="margin-top:8px">
+    <div class="storehead"><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
+      <span style="min-width:0">
+        <b>${f?esc(f.name):tr("Datei auf der Festplatte")}</b><br>
+        <span class="storecount">${f?(f.lose?tr("Zugriff abgelaufen"):tr("verbunden")):tr("nicht verbunden")}</span>
+      </span></div>
+    <p class="storenote">${f
+      ?(f.lose
+        ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.")
+        : tr("Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben."))
+      :tr("Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.")}</p>
+    <div class="storeact">
+      ${f&&f.lose?`<button class="btn pri" id="sFileRe">${tr("Verbinden")}</button>`:""}
+      <button class="btn" id="sFileAs">${f?tr("An anderem Ort speichern"):tr("In Datei speichern")}&hellip;</button>
+      <button class="btn" id="sFileOpen">${tr("Datei öffnen")}&hellip;</button>
+      ${f?`<button class="btn" id="sFileOff">${tr("Verbindung lösen")}</button>`:""}
+    </div></div>`;
+}
 function themeIsDark(k){
   const probe=document.createElement("div");
   probe.style.cssText="position:absolute;left:-9999px;top:0";
