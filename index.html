@@ -205,6 +205,30 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .mi:hover{background:var(--chrome)}
 .mi .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .mi .chk{width:12px;flex:0 0 12px;color:var(--stamp)}
+/* Ausschnitt einer Miniaturseite als Vorschau der drei Zitatstile im
+   Format-Menü — Fließtextzeile, das Zitat in seinem Stil, Fließtextzeile.
+   Wie die Formatvorlagen-Galerien in Word und Google Docs: das Aussehen zeigen
+   statt es nur zu benennen. Echte Schrift wäre in dieser Größe unlesbar,
+   deshalb Balken; Akzentfarbe, Tönung und Anführungszeichen sind dagegen echt
+   und wechseln mit dem Farbschema mit. */
+.qprev{flex:0 0 108px;width:108px;height:46px;position:relative;overflow:hidden;
+  background:var(--paper);border:1px solid var(--rule);border-radius:2px}
+.qprev i{position:absolute;display:block}
+.qprev .ql{height:2px;border-radius:1px;background:var(--ink-faint);opacity:.45}
+.qprev .qz{height:2px;border-radius:1px;background:var(--ink-soft);opacity:.6}
+.qprev .qb{width:2px;background:var(--stamp)}
+.qprev .qt{background:color-mix(in srgb,var(--stamp) 12%,var(--paper))}
+.qprev .qm{font:normal 19px/1 Georgia,serif;color:var(--rule)}
+/* Dasselbe Bildformat für die Listenstile, nur als drei Zeilen aus echtem
+   Zeichen plus Textbalken — das Zeichen selbst ist der Unterschied, den man
+   sehen will, und wird deshalb nicht angedeutet, sondern gesetzt. */
+.lprev{flex:0 0 108px;width:108px;height:46px;overflow:hidden;
+  background:var(--paper);border:1px solid var(--rule);border-radius:2px;
+  padding:6px;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.lprev span{display:flex;align-items:center;gap:5px}
+.lprev b{flex:0 0 16px;text-align:right;font:normal 9px/1 Georgia,serif;
+  color:var(--ink-soft);letter-spacing:-.02em}
+.lprev i{flex:1;height:2px;border-radius:1px;background:var(--ink-faint);opacity:.5}
 .msep{height:1px;background:var(--rule);margin:4px 3px}
 .mlabel{padding:8px 8px 4px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   text-transform:uppercase;color:var(--ink-faint)}
@@ -418,10 +442,51 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
 #editor p{margin:0 0 var(--ps,.82em)}
 #editor ul,#editor ol{margin:0 0 .82em;padding-left:1.5em}
-#editor blockquote{margin:0 0 .82em;padding:.1em 0 .1em 1em;
-  border-left:3px solid var(--rule);color:var(--ink-soft);font-style:italic}
+/* Drei Zitatstile, gewählt je Zitat — über Format → Zitat oder das
+   Absatzformat-Feld der Werkzeugleiste („Zitat 1/2/3"). Der Stil steht als
+   data-qs am <blockquote> selbst, nicht am Dokument: dadurch lassen sich in
+   einem Text mehrere Zitate verschieden setzen, der Stil wandert beim
+   Kopieren mit und übersteht Speichern wie Export. Ohne Attribut gilt
+   Zitat 1, das ist zugleich die Grundlage, auf der die beiden anderen nur
+   noch ändern, was sie ändern.
+   Bewusst nicht an #editor gebunden: so tragen dieselben Regeln auch
+   Leseansicht und Druckvorschau, statt an drei Stellen gepflegt zu werden.
+   Eine ID-gebundene Regel (#editor blockquote) würde sie schlagen — deshalb
+   gibt es keine mehr. */
+blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;
+  border-left:3px solid var(--stamp);color:var(--ink-soft);font-style:italic}
+/* Die Tönung mischt sich aus Akzent- und Papierfarbe, statt fest zu stehen —
+   sonst wäre sie auf den fünf dunklen Schemata ein heller Kasten. */
+blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;
+  border-radius:0 var(--radius-paper) var(--radius-paper) 0;
+  background:color-mix(in srgb,var(--stamp) 7%,var(--paper))}
+blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;
+  border-left:none;position:relative}
+/* Ein Pseudoelement, kein Zeichen im Text: es ist nicht bearbeitbar, landet
+   nicht in d.html und stört die Schreibmarke nicht (dieselbe Bauart wie beim
+   Seitenumbruch-Etikett). */
+blockquote[data-qs="typo"]::before{content:'"';position:absolute;
+  left:.3em;top:-.06em;font-size:2.1em;line-height:1;
+  color:var(--rule);font-style:normal}
 #editor blockquote p{margin:0 0 .5em}
 #editor blockquote p:last-child{margin-bottom:0}
+/* Aufzählungszeichen und Nummerierung, gewählt je Liste (Format → Aufzählung
+   bzw. Nummerierung). Wie beim Zitat steht der Stil als data-ls an der Liste
+   selbst und ohne Attribut gilt der Grundstil — bestehende Listen bleiben
+   dadurch unangetastet. Ebenfalls ohne #editor davor, damit Leseansicht und
+   Druckvorschau dieselben Regeln bekommen.
+   Strich und Haken laufen über eine Zeichenkette statt über einen Namen:
+   list-style-type kennt für sie keinen eingebauten Wert. */
+ul[data-ls="kreis"]{list-style-type:circle}
+ul[data-ls="quadrat"]{list-style-type:square}
+ul[data-ls="strich"]{list-style-type:"–  "}
+ul[data-ls="haken"]{list-style-type:"✓  "}
+ol[data-ls="alpha"]{list-style-type:lower-alpha}
+ol[data-ls="alphagross"]{list-style-type:upper-alpha}
+ol[data-ls="roemisch"]{list-style-type:upper-roman}
+/* Für „1)" gibt es keinen eingebauten Wert — die Zahl kommt aus dem Zähler,
+   den der Browser ohnehin für die Liste führt. */
+ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 /* Browser setzen die Schrift von <table> per UA-Stylesheet auf einen festen
    Wert zurück, statt sie vom Elternelement zu erben — betraf bisher jeden
    Tabellentext, der dadurch nie mit Zoom, Dokumentschrift oder -größe
@@ -1163,6 +1228,23 @@ const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],[
 const lhOf=d=>d.lh||S.settings.lh||1.62;
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
 const psOf=d=>d.ps||S.settings.ps||.82;
+/* Zitatstile in der Reihenfolge „Zitat 1/2/3". Der leere Schlüssel ist der
+   Grundstil: er steht als gar kein Attribut am Zitat, siehe CSS oben.
+   Der Name steht im Format-Menü, die Nummer in der Werkzeugleiste — beides
+   zeigt dort aufeinander, damit die Zuordnung nicht geraten werden muss. */
+const QUOTESTYLES=[["Akzentlinie",""],["Getönt","toent"],["Typografisch","typo"]];
+const quoteStyleOf=bq=>(bq&&bq.getAttribute("data-qs"))||"";
+/* Listenstile, je Liste wählbar (data-ls an ul/ol). Wie bei den Zitaten ist
+   der leere Schlüssel der Grundstil und steht als gar kein Attribut da — so
+   bleiben alle bisherigen Listen unverändert. Das dritte Feld liefert das
+   Zeichen für die Vorschau: bei Aufzählungen fest, bei Nummerierungen je
+   Zeilennummer, damit die Miniatur genau zeigt, was die Liste später setzt. */
+const BULLETSTYLES=[["Punkt","",()=>"•"],["Kreis","kreis",()=>"○"],
+  ["Quadrat","quadrat",()=>"▪"],["Strich","strich",()=>"–"],["Haken","haken",()=>"✓"]];
+const NUMSTYLES=[["Dezimal","",n=>n+"."],["Dezimal mit Klammer","klammer",n=>n+")"],
+  ["Kleinbuchstaben","alpha",n=>"abc"[n-1]+")"],["Großbuchstaben","alphagross",n=>"ABC"[n-1]+"."],
+  ["Römisch","roemisch",n=>["I","II","III"][n-1]+"."]];
+const listStyleOf=el=>(el&&el.getAttribute("data-ls"))||"";
 function fmtOf(d){
   const f=d.fmt||S.settings.fmt||"a4";
   const o=typeof f==="object"?f:{...FORMATS[f]||FORMATS.a4,key:f};
@@ -1255,12 +1337,14 @@ en:{
   "Absatzformat":"Paragraph style",
   "Text":"Text",
   "Ausrichten und einrücken":"Align and indent",
-  "Aufzählungszeichen und Nummerierung":"Bullets and numbering",
   "Fließtext":"Body text",
   "Überschrift 1":"Heading 1",
   "Überschrift 2":"Heading 2",
   "Überschrift 3":"Heading 3",
   "Aufzählung":"Bulleted list",
+  "Punkt":"Dot","Kreis":"Circle","Quadrat":"Square","Strich":"Dash","Haken":"Check",
+  "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal with bracket",
+  "Kleinbuchstaben":"Lowercase letters","Großbuchstaben":"Uppercase letters","Römisch":"Roman",
   "Nummerierung":"Numbered list",
   "Linksbündig":"Align left",
   "Zentriert":"Center",
@@ -1576,11 +1660,14 @@ en:{
   "Anschriftfeld oben":"Address field on top",
   "Manuskript für Verlage":"Manuscript for publishers",
   "Broschüre, Heft":"Booklet, pamphlet",
-  "Buchsatz":"Book typesetting",
   "Nordamerika":"North America",
   "Brief DIN 5008":"Letter DIN 5008",
   "Normseite":"Manuscript page",
   "Taschenbuch":"Paperback",
+  "Buchsatz":"Book typesetting",
+  "Akzentlinie":"Accent rule",
+  "Getönt":"Tinted",
+  "Typografisch":"Typographic",
   "Eigene Maße":"Custom size",
   "Breite und Höhe frei wählen":"Choose width and height freely",
   "Eigenes Format speichern":"Save custom format",
@@ -1851,12 +1938,14 @@ fr:{
   "Absatzformat":"Style de paragraphe",
   "Text":"Texte",
   "Ausrichten und einrücken":"Aligner et mettre en retrait",
-  "Aufzählungszeichen und Nummerierung":"Puces et numérotation",
   "Fließtext":"Texte courant",
   "Überschrift 1":"Titre 1",
   "Überschrift 2":"Titre 2",
   "Überschrift 3":"Titre 3",
   "Aufzählung":"Liste à puces",
+  "Punkt":"Point","Kreis":"Cercle","Quadrat":"Carré","Strich":"Tiret","Haken":"Coche",
+  "Dezimal":"Décimal","Dezimal mit Klammer":"Décimal avec parenthèse",
+  "Kleinbuchstaben":"Minuscules","Großbuchstaben":"Majuscules","Römisch":"Romain",
   "Nummerierung":"Liste numérotée",
   "Linksbündig":"Aligné à gauche",
   "Zentriert":"Centré",
@@ -2172,11 +2261,14 @@ fr:{
   "Anschriftfeld oben":"Zone d'adresse en haut",
   "Manuskript für Verlage":"Manuscrit pour éditeurs",
   "Broschüre, Heft":"Brochure, cahier",
-  "Buchsatz":"Composition de livre",
   "Nordamerika":"Amérique du Nord",
   "Brief DIN 5008":"Lettre DIN 5008",
   "Normseite":"Page manuscrit standard",
   "Taschenbuch":"Livre de poche",
+  "Buchsatz":"Composition de livre",
+  "Akzentlinie":"Filet d'accent",
+  "Getönt":"Teinté",
+  "Typografisch":"Typographique",
   "Eigene Maße":"Dimensions personnalisées",
   "Breite und Höhe frei wählen":"Choisir librement largeur et hauteur",
   "Eigenes Format speichern":"Enregistrer le format personnalisé",
@@ -2447,12 +2539,14 @@ es:{
   "Absatzformat":"Estilo de párrafo",
   "Text":"Texto",
   "Ausrichten und einrücken":"Alinear y sangrar",
-  "Aufzählungszeichen und Nummerierung":"Viñetas y numeración",
   "Fließtext":"Texto normal",
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
   "Überschrift 3":"Título 3",
   "Aufzählung":"Lista con viñetas",
+  "Punkt":"Punto","Kreis":"Círculo","Quadrat":"Cuadrado","Strich":"Guion","Haken":"Marca",
+  "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal con paréntesis",
+  "Kleinbuchstaben":"Minúsculas","Großbuchstaben":"Mayúsculas","Römisch":"Romano",
   "Nummerierung":"Lista numerada",
   "Linksbündig":"Alinear a la izquierda",
   "Zentriert":"Centrado",
@@ -2768,11 +2862,14 @@ es:{
   "Anschriftfeld oben":"Campo de dirección arriba",
   "Manuskript für Verlage":"Manuscrito para editoriales",
   "Broschüre, Heft":"Folleto, cuadernillo",
-  "Buchsatz":"Maquetación de libro",
   "Nordamerika":"Norteamérica",
   "Brief DIN 5008":"Carta DIN 5008",
   "Normseite":"Página manuscrito estándar",
   "Taschenbuch":"Libro de bolsillo",
+  "Buchsatz":"Maquetación de libro",
+  "Akzentlinie":"Línea de acento",
+  "Getönt":"Con fondo",
+  "Typografisch":"Tipográfico",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Elegir libremente ancho y alto",
   "Eigenes Format speichern":"Guardar formato personalizado",
@@ -3043,12 +3140,14 @@ pt:{
   "Absatzformat":"Estilo de parágrafo",
   "Text":"Texto",
   "Ausrichten und einrücken":"Alinhar e recuar",
-  "Aufzählungszeichen und Nummerierung":"Marcadores e numeração",
   "Fließtext":"Texto normal",
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
   "Überschrift 3":"Título 3",
   "Aufzählung":"Lista com marcadores",
+  "Punkt":"Ponto","Kreis":"Círculo","Quadrat":"Quadrado","Strich":"Traço","Haken":"Marca",
+  "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal com parêntese",
+  "Kleinbuchstaben":"Minúsculas","Großbuchstaben":"Maiúsculas","Römisch":"Romano",
   "Nummerierung":"Lista numerada",
   "Linksbündig":"Alinhar à esquerda",
   "Zentriert":"Centralizado",
@@ -3364,11 +3463,14 @@ pt:{
   "Anschriftfeld oben":"Campo de endereço no topo",
   "Manuskript für Verlage":"Manuscrito para editoras",
   "Broschüre, Heft":"Brochura, caderno",
-  "Buchsatz":"Diagramação de livro",
   "Nordamerika":"América do Norte",
   "Brief DIN 5008":"Carta DIN 5008",
   "Normseite":"Página padrão de manuscrito",
   "Taschenbuch":"Livro de bolso",
+  "Buchsatz":"Diagramação de livro",
+  "Akzentlinie":"Linha de destaque",
+  "Getönt":"Com fundo",
+  "Typografisch":"Tipográfico",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Escolher largura e altura livremente",
   "Eigenes Format speichern":"Salvar formato personalizado",
@@ -3639,12 +3741,14 @@ pl:{
   "Absatzformat":"Styl akapitu",
   "Text":"Tekst",
   "Ausrichten und einrücken":"Wyrównanie i wcięcia",
-  "Aufzählungszeichen und Nummerierung":"Punktory i numeracja",
   "Fließtext":"Tekst podstawowy",
   "Überschrift 1":"Nagłówek 1",
   "Überschrift 2":"Nagłówek 2",
   "Überschrift 3":"Nagłówek 3",
   "Aufzählung":"Lista punktowana",
+  "Punkt":"Kropka","Kreis":"Kółko","Quadrat":"Kwadrat","Strich":"Myślnik","Haken":"Ptaszek",
+  "Dezimal":"Dziesiętne","Dezimal mit Klammer":"Dziesiętne z nawiasem",
+  "Kleinbuchstaben":"Małe litery","Großbuchstaben":"Wielkie litery","Römisch":"Rzymskie",
   "Nummerierung":"Lista numerowana",
   "Linksbündig":"Wyrównaj do lewej",
   "Zentriert":"Wyśrodkuj",
@@ -3960,11 +4064,14 @@ pl:{
   "Anschriftfeld oben":"Pole adresowe u góry",
   "Manuskript für Verlage":"Manuskrypt dla wydawnictw",
   "Broschüre, Heft":"Broszura, zeszyt",
-  "Buchsatz":"Skład książkowy",
   "Nordamerika":"Ameryka Północna",
   "Brief DIN 5008":"List DIN 5008",
   "Normseite":"Strona znormalizowana",
   "Taschenbuch":"Książka kieszonkowa",
+  "Buchsatz":"Skład książkowy",
+  "Akzentlinie":"Linia akcentu",
+  "Getönt":"Z tłem",
+  "Typografisch":"Typograficzny",
   "Eigene Maße":"Własne wymiary",
   "Breite und Höhe frei wählen":"Dowolnie wybierz szerokość i wysokość",
   "Eigenes Format speichern":"Zapisz własny format",
@@ -4626,7 +4733,8 @@ function drawTools(){
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
         <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option>
-        <option value="blockquote">${tr("Zitat")}</option></select>
+        ${QUOTESTYLES.map(([lab,k],i)=>
+          `<option value="blockquote${k?":"+k:""}" title="${tr(lab)}">${tr("Zitat")} ${i+1}</option>`).join("")}</select>
       <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICO('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
       <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICO('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.2 4.6 4.6 4v4M2.9 12.2c0-.7.6-1.2 1.3-1.2s1.2.5 1.2 1.1c0 1.1-2.5 1.5-2.5 2.9h2.6M2.9 16.6c.2-.5.7-.7 1.3-.7.7 0 1.2.4 1.2 1s-.5 1-1.1 1c.7 0 1.3.4 1.3 1.1 0 .7-.6 1.1-1.4 1.1-.6 0-1.1-.2-1.3-.7"/>')}</button>
       <span style="display:flex;gap:7px">
@@ -5004,7 +5112,12 @@ function syncToolbarState(){
   if(fb){
     let n=sel.anchorNode;n=n.nodeType===1?n:n.parentElement;
     const block=n&&n.closest("h1,h2,h3,blockquote");
-    fb.value=block?block.tagName.toLowerCase():"p";
+    /* Bei einem Zitat gehört der Stil mit in den Wert, sonst zeigte das Feld
+       immer „Zitat 1", egal welcher der drei gerade gesetzt ist. */
+    if(block&&block.tagName==="BLOCKQUOTE"){
+      const k=quoteStyleOf(block);
+      fb.value="blockquote"+(k?":"+k:"");
+    }else fb.value=block?block.tagName.toLowerCase():"p";
   }
 }
 document.addEventListener("selectionchange",syncToolbarState);
@@ -5815,8 +5928,25 @@ function exportTxt(){
   }
   download(d.title+".txt",(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n");
 }
+/* Eine exportierte Datei kennt die CSS-Variablen des Programms nicht. Die drei
+   Zitatstile werden deshalb einmal in feste Werte aufgelöst, mit den Farben des
+   gerade aktiven Schemas — und zwar alle drei, weil ein Dokument sie mischen
+   kann. Ohne das bekäme ein Zitat dort nur den Browserstandard: Einzug
+   beidseitig, sonst nichts. */
+function quoteExportCss(){
+  const cs=getComputedStyle(document.documentElement);
+  const v=n=>cs.getPropertyValue(n).trim();
+  return `blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;`+
+      `border-left:3px solid ${v("--stamp")};color:${v("--ink-soft")};font-style:italic}`+
+    `blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;border-radius:0 3px 3px 0;`+
+      `background:color-mix(in srgb,${v("--stamp")} 7%,${v("--paper")})}`+
+    `blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;border-left:none;position:relative}`+
+    `blockquote[data-qs="typo"]::before{content:'"';position:absolute;left:.3em;top:-.06em;`+
+      `font-size:2.1em;line-height:1;color:${v("--rule")};font-style:normal}`;
+}
 function exportHtml(){flush();const d=doc();
   download(d.title+".html",`<meta charset="utf-8"><title>${esc(d.title)}</title>`+
+    `<style>${quoteExportCss()}</style>`+
     `<div style="max-width:660px;margin:40px auto;font-family:${d.font||S.settings.font},serif;`+
     `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}${footnoteListHtml(d)}</div>`,"text/html")}
 function exportCsv(){
@@ -6197,16 +6327,41 @@ const DOCX_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </Relationships>`;
 /* Zwei Ebenen genügen für das, was der Editor an Listen erzeugen kann - ein
    Aufzählungs- und ein Nummerierungs-abstractNum mit je vier Einzugsstufen. */
+/* Je Listenstil eine eigene Zählvorlage im docx. Word kennt kein CSS: der Stil
+   muss als w:numFmt (Zählart) und w:lvlText (wie der Zähler aussieht) mit —
+   ohne das fiele beim Export jede Liste wieder auf Punkt bzw. „1." zurück.
+   Die Reihenfolge hier legt die numId fest (Index + 1), docxNumId() rechnet
+   sie aus derselben Reihenfolge zurück. Reihenfolge und Schlüssel müssen zu
+   BULLETSTYLES/NUMSTYLES passen. */
+const DOCXLISTS=[
+  {tag:"ul",ls:"",          fmt:"bullet",     text:()=>"•"},
+  {tag:"ul",ls:"kreis",     fmt:"bullet",     text:()=>"o"},
+  {tag:"ul",ls:"quadrat",   fmt:"bullet",     text:()=>"▪"},
+  {tag:"ul",ls:"strich",    fmt:"bullet",     text:()=>"–"},
+  {tag:"ul",ls:"haken",     fmt:"bullet",     text:()=>"✓"},
+  {tag:"ol",ls:"",          fmt:"decimal",    text:i=>"%"+(i+1)+"."},
+  {tag:"ol",ls:"klammer",   fmt:"decimal",    text:i=>"%"+(i+1)+")"},
+  {tag:"ol",ls:"alpha",     fmt:"lowerLetter",text:i=>"%"+(i+1)+")"},
+  {tag:"ol",ls:"alphagross",fmt:"upperLetter",text:i=>"%"+(i+1)+"."},
+  {tag:"ol",ls:"roemisch",  fmt:"upperRoman", text:i=>"%"+(i+1)+"."}
+];
+/* Ein unbekannter Stil (etwa aus einer fremden eingefügten Liste) fällt auf
+   den Grundstil seiner Art zurück, statt eine numId ohne Vorlage zu erzeugen —
+   Word würde die Datei sonst als beschädigt melden. */
+function docxNumId(el){
+  const tag=el.tagName.toLowerCase(),ls=listStyleOf(el);
+  let i=DOCXLISTS.findIndex(d=>d.tag===tag&&d.ls===ls);
+  if(i<0)i=DOCXLISTS.findIndex(d=>d.tag===tag&&d.ls==="");
+  return i+1;
+}
 function numberingXml(){
   const stufe=(fmt,text)=>[0,1,2,3].map(i=>
     `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${fmt}"/><w:lvlText w:val="${text(i)}"/>`+
     `<w:pPr><w:ind w:left="${(i+1)*360}" w:hanging="360"/></w:pPr></w:lvl>`).join("");
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-<w:abstractNum w:abstractNumId="0">${stufe("bullet",()=>"•")}</w:abstractNum>
-<w:abstractNum w:abstractNumId="1">${stufe("decimal",i=>"%"+(i+1)+".")}</w:abstractNum>
-<w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num>
-<w:num w:numId="2"><w:abstractNumId w:val="1"/></w:num>
+${DOCXLISTS.map((d,i)=>`<w:abstractNum w:abstractNumId="${i}">${stufe(d.fmt,d.text)}</w:abstractNum>`).join("\n")}
+${DOCXLISTS.map((d,i)=>`<w:num w:numId="${i+1}"><w:abstractNumId w:val="${i}"/></w:num>`).join("\n")}
 </w:numbering>`;
 }
 function stylesXml(d){
@@ -6367,7 +6522,7 @@ async function walkBlocks(root,ctx){
       const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`,null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="ul"||tag==="ol"){
-      xml+=listeXml(el,tag==="ol"?2:1,0,ctx);
+      xml+=listeXml(el,docxNumId(el),0,ctx);
     }else if(tag==="table"){
       xml+=await tabelleXml(el,ctx);
     }else if(tag==="figure"){
@@ -6402,7 +6557,7 @@ function listeXml(list,numId,ilvl,ctx){
     if(unterliste)klon.querySelector(":scope > ul, :scope > ol")?.remove();
     const a=absatzXml(klon,`<w:numPr><w:ilvl w:val="${ilvl}"/><w:numId w:val="${numId}"/></w:numPr>`,null,ctx);
     xml+=absatzZuXml(a,ctx);
-    if(unterliste)xml+=listeXml(unterliste,unterliste.tagName.toLowerCase()==="ol"?2:1,Math.min(3,ilvl+1),ctx);
+    if(unterliste)xml+=listeXml(unterliste,docxNumId(unterliste),Math.min(3,ilvl+1),ctx);
   });
   return xml;
 }
@@ -7394,7 +7549,9 @@ function formatMenu(){
     <button class="mi" data-f="align"><span class="chk"></span>${tr("Ausrichten und einrücken")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilenabstand")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="ps"><span class="chk"></span>${tr("Absatzabstand")}<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-f="list"><span class="chk"></span>${tr("Aufzählungszeichen und Nummerierung")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="qs"><span class="chk"></span>${tr("Zitat")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="ul"><span class="chk"></span>${tr("Aufzählung")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="ol"><span class="chk"></span>${tr("Nummerierung")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     <button class="mi" data-f="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}&hellip;</button>
     <button class="mi" data-f="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>
@@ -7448,10 +7605,22 @@ function formatMenu(){
     if(a==="ps"){const cp=psOf(doc());return openSubMenu(b,PARSPACES.map(([lab,v])=>
       ({a:String(v),label:tr(lab),cur:Math.abs(cp-v)<0.001})),
       sub=>formatAct(()=>setParSpace(parseFloat(sub))));}
-    if(a==="list")return openSubMenu(b,[
-      {a:"insertUnorderedList",label:tr("Aufzählung"),cur:qState("insertUnorderedList")},
-      {a:"insertOrderedList",label:tr("Nummerierung"),cur:qState("insertOrderedList")}
-    ],sub=>formatAct(()=>document.execCommand(sub)));
+    /* Ohne Zitat an der Schreibmarke steht nirgends ein Haken — ein Klick legt
+       dann eins an. Mit Zitat zeigt der Haken dessen Stil. */
+    if(a==="qs"){const bq=curQuote(),cq=bq?quoteStyleOf(bq):null;
+      return openSubMenu(b,QUOTESTYLES.map(([lab,k],i)=>
+      ({a:k,label:quotePreviewHtml(k)+tr(lab),k:tr("Zitat")+" "+(i+1),cur:cq===k})),
+      sub=>formatAct(()=>applyQuote(sub)));}
+    /* Wie beim Zitat: ohne Liste an der Schreibmarke steht nirgends ein Haken,
+       ein Klick legt dann eine an. Steht die Marke in einer Liste der anderen
+       Art, wandelt applyList() sie um. */
+    if(a==="ul"||a==="ol"){
+      const tag=a,stile=tag==="ol"?NUMSTYLES:BULLETSTYLES;
+      const list=curList(tag),cur=list?listStyleOf(list):null;
+      return openSubMenu(b,stile.map(([lab,k,zeichen])=>
+        ({a:k,label:listPreviewHtml(zeichen)+tr(lab),cur:cur===k})),
+        sub=>formatAct(()=>applyList(tag,sub)));
+    }
     if(a==="fore"||a==="hilite"){
       /* colorMenu() ruft selbst zuerst closeMenu() auf, das würde b (den
          Format-Menü-Knopf) sofort aus dem DOM lösen - Rect vorher sichern. */
@@ -8053,6 +8222,82 @@ function setParSpace(v){
   doc().ps=v;commit();render();
   const tier=PARSPACES.find(([,n])=>n===v);
   toast(tr("Absatzabstand")+": "+tr(tier?tier[0]:"Normal"));
+}
+/* Baut die Miniaturseite eines Zitatstils; Aufbau der Teile siehe .qprev im CSS.
+   Oben und unten je eine Fließtextzeile, dazwischen das Zitat — der Ausschnitt,
+   an dem sich die drei Stile unterscheiden. */
+function quotePreviewHtml(k){
+  const rahmen=`<i class="ql" style="left:6px;top:6px;right:6px"></i>`+
+               `<i class="ql" style="left:6px;bottom:6px;right:14px"></i>`;
+  const ein=k==="typo"?18:12;
+  const zitat=`<i class="qz" style="left:${ein}px;top:18px;right:${k==="typo"?14:12}px"></i>`+
+              `<i class="qz" style="left:${ein}px;top:25px;right:${k==="typo"?24:22}px"></i>`;
+  const deko=k==="typo"
+    ? `<i class="qm" style="left:6px;top:11px">"</i>`
+    : (k==="toent"?`<i class="qt" style="left:6px;top:14px;right:10px;height:18px;border-radius:0 2px 2px 0"></i>`:"")
+      +`<i class="qb" style="left:6px;top:15px;height:16px"></i>`;
+  return `<span class="qprev">${rahmen}${deko}${zitat}</span>`;
+}
+/* Das Zitat, in dem die Schreibmarke gerade steht — null, wenn keins. */
+function curQuote(){
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount)return null;
+  let n=sel.getRangeAt(0).startContainer;
+  if(n.nodeType!==1)n=n.parentElement;
+  return n&&ed.contains(n)&&n.closest?n.closest("blockquote"):null;
+}
+/* Setzt den gewählten Zitatstil auf das Zitat an der Schreibmarke. Steht die
+   Marke noch in einem normalen Absatz, wird der erst zum Zitat gemacht —
+   „Zitat 2" in einem Rutsch, statt erst Zitat, dann Stil. Bewusst ohne
+   render(): das würde die Schreibfläche aus d.html neu aufbauen und die
+   Schreibmarke verlieren, obwohl sich nur ein Attribut geändert hat. */
+function applyQuote(k){
+  if(S.mode!=="write"){setMode("write");setTimeout(()=>applyQuote(k),60);return}
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  let bq=curQuote();
+  if(!bq){document.execCommand("formatBlock",false,"blockquote");bq=curQuote()}
+  if(!bq)return;
+  if(k)bq.setAttribute("data-qs",k);else bq.removeAttribute("data-qs");
+  dirty=true;commit();queuePaginate();syncToolbarState();
+  const i=QUOTESTYLES.findIndex(([,x])=>x===k);
+  toast(tr("Zitat")+" "+(i+1)+" · "+tr(QUOTESTYLES[i<0?0:i][0]));
+}
+/* Baut die Miniatur eines Listenstils: drei Zeilen aus echtem Zeichen und
+   Textbalken. zeichen(n) liefert je Zeilennummer das Zeichen — bei einer
+   Aufzählung immer dasselbe, bei einer Nummerierung 1./2./3. bzw. a)/b)/c). */
+function listPreviewHtml(zeichen){
+  return `<span class="lprev">`+[1,2,3].map(n=>
+    `<span><b>${zeichen(n)}</b><i style="margin-right:${n===3?22:n===2?6:0}px"></i></span>`).join("")+`</span>`;
+}
+/* Die Liste, in der die Schreibmarke steht — nur, wenn sie die gesuchte Art
+   hat (ul oder ol), sonst null; dann wandelt applyList() sie um. */
+function curList(tag){
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount)return null;
+  let n=sel.getRangeAt(0).startContainer;
+  if(n.nodeType!==1)n=n.parentElement;
+  return n&&ed.contains(n)&&n.closest?n.closest(tag):null;
+}
+/* Setzt Listenart und -stil in einem Schritt. Steht die Marke in einem
+   normalen Absatz, wird daraus erst eine Liste; steht sie in einer Liste der
+   anderen Art, wandelt execCommand sie um (ul <-> ol). Kein render(), sonst
+   ginge die Schreibmarke verloren — es ändert sich nur ein Attribut. */
+function applyList(tag,k){
+  if(S.mode!=="write"){setMode("write");setTimeout(()=>applyList(tag,k),60);return}
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  let list=curList(tag);
+  if(!list){
+    document.execCommand(tag==="ol"?"insertOrderedList":"insertUnorderedList");
+    list=curList(tag);
+  }
+  if(!list)return;
+  if(k)list.setAttribute("data-ls",k);else list.removeAttribute("data-ls");
+  dirty=true;commit();queuePaginate();syncToolbarState();
+  const stile=tag==="ol"?NUMSTYLES:BULLETSTYLES;
+  const t=stile.find(([,x])=>x===k);
+  toast(tr(tag==="ol"?"Nummerierung":"Aufzählung")+" · "+tr(t?t[0]:stile[0][0]));
 }
 
 /* ================= Schreibfluss-Verhalten ================= */
@@ -11190,7 +11435,12 @@ $("#tools").addEventListener("keydown",e=>{
 $("#tools").addEventListener("change",e=>{
   if(e.target.id==="fFont"){doc().font=e.target.value;$("#editor").style.fontFamily=e.target.value+",serif";commit()}
   if(e.target.id==="fSize")setFontSize(e.target.value);
-  if(e.target.id==="fBlock"){document.execCommand("formatBlock",false,e.target.value);$("#editor").focus();dirty=true}
+  if(e.target.id==="fBlock"){
+    /* „blockquote:toent" trägt Absatzart und Zitatstil in einem Wert — der
+       Doppelpunkt trennt beides, damit das eine Auswahlfeld beides kann. */
+    const [tag,qs]=e.target.value.split(":");
+    if(tag==="blockquote"){applyQuote(qs||"");return}
+    document.execCommand("formatBlock",false,tag);$("#editor").focus();dirty=true}
 });
 $("#tools").addEventListener("input",e=>{
   if(e.target.id==="nSearch"){window._nq=e.target.value;drawNotes()}
