@@ -538,7 +538,6 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 #editor td,#editor th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
 #editor th{background:var(--chrome-2);font-weight:600;text-align:left}
-#editor td.selcell,#editor th.selcell{outline:2px solid var(--stamp);outline-offset:-2px}
 .tgrid{display:grid;grid-template-columns:repeat(8,18px);gap:2px;padding:7px 7px 3px}
 .tgrid i{width:18px;height:15px;border:1px solid var(--rule);background:var(--paper);display:block;cursor:pointer}
 .tgrid i.on{background:var(--stamp);border-color:var(--stamp)}
@@ -722,6 +721,14 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .status .zoomctl input{width:58px;font-size:12px;padding:2px 0}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
 .dot.dirty{background:var(--stamp)}
+/* Fehlgeschlagene Sicherung — die einzige Stelle, an der die Statuszeile
+   selbst Farbe bekennt. Ein fest verdrahtetes Rot fiel in sieben der dreizehn
+   Schemata unter 4,5:1 (in den dunklen bis auf 2,3), deshalb Richtung Tinte
+   gemischt: das dunkelt auf hellem Papier ab und hellt auf dunklem auf und
+   bleibt dabei erkennbar rot. Gemessenes Minimum über alle Schemata: 4,58:1. */
+.dot.fail{background:color-mix(in srgb,#E74C3C 62%,var(--ink));
+  box-shadow:0 0 0 2px color-mix(in srgb,#E74C3C 30%,transparent)}
+.status .savefail{color:color-mix(in srgb,#E74C3C 62%,var(--ink));font-weight:600}
 
 /* ---- Notizen ---- */
 .pane{flex:1;overflow:auto;position:relative}
@@ -957,7 +964,6 @@ body.focus .outline{display:none}
 .spelllist li:last-child{border-bottom:none}
 .spelllist li:hover{background:var(--chrome-2)}
 .spelllist li.on{background:var(--stamp);color:var(--on-stamp,#fff)}
-.spellnone{padding:10px 11px;color:var(--ink-faint);font-family:Georgia,serif;font-size:13px}
 .spellprog{height:5px;background:var(--chrome);border-radius:3px;overflow:hidden;margin-top:12px}
 .spellprog i{display:block;height:100%;background:var(--stamp);width:0;transition:width .15s linear}
 .spellbig{font-family:Georgia,serif;font-size:15px;line-height:1.6;color:var(--ink);padding:6px 0 2px}
@@ -971,8 +977,7 @@ body.focus .outline{display:none}
    eine Handlung. Rechtsbündig in eine .setrow gequetscht ergab das einen
    Textklumpen. Deshalb ein eigener Block über die volle Breite, linksbündig
    und mit echtem Knopf statt der Aufforderung, das Menü zu suchen. */
-.setblock{border-top:1px solid var(--rule);margin-top:6px;padding-top:13px}
-.setblock h4,.setsec{margin:0 0 9px;font-family:var(--mono);font-size:11px;font-weight:600;
+.setsec{margin:0 0 9px;font-family:var(--mono);font-size:11px;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
 /* Abschnitt innerhalb eines Reiters. Der erste braucht keinen Abstand nach
    oben, die folgenden schon — sonst kleben sie an der Zeile darüber. */
@@ -1859,6 +1864,8 @@ en:{
   "Nur Text übernehmen":"Keep text only",
   "Rechtschreibprüfung":"Spell check",
   "Rechtschreibprüfung&hellip;":"Spell check&hellip;",
+  "Nicht gesichert":"Not saved",
+  "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Browser storage will not accept anything more. Save via File → Save everything as a file.",
   "Autokorrektur":"AutoCorrect",
   "Beim Tippen":"While typing",
   "Anführungszeichen":"Quotation marks",
@@ -2501,6 +2508,8 @@ fr:{
   "Nur Text übernehmen":"Conserver le texte seul",
   "Rechtschreibprüfung":"Vérification orthographique",
   "Rechtschreibprüfung&hellip;":"Vérification orthographique&hellip;",
+  "Nicht gesichert":"Non enregistré",
+  "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Le stockage du navigateur n’accepte plus rien. Enregistrez via Fichier → Tout enregistrer dans un fichier.",
   "Autokorrektur":"Correction automatique",
   "Beim Tippen":"Pendant la frappe",
   "Anführungszeichen":"Guillemets",
@@ -3143,6 +3152,8 @@ es:{
   "Nur Text übernehmen":"Mantener solo el texto",
   "Rechtschreibprüfung":"Revisión ortográfica",
   "Rechtschreibprüfung&hellip;":"Revisión ortográfica&hellip;",
+  "Nicht gesichert":"Sin guardar",
+  "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"El almacenamiento del navegador ya no acepta nada. Guarda mediante Archivo → Guardar todo como archivo.",
   "Autokorrektur":"Autocorrección",
   "Beim Tippen":"Al escribir",
   "Anführungszeichen":"Comillas",
@@ -3785,6 +3796,8 @@ pt:{
   "Nur Text übernehmen":"Manter somente o texto",
   "Rechtschreibprüfung":"Verificação ortográfica",
   "Rechtschreibprüfung&hellip;":"Verificação ortográfica&hellip;",
+  "Nicht gesichert":"Não guardado",
+  "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"O armazenamento do navegador não aceita mais nada. Guarde em Ficheiro → Guardar tudo como ficheiro.",
   "Autokorrektur":"Correção automática",
   "Beim Tippen":"Ao digitar",
   "Anführungszeichen":"Aspas",
@@ -4427,6 +4440,8 @@ pl:{
   "Nur Text übernehmen":"Zachowaj tylko tekst",
   "Rechtschreibprüfung":"Sprawdzanie pisowni",
   "Rechtschreibprüfung&hellip;":"Sprawdzanie pisowni&hellip;",
+  "Nicht gesichert":"Niezapisane",
+  "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Pamięć przeglądarki nie przyjmuje już nic. Zapisz przez Plik → Zapisz wszystko do pliku.",
   "Autokorrektur":"Autokorekta",
   "Beim Tippen":"Podczas pisania",
   "Anführungszeichen":"Cudzysłowy",
@@ -4706,12 +4721,13 @@ function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}
   return mem||null}
 let storageOk=true;
 function save(){const s=JSON.stringify(S);mem=JSON.parse(s);
-  try{localStorage.setItem(KEY,s);if(!storageOk){storageOk=true}}
+  try{localStorage.setItem(KEY,s);if(!storageOk){storageOk=true;drawStatus()}return true}
   catch(e){
     if(storageOk){storageOk=false;
       setTimeout(()=>toast(String(e).includes("quota")||String(e).includes("Quota")
         ?tr("Speicher voll — bitte über Datei → Alles sichern als Datei auslagern")
         :tr("Browser-Speicher nicht verfügbar — bitte regelmäßig als Datei sichern")),400)}
+    return false;
   }}
 
 const uid=()=>Math.random().toString(36).slice(2,9);
@@ -6136,9 +6152,11 @@ function drawStatus(){
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
     <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki")}</span>
     <span class="grow"></span>
-    <span title="${esc(saveHint())}">
-      <span class="dot ${dirty?"dirty":""}"></span>${
-      dirty?tr("Wird gesichert…"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Alles gesichert"))}</span>
+    <span title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei."))}"
+      ${storageOk?"":'class="savefail"'}>
+      <span class="dot ${storageOk?(dirty?"dirty":""):"fail"}"></span>${
+      !storageOk?tr("Nicht gesichert")
+      :dirty?tr("Wird gesichert…"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Alles gesichert"))}</span>
     ${S.mode==="write"?`<span class="zoomctl" id="zoomctl">
       <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
       <button id="zVal" title="${tr("Zoomstufe wählen")}">${Math.round(S.zoom*100)} %</button>
@@ -6223,6 +6241,19 @@ function saveHint(){
   return wo+" "+tr("Zwischenstand")+": "+tr(t[0])+".";
 }
 function merkeGesichert(){
+  /* Nur melden, was auch stimmt: hat der Browserspeicher die Schreibung
+     abgelehnt (voll, privater Modus, Speicher gesperrt), stand hier vorher
+     trotzdem „Gesichert 14:32" samt Uhrzeit — die Zusicherung, auf die man
+     sich beim Schreiben verlässt, für etwas, das nie geschrieben wurde.
+     dirty bleibt in dem Fall stehen, damit der nächste Versuch es erneut
+     probiert, und die Statuszeile zeigt die Warnung dauerhaft statt einmalig. */
+  if(!storageOk){
+    /* Eine verbundene Datei ist ein eigener, echter Speicherort und wird
+       weiterhin geschrieben - sie ist dann die einzige Sicherung. */
+    queueFileWrite();
+    drawStatus();
+    return;
+  }
   dirty=false;
   lastSaved=new Date().toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
   /* Ist eine Datei verbunden, wird sie mitgeschrieben — der Browserspeicher
@@ -10834,10 +10865,14 @@ function cleanDialog(){
       return`<div class="spellbig">${tr("Nichts zu bereinigen gefunden.")}</div>
         <div class="fmttip">${tr("Geprüft wurden doppelte und geschützte Leerzeichen, Leerzeichen am Zeilenende und mehrfach leere Absätze.")}</div>`;
     if(cleanState!=="run"||!cleanHits.length)return"";
+    /* Ohne diese Zeile gab es #clCount gar nicht: paint() suchte den Zähler,
+       fand ihn nie und ließ es wegen der if(cnt)-Absicherung lautlos bleiben —
+       während dieselbe Anzeige in der Rechtschreibprüfung funktioniert. */
+    const kopf=`<div class="spellbar"><span class="spellcount" id="clCount"></span></div>`;
     const h=cleanHits[cleanIdx];
     if(h.kind==="para"){
       const n=h.group.length;   /* die Gesamtlänge des Laufs — zwei davon bleiben stehen */
-      return`<div class="spellsub">${KIND.para()}</div>
+      return kopf+`<div class="spellsub">${KIND.para()}</div>
         <div class="spellctx">${PL(
           `${n} aufeinanderfolgende leere Absätze werden auf zwei gekürzt.`,
           `${n} consecutive empty paragraphs will be reduced to two.`,
@@ -10847,7 +10882,7 @@ function cleanDialog(){
           `${n} kolejnych pustych akapitów zostanie skróconych do dwóch.`)}</div>`;
     }
     const c=cleanContextText(h);
-    return`<div class="spellsub">${KIND[h.kind]()}</div>
+    return kopf+`<div class="spellsub">${KIND[h.kind]()}</div>
       <div class="spellctx cleanctx">${esc(c.pre)}<b>${esc(c.mid)}</b>${esc(c.post)}</div>`;
   };
   const foot=()=>{
