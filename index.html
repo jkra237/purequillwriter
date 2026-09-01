@@ -5111,9 +5111,7 @@ function tabContextMenu(e,id){
         padding:0;background:${x.c};border:1px solid rgba(0,0,0,.25);${d.tabColor===x.c?"box-shadow:0 0 0 2px var(--stamp);":""}"></button>`).join("")}
     </div>`;
   document.body.appendChild(m);
-  const w=m.offsetWidth,h=m.offsetHeight;
-  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
-  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  menuPlatzieren(m,e.clientX,e.clientY);
   m.onclick=ev=>{
     const rb=ev.target.closest("[data-ta]");
     if(rb){closeMenu();renameTab(id);return}
@@ -5529,8 +5527,7 @@ function sizeMenu(e){
     `<button class="mi" data-fs="${x}"><span class="chk">${x==akt?"✓":""}</span>${x}</button>`).join("");
   document.body.appendChild(m);
   const r=e.currentTarget.getBoundingClientRect();
-  m.style.left=Math.min(r.left,innerWidth-m.offsetWidth-8)+"px";
-  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+"px";
+  menuPlatzieren(m,r.left,r.bottom+4,r);
   m.onclick=ev=>{const b=ev.target.closest("[data-fs]");if(!b)return;
     closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
 }
@@ -5636,8 +5633,7 @@ function colorMenu(e,art){
       art==="fore"?tr("Farbe entfernen"):tr("Hervorhebung entfernen")}</button>`;
   document.body.appendChild(m);
   const r=e.currentTarget?e.currentTarget.getBoundingClientRect():{left:e.clientX,bottom:e.clientY};
-  m.style.left=Math.min(r.left,innerWidth-m.offsetWidth-8)+"px";
-  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+"px";
+  menuPlatzieren(m,r.left,r.bottom+4,r);
   /* Auswahl im Editor darf beim Klicken nicht verlorengehen */
   m.addEventListener("mousedown",ev=>{if(ev.target.type!=="color")ev.preventDefault()});
   m.onclick=ev=>{
@@ -6041,9 +6037,7 @@ function collContextMenu(e,id){
     <div class="msep"></div>
     <button class="mi" data-ca="del"><span class="chk"></span>${tr("Glossar löschen")}&hellip;</button>`;
   document.body.appendChild(m);
-  const w=m.offsetWidth,h=m.offsetHeight;
-  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
-  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  menuPlatzieren(m,e.clientX,e.clientY);
   m.onclick=ev=>{
     const rb=ev.target.closest('[data-ca="rename"]');
     if(rb){closeMenu();renameGlossColl(id);return}
@@ -6115,9 +6109,7 @@ function assignMenu(e,gid){
     <div class="msep"></div>
     <button class="mi" data-ad="none">${c(keine)}${tr("Ohne Zuordnung")}</button>`;
   document.body.appendChild(m);
-  const w=m.offsetWidth,h=m.offsetHeight;
-  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
-  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  menuPlatzieren(m,e.clientX,e.clientY);
   m.onclick=ev=>{
     const b=ev.target.closest("[data-ad]");if(!b)return;
     if(b.dataset.ad==="none")S.docs.forEach(d=>{if(d.glossaryId===gid)d.glossaryId=null});
@@ -7450,8 +7442,9 @@ function pasteBarShow(snapshot,pos,text){
     r=rects.length?rects[rects.length-1]:s.getRangeAt(0).getBoundingClientRect();
   }
   if(!r||(!r.width&&!r.height&&!r.top))r=ed.getBoundingClientRect();
-  bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bar.offsetWidth-10))+"px";
-  bar.style.top=Math.min(r.bottom+6,innerHeight-bar.offsetHeight-8)+"px";
+  /* Mit Anker: reicht der Platz darunter nicht, klappt die Leiste darüber auf,
+     statt sich an den unteren Rand zu kleben und die Auswahl zu überdecken. */
+  menuPlatzieren(bar,r.left,r.bottom+6,r);
   $("#pbPlain").onclick=pasteBarPlain;
   $("#pbClose").onclick=pasteBarClose;
   /* Erst im nächsten Durchlauf anmelden: das Einfügen selbst löst noch ein
@@ -8118,6 +8111,44 @@ function confirmReplace(onOk){
 }
 function closeMenu(){document.querySelectorAll(".menu").forEach(m=>m.remove());
   document.querySelectorAll(".filebtn").forEach(b=>b.classList.remove("on"))}
+/* Ein Aufklappfenster ganz sichtbar setzen — der eine Ort, an dem das
+   gerechnet wird. Vorher stand die Rechnung an einem Dutzend Stellen leicht
+   abweichend, und fast alle prüften nur gegen die rechte und untere Kante:
+   `Math.min(x, innerWidth-breite-8)` ohne unteres Halt wird negativ, sobald
+   das Menü breiter als das Fenster ist oder der Anker weit rechts sitzt —
+   dann steht es links draußen. Zwei Stellen deckelten gar nicht nach unten,
+   eine rechnete mit einer fest eingetragenen Breite statt der gemessenen.
+
+   `anker` ist wahlweise das Rechteck des auslösenden Elements: passt das
+   Menü darunter nicht mehr, klappt es darüber auf, statt sich an den unteren
+   Rand zu quetschen. Ist es höher als das Fenster, bekommt es einen
+   Rollbalken — sonst wären die untersten Einträge unerreichbar. */
+const OVLRAND=8;
+/* Die Menüs der Kopfleiste hängen über CSS an `top:100%` unter ihrem Knopf und
+   setzten in JS nur `left` — nach unten war gar nichts begrenzt. Auf einem
+   kleinen Fenster lief das Datei-Menü über zweihundert Pixel unter den
+   Bildschirmrand, die untersten Einträge waren schlicht nicht erreichbar.
+   Sie sind absolut im Kopfbereich positioniert, nicht im Fenster, und
+   brauchen deshalb eine eigene Rechnung statt menuPlatzieren. */
+function menuUnterKnopf(m,btn){
+  if(!m||!btn)return;
+  m.style.left=btn.offsetLeft+"px";
+  const r=m.getBoundingClientRect();
+  const platz=innerHeight-r.top-OVLRAND;
+  if(r.height>platz){m.style.maxHeight=Math.max(140,platz)+"px";m.style.overflowY="auto"}
+  /* Stößt es rechts an, um genau den Überstand nach links rücken */
+  const ueber=r.right-(innerWidth-OVLRAND);
+  if(ueber>0)m.style.left=Math.max(OVLRAND,btn.offsetLeft-ueber)+"px";
+}
+function menuPlatzieren(m,x,y,anker){
+  const maxH=innerHeight-2*OVLRAND;
+  if(m.offsetHeight>maxH){m.style.maxHeight=maxH+"px";m.style.overflowY="auto"}
+  const w=m.offsetWidth,h=Math.min(m.offsetHeight,maxH);
+  let oben=y;
+  if(anker&&oben+h>innerHeight-OVLRAND&&anker.top-h-4>=OVLRAND)oben=anker.top-h-4;
+  m.style.left=Math.max(OVLRAND,Math.min(x,innerWidth-w-OVLRAND))+"px";
+  m.style.top=Math.max(OVLRAND,Math.min(oben,innerHeight-h-OVLRAND))+"px";
+}
 /* Untermenüs eines bereits offenen Menüs klappen bei Hover auf, nicht erst
    beim Klick — wie bei nativen Menüs (Word, macOS-Menüleiste). Das
    Erstöffnen von Datei/Ansicht/Format/Werkzeuge selbst bleibt Klick, nur
@@ -8135,7 +8166,6 @@ function fileMenu(){
   closeMenu();
   const s=S.settings,K=tr("Strg");
   const m=document.createElement("div");m.className="menu";m.id="fmenu";
-  m.style.left=$("#fileBtn").offsetLeft+"px";
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
@@ -8167,6 +8197,7 @@ function fileMenu(){
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
     <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>`;
   $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
+  menuUnterKnopf(m,$("#fileBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
     const a=b.dataset.act;
@@ -8194,8 +8225,9 @@ function openSubMenu(anchor,items,cb=runFileAct){
   /* Knapp anschließend statt tief überlappend, wie bei Google Docs -
      nur 1px Überdeckung, damit sich die Ränder ohne sichtbare Lücke oder
      Doppelkante treffen. */
-  m.style.left=Math.max(8,Math.min(r.right-1,innerWidth-m.offsetWidth-8))+"px";
-  m.style.top=Math.max(8,Math.min(r.top-4,innerHeight-m.offsetHeight-8))+"px";
+  /* Ohne Anker: ein seitliches Untermenü soll nicht nach oben klappen,
+     sondern nur nach oben rutschen — genau das macht die Deckelung. */
+  menuPlatzieren(m,r.right-1,r.top-4);
   m.onclick=e=>{const b=e.target.closest("[data-sub]");if(!b)return;
     closeMenu();cb(b.dataset.sub)};
 }
@@ -8227,7 +8259,6 @@ function viewMenu(){
   if($("#vmenu")){closeMenu();return}
   closeMenu();
   const m=document.createElement("div");m.className="menu";m.id="vmenu";
-  m.style.left=$("#viewBtn").offsetLeft+"px";
   const c=v=>v?"&#10003;":"";
   m.innerHTML=`
     <div class="mlabel">${tr("Seite")}</div>
@@ -8250,6 +8281,7 @@ function viewMenu(){
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
     <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>`;
   $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
+  menuUnterKnopf(m,$("#viewBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
     const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo"].includes(a);
@@ -8278,7 +8310,6 @@ function formatMenu(){
   if($("#fmtmenu")){closeMenu();return}
   closeMenu();
   const m=document.createElement("div");m.className="menu";m.id="fmtmenu";
-  m.style.left=$("#formatBtn").offsetLeft+"px";
   m.innerHTML=`
     <button class="mi" data-f="text"><span class="chk"></span>${tr("Text")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="fore"><span class="chk"></span>${tr("Schriftfarbe")}&hellip;</button>
@@ -8296,6 +8327,7 @@ function formatMenu(){
     <div class="msep"></div>
     <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
   $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");armHoverSubs(m);
+  menuUnterKnopf(m,$("#formatBtn"));
   /* Zustand fürs Häkchen im Menü: dieselbe queryCommandState()-Abfrage, die
      schon die Symbolleiste synchron hält (syncToolbarState) - hier nur
      zusätzlich fürs Format-Menü ausgelesen, statt nur für die Toolbar. */
@@ -8375,7 +8407,6 @@ function toolsMenu(){
   if($("#toolsmenu")){closeMenu();return}
   closeMenu();
   const m=document.createElement("div");m.className="menu";m.id="toolsmenu";
-  m.style.left=$("#toolsBtn").offsetLeft+"px";
   const c=v=>v?"&#10003;":"";
   m.innerHTML=`
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
@@ -8389,6 +8420,7 @@ function toolsMenu(){
     ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
+  menuUnterKnopf(m,$("#toolsBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-t]");if(!b)return;
     closeMenu();
@@ -8449,9 +8481,7 @@ function contextMenu(e){
     :""}
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen&hellip;")}</button>`;
   document.body.appendChild(m);armHoverSubs(m);
-  const w=m.offsetWidth,h=m.offsetHeight;
-  m.style.left=Math.min(e.clientX,innerWidth-w-8)+"px";
-  m.style.top=Math.min(e.clientY,innerHeight-h-8)+"px";
+  menuPlatzieren(m,e.clientX,e.clientY);
   const anchId=onAnch?onAnch.dataset.n:null;
   const selText=hasSel?sel.toString().trim():"";
   m.onclick=ev=>{
@@ -9517,8 +9547,7 @@ function tablePicker(){
     <button class="mi" data-t="head"><span class="chk"></span>${tr("Erste Zeile als Kopfzeile")}</button>`;
   document.body.appendChild(m);
   const r0=$("#tblBtn").getBoundingClientRect();
-  m.style.left=Math.min(r0.left,innerWidth-m.offsetWidth-8)+"px";
-  m.style.top=(r0.bottom+5)+"px";
+  menuPlatzieren(m,r0.left,r0.bottom+5,r0);
   let head=false;
   const g=$("#tgrid"),lab=$("#tlabel");
   g.onmouseover=e=>{
@@ -11469,8 +11498,7 @@ function slashOpen(q){
     `<button class="mi ${i===slashIdx?"on":""}" data-s="${i}" style="${i===slashIdx?"background:var(--chrome)":""}">
       <span class="chk"></span>${tr(x.n)}</button>`).join("");
   const r=slashBlock.getBoundingClientRect();
-  m.style.left=Math.min(r.left,innerWidth-236)+"px";
-  m.style.top=Math.min(r.bottom+4,innerHeight-m.offsetHeight-8)+"px";
+  menuPlatzieren(m,r.left,r.bottom+4,r);
   m.onmousedown=e=>e.preventDefault();
   m.onclick=e=>{const b=e.target.closest("[data-s]");if(b)slashRun(+b.dataset.s)};
   slashOn=true;
@@ -11931,8 +11959,9 @@ function drawImgBar(){
     <button class="pill" data-ic="del">${tr("Löschen")}</button>`;
   bar.classList.add("on");
   const r=f.getBoundingClientRect();
-  bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bar.offsetWidth-10))+"px";
-  bar.style.top=Math.min(r.bottom+6,innerHeight-bar.offsetHeight-8)+"px";
+  /* Mit Anker: reicht der Platz darunter nicht, klappt die Leiste darüber auf,
+     statt sich an den unteren Rand zu kleben und die Auswahl zu überdecken. */
+  menuPlatzieren(bar,r.left,r.bottom+6,r);
   placeFigHandle();
 }
 function imgApply(){flush();dirty=true;commit();queuePaginate();drawImgBar()}
