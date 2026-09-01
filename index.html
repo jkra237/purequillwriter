@@ -955,7 +955,7 @@ body.focus .outline{display:none}
    des Schemas stehen. */
 .htopic.on{background:var(--chrome);color:var(--ink);font-weight:600;
   box-shadow:inset 3px 0 0 var(--stamp)}
-.hsearch{width:calc(100% - 24px);margin:2px 12px 10px;padding:5px 8px;
+.helpnav .hsearch{display:block;width:calc(100% - 24px);margin:2px 12px 10px;padding:5px 8px;
   border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink)}
 .hidx{display:flex;flex-direction:column;padding:4px 14px;cursor:pointer;font-size:13px}
 .hidx:hover{background:var(--chrome)}
@@ -964,7 +964,8 @@ body.focus .outline{display:none}
 .hfind:hover{background:var(--chrome)}
 .hfind.on{background:var(--chrome);box-shadow:inset 3px 0 0 var(--stamp)}
 .hfind b{display:block;font-size:13px;color:var(--ink)}
-.hfind span{display:block;font-size:11px;line-height:1.45;color:var(--ink-soft);margin-top:2px}
+.hfind span{display:block;font-size:11px;line-height:1.45;color:var(--ink-soft);margin-top:2px;
+  overflow-wrap:anywhere}
 .hcount,.hleer{padding:4px 14px 8px;font-size:11px;color:var(--ink-soft)}
 .hleer{line-height:1.5}
 /* Der Themenbereich ist Fließtext und darf ruhig anders gesetzt sein als die
