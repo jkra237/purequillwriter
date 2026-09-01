@@ -6941,10 +6941,43 @@ const DOCX_CONTENT_TYPES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?
 <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
 <Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>
 <Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>
+<Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/>
 </Types>`;
+/* Kopf- und Fußzeilen sind in einer .docx eigene Teildateien; das sectPr
+   verweist nur über eine Kennung darauf. Bisher schrieb der Export sie gar
+   nicht mit — eine Datei kam ohne ihre Kopfzeile bei Word an, obwohl sie
+   auf dem Bildschirm sichtbar war. Die Lücke war beidseitig.
+
+   Aus den Platzhaltern werden Word-Felder: eine feste Zahl wäre schon auf
+   der zweiten Seite falsch. {titel} zieht über die TITLE-Eigenschaft, die
+   dafür in docProps/core.xml stehen muss — sonst bliebe das Feld in Word
+   leer. */
+const HF_FELD=[[/^\{(?:seiten|pages)\}$/i," NUMPAGES "],[/^\{(?:seite|page)\}$/i," PAGE "],
+               [/^\{(?:titel|title)\}$/i," TITLE "],[/^\{(?:datum|date)\}$/i,' DATE \\@ "dd.MM.yyyy" ']];
+function hfLaufXml(text){
+  /* An den Platzhaltern zerteilen, damit der Text drumherum Text bleibt */
+  return String(text||"").split(/(\{[a-zA-Z]+\})/g).filter(x=>x!=="").map(teil=>{
+    for(const [rx,instr] of HF_FELD)
+      if(rx.test(teil))return `<w:fldSimple w:instr="${xesc(instr)}"><w:r><w:t>1</w:t></w:r></w:fldSimple>`;
+    return `<w:r><w:t xml:space="preserve">${xesc(teil)}</w:t></w:r>`;
+  }).join("");
+}
+function hfPartXml(d,which,groesse){
+  const hf=hfOf(d,which);
+  const tag=which==="hdr"?"hdr":"ftr";
+  const jc=hf.align==="left"?"left":hf.align==="right"?"right":"center";
+  const abs=String(hf.text||"").split("\n").map(zeile=>
+    `<w:p><w:pPr><w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${hfLaufXml(zeile)}</w:p>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:${tag} xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${abs||"<w:p/>"}</w:${tag}>`;
+}
+const coreXml=titel=>`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xesc(titel||"")}</dc:title></cp:coreProperties>`;
 const DOCX_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+<Relationship Id="rIdCore" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
 </Relationships>`;
 /* Zwei Ebenen genügen für das, was der Editor an Listen erzeugen kann - ein
    Aufzählungs- und ein Nummerierungs-abstractNum mit je vier Einzugsstufen. */
@@ -7070,8 +7103,16 @@ function inlineAblaufen(node,st,runs,links,ctx){
     /* Eine echte Fußnote statt der generischen sup-Behandlung weiter unten -
        Word verwaltet Nummerierung und Seitenzuordnung dann selbst. */
     if(tag==="sup"&&n.classList.contains("fn")&&ctx&&ctx.footnotes){
-      const fid=ctx.footnoteId++;
-      ctx.footnotes.push({id:fid,text:(ctx.footnoteLookup&&ctx.footnoteLookup.get(n.dataset.fn))||""});
+      /* Dieselbe Fußnote darf im Text an mehreren Stellen stehen — der
+         Editor nummeriert sie dann gleich (siehe renumberFootnotes). Ohne
+         diese Merkliste bekäme jede Marke eine eigene Word-Kennung, und aus
+         einer Fußnote würden beim Wiedereinlesen zwei mit gleichem Text. */
+      let fid=ctx.footnoteIds&&ctx.footnoteIds.get(n.dataset.fn);
+      if(!fid){
+        fid=ctx.footnoteId++;
+        if(ctx.footnoteIds)ctx.footnoteIds.set(n.dataset.fn,fid);
+        ctx.footnotes.push({id:fid,text:(ctx.footnoteLookup&&ctx.footnoteLookup.get(n.dataset.fn))||""});
+      }
       runs.push(`<w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="${fid}"/></w:r>`);
       return;
     }
@@ -7257,9 +7298,16 @@ async function exportDoc(){
     docSize:d.size||S.settings.size,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
-    footnoteId:1,footnotes:[],footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text]))};
+    footnoteId:1,footnotes:[],footnoteIds:new Map(),
+    footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text]))};
   const bodyXml=await walkBlocks(container,ctx);
-  const sectPr=`<w:sectPr><w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"/>`+
+  /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
+     Kopf und Fuß, dann die Maße. */
+  const hatHdr=hfOf(d,"hdr").on,hatFtr=hfOf(d,"ftr").on;
+  const sectPr=`<w:sectPr>`+
+    (hatHdr?'<w:headerReference w:type="default" r:id="rIdHdr"/>':"")+
+    (hatFtr?'<w:footerReference w:type="default" r:id="rIdFtr"/>':"")+
+    `<w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"${f.w>f.h?' w:orient="landscape"':""}/>`+
     `<w:pgMar w:top="${mmToTwip(f.m[0])}" w:right="${mmToTwip(f.m[1])}" w:bottom="${mmToTwip(f.m[2])}" w:left="${mmToTwip(f.m[3])}" `+
     `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/></w:sectPr>`;
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -7274,13 +7322,17 @@ async function exportDoc(){
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 <Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
 <Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>
+${hatHdr?'<Relationship Id="rIdHdr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>':""}
+${hatFtr?'<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>':""}
 ${hatFussnoten?'<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>':""}
 ${ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`).join("")}
 ${ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`).join("")}
 </Relationships>`;
-  const contentTypes=hatFussnoten
-    ?DOCX_CONTENT_TYPES.replace("</Types>",'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/></Types>')
-    :DOCX_CONTENT_TYPES;
+  const zusatz=
+    (hatFussnoten?'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>':"")+
+    (hatHdr?'<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>':"")+
+    (hatFtr?'<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>':"");
+  const contentTypes=zusatz?DOCX_CONTENT_TYPES.replace("</Types>",zusatz+"</Types>"):DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
   const eintraege=[
     {name:"[Content_Types].xml",bytes:enc.encode(contentTypes)},
@@ -7289,6 +7341,9 @@ ${ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlforma
     {name:"word/styles.xml",bytes:enc.encode(stylesXml(d))},
     {name:"word/numbering.xml",bytes:enc.encode(numberingXml())},
     {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
+    {name:"docProps/core.xml",bytes:enc.encode(coreXml(d.title))},
+    ...(hatHdr?[{name:"word/header1.xml",bytes:enc.encode(hfPartXml(d,"hdr",ctx.docSize))}]:[]),
+    ...(hatFtr?[{name:"word/footer1.xml",bytes:enc.encode(hfPartXml(d,"ftr",ctx.docSize))}]:[]),
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
     ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[])
   ];
@@ -7639,8 +7694,8 @@ async function ladeDokumente(dateien){
     const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
     try{
       if(ZIPFORMATE.includes(ext)){
-        const html=await zipDokument(f.name,await f.arrayBuffer());
-        if(neuesDokumentAus(f.name,html))geladen++;else abgelehnt++;
+        const erg=await zipDokument(f.name,await f.arrayBuffer());
+        if(neuesDokumentAus(f.name,erg))geladen++;else abgelehnt++;
       }else{
         if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
       }
@@ -7676,12 +7731,19 @@ function dateiEingabeDialog(){
   i.click();
 }
 /* Gemeinsamer Abschluss für alle Formate */
-function neuesDokumentAus(name,html){
-  if(!html)return false;
+/* Nimmt entweder reines HTML oder ein Bündel aus dem Word-Leser: Seitenformat,
+   Kopf- und Fußzeile und Fußnoten gehören zum Dokument, nicht in seinen Text. */
+function neuesDokumentAus(name,erg){
+  const b=typeof erg==="string"?{html:erg}:(erg||{});
+  if(!b.html)return false;
   flush();
   const d=blankDoc(String(name).replace(/\.[^.]+$/,"").slice(0,60));
   d.customTitle=true;           /* Dateiname als Titel behalten */
-  d.html=html;
+  d.html=b.html;
+  if(b.fmt)d.fmt=b.fmt;
+  if(b.hdr)d.hdr=b.hdr;
+  if(b.ftr)d.ftr=b.ftr;
+  if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
   d.glossaryId=defaultGlossId();
   S.docs.push(d);S.active=d.id;
   save();render();
@@ -7912,19 +7974,157 @@ function docxListenStil(ebene){
   return{tag:"ol",ls:""};
 }
 
+/* --- Word: Seitenaufbau, Kopf- und Fußzeile, Fußnoten ---
+   Word rechnet in Twips (1/1440 Zoll); dieses Programm in Millimetern. */
+const TWIP_MM=25.4/1440;
+const twipMm=t=>Math.round((parseInt(t,10)||0)*TWIP_MM*10)/10;
+
+/* Das letzte sectPr im Rumpf gilt für das ganze Dokument. Frühere gehören zu
+   Abschnitten, die dieses Programm nicht kennt — es hat ein Format je
+   Dokument, nicht je Abschnitt. */
+function docxSect(body){
+  const eigen=[...body.children].filter(e=>e.localName==="sectPr");
+  if(eigen.length)return eigen[eigen.length-1];
+  const abs=[...body.children].filter(e=>e.localName==="p");
+  for(let i=abs.length-1;i>=0;i--){
+    const s=KIND(KIND(abs[i],"pPr"),"sectPr");if(s)return s;
+  }
+  return null;
+}
+/* Erst gegen die bekannten Formate prüfen. „DIN A4“ zu schreiben ist
+   nützlicher als ein eigenes Maß von 210×297 — es ist dasselbe Papier, und
+   nur unter dem Namen findet man es im Formatdialog wieder. Ein Millimeter
+   Spielraum, weil Word rundet. */
+function docxFormat(sect){
+  if(!sect)return null;
+  const sz=KIND(sect,"pgSz"),mar=KIND(sect,"pgMar");
+  if(!sz)return null;
+  let w=twipMm(xattrN(sz,"w")),h=twipMm(xattrN(sz,"h"));
+  if(!(w>0&&h>0))return null;
+  const quer=String(xattrN(sz,"orient")||"").toLowerCase()==="landscape";
+  if(quer&&w<h){const t=w;w=h;h=t}
+  const m=mar?[twipMm(xattrN(mar,"top")),twipMm(xattrN(mar,"right")),
+               twipMm(xattrN(mar,"bottom")),twipMm(xattrN(mar,"left"))]
+             :[25,20,25,25];
+  const hd=mar&&xattrN(mar,"header")!=null?twipMm(xattrN(mar,"header")):12;
+  const fd=mar&&xattrN(mar,"footer")!=null?twipMm(xattrN(mar,"footer")):12;
+  /* Negative Ränder (Word erlaubt sie) ergeben hier keine Seite */
+  const rand=m.map(v=>Math.max(0,v));
+  /* Auch quer prüfen: dieses Programm unterscheidet die Ausrichtung nur
+     über w>h, das Papier bleibt dasselbe. „DIN A4“ quer ist nützlicher als
+     ein namenloses Maß von 297×210. */
+  for(const k in FORMATS){
+    const f=FORMATS[k];
+    if((Math.abs(f.w-w)<=1&&Math.abs(f.h-h)<=1)||(Math.abs(f.w-h)<=1&&Math.abs(f.h-w)<=1))
+      return {...f,key:k,w,h,m:rand,hd,fd};
+  }
+  return {n:"Word-Vorlage",key:"docx",w,h,m:rand,hd,fd,d:""};
+}
+
+/* Kopf- und Fußzeilen stehen in eigenen Teildateien. Aus Word-Feldern werden
+   die Platzhalter dieses Programms: die zwischengespeicherte Zahl im Feld
+   ist der Stand von damals, der Platzhalter rechnet neu. */
+const DOCX_FELD=[[/\bNUMPAGES\b/i,"{seiten}"],[/\bPAGE\b/i,"{seite}"],
+                 [/\bTITLE\b/i,"{titel}"],[/\b(?:DATE|TIME|CREATEDATE|SAVEDATE)\b/i,"{datum}"]];
+const feldPlatzhalter=instr=>{
+  for(const [rx,ph] of DOCX_FELD)if(rx.test(instr))return ph;
+  return "";
+};
+function docxHfAbsatz(p){
+  let out="",imFeld=0,instr="",ergebnis=false;
+  [...p.children].forEach(el=>{
+    if(el.localName==="fldSimple"){
+      out+=feldPlatzhalter(String(xattrN(el,"instr")||""));return;
+    }
+    if(el.localName!=="r")return;
+    const fc=KIND(el,"fldChar");
+    if(fc){
+      const typ=String(xattrN(fc,"fldCharType")||"");
+      if(typ==="begin"){imFeld++;instr="";ergebnis=false}
+      else if(typ==="separate"){ergebnis=true;out+=feldPlatzhalter(instr)}
+      else if(typ==="end"){if(!ergebnis)out+=feldPlatzhalter(instr);imFeld=Math.max(0,imFeld-1);ergebnis=false}
+      return;
+    }
+    const it=KIND(el,"instrText");
+    if(it){instr+=it.textContent;return}
+    /* Zwischen „separate“ und „end“ steht das gespeicherte Ergebnis — das ist
+       schon durch den Platzhalter ersetzt und darf nicht doppelt erscheinen. */
+    if(imFeld&&ergebnis)return;
+    [...el.children].forEach(c=>{if(c.localName==="t")out+=c.textContent});
+  });
+  return out;
+}
+function docxHf(xml){
+  if(!xml)return null;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return null;
+  const abs=[...dom.documentElement.children].filter(e=>e.localName==="p");
+  if(!abs.length)return null;
+  const zeilen=abs.map(docxHfAbsatz);
+  const text=zeilen.join("\n").replace(/\n+$/,"");
+  if(!text.trim())return null;
+  const jc=xattrN(KIND(KIND(abs[0],"pPr"),"jc"),"val");
+  const aus=String(jc||"").toLowerCase();
+  return {on:true,text,
+    align:aus==="left"||aus==="start"?"left":aus==="right"||aus==="end"?"right":"center"};
+}
+/* Verweis über die Beziehungsdatei auflösen: sectPr nennt nur eine rId. */
+function docxRelZiel(relXml,id){
+  if(!relXml||!id)return null;
+  const dom=new DOMParser().parseFromString(relXml,"application/xml");
+  if(dom.querySelector("parsererror"))return null;
+  const r=[...dom.documentElement.children].find(e=>e.getAttribute("Id")===id);
+  const ziel=r&&r.getAttribute("Target");
+  if(!ziel||/^https?:/i.test(ziel))return null;
+  return "word/"+String(ziel).replace(/^\.?\//,"");
+}
+const hfRefId=(sect,art)=>{
+  if(!sect)return null;
+  const refs=[...sect.children].filter(e=>e.localName===art+"Reference");
+  const std=refs.find(e=>String(xattrN(e,"type")||"default")==="default")||refs[0];
+  return std?(std.getAttribute("r:id")||xattrN(std,"id")):null;
+};
+
+/* footnotes.xml: Kennung → Text. 0 und -1 sind die Trennlinien, kein Inhalt. */
+function docxFussnoten(xml){
+  const karte=new Map();
+  if(!xml)return karte;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return karte;
+  [...dom.documentElement.children].filter(e=>e.localName==="footnote").forEach(e=>{
+    const id=String(xattrN(e,"id")||"");
+    const typ=String(xattrN(e,"type")||"");
+    if(typ==="separator"||typ==="continuationSeparator"||id==="0"||id==="-1")return;
+    const text=[...e.children].filter(c=>c.localName==="p")
+      .map(p=>{let s="";p.querySelectorAll("*").forEach(n=>{if(n.localName==="t")s+=n.textContent});return s})
+      .join(" ").replace(/\s+/g," ").trim();
+    karte.set(id,text);
+  });
+  return karte;
+}
+
 function docxLauf(p,ktx){
   let out="";
   const grund=ktx?ktx.grund:{};
   [...p.children].forEach(el=>{
     if(el.localName==="hyperlink"){out+=docxLauf(el,ktx);return}
     if(el.localName!=="r")return;
-    let t="";
+    let t="",marke="";
     [...el.children].forEach(c=>{
       if(c.localName==="t")t+=xesc(c.textContent);
       else if(c.localName==="br")t+="<br>";
       else if(c.localName==="tab")t+=" ";
+      else if(c.localName==="footnoteReference"&&ktx&&ktx.fn){
+        const wid=String(xattrN(c,"id")||"");
+        if(ktx.fn.karte.has(wid)){
+          let id=ktx.fn.zu.get(wid);
+          if(!id){id=uid();ktx.fn.zu.set(wid,id);
+            ktx.fn.liste.push({id,text:ktx.fn.karte.get(wid)||""})}
+          marke+=`<sup class="fn" data-fn="${id}">*</sup>`;
+        }
+      }
     });
-    if(!t)return;
+    if(!t){out+=marke;return}
     const pr=KIND(el,"rPr");
     /* Vorgaben und Absatzvorlage stecken schon in „grund“; darüber die
        Zeichenvorlage des Laufs, zuletzt seine direkte Auszeichnung. */
@@ -7935,18 +8135,21 @@ function docxLauf(p,ktx){
     if(wirk.i)t="<i>"+t+"</i>";
     if(wirk.u)t="<u>"+t+"</u>";
     if(wirk.strike)t="<s>"+t+"</s>";
-    out+=t;
+    out+=t+marke;
   });
   return out;
 }
 
-function docxToHtml(xml,stilXml,numXml){
+function docxToHtml(xml,stilXml,numXml,zubehoer){
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return null;
   const body=[...dom.documentElement.children].find(e=>e.localName==="body");
   if(!body)return null;
   const {def,stile}=docxStile(stilXml);
   const nummern=docxNummern(numXml);
+  const z=zubehoer||{};
+  const grundGroesse=z.groesse||S.settings.size||11;
+  const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -7964,7 +8167,7 @@ function docxToHtml(xml,stilXml,numXml){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h})||"";
+    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,fn})||"";
     const numPr=KIND(pr,"numPr");
     if(numPr){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
@@ -7990,13 +8193,27 @@ function docxToHtml(xml,stilXml,numXml){
   };
   const tabelle=t=>{
     alleZu();
+    /* tblGrid steht in Twips, die colgroup dieses Programms in Prozent —
+       ein Verhältnis überlebt Zoom und einen Wechsel des Seitenformats,
+       ein absolutes Maß nicht. */
+    const grid=KIND(t,"tblGrid");
+    const spalten=grid?[...grid.children].filter(c=>c.localName==="gridCol")
+      .map(c=>parseInt(xattrN(c,"w"),10)||0):[];
+    const summe=spalten.reduce((a,b)=>a+b,0);
     let r="<table>";
+    if(spalten.length&&summe>0)
+      r+="<colgroup>"+spalten.map(w=>
+        `<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
     [...t.children].filter(x=>x.localName==="tr").forEach(tr=>{
-      r+="<tr>";
+      const th=KIND(KIND(tr,"trPr"),"trHeight");
+      const twip=th?parseInt(xattrN(th,"val"),10)||0:0;
+      /* Zeilenhöhen stehen hier in em, damit sie mit der Schriftgröße mitgehen */
+      const em=twip&&grundGroesse?Math.round(twip/20/grundGroesse*100)/100:0;
+      r+=em>0?`<tr style="height:${em}em">`:"<tr>";
       [...tr.children].filter(x=>x.localName==="tc").forEach(tc=>{
         const inner=[...tc.children].filter(x=>x.localName==="p").map(p=>{
           const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v))});
+          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),fn});
         }).join("<br>");
         r+="<td>"+(inner||"&nbsp;")+"</td>";
       });
@@ -8013,7 +8230,9 @@ function docxToHtml(xml,stilXml,numXml){
     else if(el.localName==="tbl"){tabelle(el);nachTabelle=true}
   });
   alleZu();
-  return out||null;
+  const sect=docxSect(body);
+  return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
+    hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer")};
 }
 
 /* --- OpenDocument (LibreOffice) --- */
@@ -8085,14 +8304,26 @@ async function zipDokument(name,buf){
     if(ext==="docx"){
       const xml=await zipEintrag(buf,"word/document.xml");
       if(!xml)return null;
-      /* Beide Nebendateien sind freiwillig: fehlt eine, fällt der Leser auf
+      /* Alle Nebendateien sind freiwillig: fehlt eine, fällt der Leser auf
          das zurück, was in document.xml selbst steht. */
-      const stil=await zipEintrag(buf,"word/styles.xml").catch(()=>null);
-      const num=await zipEintrag(buf,"word/numbering.xml").catch(()=>null);
-      return docxToHtml(xml,stil,num);
+      const hol=n=>zipEintrag(buf,n).catch(()=>null);
+      const stil=await hol("word/styles.xml");
+      const num=await hol("word/numbering.xml");
+      const fuss=await hol("word/footnotes.xml");
+      const erg=docxToHtml(xml,stil,num,{fussnoten:docxFussnoten(fuss)});
+      if(!erg||!erg.html)return null;
+      /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
+         sectPr nur über eine Kennung zeigt. */
+      const rel=await hol("word/_rels/document.xml.rels");
+      for(const [art,feld] of [["hdrId","hdr"],["ftrId","ftr"]]){
+        const ziel=docxRelZiel(rel,erg[art]);
+        if(ziel)erg[feld]=docxHf(await hol(ziel));
+      }
+      return erg;
     }
     const xml=await zipEintrag(buf,"content.xml");
-    return xml?odtToHtml(xml):null;
+    const html=xml?odtToHtml(xml):null;
+    return html?{html}:null;
   }catch(e){return null}
 }
 
@@ -13118,9 +13349,17 @@ nesting come with them.</p>
 <p>Word usually keeps such formatting in a <b>style</b> rather than on the words themselves,
 and PureQuill Writer resolves those styles when reading. That is why a document whose author
 worked with proper heading and body styles arrives looking the way it did in Word.</p>
-<p>What does not come across: pictures inside a .docx, footnotes, comments, tracked changes,
-text boxes, shapes and equations. Merged table cells become separate cells. The old binary
-.doc format from before 2007 cannot be read.</p>`},
+<p>The <b>page setup</b> comes with the document: paper size, orientation, the four margins
+and the distance of header and footer from the edge. A known paper is recognised by name, so
+an A4 document arrives as <i>A4</i> rather than as a nameless measurement.</p>
+<p><b>Header, footer and footnotes</b> are carried over as well. Word's page-number fields
+become this program's placeholders, so <code>{page}</code> keeps counting instead of arriving
+as the fixed number that happened to be stored in the file. Table column widths are read from
+the document and held as proportions, so they survive a change of paper size.</p>
+<p>What does not come across: pictures inside a .docx, comments, tracked changes, text boxes,
+shapes and equations. Merged table cells become separate cells. Documents split into several
+sections keep the setup of the last one, since a document here has one page format rather than
+one per section. The old binary .doc format from before 2007 cannot be read.</p>`},
 
  {t:"Exporting",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>File &rsaquo; Export</b> writes the document out for use elsewhere:</p>
@@ -13132,6 +13371,8 @@ text boxes, shapes and equations. Merged table cells become separate cells. The 
 <tr><td><b>Plain text</b></td><td>.txt</td></tr>
 <tr><td><b>Glossary as a table</b></td><td>.csv</td></tr>
 </table>
+<p>The Word export carries the page setup, header, footer and footnotes with it, and page
+numbers become Word fields that keep counting there.</p>
 <p>An export is for handing on. It cannot be read back in with everything intact — for that,
 use a backup.</p>`},
 
@@ -13604,9 +13845,19 @@ Tabellen und beide Arten von Liste — nummerierte bleiben nummeriert, samt ihre
 Wörtern selbst; PureQuill Writer löst diese Vorlagen beim Lesen auf. Deshalb kommt ein
 Dokument, dessen Verfasser ordentlich mit Überschriften- und Textvorlagen gearbeitet hat, so
 herein, wie es in Word aussah.</p>
-<p>Nicht mit herüber kommen: Bilder aus einer .docx, Fußnoten, Kommentare,
-Änderungsverfolgung, Textfelder, Formen und Formeln. Verbundene Tabellenzellen werden zu
-einzelnen Zellen. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
+<p>Der <b>Seitenaufbau</b> kommt mit: Papiergröße, Ausrichtung, die vier Ränder und der
+Abstand von Kopf- und Fußzeile zur Kante. Ein bekanntes Papier wird am Maß erkannt, ein
+A4-Dokument kommt also als <i>DIN A4</i> herein und nicht als namenloses Maß.</p>
+<p><b>Kopfzeile, Fußzeile und Fußnoten</b> werden ebenfalls übernommen. Aus Word-Feldern für
+die Seitenzahl werden die Platzhalter dieses Programms — <code>{seite}</code> zählt also
+weiter, statt als die eine Zahl anzukommen, die zufällig in der Datei stand.
+Spaltenbreiten von Tabellen werden gelesen und als Verhältnis gehalten, sie überstehen
+deshalb einen Wechsel des Seitenformats.</p>
+<p>Nicht mit herüber kommen: Bilder aus einer .docx, Kommentare, Änderungsverfolgung,
+Textfelder, Formen und Formeln. Verbundene Tabellenzellen werden zu einzelnen Zellen.
+Dokumente mit mehreren Abschnitten behalten den Aufbau des letzten, denn hier hat ein
+Dokument ein Seitenformat und nicht eines je Abschnitt. Das alte binäre .doc-Format von vor
+2007 lässt sich nicht lesen.</p>`},
 
  {t:"Exportieren",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>Datei &rsaquo; Exportieren</b> schreibt das Dokument zur Weitergabe heraus:</p>
@@ -13618,6 +13869,8 @@ einzelnen Zellen. Das alte binäre .doc-Format von vor 2007 lässt sich nicht le
 <tr><td><b>Nur Text</b></td><td>.txt</td></tr>
 <tr><td><b>Glossar als Tabelle</b></td><td>.csv</td></tr>
 </table>
+<p>Der Word-Export nimmt Seitenformat, Kopf- und Fußzeile und Fußnoten mit; die Seitenzahlen
+darin werden zu Word-Feldern und zählen dort weiter.</p>
 <p>Ein Export ist zum Weitergeben. Vollständig wieder einlesen lässt er sich nicht — dafür
 nimmst du eine Sicherung.</p>`},
 
