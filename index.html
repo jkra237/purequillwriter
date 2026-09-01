@@ -965,7 +965,7 @@ body.focus .outline{display:none}
 .hfind.on{background:var(--chrome);box-shadow:inset 3px 0 0 var(--stamp)}
 .hfind b{display:block;font-size:13px;color:var(--ink)}
 .hfind span{display:block;font-size:11px;line-height:1.45;color:var(--ink-soft);margin-top:2px}
-.hcount,.hleer{padding:4px 14px 8px;font-size:11px;color:var(--ink-faint)}
+.hcount,.hleer{padding:4px 14px 8px;font-size:11px;color:var(--ink-soft)}
 .hleer{line-height:1.5}
 /* Der Themenbereich ist Fließtext und darf ruhig anders gesetzt sein als die
    Bedienoberfläche — er wird gelesen, nicht bedient. */
@@ -987,7 +987,7 @@ body.focus .outline{display:none}
   line-height:1.5;color:var(--ink)}
 .hkeys td:first-child{white-space:nowrap;width:1%}
 .hwelcome{max-width:46em}
-.hnote{color:var(--ink-faint);font-size:12px!important;margin-top:18px!important}
+.hersatz{margin:0 16px 10px;padding:7px 10px;border:1px solid var(--line);border-radius:var(--radius);background:var(--chrome-2);color:var(--ink-soft);font-size:12px;line-height:1.45}
 @media (max-width:700px){
   .helpsplit{flex-direction:column;height:min(70vh,560px)}
   .helpnav{flex:0 0 180px;border-right:none;border-bottom:1px solid var(--rule)}
@@ -1656,7 +1656,7 @@ en:{
   "Seitenränder umschalten":"Toggle page margins",
   "Farbschema wählen":"Choose color scheme",
   "Schema: ":"Scheme: ",
-  "Wörter zählen&hellip;":"Count words&hellip;",
+  "Wörter zählen…":"Count words…",
   "Seitenzahlen umschalten":"Toggle page numbers",
   "Seitenbreite einpassen":"Fit to page width",
   "Silberton":"Silver tone",
@@ -1714,14 +1714,14 @@ en:{
   "OpenDocument und RTF":"OpenDocument and RTF",
   "Sicherung erstellen":"Create backup",
   "Teilsicherung":"Partial backup",
-  "Dokument laden&hellip;":"Load a document&hellip;",
+  "Dokument laden…":"Load a document…",
   "Dokument geladen":"Document loaded",
   "geladen":"loaded",
   "Diese Datei ließ sich nicht lesen":"This file could not be read",
   "Glossar als Tabelle":"Glossary as a table",
   "Dieses Dokument mit Notizen":"This document with its notes",
   "Nur Notizen und Glossar":"Notes and glossary only",
-  "Sicherung laden&hellip;":"Load a backup&hellip;",
+  "Sicherung laden…":"Load a backup…",
   "Dieses Dokument mit Notizen sichern":"Back up this document with its notes",
   "Nur Notizen und Glossar sichern":"Back up notes and glossary only",
   "Alles sichern — Vollsicherung":"Back up everything — full backup",
@@ -1773,6 +1773,16 @@ en:{
   "Einstellungen&hellip;":"Settings&hellip;",
   "Alle Befehle":"All commands",
   "Hilfe":"Help",
+  "Inhalt":"Contents",
+  "Stichwortverzeichnis":"Index",
+  "Erste Buchstaben eingeben":"Type the first letters",
+  "Ein Wort zum Nachschlagen eingeben":"Type a word to look for",
+  "Kein Eintrag passt dazu.":"No entry matches that.",
+  "Durchsucht wird der Text aller Themen, nicht nur die Überschriften.":"Every topic is searched, not just the headings.",
+  "PureQuill Writer Hilfe":"PureQuill Writer Help",
+  "Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.":"Choose a topic on the left. <b>Contents</b> is arranged as books you can open, <b>Index</b> is an alphabetical list of keywords, and <b>Find</b> searches the full text of every topic.",
+  "Neu hier? Beginne mit":"New here? Start with",
+  "Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt.":"This help is not available in your language yet and is shown in English.",
   "Seite":"Page",
   "Seitenränder":"Page margins",
   "Seitenzahlen":"Page numbers",
@@ -2322,7 +2332,7 @@ fr:{
   "Seitenränder umschalten":"Basculer les marges de page",
   "Farbschema wählen":"Choisir un thème de couleurs",
   "Schema: ":"Thème : ",
-  "Wörter zählen&hellip;":"Compter les mots&hellip;",
+  "Wörter zählen…":"Compter les mots…",
   "Seitenzahlen umschalten":"Basculer les numéros de page",
   "Seitenbreite einpassen":"Ajuster à la largeur de page",
   "Silberton":"Ton argenté",
@@ -2380,14 +2390,14 @@ fr:{
   "OpenDocument und RTF":"OpenDocument et RTF",
   "Sicherung erstellen":"Créer une sauvegarde",
   "Teilsicherung":"Sauvegarde partielle",
-  "Dokument laden&hellip;":"Charger un document&hellip;",
+  "Dokument laden…":"Charger un document…",
   "Dokument geladen":"Document chargé",
   "geladen":"chargé",
   "Diese Datei ließ sich nicht lesen":"Ce fichier n'a pas pu être lu",
   "Glossar als Tabelle":"Glossaire en tableau",
   "Dieses Dokument mit Notizen":"Ce document avec ses notes",
   "Nur Notizen und Glossar":"Notes et glossaire uniquement",
-  "Sicherung laden&hellip;":"Charger une sauvegarde&hellip;",
+  "Sicherung laden…":"Charger une sauvegarde…",
   "Dieses Dokument mit Notizen sichern":"Sauvegarder ce document avec ses notes",
   "Nur Notizen und Glossar sichern":"Sauvegarder uniquement notes et glossaire",
   "Alles sichern — Vollsicherung":"Tout sauvegarder — sauvegarde complète",
@@ -2439,6 +2449,16 @@ fr:{
   "Einstellungen&hellip;":"Paramètres&hellip;",
   "Alle Befehle":"Toutes les commandes",
   "Hilfe":"Aide",
+  "Inhalt":"Sommaire",
+  "Stichwortverzeichnis":"Index",
+  "Erste Buchstaben eingeben":"Saisissez les premières lettres",
+  "Ein Wort zum Nachschlagen eingeben":"Saisissez un mot à rechercher",
+  "Kein Eintrag passt dazu.":"Aucune entrée ne correspond.",
+  "Durchsucht wird der Text aller Themen, nicht nur die Überschriften.":"La recherche porte sur tout le texte, pas seulement les titres.",
+  "PureQuill Writer Hilfe":"Aide de PureQuill Writer",
+  "Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.":"Choisissez une rubrique à gauche. <b>Sommaire</b> se présente en livres à ouvrir, <b>Index</b> est une liste alphabétique de mots-clés, et <b>Rechercher</b> parcourt le texte de toutes les rubriques.",
+  "Neu hier? Beginne mit":"Nouveau ici ? Commencez par",
+  "Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt.":"Cette aide n'existe pas encore dans votre langue ; elle est affichée en anglais.",
   "Seite":"Page",
   "Seitenränder":"Marges de page",
   "Seitenzahlen":"Numéros de page",
@@ -2988,7 +3008,7 @@ es:{
   "Seitenränder umschalten":"Alternar márgenes de página",
   "Farbschema wählen":"Elegir esquema de color",
   "Schema: ":"Esquema: ",
-  "Wörter zählen&hellip;":"Contar palabras&hellip;",
+  "Wörter zählen…":"Contar palabras…",
   "Seitenzahlen umschalten":"Alternar números de página",
   "Seitenbreite einpassen":"Ajustar al ancho de página",
   "Silberton":"Tono plateado",
@@ -3046,14 +3066,14 @@ es:{
   "OpenDocument und RTF":"OpenDocument y RTF",
   "Sicherung erstellen":"Crear copia de seguridad",
   "Teilsicherung":"Copia de seguridad parcial",
-  "Dokument laden&hellip;":"Cargar documento&hellip;",
+  "Dokument laden…":"Cargar documento…",
   "Dokument geladen":"Documento cargado",
   "geladen":"cargado",
   "Diese Datei ließ sich nicht lesen":"Este archivo no se pudo leer",
   "Glossar als Tabelle":"Glosario como tabla",
   "Dieses Dokument mit Notizen":"Este documento con sus notas",
   "Nur Notizen und Glossar":"Solo notas y glosario",
-  "Sicherung laden&hellip;":"Cargar copia de seguridad&hellip;",
+  "Sicherung laden…":"Cargar copia de seguridad…",
   "Dieses Dokument mit Notizen sichern":"Guardar este documento con sus notas",
   "Nur Notizen und Glossar sichern":"Guardar solo notas y glosario",
   "Alles sichern — Vollsicherung":"Guardar todo — copia completa",
@@ -3105,6 +3125,16 @@ es:{
   "Einstellungen&hellip;":"Configuración&hellip;",
   "Alle Befehle":"Todos los comandos",
   "Hilfe":"Ayuda",
+  "Inhalt":"Contenido",
+  "Stichwortverzeichnis":"Índice",
+  "Erste Buchstaben eingeben":"Escriba las primeras letras",
+  "Ein Wort zum Nachschlagen eingeben":"Escriba una palabra a buscar",
+  "Kein Eintrag passt dazu.":"Ninguna entrada coincide.",
+  "Durchsucht wird der Text aller Themen, nicht nur die Überschriften.":"Se busca en todo el texto, no solo en los títulos.",
+  "PureQuill Writer Hilfe":"Ayuda de PureQuill Writer",
+  "Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.":"Elija un tema a la izquierda. <b>Contenido</b> está ordenado en libros que se abren, <b>Índice</b> es una lista alfabética de palabras clave, y <b>Buscar</b> recorre el texto de todos los temas.",
+  "Neu hier? Beginne mit":"¿Nuevo aquí? Empiece por",
+  "Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt.":"Esta ayuda aún no existe en su idioma y se muestra en inglés.",
   "Seite":"Página",
   "Seitenränder":"Márgenes de página",
   "Seitenzahlen":"Números de página",
@@ -3654,7 +3684,7 @@ pt:{
   "Seitenränder umschalten":"Alternar margens de página",
   "Farbschema wählen":"Escolher esquema de cores",
   "Schema: ":"Esquema: ",
-  "Wörter zählen&hellip;":"Contar palavras&hellip;",
+  "Wörter zählen…":"Contar palavras…",
   "Seitenzahlen umschalten":"Alternar números de página",
   "Seitenbreite einpassen":"Ajustar à largura da página",
   "Silberton":"Tom prateado",
@@ -3712,14 +3742,14 @@ pt:{
   "OpenDocument und RTF":"OpenDocument e RTF",
   "Sicherung erstellen":"Criar backup",
   "Teilsicherung":"Backup parcial",
-  "Dokument laden&hellip;":"Carregar documento&hellip;",
+  "Dokument laden…":"Carregar documento…",
   "Dokument geladen":"Documento carregado",
   "geladen":"carregado",
   "Diese Datei ließ sich nicht lesen":"Não foi possível ler este arquivo",
   "Glossar als Tabelle":"Glossário como tabela",
   "Dieses Dokument mit Notizen":"Este documento com suas notas",
   "Nur Notizen und Glossar":"Somente notas e glossário",
-  "Sicherung laden&hellip;":"Carregar backup&hellip;",
+  "Sicherung laden…":"Carregar backup…",
   "Dieses Dokument mit Notizen sichern":"Salvar este documento com suas notas",
   "Nur Notizen und Glossar sichern":"Salvar somente notas e glossário",
   "Alles sichern — Vollsicherung":"Salvar tudo — backup completo",
@@ -3771,6 +3801,16 @@ pt:{
   "Einstellungen&hellip;":"Configurações&hellip;",
   "Alle Befehle":"Todos os comandos",
   "Hilfe":"Ajuda",
+  "Inhalt":"Conteúdo",
+  "Stichwortverzeichnis":"Índice",
+  "Erste Buchstaben eingeben":"Digite as primeiras letras",
+  "Ein Wort zum Nachschlagen eingeben":"Digite uma palavra a procurar",
+  "Kein Eintrag passt dazu.":"Nenhuma entrada corresponde.",
+  "Durchsucht wird der Text aller Themen, nicht nur die Überschriften.":"A busca abrange todo o texto, não apenas os títulos.",
+  "PureQuill Writer Hilfe":"Ajuda do PureQuill Writer",
+  "Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.":"Escolha um tópico à esquerda. <b>Conteúdo</b> está organizado em livros que se abrem, <b>Índice</b> é uma lista alfabética de palavras-chave, e <b>Localizar</b> percorre o texto de todos os tópicos.",
+  "Neu hier? Beginne mit":"Novo aqui? Comece por",
+  "Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt.":"Esta ajuda ainda não existe no seu idioma e é exibida em inglês.",
   "Seite":"Página",
   "Seitenränder":"Margens de página",
   "Seitenzahlen":"Números de página",
@@ -4320,7 +4360,7 @@ pl:{
   "Seitenränder umschalten":"Przełącz marginesy strony",
   "Farbschema wählen":"Wybierz schemat kolorów",
   "Schema: ":"Schemat: ",
-  "Wörter zählen&hellip;":"Licz słowa&hellip;",
+  "Wörter zählen…":"Licz słowa…",
   "Seitenzahlen umschalten":"Przełącz numery stron",
   "Seitenbreite einpassen":"Dopasuj do szerokości strony",
   "Silberton":"Srebrny odcień",
@@ -4378,14 +4418,14 @@ pl:{
   "OpenDocument und RTF":"OpenDocument i RTF",
   "Sicherung erstellen":"Utwórz kopię zapasową",
   "Teilsicherung":"Kopia częściowa",
-  "Dokument laden&hellip;":"Wczytaj dokument&hellip;",
+  "Dokument laden…":"Wczytaj dokument…",
   "Dokument geladen":"Dokument wczytany",
   "geladen":"wczytano",
   "Diese Datei ließ sich nicht lesen":"Nie udało się odczytać tego pliku",
   "Glossar als Tabelle":"Słowniczek jako tabela",
   "Dieses Dokument mit Notizen":"Ten dokument z notatkami",
   "Nur Notizen und Glossar":"Tylko notatki i słowniczek",
-  "Sicherung laden&hellip;":"Wczytaj kopię zapasową&hellip;",
+  "Sicherung laden…":"Wczytaj kopię zapasową…",
   "Dieses Dokument mit Notizen sichern":"Zapisz kopię tego dokumentu z notatkami",
   "Nur Notizen und Glossar sichern":"Zapisz kopię tylko notatek i słowniczka",
   "Alles sichern — Vollsicherung":"Zapisz wszystko — pełna kopia zapasowa",
@@ -4437,6 +4477,16 @@ pl:{
   "Einstellungen&hellip;":"Ustawienia&hellip;",
   "Alle Befehle":"Wszystkie polecenia",
   "Hilfe":"Pomoc",
+  "Inhalt":"Spis treści",
+  "Stichwortverzeichnis":"Indeks",
+  "Erste Buchstaben eingeben":"Wpisz pierwsze litery",
+  "Ein Wort zum Nachschlagen eingeben":"Wpisz szukane słowo",
+  "Kein Eintrag passt dazu.":"Żaden wpis nie pasuje.",
+  "Durchsucht wird der Text aller Themen, nicht nur die Überschriften.":"Przeszukiwany jest cały tekst, nie tylko nagłówki.",
+  "PureQuill Writer Hilfe":"Pomoc PureQuill Writer",
+  "Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.":"Wybierz temat po lewej. <b>Spis treści</b> ułożony jest jak książki do otwarcia, <b>Indeks</b> to alfabetyczna lista haseł, a <b>Szukaj</b> przeszukuje tekst wszystkich tematów.",
+  "Neu hier? Beginne mit":"Nowy tutaj? Zacznij od",
+  "Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt.":"Ta pomoc nie jest jeszcze dostępna w Twoim języku i jest wyświetlana po angielsku.",
   "Seite":"Strona",
   "Seitenränder":"Marginesy strony",
   "Seitenzahlen":"Numery stron",
@@ -6665,7 +6715,7 @@ function commandList(){
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
   add("Ansicht","Farbschema wählen","",themeDialog);
   THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
-  add("Ansicht","Wörter zählen&hellip;","",()=>{
+  add("Ansicht","Wörter zählen…","",()=>{
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")});
   add("Ansicht","Seitenzahlen umschalten","",()=>{S.pagenum=S.pagenum===false;save();
     if(S.mode==="write")paginate()});
@@ -6705,7 +6755,7 @@ function commandList(){
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
   add("Dokument","Neues Dokument mit Format","Alt ⇧ D",newDocument);
-  add("Dokument","Dokument laden&hellip;","",loadDocumentFile);
+  add("Dokument","Dokument laden…","",loadDocumentFile);
   add("Dokument","Seitenformat ändern","",changeFormat);
   LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
     tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),"",()=>setLineHeight(v)));
@@ -6755,7 +6805,7 @@ function commandList(){
       const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,g.term);dirty=true;drawStatus()}}));
 
   add("Einstellungen","Einstellungen öffnen","",settings);
-  add("Einstellungen","Sicherung laden&hellip;","",importJson);
+  add("Einstellungen","Sicherung laden…","",importJson);
   add("Einstellungen",S.settings.typewriter===false?"Schreibmaschinen-Scrollen einschalten":"Schreibmaschinen-Scrollen ausschalten","",
     ()=>{S.settings.typewriter=S.settings.typewriter===false;save();
       toast(tr(S.settings.typewriter?"Schreibmaschinen-Scrollen an":"aus"))});
@@ -8233,7 +8283,7 @@ function fileMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
-    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Dokument laden&hellip;")}</button>
+    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Dokument laden…")}</button>
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
@@ -8245,15 +8295,8 @@ function fileMenu(){
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${K} P</span></button>
     <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
     <div class="msep"></div>
-    <div class="mlabel">${tr("Exportieren")}</div>
-    <button class="mi" data-act="docw"><span class="chk"></span>${tr("Word-Dokument")}<span class="k">.docx</span></button>
-    <button class="mi" data-act="pdf"><span class="chk"></span>${tr("Als PDF exportieren")}<span class="k">.pdf</span></button>
-    <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Weitere Formate")}&hellip;<span class="k">&rsaquo;</span></button>
-    <div class="msep"></div>
-    <div class="mlabel">${tr("Sicherung")}</div>
-    <button class="mi" data-act="ball"><span class="chk"></span>${tr("Sicherung erstellen")}<span class="k">.json</span></button>
-    <button class="mi" data-act="bmore"><span class="chk"></span>${tr("Teilsicherung")}&hellip;<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-act="open"><span class="chk"></span>${tr("Sicherung laden&hellip;")}<span class="k">.json</span></button>
+    <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Exportieren")}&hellip;<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-act="bmore"><span class="chk"></span>${tr("Sicherung")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="save"><span class="chk"></span>${tr("Jetzt sichern")}<span class="k">Alt ⇧ S</span></button>
     <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Zwischenstände")}
@@ -8267,16 +8310,23 @@ function fileMenu(){
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
     const a=b.dataset.act;
-    /* Die Untermenüs bündeln die selteneren Formate: die Liste bleibt kurz,
-       ohne dass eine Möglichkeit verschwindet. */
+    /* Die Untermenüs bündeln, was selten gebraucht wird und keinen Zustand
+       anzeigt: die Liste bleibt kurz, ohne dass eine Möglichkeit verschwindet.
+       Oben bleibt, was beim Öffnen etwas mitteilt — der Dateiname hinter „In
+       Datei speichern", der Takt hinter „Zwischenstände". Ein Untermenü wäre
+       für eine Zustandsanzeige der falsche Ort, weil man sie dort nicht sieht. */
     if(a==="expmore")return openSubMenu(b,[
+      {a:"docw",label:tr("Word-Dokument"),k:".docx"},
+      {a:"pdf",label:tr("Als PDF exportieren"),k:".pdf"},
       {a:"html",label:tr("Webseite"),k:".html"},
       {a:"md",label:"Markdown",k:".md"},
       {a:"txt",label:tr("Nur Text"),k:".txt"},
       {a:"csv",label:tr("Glossar als Tabelle"),k:".csv"}]);
     if(a==="bmore")return openSubMenu(b,[
+      {a:"ball",label:tr("Sicherung erstellen"),k:".json"},
       {a:"bdoc",label:tr("Dieses Dokument mit Notizen"),k:".json"},
-      {a:"bnotes",label:tr("Nur Notizen und Glossar"),k:".json"}]);
+      {a:"bnotes",label:tr("Nur Notizen und Glossar"),k:".json"},
+      {a:"open",label:tr("Sicherung laden…"),k:".json"}]);
     if(a==="auto"){s.autosave=!s.autosave;save();resetTimer();drawStatus();closeMenu();fileMenu();return}
     closeMenu();runFileAct(a);
   };
@@ -8546,7 +8596,7 @@ function contextMenu(e){
     <button class="mi" data-c="tblDel"><span class="chk"></span>${tr("Tabelle löschen")}</button>
     <div class="msep"></div>`
     :""}
-    <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen&hellip;")}</button>`;
+    <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen…")}</button>`;
   document.body.appendChild(m);armHoverSubs(m);
   menuPlatzieren(m,e.clientX,e.clientY);
   const anchId=onAnch?onAnch.dataset.n:null;
@@ -12547,7 +12597,11 @@ function zoomPresets(){
    Der Inhalt ist vorerst nur englisch und läuft deshalb nicht durch tr().
    Eine halb übersetzte Hilfe — deutsche Reiter über englischen Texten — wäre
    schlechter als eine durchgehend englische. */
-const HELPBOOKS=[
+/* Die Hilfe folgt der Oberflächensprache. Fehlt sie in einer Sprache, tritt
+   die englische Fassung ein — mit sichtbarem Hinweis, statt stillschweigend.
+   Der Inhalt läuft nicht über tr(): Schlüssel wären hier ganze Absätze, und
+   die Themen-Titel dienen zugleich als Ziel der Querverweise. */
+const HELPTEXTE={en:[
 {b:"Getting started",t:[
  {t:"About PureQuill Writer",k:"about;overview;introduction",b:`
 <p>PureQuill Writer is a word processor that runs entirely in your browser. There is
@@ -13008,10 +13062,516 @@ to the address you were using, or load a backup.</p>
 <p class="hsec">"File on disk" is greyed out</p>
 <p>Reading and writing real files needs Chrome or Edge. In other browsers, use <b>Create a
 backup</b> and <b>Load a backup</b> instead.</p>`}]}
-];
+],
+de:[
+{b:"Erste Schritte",t:[
+ {t:"Über PureQuill Writer",k:"über;überblick;einführung;was ist das",b:`
+<p>PureQuill Writer ist eine Textverarbeitung, die vollständig im Browser läuft. Es gibt
+nichts zu installieren und nichts anzumelden. Dein Text wird nirgendwohin gesendet.</p>
+<p>Das Programm ist für lange Texte gebaut — Manuskripte, Berichte, Abschlussarbeiten —
+und nicht für kurze Notizen. Drei Dinge unterscheiden es von einem einfachen Editor:</p>
+<ul>
+<li>Eine <b>echte Seite</b> in Millimetermaßen, die dem entspricht, was aus dem Drucker kommt.</li>
+<li>Eine <b>Pinnwand</b> für Notizen, die zur Arbeit gehören, aber nicht in den Text.</li>
+<li>Ein <b>Glossar</b> wiederkehrender Begriffe, die im Text markiert und beim Schreiben
+nachgeschlagen werden können.</li>
+</ul>
+<p>Siehe auch: <a data-goto="Die drei Ansichten">Die drei Ansichten</a>.</p>`},
+
+ {t:"Die drei Ansichten",k:"ansichten;modus;schreiben;notizen;glossar;wechseln",b:`
+<p>Die drei Knöpfe am linken Rand wechseln zwischen den Ansichten. Jede merkt sich ihren
+Zustand, du kannst also hin und her wechseln, ohne die Stelle zu verlieren.</p>
+<table class="hkeys">
+<tr><td><b>Schreiben</b></td><td><kbd>Alt</kbd>+<kbd>1</kbd></td><td>Das Dokument auf der Seite.</td></tr>
+<tr><td><b>Notizen</b></td><td><kbd>Alt</kbd>+<kbd>2</kbd></td><td>Die Pinnwand.</td></tr>
+<tr><td><b>Glossar</b></td><td><kbd>Alt</kbd>+<kbd>3</kbd></td><td>Deine Begriffssammlungen.</td></tr>
+</table>
+<p>Notizen und Glossareinträge gehören zum Programm, nicht zu einem einzelnen Dokument —
+sie stehen bereit, welches Dokument auch immer offen ist.</p>`},
+
+ {t:"Das erste Dokument",k:"neues dokument;anlegen;beginnen;reiter;umbenennen",b:`
+<p>Beim ersten Öffnen fragt das Programm nach Sprache und Farbschema und bietet dann ein
+neues Dokument oder eine vorhandene Datei an.</p>
+<p><b>Ein weiteres Dokument</b> legst du mit dem <b>+</b> rechts in der Reiterleiste an oder
+über <b>Datei &rsaquo; Neues Dokument</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd>). Zuerst
+wird nach dem Seitenformat gefragt; ändern lässt es sich jederzeit.</p>
+<p>Dokumente erscheinen als Reiter oben. Ziehen ordnet sie um. Ein Rechtsklick benennt um oder
+gibt eine Farbe. Wird der letzte Reiter geschlossen, kehrt der Startbildschirm zurück.</p>
+<p>Jedes Dokument behält seinen eigenen Titel, sein Seitenformat, seine Schrift und seinen
+Zeilenabstand. Änderungen daran betreffen nur das Dokument, in dem du gerade bist.</p>`},
+
+ {t:"Wo deine Arbeit liegt",k:"sichern;speicher;speicherort;browserspeicher;verlust",b:`
+<p>Dein Text wird fortlaufend beim Tippen gesichert. Es gibt keinen Speichern-Befehl, an den
+man denken müsste, und die Statuszeile unten rechts sagt jederzeit, woran man ist.</p>
+<p>Die Arbeit liegt an <b>drei Orten</b>, im Einstellungsdialog unter <b>Speichern</b>
+durchnummeriert:</p>
+<ol>
+<li><b>Dieser Browser</b> — immer, und alles. Hier liegt der Arbeitsstand. Er hängt an der
+Adresse, von der du das Programm geöffnet hast, und geht verloren, wenn du die Browserdaten
+löschst.</li>
+<li><b>Eine Datei auf der Festplatte</b> — freiwillig, und nur das Dokument, in dem du bist,
+samt der daran angehefteten Notizen.</li>
+<li><b>Automatische Sicherung</b> — freiwillig, und der ganze Programmstand: alle Dokumente,
+Notizen, Glossare und Einstellungen.</li>
+</ol>
+<p>Steht in der Statuszeile jemals <b>Nicht gesichert</b> in Rot, nimmt der Browser nichts
+mehr an. Dann sofort eine Sicherung anlegen und Platz schaffen.</p>
+<p>Siehe auch: <a data-goto="Automatische Sicherung">Automatische Sicherung</a>.</p>`}]},
+
+{b:"Schreiben",t:[
+ {t:"Tippen und Auszeichnen",k:"fett;kursiv;unterstrichen;durchgestrichen;schrift;größe;farbe;hervorhebung",b:`
+<p>Die Werkzeugleiste über der Seite trägt die Zeichenauszeichnung. Alles dort gilt für den
+markierten Text — oder für das, was du als Nächstes tippst, wenn nichts markiert ist.</p>
+<table class="hkeys">
+<tr><td>Fett</td><td><kbd>Strg</kbd>+<kbd>B</kbd></td></tr>
+<tr><td>Kursiv</td><td><kbd>Strg</kbd>+<kbd>I</kbd></td></tr>
+<tr><td>Unterstrichen</td><td><kbd>Strg</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Durchgestrichen</td><td>nur über die Leiste</td></tr>
+</table>
+<p><b>Die Schriftgröße</b> ist ein beschreibbares Feld: Über den Pfeil daneben wählst du einen
+der vorgegebenen Werte, oder du tippst eine beliebige Zahl zwischen 4 und 200 und drückst
+<kbd>Eingabe</kbd>. Die Pfeiltasten ändern in Einerschritten.</p>
+<p><b>Schriftfarbe</b> und <b>Hervorhebung</b> öffnen je eine Palette vorbereiteter Farben und
+einen Wähler für alles andere. Der Streifen unter dem Knopf zeigt die aktuelle Farbe.</p>
+<p>Eine Hervorhebung dunkelt zugleich die Schrift darüber ab, damit die Stelle auch auf den
+dunklen Farbschemata lesbar bleibt. Wer beides will, hebt zuerst hervor und färbt danach.</p>
+<p><b>Format &rsaquo; Formatierung entfernen</b> nimmt die Zeichenauszeichnung weg und lässt
+die Wörter stehen.</p>`},
+
+ {t:"Absätze und Überschriften",k:"überschrift;absatz;ausrichtung;einrücken;zeilenabstand;absatzabstand",b:`
+<p>Das Feld <b>Absatzformat</b> macht aus dem Absatz Fließtext oder eine von drei
+Überschriftsebenen. Aus Überschriften bauen sich Gliederung und Inhaltsverzeichnis — nimm
+also sie, statt eine Zeile nur größer und fett zu machen.</p>
+<table class="hkeys">
+<tr><td>Linksbündig</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Zentriert</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Rechtsbündig</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Blocksatz</td><td>nur über die Leiste</td></tr>
+</table>
+<p><b>Zum Einrücken</b> drückst du <kbd>Tab</kbd> am Absatzanfang;
+<kbd>⇧</kbd>+<kbd>Tab</kbd> nimmt es zurück. In einer Tabelle wechseln diese Tasten
+stattdessen die Zelle.</p>
+<p><b>Zeilenabstand</b> und <b>Absatzabstand</b> stehen im Format-Menü und gelten für das
+ganze Dokument, nicht für einzelne Absätze.</p>`},
+
+ {t:"Listen und Zitate",k:"liste;aufzählung;nummerierung;zitat;blockzitat;aufzählungszeichen",b:`
+<p>Eine Liste beginnst du über die Werkzeugleiste, über <b>Format</b> — oder indem du am
+Anfang eines leeren Absatzes <code>- </code> oder <code>1. </code> tippst. Mit dem Leerzeichen
+wird der Absatz zur Liste.</p>
+<p><kbd>Eingabe</kbd> beginnt den nächsten Punkt; auf einem leeren Punkt verlässt sie die
+Liste. <kbd>Tab</kbd> rückt einen Punkt eine Ebene ein.</p>
+<p><b>Format &rsaquo; Aufzählung</b> und <b>Nummerierung</b> bieten außerdem Zeichenstile —
+Punkt, Kreis, Quadrat, Strich und Haken für Aufzählungen; dezimal, mit Klammer, Buchstaben und
+römisch für Nummerierungen. Der Stil gilt für die Liste, in der du stehst, verschiedene Listen
+im Dokument dürfen also verschieden aussehen.</p>
+<p><b>Zitate</b> kommen aus <b>Format &rsaquo; Zitat</b> und haben drei Stile: Akzentlinie,
+getönter Block und typografische Marke. Zweimal <kbd>Eingabe</kbd> auf einer leeren Zitatzeile
+verlässt das Zitat.</p>`},
+
+ {t:"Tabellen",k:"tabelle;zeilen;spalten;zellen;kopfzeile",b:`
+<p>Eine Tabelle fügst du über den Knopf in der Werkzeugleiste ein — dort ziehst du im Raster
+die Größe auf — oder indem du am Anfang eines leeren Absatzes <code>/tabelle</code> tippst.</p>
+<p><kbd>Tab</kbd> springt zur nächsten Zelle; in der letzten hängt es eine Zeile an.
+<kbd>⇧</kbd>+<kbd>Tab</kbd> geht zurück.</p>
+<p><b>Ein Rechtsklick in der Tabelle</b> bringt die Befehle für Zeilen und Spalten: darüber
+oder darunter einfügen, links oder rechts einfügen, Zeile löschen, Spalte löschen, Tabelle
+löschen, und die erste Zeile zur Kopfzeile machen.</p>
+<p><b>Spaltenbreiten und Zeilenhöhen</b> änderst du, indem du die Grenze zwischen zwei Zellen
+ziehst. Breiten werden als Prozentwerte gehalten und überstehen deshalb Zoom und einen Wechsel
+des Seitenformats.</p>`},
+
+ {t:"Bilder",k:"bild;foto;grafik;bildunterschrift;alternativtext;größe ändern",b:`
+<p>Ein Bild fügst du über die Werkzeugleiste ein oder mit <code>/bild</code>. Die Datei wird im
+Dokument eingebettet und wandert damit in jede Sicherung mit — bedenke, dass einige große
+Fotos den Browserspeicher rasch füllen.</p>
+<p><b>Ein Klick auf ein Bild</b> wählt es aus. Eine kleine Leiste erscheint mit Ausrichtung,
+Bildunterschrift, Alternativtext für Screenreader und Löschen. Am runden Eckanfasser ziehst du
+die Größe.</p>
+<p>Eine Bildunterschrift lässt das Bild im <b>Abbildungsverzeichnis</b> mitzählen.</p>`},
+
+ {t:"Links und Seitenumbrüche",k:"link;verweis;url;seitenumbruch",b:`
+<p><b>Einen Link einfügen oder ändern</b>: Text markieren und
+<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>K</kbd> drücken, oder den Knopf in der Werkzeugleiste
+nehmen. Links öffnen in einem neuen Reiter.</p>
+<p><b>Ein Seitenumbruch</b> schiebt das Folgende auf eine neue Seite. Über den Knopf, mit
+<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Eingabe</kbd> oder mit <code>/umbruch</code>. Beim Schreiben
+zeigt er sich als beschriftete Linie, beim Drucken verschwindet er.</p>`},
+
+ {t:"Autokorrektur beim Tippen",k:"autokorrektur;anführungszeichen;gedankenstrich;großschreibung",b:`
+<p>Vier Korrekturen geschehen beim Tippen. Alle vier sind zunächst eingeschaltet und lassen
+sich einzeln unter <b>Einstellungen &rsaquo; Autokorrektur</b> abschalten.</p>
+<table class="hkeys">
+<tr><td><b>Anführungszeichen</b></td><td>Gerade werden zu typografischen.</td></tr>
+<tr><td><b>Gedankenstrich</b></td><td>Zwei Bindestriche werden zu einem Gedankenstrich.</td></tr>
+<tr><td><b>Großschreibung</b></td><td>Der erste Buchstabe eines Satzes wird groß.</td></tr>
+<tr><td><b>Listen</b></td><td><code>- </code> oder <code>1. </code> beginnt eine Liste.</td></tr>
+</table>
+<p>Welche Anführungszeichen gesetzt werden, richtet sich nach der <b>Rechtschreibsprache</b>,
+nicht nach der Sprache der Menüs — Deutsch und Polnisch öffnen unten, Französisch und Spanisch
+nehmen Guillemets, Englisch und Portugiesisch die oben stehenden. Ein Apostroph in „geht's"
+wird erkannt und bleibt ein Apostroph.</p>
+<p>Jede Korrektur lässt sich mit <kbd>Strg</kbd>+<kbd>Z</kbd> zurücknehmen wie jeder andere
+Tastendruck.</p>`}]},
+
+{b:"Die Seite",t:[
+ {t:"Seitenformat und Ränder",k:"seitenformat;papier;a4;brief;ränder;ausrichtung;maßeinheit",b:`
+<p><b>Datei &rsaquo; Seitenformat</b> legt Papiergröße, Ausrichtung und die vier Ränder für das
+Dokument fest, in dem du bist. Sechs Formate sind vorbereitet — DIN A4, Brief DIN 5008,
+Normseite, DIN A5, Taschenbuch und US Letter — und eigene Maße lassen sich eintragen.</p>
+<p>Gemessen wird in Millimetern, sofern du unter <b>Einstellungen &rsaquo; Allgemein</b> nicht
+auf Zoll umstellst.</p>
+<p><b>Linker und rechter Rand lassen sich auch im Lineal ziehen</b>, das über der Seite liegt.</p>
+<p>Das Häkchen <b>Als Standard</b> im Dialog sorgt dafür, dass neue Dokumente mit diesem Format
+beginnen.</p>`},
+
+ {t:"Kopf- und Fußzeile",k:"kopfzeile;fußzeile;platzhalter;von rand;höhe",b:`
+<p><b>Ein Doppelklick auf den oberen oder unteren Seitenrand</b> öffnet die Kopf- oder Fußzeile
+genau dort, wo sie steht. Eine kleine Leiste erscheint mit Ausrichtung, Platzhaltern und der
+Höhe.</p>
+<p>Vier Platzhalter werden auf jeder Seite ersetzt:</p>
+<table class="hkeys">
+<tr><td><code>{seite}</code></td><td>die Seitenzahl</td></tr>
+<tr><td><code>{seiten}</code></td><td>die Gesamtzahl der Seiten</td></tr>
+<tr><td><code>{titel}</code></td><td>der Dokumenttitel</td></tr>
+<tr><td><code>{datum}</code></td><td>das heutige Datum</td></tr>
+</table>
+<p><b>Die Höhe des Kopfzeilenbereichs</b> ist die Grenze zwischen ihm und dem Textkörper. Zieh
+den Griff auf dieser Grenze, oder trag einen Wert in der Leiste ein. Eine höhere Kopfzeile
+schiebt den Text nach unten; sie läuft nie darunter hindurch.</p>
+<p><b>Der Abstand zur Papierkante</b> — wo die Zeile selbst sitzt — gehört zum Seitenformat und
+wird unter <b>Datei &rsaquo; Seitenformat</b> neben den Rändern eingestellt.</p>
+<p><kbd>⇧</kbd>+<kbd>Eingabe</kbd> fügt eine zweite Zeile hinzu. <kbd>Tab</kbd> springt
+zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet.</p>`},
+
+ {t:"Seitenzahlen",k:"seitenzahlen;nummerierung;paginierung",b:`
+<p><b>Format &rsaquo; Seitenzahlen</b> schaltet eine schlichte Seitenzahl am Fuß jeder Seite
+ein und aus.</p>
+<p>Richtest du eine eigene Fußzeile mit <code>{seite}</code> ein, tritt diese an die Stelle der
+schlichten Zahl — beide erscheinen nie zugleich.</p>`},
+
+ {t:"Zoom und Seitenbreite",k:"zoom;vergrößern;verkleinern;einpassen;seitenbreite",b:`
+<p>Die Zoomsteuerung sitzt unten rechts. Ein Klick auf die Prozentzahl öffnet die Auswahl, in
+der auch ein eigener Wert eingetragen werden kann.</p>
+<table class="hkeys">
+<tr><td>Vergrößern</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>+</kbd></td></tr>
+<tr><td>Verkleinern</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Seitenbreite einpassen</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>0</kbd></td></tr>
+</table>
+<p>Ist <b>Seitenbreite einpassen</b> aktiv, folgt der Zoom dem Fenster, während du es
+veränderst. Eine Stufe von Hand zu setzen schaltet das ab.</p>`},
+
+ {t:"Drucken und Druckvorschau",k:"drucken;pdf;vorschau;pdf exportieren",b:`
+<p>Die <b>Druckvorschau</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd>) zeigt das Dokument
+genau so, wie es gedruckt wird — mit Seitenzahlen, Kopfzeilen und Rändern. Sie wird aus den
+Seiten gebaut, die du ohnehin siehst, deshalb können Vorschau und Papier nicht auseinandergehen.
+<kbd>Esc</kbd> schließt sie.</p>
+<p><b>Zum Drucken</b> drückst du <kbd>Strg</kbd>+<kbd>P</kbd> oder nimmst
+<b>Datei &rsaquo; Drucken</b>.</p>
+<p><b>Für ein PDF</b> wählst du <b>Datei &rsaquo; Exportieren &rsaquo; Als PDF exportieren</b>.
+Das öffnet denselben Druckdialog; als Ziel wählst du dort <i>Als PDF speichern</i>.</p>`}]},
+
+{b:"Arbeit an längeren Texten",t:[
+ {t:"Notizen auf der Pinnwand",k:"notizen;pinnwand;zettel;farben",b:`
+<p>Die Ansicht <b>Notizen</b> (<kbd>Alt</kbd>+<kbd>2</kbd>) ist eine Pinnwand für alles, was
+zur Arbeit gehört, aber nicht in den Text: offene Fragen, Recherchelinks, Erinnerungen.</p>
+<p><b>Eine Notiz anlegen</b> geht über den Knopf links in der Werkzeugleiste oder mit
+<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd> — das funktioniert auch mitten im Schreiben, ohne die
+Ansicht zu wechseln. Eine neue Notiz öffnet mit der Schreibmarke in der Überschrift.</p>
+<p><b>Ein Klick</b> öffnet eine Notiz in der Seitenleiste. <b>Ziehen</b> verschiebt sie; neue
+Notizen nehmen den ersten freien Platz oben links. Die Pinnwand scrollt mit, wenn du über ihren
+Rand hinausziehst.</p>
+<p>Notizen lassen sich aus sieben Farben am Fuß des Editors einfärben.</p>`},
+
+ {t:"Eine Notiz an eine Textstelle heften",k:"anheften;anker;verknüpfen;randnotizen;kommentar",b:`
+<p>Eine Notiz kann an eine oder mehrere Stellen im Text gebunden werden, wie ein Kommentar.</p>
+<p><b>Markiere die Stelle</b> und drücke <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd>, oder wähle
+es im Rechtsklickmenü. Die Stelle wird markiert, und die Notiz zeigt, an wie vielen Stellen sie
+hängt.</p>
+<p>Ist <b>Ansicht &rsaquo; Notizen am Seitenrand</b> eingeschaltet, erscheinen angeheftete
+Notizen beim Schreiben neben der Seite. Ein Klick springt zur Stelle; hängt eine Notiz an
+mehreren, schalten Pfeile zwischen ihnen um.</p>
+<p>Wird der markierte Text gelöscht, verschwindet die Notiz nicht — sie verliert nur diese
+Verknüpfung.</p>`},
+
+ {t:"Das Glossar",k:"glossar;begriffe;definitionen;nachschlagen;begriffe markieren",b:`
+<p>Die Ansicht <b>Glossar</b> (<kbd>Alt</kbd>+<kbd>3</kbd>) hält Begriffe, die in deinen Texten
+wiederkehren — Figuren, Orte, Fachvokabular — je mit einer Definition und einer Kategorie.</p>
+<p>Die Einträge stehen mit dem Begriff links und der Definition rechts und sind nach
+Anfangsbuchstabe oder Kategorie gruppiert, je nach gewählter Sortierung.</p>
+<p><b>Ansicht &rsaquo; Glossarbegriffe markieren</b> unterstreicht diese Begriffe überall im
+Text; die Definition erscheint beim Überfahren.</p>
+<p><b>Zum Nachschlagen beim Schreiben</b> drückst du <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd>.
+Ein Klick auf einen Treffer fügt den Begriff an der Schreibmarke ein.</p>`},
+
+ {t:"Mehrere Glossare",k:"glossare;sammlungen;zuordnen;import;export csv",b:`
+<p>Du kannst mehrere Glossare führen — ein Fantasyroman und ein Sachbuch haben keine Begriffe
+gemeinsam, und eine Vermischung würde in beiden die falschen Wörter markieren.</p>
+<p>Die Reiter oben in der Glossaransicht wechseln, <b>welches Glossar du ansiehst</b>. Das
+allein ändert sonst nichts: Ein Dokument behält das Glossar, das ihm zugewiesen wurde.</p>
+<p><b>Welches Glossar ein Dokument benutzt</b>, bestimmst du über die Auswahl <b>Zugeordnet</b>
+im Kopf. Sie führt jedes offene Dokument mit Häkchen auf, dazu einen Eintrag für gar keine
+Zuordnung. Nur die Begriffe des zugeordneten Glossars werden im Text markiert.</p>
+<p><b>Import und Export</b> liegen im selben Kopf unter dem ⋮-Knopf. Ein Glossar lässt sich als
+Tabelle (.csv) oder als Sicherung (.json) herausschreiben und aus beidem wieder einlesen — in
+das angesehene Glossar oder als neues, benannt nach der Datei. Schon vorhandene Begriffe werden
+übersprungen statt gedoppelt.</p>`},
+
+ {t:"Fußnoten",k:"fußnote;referenz;anmerkung",b:`
+<p><b>Werkzeuge &rsaquo; Fußnote einfügen</b> setzt eine nummerierte Marke an die Schreibmarke
+und stellt die Anmerkung an den Fuß der Seite, auf die sie fällt.</p>
+<p>Fußnoten nummerieren sich beim Schreiben selbst neu und wandern mit dem Text, zu dem sie
+gehören. Wird die Marke im Text gelöscht, verschwindet auch die Anmerkung.</p>`},
+
+ {t:"Inhalts- und Abbildungsverzeichnis",k:"inhaltsverzeichnis;verzeichnis;abbildungen",b:`
+<p><b>Werkzeuge &rsaquo; Inhaltsverzeichnis einfügen</b>
+(<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>I</kbd>) baut ein Verzeichnis aus den Überschriften des
+Dokuments. Zur Wahl stehen der Stil, wie viele Überschriftsebenen aufgenommen werden, ob
+Seitenzahlen erscheinen und welche Füllzeichen zwischen Eintrag und Zahl stehen.</p>
+<p>Das Verzeichnis aktualisiert sich beim Schreiben, und einzelne Überschriften lassen sich
+davon ausnehmen.</p>
+<p><b>Ein Abbildungsverzeichnis</b> arbeitet genauso für Bilder mit Bildunterschrift. Es wird
+angeboten, sobald du es unter <b>Einstellungen &rsaquo; Allgemein</b> einschaltest.</p>`},
+
+ {t:"Die Gliederung",k:"gliederung;navigation;struktur;zu überschrift springen",b:`
+<p><b>Ansicht &rsaquo; Gliederung</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>O</kbd>) öffnet eine
+Leiste mit allen Überschriften des Dokuments. Ein Klick springt zur Stelle.</p>
+<p>Bei einem langen Manuskript ist das meist der schnellste Weg, sich zu bewegen — schneller
+als Scrollen und schneller als Suchen.</p>`},
+
+ {t:"Schreibziel",k:"ziel;wortzahl;schreibziel;sitzung",b:`
+<p><b>Werkzeuge &rsaquo; Schreibziel festlegen</b> stellt einen kleinen Zähler neben die
+Wortzahl in der Statuszeile — <i>640 / 1.000</i> mit einem dezenten Balken.</p>
+<p>Gezählt wird, was du <b>seit dem Einschalten oder Zurücksetzen</b> geschrieben hast, über
+alle Dokumente hinweg, und es übersteht das Schließen des Programms. Beim Erreichen des Ziels
+geschieht nichts weiter, als dass der Balken grün wird. Es gibt keinen Alarm.</p>
+<p>Ein Klick auf den Zähler ändert das Ziel, setzt es zurück oder schaltet es ab.</p>`},
+
+ {t:"Dokument-Memo",k:"memo;dokumentnotizen;handlungsnotizen",b:`
+<p><b>Ansicht &rsaquo; Dokument-Memo</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd>) öffnet ein
+einfaches Textfeld in der Seitenleiste, eines je Dokument.</p>
+<p>Es liegt eine Ebene über der Pinnwand: Gedanken zum Dokument selbst statt zu einer Stelle —
+wohin die Handlung soll, was noch zu prüfen ist. Sein Inhalt taucht nie im Text und nie in
+einem Export auf, wandert aber in jede Sicherung mit.</p>`}]},
+
+{b:"Prüfen und Fertigstellen",t:[
+ {t:"Rechtschreibprüfung",k:"rechtschreibung;prüfung;wörterbuch;sprachen;eigene wörter",b:`
+<p><b>Werkzeuge &rsaquo; Rechtschreibprüfung</b> geht das Dokument durch und listet auf, was
+sie nicht kennt, mit Vorschlägen.</p>
+<p>Das Wörterbuch wird je Sprache einmal geladen und steht dann bereit, solange das Programm
+offen ist. Sechs Sprachen gibt es: Deutsch, Englisch, Französisch, Spanisch, Portugiesisch und
+Polnisch. Eingestellt wird sie unter <b>Einstellungen &rsaquo; Allgemein</b>.</p>
+<p>Zu jedem Wort kannst du einen Vorschlag übernehmen, eine eigene Korrektur eintippen, es
+einmal übergehen oder es zu deinen eigenen Wörtern legen — die gelten über alle Dokumente.</p>
+<p><b>Die Wörterbücher brauchen eine echte Adresse.</b> Wurde die Datei per Doppelklick
+geöffnet, kann die Prüfung sie nicht holen. Das Programm über eine Webadresse oder einen
+lokalen Server aufzurufen löst das.</p>`},
+
+ {t:"Text bereinigen",k:"bereinigen;aufräumen;doppelte leerzeichen;geschütztes leerzeichen;leere absätze",b:`
+<p><b>Werkzeuge &rsaquo; Text bereinigen</b> findet die kleinen Unsauberkeiten, die sich in
+einem langen Manuskript ansammeln, und bietet an, sie zu entfernen — einzeln oder auf einmal:</p>
+<ul>
+<li>doppelte Leerzeichen</li>
+<li>Leerzeichen am Zeilenende</li>
+<li>geschützte Leerzeichen</li>
+<li>mehrfach leere Absätze</li>
+</ul>
+<p>Bis zu zwei leere Absätze hintereinander gelten als bewusster Abstand und bleiben
+unangetastet; erst ab dem dritten wird gekürzt — und dann auf zwei, nicht auf einen.</p>`},
+
+ {t:"Suchen und Ersetzen",k:"suchen;finden;ersetzen;groß- und kleinschreibung;ganzes wort",b:`
+<table class="hkeys">
+<tr><td>Suchen</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Ersetzen</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd></td></tr>
+</table>
+<p>Eine Leiste erscheint über der Seite. Sie zählt die Treffer und geht mit <kbd>Eingabe</kbd>
+oder den Pfeilen durch sie hindurch. Zwei Schalter engen die Suche ein: <b>Groß- und
+Kleinschreibung</b> und <b>Ganzes Wort</b>.</p>
+<p>Ersetzen wirkt auf den aktuellen Treffer; <b>Alle</b> ersetzt sämtliche. <kbd>Esc</kbd>
+schließt die Leiste.</p>`},
+
+ {t:"Leseansicht und Fokusmodus",k:"leseansicht;lesen;ablenkungsfrei;fokusmodus",b:`
+<p>Die <b>Leseansicht</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>B</kbd>) blendet die ganze
+Oberfläche aus und zeigt nur den Text in einer angenehmen Spalte. Getippt werden kann darin
+nicht. Arbeitsspuren — Notizanker, Glossarunterstreichungen, Umbruchbeschriftungen — bleiben
+verborgen, denn sie sind nicht Teil des Textes.</p>
+<p>Nimm sie, um zu beurteilen, wie der Text wirkt, statt wie er entsteht. <kbd>Esc</kbd> führt
+zurück.</p>
+<p>Der <b>Fokusmodus</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd>) ist etwas anderes: Er
+dämpft alles außer der Seite und lässt dich weiterschreiben.</p>`}]},
+
+{b:"Dateien, Sicherungen und Einstellungen",t:[
+ {t:"Vorhandene Dateien öffnen",k:"öffnen;laden;import;docx;odt;rtf;markdown;html;txt",b:`
+<p><b>Datei &rsaquo; Dokument laden</b> öffnet anderswo geschriebene Dateien. Jede wird ein
+neuer Reiter; mehrere lassen sich auf einmal öffnen.</p>
+<table class="hkeys">
+<tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.rtf</td><td>Rich Text</td></tr>
+<tr><td>.html, .htm</td><td>Webseiten</td></tr>
+<tr><td>.md</td><td>Markdown</td></tr>
+<tr><td>.txt</td><td>reiner Text</td></tr>
+</table>
+<p>Übernommen werden Absätze, Überschriften, fett, kursiv, unterstrichen, durchgestrichen,
+Listen und Tabellen. Bilder aus einer .docx, Fußnoten und Kommentare nicht. Das alte binäre
+.doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
+
+ {t:"Exportieren",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
+<p><b>Datei &rsaquo; Exportieren</b> schreibt das Dokument zur Weitergabe heraus:</p>
+<table class="hkeys">
+<tr><td><b>Word-Dokument</b></td><td>.docx, mit Formatierung</td></tr>
+<tr><td><b>PDF</b></td><td>über den Druckdialog</td></tr>
+<tr><td><b>Webseite</b></td><td>.html</td></tr>
+<tr><td><b>Markdown</b></td><td>.md</td></tr>
+<tr><td><b>Nur Text</b></td><td>.txt</td></tr>
+<tr><td><b>Glossar als Tabelle</b></td><td>.csv</td></tr>
+</table>
+<p>Ein Export ist zum Weitergeben. Vollständig wieder einlesen lässt er sich nicht — dafür
+nimmst du eine Sicherung.</p>`},
+
+ {t:"Sicherungen",k:"sicherung;wiederherstellen;alles sichern",b:`
+<p>Eine Sicherung lässt sich, anders als ein Export, vollständig wieder einlesen.</p>
+<p><b>Datei &rsaquo; Sicherung &rsaquo; Sicherung erstellen</b> schreibt alles — sämtliche
+Dokumente, Notizen, Glossare und Einstellungen — in eine Datei. <b>Sicherung laden</b> liest
+sie wieder ein; eine Vollsicherung ersetzt den vorhandenen Bestand und fragt vorher.</p>
+<p>Zwei Teilsicherungen gibt es außerdem: dieses Dokument mit seinen angehefteten Notizen, und
+die Notizen und Glossare für sich. Teilsicherungen werden dem Bestand hinzugefügt, statt ihn zu
+ersetzen.</p>
+<p>Leg eine an, bevor du etwas Einschneidendes tust, und bevor du die Adresse wechselst — der
+Browser hält seinen Speicher je Adresse getrennt.</p>`},
+
+ {t:"Automatische Sicherung",k:"automatische sicherung;google drive;dropbox;onedrive;cloud",b:`
+<p>Die dritte Karte unter <b>Einstellungen &rsaquo; Speichern</b> schreibt den ganzen
+Programmstand von selbst in eine Datei deiner Wahl, im eingestellten Takt.</p>
+<p><b>Liegt diese Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von
+dort automatisch mit in die Cloud gesichert.</b> Das Programm braucht dafür kein Konto und
+keinen Zugang zu diesen Diensten; das erledigt deren Synchronisation. Es gilt für jeden
+Anbieter.</p>
+<p>Die Datei wählst du einmal über <b>Sicherungsdatei wählen</b>. Die Karte zeigt danach, wann
+zuletzt geschrieben wurde. <b>Jetzt sichern</b> schreibt sofort.</p>
+<p>Hat sich nichts geändert, wird nichts geschrieben — eine Datei in einem Cloud-Ordner wird
+also nicht ohne Grund angefasst.</p>
+<p>Dafür braucht es Chrome oder Edge. In anderen Browsern bleibt es bei Sicherungen von Hand.</p>`},
+
+ {t:"Darstellung",k:"farbschema;darstellung;dunkelmodus;schreibmaschinen-scrollen",b:`
+<p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet dreizehn Schemata mit
+lebenden Miniaturvorschauen — vom sehr hellen Azur und Alabaster bis zu Tinte, Zyan, Bernstein
+und Phosphor, von denen mehrere den Bildschirmen früher Textverarbeitungen nachempfunden sind.</p>
+<p>Zwei Schreibgewohnheiten stehen an derselben Stelle:</p>
+<ul>
+<li><b>Schreibmaschinen-Scrollen</b> hält die Zeile, in der du schreibst, in der Mitte des
+Fensters, statt sie nach unten wandern zu lassen.</li>
+<li><b>Oberfläche ausblenden</b> lässt die Werkzeugleisten beim Tippen zurücktreten und bringt
+sie zurück, sobald du innehältst. Es ist zunächst ausgeschaltet.</li>
+</ul>`},
+
+ {t:"Sprachen",k:"sprache;oberfläche;rechtschreibsprache;übersetzung",b:`
+<p>Zwei Sprachen werden getrennt eingestellt, unter <b>Einstellungen &rsaquo; Allgemein</b>:</p>
+<ul>
+<li>Die Sprache der <b>Oberfläche</b> — Menüs und Dialoge. Sechs stehen zur Wahl: Englisch,
+Deutsch, Französisch, Spanisch, Portugiesisch und Polnisch.</li>
+<li>Die <b>Rechtschreibsprache</b> — womit Prüfung und Autokorrektur arbeiten.</li>
+</ul>
+<p>Die Oberflächensprache zu wechseln zieht die Rechtschreibsprache mit, sofern es dafür ein
+Wörterbuch gibt. Wer nur die Rechtschreibsprache ändert, behält die Menüs, wie sie sind — genau
+das will man, wenn man in einer Sprache schreibt und das Programm in einer anderen bedient.</p>
+<p>Diese Hilfe folgt der Oberflächensprache. Für Sprachen, in denen es sie noch nicht gibt,
+erscheint die englische Fassung mit einem Hinweis.</p>`}]},
+
+{b:"Nachschlagen",t:[
+ {t:"Tastenkürzel",k:"kürzel;tasten;tastatur;tastenkombinationen",b:`
+<p>Programmbefehle nutzen <kbd>Alt</kbd>+<kbd>⇧</kbd>, weil reine <kbd>Strg</kbd>-Kombinationen
+größtenteils schon vom Browser belegt sind. Die Bearbeiten-Kürzel, die der Browser in Ruhe
+lässt, behalten ihre gewohnten Tasten.</p>
+<p class="hsec">Ansichten</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Schreiben / Notizen / Glossar</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Z</kbd></td><td>Fokusmodus (<kbd>Esc</kbd> verlässt ihn)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>B</kbd></td><td>Leseansicht</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>V</kbd></td><td>Druckvorschau</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>O</kbd></td><td>Gliederung</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd></td><td>Dokument-Memo</td></tr>
+</table>
+<p class="hsec">Schreiben</p>
+<table class="hkeys">
+<tr><td><kbd>Strg</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Fett / kursiv / unterstrichen</td></tr>
+<tr><td><kbd>Strg</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Rückgängig / Wiederholen</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Links / zentriert / rechts</td></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>⇧</kbd>+<kbd>Tab</kbd></td><td>Ein- / ausrücken (in Tabellen: nächste Zelle)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Eingabe</kbd></td><td>Seitenumbruch</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>K</kbd></td><td>Link einfügen oder ändern</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>I</kbd></td><td>Inhaltsverzeichnis</td></tr>
+</table>
+<p class="hsec">Dokumente und Notizen</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd></td><td>Neues Dokument</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd></td><td>Neue Notiz</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd></td><td>Notiz an die Markierung heften</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd></td><td>Im Glossar nachschlagen</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd></td><td>Zwischenstand jetzt sichern</td></tr>
+</table>
+<p class="hsec">Finden und Ansehen</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Suchen / Ersetzen</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd></td><td>Kommandopalette</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Vergrößern / verkleinern / einpassen</td></tr>
+<tr><td><kbd>Strg</kbd>+<kbd>P</kbd></td><td>Drucken</td></tr>
+<tr><td><kbd>F1</kbd></td><td>Diese Hilfe</td></tr>
+<tr><td><kbd>/</kbd></td><td>Einfügemenü, auf einem leeren Absatz</td></tr>
+</table>`},
+
+ {t:"Kommandopalette und das /-Menü",k:"kommandopalette;schrägstrich;befehle;schnell",b:`
+<p>Zwei Wege zu einem Befehl, ohne die Menüs zu durchsuchen.</p>
+<p><b>Die Kommandopalette</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd>) führt alles auf, was
+das Programm kann. Ein paar Buchstaben engen die Liste ein, <kbd>Eingabe</kbd> führt aus. Sie
+listet auch die Farbschemata und die ersten deiner Glossarbegriffe zum Einfügen.</p>
+<p><b>Das /-Menü</b> wirkt am Anfang eines leeren Absatzes. Tippe <code>/</code>, und eine
+kurze Liste des Einfügenswerten erscheint — Überschriften, Listen, Tabelle, Bild, Link,
+Fußnote, Seitenumbruch, heutiges Datum. Pfeiltasten wählen, <kbd>Eingabe</kbd> fügt ein,
+<kbd>Esc</kbd> bricht ab.</p>`},
+
+ {t:"Wenn etwas nicht stimmt",k:"probleme;fehler;nicht gesichert;speicher voll;verschwunden",b:`
+<p class="hsec">In der Statuszeile steht „Nicht gesichert" in Rot</p>
+<p>Der Browser nimmt nichts mehr an, meist weil sein Speicher voll ist — eingebettete Bilder
+füllen ihn rasch. Es wird nichts mehr geschrieben. Lege sofort über
+<b>Datei &rsaquo; Sicherung</b> eine Sicherung an und entferne dann große Bilder oder alte
+Dokumente.</p>
+<p class="hsec">Die Rechtschreibprüfung startet nicht</p>
+<p>Ihre Wörterbücher müssen geholt werden, und das geht nicht, wenn die Datei per Doppelklick
+geöffnet wurde. Rufe das Programm über eine Webadresse oder einen lokalen Server auf.</p>
+<p class="hsec">Meine Dokumente sind weg</p>
+<p>Der Speicher wird je Adresse getrennt gehalten. Das Programm von einer anderen Adresse zu
+öffnen — oder aus einem anderen Browser oder einem privaten Fenster — zeigt ein leeres
+Programm, kein verlorenes. Kehre zur bisherigen Adresse zurück oder lade eine Sicherung.</p>
+<p class="hsec">„Datei auf der Festplatte" ist ausgegraut</p>
+<p>Echte Dateien zu lesen und zu schreiben braucht Chrome oder Edge. In anderen Browsern nimmst
+du stattdessen <b>Sicherung erstellen</b> und <b>Sicherung laden</b>.</p>`}]}
+]
+};
 
 /* Zustand des Hilfefensters: offene Bücher, gewähltes Thema, Reiter, Suchtext */
 let helpTab="contents",helpOpen={},helpTopic=null,helpQuery="";
+const HELPSPRACHEN=["en","de"];
+function helpSprache(){return HELPSPRACHEN.includes(S.settings.uiLang)?S.settings.uiLang:"en"}
+function helpBooks(){return HELPTEXTE[helpSprache()]}
+/* Wird eine andere Sprache angezeigt als die der Oberfläche, gehört das gesagt */
+function helpErsatz(){return helpSprache()!==S.settings.uiLang}
+/* Der Titel des allerersten Themas dient auf der Willkommensseite als
+   Einstiegslink — je Sprache ein anderer Text, deshalb nicht fest verdrahtet. */
+function helpErstes(){const b=helpBooks();return b[0]&&b[0].t[0]?b[0].t[0].t:""}
+function helpAnzahl(n){return PL(
+  n+(n===1?" Thema":" Themen")+" gefunden",
+  n+" topic"+(n>1?"s":"")+" found",
+  n+" rubrique"+(n>1?"s":"")+" trouvée"+(n>1?"s":""),
+  n+" tema"+(n>1?"s":"")+" encontrado"+(n>1?"s":""),
+  n+" tópico"+(n>1?"s":"")+" encontrado"+(n>1?"s":""),
+  "Znaleziono tematy: "+n)}
+function helpNichts(q){return PL(
+  "Nichts gefunden für \u201E"+q+"\u201C.",
+  "Nothing found for \u201C"+q+"\u201D.",
+  "Aucun résultat pour \u00AB\u202F"+q+"\u202F\u00BB.",
+  "No se encontró nada para \u00AB"+q+"\u00BB.",
+  "Nada encontrado para \u201C"+q+"\u201D.",
+  "Nic nie znaleziono dla \u201E"+q+"\u201D.")}
 /* Die Bücher-Symbole von WinHelp: gelbes geschlossenes Buch, aufgeschlagenes
    Buch, und die Seite mit dem Fragezeichen für ein einzelnes Thema. Bewusst
    feste Gelbtöne statt Schemafarben — das Gelb ist der Wiedererkennungswert. */
@@ -13021,7 +13581,7 @@ const HELPICO={
   seite:'<svg viewBox="0 0 16 16" class="hicon"><path d="M4 2.5h5l3 3v8H4z" fill="var(--paper)" stroke="var(--ink-faint)"/><path d="M9 2.5v3h3" fill="none" stroke="var(--ink-faint)"/><text x="8" y="11.6" text-anchor="middle" font-size="7" font-weight="700" fill="var(--stamp)">?</text></svg>'
 };
 function helpAlleThemen(){
-  const a=[];HELPBOOKS.forEach((bk,bi)=>bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp})));
+  const a=[];helpBooks().forEach((bk,bi)=>bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp})));
   return a;
 }
 function helpFinde(titel){return helpAlleThemen().find(x=>x.t===titel)||null}
@@ -13059,7 +13619,7 @@ function helpMalen(){
   win.querySelectorAll("[data-htab]").forEach(b=>b.classList.toggle("on",b.dataset.htab===helpTab));
 
   if(helpTab==="contents"){
-    nav.innerHTML=HELPBOOKS.map((bk,bi)=>{
+    nav.innerHTML=helpBooks().map((bk,bi)=>{
       const auf=!!helpOpen[bi];
       return `<div class="hbook${auf?" auf":""}" data-hbook="${bi}">${auf?HELPICO.auf:HELPICO.zu}<span>${esc(bk.b)}</span></div>`+
         (auf?bk.t.map(tp=>`<div class="htopic${helpTopic===tp.t?" on":""}" data-htopic="${esc(tp.t)}">${HELPICO.seite}<span>${esc(tp.t)}</span></div>`).join(""):"");
@@ -13068,49 +13628,48 @@ function helpMalen(){
     const eintraege=[];
     helpAlleThemen().forEach(t=>t.k.split(";").forEach(w=>{
       w=w.trim();if(w)eintraege.push({w:w.charAt(0).toUpperCase()+w.slice(1),t:t.t})}));
-    eintraege.sort((a,b)=>a.w.localeCompare(b.w,"en"));
+    eintraege.sort((a,b)=>a.w.localeCompare(b.w,helpSprache()));
     const f=helpQuery.trim().toLowerCase();
     const zeig=f?eintraege.filter(e=>e.w.toLowerCase().includes(f)):eintraege;
-    nav.innerHTML=`<input type="text" id="helpIdxQ" class="hsearch" placeholder="Type the first letters" value="${esc(helpQuery)}" autocomplete="off">`+
+    nav.innerHTML=`<input type="text" id="helpIdxQ" class="hsearch" placeholder="${esc(tr("Erste Buchstaben eingeben"))}" value="${esc(helpQuery)}" autocomplete="off">`+
       (zeig.length?zeig.map(e=>`<div class="hidx" data-htopic="${esc(e.t)}"><span>${esc(e.w)}</span><i>${esc(e.t)}</i></div>`).join("")
-                  :`<div class="hleer">No entry matches that.</div>`);
+                  :`<div class="hleer">${esc(tr("Kein Eintrag passt dazu."))}</div>`);
   } else {
     const erg=helpSuche(helpQuery);
-    nav.innerHTML=`<input type="text" id="helpFindQ" class="hsearch" placeholder="Type a word to look for" value="${esc(helpQuery)}" autocomplete="off">`+
+    nav.innerHTML=`<input type="text" id="helpFindQ" class="hsearch" placeholder="${esc(tr("Ein Wort zum Nachschlagen eingeben"))}" value="${esc(helpQuery)}" autocomplete="off">`+
       (!helpQuery.trim()
-        ? `<div class="hleer">Every topic is searched, not just the headings.</div>`
+        ? `<div class="hleer">${esc(tr("Durchsucht wird der Text aller Themen, nicht nur die Überschriften."))}</div>`
         : erg.length
-          ? `<div class="hcount">${erg.length} topic${erg.length>1?"s":""} found</div>`+
+          ? `<div class="hcount">${esc(helpAnzahl(erg.length))}</div>`+
             erg.map(x=>`<div class="hfind${helpTopic===x.t?" on":""}" data-htopic="${esc(x.t)}"><b>${esc(x.t)}</b><span>${esc(x.aus||x.bk)}</span></div>`).join("")
-          : `<div class="hleer">Nothing found for &bdquo;${esc(helpQuery)}&ldquo;.</div>`);
+          : `<div class="hleer">${esc(helpNichts(helpQuery.trim()))}</div>`);
   }
 
   const t=helpTopic?helpFinde(helpTopic):null;
   body.innerHTML=t
     ? `<div class="hpath">${esc(t.bk)}</div><h4>${esc(t.t)}</h4>${t.b}`
-    : `<div class="hwelcome"><h4>PureQuill Writer Help</h4>
-        <p>Choose a topic on the left. <b>Contents</b> is arranged as books you can open,
-        <b>Index</b> is an alphabetical list of keywords, and <b>Find</b> searches the full
-        text of every topic.</p>
-        <p>New here? Start with <a data-goto="About PureQuill Writer">About PureQuill Writer</a>.</p>
-        <p class="hnote">This help is currently available in English only.</p></div>`;
+    : `<div class="hwelcome"><h4>${esc(tr("PureQuill Writer Hilfe"))}</h4>
+        <p>${tr("Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.")}</p>
+        <p>${esc(tr("Neu hier? Beginne mit"))} <a data-goto="${esc(helpErstes())}">${esc(helpErstes())}</a>.</p></div>`;
 }
 function helpDialog(titel){
   /* Mit Thema aufgerufen — etwa aus einem Querverweis oder später aus einem
      Dialog heraus — gehört der Inhaltsreiter nach vorn und das Buch aufgeklappt:
      man soll sehen, wo das Thema steht, nicht nur den Text davon. Sonst bliebe
      der zuletzt benutzte Reiter samt altem Suchtext stehen. */
+  if(helpTopic&&!helpFinde(helpTopic)){helpTopic=null;helpOpen={}}
   if(titel){const t=helpFinde(titel);
     if(t){helpTopic=titel;helpOpen[t.bi]=true;helpTab="contents";helpQuery=""}}
-  overlay(`<div class="modal helpwin" id="helpWin"><h3>Help</h3>
+  overlay(`<div class="modal helpwin" id="helpWin"><h3>${esc(tr("Hilfe"))}</h3>
     <div class="settabs helptabs">
-      <button class="settab" data-htab="contents">Contents</button>
-      <button class="settab" data-htab="index">Index</button>
-      <button class="settab" data-htab="find">Find</button>
-    </div>
-    <div class="helpsplit"><div class="helpnav" id="helpNav"></div>
+      <button class="settab" data-htab="contents">${esc(tr("Inhalt"))}</button>
+      <button class="settab" data-htab="index">${esc(tr("Stichwortverzeichnis"))}</button>
+      <button class="settab" data-htab="find">${esc(tr("Suchen"))}</button>
+    </div>`+
+    (helpErsatz()?`<div class="hersatz">${esc(tr("Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt."))}</div>`:"")+
+    `<div class="helpsplit"><div class="helpnav" id="helpNav"></div>
       <div class="helpbody" id="helpBody"></div></div>
-    <div class="rowend"><button class="btn" id="helpClose">Close</button></div></div>`);
+    <div class="rowend"><button class="btn" id="helpClose">${esc(tr("Schließen"))}</button></div></div>`);
   helpMalen();
   $("#helpClose").onclick=closeOvl;
   $("#helpWin").onclick=e=>{

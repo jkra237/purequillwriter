@@ -15,10 +15,10 @@ Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine
 - **Kommandopalette** (`Alt` `⇧` `P`) und Schrägstrich-Menü für alles ohne Maus
 - Tabellen, Bilder, Links, Suchen und Ersetzen, Autosave mit Versionsverlauf
 - **Dokumente laden** aus `.docx`, `.odt`, `.rtf`, `.html`, `.md` und `.txt`
-- Zwölf Farbschemata (historische wie Phosphor und Enzian, moderne wie Alabaster und Azur), Fokusmodus, Schreibmaschinen-Scrollen
-- **Leseansicht** und **Exportvorschau** — den Text beurteilen, bevor gedruckt wird
+- Siebzehn Farbschemata (historische wie Phosphor und Enzian, moderne wie Alabaster und Azur), Fokusmodus, Schreibmaschinen-Scrollen
+- **Leseansicht** und **Druckvorschau** — den Text beurteilen, bevor gedruckt wird
 - **Dokumentnotizen** je Dokument und ein abschaltbares **Schreibziel** in der Statuszeile
-- Deutsch/Englisch umschaltbar, mit Startdialog beim ersten Öffnen
+- Sechs Oberflächensprachen mit Startdialog beim ersten Öffnen; die Hilfe liegt auf Deutsch und Englisch vor und weist auf Englisch als Ersatz hin, wo eine Fassung fehlt
 
 ## Bedienung
 
@@ -37,14 +37,14 @@ Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinat
 | `Alt` `⇧` `S` | Jetzt sichern |
 | `Alt` `⇧` `Z` | Fokusmodus (`Esc` verlässt ihn) |
 | `Alt` `⇧` `B` | Leseansicht (`Esc` verlässt sie) |
-| `Alt` `⇧` `V` | Exportvorschau (`Esc` verlässt sie) |
+| `Alt` `⇧` `V` | Druckvorschau (`Esc` verlässt sie) |
 | `Alt` `⇧` `T` | Dokumentnotizen ein-/ausblenden |
 | `Alt` `⇧` `L` / `E` / `R` | Linksbündig / Zentriert / Rechtsbündig |
 | `Alt` `⇧` `+` / `−` / `0` | Vergrößern / Verkleinern / Seitenbreite einpassen |
 | `Alt` `⇧` `⏎` | Seitenumbruch einfügen |
 | `Tab` / `⇧` `Tab` | Absatz ein- / ausrücken (in Tabellen: nächste Zelle) |
 | `/` | Einfügemenü am Anfang eines leeren Absatzes |
-| `F1` | Hilfe (Inhalt, Index, Volltextsuche) |
+| `F1` | Hilfe (Inhalt, Stichwortverzeichnis, Volltextsuche) |
 
 Übrige Kürzel folgen Word: `Strg B`/`I`/`U` (Fett/Kursiv/Unterstrichen), `Strg Z`/`Y` (Rückgängig/Wiederholen), `Strg P` (Drucken).
 
@@ -82,7 +82,7 @@ Unter *Releases* → *Draft a new release* eine Marke wie `v0.1` vergeben und `i
 Dokumente, Notizen und Glossar werden im Speicher des Browsers abgelegt, getrennt nach Adresse. Das bedeutet:
 
 - Die lokale Datei und die GitHub-Pages-Adresse haben **getrennte Bestände**.
-- Beim Wechsel dorthin zuerst *Datei → Alles sichern als Datei* im alten, dann *Datei → Datei laden* im neuen.
+- Beim Wechsel dorthin zuerst *Datei → Sicherung → Sicherung erstellen* im alten, dann *Datei → Sicherung → Sicherung laden* im neuen.
 - Ein Zurücksetzen des Programmstands verändert die Texte **nicht** — Code und Inhalte liegen getrennt.
 
-Regelmäßige Sicherung über *Datei → Alles sichern als Datei* bleibt trotzdem sinnvoll.
+Regelmäßige Sicherung über *Datei → Sicherung → Sicherung erstellen* bleibt trotzdem sinnvoll.
