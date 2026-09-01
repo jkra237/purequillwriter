@@ -1002,6 +1002,17 @@ body.focus .outline{display:none}
 .storecount{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
 .storenote{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:8px 0 0}
 .storeact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+/* Die drei Speicherorte durchnummeriert: die Staffelung soll ohne Erklärung
+   lesbar sein — eins gilt immer, zwei und drei kommen freiwillig dazu. */
+.storeintro{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:0 0 10px}
+.storenum{flex:0 0 18px;height:18px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;background:var(--chrome);color:var(--ink-soft);
+  font-family:var(--mono);font-size:11px;font-weight:600}
+/* Der Cloud-Hinweis ist der eigentliche Kniff dieser Karte und darf nicht
+   mit der Zustandsbeschreibung darüber verschwimmen. */
+/* --ink-faint fiel hier in neun von dreizehn Schemata unter 3:1 — für den
+   Satz, der den eigentlichen Kniff der Karte erklärt, zu schwach. */
+.storehint{border-left:2px solid var(--rule);padding-left:9px;color:var(--ink-soft)}
 .btn{border:1px solid var(--rule);border-radius:var(--radius);padding:4px 11px;background:var(--chrome-2);
   font-family:var(--ui)}
 .btn:hover{border-color:var(--ink-soft)}
@@ -1864,6 +1875,27 @@ en:{
   "Nur Text übernehmen":"Keep text only",
   "Rechtschreibprüfung":"Spell check",
   "Rechtschreibprüfung&hellip;":"Spell check&hellip;",
+  "Automatische Sicherung":"Automatic backup",
+  "Sicherungsdatei wählen":"Choose a backup file",
+  "An anderem Ort sichern":"Back up elsewhere",
+  "nicht eingerichtet":"not set up",
+  "eingerichtet":"set up",
+  "zuletzt":"last",
+  "Wie oft":"How often",
+  "alle 15 Minuten":"every 15 minutes",
+  "jede Stunde":"every hour",
+  "nur beim Schließen":"only when closing",
+  "Automatische Sicherung eingerichtet":"Automatic backup set up",
+  "Automatische Sicherung ausgeschaltet":"Automatic backup turned off",
+  "Übernommen":"Applied",
+  "Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome and Edge can back up to a file on their own. Here it stays with “Create a backup”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.":"The browser reset access after restarting. Connect once and backing up resumes.",
+  "Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben.":"All documents, notes, glossaries and settings are written to this file automatically.",
+  "Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.":"The whole program state in one file, automatically and repeatedly — unlike number 2, which covers only the open document.",
+  "Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.":"If the file sits in a Google Drive, Dropbox or OneDrive folder, it is carried into the cloud from there automatically. The program needs no access to those services.",
+  "Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.":"Three places that apply at once. The first is always there; the other two are optional.",
+  "Arbeitsstand in diesem Browser":"Working state in this browser",
+  "alles":"everything",
   "Nicht gesichert":"Not saved",
   "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Browser storage will not accept anything more. Save via File → Save everything as a file.",
   "Autokorrektur":"AutoCorrect",
@@ -2508,6 +2540,27 @@ fr:{
   "Nur Text übernehmen":"Conserver le texte seul",
   "Rechtschreibprüfung":"Vérification orthographique",
   "Rechtschreibprüfung&hellip;":"Vérification orthographique&hellip;",
+  "Automatische Sicherung":"Sauvegarde automatique",
+  "Sicherungsdatei wählen":"Choisir un fichier de sauvegarde",
+  "An anderem Ort sichern":"Sauvegarder ailleurs",
+  "nicht eingerichtet":"non configuré",
+  "eingerichtet":"configuré",
+  "zuletzt":"dernière",
+  "Wie oft":"Fréquence",
+  "alle 15 Minuten":"toutes les 15 minutes",
+  "jede Stunde":"toutes les heures",
+  "nur beim Schließen":"seulement à la fermeture",
+  "Automatische Sicherung eingerichtet":"Sauvegarde automatique configurée",
+  "Automatische Sicherung ausgeschaltet":"Sauvegarde automatique désactivée",
+  "Übernommen":"Appliqué",
+  "Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome et Edge peuvent sauvegarder dans un fichier d’eux-mêmes. Ici, il reste « Créer une sauvegarde ».",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.":"Le navigateur a réinitialisé l’accès après le redémarrage. Connectez une fois et la sauvegarde reprend.",
+  "Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben.":"Tous les documents, notes, glossaires et réglages sont écrits automatiquement dans ce fichier.",
+  "Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.":"Tout l’état du programme dans un fichier, automatiquement et de façon répétée — contrairement au numéro 2, qui ne couvre que le document ouvert.",
+  "Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.":"Si le fichier se trouve dans un dossier Google Drive, Dropbox ou OneDrive, il est automatiquement repris dans le cloud depuis là. Le programme n’a besoin d’aucun accès à ces services.",
+  "Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.":"Trois emplacements valables en même temps. Le premier est toujours là, les deux autres sont facultatifs.",
+  "Arbeitsstand in diesem Browser":"État de travail dans ce navigateur",
+  "alles":"tout",
   "Nicht gesichert":"Non enregistré",
   "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Le stockage du navigateur n’accepte plus rien. Enregistrez via Fichier → Tout enregistrer dans un fichier.",
   "Autokorrektur":"Correction automatique",
@@ -3152,6 +3205,27 @@ es:{
   "Nur Text übernehmen":"Mantener solo el texto",
   "Rechtschreibprüfung":"Revisión ortográfica",
   "Rechtschreibprüfung&hellip;":"Revisión ortográfica&hellip;",
+  "Automatische Sicherung":"Copia de seguridad automática",
+  "Sicherungsdatei wählen":"Elegir archivo de copia",
+  "An anderem Ort sichern":"Guardar copia en otro lugar",
+  "nicht eingerichtet":"sin configurar",
+  "eingerichtet":"configurado",
+  "zuletzt":"última",
+  "Wie oft":"Con qué frecuencia",
+  "alle 15 Minuten":"cada 15 minutos",
+  "jede Stunde":"cada hora",
+  "nur beim Schließen":"solo al cerrar",
+  "Automatische Sicherung eingerichtet":"Copia automática configurada",
+  "Automatische Sicherung ausgeschaltet":"Copia automática desactivada",
+  "Übernommen":"Aplicado",
+  "Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome y Edge pueden guardar copias en un archivo por sí solos. Aquí queda «Crear copia de seguridad».",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.":"El navegador restableció el acceso tras reiniciarse. Conecta una vez y la copia se reanuda.",
+  "Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben.":"Todos los documentos, notas, glosarios y ajustes se escriben automáticamente en este archivo.",
+  "Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.":"Todo el estado del programa en un archivo, de forma automática y periódica — a diferencia del número 2, que solo cubre el documento abierto.",
+  "Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.":"Si el archivo está en una carpeta de Google Drive, Dropbox o OneDrive, se copia a la nube automáticamente desde allí. El programa no necesita acceso a esos servicios.",
+  "Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.":"Tres lugares que valen a la vez. El primero siempre está; los otros dos son opcionales.",
+  "Arbeitsstand in diesem Browser":"Estado de trabajo en este navegador",
+  "alles":"todo",
   "Nicht gesichert":"Sin guardar",
   "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"El almacenamiento del navegador ya no acepta nada. Guarda mediante Archivo → Guardar todo como archivo.",
   "Autokorrektur":"Autocorrección",
@@ -3796,6 +3870,27 @@ pt:{
   "Nur Text übernehmen":"Manter somente o texto",
   "Rechtschreibprüfung":"Verificação ortográfica",
   "Rechtschreibprüfung&hellip;":"Verificação ortográfica&hellip;",
+  "Automatische Sicherung":"Cópia de segurança automática",
+  "Sicherungsdatei wählen":"Escolher ficheiro de cópia",
+  "An anderem Ort sichern":"Guardar cópia noutro local",
+  "nicht eingerichtet":"não configurado",
+  "eingerichtet":"configurado",
+  "zuletzt":"última",
+  "Wie oft":"Com que frequência",
+  "alle 15 Minuten":"a cada 15 minutos",
+  "jede Stunde":"a cada hora",
+  "nur beim Schließen":"apenas ao fechar",
+  "Automatische Sicherung eingerichtet":"Cópia automática configurada",
+  "Automatische Sicherung ausgeschaltet":"Cópia automática desativada",
+  "Übernommen":"Aplicado",
+  "Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.":"O Chrome e o Edge podem guardar cópias num ficheiro por si próprios. Aqui fica “Criar cópia de segurança”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.":"O navegador repôs o acesso após reiniciar. Ligue uma vez e a cópia recomeça.",
+  "Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben.":"Todos os documentos, notas, glossários e definições são escritos automaticamente neste ficheiro.",
+  "Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.":"Todo o estado do programa num ficheiro, automaticamente e de forma repetida — ao contrário do número 2, que abrange apenas o documento aberto.",
+  "Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.":"Se o ficheiro estiver numa pasta do Google Drive, Dropbox ou OneDrive, é levado para a nuvem automaticamente a partir daí. O programa não precisa de acesso a esses serviços.",
+  "Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.":"Três locais que valem ao mesmo tempo. O primeiro está sempre lá; os outros dois são opcionais.",
+  "Arbeitsstand in diesem Browser":"Estado de trabalho neste navegador",
+  "alles":"tudo",
   "Nicht gesichert":"Não guardado",
   "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"O armazenamento do navegador não aceita mais nada. Guarde em Ficheiro → Guardar tudo como ficheiro.",
   "Autokorrektur":"Correção automática",
@@ -4440,6 +4535,27 @@ pl:{
   "Nur Text übernehmen":"Zachowaj tylko tekst",
   "Rechtschreibprüfung":"Sprawdzanie pisowni",
   "Rechtschreibprüfung&hellip;":"Sprawdzanie pisowni&hellip;",
+  "Automatische Sicherung":"Automatyczna kopia zapasowa",
+  "Sicherungsdatei wählen":"Wybierz plik kopii zapasowej",
+  "An anderem Ort sichern":"Zapisz kopię w innym miejscu",
+  "nicht eingerichtet":"nieskonfigurowane",
+  "eingerichtet":"skonfigurowane",
+  "zuletzt":"ostatnio",
+  "Wie oft":"Jak często",
+  "alle 15 Minuten":"co 15 minut",
+  "jede Stunde":"co godzinę",
+  "nur beim Schließen":"tylko przy zamykaniu",
+  "Automatische Sicherung eingerichtet":"Skonfigurowano automatyczną kopię",
+  "Automatische Sicherung ausgeschaltet":"Wyłączono automatyczną kopię",
+  "Übernommen":"Zastosowano",
+  "Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.":"Chrome i Edge potrafią same zapisywać kopię do pliku. Tutaj pozostaje „Utwórz kopię zapasową”.",
+  "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.":"Przeglądarka zresetowała dostęp po ponownym uruchomieniu. Połącz raz, a kopiowanie wznowi się.",
+  "Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben.":"Wszystkie dokumenty, notatki, glosariusze i ustawienia są automatycznie zapisywane do tego pliku.",
+  "Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.":"Cały stan programu w jednym pliku, automatycznie i cyklicznie — inaczej niż numer 2, który obejmuje tylko otwarty dokument.",
+  "Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.":"Jeśli plik leży w folderze Google Drive, Dropbox lub OneDrive, trafia stamtąd do chmury automatycznie. Program nie potrzebuje dostępu do tych usług.",
+  "Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.":"Trzy miejsca obowiązujące jednocześnie. Pierwsze jest zawsze, dwa pozostałe są dobrowolne.",
+  "Arbeitsstand in diesem Browser":"Stan pracy w tej przeglądarce",
+  "alles":"wszystko",
   "Nicht gesichert":"Niezapisane",
   "Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern als Datei.":"Pamięć przeglądarki nie przyjmuje już nic. Zapisz przez Plik → Zapisz wszystko do pliku.",
   "Autokorrektur":"Autokorekta",
@@ -4808,6 +4924,12 @@ if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 /* Autokorrektur: alle vier Schalter an, wie bei einer neu installierten
    Textverarbeitung üblich - fehlende Einzelschalter (ein künftiger fünfter)
    würden hier ebenso auf an nachgezogen, nicht das ganze Objekt ersetzt. */
+/* Automatische Vollsicherung: standardmäßig aus. Der Zugriff auf die Datei
+   überlebt einen Neustart des Browsers nicht immer — deshalb beim Laden als
+   „abgelaufen" annehmen und erst nach der ersten geglückten Schreibung
+   wieder auf verbunden setzen, statt Verbundenheit zu behaupten. */
+if(S.autoBackup&&typeof S.autoBackup!=="object")delete S.autoBackup;
+if(S.autoBackup){S.autoBackup.lose=true;if(!S.autoBackup.jede&&S.autoBackup.jede!==0)S.autoBackup.jede=900}
 if(S.settings&&!S.settings.autoc)S.settings.autoc={quotes:true,dash:true,cap:true,lists:true};
 if(S.settings&&S.settings.autoc)["quotes","dash","cap","lists"].forEach(k=>{
   if(S.settings.autoc[k]===undefined)S.settings.autoc[k]=true});
@@ -7824,6 +7946,111 @@ async function fileReconnect(){
 async function fileDetach(){
   const d=doc();if(!d)return;
   await handleDel(d.id);delete d.file;save();drawStatus();toast(tr("Verbindung gelöst"));settings();
+}
+
+/* ================= Automatische Vollsicherung =================
+   Die Dateiverbindung oben sichert ein einzelnes Dokument samt seiner
+   angehefteten Notizen — nicht die übrigen Dokumente, nicht das Glossar,
+   nicht die Einstellungen. Wer nur darauf vertraut, verliert bei gelöschten
+   Browserdaten trotzdem den größten Teil. Diese Sicherung schreibt denselben
+   Stand wie „Sicherung erstellen", nur von selbst und an einen festen Ort.
+
+   Liegt dieser Ort in einem Ordner von Google Drive, Dropbox oder OneDrive,
+   ist die Cloud-Sicherung damit erledigt, ohne dass das Programm je erfährt,
+   mit welchem Dienst es zu tun hat — kein OAuth, kein Schlüssel, kein
+   Freigabeverfahren, und es gilt für jeden Anbieter gleichermaßen.
+
+   AB_ID ist eine feste Kennung: die Sicherung hängt am Programm, nicht an
+   einem Dokument, und teilt sich den Kennungsspeicher mit den Dateien. */
+const AB_ID="__autobackup__";
+const AB_INTERVALL=[["alle 5 Minuten",300],["alle 15 Minuten",900],
+                    ["jede Stunde",3600],["nur beim Schließen",0]];
+
+/* --- Die Nahtstelle ---
+   Der einzige Ort, der weiß, WIE geschrieben wird. In einer späteren
+   Electron- oder Tauri-Fassung wird genau diese Funktion durch einen
+   nativen Dateizugriff ersetzt; alles andere bleibt, wie es ist. Dort
+   entfallen dann auch der ablaufende Zugriff und die Kennungsablage. */
+async function abSchreiben(text){
+  const h=await handleGet(AB_ID);
+  if(!await fileOk(h,false))return "kein-zugriff";
+  try{
+    const w=await h.createWritable();
+    await w.write(text);
+    await w.close();
+    return "ok";
+  }catch(e){return "fehler"}
+}
+/* Zwei Dinge, die auseinandergehalten werden müssen: was verglichen wird und
+   was geschrieben wird. Der Zeitstempel gehört in die Datei, darf aber nicht
+   in den Vergleich — sonst unterscheidet sich jeder Stand von jedem anderen
+   und es würde bei jedem Takt geschrieben, auch wenn sich nichts geändert hat.
+   In einem Cloud-Ordner hieße das: alle fünf Minuten eine Synchronisation
+   ohne ein einziges abweichendes Byte. */
+function abStand(){
+  flush();
+  const roh=JSON.stringify(S);
+  /* Aus dem Vergleich fällt auch die eigene Buchführung heraus: abSichern
+     schreibt nach jeder geglückten Schreibung Zeitpunkt und Zugriffszustand
+     nach S.autoBackup zurück. Bliebe das drin, unterschiede sich der Stand
+     nach dem Schreiben von dem davor — und der nächste Takt schriebe wieder,
+     endlos, ohne dass je ein Buchstabe des Textes anders wäre. */
+  const ohne=JSON.parse(roh);delete ohne.autoBackup;
+  return {roh:JSON.stringify(ohne),text:JSON.stringify(
+    Object.assign({pqw:PQW,kind:"all",saved:new Date().toISOString()},JSON.parse(roh)),null,1)};
+}
+/* Nur schreiben, wenn sich seit dem letzten Mal etwas geändert hat — sonst
+   liefe eine Datei in einem Cloud-Ordner alle fünf Minuten durch die
+   Synchronisation, ohne dass sich ein Byte unterscheidet. */
+let abLetzterStand="",abTimer=null,abLaeuft=false;
+async function abSichern(erzwingen){
+  const a=S.autoBackup;
+  if(!a||!a.on||!hatDateien()||abLaeuft)return;
+  const {roh,text}=abStand();
+  if(!erzwingen&&roh===abLetzterStand)return;
+  abLaeuft=true;
+  const r=await abSchreiben(text);
+  abLaeuft=false;
+  if(r==="ok"){abLetzterStand=roh;a.at=Date.now();a.lose=false}
+  else a.lose=true;
+  save();
+  /* Steht der Einstellungsdialog offen, die Karte nachziehen */
+  if($("#abCard"))settings();
+}
+function abPlanen(){
+  clearInterval(abTimer);
+  const a=S.autoBackup;
+  if(!a||!a.on||!a.jede)return;
+  abTimer=setInterval(()=>abSichern(false),a.jede*1000);
+}
+async function abWaehlen(){
+  if(!hatDateien()){toast(tr("Dieser Browser kann keine Dateien öffnen."));return}
+  try{
+    const h=await showSaveFilePicker({
+      suggestedName:"PureQuill "+tr("Sicherung")+PQWEXT,
+      types:[{description:"PureQuill",accept:{"application/json":PQWLESEN}}]});
+    await handleSet(AB_ID,h);
+    S.autoBackup={on:true,name:h.name,jede:(S.autoBackup&&S.autoBackup.jede)||900,lose:false,at:0};
+    save();
+    await abSichern(true);
+    abPlanen();
+    toast(tr("Automatische Sicherung eingerichtet"));
+    settings();
+  }catch(e){/* Abbruch im Dateidialog ist kein Fehler */}
+}
+async function abVerbinden(){
+  const h=await handleGet(AB_ID);
+  if(await fileOk(h,true)){
+    S.autoBackup.lose=false;save();
+    await abSichern(true);abPlanen();
+    toast(tr("Verbunden"));settings();
+  } else toast(tr("Der Zugriff wurde nicht erteilt."));
+}
+async function abLoesen(){
+  clearInterval(abTimer);
+  await handleDel(AB_ID);
+  delete S.autoBackup;abLetzterStand="";
+  save();toast(tr("Automatische Sicherung ausgeschaltet"));settings();
 }
 function importJson(){
   const i=document.createElement("input");i.type="file";
@@ -11829,12 +12056,14 @@ function settings(){
       <label style="font-size:12px;color:var(--ink-faint);line-height:1.45">
         ${tr("Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.")}</label></div>
     <div class="setsec">${tr("Speicherort")}</div>
+      <p class="storeintro">${tr("Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.")}</p>
       <div class="storecard">
         <div class="storehead">
+          <span class="storenum">1</span>
           <span class="storeicon">${ICO('<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 10h16"/><circle cx="7.5" cy="7.6" r=".6"/>')}</span>
           <span style="min-width:0">
-            <b>${tr("Dieser Browser")}</b><br>
-            <span class="storecount">${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")}</span>
+            <b>${tr("Arbeitsstand in diesem Browser")}</b><br>
+            <span class="storecount">${tr("alles")} · ${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")}</span>
           </span>
         </div>
         <p class="storenote">${tr("Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.")}</p>
@@ -11843,7 +12072,8 @@ function settings(){
           <button class="btn" id="sRestore">${tr("Sicherung laden")}&hellip;</button>
         </div>
       </div>
-      ${dateiKarte()}`;
+      ${dateiKarte()}
+      ${abKarte()}`;
   overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3>
     <div class="settabs">${reiter.map(([k,n])=>
       `<button class="settab ${setTab===k?"on":""}" data-tab="${k}">${tr(n)}</button>`).join("")}</div>
@@ -11892,6 +12122,19 @@ function settings(){
   anBtn("sFileOpen",()=>{closeOvl();fileOpen()});
   anBtn("sFileRe",fileReconnect);
   anBtn("sFileOff",fileDetach);
+  /* Automatische Vollsicherung — der Dateidialog muss aus dem Klick heraus
+     kommen, deshalb ohne closeOvl() davor: der Einstellungsdialog bleibt
+     stehen und zeichnet sich danach mit der neuen Karte neu. */
+  anBtn("abPick",abWaehlen);
+  anBtn("abRe",abVerbinden);
+  anBtn("abOff",abLoesen);
+  anBtn("abNow",async()=>{await abSichern(true);
+    toast(S.autoBackup&&!S.autoBackup.lose?tr("Gesichert"):tr("Der Zugriff wurde nicht erteilt."))});
+  const abJ=$("#abJede");if(abJ)abJ.onchange=()=>{
+    S.autoBackup.jede=+abJ.value||900;save();abPlanen();
+    /* „nur beim Schließen" heißt: kein Takt, aber beim Verlassen wird noch
+       geschrieben — siehe beforeunload weiter unten. */
+    toast(tr("Übernommen"))};
   /* Ob der Zugriff noch gilt, weiß nur der Browser. Nachträglich nachsehen —
      ohne zu fragen — und die Karte berichtigen, falls sie das Falsche behauptet.
      Der zweite Durchlauf findet nichts mehr zu ändern und hört auf. */
@@ -11916,13 +12159,13 @@ function download(name,text,mime){
 function dateiKarte(){
   const d=doc();
   if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
-    <div class="storehead"><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
+    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
       <span><b>${tr("Datei auf der Festplatte")}</b><br>
       <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span></div>
     <p class="storenote">${tr("Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Sicherung erstellen“.")}</p></div>`;
   const f=d&&d.file;
   return `<div class="storecard" style="margin-top:8px">
-    <div class="storehead"><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
+    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
       <span style="min-width:0">
         <b>${f?esc(f.name):tr("Datei auf der Festplatte")}</b><br>
         <span class="storecount">${f?(f.lose?tr("Zugriff abgelaufen"):tr("verbunden")):tr("nicht verbunden")}</span>
@@ -11937,6 +12180,45 @@ function dateiKarte(){
       <button class="btn" id="sFileAs">${f?tr("An anderem Ort speichern"):tr("In Datei speichern")}&hellip;</button>
       <button class="btn" id="sFileOpen">${tr("Datei öffnen")}&hellip;</button>
       ${f?`<button class="btn" id="sFileOff">${tr("Verbindung lösen")}</button>`:""}
+    </div></div>`;
+}
+
+/* Die dritte Karte: die einzige, die den ganzen Programmstand abdeckt.
+   Nummeriert wie die beiden darüber, damit die Staffelung ohne Erklärung
+   lesbar ist — eins gilt immer, zwei und drei sind freiwillig. */
+function abKarte(){
+  const ICON=ICO('<path d="M12 4v10"/><path d="m8.5 10.5 3.5 3.5 3.5-3.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>');
+  if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
+    <div class="storehead"><span class="storenum">3</span><span class="storeicon">${ICON}</span>
+      <span><b>${tr("Automatische Sicherung")}</b><br>
+      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span></div>
+    <p class="storenote">${tr("Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Sicherung erstellen“.")}</p></div>`;
+  const a=S.autoBackup;
+  const wann=a&&a.at?new Date(a.at).toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"}):"";
+  return `<div class="storecard" id="abCard" style="margin-top:8px">
+    <div class="storehead"><span class="storenum">3</span><span class="storeicon">${ICON}</span>
+      <span style="min-width:0">
+        <b>${a?esc(a.name):tr("Automatische Sicherung")}</b><br>
+        <span class="storecount">${a
+          ?(a.lose?tr("Zugriff abgelaufen"):(wann?tr("zuletzt")+" "+wann:tr("eingerichtet")))
+          :tr("nicht eingerichtet")}</span>
+      </span></div>
+    <p class="storenote">${a
+      ?(a.lose
+        ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.")
+        : tr("Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben."))
+      :tr("Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.")}</p>
+    <p class="storenote storehint">${tr("Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.")}</p>
+    ${a&&!a.lose?`<div class="storeact" style="align-items:center">
+      <label style="color:var(--ink-soft);font-size:12px">${tr("Wie oft")}</label>
+      <select id="abJede" style="width:auto">${AB_INTERVALL.map(([lab,v])=>
+        `<option value="${v}" ${a.jede==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>
+    </div>`:""}
+    <div class="storeact">
+      ${a&&a.lose?`<button class="btn pri" id="abRe">${tr("Verbinden")}</button>`:""}
+      <button class="btn${a?"":" pri"}" id="abPick">${a?tr("An anderem Ort sichern"):tr("Sicherungsdatei wählen")}&hellip;</button>
+      ${a?`<button class="btn" id="abNow">${tr("Jetzt sichern")}</button>
+           <button class="btn" id="abOff">${tr("Ausschalten")}</button>`:""}
     </div></div>`;
 }
 function themeIsDark(k){
@@ -12212,6 +12494,13 @@ document.addEventListener("keydown",e=>{
     else document.body.classList.remove("focus")}
 });
 window.addEventListener("beforeunload",()=>{flush();save()});
+/* Beim Verlassen noch einmal sichern. beforeunload wartet auf nichts
+   Asynchrones, deshalb visibilitychange: der Browser räumt die Seite erst
+   ab, nachdem sie verborgen wurde, und lässt bis dahin den Schreibvorgang
+   zu Ende laufen. Deckt auch den Fall ab, dass der Rechner zuklappt. */
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="hidden")abSichern(false);
+});
 
 /* ================= Ereignisse Werkzeugleiste ================= */
 $("#tools").addEventListener("click",e=>{
@@ -12345,4 +12634,11 @@ function render(){
 }
 applyTheme();applyStaticLabels();resetTimer();
 if(isTrulyEmpty()){clearShell();startupDialog();}else render();
+/* Die Sicherung anlaufen lassen. Der erste Versuch prüft nur nach, ob der
+   Zugriff noch gilt — gefragt wird nie ungefragt, sondern erst, wenn der
+   Benutzer in den Einstellungen auf „Verbinden" klickt. */
+if(S.autoBackup&&S.autoBackup.on)(async()=>{
+  const h=await handleGet(AB_ID);
+  if(await fileOk(h,false)){S.autoBackup.lose=false;save();await abSichern(true);abPlanen()}
+})();
 </script>
