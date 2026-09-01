@@ -1773,6 +1773,9 @@ en:{
   "Einstellungen&hellip;":"Settings&hellip;",
   "Alle Befehle":"All commands",
   "Hilfe":"Help",
+  "Bilder eingebettet":"Pictures embedded",
+  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Pictures live inside the document itself, and therefore in the browser's storage, which is limited. Make a backup while everything is still saved — the status bar tells you where you stand.",
+  "Weiter":"Continue",
   "Inhalt":"Contents",
   "Stichwortverzeichnis":"Index",
   "Erste Buchstaben eingeben":"Type the first letters",
@@ -2449,6 +2452,9 @@ fr:{
   "Einstellungen&hellip;":"Paramètres&hellip;",
   "Alle Befehle":"Toutes les commandes",
   "Hilfe":"Aide",
+  "Bilder eingebettet":"Images intégrées",
+  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Les images se trouvent dans le document lui-même, donc dans le stockage du navigateur, qui est limité. Faites une sauvegarde tant que tout est enregistré — la barre d'état vous dit où vous en êtes.",
+  "Weiter":"Continuer",
   "Inhalt":"Sommaire",
   "Stichwortverzeichnis":"Index",
   "Erste Buchstaben eingeben":"Saisissez les premières lettres",
@@ -3125,6 +3131,9 @@ es:{
   "Einstellungen&hellip;":"Configuración&hellip;",
   "Alle Befehle":"Todos los comandos",
   "Hilfe":"Ayuda",
+  "Bilder eingebettet":"Imágenes incrustadas",
+  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Las imágenes están dentro del propio documento y por tanto en el almacenamiento del navegador, que es limitado. Cree una copia de seguridad mientras todo esté guardado — la barra de estado le dice cómo está.",
+  "Weiter":"Continuar",
   "Inhalt":"Contenido",
   "Stichwortverzeichnis":"Índice",
   "Erste Buchstaben eingeben":"Escriba las primeras letras",
@@ -3801,6 +3810,9 @@ pt:{
   "Einstellungen&hellip;":"Configurações&hellip;",
   "Alle Befehle":"Todos os comandos",
   "Hilfe":"Ajuda",
+  "Bilder eingebettet":"Imagens incorporadas",
+  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"As imagens ficam dentro do próprio documento e, portanto, no armazenamento do navegador, que é limitado. Crie um backup enquanto tudo está salvo — a barra de status mostra a situação.",
+  "Weiter":"Continuar",
   "Inhalt":"Conteúdo",
   "Stichwortverzeichnis":"Índice",
   "Erste Buchstaben eingeben":"Digite as primeiras letras",
@@ -4477,6 +4489,9 @@ pl:{
   "Einstellungen&hellip;":"Ustawienia&hellip;",
   "Alle Befehle":"Wszystkie polecenia",
   "Hilfe":"Pomoc",
+  "Bilder eingebettet":"Obrazy osadzone",
+  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Obrazy znajdują się w samym dokumencie, a więc w pamięci przeglądarki, która jest ograniczona. Utwórz kopię zapasową, póki wszystko jest zapisane — pasek stanu pokazuje stan.",
+  "Weiter":"Dalej",
   "Inhalt":"Spis treści",
   "Stichwortverzeichnis":"Indeks",
   "Erste Buchstaben eingeben":"Wpisz pierwsze litery",
@@ -7687,21 +7702,55 @@ const DOKFORMATE=[
   {n:"OpenDocument und RTF",e:[".odt",".rtf"]}
 ];
 const DOKENDUNGEN=DOKFORMATE.flatMap(f=>f.e);
+/* Ab hier lohnt der Hinweis: darunter fällt es im Browserspeicher nicht auf,
+   darüber ist es der Anfang des Problems. Als data:-URI wächst jedes Bild
+   um ein Drittel. */
+const BILD_WARNUNG=1500*1024;
+const mbText=b=>(b/1048576).toFixed(1).replace(".",PL(",",".",",",",",",",","))+" MB";
+function bildHinweis(zahl,bytes,fehlend){
+  overlay(`<div class="modal"><h3>${esc(tr("Bilder eingebettet"))}</h3>
+    <div class="pad">
+      <p style="margin:0 0 10px;line-height:1.55">${esc(PL(
+        zahl+" Bilder aus dem Dokument wurden mitgeladen, zusammen "+mbText(bytes)+".",
+        zahl+" pictures were brought in with the document, "+mbText(bytes)+" in total.",
+        zahl+" images ont été repris avec le document, "+mbText(bytes)+" au total.",
+        zahl+" imágenes se cargaron con el documento, "+mbText(bytes)+" en total.",
+        zahl+" imagens vieram com o documento, "+mbText(bytes)+" no total.",
+        "Wraz z dokumentem wczytano obrazy: "+zahl+", łącznie "+mbText(bytes)+"."))}</p>
+      <p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(tr(
+        "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist."))}</p>
+      ${fehlend?`<p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(PL(
+        fehlend+" Bilder ließen sich nicht lesen und fehlen im Text.",
+        fehlend+" pictures could not be read and are missing from the text.",
+        fehlend+" images n'ont pas pu être lues et manquent dans le texte.",
+        fehlend+" imágenes no se pudieron leer y faltan en el texto.",
+        fehlend+" imagens não puderam ser lidas e faltam no texto.",
+        "Nie udało się wczytać obrazów: "+fehlend+" — brakuje ich w tekście."))}</p>`:""}
+    </div>
+    <div class="rowend"><button class="btn" id="biBackup">${esc(tr("Sicherung erstellen"))}</button>
+      <button class="btn prim" id="biOk">${esc(tr("Weiter"))}</button></div></div>`);
+  $("#biOk").onclick=closeOvl;
+  $("#biBackup").onclick=()=>{closeOvl();saveBundle("all")};
+}
 async function ladeDokumente(dateien){
   if(!dateien.length)return;
-  let geladen=0,abgelehnt=0;
+  let geladen=0,abgelehnt=0,bildZahl=0,bildBytes=0,bildFehlend=0;
   for(const f of dateien){
     const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
     try{
       if(ZIPFORMATE.includes(ext)){
         const erg=await zipDokument(f.name,await f.arrayBuffer());
-        if(neuesDokumentAus(f.name,erg))geladen++;else abgelehnt++;
+        if(neuesDokumentAus(f.name,erg)){geladen++;
+          if(erg&&erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes;
+            bildFehlend+=erg.bilder.fehlend}
+        }else abgelehnt++;
       }else{
         if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
       }
     }catch(e){abgelehnt++}
   }
-  if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
+  if(geladen&&bildBytes>BILD_WARNUNG)bildHinweis(bildZahl,bildBytes,bildFehlend);
+  else if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
   else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
 }
 function loadDocumentFile(){
@@ -7803,6 +7852,13 @@ function rtfToHtml(raw){
    (DecompressionStream), deshalb braucht es dafür keine Fremdbibliothek. */
 const ZIPFORMATE=["docx","odt"];
 async function zipEintrag(buf,name){
+  const b=await zipBytes(buf,name);
+  return b?new TextDecoder().decode(b):null;
+}
+/* Rohe Bytes eines Eintrags. Text wie Bild kommen aus derselben Stelle —
+   nur ein TextDecoder darüber macht aus dem einen das andere, und über
+   Bildbytes gelegt zerstörte er sie stillschweigend. */
+async function zipBytes(buf,name){
   const dv=new DataView(buf),u8=new Uint8Array(buf),dec=new TextDecoder();
   /* Zentrales Verzeichnis steht am Dateiende, Signatur rückwärts suchen */
   let eocd=-1;
@@ -7823,10 +7879,10 @@ async function zipEintrag(buf,name){
       const ln=dv.getUint16(lokal+26,true),le=dv.getUint16(lokal+28,true);
       const start=lokal+30+ln+le;
       const daten=u8.subarray(start,start+komp);
-      if(methode===0)return dec.decode(daten);
+      if(methode===0)return daten;
       if(methode!==8||typeof DecompressionStream!=="function")return null;
       const strom=new Blob([daten]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
-      return dec.decode(await new Response(strom).arrayBuffer());
+      return new Uint8Array(await new Response(strom).arrayBuffer());
     }
     q+=46+nlen+elen+clen;
   }
@@ -8085,6 +8141,32 @@ const hfRefId=(sect,art)=>{
   return std?(std.getAttribute("r:id")||xattrN(std,"id")):null;
 };
 
+/* Alle Bildverweise der Beziehungsdatei einsammeln und die Bytes dazu aus
+   dem ZIP holen. Vorab statt bei Bedarf, weil das Lesen asynchron ist und
+   docxToHtml von oben bis unten synchron durchläuft. */
+async function docxBildKarte(buf,relXml){
+  const karte={};
+  if(!relXml)return karte;
+  const dom=new DOMParser().parseFromString(relXml,"application/xml");
+  if(dom.querySelector("parsererror"))return karte;
+  for(const r of [...dom.documentElement.children]){
+    if(!/\/image$/.test(r.getAttribute("Type")||""))continue;
+    const id=r.getAttribute("Id"),ziel=r.getAttribute("Target")||"";
+    /* Externe Bilder liegen nicht in der Datei — sie wären ein Verweis auf
+       einen fremden Rechner, kein Inhalt. */
+    if(!id||/^https?:/i.test(ziel)||r.getAttribute("TargetMode")==="External")continue;
+    const pfad="word/"+ziel.replace(/^\.?\//,"").replace(/^\.\.\//,"");
+    const ext=(ziel.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
+    const typ=BILDTYP[ext];
+    if(!typ)continue;
+    let bytes=null;
+    try{bytes=await zipBytes(buf,pfad)}catch(e){}
+    if(!bytes||!bytes.length)continue;
+    karte[id]={uri:"data:"+typ+";base64,"+base64Von(bytes),bytes:bytes.length};
+  }
+  return karte;
+}
+
 /* footnotes.xml: Kennung → Text. 0 und -1 sind die Trennlinien, kein Inhalt. */
 function docxFussnoten(xml){
   const karte=new Map();
@@ -8103,6 +8185,44 @@ function docxFussnoten(xml){
   return karte;
 }
 
+/* Bilder hängen an derselben Verweiskette wie Kopfzeilen: das Bild im Text
+   nennt nur eine rId, das Ziel steht in document.xml.rels, die Bytes im
+   ZIP unter word/media/. Eingebettet wird als data:-URI — dieselbe Form,
+   in der der Editor seine eigenen Bilder hält. */
+const BILDTYP={png:"image/png",jpg:"image/jpeg",jpeg:"image/jpeg",gif:"image/gif",
+               bmp:"image/bmp",webp:"image/webp",svg:"image/svg+xml"};
+function base64Von(bytes){
+  /* In Blöcken, weil String.fromCharCode mit dem ganzen Array bei großen
+     Bildern den Aufrufstapel sprengt. */
+  let roh="";const block=0x8000;
+  for(let i=0;i<bytes.length;i+=block)
+    roh+=String.fromCharCode.apply(null,bytes.subarray(i,i+block));
+  return btoa(roh);
+}
+/* EMU sind Word-Maße: 914400 je Zoll. Die Breite wird als Anteil der
+   Textbreite gehalten, wie bei den eigenen Bildern — ein Prozentwert
+   übersteht Zoom und einen Wechsel des Seitenformats, ein Millimetermaß nicht. */
+const EMU_MM=25.4/914400;
+function docxBildBreite(el,textbreiteMm){
+  const ext=el.querySelector?el.querySelector("extent"):null;
+  const cx=ext?parseInt(ext.getAttribute("cx"),10):0;
+  if(!cx||!textbreiteMm)return 70;
+  return Math.max(5,Math.min(100,Math.round(cx*EMU_MM/textbreiteMm*100)));
+}
+function docxBildRid(el){
+  /* Modern: a:blip r:embed. Älter (VML): v:imagedata r:id. */
+  const alle=el.getElementsByTagName("*");
+  for(const n of alle){
+    if(n.localName==="blip"){
+      const r=n.getAttribute("r:embed")||n.getAttribute("embed");if(r)return r;
+    }
+    if(n.localName==="imagedata"){
+      const r=n.getAttribute("r:id")||n.getAttribute("id");if(r)return r;
+    }
+  }
+  return null;
+}
+
 function docxLauf(p,ktx){
   let out="";
   const grund=ktx?ktx.grund:{};
@@ -8114,6 +8234,16 @@ function docxLauf(p,ktx){
       if(c.localName==="t")t+=xesc(c.textContent);
       else if(c.localName==="br")t+="<br>";
       else if(c.localName==="tab")t+=" ";
+      else if((c.localName==="drawing"||c.localName==="pict")&&ktx&&ktx.bild){
+        const rid=docxBildRid(c);
+        const quelle=rid&&ktx.bild.karte[rid];
+        if(quelle){
+          const br=docxBildBreite(c,ktx.bild.breiteMm);
+          ktx.bild.zahl++;ktx.bild.bytes+=quelle.bytes;
+          marke+=`<figure class="fig" contenteditable="false" data-w="${br}" style="text-align:center">`+
+            `<img src="${quelle.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
+        } else if(rid!==null&&ktx.bild) ktx.bild.fehlend++;
+      }
       else if(c.localName==="footnoteReference"&&ktx&&ktx.fn){
         const wid=String(xattrN(c,"id")||"");
         if(ktx.fn.karte.has(wid)){
@@ -8150,6 +8280,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const z=zubehoer||{};
   const grundGroesse=z.groesse||S.settings.size||11;
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
+  const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -8167,7 +8298,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,fn})||"";
+    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,fn,bild})||"";
     const numPr=KIND(pr,"numPr");
     if(numPr){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
@@ -8188,6 +8319,16 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       }
     }
     alleZu();
+    /* Ein Bild ist hier ein eigener Block. Steht im Absatz nichts als das
+       Bild, tritt die Figur an seine Stelle; steht Text daneben, folgt sie
+       ihm — verschachtelt im <p> wäre sie ungültiges Markup. */
+    const figuren=inhalt.match(/<figure[\s\S]*?<\/figure>/g);
+    if(figuren){
+      const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
+      if(rest)out+="<p>"+rest+"</p>";
+      out+=figuren.join("");
+      return;
+    }
     if(h)out+="<h"+h+">"+(inhalt||"<br>")+"</h"+h+">";
     else out+="<p>"+(inhalt||"<br>")+"</p>";
   };
@@ -8213,7 +8354,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       [...tr.children].filter(x=>x.localName==="tc").forEach(tc=>{
         const inner=[...tc.children].filter(x=>x.localName==="p").map(p=>{
           const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),fn});
+          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),fn,bild});
         }).join("<br>");
         r+="<td>"+(inner||"&nbsp;")+"</td>";
       });
@@ -8232,6 +8373,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   alleZu();
   const sect=docxSect(body);
   return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
+    bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
     hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer")};
 }
 
@@ -8310,11 +8452,22 @@ async function zipDokument(name,buf){
       const stil=await hol("word/styles.xml");
       const num=await hol("word/numbering.xml");
       const fuss=await hol("word/footnotes.xml");
-      const erg=docxToHtml(xml,stil,num,{fussnoten:docxFussnoten(fuss)});
+      /* Die Beziehungsdatei wird zweimal gebraucht: für die Bilder vor dem
+         Lesen, für Kopf und Fuß danach. */
+      const rel=await hol("word/_rels/document.xml.rels");
+      const bilder=await docxBildKarte(buf,rel);
+      /* Die Textbreite braucht der Leser, um Bildbreiten als Anteil davon
+         auszudrücken; sie steht im sectPr, das er selbst erst findet — also
+         einmal vorab nachsehen. */
+      const vorabSect=docxSect([...new DOMParser().parseFromString(xml,"application/xml")
+        .documentElement.children].find(e=>e.localName==="body")||{children:[]});
+      const vorabFmt=docxFormat(vorabSect);
+      const breiteMm=vorabFmt?vorabFmt.w-vorabFmt.m[1]-vorabFmt.m[3]:170;
+      const erg=docxToHtml(xml,stil,num,
+        {fussnoten:docxFussnoten(fuss),bilder,breiteMm});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
-      const rel=await hol("word/_rels/document.xml.rels");
       for(const [art,feld] of [["hdrId","hdr"],["ftrId","ftr"]]){
         const ziel=docxRelZiel(rel,erg[art]);
         if(ziel)erg[feld]=docxHf(await hol(ziel));
@@ -13124,7 +13277,8 @@ are kept as percentages, so they survive zooming and a change of page format.</p
  {t:"Pictures",k:"image;picture;photo;caption;alt text;resize",b:`
 <p>Insert a picture from the toolbar, or type <code>/image</code>. The file is embedded in
 the document, so it travels with your backups — bear in mind that several large
-photographs will fill the browser's storage quickly.</p>
+photographs will fill the browser's storage quickly. The same goes for pictures that arrive with a loaded Word
+document.</p>
 <p><b>Click a picture</b> to select it. A small bar appears with alignment, a caption,
 alternative text for screen readers, and delete. Drag the round corner handle to resize.</p>
 <p>A caption lets the picture be counted in a <b>table of figures</b>.</p>`},
@@ -13356,10 +13510,14 @@ an A4 document arrives as <i>A4</i> rather than as a nameless measurement.</p>
 become this program's placeholders, so <code>{page}</code> keeps counting instead of arriving
 as the fixed number that happened to be stored in the file. Table column widths are read from
 the document and held as proportions, so they survive a change of paper size.</p>
-<p>What does not come across: pictures inside a .docx, comments, tracked changes, text boxes,
-shapes and equations. Merged table cells become separate cells. Documents split into several
-sections keep the setup of the last one, since a document here has one page format rather than
-one per section. The old binary .doc format from before 2007 cannot be read.</p>`},
+<p><b>Pictures come across too</b>, at the width they had in Word. They are embedded in the
+document, which means they sit in the browser's storage — so when a file brings a lot of them,
+you are told how much was added and offered a backup on the spot. Pictures a Word document only
+links to, rather than containing, cannot come along: they live on someone else's machine.</p>
+<p>What does not come across: comments, tracked changes, text boxes, shapes and equations.
+Merged table cells become separate cells. Documents split into several sections keep the setup
+of the last one, since a document here has one page format rather than one per section. The old
+binary .doc format from before 2007 cannot be read.</p>`},
 
  {t:"Exporting",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>File &rsaquo; Export</b> writes the document out for use elsewhere:</p>
@@ -13610,7 +13768,8 @@ des Seitenformats.</p>`},
  {t:"Bilder",k:"bild;foto;grafik;bildunterschrift;alternativtext;größe ändern",b:`
 <p>Ein Bild fügst du über die Werkzeugleiste ein oder mit <code>/bild</code>. Die Datei wird im
 Dokument eingebettet und wandert damit in jede Sicherung mit — bedenke, dass einige große
-Fotos den Browserspeicher rasch füllen.</p>
+Fotos den Browserspeicher rasch füllen. Dasselbe gilt für Bilder, die mit einem geladenen
+Word-Dokument hereinkommen.</p>
 <p><b>Ein Klick auf ein Bild</b> wählt es aus. Eine kleine Leiste erscheint mit Ausrichtung,
 Bildunterschrift, Alternativtext für Screenreader und Löschen. Am runden Eckanfasser ziehst du
 die Größe.</p>
@@ -13853,11 +14012,15 @@ die Seitenzahl werden die Platzhalter dieses Programms — <code>{seite}</code> 
 weiter, statt als die eine Zahl anzukommen, die zufällig in der Datei stand.
 Spaltenbreiten von Tabellen werden gelesen und als Verhältnis gehalten, sie überstehen
 deshalb einen Wechsel des Seitenformats.</p>
-<p>Nicht mit herüber kommen: Bilder aus einer .docx, Kommentare, Änderungsverfolgung,
-Textfelder, Formen und Formeln. Verbundene Tabellenzellen werden zu einzelnen Zellen.
-Dokumente mit mehreren Abschnitten behalten den Aufbau des letzten, denn hier hat ein
-Dokument ein Seitenformat und nicht eines je Abschnitt. Das alte binäre .doc-Format von vor
-2007 lässt sich nicht lesen.</p>`},
+<p><b>Bilder kommen ebenfalls mit</b>, in der Breite, die sie in Word hatten. Sie werden ins
+Dokument eingebettet und liegen damit im Browserspeicher — bringt eine Datei viele davon mit,
+sagt dir das Programm, wie viel dazugekommen ist, und bietet gleich eine Sicherung an. Bilder,
+die ein Word-Dokument nur verknüpft statt sie zu enthalten, können nicht mit: sie liegen auf
+einem fremden Rechner.</p>
+<p>Nicht mit herüber kommen: Kommentare, Änderungsverfolgung, Textfelder, Formen und Formeln.
+Verbundene Tabellenzellen werden zu einzelnen Zellen. Dokumente mit mehreren Abschnitten
+behalten den Aufbau des letzten, denn hier hat ein Dokument ein Seitenformat und nicht eines je
+Abschnitt. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
 
  {t:"Exportieren",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>Datei &rsaquo; Exportieren</b> schreibt das Dokument zur Weitergabe heraus:</p>
