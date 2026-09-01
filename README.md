@@ -44,6 +44,7 @@ Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinat
 | `Alt` `⇧` `⏎` | Seitenumbruch einfügen |
 | `Tab` / `⇧` `Tab` | Absatz ein- / ausrücken (in Tabellen: nächste Zelle) |
 | `/` | Einfügemenü am Anfang eines leeren Absatzes |
+| `F1` | Hilfe (Inhalt, Index, Volltextsuche) |
 
 Übrige Kürzel folgen Word: `Strg B`/`I`/`U` (Fett/Kursiv/Unterstrichen), `Strg Z`/`Y` (Rückgängig/Wiederholen), `Strg P` (Drucken).
 

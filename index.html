@@ -933,6 +933,65 @@ body.focus .outline{display:none}
 .modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius-lg);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
 .modal.wide{width:min(600px,94vw)}
+/* ---- Hilfefenster ----
+   Zweigeteilt wie die WinHelp-Fenster: links der Wegweiser (Inhalt, Index,
+   Suchen), rechts das Thema. Beide Seiten rollen für sich, damit die Auswahl
+   stehen bleibt, während man einen langen Text liest. */
+.helpwin{width:min(880px,96vw)}
+.helptabs{padding:0 16px}
+.helpsplit{display:flex;height:min(62vh,520px);border-bottom:1px solid var(--rule)}
+.helpnav{flex:0 0 268px;border-right:1px solid var(--rule);overflow-y:auto;
+  padding:8px 0 12px;background:var(--chrome-2)}
+.helpbody{flex:1;min-width:0;overflow-y:auto;padding:20px 24px 28px}
+.hicon{width:16px;height:16px;flex:none}
+.hbook,.htopic{display:flex;align-items:center;gap:8px;padding:5px 14px;cursor:pointer;
+  font-size:13px;color:var(--ink)}
+.hbook{font-weight:600}
+.hbook:hover,.htopic:hover{background:var(--chrome)}
+.htopic{padding-left:32px;color:var(--ink-soft)}
+/* Auswahl ohne Vollfläche in der Akzentfarbe: weiße Schrift darauf erreichte
+   in Tinte nur 3,6:1 — für 13px-Text zu wenig. Ein Balken links und ein
+   ruhiger Hintergrund markieren genauso deutlich und lassen die Schriftfarbe
+   des Schemas stehen. */
+.htopic.on{background:var(--chrome);color:var(--ink);font-weight:600;
+  box-shadow:inset 3px 0 0 var(--stamp)}
+.hsearch{width:calc(100% - 24px);margin:2px 12px 10px;padding:5px 8px;
+  border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink)}
+.hidx{display:flex;flex-direction:column;padding:4px 14px;cursor:pointer;font-size:13px}
+.hidx:hover{background:var(--chrome)}
+.hidx i{font-style:normal;font-size:11px;color:var(--ink-faint)}
+.hfind{padding:7px 14px;cursor:pointer;border-bottom:1px solid var(--rule)}
+.hfind:hover{background:var(--chrome)}
+.hfind.on{background:var(--chrome);box-shadow:inset 3px 0 0 var(--stamp)}
+.hfind b{display:block;font-size:13px;color:var(--ink)}
+.hfind span{display:block;font-size:11px;line-height:1.45;color:var(--ink-soft);margin-top:2px}
+.hcount,.hleer{padding:4px 14px 8px;font-size:11px;color:var(--ink-faint)}
+.hleer{line-height:1.5}
+/* Der Themenbereich ist Fließtext und darf ruhig anders gesetzt sein als die
+   Bedienoberfläche — er wird gelesen, nicht bedient. */
+.helpbody h4{margin:0 0 12px;font-family:Georgia,serif;font-size:19px;font-weight:600;color:var(--ink)}
+.helpbody p{margin:0 0 11px;font-size:13.5px;line-height:1.62;color:var(--ink)}
+.helpbody ul,.helpbody ol{margin:0 0 11px;padding-left:20px;font-size:13.5px;line-height:1.62}
+.helpbody li{margin-bottom:4px}
+.helpbody a{color:var(--stamp);cursor:pointer;text-decoration:underline}
+.helpbody code{font-family:var(--mono);font-size:12px;background:var(--chrome-2);
+  padding:1px 4px;border-radius:3px}
+.helpbody kbd{font-family:var(--ui);font-size:11px;border:1px solid var(--rule);
+  border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--chrome-2);
+  color:var(--ink);white-space:nowrap}
+.hpath{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:6px}
+.hsec{font-weight:600;margin-top:16px!important;margin-bottom:6px!important}
+.hkeys{border-collapse:collapse;margin:0 0 12px;font-size:13px;width:100%}
+.hkeys td{padding:4px 10px 4px 0;vertical-align:top;border-bottom:1px solid var(--rule);
+  line-height:1.5;color:var(--ink)}
+.hkeys td:first-child{white-space:nowrap;width:1%}
+.hwelcome{max-width:46em}
+.hnote{color:var(--ink-faint);font-size:12px!important;margin-top:18px!important}
+@media (max-width:700px){
+  .helpsplit{flex-direction:column;height:min(70vh,560px)}
+  .helpnav{flex:0 0 180px;border-right:none;border-bottom:1px solid var(--rule)}
+}
 .modal h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .modal .pad{padding:16px}
@@ -1713,6 +1772,7 @@ en:{
   "Word-Dokument":"Word document",
   "Einstellungen&hellip;":"Settings&hellip;",
   "Alle Befehle":"All commands",
+  "Hilfe":"Help",
   "Seite":"Page",
   "Seitenränder":"Page margins",
   "Seitenzahlen":"Page numbers",
@@ -2378,6 +2438,7 @@ fr:{
   "Word-Dokument":"Document Word",
   "Einstellungen&hellip;":"Paramètres&hellip;",
   "Alle Befehle":"Toutes les commandes",
+  "Hilfe":"Aide",
   "Seite":"Page",
   "Seitenränder":"Marges de page",
   "Seitenzahlen":"Numéros de page",
@@ -3043,6 +3104,7 @@ es:{
   "Word-Dokument":"Documento Word",
   "Einstellungen&hellip;":"Configuración&hellip;",
   "Alle Befehle":"Todos los comandos",
+  "Hilfe":"Ayuda",
   "Seite":"Página",
   "Seitenränder":"Márgenes de página",
   "Seitenzahlen":"Números de página",
@@ -3708,6 +3770,7 @@ pt:{
   "Word-Dokument":"Documento Word",
   "Einstellungen&hellip;":"Configurações&hellip;",
   "Alle Befehle":"Todos os comandos",
+  "Hilfe":"Ajuda",
   "Seite":"Página",
   "Seitenränder":"Margens de página",
   "Seitenzahlen":"Números de página",
@@ -4373,6 +4436,7 @@ pl:{
   "Word-Dokument":"Dokument Word",
   "Einstellungen&hellip;":"Ustawienia&hellip;",
   "Alle Befehle":"Wszystkie polecenia",
+  "Hilfe":"Pomoc",
   "Seite":"Strona",
   "Seitenränder":"Marginesy strony",
   "Seitenzahlen":"Numery stron",
@@ -8195,7 +8259,9 @@ function fileMenu(){
     <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Zwischenstände")}
       <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}</span></button>
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
-    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>`;
+    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>
+    <div class="msep"></div>
+    <button class="mi" data-act="help"><span class="chk"></span>${tr("Hilfe")}<span class="k">F1</span></button>`;
   $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
   menuUnterKnopf(m,$("#fileBtn"));
   m.onclick=e=>{
@@ -8232,6 +8298,7 @@ function openSubMenu(anchor,items,cb=runFileAct){
     closeMenu();cb(b.dataset.sub)};
 }
 function runFileAct(a){
+  if(a==="help")helpDialog();
   if(a==="new")newDocument();
   if(a==="loaddoc")loadDocumentFile();
   if(a==="rename")renameTab(S.active);
@@ -12470,10 +12537,608 @@ function zoomPresets(){
     else setZoom(+b.dataset.z/100)};
 }
 
+/* ================= Hilfe =================
+   Nach dem Vorbild der WinHelp-Fenster der Neunziger: drei Reiter — Inhalt,
+   Index, Suchen — und die Bücher-Metapher im Inhaltsverzeichnis. Bewusst
+   inline und nicht nachgeladen: eine Hilfe muss gerade dann zur Stelle sein,
+   wenn die Datei per Doppelklick geöffnet wurde, und ein fetch() auf einen
+   Nachbarordner scheitert unter file:// (wie bei dict/ und der Rechtschreibung).
+
+   Der Inhalt ist vorerst nur englisch und läuft deshalb nicht durch tr().
+   Eine halb übersetzte Hilfe — deutsche Reiter über englischen Texten — wäre
+   schlechter als eine durchgehend englische. */
+const HELPBOOKS=[
+{b:"Getting started",t:[
+ {t:"About PureQuill Writer",k:"about;overview;introduction",b:`
+<p>PureQuill Writer is a word processor that runs entirely in your browser. There is
+nothing to install and nothing to sign in to. Your text is not sent anywhere.</p>
+<p>It is built for long-form writing — manuscripts, reports, theses — rather than short
+memos. Three things set it apart from a plain text editor:</p>
+<ul>
+<li>A <b>real page</b>, measured in millimetres, matching what comes out of the printer.</li>
+<li>A <b>pinboard</b> for notes that belong to the work but not in the text.</li>
+<li>A <b>glossary</b> of recurring terms that can be highlighted and looked up while writing.</li>
+</ul>
+<p>See also: <a data-goto="The three views">The three views</a>.</p>`},
+
+ {t:"The three views",k:"views;modes;write;notes;glossary;switching",b:`
+<p>The three buttons down the left edge switch between the views. Each keeps its own
+state, so you can move between them without losing your place.</p>
+<table class="hkeys">
+<tr><td><b>Write</b></td><td><kbd>Alt</kbd>+<kbd>1</kbd></td><td>The document on the page.</td></tr>
+<tr><td><b>Notes</b></td><td><kbd>Alt</kbd>+<kbd>2</kbd></td><td>The pinboard of notes.</td></tr>
+<tr><td><b>Glossary</b></td><td><kbd>Alt</kbd>+<kbd>3</kbd></td><td>Your collections of terms.</td></tr>
+</table>
+<p>Notes and glossary entries belong to the program, not to a single document — they
+stay available whichever document you have open.</p>`},
+
+ {t:"Your first document",k:"new document;create;start;tabs;rename",b:`
+<p>On first use the program asks for a language and a colour scheme, then offers a new
+document or an existing file.</p>
+<p><b>To create another document</b>, click the <b>+</b> at the right of the tab strip,
+or choose <b>File &rsaquo; New document</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
+You are asked for a page format first; it can be changed at any time afterwards.</p>
+<p>Documents appear as tabs along the top. Drag a tab to reorder it. Right-click one to
+rename it or give it a colour. Closing the last document returns you to the welcome screen.</p>
+<p>Each document keeps its own title, page format, font and line spacing. Changing those
+affects only the document you are in.</p>`},
+
+ {t:"Where your work is kept",k:"saving;storage;autosave;browser storage;lost work",b:`
+<p>Your text is saved continuously as you type. There is no Save command to remember,
+and the status bar at the bottom right always says where things stand.</p>
+<p>Work is kept in <b>three places</b>, numbered in <b>Settings &rsaquo; Saving</b>:</p>
+<ol>
+<li><b>This browser</b> — always, and everything. Tied to the address you opened the
+program from, and lost if you clear your browser data.</li>
+<li><b>A file on disk</b> — optional, and only the document you are in, together with
+the notes pinned to it.</li>
+<li><b>Automatic backup</b> — optional, and the whole program state: every document,
+note, glossary and setting.</li>
+</ol>
+<p>If the status bar ever reads <b>Not saved</b> in red, the browser has refused to store
+anything further. Make a backup at once and free some space.</p>
+<p>See also: <a data-goto="Automatic backup">Automatic backup</a>.</p>`}]},
+
+{b:"Writing",t:[
+ {t:"Typing and formatting",k:"bold;italic;underline;strikethrough;font;size;colour;highlight",b:`
+<p>The toolbar above the page carries the character formatting. Everything there applies
+to the selected text, or to what you type next if nothing is selected.</p>
+<table class="hkeys">
+<tr><td>Bold</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
+<tr><td>Italic</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
+<tr><td>Underline</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Strikethrough</td><td>toolbar only</td></tr>
+</table>
+<p><b>Font size</b> is an editable box: pick a listed size from the arrow beside it, or
+type any value between 4 and 200 and press <kbd>Enter</kbd>. The arrow keys step it.</p>
+<p><b>Text colour</b> and <b>highlight</b> each open a palette of prepared colours and a
+picker for anything else. The stripe under the button shows what will be used.</p>
+<p>Highlighting also darkens the text it covers, so the passage stays readable on the dark
+colour schemes. Apply the highlight first and the text colour afterwards if you want both.</p>
+<p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words.</p>`},
+
+ {t:"Paragraphs and headings",k:"heading;paragraph;alignment;indent;line spacing;paragraph spacing",b:`
+<p>The <b>paragraph style</b> box turns the current paragraph into body text or one of
+three heading levels. Headings are what the outline and the table of contents are built
+from, so use them rather than merely making a line bigger and bold.</p>
+<table class="hkeys">
+<tr><td>Align left</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centre</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Align right</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justify</td><td>toolbar only</td></tr>
+</table>
+<p><b>To indent a paragraph</b>, press <kbd>Tab</kbd> at the start of it;
+<kbd>Shift</kbd>+<kbd>Tab</kbd> takes it back. Inside a table these keys move between cells.</p>
+<p><b>Line spacing</b> and <b>paragraph spacing</b> are under Format and apply to the whole
+document rather than to single paragraphs.</p>`},
+
+ {t:"Lists and quotations",k:"list;bullet;numbered;quote;blockquote;markers",b:`
+<p>Start a list from the toolbar, from <b>Format</b>, or simply by typing <code>- </code>
+or <code>1. </code> at the beginning of an empty paragraph — it becomes a list as soon as
+you type the space.</p>
+<p><kbd>Enter</kbd> starts the next item; on an empty item it leaves the list.
+<kbd>Tab</kbd> indents an item one level.</p>
+<p><b>Format &rsaquo; Bulleted list</b> and <b>Numbered list</b> also offer marker styles —
+dots, circles, squares, dashes and ticks; decimal, bracketed, letters and Roman numerals.
+The style applies to the list you are standing in, so different lists can differ.</p>
+<p><b>Quotations</b> come from <b>Format &rsaquo; Quotation</b> in three styles: an accent
+rule, a tinted block, and a typographic mark. Pressing <kbd>Enter</kbd> twice on an empty
+quotation line leaves the quotation.</p>`},
+
+ {t:"Tables",k:"table;rows;columns;cells;header row",b:`
+<p>Insert a table from the toolbar button, which opens a grid you drag across to pick the
+size, or by typing <code>/table</code> at the start of an empty paragraph.</p>
+<p><kbd>Tab</kbd> moves to the next cell; in the last cell it adds a row.
+<kbd>Shift</kbd>+<kbd>Tab</kbd> moves back.</p>
+<p><b>Right-click inside a table</b> for the row and column commands: insert above or
+below, insert left or right, delete row, delete column, delete table, and turn the first
+row into a header row.</p>
+<p><b>To change column widths or row heights</b>, drag the border between two cells. Widths
+are kept as percentages, so they survive zooming and a change of page format.</p>`},
+
+ {t:"Pictures",k:"image;picture;photo;caption;alt text;resize",b:`
+<p>Insert a picture from the toolbar, or type <code>/image</code>. The file is embedded in
+the document, so it travels with your backups — bear in mind that several large
+photographs will fill the browser's storage quickly.</p>
+<p><b>Click a picture</b> to select it. A small bar appears with alignment, a caption,
+alternative text for screen readers, and delete. Drag the round corner handle to resize.</p>
+<p>A caption lets the picture be counted in a <b>table of figures</b>.</p>`},
+
+ {t:"Links and page breaks",k:"link;hyperlink;url;page break",b:`
+<p><b>To insert or edit a link</b>, select the text and press
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>, or use the toolbar button. Links open in a
+new tab.</p>
+<p><b>A page break</b> forces what follows onto a new page. Use the toolbar button,
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd>, or type <code>/break</code>. It shows as
+a labelled line while you write and disappears when printing.</p>`},
+
+ {t:"AutoCorrect while you type",k:"autocorrect;quotes;quotation marks;dash;capitalisation",b:`
+<p>Four corrections are made as you type. All four start switched on and can be turned off
+individually under <b>Settings &rsaquo; AutoCorrect</b>.</p>
+<table class="hkeys">
+<tr><td><b>Quotation marks</b></td><td>Straight quotes become typographic ones.</td></tr>
+<tr><td><b>Dash</b></td><td>Two hyphens become a dash.</td></tr>
+<tr><td><b>Capitalisation</b></td><td>The first letter of a sentence is capitalised.</td></tr>
+<tr><td><b>Lists</b></td><td><code>- </code> or <code>1. </code> starts a list.</td></tr>
+</table>
+<p>Which quotation marks are used follows the <b>spelling language</b>, not the language of
+the menus — German and Polish open low, French and Spanish use guillemets, English and
+Portuguese use raised quotes. An apostrophe in a contraction is recognised and left alone.</p>
+<p>Every correction can be undone with <kbd>Ctrl</kbd>+<kbd>Z</kbd> like any other keystroke.</p>`}]},
+
+{b:"The page",t:[
+ {t:"Page format and margins",k:"page format;paper;a4;letter;margins;orientation;units",b:`
+<p><b>File &rsaquo; Page format</b> sets the paper size, orientation and the four margins
+for the document you are in. Six formats are prepared — A4, DIN 5008 letter, manuscript
+page, A5, paperback and US Letter — and you can enter your own dimensions.</p>
+<p>Measurements are in millimetres unless you switch to inches under
+<b>Settings &rsaquo; General</b>.</p>
+<p><b>The left and right margins can also be dragged</b> in the ruler above the page.</p>
+<p>Tick <b>Set as default</b> to have new documents start with this format.</p>`},
+
+ {t:"Headers and footers",k:"header;footer;running head;placeholders;from edge",b:`
+<p><b>Double-click the top or bottom margin of the page</b> to edit the header or footer
+where it sits. A small bar appears with alignment, placeholders and the height.</p>
+<p>Four placeholders are replaced on every page:</p>
+<table class="hkeys">
+<tr><td><code>{page}</code></td><td>the page number</td></tr>
+<tr><td><code>{pages}</code></td><td>the total number of pages</td></tr>
+<tr><td><code>{title}</code></td><td>the document title</td></tr>
+<tr><td><code>{date}</code></td><td>today's date</td></tr>
+</table>
+<p><b>The height of the header area</b> is the boundary between it and the body text. Drag
+the handle along that boundary, or type a value in the bar. Making the header taller pushes
+the text down; it never runs underneath it.</p>
+<p><b>The distance from the paper edge</b> — where the line itself sits — belongs to the
+page format and is set under <b>File &rsaquo; Page format</b>, beside the margins.</p>
+<p><kbd>Shift</kbd>+<kbd>Enter</kbd> adds a second line. <kbd>Tab</kbd> jumps between header
+and footer. <kbd>Esc</kbd> finishes.</p>`},
+
+ {t:"Page numbers",k:"page numbers;numbering;pagination",b:`
+<p><b>Format &rsaquo; Page numbers</b> switches a plain page number at the foot of each page
+on and off.</p>
+<p>If you set up a footer of your own containing <code>{page}</code>, that replaces the
+plain number — the two never appear together.</p>`},
+
+ {t:"Zoom and page width",k:"zoom;magnification;fit;page width",b:`
+<p>The zoom control sits at the bottom right. Click the percentage to choose a level or
+enter your own.</p>
+<table class="hkeys">
+<tr><td>Zoom in</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
+<tr><td>Zoom out</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Fit page width</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
+</table>
+<p>With <b>fit page width</b> active the zoom follows the window as you resize it. Setting a
+level by hand switches that off.</p>`},
+
+ {t:"Printing and print preview",k:"print;pdf;preview;export pdf",b:`
+<p><b>Print preview</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) shows the document
+exactly as it will be printed — page numbers, headers, margins and all. It is built from
+the pages you already see, so preview and paper cannot differ. <kbd>Esc</kbd> closes it.</p>
+<p><b>To print</b>, press <kbd>Ctrl</kbd>+<kbd>P</kbd> or use <b>File &rsaquo; Print</b>.</p>
+<p><b>To make a PDF</b>, choose <b>File &rsaquo; Export &rsaquo; Export as PDF</b>. This
+opens the same print dialog; pick <i>Save as PDF</i> as the destination.</p>`}]},
+
+{b:"Working on longer texts",t:[
+ {t:"Notes on the pinboard",k:"notes;pinboard;sticky notes;colours",b:`
+<p>The <b>Notes</b> view (<kbd>Alt</kbd>+<kbd>2</kbd>) is a board of cards for everything
+that belongs to the work but not into the text: open questions, research links, reminders.</p>
+<p><b>To create a note</b>, use the button at the left of the toolbar or press
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> — that works while writing too, without
+changing view. A new note opens with the cursor in its heading.</p>
+<p><b>Click a note</b> to open it in the side panel. <b>Drag it</b> to move it; new notes
+take the first free space at the top left. The board scrolls as you drag past its edge.</p>
+<p>Notes can be given one of seven colours from the panel at the foot of the editor.</p>`},
+
+ {t:"Pinning a note to a passage",k:"pin;anchor;link note;margin notes;comment",b:`
+<p>A note can be tied to one or more places in the text, the way a comment is.</p>
+<p><b>Select the passage</b> and press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, or
+right-click and choose to pin a note. The passage is marked, and the note shows how many
+places it is tied to.</p>
+<p>With <b>View &rsaquo; Notes in the margin</b> switched on, pinned notes appear beside the
+page as you write. Clicking one jumps to its place; if a note is tied to several places,
+arrows step between them.</p>
+<p>Deleting the marked text does not delete the note — it only loses that connection.</p>`},
+
+ {t:"The glossary",k:"glossary;terms;definitions;lookup;highlight terms",b:`
+<p>The <b>Glossary</b> view (<kbd>Alt</kbd>+<kbd>3</kbd>) holds terms that recur in your
+writing — characters, places, technical vocabulary — each with a definition and an optional
+category.</p>
+<p>Entries are listed with the term on the left and its definition on the right, grouped by
+initial letter or by category depending on the sort order you choose.</p>
+<p><b>View &rsaquo; Highlight glossary terms</b> underlines those terms wherever they appear
+in the text, with the definition on hover.</p>
+<p><b>To look a term up while writing</b>, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>.
+Clicking a result inserts the term at the cursor.</p>`},
+
+ {t:"Several glossaries",k:"glossaries;collections;assign;import;export csv",b:`
+<p>You can keep more than one glossary — a fantasy novel and a textbook have no terms in
+common, and mixing them would highlight the wrong words in both.</p>
+<p>The tabs at the top of the Glossary view switch <b>which glossary you are looking at</b>.
+That alone changes nothing else: a document keeps the glossary it was given.</p>
+<p><b>To decide which glossary a document uses</b>, use the <b>Assigned</b> dropdown in the
+header. It lists every open document with a tick, and an entry for no assignment at all.
+Only the assigned glossary's terms are highlighted in that document.</p>
+<p><b>Import and export</b> sits in the same header, under the ⋮ button. A glossary can be
+written out as a table (.csv) or as a backup (.json) and read back from either — into the
+glossary you are viewing, or as a new one named after the file. Terms already present are
+skipped rather than duplicated.</p>`},
+
+ {t:"Footnotes",k:"footnote;reference;notes at foot",b:`
+<p><b>Tools &rsaquo; Insert footnote</b> places a numbered reference at the cursor and puts
+the note at the foot of the page it falls on.</p>
+<p>Footnotes renumber themselves as you write and move with the text they belong to.
+Deleting the reference removes the note as well.</p>`},
+
+ {t:"Table of contents and figures",k:"table of contents;toc;contents;figures",b:`
+<p><b>Tools &rsaquo; Insert table of contents</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+builds a list from the headings in the document. It offers a choice of style, how many
+heading levels to include, whether to show page numbers, and which leader to use between
+entry and number.</p>
+<p>The table updates as you write, and individual headings can be excluded from it.</p>
+<p><b>A table of figures</b> works the same way for pictures that have a caption. It is
+offered once you switch it on under <b>Settings &rsaquo; General</b>.</p>`},
+
+ {t:"The outline",k:"outline;navigation;structure;jump to heading",b:`
+<p><b>View &rsaquo; Outline</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) opens a panel
+listing every heading in the document. Clicking one jumps to it.</p>
+<p>For a long manuscript this is usually the quickest way to move around — quicker than
+scrolling and quicker than search.</p>`},
+
+ {t:"Writing goal",k:"goal;word count;target;session",b:`
+<p><b>Tools &rsaquo; Set writing goal</b> puts a small counter beside the word count in the
+status bar — <i>640 / 1,000</i> with a quiet bar.</p>
+<p>It counts what you have written <b>since you switched the goal on or reset it</b>, across
+all documents, and survives closing the program. Nothing happens when you reach the target
+except that the bar turns green. There is no alarm.</p>
+<p>Click the counter to change the target, reset it, or switch it off.</p>`},
+
+ {t:"Document memo",k:"memo;document notes;plot notes",b:`
+<p><b>View &rsaquo; Document memo</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>) opens a
+plain text field in the side panel, one per document.</p>
+<p>It sits a level above the pinboard: thoughts about the document itself rather than about
+a passage — where the plot has to go, what still needs checking. Its contents never appear
+in the text and never in an export, but they do travel with backups.</p>`}]},
+
+{b:"Checking and finishing",t:[
+ {t:"Spell check",k:"spelling;spell check;dictionary;languages;own words",b:`
+<p><b>Tools &rsaquo; Spell check</b> goes through the document and lists what it does not
+recognise, with suggestions.</p>
+<p>The dictionary is downloaded once per language and stays ready for as long as the program
+is open. Six languages are available: German, English, French, Spanish, Portuguese and
+Polish. The language is set under <b>Settings &rsaquo; General</b>.</p>
+<p>For each word you can accept a suggestion, type a correction of your own, ignore it once,
+or add it to your own words — those are remembered across all documents.</p>
+<p><b>The dictionaries need a real address.</b> If you opened the file by double-clicking it,
+the spell check cannot fetch them. Serving the program from a web address or a local server
+solves this.</p>`},
+
+ {t:"Cleaning up the text",k:"clean;tidy;double spaces;non-breaking space;empty paragraphs",b:`
+<p><b>Tools &rsaquo; Clean up text</b> finds the small mess that accumulates in a long
+manuscript and offers to remove it, one item at a time or all at once:</p>
+<ul>
+<li>double spaces</li>
+<li>spaces at the end of a line</li>
+<li>non-breaking spaces</li>
+<li>runs of empty paragraphs</li>
+</ul>
+<p>Up to two empty paragraphs in a row are treated as deliberate spacing and left alone; only
+from the third onwards are they reduced — and then to two, not to one.</p>`},
+
+ {t:"Find and replace",k:"find;search;replace;match case;whole word",b:`
+<table class="hkeys">
+<tr><td>Find</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Replace</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+</table>
+<p>A bar appears at the top of the page. It counts the matches and steps through them with
+<kbd>Enter</kbd> or the arrows. Two options narrow the search: <b>match case</b> and
+<b>whole word</b>.</p>
+<p>Replace acts on the current match; <b>All</b> replaces every one of them. <kbd>Esc</kbd>
+closes the bar.</p>`},
+
+ {t:"Reading view and focus mode",k:"reading view;read;distraction free;focus mode",b:`
+<p><b>Reading view</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) hides the whole
+interface and shows only the text in a single comfortable column. It cannot be typed in.
+Working marks — note anchors, glossary underlines, page-break labels — are hidden, because
+they are not part of the text.</p>
+<p>Use it to judge how the text reads rather than how it is coming along. <kbd>Esc</kbd>
+returns.</p>
+<p><b>Focus mode</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>) is a different thing: it
+dims everything but the page and lets you keep writing.</p>`}]},
+
+{b:"Files, backups and settings",t:[
+ {t:"Opening existing files",k:"open;import;docx;odt;rtf;markdown;html;txt",b:`
+<p><b>File &rsaquo; Load document</b> opens files written elsewhere. Each becomes a new tab;
+several can be opened at once.</p>
+<table class="hkeys">
+<tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.rtf</td><td>Rich Text</td></tr>
+<tr><td>.html, .htm</td><td>web pages</td></tr>
+<tr><td>.md</td><td>Markdown</td></tr>
+<tr><td>.txt</td><td>plain text</td></tr>
+</table>
+<p>Paragraphs, headings, bold, italic, underline, strikethrough, lists and tables are carried
+over. Pictures inside a .docx, footnotes and comments are not. The old binary .doc format
+from before 2007 cannot be read.</p>`},
+
+ {t:"Exporting",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
+<p><b>File &rsaquo; Export</b> writes the document out for use elsewhere:</p>
+<table class="hkeys">
+<tr><td><b>Word document</b></td><td>.docx, with formatting</td></tr>
+<tr><td><b>PDF</b></td><td>through the print dialog</td></tr>
+<tr><td><b>Web page</b></td><td>.html</td></tr>
+<tr><td><b>Markdown</b></td><td>.md</td></tr>
+<tr><td><b>Plain text</b></td><td>.txt</td></tr>
+<tr><td><b>Glossary as a table</b></td><td>.csv</td></tr>
+</table>
+<p>An export is for handing on. It cannot be read back in with everything intact — for that,
+use a backup.</p>`},
+
+ {t:"Backups",k:"backup;restore;bundle;save everything",b:`
+<p>A backup, unlike an export, can be read back in complete.</p>
+<p><b>File &rsaquo; Backup &rsaquo; Create a backup</b> writes everything — all documents,
+notes, glossaries and settings — into one file. <b>Load a backup</b> reads it in again; a
+full backup replaces what is currently there and asks first.</p>
+<p>Two partial backups are offered as well: this document with its pinned notes, and the
+notes and glossaries on their own. Partial backups are added to what you have rather than
+replacing it.</p>
+<p>Make one before anything drastic, and before moving to a different address — the browser
+keeps its storage separately for each.</p>`},
+
+ {t:"Automatic backup",k:"automatic backup;google drive;dropbox;onedrive;cloud;sync",b:`
+<p>The third card under <b>Settings &rsaquo; Saving</b> writes the whole program state to a
+file of your choosing, by itself, at an interval you set.</p>
+<p><b>If you put that file in a Google Drive, Dropbox or OneDrive folder, it is carried into
+the cloud from there automatically.</b> The program needs no account and no access to those
+services; the sync client does the rest. This works with any provider.</p>
+<p>Choose the file once with <b>Choose a backup file</b>. The card then shows when it last
+wrote. <b>Back up now</b> writes immediately.</p>
+<p>Nothing is written when nothing has changed, so a file in a synced folder is not touched
+needlessly.</p>
+<p>This needs Chrome or Edge. Other browsers are limited to backups made by hand.</p>`},
+
+ {t:"Appearance",k:"theme;colour scheme;appearance;dark mode;typewriter scrolling",b:`
+<p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers thirteen schemes with live
+miniature previews — from the very light Azure and Alabaster through to Ink, Cyan, Amber and
+Phosphor, several of them drawn from the screens of early word processors.</p>
+<p>Two writing behaviours sit in the same place:</p>
+<ul>
+<li><b>Typewriter scrolling</b> keeps the line you are writing in the middle of the window
+instead of letting it wander to the bottom.</li>
+<li><b>Dim the interface</b> fades the toolbars while you type and brings them back when you
+stop. It starts switched off.</li>
+</ul>`},
+
+ {t:"Languages",k:"language;interface;spelling language;translation",b:`
+<p>Two languages are set separately under <b>Settings &rsaquo; General</b>:</p>
+<ul>
+<li>The <b>interface</b> language — menus and dialogs. Six are available: English, German,
+French, Spanish, Portuguese and Polish.</li>
+<li>The <b>spelling</b> language — what the spell check and AutoCorrect work with.</li>
+</ul>
+<p>Changing the interface language moves the spelling language with it, provided a dictionary
+exists for it. Changing the spelling language alone leaves the menus as they are — which is
+what you want when writing in one language with the program set to another.</p>
+<p>This help is currently available in English only.</p>`}]},
+
+{b:"Reference",t:[
+ {t:"Keyboard shortcuts",k:"shortcuts;keys;keyboard;hotkeys",b:`
+<p>Program commands use <kbd>Alt</kbd>+<kbd>Shift</kbd>, because plain <kbd>Ctrl</kbd>
+combinations are largely spoken for by the browser itself. The editing shortcuts the browser
+leaves alone keep their usual keys.</p>
+<p class="hsec">Views</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Write / Notes / Glossary</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Focus mode (<kbd>Esc</kbd> leaves)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td><td>Reading view</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td><td>Print preview</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Outline</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></td><td>Document memo</td></tr>
+</table>
+<p class="hsec">Writing</p>
+<table class="hkeys">
+<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Bold / italic / underline</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Undo / redo</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Left / centre / right</td></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Indent / outdent (in tables: next cell)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Page break</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Insert or edit a link</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Table of contents</td></tr>
+</table>
+<p class="hsec">Documents and notes</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>New document</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>New note</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Pin a note to the selection</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Look up in the glossary</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Save a snapshot now</td></tr>
+</table>
+<p class="hsec">Finding and viewing</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / replace</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Command palette</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Zoom in / out / fit width</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Print</td></tr>
+<tr><td><kbd>/</kbd></td><td>Insert menu, on an empty paragraph</td></tr>
+</table>`},
+
+ {t:"Command palette and the / menu",k:"command palette;slash menu;commands;quick",b:`
+<p>Two ways to reach a command without hunting through menus.</p>
+<p><b>The command palette</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) lists everything
+the program can do. Type a few letters to narrow it down and press <kbd>Enter</kbd>. It also
+lists the colour schemes and the first of your glossary terms, ready to insert.</p>
+<p><b>The / menu</b> works at the start of an empty paragraph. Type <code>/</code> and a short
+list of things worth inserting appears — headings, lists, a table, a picture, a link, a
+footnote, a page break, today's date. Arrow keys choose, <kbd>Enter</kbd> inserts,
+<kbd>Esc</kbd> dismisses.</p>`},
+
+ {t:"When something goes wrong",k:"problems;troubleshooting;not saved;storage full;missing",b:`
+<p class="hsec">The status bar says "Not saved" in red</p>
+<p>The browser has refused to store anything further, usually because its storage is full —
+embedded pictures fill it quickly. Nothing more is being written. Make a backup at once, then
+remove large pictures or old documents.</p>
+<p class="hsec">The spell check will not start</p>
+<p>Its dictionaries have to be fetched, which is not possible when the file was opened by
+double-clicking it. Serve the program from a web address or a local server.</p>
+<p class="hsec">My documents are gone</p>
+<p>Storage is kept separately for each address. Opening the program from a different address —
+or a different browser, or a private window — shows an empty program, not a lost one. Return
+to the address you were using, or load a backup.</p>
+<p class="hsec">"File on disk" is greyed out</p>
+<p>Reading and writing real files needs Chrome or Edge. In other browsers, use <b>Create a
+backup</b> and <b>Load a backup</b> instead.</p>`}]}
+];
+
+/* Zustand des Hilfefensters: offene Bücher, gewähltes Thema, Reiter, Suchtext */
+let helpTab="contents",helpOpen={},helpTopic=null,helpQuery="";
+/* Die Bücher-Symbole von WinHelp: gelbes geschlossenes Buch, aufgeschlagenes
+   Buch, und die Seite mit dem Fragezeichen für ein einzelnes Thema. Bewusst
+   feste Gelbtöne statt Schemafarben — das Gelb ist der Wiedererkennungswert. */
+const HELPICO={
+  zu:'<svg viewBox="0 0 16 16" class="hicon"><path d="M2.5 2.5h9a1.5 1.5 0 0 1 1.5 1.5v9H4a1.5 1.5 0 0 1-1.5-1.5z" fill="#D9A62B" stroke="#7A5810"/><path d="M4 13h9" stroke="#7A5810" fill="none"/><path d="M4.8 5.2h5M4.8 7.2h3.6" stroke="#7A5810" fill="none" opacity=".65"/></svg>',
+  auf:'<svg viewBox="0 0 16 16" class="hicon"><path d="M8 4.4C6.6 3.3 4.7 3 2.5 3.3v8.6C4.7 11.6 6.6 11.9 8 13z" fill="#E8BC4F" stroke="#7A5810"/><path d="M8 4.4C9.4 3.3 11.3 3 13.5 3.3v8.6C11.3 11.6 9.4 11.9 8 13z" fill="#F5DA96" stroke="#7A5810"/></svg>',
+  seite:'<svg viewBox="0 0 16 16" class="hicon"><path d="M4 2.5h5l3 3v8H4z" fill="var(--paper)" stroke="var(--ink-faint)"/><path d="M9 2.5v3h3" fill="none" stroke="var(--ink-faint)"/><text x="8" y="11.6" text-anchor="middle" font-size="7" font-weight="700" fill="var(--stamp)">?</text></svg>'
+};
+function helpAlleThemen(){
+  const a=[];HELPBOOKS.forEach((bk,bi)=>bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp})));
+  return a;
+}
+function helpFinde(titel){return helpAlleThemen().find(x=>x.t===titel)||null}
+function helpZeige(titel){
+  const t=helpFinde(titel);if(!t)return;
+  helpTopic=titel;helpOpen[t.bi]=true;helpMalen();
+  const k=$("#helpBody");if(k)k.scrollTop=0;
+}
+/* Volltextsuche über alle Themen. Der Titel zählt schwerer als der Fließtext,
+   damit "Footnotes" bei der Eingabe "foot" oben steht und nicht hinter einem
+   Thema, das das Wort nur beiläufig erwähnt. */
+function helpSuche(q){
+  q=q.trim().toLowerCase();if(!q)return[];
+  const worte=q.split(/\s+/);
+  return helpAlleThemen().map(t=>{
+    const titel=t.t.toLowerCase();
+    const roh=t.b.replace(/<[^>]*>/g," ").replace(/\s+/g," ").trim();
+    const text=roh.toLowerCase(),schlag=t.k.toLowerCase();
+    let p=0;
+    worte.forEach(w=>{
+      if(titel.includes(w))p+=10;
+      if(schlag.includes(w))p+=5;
+      p+=Math.min(text.split(w).length-1,4);
+    });
+    if(!worte.every(w=>titel.includes(w)||schlag.includes(w)||text.includes(w)))p=0;
+    let aus="";
+    const i=text.indexOf(worte[0]);
+    if(i>=0)aus=(i>40?"… ":"")+roh.slice(Math.max(0,i-40),i+90).trim()+" …";
+    return{...t,p,aus};
+  }).filter(x=>x.p>0).sort((a,b)=>b.p-a.p);
+}
+function helpMalen(){
+  const nav=$("#helpNav"),body=$("#helpBody"),win=$("#helpWin");
+  if(!nav||!body||!win)return;
+  win.querySelectorAll("[data-htab]").forEach(b=>b.classList.toggle("on",b.dataset.htab===helpTab));
+
+  if(helpTab==="contents"){
+    nav.innerHTML=HELPBOOKS.map((bk,bi)=>{
+      const auf=!!helpOpen[bi];
+      return `<div class="hbook${auf?" auf":""}" data-hbook="${bi}">${auf?HELPICO.auf:HELPICO.zu}<span>${esc(bk.b)}</span></div>`+
+        (auf?bk.t.map(tp=>`<div class="htopic${helpTopic===tp.t?" on":""}" data-htopic="${esc(tp.t)}">${HELPICO.seite}<span>${esc(tp.t)}</span></div>`).join(""):"");
+    }).join("");
+  } else if(helpTab==="index"){
+    const eintraege=[];
+    helpAlleThemen().forEach(t=>t.k.split(";").forEach(w=>{
+      w=w.trim();if(w)eintraege.push({w:w.charAt(0).toUpperCase()+w.slice(1),t:t.t})}));
+    eintraege.sort((a,b)=>a.w.localeCompare(b.w,"en"));
+    const f=helpQuery.trim().toLowerCase();
+    const zeig=f?eintraege.filter(e=>e.w.toLowerCase().includes(f)):eintraege;
+    nav.innerHTML=`<input type="text" id="helpIdxQ" class="hsearch" placeholder="Type the first letters" value="${esc(helpQuery)}" autocomplete="off">`+
+      (zeig.length?zeig.map(e=>`<div class="hidx" data-htopic="${esc(e.t)}"><span>${esc(e.w)}</span><i>${esc(e.t)}</i></div>`).join("")
+                  :`<div class="hleer">No entry matches that.</div>`);
+  } else {
+    const erg=helpSuche(helpQuery);
+    nav.innerHTML=`<input type="text" id="helpFindQ" class="hsearch" placeholder="Type a word to look for" value="${esc(helpQuery)}" autocomplete="off">`+
+      (!helpQuery.trim()
+        ? `<div class="hleer">Every topic is searched, not just the headings.</div>`
+        : erg.length
+          ? `<div class="hcount">${erg.length} topic${erg.length>1?"s":""} found</div>`+
+            erg.map(x=>`<div class="hfind${helpTopic===x.t?" on":""}" data-htopic="${esc(x.t)}"><b>${esc(x.t)}</b><span>${esc(x.aus||x.bk)}</span></div>`).join("")
+          : `<div class="hleer">Nothing found for &bdquo;${esc(helpQuery)}&ldquo;.</div>`);
+  }
+
+  const t=helpTopic?helpFinde(helpTopic):null;
+  body.innerHTML=t
+    ? `<div class="hpath">${esc(t.bk)}</div><h4>${esc(t.t)}</h4>${t.b}`
+    : `<div class="hwelcome"><h4>PureQuill Writer Help</h4>
+        <p>Choose a topic on the left. <b>Contents</b> is arranged as books you can open,
+        <b>Index</b> is an alphabetical list of keywords, and <b>Find</b> searches the full
+        text of every topic.</p>
+        <p>New here? Start with <a data-goto="About PureQuill Writer">About PureQuill Writer</a>.</p>
+        <p class="hnote">This help is currently available in English only.</p></div>`;
+}
+function helpDialog(titel){
+  /* Mit Thema aufgerufen — etwa aus einem Querverweis oder später aus einem
+     Dialog heraus — gehört der Inhaltsreiter nach vorn und das Buch aufgeklappt:
+     man soll sehen, wo das Thema steht, nicht nur den Text davon. Sonst bliebe
+     der zuletzt benutzte Reiter samt altem Suchtext stehen. */
+  if(titel){const t=helpFinde(titel);
+    if(t){helpTopic=titel;helpOpen[t.bi]=true;helpTab="contents";helpQuery=""}}
+  overlay(`<div class="modal helpwin" id="helpWin"><h3>Help</h3>
+    <div class="settabs helptabs">
+      <button class="settab" data-htab="contents">Contents</button>
+      <button class="settab" data-htab="index">Index</button>
+      <button class="settab" data-htab="find">Find</button>
+    </div>
+    <div class="helpsplit"><div class="helpnav" id="helpNav"></div>
+      <div class="helpbody" id="helpBody"></div></div>
+    <div class="rowend"><button class="btn" id="helpClose">Close</button></div></div>`);
+  helpMalen();
+  $("#helpClose").onclick=closeOvl;
+  $("#helpWin").onclick=e=>{
+    const tb=e.target.closest("[data-htab]");
+    if(tb){helpTab=tb.dataset.htab;helpQuery="";helpMalen();
+      const f=$("#helpIdxQ")||$("#helpFindQ");if(f)f.focus();return}
+    const bk=e.target.closest("[data-hbook]");
+    if(bk){const i=+bk.dataset.hbook;helpOpen[i]=!helpOpen[i];helpMalen();return}
+    const tp=e.target.closest("[data-htopic]")||e.target.closest("[data-goto]");
+    if(tp){helpZeige(tp.dataset.htopic||tp.dataset.goto);return}
+  };
+  /* Beim Tippen wird die Liste neu gezeichnet — Fokus und Schreibmarke müssen
+     danach wieder dort stehen, wo sie waren, sonst tippt man ins Leere. */
+  $("#helpWin").addEventListener("input",e=>{
+    if(e.target.id!=="helpIdxQ"&&e.target.id!=="helpFindQ")return;
+    helpQuery=e.target.value;
+    const wo=e.target.selectionStart,id=e.target.id;
+    helpMalen();
+    const f=$("#"+id);if(f){f.focus();f.setSelectionRange(wo,wo)}
+  });
+}
+
 /* ================= Tastatur ================= */
 document.addEventListener("keydown",e=>{
   const c=e.ctrlKey||e.metaKey;
   const as=e.altKey&&e.shiftKey&&!c;
+  /* F1 ohne Zusatztaste — die Hilfetaste seit Windows 3.1 */
+  if(e.key==="F1"){e.preventDefault();lockedOvl=false;closeOvl();helpDialog();return}
   if(as&&e.key.toLowerCase()==="p"){e.preventDefault();
     if($("#ovl").innerHTML)closeOvl();else palette();return}
   if(as&&e.key.toLowerCase()==="m"){e.preventDefault();linkSelection();return}
