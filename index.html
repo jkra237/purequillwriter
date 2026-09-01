@@ -13335,10 +13335,16 @@ and the status bar at the bottom right always says where things stand.</p>
 <li><b>This browser</b> — always, and everything. Tied to the address you opened the
 program from, and lost if you clear your browser data.</li>
 <li><b>A file on disk</b> — optional, and only the document you are in, together with
-the notes pinned to it.</li>
+the notes pinned to it. Set up through <b>File &rsaquo; Save everything &rsaquo; Link to a
+file</b>; from then on it is written along on every save. On another machine — or after the
+browser storage has been cleared — <b>Open a linked file</b> brings it back.</li>
 <li><b>Automatic backup</b> — optional, and the whole program state: every document,
 note, glossary and setting.</li>
 </ol>
+<p>You can write that same complete state out by hand through <b>File &rsaquo; Save
+everything</b>. And inside place 1 the program also keeps
+<a data-goto="Version history and snapshots">snapshots</a> per document — points you can go
+back to.</p>
 <p>If the status bar ever reads <b>Not saved</b> in red, the browser has refused to store
 anything further. Make a backup at once and free some space.</p>
 <p>See also: <a data-goto="Automatic backup">Automatic backup</a>.</p>`}]},
@@ -13359,6 +13365,8 @@ type any value between 4 and 200 and press <kbd>Enter</kbd>. The arrow keys step
 picker for anything else. The stripe under the button shows what will be used.</p>
 <p>Highlighting also darkens the text it covers, so the passage stays readable on the dark
 colour schemes. Apply the highlight first and the text colour afterwards if you want both.</p>
+<p><b>Superscript and subscript</b> sit in the Format menu under <b>Character</b> — for units,
+formulas and for figures you want to set by hand.</p>
 <p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words.</p>`},
 
  {t:"Paragraphs and headings",k:"heading;paragraph;alignment;indent;line spacing;paragraph spacing",b:`
@@ -13439,7 +13447,9 @@ page, A5, paperback and US Letter — and you can enter your own dimensions.</p>
 <p>Measurements are in millimetres unless you switch to inches under
 <b>Settings &rsaquo; General</b>.</p>
 <p><b>The left and right margins can also be dragged</b> in the ruler above the page.</p>
-<p>Tick <b>Set as default</b> to have new documents start with this format.</p>`},
+<p>Tick <b>Set as default</b> to have new documents start with this format.</p>
+<p><b>View &rsaquo; Page margins</b> shows the margins as thin guide lines on the page. They
+are there to write against and are never printed.</p>`},
 
  {t:"Headers and footers",k:"header;footer;running head;placeholders;from edge",b:`
 <p><b>Double-click the top or bottom margin of the page</b> to edit the header or footer
@@ -13503,6 +13513,11 @@ places it is tied to.</p>
 <p>With <b>View &rsaquo; Notes in the margin</b> switched on, pinned notes appear beside the
 page as you write. Clicking one jumps to its place; if a note is tied to several places,
 arrows step between them.</p>
+<p><b>View &rsaquo; Highlights in text</b> turns the colouring of pinned passages off and on
+again. The connections stay either way — they are simply out of sight, which helps when you
+want to judge the text rather than the work on it. The other way round, right-clicking a
+pinned passage offers <b>Highlight note</b>, which picks out the matching note in the
+sidebar.</p>
 <p>Deleting the marked text does not delete the note — it only loses that connection.</p>`},
 
  {t:"The glossary",k:"glossary;terms;definitions;lookup;highlight terms",b:`
@@ -13513,6 +13528,9 @@ category.</p>
 initial letter or by category depending on the sort order you choose.</p>
 <p><b>View &rsaquo; Highlight glossary terms</b> underlines those terms wherever they appear
 in the text, with the definition on hover.</p>
+<p><b>To add a term as you write</b>, select it in the text and choose <b>Add as glossary
+entry</b> from the right-click menu. That is the shortest route — you need not switch views for
+it.</p>
 <p><b>To look a term up while writing</b>, press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>.
 Clicking a result inserts the term at the cursor.</p>`},
 
@@ -13662,6 +13680,23 @@ numbers become Word fields that keep counting there.</p>
 <p>An export is for handing on. It cannot be read back in with everything intact — for that,
 use a backup.</p>`},
 
+ {t:"Version history and snapshots",k:"version;history;snapshot;undo;restore;earlier;revert",b:`
+<p>While you write, the program keeps <b>snapshots</b> of the document you are in — points you
+can go back to. They are not the same as saving: your text goes into the browser continuously
+and needs no command at all.</p>
+<p>One is taken by itself at the interval set under <b>File &rsaquo; Snapshots &rsaquo;
+Automatic</b>, but only when something has actually changed. <b>Take a snapshot</b>
+(<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) makes one on the spot — worth doing before you
+rewrite a passage you might want back.</p>
+<p><b>File &rsaquo; Snapshots &rsaquo; Version history</b> lists them, newest first, each with
+its time and word count so you can recognise the one you want. <i>Restore</i> puts that version
+back in place of the current text.</p>
+<p>The <b>last twelve</b> are kept per document; older ones fall away. They sit in the browser
+beside the document, so they travel along inside a backup — but they are no substitute for one.
+A snapshot helps you take a step back while writing; a backup is for the day the browser is
+gone.</p>
+<p>See also: <a data-goto="Backups">Backups</a>.</p>`},
+
  {t:"Backups",k:"backup;restore;bundle;save everything",b:`
 <p>A backup, unlike an export, can be read back in complete.</p>
 <p>It is also a different thing from a <b>snapshot</b>. A snapshot is a point in this
@@ -13691,7 +13726,7 @@ needlessly.</p>
 <p>This needs Chrome or Edge. Other browsers are limited to backups made by hand.</p>`},
 
  {t:"Appearance",k:"theme;colour scheme;appearance;dark mode;typewriter scrolling",b:`
-<p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers thirteen schemes with live
+<p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers seventeen schemes with live
 miniature previews — from the very light Azure and Alabaster through to Ink, Cyan, Amber and
 Phosphor, several of them drawn from the screens of early word processors.</p>
 <p>Two writing behaviours sit in the same place:</p>
@@ -13828,10 +13863,17 @@ durchnummeriert:</p>
 Adresse, von der du das Programm geöffnet hast, und geht verloren, wenn du die Browserdaten
 löschst.</li>
 <li><b>Eine Datei auf der Festplatte</b> — freiwillig, und nur das Dokument, in dem du bist,
-samt der daran angehefteten Notizen.</li>
+samt der daran angehefteten Notizen. Eingerichtet über <b>Datei &rsaquo; Alles sichern &rsaquo;
+Mit Datei verknüpfen</b>; von da an wird sie bei jedem Sichern mitgeschrieben. An einem anderen
+Rechner — oder nachdem der Browserspeicher geleert wurde — holst du sie mit
+<b>Verknüpfte Datei öffnen</b> zurück.</li>
 <li><b>Automatische Sicherung</b> — freiwillig, und der ganze Programmstand: alle Dokumente,
 Notizen, Glossare und Einstellungen.</li>
 </ol>
+<p>Denselben Gesamtstand schreibst du von Hand über <b>Datei &rsaquo; Alles sichern</b> heraus.
+Und innerhalb von Ort 1 hält das Programm zusätzlich
+<a data-goto="Versionsverlauf und Zwischenstände">Zwischenstände</a> je Dokument — Punkte, zu
+denen du zurückkehren kannst.</p>
 <p>Steht in der Statuszeile jemals <b>Nicht gesichert</b> in Rot, nimmt der Browser nichts
 mehr an. Dann sofort eine Sicherung anlegen und Platz schaffen.</p>
 <p>Siehe auch: <a data-goto="Automatische Sicherung">Automatische Sicherung</a>.</p>`}]},
@@ -13853,6 +13895,8 @@ der vorgegebenen Werte, oder du tippst eine beliebige Zahl zwischen 4 und 200 un
 einen Wähler für alles andere. Der Streifen unter dem Knopf zeigt die aktuelle Farbe.</p>
 <p>Eine Hervorhebung dunkelt zugleich die Schrift darüber ab, damit die Stelle auch auf den
 dunklen Farbschemata lesbar bleibt. Wer beides will, hebt zuerst hervor und färbt danach.</p>
+<p><b>Hochgestellt und tiefgestellt</b> stehen im Format-Menü unter <b>Zeichen</b> — für
+Maßeinheiten, Formeln und für Ziffern, die du von Hand setzen willst.</p>
 <p><b>Format &rsaquo; Formatierung entfernen</b> nimmt die Zeichenauszeichnung weg und lässt
 die Wörter stehen.</p>`},
 
@@ -13941,7 +13985,9 @@ Normseite, DIN A5, Taschenbuch und US Letter — und eigene Maße lassen sich ei
 auf Zoll umstellst.</p>
 <p><b>Linker und rechter Rand lassen sich auch im Lineal ziehen</b>, das über der Seite liegt.</p>
 <p>Das Häkchen <b>Als Standard</b> im Dialog sorgt dafür, dass neue Dokumente mit diesem Format
-beginnen.</p>`},
+beginnen.</p>
+<p><b>Ansicht &rsaquo; Seitenränder</b> zeigt die Ränder als dünne Hilfslinien auf der Seite.
+Sie sind nur zur Orientierung beim Schreiben da und werden nicht gedruckt.</p>`},
 
  {t:"Kopf- und Fußzeile",k:"kopfzeile;fußzeile;platzhalter;von rand;höhe",b:`
 <p><b>Ein Doppelklick auf den oberen oder unteren Seitenrand</b> öffnet die Kopf- oder Fußzeile
@@ -14009,6 +14055,11 @@ hängt.</p>
 <p>Ist <b>Ansicht &rsaquo; Notizen am Seitenrand</b> eingeschaltet, erscheinen angeheftete
 Notizen beim Schreiben neben der Seite. Ein Klick springt zur Stelle; hängt eine Notiz an
 mehreren, schalten Pfeile zwischen ihnen um.</p>
+<p><b>Ansicht &rsaquo; Markierungen im Text</b> schaltet die farbige Unterlegung der
+angehefteten Stellen aus und wieder ein. Die Verknüpfungen bleiben dabei bestehen — nur zu
+sehen sind sie nicht mehr, was beim Beurteilen des Textes hilft. Umgekehrt zeigt ein
+Rechtsklick auf eine angeheftete Stelle <b>Notiz hervorheben</b> und hebt die zugehörige Notiz
+in der Seitenleiste hervor.</p>
 <p>Wird der markierte Text gelöscht, verschwindet die Notiz nicht — sie verliert nur diese
 Verknüpfung.</p>`},
 
@@ -14019,6 +14070,9 @@ wiederkehren — Figuren, Orte, Fachvokabular — je mit einer Definition und ei
 Anfangsbuchstabe oder Kategorie gruppiert, je nach gewählter Sortierung.</p>
 <p><b>Ansicht &rsaquo; Glossarbegriffe markieren</b> unterstreicht diese Begriffe überall im
 Text; die Definition erscheint beim Überfahren.</p>
+<p><b>Einen Begriff aufnehmen, während du schreibst</b>: markiere ihn im Text und wähle im
+Rechtsklickmenü <b>Als Glossareintrag anlegen</b>. Das ist der kürzeste Weg — die Ansicht muss
+dafür nicht gewechselt werden.</p>
 <p><b>Zum Nachschlagen beim Schreiben</b> drückst du <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd>.
 Ein Klick auf einen Treffer fügt den Begriff an der Schreibmarke ein.</p>`},
 
@@ -14172,6 +14226,23 @@ darin werden zu Word-Feldern und zählen dort weiter.</p>
 <p>Ein Export ist zum Weitergeben. Vollständig wieder einlesen lässt er sich nicht — dafür
 nimmst du eine Sicherung.</p>`},
 
+ {t:"Versionsverlauf und Zwischenstände",k:"version;verlauf;zwischenstand;zurück;wiederherstellen;früher",b:`
+<p>Während du schreibst, legt das Programm <b>Zwischenstände</b> des Dokuments an, in dem du
+gerade bist — Punkte, zu denen du zurückkehren kannst. Das ist nicht dasselbe wie Sichern:
+dein Text geht ohnehin fortlaufend in den Browser und braucht dafür keinen Befehl.</p>
+<p>Einer entsteht von selbst im Takt, der unter <b>Datei &rsaquo; Zwischenstände &rsaquo;
+Automatisch</b> eingestellt ist — aber nur, wenn sich wirklich etwas geändert hat.
+<b>Zwischenstand anlegen</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd>) legt sofort einen an;
+das lohnt sich, bevor du eine Passage umschreibst, die du vielleicht zurückhaben möchtest.</p>
+<p><b>Datei &rsaquo; Zwischenstände &rsaquo; Versionsverlauf</b> zeigt sie, den neuesten zuerst,
+je mit Uhrzeit und Wortzahl — daran erkennst du den, den du suchst. <i>Wiederherstellen</i>
+setzt diesen Stand an die Stelle des aktuellen Textes.</p>
+<p>Aufgehoben werden die <b>letzten zwölf</b> je Dokument, ältere fallen weg. Sie liegen im
+Browser neben dem Dokument und wandern deshalb in einer Sicherung mit — ersetzen sie aber
+nicht. Ein Zwischenstand hilft beim Schreiben einen Schritt zurück; eine Sicherung ist für den
+Tag, an dem der Browser weg ist.</p>
+<p>Siehe auch: <a data-goto="Sicherungen">Sicherungen</a>.</p>`},
+
  {t:"Sicherungen",k:"sicherung;wiederherstellen;alles sichern",b:`
 <p>Eine Sicherung lässt sich, anders als ein Export, vollständig wieder einlesen.</p>
 <p>Sie ist auch etwas anderes als ein <b>Zwischenstand</b>. Ein Zwischenstand ist ein Punkt im
@@ -14202,7 +14273,7 @@ also nicht ohne Grund angefasst.</p>
 <p>Dafür braucht es Chrome oder Edge. In anderen Browsern bleibt es bei Sicherungen von Hand.</p>`},
 
  {t:"Darstellung",k:"farbschema;darstellung;dunkelmodus;schreibmaschinen-scrollen",b:`
-<p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet dreizehn Schemata mit
+<p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet siebzehn Schemata mit
 lebenden Miniaturvorschauen — vom sehr hellen Azur und Alabaster bis zu Tinte, Zyan, Bernstein
 und Phosphor, von denen mehrere den Bildschirmen früher Textverarbeitungen nachempfunden sind.</p>
 <p>Zwei Schreibgewohnheiten stehen an derselben Stelle:</p>
