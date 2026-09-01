@@ -8,7 +8,7 @@
 <style>
 :root{
   --paper:#FCFBF8; --chrome:#EAE8E0; --chrome-2:#F3F1EA; --canvas:#8B8F94;
-  --ink:#1E2023; --ink-soft:#6A6D71; --ink-faint:#9A9C9E;
+  --ink:#1E2023; --ink-soft:#65686C; --ink-faint:#9A9C9E;
   --rule:#D6D3C9; --stamp:#8C3B2E; --manila:#EBDFC4;
   --ok:#3F6B4A; --pageedge:rgba(0,0,0,.35);
   /* Wellenlinie der Rechtschreibprüfung. Die dunklen Schemata hellen sie auf,
@@ -98,14 +98,14 @@
 /* Blasses, warmes Pastellgelb wie frühes Sonnenlicht über einer Wiese */
 [data-theme="morgensonne"]{
   --paper:#FBF8EF; --chrome:#F3ECD5; --chrome-2:#F8F3E4; --canvas:#E6D9AD;
-  --ink:#4A3F1E; --ink-soft:#7A6A3D; --ink-faint:#A69868;
+  --ink:#4A3F1E; --ink-soft:#79693C; --ink-faint:#A69868;
   --rule:#E2D6AE; --stamp:#9C6410; --manila:#EBDFC4;
   --ok:#6E8A2A; --pageedge:rgba(0,0,0,.28);
 }
 /* Noch blasser und diesiger als Morgensonne, fast khakifarbenes Gelb im Nebel */
 [data-theme="sonnennebel"]{
   --paper:#FAF9F3; --chrome:#F0EEE0; --chrome-2:#F6F4EA; --canvas:#DBD6BC;
-  --ink:#46442F; --ink-soft:#726F55; --ink-faint:#A19D80;
+  --ink:#46442F; --ink-soft:#6F6C52; --ink-faint:#A19D80;
   --rule:#E0DCC8; --stamp:#85661F; --manila:#EBDFC4;
   --ok:#6E8A2A; --pageedge:rgba(0,0,0,.26);
 }
@@ -119,7 +119,7 @@
 /* Dasselbe helle Salbeigrün, aber mit lavendelfarbenem statt grünem Akzent */
 [data-theme="lavendelfeld"]{
   --paper:#F7F8F3; --chrome:#E8EBE0; --chrome-2:#F1F2EB; --canvas:#C7CDBE;
-  --ink:#3C4238; --ink-soft:#666F5E; --ink-faint:#96A08C;
+  --ink:#3C4238; --ink-soft:#636C5B; --ink-faint:#96A08C;
   --rule:#D6DACD; --stamp:#6E5A96; --manila:#EBDFC4;
   --ok:#3F7A4A; --pageedge:rgba(0,0,0,.28);
 }
@@ -203,7 +203,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 #editor.nomark .anch{background:none;border-bottom:none}
 .mi{display:flex;align-items:center;gap:8px;width:100%;padding:6px 8px;border-radius:4px;text-align:left}
 .mi:hover{background:var(--chrome)}
-.mi .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.mi .k{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .mi .chk{width:12px;flex:0 0 12px;color:var(--stamp)}
 /* Ausschnitt einer Miniaturseite als Vorschau der drei Zitatstile im
    Format-Menü — Fließtextzeile, das Zitat in seinem Stil, Fließtextzeile.
@@ -240,7 +240,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Dialog passt damit auf einen üblichen Bildschirm, ohne zu scrollen. */
 .thgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .thsec{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
-  color:var(--ink-faint);margin:0 0 7px}
+  color:var(--ink-soft);margin:0 0 7px}
 .thsec.spaeter{margin-top:15px}
 .thopt{border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;
   background:var(--chrome-2);padding:0;display:block;text-align:left}
@@ -266,7 +266,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .thinfo b{color:var(--ink);font-weight:600}
 .msep{height:1px;background:var(--rule);margin:4px 3px}
 .mlabel{padding:8px 8px 4px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-  text-transform:uppercase;color:var(--ink-faint)}
+  text-transform:uppercase;color:var(--ink-soft)}
 .tabbar{display:flex;align-items:flex-end;gap:2px;padding:8px 8px 0;background:var(--chrome);flex:1;min-width:0;overflow:hidden}
 /* Reiter lassen sich umsortieren — beim Ziehen darf die Beschriftung nicht
    markiert werden, sonst zieht man Text statt des Reiters. */
@@ -299,9 +299,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   position:relative;z-index:5}
 .tab.on{background:var(--paper);border-color:color-mix(in srgb, var(--rule) 80%, var(--ink));color:var(--ink)}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.tab .x{color:var(--ink-faint);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto}
+.tab .x{color:var(--ink-soft);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto}
 .tab .x:hover{color:var(--stamp)}
-.tabadd{padding:6px 9px;color:var(--ink-faint);font-size:16px;flex:0 0 auto}
+.tabadd{padding:6px 9px;color:var(--ink-soft);font-size:16px;flex:0 0 auto}
 
 /* ---- Rahmen ---- */
 .body{flex:1;display:flex;min-height:0;background:var(--paper);border-top:1px solid var(--rule)}
@@ -423,7 +423,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .figrsz.on{display:block}
 .hfedit.on{display:block}
 .printhf{display:none}
-.sheetpage .pn{position:absolute;font-family:var(--mono);color:var(--ink-faint)}
+.sheetpage .pn{position:absolute;font-family:var(--mono);color:var(--ink-soft)}
 #editor{
   position:relative;z-index:1;outline:none;
   font-family:Georgia,serif;line-height:var(--lh,1.62);color:var(--ink);
@@ -441,7 +441,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .fmtopt:hover{border-color:var(--ink-soft)}
 .fmtopt.on{border-color:var(--stamp);box-shadow:inset 0 0 0 1px var(--stamp)}
 .fmtopt b{display:block;font-weight:600;margin-bottom:2px}
-.fmtopt span{font-size:12px;color:var(--ink-faint)}
+.fmtopt span{font-size:12px;color:var(--ink-soft)}
 /* Gleich hohe Formatkarten, auch wenn die Beschreibung umbricht */
 #fbody .fmtopt{min-height:56px;display:flex;flex-direction:column;justify-content:center}
 #fbody .fmtopt span{line-height:1.35}
@@ -461,7 +461,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   box-shadow:0 2px 7px rgba(0,0,0,.2)}
 .fmtprev .pg i{position:absolute;border:1px dashed var(--stamp);opacity:.55}
 .fmtinfo{font-size:12px;color:var(--ink-soft);margin-top:11px}
-.fmttip{color:var(--ink-faint);font-size:12px;line-height:1.5;margin-top:4px}
+.fmttip{color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:4px}
 /* Aufklappbare Feineinstellungen: Zeilenabstand und die Millimeterfelder
    füllen über die halbe Dialoghöhe, werden aber selten angefasst. Eingeklappt
    rückt „Anlegen" dicht unter die Formatauswahl. Die Zeile trägt die aktuellen
@@ -471,7 +471,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   background:var(--chrome-2);color:var(--ink-soft);text-align:left}
 .fmtmore:hover{border-color:var(--ink-soft);color:var(--ink)}
 .fmtmore .sum{margin-left:auto;min-width:0;font-family:var(--mono);font-size:11px;
-  color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #editor h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
 #editor h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
 #editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
@@ -546,7 +546,7 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 #editor .pgbreak{position:relative;display:block;border-top:1px dashed var(--ink-faint);
   margin:0;padding:0;overflow:hidden}
 #editor .pgbreak::before{content:attr(data-label);position:absolute;left:0;top:2px;
-  font-family:var(--ui);font-size:11px;color:var(--ink-faint)}
+  font-family:var(--ui);font-size:11px;color:var(--ink-soft)}
 #editor .fn,.readview .fn,.pvinner .fn{color:var(--stamp);cursor:pointer;font-weight:600}
 #editor .fn:hover{text-decoration:underline}
 .toc{border:1px solid var(--rule);border-radius:var(--radius);padding:10px 14px 6px;
@@ -573,7 +573,7 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .toc[data-leader="line"] .toc-leader{border-bottom:1px solid var(--ink-faint)}
 .toc-num{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
 .toc-pg{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
-.toc-empty{color:var(--ink-faint);font-style:italic;font-size:13px;padding:4px 0}
+.toc-empty{color:var(--ink-soft);font-style:italic;font-size:13px;padding:4px 0}
 /* .toc-t ist die einzige editierbare Insel im sonst gesperrten Block (siehe
    Klick-Behandlung in drawWrite) - ein zarter Fokusring statt keinem
    Feedback, sonst wirkt ein Umbenennen wie ein Bug statt einer Funktion. */
@@ -582,9 +582,9 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .toc-entrylist{max-height:180px;overflow-y:auto;border:1px solid var(--rule);border-radius:var(--radius)}
 .toc-entryrow{display:flex;align-items:center;gap:8px;padding:6px 9px;font-size:13px;color:var(--ink);cursor:pointer}
 .toc-entryrow:hover{background:var(--chrome-2)}
-.toc-entryrow.off{color:var(--ink-faint)}
+.toc-entryrow.off{color:var(--ink-soft)}
 .toc-entryrow.off .toc-entrytext{text-decoration:line-through}
-.toc-entrylvl{font-family:var(--mono);font-size:10px;color:var(--ink-faint);flex:none;
+.toc-entrylvl{font-family:var(--mono);font-size:10px;color:var(--ink-soft);flex:none;
   border:1px solid var(--rule);border-radius:3px;padding:0 3px}
 .toc-entrytext{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* -- Stile: Klassisch ist die Grundausstattung oben, der Rest weicht gezielt ab -- */
@@ -671,7 +671,7 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
    verschwindet beim nächsten Handgriff. Bewusst leiser als die Bildleiste —
    wer die Formatierung behalten will, soll ihn kaum bemerken. */
 .pastebar{padding:5px 6px 5px 9px;gap:9px}
-.pastebar .k{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.pastebar .k{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .pastebar .tb{width:20px;height:20px;font-size:15px}
 .imgbar input[type=range]{width:96px}
 .imgbar .pct{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:38px}
@@ -688,7 +688,7 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .side .memo{flex:1;border:none;outline:none;resize:none;padding:14px 16px;
   background:var(--chrome-2);color:var(--ink);
   font-family:Georgia,serif;font-size:14px;line-height:1.6}
-.side .memo::placeholder{color:var(--ink-faint)}
+.side .memo::placeholder{color:var(--ink-soft)}
 /* Schreibziel: dezenter Balken, kein Alarm. Die Füllfarbe wandert in fünf
    Phasen von kühlem Schieferblau zu warmem Gold - ein Fortschrittsgefühl,
    nicht nur eine Prozentzahl. Bei 100% blinkt der Balken golden auf. */
@@ -789,7 +789,7 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .side .head{display:flex;align-items:center;gap:7px;padding:9px 11px;border-bottom:1px solid var(--rule)}
 .side .head input{flex:1;background:none;border:none;outline:none;font-family:Georgia,serif;
   font-size:16px;font-weight:600;color:var(--ink)}
-.side .head input::placeholder{color:var(--ink-faint);font-weight:400}
+.side .head input::placeholder{color:var(--ink-soft);font-weight:400}
 .side .hb{width:26px;height:24px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .side .hb:hover{background:var(--chrome);color:var(--ink)}
 .side .hb svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
@@ -830,13 +830,13 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .outline-item.ol2{font-size:12.5px;padding-left:22px}
 .outline-item.ol3{font-size:12px;padding-left:38px}
 .outline-drag{flex:none;width:16px;height:16px;display:flex;align-items:center;justify-content:center;
-  color:var(--ink-faint);cursor:grab;opacity:0;transition:opacity .12s}
+  color:var(--ink-soft);cursor:grab;opacity:0;transition:opacity .12s}
 .outline-item:hover .outline-drag{opacity:1}
 .outline-item.dragging{opacity:.4}
 .outline-item.drop-above{box-shadow:inset 0 2px 0 var(--stamp)}
 .outline-item.drop-below{box-shadow:inset 0 -2px 0 var(--stamp)}
 .outline-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.outline-empty{color:var(--ink-faint);font-style:italic;font-size:12.5px;padding:10px 14px;line-height:1.5}
+.outline-empty{color:var(--ink-soft);font-style:italic;font-size:12.5px;padding:10px 14px;line-height:1.5}
 body.focus .outline{display:none}
 
 /* ---- Glossar ---- */
@@ -847,14 +847,14 @@ body.focus .outline{display:none}
 .ghead .grow{display:flex;align-items:baseline;gap:9px}
 .ghead h2{margin:0;font-family:Georgia,serif;font-size:20px;font-weight:600;color:var(--ink);
   letter-spacing:-.01em;overflow-wrap:anywhere}
-.ghead .gmore{flex:none;align-self:center;margin-left:auto;color:var(--ink-faint);font-size:16px;
+.ghead .gmore{flex:none;align-self:center;margin-left:auto;color:var(--ink-soft);font-size:16px;
   line-height:1;padding:3px 7px;border-radius:var(--radius)}
 .ghead .gmore:hover{color:var(--ink);background:var(--chrome-2)}
 /* Umfang und Zuordnung teilen sich eine Zeile unter dem Namen */
 .ghead .gmeta{margin:6px 0 0;font-size:12px;color:var(--ink-soft);line-height:1.6;
   display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .ghead .gdot{color:var(--ink-faint)}
-.ghead .gulabel{color:var(--ink-faint)}
+.ghead .gulabel{color:var(--ink-soft)}
 .ghead .gupick{display:inline-flex;align-items:center;gap:6px;max-width:240px;
   font-size:12px;padding:2px 8px;border:1px solid var(--rule);border-radius:var(--radius);
   background:var(--chrome-2);color:var(--ink)}
@@ -906,11 +906,11 @@ body.focus .outline{display:none}
   .gitem .d{grid-column:1/-1}
 }
 .gform{background:var(--chrome-2);border:1px solid var(--rule);border-radius:var(--radius);padding:12px;margin-bottom:16px}
-.gform .ghint{margin:0 0 8px;font-size:12px;color:var(--ink-faint)}
+.gform .ghint{margin:0 0 8px;font-size:12px;color:var(--ink-soft)}
 /* Import/Export-Dialog */
 .iohead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .iohint{margin:4px 0 9px;font-size:12px;color:var(--ink-soft);line-height:1.5}
-.ioext{color:var(--ink-faint)}
+.ioext{color:var(--ink-soft)}
 .iosep{height:1px;background:var(--rule);margin:17px 0 14px}
 .ioradio{display:flex;flex-direction:column;gap:7px;margin-top:2px}
 /* min-width:0 lässt den Text im Flex-Label umbrechen statt aus dem Dialog zu laufen */
@@ -922,7 +922,7 @@ body.focus .outline{display:none}
 .gform input,.gform textarea{width:100%;background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);
   padding:5px 7px;margin-bottom:7px;font-family:Georgia,serif}
 .gform textarea{resize:vertical;min-height:56px}
-.empty{color:var(--ink-faint);font-family:Georgia,serif;font-size:14px;padding:26px 2px;line-height:1.6}
+.empty{color:var(--ink-soft);font-family:Georgia,serif;font-size:14px;padding:26px 2px;line-height:1.6}
 
 /* ---- Overlays ---- */
 /* Scrollbar, damit hohe Dialoge auf kleinen Fenstern nicht abgeschnitten werden */
@@ -959,7 +959,7 @@ body.focus .outline{display:none}
   border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink)}
 .hidx{display:flex;flex-direction:column;padding:4px 14px;cursor:pointer;font-size:13px}
 .hidx:hover{background:var(--chrome)}
-.hidx i{font-style:normal;font-size:11px;color:var(--ink-faint)}
+.hidx i{font-style:normal;font-size:11px;color:var(--ink-soft)}
 .hfind{padding:7px 14px;cursor:pointer;border-bottom:1px solid var(--rule)}
 .hfind:hover{background:var(--chrome)}
 .hfind.on{background:var(--chrome);box-shadow:inset 3px 0 0 var(--stamp)}
@@ -1037,7 +1037,7 @@ body.focus .outline{display:none}
    Textklumpen. Deshalb ein eigener Block über die volle Breite, linksbündig
    und mit echtem Knopf statt der Aufforderung, das Menü zu suchen. */
 .setsec{margin:0 0 9px;font-family:var(--mono);font-size:11px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint)}
+  letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 /* Abschnitt innerhalb eines Reiters. Der erste braucht keinen Abstand nach
    oben, die folgenden schon — sonst kleben sie an der Zeile darüber. */
 .setsec{margin-top:17px}
@@ -1058,7 +1058,7 @@ body.focus .outline{display:none}
 .storeicon{flex:0 0 26px;height:26px;border-radius:var(--radius);display:flex;
   align-items:center;justify-content:center;background:var(--paper);
   border:1px solid var(--rule);color:var(--ink-soft)}
-.storecount{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.storecount{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .storenote{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:8px 0 0}
 .storeact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 /* Die drei Speicherorte durchnummeriert: die Staffelung soll ohne Erklärung
@@ -1221,11 +1221,11 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .cmd:last-child{border-bottom:none}
 .cmd.on{background:var(--chrome)}
 .cmd .lab{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cmd .grp{font-family:var(--mono);font-size:11px;color:var(--ink-faint);
+.cmd .grp{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   letter-spacing:.06em;text-transform:uppercase;flex:0 0 62px}
 .kbd{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   border:1px solid var(--rule);border-radius:3px;padding:1px 6px;white-space:nowrap}
-.hintk{font-family:var(--mono);font-size:11px;color:var(--ink-faint)}
+.hintk{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
 .hist{max-height:340px;overflow:auto}
 /* Fließtext („wiederherstellen", „Noch keine gesicherten Stände.") in der
    Oberflächenschrift, nur der Zeitstempel mit der Wortzahl bleibt monospace. */
@@ -6842,7 +6842,7 @@ function palette(){
       `<div class="cmd ${i===idx?"on":""}" data-i="${i}">
         <span class="grp">${c.grp}</span><span class="lab">${esc(c.label)}</span>
         ${c.hint?`<span class="kbd">${c.hint}</span>`:""}</div>`).join("")
-      :`<div style="padding:14px;color:var(--ink-faint)">${tr("Kein passender Befehl.")}</div>`;
+      :`<div style="padding:14px;color:var(--ink-soft)">${tr("Kein passender Befehl.")}</div>`;
     const on=l.querySelector(".cmd.on");if(on)on.scrollIntoView({block:"nearest"})};
   const go=()=>{const c=hits[idx];if(!c)return;closeOvl();c.run()};
   q.oninput=()=>{idx=0;paint()};
@@ -9360,7 +9360,7 @@ function formatDialog(mode,onDone){
           <b>${esc(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()}</span></button>
         <button data-delcf="${f.id}" title="${tr("Löschen")}" aria-label="${tr("Löschen")}"
           style="position:absolute;top:3px;right:3px;width:20px;height:20px;line-height:1;border:none;
-          border-radius:50%;background:transparent;color:var(--ink-faint);font-size:15px;cursor:pointer">&times;</button>
+          border-radius:50%;background:transparent;color:var(--ink-soft);font-size:15px;cursor:pointer">&times;</button>
       </div>`).join("")}
       <button class="fmtopt ${sel==="custom"?"on":""}" data-f="custom" style="grid-column:1/3">
         <b>${tr("Eigene Maße")}</b><span>${tr("Breite und Höhe frei wählen")}</span></button>
@@ -9832,7 +9832,7 @@ function drawHfBar(){
     right:'<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>'};
   bar.innerHTML=
     `<span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-      text-transform:uppercase;color:var(--ink-faint)">${tr(hfEditing.which==="hdr"?"Kopfzeile":"Fußzeile")}</span>
+      text-transform:uppercase;color:var(--ink-soft)">${tr(hfEditing.which==="hdr"?"Kopfzeile":"Fußzeile")}</span>
     <div class="sep"></div>
     ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
       title="${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}">${ICO(ic[a])}</button>`).join("")}
@@ -9845,7 +9845,7 @@ function drawHfBar(){
     <input type="number" id="hfHeight" value="${fmtOf(doc()).m[hfEditing.which==="hdr"?0:2]}"
       title="${tr("Bis hierher bleibt die Seite frei von Text")}" style="width:50px;background:var(--paper);
       border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
-    <span style="color:var(--ink-faint);font-size:11px">mm</span>
+    <span style="color:var(--ink-soft);font-size:11px">mm</span>
     <div class="sep"></div>
     <button class="pill" data-hfx="del">${tr("Entfernen")}</button>
     <button class="pill" data-hfx="done">${tr("Fertig")}</button>`;
@@ -9958,7 +9958,7 @@ function pageNumDialog(){
     <div class="mmrow">
       <label>${tr("Schriftgröße")}</label>
       <input type="number" id="pnSize" value="${S.pageNumSize||9}" min="6" max="24" style="flex:0 0 62px" ${off?"disabled":""}>
-      <span style="color:var(--ink-faint)">pt</span>
+      <span style="color:var(--ink-soft)">pt</span>
     </div>
     <div class="mmrow">
       <label>${tr("Anzeigen ab Seite")}</label>
@@ -10018,7 +10018,7 @@ function hfDialog(){
             ${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
         <label style="flex:0 0 84px;text-align:right">${tr("Von Rand")}</label>
         <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-di="${k}" value="${toUnit(fmtOf(d)[k==="hdr"?"hd":"fd"])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
-        <span style="color:var(--ink-faint)">${unitAbbr()}</span>
+        <span style="color:var(--ink-soft)">${unitAbbr()}</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
         ${[["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
@@ -10028,7 +10028,7 @@ function hfDialog(){
   /* Eine Warnung wegen knapper Ränder braucht es nicht mehr: reicht die Zeile
      tiefer als der Rand, rückt der Textkörper von selbst nach. */
   const body=()=>row("hdr",tr("Kopfzeile"))+row("ftr",tr("Fußzeile"))+
-    `<div style="color:var(--ink-faint);font-size:12px;line-height:1.5;margin-top:6px">
+    `<div style="color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:6px">
       ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}<br>
       ${tr("Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.")}<br>
       ${tr("Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.")}</div>`;
@@ -10251,7 +10251,7 @@ function linkDialog(){
       <input type="text" id="lkTxt" value="${esc(a?a.textContent:selText)}" placeholder="${tr("Text im Dokument")}"></div>
     <div class="mmrow"><label>${tr("Ziel")}</label>
       <input type="text" id="lkUrl" value="${esc(a?a.getAttribute("href")||"":"")}" placeholder="https://…"></div>
-    <div style="color:var(--ink-faint);font-size:12px;line-height:1.5">
+    <div style="color:var(--ink-soft);font-size:12px;line-height:1.5">
       ${tr("Ohne Vorsatz wird <b>https://</b> ergänzt. Im Dokument öffnest du einen Link mit Strg&nbsp;+&nbsp;Klick.")}</div>
     </div>
     <div class="rowend">
@@ -12520,7 +12520,7 @@ $("#imgbar").addEventListener("click",e=>{
     const im=selFig.querySelector("img");if(!im)return;
     overlay(`<div class="modal"><h3>${tr("Alternativtext")}</h3><div class="pad">
       <input type="text" id="altT" value="${esc(im.getAttribute("alt")||"")}" placeholder="${tr("Beschreibung des Bildes")}">
-      <div style="color:var(--ink-faint);font-size:12px;line-height:1.5;margin-top:7px">
+      <div style="color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:7px">
         ${tr("Wird angezeigt, wenn das Bild fehlt, und von Vorlesesoftware verwendet.")}</div></div>
       <div class="rowend"><button class="btn" id="altC">${tr("Abbrechen")}</button>
       <button class="btn pri" id="altO">${tr("Übernehmen")}</button></div></div>`);
@@ -12533,7 +12533,7 @@ function glossSearch(){
   const gid=doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
   overlay(`<div class="modal"><h3>${tr("Glossar nachschlagen")}</h3>
-    <div class="pad" style="padding-bottom:0;padding-top:0;color:var(--ink-faint);font-size:12px">${
+    <div class="pad" style="padding-bottom:0;padding-top:0;color:var(--ink-soft);font-size:12px">${
       coll?esc(tr(coll.name)):tr("Dieses Dokument ist keinem Glossar zugeordnet.")}</div>
     <div class="pad" style="padding-bottom:0"><input id="gsq" placeholder="${tr("Begriff eingeben")}" autocomplete="off"></div>
     <div id="gsr" style="max-height:280px;overflow:auto;margin-top:11px"></div></div>`);
@@ -12541,7 +12541,7 @@ function glossSearch(){
   const run=()=>{const v=q.value.toLowerCase();
     const hits=S.glossary.filter(g=>g.gid===gid).filter(g=>!v||g.term.toLowerCase().includes(v)||(g.def||"").toLowerCase().includes(v)).slice(0,25);
     r.innerHTML=hits.length?hits.map(g=>`<div class="hit" data-t="${esc(g.term)}"><b>${esc(g.term)}</b><p>${esc(g.def||"")}</p></div>`).join("")
-      :`<div style="padding:13px 14px;color:var(--ink-faint)">${tr("Kein Treffer. Neue Einträge legst du mit Alt+3 an.")}</div>`};
+      :`<div style="padding:13px 14px;color:var(--ink-soft)">${tr("Kein Treffer. Neue Einträge legst du mit Alt+3 an.")}</div>`};
   q.oninput=run;run();q.focus();
   r.onclick=e=>{const h=e.target.closest(".hit");if(!h)return;
     closeOvl();const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,h.dataset.t);dirty=true;drawStatus()}};
@@ -12575,7 +12575,7 @@ function settings(){
   const reiter=[["allg","Allgemein"],["auto","Autokorrektur"],["save","Speichern"]];
   const zeile=(titel,inhalt)=>`<div class="setrow"><label>${titel}</label><div class="ctl">${inhalt}</div></div>`;
   const haken=(id,an,text)=>`<input type="checkbox" id="${id}" ${an?"checked":""} style="width:auto">
-      <span style="color:var(--ink-faint);font-size:12px;flex:1;text-align:left">${text}</span>`;
+      <span style="color:var(--ink-soft);font-size:12px;flex:1;text-align:left">${text}</span>`;
   const allg=`
     <div class="setsec">${tr("Sprache")}</div>
     ${zeile(tr("Benutzeroberfläche"),`<select id="sUiLang">${UI_LANGS.map(([v,n])=>
@@ -12602,7 +12602,7 @@ function settings(){
     ${zeile(tr("Großschreibung"),haken("acCap",a.cap,tr("Erster Buchstabe nach einem Satzende wird groß")))}
     ${zeile(tr("Listen"),haken("acLists",a.lists,tr("Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste")))}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
-      <label style="font-size:12px;color:var(--ink-faint);line-height:1.45">
+      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
         ${tr("Anführungszeichen richten sich nach der oben gewählten Rechtschreibsprache.")}</label></div>`;
   const spei=`
     <div class="setsec">${tr("Zwischenstände")}</div>
@@ -12610,7 +12610,7 @@ function settings(){
       <select id="sInt" ${s.autosave?"":"disabled"}>${SNAPSHOTS.map(([lab,v])=>
         `<option value="${v}" ${s.interval==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
-      <label style="font-size:12px;color:var(--ink-faint);line-height:1.45">
+      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
         ${tr("Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.")}</label></div>
     <div class="setsec">${tr("Speicherort")}</div>
       <p class="storeintro">${tr("Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.")}</p>
@@ -12928,7 +12928,7 @@ function readView(){
   const d=doc(),rv=$("#readview");
   rv.innerHTML=`<div class="rbar">
       <span>${esc(tr(d.title))}</span>
-      <span style="color:var(--ink-faint)">${wordsOf(d.html).toLocaleString(LOC())} ${tr("Wörter")}</span>
+      <span style="color:var(--ink-soft)">${wordsOf(d.html).toLocaleString(LOC())} ${tr("Wörter")}</span>
       <button class="btn" id="rvClose">${tr("Schließen (Esc)")}</button>
     </div>
     <div class="rinner">${d.html||""}</div>`;
