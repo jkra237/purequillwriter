@@ -35,7 +35,7 @@ Die Tastenkombinationen verwenden `Alt` `⇧` statt `Strg`, weil `Strg`-Kombinat
 | `Alt` `⇧` `K` | Link einfügen/bearbeiten |
 | `Alt` `⇧` `G` | Glossar nachschlagen |
 | `Alt` `⇧` `F` / `H` | Suchen / Ersetzen |
-| `Alt` `⇧` `S` | Jetzt sichern |
+| `Alt` `⇧` `S` | Zwischenstand anlegen |
 | `Alt` `⇧` `Z` | Fokusmodus (`Esc` verlässt ihn) |
 | `Alt` `⇧` `B` | Leseansicht (`Esc` verlässt sie) |
 | `Alt` `⇧` `V` | Druckvorschau (`Esc` verlässt sie) |
