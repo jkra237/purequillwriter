@@ -7774,11 +7774,149 @@ const xesc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}
 const xattr=(el,n)=>el.getAttribute("w:"+n)||el.getAttribute(n)||
   el.getAttributeNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main",n);
 
-/* --- Word --- */
-function docxLauf(p){
+/* --- Word ---
+   Word legt Auszeichnung selten dort ab, wo man sie sucht. Ein fetter Absatz
+   trägt oft gar kein <w:b> am Lauf: das Fett steckt in einer Formatvorlage,
+   die ihrerseits von einer anderen erbt, unter der noch die Dokumentvorgaben
+   liegen. Wer nur die Läufe liest, bekommt darum Dateien herein, die fast
+   unformatiert aussehen. Deshalb wird styles.xml mitgelesen und die Kette
+   Vorgaben → Absatzvorlage → Zeichenvorlage → direkte Auszeichnung aufgelöst.
+
+   Ebenso die Nummerierung: <w:numPr> nennt nur eine numId. Ob daraus ein
+   Punkt oder eine Zahl wird, steht erst in numbering.xml, eine Verweisstufe
+   weiter (numId → abstractNumId → Ebene → numFmt). Ohne diese Datei wurde
+   bisher jede nummerierte Liste zur Aufzählung — nicht fehlend, sondern
+   falsch, und das ist der schlechtere Fehler. */
+
+/* Umschalt-Eigenschaften nach OOXML: fehlt das Element, gilt der geerbte
+   Wert; ein val von 0/false/off schaltet ausdrücklich ab. Deshalb drei
+   Zustände und nicht zwei — sonst könnte eine Vorlage ein Fett nie zurücknehmen. */
+function docxSchalter(pr,n){
+  if(!pr)return undefined;
+  const e=[...pr.children].find(c=>c.localName===n);
+  if(!e)return undefined;
+  const v=xattr(e,"val");
+  if(n==="u")return v!=null&&String(v).toLowerCase()==="none"?false:true;
+  if(v==null)return true;
+  const s=String(v).toLowerCase();
+  return s!=="0"&&s!=="false"&&s!=="off"&&s!=="none";
+}
+function docxRPr(pr){
+  const o={};["b","i","u","strike"].forEach(n=>{
+    const v=docxSchalter(pr,n);if(v!==undefined)o[n]=v});
+  return o;
+}
+const KIND=(el,n)=>el?[...el.children].find(c=>c.localName===n):null;
+const xattrN=(el,n)=>el?xattr(el,n):null;
+
+/* styles.xml: Vorgaben und alle Vorlagen mit ihrer basedOn-Kette. */
+function docxStile(xml){
+  const leer={def:{},stile:{}};
+  if(!xml)return leer;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return leer;
+  const wurzel=dom.documentElement;
+  const dd=KIND(wurzel,"docDefaults");
+  const def=docxRPr(KIND(KIND(dd,"rPrDefault"),"rPr"));
+  const stile={};
+  [...wurzel.children].filter(e=>e.localName==="style").forEach(e=>{
+    const id=xattr(e,"styleId");if(!id)return;
+    const pPr=KIND(e,"pPr"),ol=KIND(pPr,"outlineLvl");
+    stile[id]={
+      typ:xattr(e,"type")||"paragraph",
+      name:String(xattrN(KIND(e,"name"),"val")||""),
+      erbt:xattrN(KIND(e,"basedOn"),"val")||"",
+      rPr:docxRPr(KIND(e,"rPr")),
+      gliederung:ol?parseInt(xattr(ol,"val"),10):null
+    };
+  });
+  return {def,stile};
+}
+/* Die Kette von unten nach oben einsammeln, dann von oben nach unten
+   anwenden — sonst überschriebe die Elternvorlage das Kind. Der Zähler
+   bricht Ringe ab, die in echten Dateien vorkommen. */
+function docxKette(stile,id){
+  const kette=[];let n=0;
+  while(id&&stile[id]&&n++<20){kette.unshift(stile[id]);id=stile[id].erbt}
+  return kette;
+}
+function docxVorlageWirkung(stile,id){
+  const o={};docxKette(stile,id).forEach(s=>Object.assign(o,s.rPr));return o;
+}
+/* Der Name steht sprachabhängig in der Datei („Heading 1", „Überschrift 1“,
+   „Titre 1“). Verlässlicher ist outlineLvl, das Word unabhängig davon setzt —
+   deshalb zuerst danach fragen und den Namen nur als Rückfall nehmen. */
+function docxUeberschrift(stile,id){
+  const kette=docxKette(stile,id);
+  for(let i=kette.length-1;i>=0;i--){
+    const g=kette[i].gliederung;
+    if(g!=null&&!isNaN(g)&&g>=0&&g<=5)return Math.min(3,g+1);
+  }
+  const treffer=(id+" "+kette.map(s=>s.name).join(" "))
+    .match(/(?:heading|überschrift|berschrift|titre|título|ttulo|nagłówek|naglowek|kop)\s*([1-6])/i);
+  return treffer?Math.min(3,+treffer[1]):0;
+}
+
+/* numbering.xml: numId → abstractNumId → Ebene → Zahlenformat. */
+function docxNummern(xml){
+  const leer={};
+  if(!xml)return leer;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return leer;
+  const wurzel=dom.documentElement;
+  const abstrakt={};
+  [...wurzel.children].filter(e=>e.localName==="abstractNum").forEach(e=>{
+    const id=xattr(e,"abstractNumId");if(id==null)return;
+    const ebenen={};
+    [...e.children].filter(c=>c.localName==="lvl").forEach(l=>{
+      ebenen[String(xattrN(l,"ilvl")||"0")]={
+        fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
+        text:String(xattrN(KIND(l,"lvlText"),"val")||"")};
+    });
+    abstrakt[String(id)]=ebenen;
+  });
+  const karte={};
+  [...wurzel.children].filter(e=>e.localName==="num").forEach(e=>{
+    const id=xattr(e,"numId");if(id==null)return;
+    const ziel=String(xattrN(KIND(e,"abstractNumId"),"val")||"");
+    const ebenen=Object.assign({},abstrakt[ziel]||{});
+    /* lvlOverride ersetzt einzelne Ebenen für genau diese Liste */
+    [...e.children].filter(c=>c.localName==="lvlOverride").forEach(o=>{
+      const l=KIND(o,"lvl");if(!l)return;
+      ebenen[String(xattr(o,"ilvl")||xattrN(l,"ilvl")||"0")]={
+        fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
+        text:String(xattrN(KIND(l,"lvlText"),"val")||"")};
+    });
+    karte[String(id)]=ebenen;
+  });
+  return karte;
+}
+/* Zahlenformat und Zeichen der Vorlage auf die Listenstile dieses Programms
+   abbilden. Was hier nicht steht, fällt auf den Grundstil zurück — lieber
+   ein schlichter Punkt als eine erfundene Zuordnung. */
+function docxListenStil(ebene){
+  const fmt=String(ebene&&ebene.fmt||"bullet").toLowerCase();
+  const zeichen=String(ebene&&ebene.text||"").trim();
+  if(fmt==="none")return null;
+  if(fmt==="bullet"){
+    if(/^o$/i.test(zeichen))return{tag:"ul",ls:"kreis"};
+    if(/^[§▪■n]$/.test(zeichen))return{tag:"ul",ls:"quadrat"};
+    if(/^[-–—]$/.test(zeichen))return{tag:"ul",ls:"strich"};
+    if(/^[ü✓P]$/.test(zeichen))return{tag:"ul",ls:"haken"};
+    return{tag:"ul",ls:""};
+  }
+  if(/^lowerletter$/i.test(fmt))return{tag:"ol",ls:"alpha"};
+  if(/^upperletter$/i.test(fmt))return{tag:"ol",ls:"alphagross"};
+  if(/^(upper|lower)roman$/i.test(fmt))return{tag:"ol",ls:"roemisch"};
+  if(/\)\s*$/.test(zeichen))return{tag:"ol",ls:"klammer"};
+  return{tag:"ol",ls:""};
+}
+
+function docxLauf(p,ktx){
   let out="";
+  const grund=ktx?ktx.grund:{};
   [...p.children].forEach(el=>{
-    if(el.localName==="hyperlink"){out+=docxLauf(el);return}
+    if(el.localName==="hyperlink"){out+=docxLauf(el,ktx);return}
     if(el.localName!=="r")return;
     let t="";
     [...el.children].forEach(c=>{
@@ -7787,57 +7925,94 @@ function docxLauf(p){
       else if(c.localName==="tab")t+=" ";
     });
     if(!t)return;
-    const pr=[...el.children].find(c=>c.localName==="rPr");
-    if(pr){
-      const an=n=>{const e=[...pr.children].find(c=>c.localName===n);
-        if(!e)return false;const v=xattr(e,"val");return v!=="0"&&v!=="false"};
-      if(an("b"))t="<b>"+t+"</b>";
-      if(an("i"))t="<i>"+t+"</i>";
-      if(an("u"))t="<u>"+t+"</u>";
-      if(an("strike"))t="<s>"+t+"</s>";
-    }
+    const pr=KIND(el,"rPr");
+    /* Vorgaben und Absatzvorlage stecken schon in „grund“; darüber die
+       Zeichenvorlage des Laufs, zuletzt seine direkte Auszeichnung. */
+    const wirk=Object.assign({},grund,
+      ktx?docxVorlageWirkung(ktx.stile,xattrN(KIND(pr,"rStyle"),"val")||""):{},
+      docxRPr(pr));
+    if(wirk.b&&!(ktx&&ktx.ohneFett))t="<b>"+t+"</b>";
+    if(wirk.i)t="<i>"+t+"</i>";
+    if(wirk.u)t="<u>"+t+"</u>";
+    if(wirk.strike)t="<s>"+t+"</s>";
     out+=t;
   });
   return out;
 }
-function docxToHtml(xml){
+
+function docxToHtml(xml,stilXml,numXml){
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return null;
   const body=[...dom.documentElement.children].find(e=>e.localName==="body");
   if(!body)return null;
-  let out="",liste=false;
-  const zu=()=>{if(liste){out+="</ul>";liste=false}};
+  const {def,stile}=docxStile(stilXml);
+  const nummern=docxNummern(numXml);
+  let out="";
+  /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
+     das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
+     bewusst nicht geschlossen. */
+  const stapel=[];
+  const auf=s=>{out+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+">";
+    stapel.push({tag:s.tag,ls:s.ls,offen:false})};
+  const zuBis=n=>{while(stapel.length>n){const t=stapel.pop();
+    if(t.offen)out+="</li>";out+="</"+t.tag+">"}};
+  const alleZu=()=>zuBis(0);
+
   const absatz=p=>{
-    const pr=[...p.children].find(c=>c.localName==="pPr");
-    const stil=pr&&[...pr.children].find(c=>c.localName==="pStyle");
-    const nummer=pr&&[...pr.children].some(c=>c.localName==="numPr");
-    const name=stil?String(xattr(stil,"val")||""):"";
-    /* Word beschriftet Überschriften je nach Sprache anders */
-    const h=name.match(/^(?:Heading|berschrift|Titre|Ttulo)\s*([1-6])/i);
-    const inhalt=docxLauf(p);
-    if(nummer){if(!liste){out+="<ul>";liste=true}out+="<li>"+(inhalt||"<br>")+"</li>";return}
-    zu();
-    if(h)out+="<h"+Math.min(3,+h[1])+">"+(inhalt||"<br>")+"</h"+Math.min(3,+h[1])+">";
+    const pr=KIND(p,"pPr");
+    const vorlage=xattrN(KIND(pr,"pStyle"),"val")||"";
+    const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
+    const h=docxUeberschrift(stile,vorlage);
+    if(h)delete grund.b;
+    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h})||"";
+    const numPr=KIND(pr,"numPr");
+    if(numPr){
+      const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
+      const ilvl=Math.max(0,Math.min(8,parseInt(xattrN(KIND(numPr,"ilvl"),"val"),10)||0));
+      const ebenen=nummern[numId];
+      const stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
+      /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
+      if(stil){
+        if(!stapel.length)auf(stil);
+        zuBis(ilvl+1);
+        while(stapel.length<ilvl+1)auf(stil);
+        const oben=stapel[stapel.length-1];
+        if(oben.tag!==stil.tag||oben.ls!==stil.ls){zuBis(stapel.length-1);auf(stil)}
+        const jetzt=stapel[stapel.length-1];
+        if(jetzt.offen)out+="</li>";
+        out+="<li>"+(inhalt||"<br>");jetzt.offen=true;
+        return;
+      }
+    }
+    alleZu();
+    if(h)out+="<h"+h+">"+(inhalt||"<br>")+"</h"+h+">";
     else out+="<p>"+(inhalt||"<br>")+"</p>";
   };
   const tabelle=t=>{
-    zu();
+    alleZu();
     let r="<table>";
     [...t.children].filter(x=>x.localName==="tr").forEach(tr=>{
       r+="<tr>";
       [...tr.children].filter(x=>x.localName==="tc").forEach(tc=>{
-        const inner=[...tc.children].filter(x=>x.localName==="p").map(docxLauf).join("<br>");
+        const inner=[...tc.children].filter(x=>x.localName==="p").map(p=>{
+          const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
+          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v))});
+        }).join("<br>");
         r+="<td>"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
     out+=r+"</table>";
   };
+  let nachTabelle=false;
   [...body.children].forEach(el=>{
-    if(el.localName==="p")absatz(el);
-    else if(el.localName==="tbl")tabelle(el);
+    if(el.localName==="p"){
+      if(nachTabelle&&!docxLauf(el,null).trim()&&!KIND(KIND(el,"pPr"),"numPr")){nachTabelle=false;return}
+      nachTabelle=false;absatz(el);
+    }
+    else if(el.localName==="tbl"){tabelle(el);nachTabelle=true}
   });
-  zu();
+  alleZu();
   return out||null;
 }
 
@@ -7909,7 +8084,12 @@ async function zipDokument(name,buf){
   try{
     if(ext==="docx"){
       const xml=await zipEintrag(buf,"word/document.xml");
-      return xml?docxToHtml(xml):null;
+      if(!xml)return null;
+      /* Beide Nebendateien sind freiwillig: fehlt eine, fällt der Leser auf
+         das zurück, was in document.xml selbst steht. */
+      const stil=await zipEintrag(buf,"word/styles.xml").catch(()=>null);
+      const num=await zipEintrag(buf,"word/numbering.xml").catch(()=>null);
+      return docxToHtml(xml,stil,num);
     }
     const xml=await zipEintrag(buf,"content.xml");
     return xml?odtToHtml(xml):null;
@@ -12932,9 +13112,15 @@ several can be opened at once.</p>
 <tr><td>.md</td><td>Markdown</td></tr>
 <tr><td>.txt</td><td>plain text</td></tr>
 </table>
-<p>Paragraphs, headings, bold, italic, underline, strikethrough, lists and tables are carried
-over. Pictures inside a .docx, footnotes and comments are not. The old binary .doc format
-from before 2007 cannot be read.</p>`},
+<p>Paragraphs, headings, bold, italic, underline, strikethrough, tables and both kinds of
+list are carried over — numbered lists stay numbered, and their style (1., a., I.) and
+nesting come with them.</p>
+<p>Word usually keeps such formatting in a <b>style</b> rather than on the words themselves,
+and PureQuill Writer resolves those styles when reading. That is why a document whose author
+worked with proper heading and body styles arrives looking the way it did in Word.</p>
+<p>What does not come across: pictures inside a .docx, footnotes, comments, tracked changes,
+text boxes, shapes and equations. Merged table cells become separate cells. The old binary
+.doc format from before 2007 cannot be read.</p>`},
 
  {t:"Exporting",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>File &rsaquo; Export</b> writes the document out for use elsewhere:</p>
@@ -13412,8 +13598,15 @@ neuer Reiter; mehrere lassen sich auf einmal öffnen.</p>
 <tr><td>.txt</td><td>reiner Text</td></tr>
 </table>
 <p>Übernommen werden Absätze, Überschriften, fett, kursiv, unterstrichen, durchgestrichen,
-Listen und Tabellen. Bilder aus einer .docx, Fußnoten und Kommentare nicht. Das alte binäre
-.doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
+Tabellen und beide Arten von Liste — nummerierte bleiben nummeriert, samt ihrem Stil
+(1., a., I.) und ihrer Verschachtelung.</p>
+<p>Word legt solche Auszeichnungen meist in einer <b>Formatvorlage</b> ab statt an den
+Wörtern selbst; PureQuill Writer löst diese Vorlagen beim Lesen auf. Deshalb kommt ein
+Dokument, dessen Verfasser ordentlich mit Überschriften- und Textvorlagen gearbeitet hat, so
+herein, wie es in Word aussah.</p>
+<p>Nicht mit herüber kommen: Bilder aus einer .docx, Fußnoten, Kommentare,
+Änderungsverfolgung, Textfelder, Formen und Formeln. Verbundene Tabellenzellen werden zu
+einzelnen Zellen. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
 
  {t:"Exportieren",k:"export;word;docx;pdf;html;markdown;text;csv",b:`
 <p><b>Datei &rsaquo; Exportieren</b> schreibt das Dokument zur Weitergabe heraus:</p>
