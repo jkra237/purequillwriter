@@ -18,6 +18,17 @@ npm run dist       # NSIS-Installer (Direkt-Download)  -> release/
 npm run dist:store # APPX/MSIX fürs Microsoft Store     -> release/
 ```
 
+### Wenn PowerShell npm blockiert
+
+`npm : ... npm.ps1 cannot be loaded because running scripts is disabled on this
+system.` — das ist die Execution Policy von Windows, nicht das Projekt. Zwei Wege:
+
+- **Ohne etwas zu ändern:** `npm.cmd` statt `npm` aufrufen, das umgeht den
+  PowerShell-Wrapper. Oder `cmd` statt PowerShell benutzen.
+- **Dauerhaft:** `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` — die
+  übliche Entwicklereinstellung, kein Admin nötig, gilt nur für den eigenen
+  Benutzer.
+
 ## Was die Desktop-Fassung anders macht
 
 Drei Stellen in `index.html` fragen `window.pqwDesktop` ab. Fehlt es — also im
