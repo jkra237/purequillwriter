@@ -12943,8 +12943,8 @@ const SLASH=[
   {n:"Aufzählung",k:"liste punkte bullet list",f:()=>document.execCommand("insertUnorderedList")},
   {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>document.execCommand("insertOrderedList")},
   {n:"Tabelle",k:"tabelle table raster tabla tabela tableau",f:()=>setTimeout(tablePicker,20)},
-  {n:"Seitenumbruch",k:"umbruch seite break page salto quebra saut",f:insertPageBreak},
-  {n:"Bild",k:"bild foto grafik image picture imagen imagem",f:pickImage},
+  {n:"Seitenumbruch",k:"umbruch seite break page salto quebra saut podział",f:insertPageBreak},
+  {n:"Bild",k:"bild foto grafik image picture imagen imagem obraz",f:pickImage},
   {n:"Link",k:"link url verweis",f:()=>setTimeout(linkDialog,20)},
   {n:"Notiz anheften",k:"notiz kommentar anker note pin",f:()=>setTimeout(linkSelection,20)},
   {n:"Fußnote",k:"fussnote fußnote footnote referenz reference",f:insertFootnote},
@@ -12964,7 +12964,7 @@ function curBlock(){
 function slashCheck(){
   const b=curBlock();
   const txt=b?(b.textContent||"").trim():"";
-  const m=/^\/([\wäöüßÄÖÜ]*)$/.exec(txt);
+  const m=/^\/([\wäöüßÄÖÜąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*)$/.exec(txt);
   if(!m||b.querySelector("table")){slashClose();return}
   slashBlock=b;slashOpen(m[1]);
 }
@@ -12988,7 +12988,7 @@ function slashOpen(q){
 }
 function currentSlashQuery(){
   const t=slashBlock?(slashBlock.textContent||"").trim():"";
-  const m=/^\/([\wäöüßÄÖÜ]*)$/.exec(t);
+  const m=/^\/([\wäöüßÄÖÜąćęłńóśźżĄĆĘŁŃÓŚŹŻ]*)$/.exec(t);
   return m?m[1]:"";
 }
 function slashClose(){const m=$("#smenu");if(m)m.remove();slashOn=false;slashIdx=0}
@@ -16789,12 +16789,556 @@ programme perdu. Revenez à l'adresse que vous utilisiez, ou chargez une sauvega
 <p class="hsec">« Fichier sur le disque » est grisé</p>
 <p>Lire et écrire de vrais fichiers demande Chrome ou Edge. Dans les autres navigateurs, servez-
 vous de <b>Créer une sauvegarde</b> et <b>Charger une sauvegarde</b> à la place.</p>`}]}
+],
+pl:[
+{b:"Pierwsze kroki",t:[
+ {t:"O programie PureQuill Writer",k:"o programie;przegląd;wprowadzenie;co to jest",b:`
+<p>PureQuill Writer to edytor tekstu, który działa w całości w przeglądarce. Nie ma nic do
+zainstalowania ani żadnego logowania. Twój tekst nie jest nigdzie wysyłany.</p>
+<p>Powstał do długich tekstów — manuskryptów, raportów, prac dyplomowych — a nie do krótkich
+notatek. Trzy rzeczy odróżniają go od zwykłego edytora tekstu:</p>
+<ul>
+<li><b>Prawdziwa strona</b>, mierzona w milimetrach, taka sama jak wydruk z drukarki.</li>
+<li><b>Tablica</b> na notatki, które należą do pracy, ale nie do samego tekstu.</li>
+<li><b>Słowniczek</b> powracających pojęć, które można zaznaczać i sprawdzać podczas
+pisania.</li>
+</ul>
+<p>Zobacz też: <a data-goto="Trzy widoki">Trzy widoki</a>.</p>`},
+
+ {t:"Trzy widoki",k:"widoki;tryby;pisanie;notatki;słowniczek;przełączanie",b:`
+<p>Trzy przyciski przy lewej krawędzi przełączają między widokami. Każdy zachowuje swój stan,
+więc można się między nimi przemieszczać, nie tracąc miejsca.</p>
+<table class="hkeys">
+<tr><td><b>Pisanie</b></td><td><kbd>Alt</kbd>+<kbd>1</kbd></td><td>Dokument na stronie.</td></tr>
+<tr><td><b>Notatki</b></td><td><kbd>Alt</kbd>+<kbd>2</kbd></td><td>Tablica notatek.</td></tr>
+<tr><td><b>Słowniczek</b></td><td><kbd>Alt</kbd>+<kbd>3</kbd></td><td>Twoje zbiory pojęć.</td></tr>
+</table>
+<p>Notatki i wpisy słowniczka należą do programu, nie do pojedynczego dokumentu — są dostępne
+niezależnie od tego, który dokument jest otwarty.</p>`},
+
+ {t:"Twój pierwszy dokument",k:"nowy dokument;utwórz;start;karty;zmień nazwę",b:`
+<p>Przy pierwszym uruchomieniu program pyta o język i schemat kolorów, a potem proponuje nowy
+dokument albo istniejący plik.</p>
+<p><b>Aby utworzyć kolejny dokument</b>, kliknij <b>+</b> po prawej stronie paska kart albo
+wybierz <b>Plik &rsaquo; Nowy dokument</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
+Najpierw program pyta o format strony; można go zmienić w dowolnej chwili później.</p>
+<p>Dokumenty pojawiają się jako karty u góry. Przeciągnij kartę, aby zmienić kolejność. Kliknij
+ją prawym przyciskiem, aby zmienić nazwę lub nadać kolor. Zamknięcie ostatniego dokumentu wraca
+do ekranu powitalnego.</p>
+<p>Każdy dokument ma własny tytuł, format strony, czcionkę i odstęp między wierszami. Ich zmiana
+dotyczy tylko dokumentu, w którym jesteś.</p>`},
+
+ {t:"Gdzie przechowywana jest Twoja praca",k:"zapisywanie;przechowywanie;autozapis;pamięć przeglądarki;utracona praca",b:`
+<p>Tekst jest zapisywany na bieżąco podczas pisania. Nie ma żadnego polecenia zapisu do
+zapamiętania, a pasek stanu w prawym dolnym rogu zawsze pokazuje, jak stoją sprawy.</p>
+<p>Praca jest przechowywana w <b>trzech miejscach</b>, ponumerowanych w <b>Ustawienia &rsaquo;
+Zapisywanie</b>:</p>
+<ol>
+<li><b>Ta przeglądarka</b> — zawsze i wszystko. Powiązane z adresem, spod którego otworzono
+program, i utracone po wyczyszczeniu danych przeglądarki.</li>
+<li><b>Plik na dysku</b> — opcjonalnie i tylko dokument, w którym jesteś, wraz z przypiętymi do
+niego notatkami. Ustawiane w <b>Plik &rsaquo; Zapisz wszystko &rsaquo; Powiąż z plikiem</b>; od
+tej pory jest zapisywany przy każdym zapisie. Na innym komputerze — albo po wyczyszczeniu
+pamięci przeglądarki — <b>Otwórz powiązany plik</b> przywraca go.</li>
+<li><b>Automatyczna kopia zapasowa</b> — opcjonalnie i cały stan programu: każdy dokument,
+notatka, słowniczek i ustawienie.</li>
+</ol>
+<p>Ten sam pełny stan można zapisać ręcznie przez <b>Plik &rsaquo; Zapisz wszystko</b>. A
+wewnątrz miejsca 1 program przechowuje też
+<a data-goto="Historia wersji i punkty przywracania">punkty przywracania</a> dla każdego
+dokumentu — miejsca, do których można wrócić.</p>
+<p>Jeśli pasek stanu kiedykolwiek pokaże <b>Nie zapisano</b> na czerwono, przeglądarka odmówiła
+zapisania czegokolwiek więcej. Zrób od razu kopię zapasową i zwolnij trochę miejsca.</p>
+<p>Zobacz też: <a data-goto="Automatyczna kopia zapasowa">Automatyczna kopia zapasowa</a>.</p>`}]},
+
+{b:"Pisanie",t:[
+ {t:"Wpisywanie i formatowanie",k:"pogrubienie;kursywa;podkreślenie;przekreślenie;czcionka;rozmiar;kolor;wyróżnienie",b:`
+<p>Pasek narzędzi nad stroną zawiera formatowanie znaku. Wszystko z niego stosuje się do
+zaznaczonego tekstu albo do tego, co napiszesz dalej, jeśli nic nie jest zaznaczone.</p>
+<table class="hkeys">
+<tr><td>Pogrubienie</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
+<tr><td>Kursywa</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
+<tr><td>Podkreślenie</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Przekreślenie</td><td>tylko pasek narzędzi</td></tr>
+</table>
+<p><b>Rozmiar czcionki</b> to pole edytowalne: wybierz rozmiar z listy przy strzałce obok albo
+wpisz dowolną wartość od 4 do 200 i naciśnij <kbd>Enter</kbd>. Strzałki zmieniają go co
+jeden.</p>
+<p><b>Kolor tekstu</b> i <b>wyróżnienie</b> otwierają każde paletę gotowych kolorów oraz próbnik
+dla dowolnego innego. Pasek pod przyciskiem pokazuje, co zostanie użyte.</p>
+<p>Wyróżnienie przyciemnia też tekst, który zakrywa, aby fragment pozostał czytelny w ciemnych
+schematach kolorów. Zastosuj najpierw wyróżnienie, a potem kolor tekstu, jeśli chcesz obu.</p>
+<p><b>Indeks górny i dolny</b> znajdują się w menu Format, w <b>Znak</b> — do jednostek, wzorów
+i rysunków, które chcesz złożyć ręcznie.</p>
+<p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa.</p>`},
+
+ {t:"Akapity i tytuły",k:"tytuł;akapit;wyrównanie;wcięcie;interlinia;odstęp między akapitami",b:`
+<p>Pole <b>styl akapitu</b> zamienia bieżący akapit w tekst podstawowy albo w jeden z trzech
+poziomów tytułu. Tytuły są tym, z czego budowany jest konspekt i spis treści, więc używaj ich
+zamiast po prostu powiększać wiersz i pogrubiać.</p>
+<table class="hkeys">
+<tr><td>Wyrównaj do lewej</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Wyśrodkuj</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Wyrównaj do prawej</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Wyjustuj</td><td>tylko pasek narzędzi</td></tr>
+</table>
+<p><b>Aby zrobić wcięcie akapitu</b>, naciśnij <kbd>Tab</kbd> na jego początku;
+<kbd>Shift</kbd>+<kbd>Tab</kbd> je cofa. W tabeli te klawisze przechodzą między komórkami.</p>
+<p><b>Interlinia</b> i <b>odstęp między akapitami</b> są w menu Format i dotyczą całego
+dokumentu, a nie pojedynczych akapitów.</p>`},
+
+ {t:"Listy i cytaty",k:"lista;punktor;numerowana;cytat;blok cytatu;znaczniki",b:`
+<p>Rozpocznij listę z paska narzędzi, z menu <b>Format</b> albo po prostu wpisując
+<code>- </code> lub <code>1. </code> na początku pustego akapitu — staje się listą, gdy tylko
+wpiszesz spację.</p>
+<p><kbd>Enter</kbd> rozpoczyna następny element; na pustym elemencie opuszcza listę.
+<kbd>Tab</kbd> robi wcięcie elementu o jeden poziom.</p>
+<p><b>Format &rsaquo; Lista punktowana</b> i <b>Lista numerowana</b> oferują też style znacznika
+— kropki, kółka, kwadraty, kreski i ptaszki; dziesiętny, z nawiasem, litery i cyfry rzymskie.
+Styl dotyczy listy, w której stoisz, więc różne listy mogą się różnić.</p>
+<p><b>Cytaty</b> pochodzą z <b>Format &rsaquo; Cytat</b> w trzech stylach: linia akcentu,
+zabarwiony blok i znak typograficzny. Naciśnięcie <kbd>Enter</kbd> dwa razy w pustym wierszu
+cytatu opuszcza cytat.</p>`},
+
+ {t:"Tabele",k:"tabela;wiersze;kolumny;komórki;wiersz nagłówka",b:`
+<p>Wstaw tabelę przyciskiem paska narzędzi, który otwiera siatkę do przeciągnięcia w celu wyboru
+rozmiaru, albo wpisując <code>/tabela</code> na początku pustego akapitu.</p>
+<p><kbd>Tab</kbd> przechodzi do następnej komórki; w ostatniej komórce dodaje wiersz.
+<kbd>Shift</kbd>+<kbd>Tab</kbd> cofa.</p>
+<p><b>Kliknij prawym przyciskiem wewnątrz tabeli</b>, aby uzyskać polecenia wierszy i kolumn:
+wstaw powyżej lub poniżej, wstaw z lewej lub z prawej, usuń wiersz, usuń kolumnę, usuń tabelę
+oraz zamień pierwszy wiersz w wiersz nagłówka.</p>
+<p><b>Aby zmienić szerokość kolumn lub wysokość wierszy</b>, przeciągnij krawędź między dwiema
+komórkami. Szerokości są przechowywane w procentach, więc przetrwają powiększenie i zmianę
+formatu strony.</p>`},
+
+ {t:"Obrazy",k:"obraz;zdjęcie;podpis;tekst alternatywny;zmiana rozmiaru",b:`
+<p>Wstaw obraz z paska narzędzi albo wpisz <code>/obraz</code>. Plik jest osadzony w dokumencie,
+więc podróżuje z kopiami zapasowymi — pamiętaj, że kilka dużych zdjęć szybko zapełni pamięć
+przeglądarki. To samo dotyczy obrazów, które przychodzą z dokumentem Word.</p>
+<p><b>Kliknij obraz</b>, aby go zaznaczyć. Pojawia się mały pasek z wyrównaniem, podpisem,
+tekstem alternatywnym dla czytników ekranu i usuwaniem. Przeciągnij okrągły uchwyt narożnika,
+aby zmienić rozmiar.</p>
+<p>Podpis pozwala, aby obraz był liczony w <b>spisie ilustracji</b>.</p>`},
+
+ {t:"Linki i podziały strony",k:"link;hiperłącze;url;podział strony",b:`
+<p><b>Aby wstawić lub edytować link</b>, zaznacz tekst i naciśnij
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>, albo użyj przycisku paska narzędzi. Linki otwierają
+się w nowej karcie.</p>
+<p><b>Podział strony</b> przenosi to, co następuje, na nową stronę. Użyj przycisku paska
+narzędzi, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> albo wpisz <code>/podział</code>.
+Wyświetla się jako opisana linia podczas pisania i znika przy drukowaniu.</p>`},
+
+ {t:"Autokorekta podczas pisania",k:"autokorekta;cudzysłowy;dywiz;myślnik;wielkie litery;listy",b:`
+<p>Podczas pisania wprowadzane są cztery poprawki. Wszystkie cztery są początkowo włączone i
+można je wyłączyć osobno w <b>Ustawienia &rsaquo; Autokorekta</b>.</p>
+<table class="hkeys">
+<tr><td><b>Cudzysłowy</b></td><td>Proste cudzysłowy stają się typograficzne.</td></tr>
+<tr><td><b>Myślnik</b></td><td>Dwa dywizy stają się myślnikiem.</td></tr>
+<tr><td><b>Wielkie litery</b></td><td>Pierwsza litera zdania jest zamieniana na wielką.</td></tr>
+<tr><td><b>Listy</b></td><td><code>- </code> lub <code>1. </code> rozpoczyna listę.</td></tr>
+</table>
+<p>To, których cudzysłowów się używa, zależy od <b>języka pisowni</b>, nie od języka menu —
+niemiecki i polski otwierają na dole, francuski i hiszpański używają cudzysłowów ostrokątnych,
+angielski i portugalski używają cudzysłowów górnych. Apostrof w formie ściągniętej jest
+rozpoznawany i pozostawiany w spokoju.</p>
+<p>Każdą poprawkę można cofnąć przez <kbd>Ctrl</kbd>+<kbd>Z</kbd> jak każde inne naciśnięcie
+klawisza.</p>`}]},
+
+{b:"Strona",t:[
+ {t:"Format strony i marginesy",k:"format strony;papier;a4;list;marginesy;orientacja;jednostki",b:`
+<p><b>Plik &rsaquo; Format strony</b> ustawia rozmiar papieru, orientację i cztery marginesy
+dokumentu, w którym jesteś. Przygotowano sześć formatów — A4, list DIN 5008, strona
+znormalizowana, A5, książka kieszonkowa i US Letter — a własne wymiary można wpisać.</p>
+<p>Pomiary są w milimetrach, chyba że przełączysz się na cale w <b>Ustawienia &rsaquo;
+Ogólne</b>.</p>
+<p><b>Lewy i prawy margines można też przeciągać</b> na linijce nad stroną.</p>
+<p>Pole wyboru <b>Jako domyślny</b> w oknie sprawia, że nowe dokumenty zaczynają się z tym
+formatem.</p>
+<p><b>Widok &rsaquo; Marginesy strony</b> pokazuje marginesy jako cienkie linie pomocnicze na
+stronie. Służą tylko do orientacji podczas pisania i nigdy nie są drukowane.</p>`},
+
+ {t:"Nagłówki i stopki",k:"nagłówek;stopka;żywa pagina;znaczniki;odległość od krawędzi",b:`
+<p><b>Kliknij dwukrotnie górny lub dolny margines strony</b>, aby edytować nagłówek lub stopkę
+tam, gdzie się znajduje. Pojawia się mały pasek z wyrównaniem, znacznikami i wysokością.</p>
+<p>Cztery znaczniki są zastępowane na każdej stronie:</p>
+<table class="hkeys">
+<tr><td><code>{page}</code></td><td>numer strony</td></tr>
+<tr><td><code>{pages}</code></td><td>łączna liczba stron</td></tr>
+<tr><td><code>{title}</code></td><td>tytuł dokumentu</td></tr>
+<tr><td><code>{date}</code></td><td>dzisiejsza data</td></tr>
+</table>
+<p><b>Wysokość obszaru nagłówka</b> to granica między nim a treścią tekstu. Przeciągnij uchwyt
+wzdłuż tej granicy albo wpisz wartość w pasku. Zwiększenie nagłówka przesuwa tekst w dół; nigdy
+nie wchodzi pod niego.</p>
+<p><b>Odległość od krawędzi papieru</b> — gdzie leży sama linia — należy do formatu strony i
+ustawia się w <b>Plik &rsaquo; Format strony</b>, obok marginesów.</p>
+<p><kbd>Shift</kbd>+<kbd>Enter</kbd> dodaje drugi wiersz. <kbd>Tab</kbd> przeskakuje między
+nagłówkiem a stopką. <kbd>Esc</kbd> kończy.</p>`},
+
+ {t:"Numery stron",k:"numery stron;numeracja;paginacja",b:`
+<p><b>Format &rsaquo; Numery stron</b> włącza i wyłącza zwykły numer strony u dołu każdej
+strony.</p>
+<p>Jeśli utworzysz własną stopkę zawierającą <code>{page}</code>, zastępuje ona zwykły numer —
+te dwa nigdy nie pojawiają się razem.</p>`},
+
+ {t:"Powiększenie i szerokość strony",k:"powiększenie;zoom;dopasuj;szerokość strony",b:`
+<p>Sterowanie powiększeniem znajduje się w prawym dolnym rogu. Kliknij procent, aby wybrać
+poziom albo wpisać własny.</p>
+<table class="hkeys">
+<tr><td>Powiększ</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
+<tr><td>Pomniejsz</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Dopasuj do szerokości strony</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
+</table>
+<p>Przy aktywnym <b>dopasowaniu do szerokości strony</b> powiększenie podąża za oknem podczas
+zmiany jego rozmiaru. Ustawienie poziomu ręcznie to wyłącza.</p>`},
+
+ {t:"Drukowanie i podgląd wydruku",k:"drukuj;pdf;podgląd;eksport pdf",b:`
+<p><b>Podgląd wydruku</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) pokazuje dokument
+dokładnie tak, jak zostanie wydrukowany — numery stron, nagłówki, marginesy i wszystko. Jest
+budowany ze stron, które już widzisz, więc podgląd i papier nie mogą się różnić. <kbd>Esc</kbd>
+go zamyka.</p>
+<p><b>Aby wydrukować</b>, naciśnij <kbd>Ctrl</kbd>+<kbd>P</kbd> albo użyj <b>Plik &rsaquo;
+Drukuj</b>.</p>
+<p><b>Aby zrobić PDF</b>, wybierz <b>Plik &rsaquo; Zapisz jako &rsaquo; PDF</b>. Otwiera to to
+samo okno drukowania; wybierz <i>Zapisz jako PDF</i> jako miejsce docelowe.</p>`}]},
+
+{b:"Praca nad dłuższymi tekstami",t:[
+ {t:"Notatki na tablicy",k:"notatki;tablica;karteczki;kolory",b:`
+<p>Widok <b>Notatki</b> (<kbd>Alt</kbd>+<kbd>2</kbd>) to tablica kart na wszystko, co należy do
+pracy, ale nie do tekstu: otwarte pytania, linki do materiałów, przypomnienia.</p>
+<p><b>Aby utworzyć notatkę</b>, użyj przycisku po lewej stronie paska narzędzi albo naciśnij
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> — działa to również podczas pisania, bez zmiany
+widoku. Nowa notatka otwiera się z kursorem w tytule.</p>
+<p><b>Kliknij notatkę</b>, aby otworzyć ją w panelu bocznym. <b>Przeciągnij ją</b>, aby ją
+przenieść; nowe notatki zajmują pierwsze wolne miejsce w lewym górnym rogu. Tablica przewija
+się, gdy przeciągasz poza jej krawędź.</p>
+<p>Notatkom można nadać jeden z siedmiu kolorów z panelu u dołu edytora.</p>`},
+
+ {t:"Przypinanie notatki do fragmentu",k:"przypnij;kotwica;powiąż notatkę;notatki na marginesie;komentarz",b:`
+<p>Notatkę można powiązać z jednym lub wieloma miejscami w tekście, tak jak komentarz.</p>
+<p><b>Zaznacz fragment</b> i naciśnij <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, albo kliknij
+prawym przyciskiem i wybierz przypięcie notatki. Fragment zostaje oznaczony, a notatka pokazuje,
+z iloma miejscami jest powiązana.</p>
+<p>Przy włączonym <b>Widok &rsaquo; Notatki na marginesie</b> przypięte notatki pojawiają się
+obok strony podczas pisania. Kliknięcie jednej przeskakuje do jej miejsca; jeśli notatka jest
+powiązana z wieloma miejscami, strzałki przechodzą między nimi.</p>
+<p><b>Widok &rsaquo; Zaznaczenia w tekście</b> wyłącza i ponownie włącza kolorowanie przypiętych
+fragmentów. Powiązania pozostają w obu przypadkach — są po prostu poza wzrokiem, co pomaga, gdy
+chcesz ocenić sam tekst, a nie pracę nad nim. W drugą stronę, kliknięcie prawym przyciskiem
+przypiętego fragmentu oferuje <b>Wyróżnij notatkę</b>, co wskazuje odpowiednią notatkę w panelu
+bocznym.</p>
+<p>Usunięcie oznaczonego tekstu nie usuwa notatki — traci ona tylko to powiązanie.</p>`},
+
+ {t:"Słowniczek",k:"słowniczek;pojęcia;definicje;sprawdzanie;zaznaczanie pojęć",b:`
+<p>Widok <b>Słowniczek</b> (<kbd>Alt</kbd>+<kbd>3</kbd>) przechowuje pojęcia, które powracają w
+Twoich tekstach — postacie, miejsca, słownictwo fachowe — każde z definicją i opcjonalną
+kategorią.</p>
+<p>Wpisy są wymienione z pojęciem po lewej i definicją po prawej, pogrupowane według pierwszej
+litery albo według kategorii, zależnie od wybranego sortowania.</p>
+<p><b>Widok &rsaquo; Zaznaczaj pojęcia ze słowniczka</b> podkreśla te pojęcia wszędzie tam,
+gdzie pojawiają się w tekście, a definicja wyświetla się po najechaniu.</p>
+<p><b>Aby dodać pojęcie podczas pisania</b>, zaznacz je w tekście i wybierz <b>Dodaj jako wpis
+słowniczka</b> z menu prawego przycisku. To najkrótsza droga — nie trzeba zmieniać widoku.</p>
+<p><b>Aby sprawdzić pojęcie podczas pisania</b>, naciśnij
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>. Kliknięcie wyniku wstawia pojęcie w miejscu
+kursora.</p>`},
+
+ {t:"Kilka słowniczków",k:"słowniczki;zbiory;przypisz;importuj;eksportuj csv",b:`
+<p>Można prowadzić więcej niż jeden słowniczek — powieść fantasy i podręcznik nie mają wspólnych
+pojęć, a ich pomieszanie zaznaczyłoby w obu niewłaściwe słowa.</p>
+<p>Karty u góry widoku Słowniczek zmieniają, <b>który słowniczek oglądasz</b>. To samo w sobie
+niczego nie zmienia: dokument zachowuje słowniczek, który mu przypisano.</p>
+<p><b>Aby zdecydować, którego słowniczka używa dokument</b>, użyj listy rozwijanej
+<b>Przypisany</b> w nagłówku. Wymienia ona każdy otwarty dokument z ptaszkiem oraz wpis dla
+braku przypisania. Tylko pojęcia przypisanego słowniczka są zaznaczane w tym dokumencie.</p>
+<p><b>Import i eksport</b> znajdują się w tym samym nagłówku, pod przyciskiem ⋮. Słowniczek
+można zapisać jako tabelę (.csv) albo jako kopię zapasową (.json) i wczytać z powrotem z każdego
+z nich — do oglądanego słowniczka albo jako nowy o nazwie pliku. Pojęcia już obecne są pomijane,
+a nie powielane.</p>`},
+
+ {t:"Przypisy",k:"przypis;odwołanie;notki u dołu",b:`
+<p><b>Narzędzia &rsaquo; Wstaw przypis</b> umieszcza numerowane odwołanie w miejscu kursora i
+umieszcza notkę u dołu strony, na którą przypada.</p>
+<p>Przypisy same się przenumerowują podczas pisania i przemieszczają się z tekstem, do którego
+należą. Usunięcie odwołania usuwa też notkę.</p>`},
+
+ {t:"Spis treści i spis ilustracji",k:"spis treści;spis;zawartość;ilustracje",b:`
+<p><b>Narzędzia &rsaquo; Wstaw spis treści</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+buduje listę z tytułów w dokumencie. Oferuje wybór stylu, ile poziomów tytułów uwzględnić, czy
+pokazywać numery stron oraz jakiego wypełnienia użyć między wpisem a numerem.</p>
+<p>Spis aktualizuje się podczas pisania, a pojedyncze tytuły można z niego wykluczyć.</p>
+<p><b>Spis ilustracji</b> działa tak samo dla obrazów, które mają podpis. Jest oferowany po
+włączeniu go w <b>Ustawienia &rsaquo; Ogólne</b>.</p>`},
+
+ {t:"Konspekt",k:"konspekt;nawigacja;struktura;przejdź do tytułu",b:`
+<p><b>Widok &rsaquo; Konspekt</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) otwiera panel z
+listą każdego tytułu w dokumencie. Kliknięcie jednego przeskakuje do niego.</p>
+<p>Dla długiego manuskryptu to zwykle najszybszy sposób poruszania się — szybszy niż przewijanie
+i szybszy niż wyszukiwanie.</p>`},
+
+ {t:"Cel pisania",k:"cel;liczba słów;norma;sesja",b:`
+<p><b>Narzędzia &rsaquo; Ustaw cel pisania</b> umieszcza mały licznik obok liczby słów w pasku
+stanu — <i>640 / 1 000</i> z dyskretnym paskiem.</p>
+<p>Liczy to, co napisano <b>od włączenia celu lub jego wyzerowania</b>, we wszystkich
+dokumentach, i przetrwa zamknięcie programu. Po osiągnięciu celu nic się nie dzieje poza tym, że
+pasek robi się zielony. Nie ma żadnego alarmu.</p>
+<p>Kliknij licznik, aby zmienić normę, wyzerować ją lub wyłączyć.</p>`},
+
+ {t:"Notatka do dokumentu",k:"notatka;notatki do dokumentu;notatki fabularne",b:`
+<p><b>Widok &rsaquo; Notatka do dokumentu</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
+otwiera zwykłe pole tekstowe w panelu bocznym, jedno na dokument.</p>
+<p>Stoi poziom wyżej niż tablica: przemyślenia o samym dokumencie, a nie o fragmencie — dokąd ma
+zmierzać fabuła, co jeszcze trzeba sprawdzić. Jej treść nigdy nie pojawia się w tekście ani w
+eksporcie, ale podróżuje z kopiami zapasowymi.</p>`}]},
+
+{b:"Sprawdzanie i wykończenie",t:[
+ {t:"Sprawdzanie pisowni",k:"pisownia;korektor;słownik;języki;własne słowa",b:`
+<p><b>Narzędzia &rsaquo; Sprawdzanie pisowni</b> przechodzi przez dokument i wymienia to, czego
+nie rozpoznaje, z podpowiedziami.</p>
+<p>Słownik jest pobierany raz na język i pozostaje gotowy tak długo, jak program jest otwarty.
+Dostępnych jest sześć języków: niemiecki, angielski, francuski, hiszpański, portugalski i
+polski. Język ustawia się w <b>Ustawienia &rsaquo; Ogólne</b>.</p>
+<p>Dla każdego słowa możesz przyjąć podpowiedź, wpisać własną poprawkę, zignorować je raz albo
+dodać do własnych słów — te są zapamiętywane we wszystkich dokumentach.</p>
+<p><b>Słowniki potrzebują prawdziwego adresu.</b> Jeśli otworzyłeś plik przez dwukrotne
+kliknięcie, korektor nie może ich pobrać. Serwowanie programu spod adresu internetowego albo z
+serwera lokalnego to rozwiązuje.</p>`},
+
+ {t:"Czyszczenie tekstu",k:"czyszczenie;porządkowanie;podwójne spacje;spacja nierozdzielająca;puste akapity",b:`
+<p><b>Narzędzia &rsaquo; Wyczyść tekst</b> znajduje drobny bałagan, który gromadzi się w długim
+manuskrypcie, i proponuje jego usunięcie, po jednej pozycji naraz albo wszystko naraz:</p>
+<ul>
+<li>podwójne spacje</li>
+<li>spacje na końcu wiersza</li>
+<li>spacje nierozdzielające</li>
+<li>ciągi pustych akapitów</li>
+</ul>
+<p>Do dwóch pustych akapitów pod rząd traktowane jest jako celowy odstęp i pozostawiane w
+spokoju; dopiero od trzeciego są redukowane — i to do dwóch, nie do jednego.</p>`},
+
+ {t:"Szukanie i zamiana",k:"szukaj;wyszukiwanie;zamień;uwzględnij wielkość liter;całe słowo",b:`
+<table class="hkeys">
+<tr><td>Szukaj</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Zamień</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+</table>
+<p>U góry strony pojawia się pasek. Liczy dopasowania i przechodzi przez nie za pomocą
+<kbd>Enter</kbd> lub strzałek. Dwie opcje zawężają wyszukiwanie: <b>uwzględnij wielkość
+liter</b> i <b>całe słowo</b>.</p>
+<p>Zamiana działa na bieżącym dopasowaniu; <b>Wszystko</b> zamienia je wszystkie. <kbd>Esc</kbd>
+zamyka pasek.</p>`},
+
+ {t:"Widok czytania i tryb skupienia",k:"widok czytania;czytanie;bez rozpraszaczy;tryb skupienia",b:`
+<p><b>Widok czytania</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) ukrywa cały interfejs i
+pokazuje tylko tekst w jednej wygodnej kolumnie. Nie da się w nim pisać. Znaczniki robocze —
+kotwice notatek, podkreślenia słowniczka, etykiety podziału strony — są ukryte, bo nie są
+częścią tekstu.</p>
+<p>Użyj go, aby ocenić, jak tekst się czyta, a nie jak postępuje. <kbd>Esc</kbd> wraca.</p>
+<p><b>Tryb skupienia</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>) to co innego: przyciemnia
+wszystko poza stroną i pozwala dalej pisać.</p>`}]},
+
+{b:"Pliki, kopie zapasowe i ustawienia",t:[
+ {t:"Otwieranie istniejących plików",k:"otwórz;importuj;docx;odt;rtf;markdown;html;txt",b:`
+<p><b>Plik &rsaquo; Wczytaj dokument</b> otwiera pliki napisane gdzie indziej. Każdy staje się
+nową kartą; można otworzyć kilka naraz.</p>
+<table class="hkeys">
+<tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.rtf</td><td>Rich Text</td></tr>
+<tr><td>.html, .htm</td><td>strony internetowe</td></tr>
+<tr><td>.md</td><td>Markdown</td></tr>
+<tr><td>.txt</td><td>zwykły tekst</td></tr>
+</table>
+<p>Akapity, tytuły, pogrubienie, kursywa, podkreślenie, przekreślenie, tabele i oba rodzaje list
+są przenoszone — listy numerowane pozostają numerowane, a ich styl (1., a., I.) i zagnieżdżenie
+przychodzą razem z nimi.</p>
+<p>Word zwykle trzyma takie formatowanie w <b>stylu</b>, a nie na samych słowach, a PureQuill
+Writer rozwiązuje te style przy wczytywaniu. Dlatego dokument, którego autor pracował z
+prawdziwymi stylami tytułu i tekstu podstawowego, przychodzi wyglądając tak jak w Wordzie.</p>
+<p><b>Ustawienia strony</b> przychodzą z dokumentem: rozmiar papieru, orientacja, cztery
+marginesy oraz odległość nagłówka i stopki od krawędzi. Znany papier jest rozpoznawany po
+nazwie, więc dokument A4 przychodzi jako <i>A4</i>, a nie jako bezimienny wymiar.</p>
+<p><b>Nagłówek, stopka i przypisy</b> również są przenoszone. Pola numeru strony z Worda stają
+się znacznikami tego programu, więc <code>{page}</code> nadal liczy, zamiast przychodzić jako
+stała liczba, która akurat była zapisana w pliku. Szerokość kolumn tabel jest odczytywana z
+dokumentu i trzymana jako proporcje, więc przetrwa zmianę rozmiaru papieru.</p>
+<p><b>Obrazy też przychodzą</b>, w szerokości, którą miały w Wordzie. Są osadzone w dokumencie,
+co oznacza, że zajmują pamięć przeglądarki — więc gdy plik przynosi ich dużo, dowiadujesz się,
+ile dodano, i od razu proponowana jest kopia zapasowa. Obrazy, do których dokument Word tylko
+odsyła linkiem, zamiast je zawierać, nie mogą przyjść: żyją na komputerze kogoś innego.</p>
+<p>Czego nie ma: komentarzy, śledzenia zmian, pól tekstowych, kształtów i równań. Scalone
+komórki tabeli stają się osobnymi komórkami. Dokumenty podzielone na kilka sekcji zachowują
+ustawienia ostatniej, ponieważ tutaj dokument ma jeden format strony, a nie jeden na sekcję.
+Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>`},
+
+ {t:"Zapisz jako",k:"zapisz;eksportuj;word;docx;epub;e-book;czytnik;kindle;pdf;html;markdown;tekst;csv",b:`
+<p><b>Plik &rsaquo; Zapisz jako</b> zapisuje dokument jako plik. Format Word jest pierwszy,
+ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym programem lub bez niego.</p>
+<table class="hkeys">
+<tr><td><b>Dokument Word</b></td><td>.docx, z formatowaniem</td></tr>
+<tr><td><b>E-book</b></td><td>.epub, do czytników</td></tr>
+<tr><td><b>PDF</b></td><td>przez okno drukowania</td></tr>
+<tr><td><b>Strona internetowa</b></td><td>.html</td></tr>
+<tr><td><b>Markdown</b></td><td>.md</td></tr>
+<tr><td><b>Sam tekst</b></td><td>.txt</td></tr>
+<tr><td><b>Słowniczek jako tabela</b></td><td>.csv</td></tr>
+</table>
+<p>Eksport do Worda zabiera ze sobą ustawienia strony, nagłówek, stopkę i przypisy, a numery
+stron stają się polami Worda, które nadal tam liczą.</p>
+<p>Eksport <b>EPUB</b> dzieli tekst na rozdziały w miejscach tytułów i buduje spis treści dla
+czytnika. Przed zapisem krótkie okno pyta o autora i o to, gdzie zaczynają się rozdziały —
+wszystkie pola są opcjonalne. Czcionkę, marginesy i tryb nocny ustala urządzenie czytające, a
+nie plik.</p>
+<p><b>Na czytnik e-booków:</b> skopiuj zapisany plik <b>.epub</b> do folderu urządzenia przez
+USB albo wyślij go przez Calibre. Na Kindle: wyślij plik jako załącznik na swój osobisty adres
+<b>@kindle.com</b> (widoczny na koncie Amazon, w sekcji „Zarządzaj treścią i urządzeniami”),
+albo upuść go w aplikacji Windows <b>Send to Kindle</b>.</p>
+<p>Eksport służy do przekazania dalej. Nie da się go wczytać z powrotem w całości — do tego
+służy kopia zapasowa.</p>`},
+
+ {t:"Historia wersji i punkty przywracania",k:"wersja;historia;punkt przywracania;cofnij;przywróć;wcześniej;odwróć",b:`
+<p>Podczas pisania program przechowuje <b>punkty przywracania</b> dokumentu, w którym jesteś —
+miejsca, do których można wrócić. To nie to samo co zapis: tekst trafia do przeglądarki na
+bieżąco i nie potrzebuje żadnego polecenia.</p>
+<p>Jeden powstaje sam w odstępie ustawionym w <b>Plik &rsaquo; Punkty przywracania &rsaquo;
+Automatycznie</b>, ale tylko gdy coś naprawdę się zmieniło. <b>Utwórz punkt przywracania</b>
+(<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) robi jeden od razu — warto przed przepisaniem
+fragmentu, który być może zechcesz odzyskać.</p>
+<p><b>Plik &rsaquo; Punkty przywracania &rsaquo; Historia wersji</b> wymienia je, od najnowszego
+do najstarszego, każdy z godziną i liczbą słów, żebyś rozpoznał ten, którego chcesz.
+<i>Przywróć</i> stawia tę wersję na miejsce bieżącego tekstu.</p>
+<p><b>Dwanaście ostatnich</b> jest przechowywanych na dokument; starsze odpadają. Leżą w
+przeglądarce obok dokumentu, więc podróżują wewnątrz kopii zapasowej — ale jej nie zastępują.
+Punkt przywracania pomaga zrobić krok wstecz podczas pisania; kopia zapasowa jest na dzień, w
+którym przeglądarki już nie będzie.</p>
+<p>Zobacz też: <a data-goto="Kopie zapasowe">Kopie zapasowe</a>.</p>`},
+
+ {t:"Kopie zapasowe",k:"kopia zapasowa;przywracanie;pakiet;zapisz wszystko",b:`
+<p>Kopię zapasową, w przeciwieństwie do eksportu, można wczytać z powrotem w całości.</p>
+<p>To też co innego niż <b>punkt przywracania</b>. Punkt przywracania to miejsce we własnej
+historii tego dokumentu, przechowywane w przeglądarce. Kopia zapasowa to plik na Twoim dysku z
+wszystkim naraz. Pierwsze służy do zrobienia kroku wstecz podczas pisania; druga jest na dzień,
+w którym przeglądarki już nie będzie.</p>
+<p><b>Plik &rsaquo; Zapisz wszystko</b> obejmuje to wszystko. Jego pierwsza pozycja — <i>Wszystko:
+dokumenty, notatki, słowniczki, ustawienia</i> — zapisuje cały stan programu do jednego pliku.
+<b>Wczytaj kopię zapasową</b> odczytuje ją z powrotem; pełna kopia zastępuje to, co jest, i
+pyta najpierw.</p>
+<p>Oferowane są też dwie kopie częściowe: ten dokument z przypiętymi do niego notatkami oraz
+same notatki i słowniczki. Kopie częściowe są dodawane do tego, co masz, zamiast to
+zastępować.</p>
+<p>Zrób jedną przed czymkolwiek drastycznym oraz przed przejściem na inny adres — przeglądarka
+trzyma swoją pamięć osobno dla każdego.</p>`},
+
+ {t:"Automatyczna kopia zapasowa",k:"automatyczna kopia zapasowa;google drive;dropbox;onedrive;chmura;synchronizacja",b:`
+<p>Trzecia karta w <b>Ustawienia &rsaquo; Zapisywanie</b> zapisuje cały stan programu do
+wybranego przez Ciebie pliku, sama, w odstępie, który ustawisz.</p>
+<p><b>Jeśli umieścisz ten plik w folderze Google Drive, Dropbox albo OneDrive, jest stamtąd
+przenoszony do chmury automatycznie.</b> Program nie potrzebuje żadnego konta ani dostępu do
+tych usług; klient synchronizacji robi resztę. Działa to z dowolnym dostawcą.</p>
+<p>Wybierz plik raz przez <b>Wybierz plik kopii zapasowej</b>. Karta pokazuje wtedy, kiedy
+zapisała ostatnio. <b>Zapisz teraz</b> zapisuje natychmiast.</p>
+<p>Nic nie jest zapisywane, gdy nic się nie zmieniło, więc plik w zsynchronizowanym folderze nie
+jest ruszany bez potrzeby.</p>
+<p>To wymaga Chrome albo Edge. Pozostałe przeglądarki są ograniczone do kopii robionych
+ręcznie.</p>`},
+
+ {t:"Wygląd",k:"motyw;schemat kolorów;wygląd;tryb ciemny;przewijanie maszyny do pisania",b:`
+<p><b>Ustawienia &rsaquo; Ogólne &rsaquo; Schemat kolorów</b> oferuje siedemnaście schematów z
+miniaturami podglądu na żywo — od bardzo jasnych Azur i Alabaster po Atrament, Cyjan, Bursztyn i
+Fosfor, kilka z nich zaczerpniętych z ekranów wczesnych edytorów tekstu.</p>
+<p>Dwa zachowania podczas pisania są w tym samym miejscu:</p>
+<ul>
+<li><b>Przewijanie maszyny do pisania</b> trzyma wiersz, w którym piszesz, na środku okna
+zamiast pozwalać mu schodzić na dół.</li>
+<li><b>Wyciszanie interfejsu</b> wygasza paski narzędzi podczas pisania i przywraca je, gdy
+przestajesz. Zaczyna wyłączone.</li>
+</ul>`},
+
+ {t:"Języki",k:"język;interfejs;język pisowni;tłumaczenie",b:`
+<p>Dwa języki ustawia się osobno w <b>Ustawienia &rsaquo; Ogólne</b>:</p>
+<ul>
+<li>Język <b>interfejsu</b> — menu i okna dialogowe. Dostępnych jest sześć: angielski,
+niemiecki, francuski, hiszpański, portugalski i polski.</li>
+<li>Język <b>pisowni</b> — to, z czym pracują sprawdzanie pisowni i autokorekta.</li>
+</ul>
+<p>Zmiana języka interfejsu pociąga za sobą język pisowni, o ile istnieje dla niego słownik.
+Zmiana samego języka pisowni zostawia menu bez zmian — to właśnie chcesz, gdy piszesz w jednym
+języku, a program masz w innym.</p>
+<p>Ta pomoc podąża za językiem interfejsu. Dla języków, w których jeszcze jej nie ma, wyświetla
+się wersja angielska z informacją.</p>`}]},
+
+{b:"Informacje",t:[
+ {t:"Skróty klawiszowe",k:"skróty;klawisze;klawiatura",b:`
+<p>Polecenia programu używają <kbd>Alt</kbd>+<kbd>Shift</kbd>, ponieważ same kombinacje z
+<kbd>Ctrl</kbd> są w większości już zajęte przez samą przeglądarkę. Skróty edycji, które
+przeglądarka zostawia w spokoju, zachowują swoje zwykłe klawisze.</p>
+<p class="hsec">Widoki</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Pisanie / Notatki / Słowniczek</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Tryb skupienia (<kbd>Esc</kbd> wychodzi)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td><td>Widok czytania</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td><td>Podgląd wydruku</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Konspekt</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></td><td>Notatka do dokumentu</td></tr>
+</table>
+<p class="hsec">Pisanie</p>
+<table class="hkeys">
+<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Pogrubienie / kursywa / podkreślenie</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Cofnij / ponów</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Lewo / środek / prawo</td></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Wcięcie / cofnięcie wcięcia (w tabelach: następna komórka)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Podział strony</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Wstaw lub edytuj link</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Spis treści</td></tr>
+</table>
+<p class="hsec">Dokumenty i notatki</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Nowy dokument</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nowa notatka</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Przypnij notatkę do zaznaczenia</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Wyszukaj w słowniczku</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Utwórz punkt przywracania</td></tr>
+</table>
+<p class="hsec">Wyszukiwanie i podgląd</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Szukaj / zamień</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Paleta poleceń</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Powiększ / pomniejsz / dopasuj do szerokości</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Drukuj</td></tr>
+<tr><td><kbd>F1</kbd></td><td>Ta pomoc</td></tr>
+<tr><td><kbd>/</kbd></td><td>Menu wstawiania, na pustym akapicie</td></tr>
+</table>`},
+
+ {t:"Paleta poleceń i menu /",k:"paleta poleceń;menu ukośnika;polecenia;szybko",b:`
+<p>Dwa sposoby, aby dotrzeć do polecenia bez przeszukiwania menu.</p>
+<p><b>Paleta poleceń</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) wymienia wszystko, co
+program potrafi. Wpisz kilka liter, aby to zawęzić, i naciśnij <kbd>Enter</kbd>. Wymienia też
+schematy kolorów oraz pierwsze z Twoich pojęć słowniczka, gotowe do wstawienia.</p>
+<p><b>Menu /</b> działa na początku pustego akapitu. Wpisz <code>/</code> i pojawi się krótka
+lista rzeczy wartych wstawienia — tytuły, listy, tabela, obraz, link, przypis, podział strony,
+dzisiejsza data. Strzałki wybierają, <kbd>Enter</kbd> wstawia, <kbd>Esc</kbd> zamyka.</p>`},
+
+ {t:"Gdy coś idzie nie tak",k:"problemy;rozwiązywanie problemów;nie zapisano;pamięć pełna;zniknęło",b:`
+<p class="hsec">Pasek stanu pokazuje „Nie zapisano” na czerwono</p>
+<p>Przeglądarka odmówiła zapisania czegokolwiek więcej, zwykle dlatego, że jej pamięć jest pełna
+— osadzone obrazy zapełniają ją szybko. Nic więcej nie jest zapisywane. Zrób od razu kopię
+zapasową, a potem usuń duże obrazy albo stare dokumenty.</p>
+<p class="hsec">Sprawdzanie pisowni nie startuje</p>
+<p>Jego słowniki muszą zostać pobrane, a to nie jest możliwe, gdy plik otwarto przez dwukrotne
+kliknięcie. Serwuj program spod adresu internetowego albo z serwera lokalnego.</p>
+<p class="hsec">Moje dokumenty zniknęły</p>
+<p>Pamięć jest trzymana osobno dla każdego adresu. Otwarcie programu spod innego adresu — albo z
+innej przeglądarki, albo z okna prywatnego — pokazuje pusty program, a nie utracony. Wróć do
+adresu, którego używałeś, albo wczytaj kopię zapasową.</p>
+<p class="hsec">„Plik na dysku” jest wyszarzony</p>
+<p>Czytanie i zapisywanie prawdziwych plików wymaga Chrome albo Edge. W innych przeglądarkach
+użyj zamiast tego <b>Utwórz kopię zapasową</b> i <b>Wczytaj kopię zapasową</b>.</p>`}]}
 ]
 };
 
 /* Zustand des Hilfefensters: offene Bücher, gewähltes Thema, Reiter, Suchtext */
 let helpTab="contents",helpOpen={},helpTopic=null,helpQuery="";
-const HELPSPRACHEN=["en","de","es","pt","fr"];
+const HELPSPRACHEN=["en","de","es","pt","fr","pl"];
 function helpSprache(){return HELPSPRACHEN.includes(S.settings.uiLang)?S.settings.uiLang:"en"}
 function helpBooks(){return HELPTEXTE[helpSprache()]}
 /* Wird eine andere Sprache angezeigt als die der Oberfläche, gehört das gesagt */
