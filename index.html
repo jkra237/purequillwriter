@@ -6342,6 +6342,14 @@ function drawWrite(){
   ed.addEventListener("input",()=>{dirty=true;queueSave();setTyping();markEmpty();
     drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
   ed.addEventListener("beforeinput",autoCorrectInput);
+  /* Bilder dekodiert der Browser asynchron - ihre Höhe ist beim ersten
+     paginate() (am Ende von drawWrite, oder per queuePaginate nach dem
+     Einfügen/Öffnen) oft noch 0. Ohne diese Nachzündung steht der Umbruch
+     dann daneben, bis irgendein Tastendruck ihn neu auslöst. Das load-Event
+     von <img> steigt nicht auf, daher die Capture-Phase. */
+  ed.addEventListener("load",e=>{
+    if(e.target.tagName==="IMG"&&S.mode==="write")queuePaginate();
+  },true);
   ed.addEventListener("keydown",e=>{
     if(slashOn){
       if(e.key==="ArrowDown"){e.preventDefault();slashIdx=Math.min(slashIdx+1,slashHits.length-1);slashOpen(currentSlashQuery());return}
