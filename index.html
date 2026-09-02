@@ -7482,6 +7482,11 @@ function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="ve
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
 
 /* ---- Export ---- */
+/* Die Desktop-Fassung (Electron) legt über preload.js ein kleines, geprüftes
+   API auf window.pqwDesktop. Fehlt es — also im Browser —, bleibt alles beim
+   Alten: jeder Zweig darauf ist ein Zugewinn, kein Ersatz. Deshalb steht hier
+   kein Bündel-Schalter, sondern eine Abfrage je Fähigkeit. */
+const PQWD=()=>window.pqwDesktop||null;
 /* Gemeinsam für TXT und Markdown: die Fußnoten stehen im Text als Marken, ihre
    Nummern richten sich nach der Reihenfolge des ersten Auftretens (wie im
    Editor, siehe renumberFootnotes) — der sichtbare Zifferntext in d.html kann
@@ -8890,18 +8895,48 @@ function exportEpub(){
     toast(tr("Als EPUB gespeichert"));
   };
 }
-/* Kein eigener PDF-Schreiber - der nutzt denselben Druckdialog wie
-   "Drucken", nur unter einem Namen, unter dem Leute tatsächlich danach
-   suchen. Chrome und Edge bieten dort "Als PDF speichern" als Ziel an;
-   der Hinweis-Toast erscheint vor dem Dialog, weil window.print() danach
-   blockiert, bis er geschlossen wird. */
+/* Im Browser gibt es keinen eigenen PDF-Schreiber - der nutzt denselben
+   Druckdialog wie "Drucken", nur unter einem Namen, unter dem Leute
+   tatsächlich danach suchen. Chrome und Edge bieten dort "Als PDF speichern"
+   als Ziel an; der Hinweis-Toast erscheint vor dem Dialog, weil window.print()
+   danach blockiert, bis er geschlossen wird.
+
+   Die Desktop-Fassung kann es besser und nimmt deshalb einen eigenen Weg -
+   siehe exportPdfDesktop(). */
 function exportPdf(){
+  const D=PQWD();
+  if(D&&D.savePdf)return exportPdfDesktop(D);
   flush();
   withPrintFootnotes(()=>{
     setPrintPage();
     toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
     setTimeout(()=>window.print(),500);
   });
+}
+/* Electron schreibt das PDF ohne Druckdialog direkt in die gewählte Datei.
+   Drei Dinge, die der Browserweg nicht sicherstellen kann:
+   - Hintergrundgrafiken sind immer an. Im Browserdialog ist das ein Haken,
+     den man vergisst - und dann drucken getönte Zitate und Tabellenköpfe leer.
+   - preferCSSPageSize übernimmt das @page-Format aus setPrintPage() exakt,
+     statt es der Papierauswahl des Druckertreibers zu überlassen.
+   - Aus den Überschriften entstehen PDF-Lesezeichen (und ein getaggtes,
+     barrierefreies PDF) - das, was Word "Textmarken anhand von Überschriften"
+     nennt.
+   Die Fußnotenliste wird wie beim Drucken vorher angehängt und danach wieder
+   entfernt; withPrintFootnotes() räumt zeitgesteuert auf und passt deshalb
+   nicht zu einem await. */
+async function exportPdfDesktop(D){
+  flush();
+  const d=doc(),ed=$("#editor");
+  const liste=footnoteListHtml(d,"fnprint");
+  let node=null;
+  if(liste&&ed){const w=document.createElement("div");w.innerHTML=liste;node=w.firstElementChild;ed.appendChild(node)}
+  setPrintPage();
+  try{
+    const r=await D.savePdf({suggestedName:safeName(tr(d.title))+".pdf"});
+    if(r&&r.ok)toast(tr("Gespeichert"));
+  }catch(e){toast(tr("Datei ließ sich nicht schreiben"))}
+  finally{if(node)node.remove()}
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -10726,8 +10761,26 @@ function contextMenu(e){
     if(a==="selall"){const r=document.createRange();r.selectNodeContents(ed);
       const s=getSelection();s.removeAllRanges();s.addRange(r)}
     if(a==="cut"||a==="copy"){document.execCommand(a);if(a==="cut"){dirty=true;queuePaginate()}}
+    /* Einfügen über das Kontextmenü. Im Browser bleibt nur der Umweg über
+       navigator.clipboard.readText() - reiner Text, die Formatierung geht
+       verloren, und je nach Browser scheitert der Zugriff ganz; dann steht der
+       Hinweis auf Strg+V da, der immer funktioniert.
+       Die Desktop-Fassung liest das HTML der Zwischenablage synchron und
+       schickt es durch dieselbe Bereinigung wie ein echtes Strg+V - Rechtsklick
+       einfügen erhält dort also die Formatierung. Synchron bewusst: ein await
+       zwischen Menüklick und execCommand würde die Schreibmarke verlieren. */
     if(a==="paste"){
-      if(navigator.clipboard&&navigator.clipboard.readText)
+      const D=PQWD();
+      if(D&&D.clipboardHtmlSync){
+        const c=D.clipboardHtmlSync()||{};
+        if(c.html){
+          const sauber=c.html.indexOf(PQW_MARK)>=0?cleanPasteOwn(c.html):cleanPasteForeign(c.html);
+          if(sauber)document.execCommand("insertHTML",false,sauber);
+          pasteTidy();
+        }else if(c.text)document.execCommand("insertText",false,c.text);
+        flush();dirty=true;commit();queuePaginate();
+      }
+      else if(navigator.clipboard&&navigator.clipboard.readText)
         navigator.clipboard.readText().then(t=>{document.execCommand("insertText",false,t);
           dirty=true;queuePaginate()}).catch(()=>toast(tr("Einfügen bitte mit Strg+V")));
       else toast(tr("Einfügen bitte mit Strg+V"))}
@@ -12890,12 +12943,21 @@ function spellLangName(k){
   const e=SPELL_LANGS.find(l=>l[0]===k);
   return e?tr(e[1]):k;
 }
+/* Wörterbücher liegen neben dem Programm. Eine Ausnahme baut die Desktop-
+   Fassung: das deutsche Wörterbuch steht unter der GPL (siehe
+   dict/de.LICENSE.txt) und darf deshalb nicht mit ins Store-Paket - es wird
+   beim ersten Prüfen von der Webadresse nachgeladen. Der Rückfall greift
+   allein über den fehlgeschlagenen Abruf, also ohne Schalter und ohne dass
+   die Browserfassung etwas davon merkt. */
+const DICT_REMOTE="https://jkra237.github.io/purequillwriter/dict/";
+async function dictText(lang,ext){
+  try{const r=await fetch("dict/"+lang+ext);if(r.ok)return await r.text()}catch(e){}
+  const r=await fetch(DICT_REMOTE+lang+ext);
+  if(!r.ok)throw new Error(r.status);
+  return await r.text();
+}
 async function spellLoad(lang,onProg){
-  const base="dict/"+lang;
-  const [aff,dic]=await Promise.all([
-    fetch(base+".aff").then(r=>{if(!r.ok)throw new Error(r.status);return r.text()}),
-    fetch(base+".dic").then(r=>{if(!r.ok)throw new Error(r.status);return r.text()})
-  ]);
+  const [aff,dic]=await Promise.all([dictText(lang,".aff"),dictText(lang,".dic")]);
   const eng=await spBuild(aff,dic,onProg);
   (S.userDict||[]).forEach(w=>eng.addWord(w));
   return eng;

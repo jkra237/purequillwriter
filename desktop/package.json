@@ -1,0 +1,66 @@
+{
+  "name": "purequillwriter-desktop",
+  "productName": "PureQuill Writer",
+  "version": "1.0.0",
+  "description": "PureQuill Writer as a Windows desktop application",
+  "author": "jkra237",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "prepare-app": "node scripts/prepare.mjs",
+    "start": "npm run prepare-app && electron .",
+    "dist": "npm run prepare-app && electron-builder --win nsis",
+    "dist:store": "npm run prepare-app && electron-builder --win appx",
+    "dist:all": "npm run prepare-app && electron-builder --win nsis appx"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.jkra237.purequillwriter",
+    "productName": "PureQuill Writer",
+    "copyright": "Copyright © jkra237",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/**/*"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "pqw",
+        "name": "PureQuill Document",
+        "description": "PureQuill Writer document",
+        "role": "Editor"
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "installerLanguages": ["de_DE", "en_US", "es_ES", "fr_FR", "it_IT", "pl_PL", "pt_BR"]
+    },
+    "appx": {
+      "identityName": "REPLACE-WITH-PARTNER-CENTER-IDENTITY",
+      "publisher": "CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER",
+      "publisherDisplayName": "REPLACE-WITH-PUBLISHER-DISPLAY-NAME",
+      "applicationId": "PureQuillWriter",
+      "displayName": "PureQuill Writer",
+      "backgroundColor": "#ffffff",
+      "languages": ["de-DE", "en-US", "es-ES", "fr-FR", "it-IT", "pl-PL", "pt-BR"]
+    }
+  }
+}
