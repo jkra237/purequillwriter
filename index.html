@@ -1158,7 +1158,18 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 @media print{
   body *{visibility:hidden!important}
   #editor,#editor *{visibility:visible!important}
-  #editor{position:absolute!important;left:0;top:0;width:100%;padding:0!important;
+  /* #editor bleibt im normalen Fluss (position:relative, NICHT absolute): nur
+     so bricht Chromium / printToPDF den Text selbst über @page um. Absolut
+     positioniert landete das ganze Dokument auf einer Seite und der Rest wurde
+     abgeschnitten (die frühere feste Pixelhöhe an #paper hatte den Umbruch
+     zufällig erzwungen — und dafür leere Seiten angehängt). Dafür muss jede
+     Höhen-, Overflow- und Flex-Begrenzung zwischen <body> und #editor weg, und
+     das Bildschirmgerüst (Seitenflächen, Lineal, Anfasser) verschwindet ganz. */
+  #pane,#sheet,.pagewrap,.papercol,#paper{display:block!important;position:static!important;
+    overflow:visible!important;height:auto!important;max-height:none!important;
+    width:auto!important;padding:0!important;margin:0!important;flex:none!important;background:none!important}
+  #pagelayer,#ruler,#hfhint,#hfedit,#hfgrip,#figrsz,#anchcol{display:none!important}
+  #editor{position:relative!important;width:auto!important;padding:0!important;
     min-height:0!important;--zoom:1!important;color:#000!important}
   /* Das Farbschema der App gehört nicht ins Dokument: Zitatrahmen und -tönung,
      Links, das Anführungszeichen-Pseudoelement und die Verzeichnis-Füllpunkte
@@ -1189,13 +1200,6 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   .glossterm{border-bottom:none!important}
   .toc-refresh,.toc-settings{display:none!important}
   .pageflag,.menu,.veil,.toast,.ruler,.focusbar,.readview,.pvwrap{display:none!important}
-  /* Das Bildschirmgerüst des Seitenumbruchs darf den Druck nicht mitbestimmen:
-     #pagelayer sind die Seitenflächen samt Kopf-/Fußzeilen-Vorschau (der Druck
-     hat dafür .printhf + @page), und #paper trägt eine feste Pixelhöhe aus
-     paginate(), die höher ist als der Fließtext — daraus wurden die leeren
-     Seiten hinter dem Text. */
-  #pagelayer{display:none!important}
-  #paper{height:auto!important;min-height:0!important}
   /* Arbeitsfarben und -flächen gehören nicht aufs Papier: die getönte
      Inhaltsverzeichnis-Fläche (der „blaue Balken"), Suchtreffer, Prüfwellen
      und die Akzentfarbe der Fußnotenzeichen. */
