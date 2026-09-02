@@ -1156,6 +1156,10 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 
 /* ---- Drucken ---- */
 @media print{
+  /* <body> selbst trägt die App-Hintergrundfarbe (var(--chrome)) — auf den
+     dunklen Schemata ein blaues Blatt im PDF, weil Electron printBackground
+     immer an hat. Papier ist weiß. */
+  html,body{background:#fff!important;color:#000!important}
   body *{visibility:hidden!important}
   #editor,#editor *{visibility:visible!important}
   /* #editor bleibt im normalen Fluss (position:relative, NICHT absolute): nur
