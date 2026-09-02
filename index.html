@@ -5164,9 +5164,29 @@ function save(){const s=JSON.stringify(S);mem=JSON.parse(s);
 const uid=()=>Math.random().toString(36).slice(2,9);
 function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],font:null,size:null}}
 
+/* Beim allerersten Start (load() liefert nichts) die Oberflächensprache aus der
+   Anzeigesprache des Systems vorbelegen. navigator.languages spiegelt sie — im
+   Browser wie in der WebView der Desktop-Fassung. Nur wenn PureQuill die Sprache
+   überhaupt kann, sonst Englisch. Eine spätere Wahl in den Einstellungen wird
+   dadurch nie überschrieben: der Zweig unten greift ausschließlich, solange es
+   keinen gespeicherten Zustand gibt. */
+function systemUiLang(){
+  const cands=navigator.languages&&navigator.languages.length
+    ?navigator.languages:[navigator.language||"en"];
+  for(const c of cands){
+    const code=String(c||"").toLowerCase().split(/[-_]/)[0];
+    if(UI_LANGS.some(l=>l[0]===code))return code;
+  }
+  return "en";
+}
+const SYS_LANG=systemUiLang();
+/* Prüfsprachen als schlichtes Literal — SPELL_LANGS steht weiter unten und ist
+   hier noch in der temporalen Totzone (siehe langAngeglichen weiter unten). */
+const SYS_SPELL_LANGS=["de","en","fr","es","pt","pl"];
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
-  settings:{font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"},
+  settings:{font:"Georgia",size:12,autosave:true,interval:30,
+    lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:"azur"},
   gsort:"alpha",marks:false,zoom:1.2,fitPage:false,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
@@ -5200,7 +5220,9 @@ if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="azur";
 if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
 if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"};
-if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
+/* Fehlt die Oberflächensprache ganz (sehr alter Zustand von vor dem Feld), gab
+   es nie eine Wahl — dann darf die Systemsprache einspringen wie beim Erststart. */
+if(S.settings&&!S.settings.uiLang)S.settings.uiLang=SYS_LANG;
 /* Die Prüfsprache lief früher unabhängig von der Oberfläche und blieb dadurch
    auf Englisch stehen, auch wenn die Oberfläche längst auf Deutsch lief — die
    Rechtschreibprüfung schlug dann die falsche Sprache vor. Einmalig
@@ -5209,7 +5231,7 @@ if(S.settings&&!S.settings.uiLang)S.settings.uiLang="en";
    (es steht weiter unten) — die Liste der Prüfsprachen deshalb hier noch
    einmal als schlichtes Literal, nicht über hasSpellDict(). */
 if(S.settings&&!S.langAngeglichen){
-  if(["de","en","fr","es","pl"].includes(S.settings.uiLang))S.settings.lang=S.settings.uiLang;
+  if(SYS_SPELL_LANGS.includes(S.settings.uiLang))S.settings.lang=S.settings.uiLang;
   S.langAngeglichen=true;
 }
 /* Schreibziel: standardmäßig aus; „base" ist der Stand der gewählten Einheit beim Einschalten */
