@@ -9327,6 +9327,21 @@ async function ladeDokumente(dateien){
   else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
 }
 function loadDocumentFile(){
+  /* Desktop: nativer Öffnen-Dialog, Dateien kommen gleich als Bytes zurück
+     und werden wie ein <input type=file> weitergereicht - so geht nichts
+     durch Chromiums File System Access API. */
+  const D=PQWD();
+  if(D&&D.openFiles){
+    const roh=e=>e.replace(/^./,"");
+    D.openFiles({multiple:true,filters:[
+      {name:tr("Alle unterstützten Dokumente"),extensions:DOKENDUNGEN.map(roh)},
+      ...DOKFORMATE.map(f=>({name:tr(f.n),extensions:f.e.map(roh)}))
+    ]}).then(files=>{
+      if(!files||!files.length)return;
+      ladeDokumente(files.map(x=>new File([x.bytes],x.name)));
+    }).catch(()=>{});
+    return;
+  }
   /* Chrome und Edge können benannte Formatgruppen im Dateidialog zeigen.
      Firefox und Safari kennen showOpenFilePicker nicht, und ohne HTTPS
      steht sie auch dort nicht bereit — dann der bisherige Weg mit einer
@@ -14464,6 +14479,16 @@ const DATEIART={
    null, wenn dieser Browser es nicht kann — dann bleibt es beim Download.
    Wirft AbortError, wenn abgebrochen wurde; das ist eine Antwort, kein Fehler. */
 async function dateiZiel(name){
+  /* Die Desktop-Fassung nimmt den nativen Speichern-Dialog: Chromiums File
+     System Access API schreibt in der Electron-Umsetzung einen Blob nicht
+     verlaesslich zurueck - eine so gespeicherte .docx kam bei Word als
+     beschaedigt an. {__pfad} ist die Marke fuer dateiAblegen. */
+  const D=PQWD();
+  if(D&&D.chooseSavePath){
+    const p=await D.chooseSavePath({suggestedName:name});
+    if(!p){const err=new Error("abgebrochen");err.name="AbortError";throw err}
+    return {__pfad:p};
+  }
   if(!hatDateien())return null;
   const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,"txt"])[1].toLowerCase();
   const [bez,mime]=DATEIART[ext]||["Datei","application/octet-stream"];
@@ -14472,6 +14497,7 @@ async function dateiZiel(name){
 }
 async function dateiAblegen(name,inhalt,mime,ziel){
   const b=inhalt instanceof Blob?inhalt:new Blob([inhalt],{type:mime||"text/plain"});
+  if(ziel&&ziel.__pfad){await PQWD().writeFile(ziel.__pfad,new Uint8Array(await b.arrayBuffer()));toast(tr("Gespeichert"));return true}
   if(ziel){const w=await ziel.createWritable();await w.write(b);await w.close();
     toast(tr("Gespeichert"));return true}
   const u=URL.createObjectURL(b);

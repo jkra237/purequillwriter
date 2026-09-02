@@ -97,6 +97,53 @@ ipcMain.on("pqw:clipboard", (e) => {
   e.returnValue = { html: clipboard.readHTML() || "", text: clipboard.readText() || "" };
 });
 
+/* Nativer Speichern-Dialog + Bytes schreiben. index.html ruft erst
+   chooseSave (Pfad holen, solange nichts gebaut ist), dann writeFile mit den
+   fertigen Bytes. Bewusst getrennt, damit der Ablauf dem Browserweg gleicht;
+   der native Dialog hat aber keine ablaufende Freigabe. */
+const SAVE_FILTERS = {
+  docx: { name: "Word-Dokument", extensions: ["docx"] },
+  epub: { name: "EPUB", extensions: ["epub"] },
+  pdf:  { name: "PDF", extensions: ["pdf"] },
+  html: { name: "Webseite", extensions: ["html", "htm"] },
+  md:   { name: "Markdown", extensions: ["md"] },
+  txt:  { name: "Text", extensions: ["txt"] },
+  csv:  { name: "Tabelle (CSV)", extensions: ["csv"] },
+  pqw:  { name: "PureQuill", extensions: ["pqw"] },
+  json: { name: "PureQuill", extensions: ["json", "pqw"] }
+};
+ipcMain.handle("pqw:chooseSave", async (e, opts = {}) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  const name = opts.suggestedName || "Dokument";
+  const ext = (name.match(/[.]([a-z0-9]+)$/i) || [, ""])[1].toLowerCase();
+  const filters = [];
+  if (SAVE_FILTERS[ext]) filters.push(SAVE_FILTERS[ext]);
+  filters.push({ name: "Alle Dateien", extensions: ["*"] });
+  const { canceled, filePath } = await dialog.showSaveDialog(win, { defaultPath: name, filters });
+  return canceled ? null : filePath;
+});
+ipcMain.handle("pqw:writeFile", async (e, filePath, bytes) => {
+  await fs.writeFile(filePath, Buffer.from(bytes));
+  return { ok: true };
+});
+
+/* Nativer Öffnen-Dialog: liefert die Dateien gleich als Bytes mit, damit
+   index.html sie wie einen <input type=file> behandeln kann. */
+ipcMain.handle("pqw:openFiles", async (e, opts = {}) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    properties: ["openFile", ...(opts.multiple ? ["multiSelections"] : [])],
+    filters: opts.filters || [{ name: "Alle Dateien", extensions: ["*"] }]
+  });
+  if (canceled) return [];
+  const out = [];
+  for (const fp of filePaths) {
+    const buf = await fs.readFile(fp);
+    out.push({ name: require("node:path").basename(fp), bytes: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
+  }
+  return out;
+});
+
 /* Ein zweiter Start (etwa per Doppelklick auf eine .pqw) holt das
    vorhandene Fenster nach vorn, statt ein zweites zu öffnen — sonst liefen
    zwei Programme auf demselben Browserspeicher. */
