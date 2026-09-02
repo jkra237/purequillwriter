@@ -1180,6 +1180,21 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   .glossterm{border-bottom:none!important}
   .toc-refresh,.toc-settings{display:none!important}
   .pageflag,.menu,.veil,.toast,.ruler,.focusbar,.readview,.pvwrap{display:none!important}
+  /* Das Bildschirmgerüst des Seitenumbruchs darf den Druck nicht mitbestimmen:
+     #pagelayer sind die Seitenflächen samt Kopf-/Fußzeilen-Vorschau (der Druck
+     hat dafür .printhf + @page), und #paper trägt eine feste Pixelhöhe aus
+     paginate(), die höher ist als der Fließtext — daraus wurden die leeren
+     Seiten hinter dem Text. */
+  #pagelayer{display:none!important}
+  #paper{height:auto!important;min-height:0!important}
+  /* Arbeitsfarben und -flächen gehören nicht aufs Papier: die getönte
+     Inhaltsverzeichnis-Fläche (der „blaue Balken"), Suchtreffer, Prüfwellen
+     und die Akzentfarbe der Fußnotenzeichen. */
+  #editor .toc{background:none!important;border:none!important;padding:0!important}
+  #editor .hit,#editor .hit.cur{background:none!important;color:inherit!important}
+  #editor .spellerr{text-decoration:none!important}
+  #editor .fn{color:#000!important}
+  #editor figure.fig.sel img{outline:none!important}
 }
 /* ---- Leseansicht: nur der Text, ohne jede Bedienoberfläche ---- */
 .readview{position:fixed;inset:0;z-index:80;display:none;overflow-y:auto;
