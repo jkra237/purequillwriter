@@ -12920,9 +12920,9 @@ const SLASH=[
   {n:"Überschrift 3",k:"ueberschrift h3 heading",f:()=>document.execCommand("formatBlock",false,"h3")},
   {n:"Aufzählung",k:"liste punkte bullet list",f:()=>document.execCommand("insertUnorderedList")},
   {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>document.execCommand("insertOrderedList")},
-  {n:"Tabelle",k:"tabelle table raster tabla",f:()=>setTimeout(tablePicker,20)},
-  {n:"Seitenumbruch",k:"umbruch seite break page salto",f:insertPageBreak},
-  {n:"Bild",k:"bild foto grafik image picture imagen",f:pickImage},
+  {n:"Tabelle",k:"tabelle table raster tabla tabela",f:()=>setTimeout(tablePicker,20)},
+  {n:"Seitenumbruch",k:"umbruch seite break page salto quebra",f:insertPageBreak},
+  {n:"Bild",k:"bild foto grafik image picture imagen imagem",f:pickImage},
   {n:"Link",k:"link url verweis",f:()=>setTimeout(linkDialog,20)},
   {n:"Notiz anheften",k:"notiz kommentar anker note pin",f:()=>setTimeout(linkSelection,20)},
   {n:"Fußnote",k:"fussnote fußnote footnote referenz reference",f:insertFootnote},
@@ -15627,12 +15627,569 @@ Vuelve a la dirección que usabas, o carga una copia de seguridad.</p>
 <p class="hsec">«Archivo en el disco» está en gris</p>
 <p>Leer y escribir archivos reales necesita Chrome o Edge. En otros navegadores, usa <b>Crear
 copia de seguridad</b> y <b>Cargar copia de seguridad</b> en su lugar.</p>`}]}
+],
+pt:[
+{b:"Primeiros passos",t:[
+ {t:"Sobre o PureQuill Writer",k:"sobre;visão geral;introdução;o que é",b:`
+<p>O PureQuill Writer é um processador de texto que funciona inteiramente no navegador. Não há
+nada para instalar e nada em que fazer login. Seu texto não é enviado a lugar nenhum.</p>
+<p>Ele foi feito para textos longos —manuscritos, relatórios, trabalhos de conclusão— e não para
+anotações curtas. Três coisas o distinguem de um editor de texto simples:</p>
+<ul>
+<li>Uma <b>página de verdade</b>, medida em milímetros, igual ao que sai da impressora.</li>
+<li>Um <b>quadro de avisos</b> para as notas que pertencem ao trabalho, mas não ao texto.</li>
+<li>Um <b>glossário</b> de termos recorrentes que podem ser destacados e consultados enquanto
+você escreve.</li>
+</ul>
+<p>Veja também: <a data-goto="As três visões">As três visões</a>.</p>`},
+
+ {t:"As três visões",k:"visões;modos;escrever;notas;glossário;alternar",b:`
+<p>Os três botões na borda esquerda alternam entre as visões. Cada uma mantém seu próprio
+estado, então você pode ir de uma para outra sem perder o lugar.</p>
+<table class="hkeys">
+<tr><td><b>Escrever</b></td><td><kbd>Alt</kbd>+<kbd>1</kbd></td><td>O documento na página.</td></tr>
+<tr><td><b>Notas</b></td><td><kbd>Alt</kbd>+<kbd>2</kbd></td><td>O quadro de notas.</td></tr>
+<tr><td><b>Glossário</b></td><td><kbd>Alt</kbd>+<kbd>3</kbd></td><td>Suas coleções de termos.</td></tr>
+</table>
+<p>As notas e as entradas do glossário pertencem ao programa, não a um documento específico:
+continuam disponíveis com qualquer documento que você tenha aberto.</p>`},
+
+ {t:"Seu primeiro documento",k:"novo documento;criar;começar;abas;renomear",b:`
+<p>Na primeira vez, o programa pergunta por um idioma e um esquema de cores e depois oferece um
+documento novo ou um arquivo existente.</p>
+<p><b>Para criar outro documento</b>, clique no <b>+</b> à direita da tira de abas ou escolha
+<b>Arquivo &rsaquo; Novo documento</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>). Primeiro é
+perguntado um formato de página; ele pode ser mudado a qualquer momento depois.</p>
+<p>Os documentos aparecem como abas na parte de cima. Arraste uma aba para reordená-la. Clique
+com o botão direito nela para renomeá-la ou dar uma cor. Fechar o último documento leva de volta
+à tela de boas-vindas.</p>
+<p>Cada documento mantém o próprio título, formato de página, fonte e espaçamento entre linhas.
+Mudar isso afeta apenas o documento em que você está.</p>`},
+
+ {t:"Onde seu trabalho fica guardado",k:"salvar;armazenamento;salvamento automático;navegador;trabalho perdido",b:`
+<p>Seu texto é salvo continuamente enquanto você escreve. Não há nenhum comando de salvar para
+lembrar, e a barra de status embaixo à direita sempre mostra a situação.</p>
+<p>O trabalho fica em <b>três lugares</b>, numerados em <b>Configurações &rsaquo;
+Salvamento</b>:</p>
+<ol>
+<li><b>Este navegador</b>: sempre, e tudo. Ligado ao endereço de onde você abriu o programa, e
+perdido se você limpar os dados do navegador.</li>
+<li><b>Um arquivo no disco</b>: opcional, e apenas o documento em que você está, junto com as
+notas fixadas nele. Configurado em <b>Arquivo &rsaquo; Salvar tudo &rsaquo; Vincular a um
+arquivo</b>; a partir daí, ele é gravado a cada salvamento. Em outro computador —ou depois que o
+armazenamento do navegador foi limpo— <b>Abrir um arquivo vinculado</b> traz de volta.</li>
+<li><b>Backup automático</b>: opcional, e todo o estado do programa: cada documento, nota,
+glossário e ajuste.</li>
+</ol>
+<p>Esse mesmo estado completo você pode gravar à mão em <b>Arquivo &rsaquo; Salvar tudo</b>. E
+dentro do lugar 1 o programa também mantém
+<a data-goto="Histórico de versões e pontos de restauração">pontos de restauração</a> por
+documento: pontos aos quais você pode voltar.</p>
+<p>Se a barra de status chegar a mostrar <b>Não salvo</b> em vermelho, o navegador se recusou a
+armazenar qualquer coisa a mais. Faça um backup na hora e libere espaço.</p>
+<p>Veja também: <a data-goto="Backup automático">Backup automático</a>.</p>`}]},
+
+{b:"Escrever",t:[
+ {t:"Digitação e formatação",k:"negrito;itálico;sublinhado;tachado;fonte;tamanho;cor;realce",b:`
+<p>A barra de ferramentas acima da página carrega a formatação de caractere. Tudo ali se aplica
+ao texto selecionado, ou ao que você digitar em seguida se nada estiver selecionado.</p>
+<table class="hkeys">
+<tr><td>Negrito</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
+<tr><td>Itálico</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
+<tr><td>Sublinhado</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Tachado</td><td>somente na barra de ferramentas</td></tr>
+</table>
+<p>O <b>tamanho da fonte</b> é uma caixa editável: escolha um tamanho da lista na seta ao lado,
+ou digite qualquer valor entre 4 e 200 e pressione <kbd>Enter</kbd>. As setas ajustam de um em
+um.</p>
+<p>A <b>cor do texto</b> e o <b>realce</b> abrem cada um uma paleta de cores prontas e um
+seletor para qualquer outra. A faixa abaixo do botão mostra o que será usado.</p>
+<p>O realce também escurece o texto que cobre, para que o trecho continue legível nos esquemas
+de cores escuros. Aplique o realce primeiro e a cor do texto depois, se quiser os dois.</p>
+<p><b>Sobrescrito e subscrito</b> ficam no menu Formato, em <b>Caractere</b>: para unidades,
+fórmulas e figuras que você queira compor à mão.</p>
+<p><b>Formato &rsaquo; Limpar formatação</b> tira a formatação de caractere e deixa as
+palavras.</p>`},
+
+ {t:"Parágrafos e títulos",k:"título;parágrafo;alinhamento;recuo;espaçamento entre linhas;espaço entre parágrafos",b:`
+<p>A caixa de <b>estilo de parágrafo</b> transforma o parágrafo atual em texto normal ou em um
+de três níveis de título. Os títulos são a base da estrutura de tópicos e do sumário, então
+use-os em vez de apenas deixar uma linha maior e em negrito.</p>
+<table class="hkeys">
+<tr><td>Alinhar à esquerda</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centralizar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Alinhar à direita</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justificar</td><td>somente na barra de ferramentas</td></tr>
+</table>
+<p><b>Para recuar um parágrafo</b>, pressione <kbd>Tab</kbd> no começo dele;
+<kbd>Shift</kbd>+<kbd>Tab</kbd> volta. Dentro de uma tabela, essas teclas movem entre
+células.</p>
+<p>O <b>espaçamento entre linhas</b> e o <b>espaço entre parágrafos</b> ficam em Formato e se
+aplicam ao documento inteiro, não a parágrafos isolados.</p>`},
+
+ {t:"Listas e citações",k:"lista;marcador;numerada;citação;bloco de citação;marcadores",b:`
+<p>Comece uma lista pela barra de ferramentas, por <b>Formato</b>, ou simplesmente digitando
+<code>- </code> ou <code>1. </code> no começo de um parágrafo vazio: ele vira lista assim que
+você digita o espaço.</p>
+<p><kbd>Enter</kbd> começa o próximo item; num item vazio, sai da lista. <kbd>Tab</kbd> recua um
+item um nível.</p>
+<p><b>Formato &rsaquo; Lista com marcadores</b> e <b>Lista numerada</b> também oferecem estilos
+de marcador: pontos, círculos, quadrados, traços e marcas de seleção; decimal, com parênteses,
+letras e algarismos romanos. O estilo se aplica à lista em que você está, então listas
+diferentes podem diferir.</p>
+<p>As <b>citações</b> vêm de <b>Formato &rsaquo; Citação</b> em três estilos: uma linha de
+acento, um bloco com fundo e uma marca tipográfica. Pressionar <kbd>Enter</kbd> duas vezes numa
+linha de citação vazia sai da citação.</p>`},
+
+ {t:"Tabelas",k:"tabela;linhas;colunas;células;linha de cabeçalho",b:`
+<p>Insira uma tabela pelo botão da barra de ferramentas, que abre uma grade sobre a qual você
+arrasta para escolher o tamanho, ou digitando <code>/tabela</code> no começo de um parágrafo
+vazio.</p>
+<p><kbd>Tab</kbd> passa para a próxima célula; na última célula, adiciona uma linha.
+<kbd>Shift</kbd>+<kbd>Tab</kbd> volta.</p>
+<p><b>Clique com o botão direito dentro de uma tabela</b> para os comandos de linhas e colunas:
+inserir acima ou abaixo, inserir à esquerda ou à direita, excluir linha, excluir coluna,
+excluir tabela e transformar a primeira linha em linha de cabeçalho.</p>
+<p><b>Para mudar a largura das colunas ou a altura das linhas</b>, arraste a borda entre duas
+células. As larguras são guardadas em porcentagem, então sobrevivem ao zoom e a uma mudança de
+formato de página.</p>`},
+
+ {t:"Imagens",k:"imagem;foto;legenda;texto alternativo;redimensionar",b:`
+<p>Insira uma imagem pela barra de ferramentas ou digite <code>/imagem</code>. O arquivo fica
+embutido no documento, então viaja com seus backups; tenha em mente que várias fotografias
+grandes enchem o armazenamento do navegador rapidamente. O mesmo vale para imagens que chegam
+com um documento do Word.</p>
+<p><b>Clique numa imagem</b> para selecioná-la. Aparece uma pequena barra com alinhamento, uma
+legenda, texto alternativo para leitores de tela e excluir. Arraste a alça redonda do canto
+para redimensionar.</p>
+<p>Uma legenda permite que a imagem seja contada num <b>índice de figuras</b>.</p>`},
+
+ {t:"Links e quebras de página",k:"link;hiperlink;url;quebra de página",b:`
+<p><b>Para inserir ou editar um link</b>, selecione o texto e pressione
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>, ou use o botão da barra de ferramentas. Os links
+abrem numa aba nova.</p>
+<p><b>Uma quebra de página</b> leva o que vem a seguir para uma página nova. Use o botão da
+barra de ferramentas, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd>, ou digite
+<code>/quebra</code>. Ela aparece como uma linha com rótulo enquanto você escreve e some ao
+imprimir.</p>`},
+
+ {t:"Correção automática ao digitar",k:"correção automática;aspas;hífen;travessão;maiúsculas;listas",b:`
+<p>Quatro correções são feitas enquanto você digita. As quatro vêm ligadas e podem ser
+desligadas individualmente em <b>Configurações &rsaquo; Correção automática</b>.</p>
+<table class="hkeys">
+<tr><td><b>Aspas</b></td><td>Aspas retas viram tipográficas.</td></tr>
+<tr><td><b>Travessão</b></td><td>Dois hifens viram um travessão.</td></tr>
+<tr><td><b>Maiúsculas</b></td><td>A primeira letra de uma frase fica maiúscula.</td></tr>
+<tr><td><b>Listas</b></td><td><code>- </code> ou <code>1. </code> começa uma lista.</td></tr>
+</table>
+<p>Quais aspas são usadas segue o <b>idioma de ortografia</b>, não o idioma dos menus: alemão e
+polonês abrem embaixo, francês e espanhol usam aspas angulares, inglês e português usam aspas
+altas. O apóstrofo de uma contração é reconhecido e deixado em paz.</p>
+<p>Cada correção pode ser desfeita com <kbd>Ctrl</kbd>+<kbd>Z</kbd> como qualquer outra tecla.</p>`}]},
+
+{b:"A página",t:[
+ {t:"Formato de página e margens",k:"formato de página;papel;a4;carta;margens;orientação;unidades",b:`
+<p><b>Arquivo &rsaquo; Formato de página</b> define o tamanho do papel, a orientação e as quatro
+margens do documento em que você está. Há seis formatos prontos —A4, carta DIN 5008, página de
+manuscrito, A5, livro de bolso e Carta EUA— e você pode inserir suas próprias medidas.</p>
+<p>As medidas ficam em milímetros, a menos que você mude para polegadas em <b>Configurações
+&rsaquo; Geral</b>.</p>
+<p><b>As margens esquerda e direita também podem ser arrastadas</b> na régua acima da
+página.</p>
+<p>A caixa <b>Como padrão</b> no diálogo faz com que os documentos novos comecem com este
+formato.</p>
+<p><b>Exibir &rsaquo; Margens de página</b> mostra as margens como linhas-guia finas na página.
+Elas servem apenas de orientação ao escrever e nunca são impressas.</p>`},
+
+ {t:"Cabeçalhos e rodapés",k:"cabeçalho;rodapé;título corrente;marcadores;distância da borda",b:`
+<p><b>Dê um duplo clique na margem superior ou inferior da página</b> para editar o cabeçalho ou
+o rodapé onde ele está. Aparece uma pequena barra com alinhamento, marcadores e a altura.</p>
+<p>Quatro marcadores são substituídos em cada página:</p>
+<table class="hkeys">
+<tr><td><code>{page}</code></td><td>o número da página</td></tr>
+<tr><td><code>{pages}</code></td><td>o número total de páginas</td></tr>
+<tr><td><code>{title}</code></td><td>o título do documento</td></tr>
+<tr><td><code>{date}</code></td><td>a data de hoje</td></tr>
+</table>
+<p><b>A altura da área do cabeçalho</b> é o limite entre ela e o corpo do texto. Arraste a alça
+ao longo desse limite, ou digite um valor na barra. Deixar o cabeçalho mais alto empurra o
+texto para baixo; ele nunca fica por baixo.</p>
+<p><b>A distância da borda do papel</b> —onde a própria linha fica— pertence ao formato de
+página e é definida em <b>Arquivo &rsaquo; Formato de página</b>, ao lado das margens.</p>
+<p><kbd>Shift</kbd>+<kbd>Enter</kbd> adiciona uma segunda linha. <kbd>Tab</kbd> pula entre
+cabeçalho e rodapé. <kbd>Esc</kbd> conclui.</p>`},
+
+ {t:"Números de página",k:"números de página;numeração;paginação",b:`
+<p><b>Formato &rsaquo; Números de página</b> liga e desliga um número de página simples no pé de
+cada página.</p>
+<p>Se você configurar um rodapé próprio contendo <code>{page}</code>, ele substitui o número
+simples: os dois nunca aparecem juntos.</p>`},
+
+ {t:"Zoom e largura da página",k:"zoom;ampliação;ajustar;largura da página",b:`
+<p>O controle de zoom fica embaixo à direita. Clique na porcentagem para escolher um nível ou
+inserir o seu.</p>
+<table class="hkeys">
+<tr><td>Aproximar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
+<tr><td>Afastar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Ajustar à largura da página</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
+</table>
+<p>Com <b>ajustar à largura da página</b> ativo, o zoom acompanha a janela quando você a
+redimensiona. Definir um nível à mão desliga isso.</p>`},
+
+ {t:"Impressão e visualização de impressão",k:"imprimir;pdf;visualização;exportar pdf",b:`
+<p><b>Visualização de impressão</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd>) mostra o
+documento exatamente como será impresso: números de página, cabeçalhos, margens e tudo. Ela é
+montada a partir das páginas que você já vê, então a visualização e o papel não podem diferir.
+<kbd>Esc</kbd> fecha.</p>
+<p><b>Para imprimir</b>, pressione <kbd>Ctrl</kbd>+<kbd>P</kbd> ou use <b>Arquivo &rsaquo;
+Imprimir</b>.</p>
+<p><b>Para fazer um PDF</b>, escolha <b>Arquivo &rsaquo; Salvar como &rsaquo; PDF</b>. Isso abre
+o mesmo diálogo de impressão; escolha <i>Salvar como PDF</i> como destino.</p>`}]},
+
+{b:"Trabalhar em textos longos",t:[
+ {t:"Notas no quadro",k:"notas;quadro;lembretes;cores",b:`
+<p>A visão <b>Notas</b> (<kbd>Alt</kbd>+<kbd>2</kbd>) é um quadro de cartões para tudo que
+pertence ao trabalho, mas não ao texto: perguntas em aberto, links de pesquisa, lembretes.</p>
+<p><b>Para criar uma nota</b>, use o botão à esquerda da barra de ferramentas ou pressione
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>: isso funciona enquanto você escreve também, sem
+mudar de visão. Uma nota nova abre com o cursor no título dela.</p>
+<p><b>Clique numa nota</b> para abri-la no painel lateral. <b>Arraste-a</b> para movê-la; as
+notas novas ocupam o primeiro espaço livre no canto superior esquerdo. O quadro rola quando
+você arrasta além da borda dele.</p>
+<p>Às notas pode-se dar uma de sete cores no painel no pé do editor.</p>`},
+
+ {t:"Fixar uma nota a um trecho",k:"fixar;âncora;vincular nota;notas na margem;comentário",b:`
+<p>Uma nota pode ser presa a um ou mais lugares do texto, do jeito que um comentário é.</p>
+<p><b>Selecione o trecho</b> e pressione <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, ou clique
+com o botão direito e escolha fixar uma nota. O trecho fica marcado, e a nota mostra a quantos
+lugares está presa.</p>
+<p>Com <b>Exibir &rsaquo; Notas na margem</b> ligado, as notas fixadas aparecem ao lado da
+página enquanto você escreve. Clicar numa pula para o lugar dela; se uma nota está presa a
+vários lugares, setas passam de um para outro.</p>
+<p><b>Exibir &rsaquo; Destaques no texto</b> desliga e volta a ligar a coloração dos trechos
+fixados. As conexões continuam do mesmo jeito: só ficam fora de vista, o que ajuda quando você
+quer julgar o texto em si e não o trabalho sobre ele. No sentido inverso, clicar com o botão
+direito num trecho fixado oferece <b>Destacar nota</b>, que realça a nota correspondente na
+barra lateral.</p>
+<p>Excluir o texto marcado não exclui a nota: ela só perde essa conexão.</p>`},
+
+ {t:"O glossário",k:"glossário;termos;definições;consultar;destacar termos",b:`
+<p>A visão <b>Glossário</b> (<kbd>Alt</kbd>+<kbd>3</kbd>) guarda termos que se repetem nos seus
+textos —personagens, lugares, vocabulário técnico—, cada um com uma definição e uma categoria
+opcional.</p>
+<p>As entradas são listadas com o termo à esquerda e a definição à direita, agrupadas por letra
+inicial ou por categoria, conforme a ordenação que você escolher.</p>
+<p><b>Exibir &rsaquo; Destacar termos do glossário</b> sublinha esses termos onde quer que
+apareçam no texto, com a definição ao passar o mouse.</p>
+<p><b>Para adicionar um termo enquanto você escreve</b>, selecione-o no texto e escolha <b>Criar
+como entrada de glossário</b> no menu do botão direito. É o caminho mais curto: não é preciso
+mudar de visão.</p>
+<p><b>Para consultar um termo enquanto você escreve</b>, pressione
+<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd>. Clicar num resultado insere o termo no cursor.</p>`},
+
+ {t:"Vários glossários",k:"glossários;coleções;associar;importar;exportar csv",b:`
+<p>Você pode manter mais de um glossário: um romance de fantasia e um livro didático não têm
+termos em comum, e misturá-los destacaria as palavras erradas nos dois.</p>
+<p>As abas no alto da visão Glossário mudam <b>qual glossário você está vendo</b>. Isso sozinho
+não muda mais nada: um documento mantém o glossário que lhe foi associado.</p>
+<p><b>Para decidir qual glossário um documento usa</b>, use a lista suspensa <b>Associado</b> no
+cabeçalho. Ela lista cada documento aberto com uma marca, e uma entrada para nenhuma associação.
+Só os termos do glossário associado são destacados naquele documento.</p>
+<p><b>Importar e exportar</b> fica no mesmo cabeçalho, sob o botão ⋮. Um glossário pode ser
+gravado como tabela (.csv) ou como backup (.json) e lido de volta de qualquer um dos dois: para
+o glossário que você está vendo, ou como um novo com o nome do arquivo. Os termos que já existem
+são pulados em vez de duplicados.</p>`},
+
+ {t:"Notas de rodapé",k:"nota de rodapé;referência;notas no pé da página",b:`
+<p><b>Ferramentas &rsaquo; Inserir nota de rodapé</b> coloca uma referência numerada no cursor e
+põe a nota no pé da página em que ela cai.</p>
+<p>As notas de rodapé se renumeram sozinhas enquanto você escreve e se movem com o texto ao qual
+pertencem. Excluir a referência remove a nota também.</p>`},
+
+ {t:"Sumário e índice de figuras",k:"sumário;índice;conteúdo;figuras",b:`
+<p><b>Ferramentas &rsaquo; Inserir sumário</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+monta uma lista a partir dos títulos do documento. Ele oferece a escolha de estilo, quantos
+níveis de título incluir, se mostra números de página e qual preenchimento usar entre a entrada
+e o número.</p>
+<p>O sumário se atualiza enquanto você escreve, e títulos individuais podem ser excluídos
+dele.</p>
+<p><b>Um índice de figuras</b> funciona do mesmo jeito para as imagens que têm legenda. Ele é
+oferecido quando você o ativa em <b>Configurações &rsaquo; Geral</b>.</p>`},
+
+ {t:"A estrutura de tópicos",k:"estrutura de tópicos;navegação;estrutura;pular para um título",b:`
+<p><b>Exibir &rsaquo; Estrutura de tópicos</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) abre
+um painel que lista cada título do documento. Clicar num pula para ele.</p>
+<p>Para um manuscrito longo, costuma ser o jeito mais rápido de se mover: mais rápido que rolar
+e mais rápido que buscar.</p>`},
+
+ {t:"Meta de escrita",k:"meta;contagem de palavras;objetivo;sessão",b:`
+<p><b>Ferramentas &rsaquo; Definir meta de escrita</b> põe um pequeno contador ao lado da
+contagem de palavras na barra de status —<i>640 / 1.000</i> com uma barra discreta.</p>
+<p>Ele conta o que você escreveu <b>desde que ativou a meta ou a redefiniu</b>, em todos os
+documentos, e sobrevive ao fechamento do programa. Nada acontece quando você atinge o objetivo,
+a não ser que a barra fica verde. Não há alarme.</p>
+<p>Clique no contador para mudar o objetivo, redefini-lo ou desligá-lo.</p>`},
+
+ {t:"Memorando do documento",k:"memorando;notas do documento;notas de enredo",b:`
+<p><b>Exibir &rsaquo; Memorando do documento</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
+abre um campo de texto simples no painel lateral, um por documento.</p>
+<p>Ele fica um nível acima do quadro: reflexões sobre o documento em si e não sobre um trecho
+—para onde o enredo precisa ir, o que ainda falta verificar. O conteúdo dele nunca aparece no
+texto nem numa exportação, mas viaja com os backups.</p>`}]},
+
+{b:"Revisar e finalizar",t:[
+ {t:"Verificação ortográfica",k:"ortografia;corretor;dicionário;idiomas;palavras próprias",b:`
+<p><b>Ferramentas &rsaquo; Verificação ortográfica</b> percorre o documento e lista o que não
+reconhece, com sugestões.</p>
+<p>O dicionário é baixado uma vez por idioma e fica pronto enquanto o programa está aberto. Há
+seis idiomas disponíveis: alemão, inglês, francês, espanhol, português e polonês. O idioma é
+definido em <b>Configurações &rsaquo; Geral</b>.</p>
+<p>Para cada palavra você pode aceitar uma sugestão, digitar a sua própria correção, ignorá-la
+uma vez ou adicioná-la às suas palavras próprias: essas são lembradas em todos os documentos.</p>
+<p><b>Os dicionários precisam de um endereço de verdade.</b> Se você abriu o arquivo com um
+duplo clique, o corretor não consegue baixá-los. Servir o programa a partir de um endereço da
+web ou de um servidor local resolve isso.</p>`},
+
+ {t:"Limpar o texto",k:"limpar;organizar;espaços duplos;espaço inquebrável;parágrafos vazios",b:`
+<p><b>Ferramentas &rsaquo; Limpar texto</b> encontra a pequena bagunça que se acumula num
+manuscrito longo e oferece removê-la, um item por vez ou tudo de uma vez:</p>
+<ul>
+<li>espaços duplos</li>
+<li>espaços no fim de uma linha</li>
+<li>espaços inquebráveis</li>
+<li>sequências de parágrafos vazios</li>
+</ul>
+<p>Até dois parágrafos vazios seguidos são tratados como espaçamento proposital e deixados em
+paz; só a partir do terceiro é que são reduzidos, e então para dois, não para um.</p>`},
+
+ {t:"Localizar e substituir",k:"localizar;busca;substituir;diferenciar maiúsculas;palavra inteira",b:`
+<table class="hkeys">
+<tr><td>Localizar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Substituir</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+</table>
+<p>Aparece uma barra no alto da página. Ela conta as ocorrências e passa por elas com
+<kbd>Enter</kbd> ou as setas. Duas opções restringem a busca: <b>diferenciar
+maiúsculas/minúsculas</b> e <b>palavra inteira</b>.</p>
+<p>Substituir age sobre a ocorrência atual; <b>Tudo</b> substitui todas elas. <kbd>Esc</kbd>
+fecha a barra.</p>`},
+
+ {t:"Modo de leitura e modo de foco",k:"modo de leitura;ler;sem distrações;modo de foco",b:`
+<p><b>Modo de leitura</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) esconde a interface
+inteira e mostra só o texto numa única coluna confortável. Não dá para digitar nele. As marcas
+de trabalho —âncoras de notas, sublinhados do glossário, rótulos de quebra de página— ficam
+escondidas, porque não fazem parte do texto.</p>
+<p>Use-o para julgar como o texto se lê, e não como ele está andando. <kbd>Esc</kbd> volta.</p>
+<p><b>Modo de foco</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd>) é outra coisa: ele escurece
+tudo menos a página e deixa você continuar escrevendo.</p>`}]},
+
+{b:"Arquivos, backups e configurações",t:[
+ {t:"Abrir arquivos existentes",k:"abrir;importar;docx;odt;rtf;markdown;html;txt",b:`
+<p><b>Arquivo &rsaquo; Carregar documento</b> abre arquivos escritos em outro programa. Cada um
+vira uma aba nova; vários podem ser abertos de uma vez.</p>
+<table class="hkeys">
+<tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.rtf</td><td>Rich Text</td></tr>
+<tr><td>.html, .htm</td><td>páginas da web</td></tr>
+<tr><td>.md</td><td>Markdown</td></tr>
+<tr><td>.txt</td><td>texto simples</td></tr>
+</table>
+<p>São mantidos os parágrafos, títulos, negrito, itálico, sublinhado, tachado, tabelas e os dois
+tipos de lista: as listas numeradas continuam numeradas, e o estilo delas (1., a., I.) e o
+aninhamento vêm junto.</p>
+<p>O Word costuma guardar essa formatação num <b>estilo</b> e não nas próprias palavras, e o
+PureQuill Writer resolve esses estilos ao ler. Por isso um documento cujo autor trabalhou com
+estilos de título e de corpo chega com a aparência que tinha no Word.</p>
+<p>A <b>configuração de página</b> vem com o documento: tamanho do papel, orientação, as quatro
+margens e a distância do cabeçalho e do rodapé até a borda. Um papel conhecido é reconhecido
+pelo nome, então um documento A4 chega como <i>A4</i> e não como uma medida sem nome.</p>
+<p><b>O cabeçalho, o rodapé e as notas de rodapé</b> também são mantidos. Os campos de número de
+página do Word viram os marcadores deste programa, então <code>{page}</code> continua contando
+em vez de chegar como o número fixo que ficou guardado no arquivo. A largura das colunas das
+tabelas é lida do documento e mantida como proporção, então sobrevive a uma mudança de tamanho
+de papel.</p>
+<p><b>As imagens também vêm</b>, na largura que tinham no Word. Elas ficam embutidas no
+documento, o que significa que ocupam o armazenamento do navegador: por isso, quando um arquivo
+traz muitas, você é avisado de quanto foi adicionado e recebe a oferta de um backup na hora. As
+imagens às quais um documento do Word apenas faz link, em vez de contê-las, não podem vir: elas
+vivem no computador de outra pessoa.</p>
+<p>O que não vem: comentários, controle de alterações, caixas de texto, formas e equações. As
+células de tabela mescladas viram células separadas. Os documentos divididos em várias seções
+mantêm a configuração da última, já que aqui um documento tem um formato de página e não um por
+seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>`},
+
+ {t:"Salvar como",k:"salvar;exportar;word;docx;epub;livro eletrônico;e-book;kindle;pdf;html;markdown;texto;csv",b:`
+<p><b>Arquivo &rsaquo; Salvar como</b> grava o documento como arquivo. O formato Word vem
+primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem este programa.</p>
+<table class="hkeys">
+<tr><td><b>Documento Word</b></td><td>.docx, com formatação</td></tr>
+<tr><td><b>Livro eletrônico</b></td><td>.epub, para dispositivos de leitura</td></tr>
+<tr><td><b>PDF</b></td><td>pelo diálogo de impressão</td></tr>
+<tr><td><b>Página da web</b></td><td>.html</td></tr>
+<tr><td><b>Markdown</b></td><td>.md</td></tr>
+<tr><td><b>Somente texto</b></td><td>.txt</td></tr>
+<tr><td><b>Glossário como tabela</b></td><td>.csv</td></tr>
+</table>
+<p>A exportação para Word leva junto a configuração de página, o cabeçalho, o rodapé e as notas
+de rodapé, e os números de página viram campos do Word que continuam contando lá.</p>
+<p>A exportação para <b>EPUB</b> divide o texto em capítulos pelos títulos e monta um sumário
+para o leitor. Antes de salvar, um breve diálogo pergunta pelo autor e por onde os capítulos
+começam; todos os campos são opcionais. A tipografia, as margens e o modo noturno são definidos
+pelo dispositivo de leitura, não pelo arquivo.</p>
+<p><b>Para um leitor de e-books:</b> copie o <b>.epub</b> salvo para a pasta do dispositivo por
+USB, ou envie-o pelo Calibre. Para um Kindle: mande o arquivo como anexo para o seu endereço
+pessoal <b>@kindle.com</b> (que aparece na sua conta da Amazon, em «Gerenciar conteúdo e
+dispositivos»), ou solte-o no aplicativo do Windows <b>Send to Kindle</b>.</p>
+<p>Uma exportação é para entregar. Ela não pode ser lida de volta com tudo intacto: para isso,
+use um backup.</p>`},
+
+ {t:"Histórico de versões e pontos de restauração",k:"versão;histórico;ponto de restauração;desfazer;restaurar;antes;reverter",b:`
+<p>Enquanto você escreve, o programa mantém <b>pontos de restauração</b> do documento em que
+você está: pontos aos quais você pode voltar. Não é o mesmo que salvar: seu texto vai para o
+navegador continuamente e não precisa de nenhum comando.</p>
+<p>Um é feito sozinho no intervalo definido em <b>Arquivo &rsaquo; Pontos de restauração
+&rsaquo; Automático</b>, mas só quando algo realmente mudou. <b>Criar um ponto de restauração</b>
+(<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) faz um na hora: vale a pena antes de reescrever um
+trecho que você talvez queira de volta.</p>
+<p><b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Histórico de versões</b> lista todos, do
+mais recente ao mais antigo, cada um com a hora e a contagem de palavras para você reconhecer o
+que procura. <i>Restaurar</i> põe aquela versão no lugar do texto atual.</p>
+<p>Os <b>doze últimos</b> são mantidos por documento; os mais antigos caem fora. Eles ficam no
+navegador junto do documento, então viajam dentro de um backup, mas não o substituem. Um ponto
+de restauração ajuda a dar um passo atrás enquanto você escreve; um backup é para o dia em que o
+navegador não estiver mais lá.</p>
+<p>Veja também: <a data-goto="Backups">Backups</a>.</p>`},
+
+ {t:"Backups",k:"backup;restaurar;pacote;salvar tudo",b:`
+<p>Um backup, ao contrário de uma exportação, pode ser lido de volta completo.</p>
+<p>Ele também é diferente de um <b>ponto de restauração</b>. Um ponto de restauração é um ponto
+no histórico próprio deste documento, guardado dentro do navegador. Um backup é um arquivo no
+seu disco com tudo de uma vez. O primeiro é para dar um passo atrás enquanto você escreve; o
+segundo é para o dia em que o navegador não estiver mais lá.</p>
+<p><b>Arquivo &rsaquo; Salvar tudo</b> abrange tudo isso. A primeira entrada dele —<i>Tudo:
+documentos, notas, glossários, ajustes</i>— grava todo o estado do programa num único arquivo.
+<b>Carregar backup</b> lê de volta; um backup completo substitui o que houver e pergunta
+antes.</p>
+<p>Dois backups parciais também são oferecidos: este documento com as notas fixadas nele, e as
+notas e os glossários por conta própria. Os backups parciais são adicionados ao que você tem em
+vez de substituí-lo.</p>
+<p>Faça um antes de qualquer coisa drástica, e antes de mudar para outro endereço: o navegador
+guarda o armazenamento dele separado para cada um.</p>`},
+
+ {t:"Backup automático",k:"backup automático;google drive;dropbox;onedrive;nuvem;sincronização",b:`
+<p>O terceiro cartão em <b>Configurações &rsaquo; Salvamento</b> grava todo o estado do programa
+num arquivo à sua escolha, sozinho, no intervalo que você definir.</p>
+<p><b>Se você puser esse arquivo numa pasta do Google Drive, Dropbox ou OneDrive, ele é levado
+para a nuvem a partir dali automaticamente.</b> O programa não precisa de conta nem de acesso a
+esses serviços; o cliente de sincronização faz o resto. Isso funciona com qualquer
+provedor.</p>
+<p>Escolha o arquivo uma vez com <b>Escolher arquivo de backup</b>. O cartão então mostra
+quando ele gravou pela última vez. <b>Gravar agora</b> grava na hora.</p>
+<p>Nada é gravado quando nada mudou, então um arquivo numa pasta sincronizada não é tocado sem
+necessidade.</p>
+<p>Isso precisa do Chrome ou do Edge. Os outros navegadores ficam limitados aos backups feitos
+à mão.</p>`},
+
+ {t:"Aparência",k:"tema;esquema de cores;aparência;modo escuro;rolagem de máquina de escrever",b:`
+<p><b>Configurações &rsaquo; Geral &rsaquo; Esquema de cores</b> oferece dezessete esquemas com
+miniaturas de visualização ao vivo, dos bem claros Azur e Alabastro até Tinta, Ciano, Âmbar e
+Fósforo, vários deles tirados das telas dos primeiros processadores de texto.</p>
+<p>Dois comportamentos de escrita ficam no mesmo lugar:</p>
+<ul>
+<li>A <b>rolagem de máquina de escrever</b> mantém a linha em que você escreve no meio da janela
+em vez de deixá-la descer até o fim.</li>
+<li><b>Recuar a interface</b> desvanece as barras de ferramentas enquanto você escreve e as traz
+de volta quando você para. Vem desligado.</li>
+</ul>`},
+
+ {t:"Idiomas",k:"idioma;interface;idioma de ortografia;tradução",b:`
+<p>Dois idiomas são definidos separadamente em <b>Configurações &rsaquo; Geral</b>:</p>
+<ul>
+<li>O idioma da <b>interface</b>: menus e diálogos. Há seis: inglês, alemão, francês, espanhol,
+português e polonês.</li>
+<li>O idioma de <b>ortografia</b>: com o que o corretor e a correção automática trabalham.</li>
+</ul>
+<p>Mudar o idioma da interface leva junto o de ortografia, desde que exista um dicionário para
+ele. Mudar só o de ortografia deixa os menus como estão, que é o que você quer quando escreve
+num idioma com o programa em outro.</p>
+<p>Esta ajuda segue o idioma da interface. Para os idiomas em que ela ainda não existe, é
+mostrada a versão em inglês com um aviso.</p>`}]},
+
+{b:"Referência",t:[
+ {t:"Atalhos de teclado",k:"atalhos;teclas;teclado",b:`
+<p>Os comandos do programa usam <kbd>Alt</kbd>+<kbd>Shift</kbd>, porque as combinações só com
+<kbd>Ctrl</kbd> estão, em boa parte, tomadas pelo próprio navegador. Os atalhos de edição que o
+navegador deixa em paz mantêm as teclas de sempre.</p>
+<p class="hsec">Visões</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Escrever / Notas / Glossário</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Z</kbd></td><td>Modo de foco (<kbd>Esc</kbd> sai)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd></td><td>Modo de leitura</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd></td><td>Visualização de impressão</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd></td><td>Estrutura de tópicos</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></td><td>Memorando do documento</td></tr>
+</table>
+<p class="hsec">Escrever</p>
+<table class="hkeys">
+<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Negrito / itálico / sublinhado</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Desfazer / refazer</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Esquerda / centro / direita</td></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Recuar / reduzir recuo (em tabelas: próxima célula)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Quebra de página</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Inserir ou editar um link</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Sumário</td></tr>
+</table>
+<p class="hsec">Documentos e notas</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Novo documento</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nova nota</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Fixar uma nota à seleção</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Consultar no glossário</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Criar um ponto de restauração</td></tr>
+</table>
+<p class="hsec">Localizar e ver</p>
+<table class="hkeys">
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Localizar / substituir</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Paleta de comandos</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Aproximar / afastar / ajustar à largura</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>P</kbd></td><td>Imprimir</td></tr>
+<tr><td><kbd>F1</kbd></td><td>Esta ajuda</td></tr>
+<tr><td><kbd>/</kbd></td><td>Menu de inserção, num parágrafo vazio</td></tr>
+</table>`},
+
+ {t:"Paleta de comandos e o menu /",k:"paleta de comandos;menu barra;comandos;rápido",b:`
+<p>Dois jeitos de chegar a um comando sem caçar pelos menus.</p>
+<p><b>A paleta de comandos</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>) lista tudo que o
+programa pode fazer. Digite algumas letras para restringir e pressione <kbd>Enter</kbd>. Ela
+também lista os esquemas de cores e o primeiro dos seus termos do glossário, pronto para
+inserir.</p>
+<p><b>O menu /</b> funciona no começo de um parágrafo vazio. Digite <code>/</code> e aparece uma
+lista curta de coisas que valem a pena inserir: títulos, listas, uma tabela, uma imagem, um
+link, uma nota de rodapé, uma quebra de página, a data de hoje. As setas escolhem,
+<kbd>Enter</kbd> insere, <kbd>Esc</kbd> descarta.</p>`},
+
+ {t:"Quando algo dá errado",k:"problemas;solução de problemas;não salvo;armazenamento cheio;sumiu",b:`
+<p class="hsec">A barra de status mostra «Não salvo» em vermelho</p>
+<p>O navegador se recusou a armazenar mais nada, normalmente porque o armazenamento dele está
+cheio: as imagens embutidas o enchem depressa. Nada mais está sendo gravado. Faça um backup na
+hora e depois tire imagens grandes ou documentos antigos.</p>
+<p class="hsec">A verificação ortográfica não começa</p>
+<p>Os dicionários dela precisam ser baixados, e isso não é possível quando o arquivo foi aberto
+com um duplo clique. Sirva o programa a partir de um endereço da web ou de um servidor
+local.</p>
+<p class="hsec">Meus documentos sumiram</p>
+<p>O armazenamento é guardado separado para cada endereço. Abrir o programa de outro endereço
+—ou de outro navegador, ou de uma janela anônima— mostra um programa vazio, não um perdido.
+Volte para o endereço que você usava, ou carregue um backup.</p>
+<p class="hsec">«Arquivo no disco» está esmaecido</p>
+<p>Ler e gravar arquivos de verdade precisa do Chrome ou do Edge. Em outros navegadores, use
+<b>Criar backup</b> e <b>Carregar backup</b> no lugar.</p>`}]}
 ]
 };
 
 /* Zustand des Hilfefensters: offene Bücher, gewähltes Thema, Reiter, Suchtext */
 let helpTab="contents",helpOpen={},helpTopic=null,helpQuery="";
-const HELPSPRACHEN=["en","de","es"];
+const HELPSPRACHEN=["en","de","es","pt"];
 function helpSprache(){return HELPSPRACHEN.includes(S.settings.uiLang)?S.settings.uiLang:"en"}
 function helpBooks(){return HELPTEXTE[helpSprache()]}
 /* Wird eine andere Sprache angezeigt als die der Oberfläche, gehört das gesagt */
