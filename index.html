@@ -6814,27 +6814,124 @@ function exportTxt(){
   const text=(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n";
   download(d.title+".txt",text.replace(/\r?\n/g,"\r\n"));
 }
-/* Eine exportierte Datei kennt die CSS-Variablen des Programms nicht. Die drei
-   Zitatstile werden deshalb einmal in feste Werte aufgelöst, mit den Farben des
-   gerade aktiven Schemas — und zwar alle drei, weil ein Dokument sie mischen
-   kann. Ohne das bekäme ein Zitat dort nur den Browserstandard: Einzug
-   beidseitig, sonst nichts. */
-function quoteExportCss(){
-  const cs=getComputedStyle(document.documentElement);
-  const v=n=>cs.getPropertyValue(n).trim();
-  return `blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;`+
-      `border-left:3px solid ${v("--stamp")};color:${v("--ink-soft")};font-style:italic}`+
-    `blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;border-radius:0 3px 3px 0;`+
-      `background:color-mix(in srgb,${v("--stamp")} 7%,${v("--paper")})}`+
-    `blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;border-left:none;position:relative}`+
-    `blockquote[data-qs="typo"]::before{content:'"';position:absolute;left:.3em;top:-.06em;`+
-      `font-size:2.1em;line-height:1;color:${v("--rule")};font-style:normal}`;
+/* Eine exportierte Datei kennt die CSS-Variablen des Programms nicht — jede
+   Farbe wird deshalb an einer unsichtbaren Sonde im aktiven Schema in einen
+   festen Wert aufgelöst. Der Stil deckt genau das ab, was Dokumentinhalt sein
+   kann (Überschriften, Absätze mit --ps, alle Listen-Markerstile, alle drei
+   Zitatstile, Tabellen, Abbildungen, Links, Fußnotenmarken, Inhaltsverzeichnis,
+   Seitenumbruch); ohne ihn bekäme der Text nur die Browservoreinstellung. */
+function exportCss(d){
+  const col=expr=>{
+    const p=document.createElement("span");
+    p.style.cssText="position:absolute;left:-9999px;top:0";p.style.color=expr;
+    document.body.appendChild(p);const c=getComputedStyle(p).color;p.remove();
+    return c||expr;
+  };
+  const paper=col("var(--paper)"),ink=col("var(--ink)"),soft=col("var(--ink-soft)"),
+        faint=col("var(--ink-faint)"),stamp=col("var(--stamp)"),rule=col("var(--rule)"),
+        chrome2=col("var(--chrome-2)");
+  const font=d.font||S.settings.font,size=d.size||S.settings.size,lh=lhOf(d),ps=psOf(d);
+  return `
+*{box-sizing:border-box}
+html{color-scheme:light}
+body{margin:0;background:${paper};color:${ink};
+  font-family:${font},"Georgia","Times New Roman",serif;font-size:${size}pt;line-height:${lh};
+  -webkit-text-size-adjust:100%}
+main{max-width:40em;margin:0 auto;padding:6vh 24px 16vh}
+h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.25;margin:1.1em 0 .4em}
+h1{font-size:1.7em}h2{font-size:1.32em}h3{font-size:1.12em}
+p{margin:0 0 ${ps}em}
+a{color:${stamp};text-underline-offset:2px}
+img{max-width:100%;height:auto}
+figure{margin:1.4em 0;text-align:center}figure img{display:inline-block}
+figure figcaption{font-size:.78em;color:${soft};margin-top:.4em}
+ul,ol{margin:0 0 ${ps}em;padding-left:1.6em}
+ul[data-ls="kreis"]{list-style-type:circle}
+ul[data-ls="quadrat"]{list-style-type:square}
+ul[data-ls="strich"]{list-style-type:"–  "}
+ul[data-ls="haken"]{list-style-type:"✓  "}
+ol[data-ls="alpha"]{list-style-type:lower-alpha}
+ol[data-ls="alphagross"]{list-style-type:upper-alpha}
+ol[data-ls="roemisch"]{list-style-type:upper-roman}
+ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
+blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;
+  border-left:3px solid ${stamp};color:${soft};font-style:italic}
+blockquote p{margin:0 0 .5em}blockquote p:last-child{margin:0}
+blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;font-style:normal;
+  border-radius:0 3px 3px 0;background:color-mix(in srgb,${stamp} 7%,${paper})}
+blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;border-left:none;position:relative}
+blockquote[data-qs="typo"]::before{content:'“';position:absolute;left:.1em;top:-.06em;
+  font-size:2.4em;line-height:1;color:${rule};font-style:normal}
+table{border-collapse:collapse;width:100%;margin:0 0 ${ps}em}
+td,th{border:1px solid ${faint};padding:.35em .5em;vertical-align:top;text-align:left}
+th{background:${chrome2};font-weight:600}
+.pgbreak{border:none;border-top:1px solid ${rule};margin:2.4em 0;height:0}
+.pgbreak::before{content:""}
+.glossterm,.anch{border-bottom:none;background:none}
+sup.fn a{color:${stamp};text-decoration:none;font-weight:600}
+.toc{border:1px solid ${rule};border-radius:6px;background:${chrome2};padding:12px 16px;margin:0 0 1.6em}
+.toc .toc-head{font-weight:700;margin-bottom:.4em}
+.toc .toc-list{display:flex;flex-direction:column}
+.toc .toc-list a{padding:2px 0;color:${ink};text-decoration:none}
+.toc .toc-list a:hover{color:${stamp}}
+.toc .toc-list a.toc-l2{padding-left:1.3em;font-size:.95em}
+.toc .toc-list a.toc-l3{padding-left:2.6em;font-size:.9em}
+.footnotes{margin-top:3em;padding-top:.8em;border-top:1px solid ${rule};font-size:.9em;color:${soft}}
+.footnotes h2{font-size:1em;margin:0 0 .5em;color:${ink}}
+.footnotes li{margin:0 0 .35em}
+.footnotes .fn-back{margin-left:.4em;text-decoration:none}
+@media (max-width:600px){main{padding:4vh 16px 12vh}}
+`;
 }
-function exportHtml(){flush();const d=doc();
-  download(d.title+".html",`<meta charset="utf-8"><title>${esc(d.title)}</title>`+
-    `<style>${quoteExportCss()}</style>`+
-    `<div style="max-width:660px;margin:40px auto;font-family:${d.font||S.settings.font},serif;`+
-    `font-size:${d.size||S.settings.size}pt;line-height:${lhOf(d)}">${d.html}${footnoteListHtml(d)}</div>`,"text/html")}
+/* d.html ist auf den Editor zugeschnitten: der Inhaltsverzeichnis-Block trägt
+   Bedien-Knöpfe und contenteditable-Inseln, die Fußnotenmarken zeigen ins
+   Leere. Für den Export werden die Knöpfe entfernt, die Marken zu echten
+   Ankerlinks, und die editierbaren Stellen festgestellt. Überschriften-IDs
+   bleiben — die Verzeichnislinks hängen daran. */
+function exportHtmlBody(d){
+  const box=document.createElement("div");box.innerHTML=d.html||"";
+  box.querySelectorAll("[contenteditable]").forEach(e=>e.removeAttribute("contenteditable"));
+  box.querySelectorAll("[data-toc],[data-tof]").forEach(toc=>{
+    toc.querySelectorAll(".toc-headbtns,.toc-leader,.toc-pg,.toc-num").forEach(x=>x.remove());
+    toc.removeAttribute("data-toc");toc.removeAttribute("data-tof");
+  });
+  const fnNum=fnNumMap(d),gesehen=new Set();
+  box.querySelectorAll("sup.fn[data-fn]").forEach(sup=>{
+    const k=fnNum.get(sup.dataset.fn);
+    if(!k){sup.remove();return}
+    const erste=!gesehen.has(k);gesehen.add(k);
+    sup.removeAttribute("data-fn");sup.removeAttribute("title");
+    sup.innerHTML=`<a ${erste?`id="fnref-${k}" `:""}href="#fn-${k}">${k}</a>`;
+  });
+  return box.innerHTML;
+}
+function exportFootnotesHtml(d){
+  const order=footnoteOrderFromHtml(d.html);
+  if(!order.length)return"";
+  const items=order.map((id,i)=>{
+    const f=(d.footnotes||[]).find(x=>x.id===id);
+    return `<li id="fn-${i+1}">${esc((f&&f.text)||"")} <a href="#fnref-${i+1}" class="fn-back">↩</a></li>`;
+  }).join("");
+  return `<section class="footnotes"><h2>${tr("Fußnoten")}</h2><ol>${items}</ol></section>`;
+}
+function exportHtml(){
+  flush();const d=doc();
+  const lang=S.settings.lang||S.settings.uiLang||"de";
+  const html=`<!doctype html>
+<html lang="${lang}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(tr(d.title))}</title>
+<style>${exportCss(d)}</style>
+</head>
+<body>
+<main>${exportHtmlBody(d)}${exportFootnotesHtml(d)}</main>
+</body>
+</html>
+`;
+  download(d.title+".html",html,"text/html");
+}
 function exportCsv(){
   const gid=S.mode==="gloss"?curGView():doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
