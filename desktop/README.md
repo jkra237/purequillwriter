@@ -7,7 +7,10 @@ zusammen. `app/`, `release/` und `node_modules/` liegen nicht im Git.
 
 ## Bauen
 
-```bash
+Jede Zeile einzeln — **`&&` funktioniert in Windows PowerShell 5.1 nicht**
+(erst ab PowerShell 7). Wer alles in eine Zeile will, nimmt dort `;`.
+
+```powershell
 cd desktop
 npm install
 npm start          # zum Ausprobieren
