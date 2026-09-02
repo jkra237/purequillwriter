@@ -1720,6 +1720,8 @@ en:{
   "Als EPUB exportieren":"Export as EPUB",
   "E-Book":"E-book",
   "Autor":"Author",
+  "Ränder":"Margins",
+  "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
   "Kapitel beginnen bei":"Start chapters at",
   "Überschrift 1":"Heading 1",
@@ -2437,6 +2439,8 @@ fr:{
   "Als EPUB exportieren":"Exporter en EPUB",
   "E-Book":"Livre numérique",
   "Autor":"Auteur",
+  "Ränder":"Marges",
+  "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
   "Kapitel beginnen bei":"Commencer les chapitres à",
   "Überschrift 1":"Titre 1",
@@ -3154,6 +3158,8 @@ es:{
   "Als EPUB exportieren":"Exportar como EPUB",
   "E-Book":"Libro electrónico",
   "Autor":"Autor",
+  "Ränder":"Márgenes",
+  "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
   "Kapitel beginnen bei":"Empezar capítulos en",
   "Überschrift 1":"Título 1",
@@ -3871,6 +3877,8 @@ pt:{
   "Als EPUB exportieren":"Exportar como EPUB",
   "E-Book":"Livro eletrónico",
   "Autor":"Autor",
+  "Ränder":"Margens",
+  "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
   "Kapitel beginnen bei":"Iniciar capítulos em",
   "Überschrift 1":"Título 1",
@@ -4588,6 +4596,8 @@ pl:{
   "Als EPUB exportieren":"Eksportuj jako EPUB",
   "E-Book":"E-book",
   "Autor":"Autor",
+  "Ränder":"Marginesy",
+  "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
   "Kapitel beginnen bei":"Rozpocznij rozdziały od",
   "Überschrift 1":"Nagłówek 1",
@@ -5312,6 +5322,8 @@ it:{
   "Als EPUB exportieren":"Esporta come EPUB",
   "E-Book":"E-book",
   "Autor":"Autore",
+  "Ränder":"Margini",
+  "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
   "Kapitel beginnen bei":"Inizia i capitoli a",
   "Überschrift 1 und 2":"Titolo 1 e 2",
@@ -8934,16 +8946,77 @@ function exportEpub(){
    danach blockiert, bis er geschlossen wird.
 
    Die Desktop-Fassung kann es besser und nimmt deshalb einen eigenen Weg -
-   siehe exportPdfDesktop(). */
-function exportPdf(){
-  const D=PQWD();
-  if(D&&D.savePdf)return exportPdfDesktop(D);
+   siehe exportPdfDesktop().
+
+   "Als PDF exportieren" zeigt vorher einen kleinen Dialog - wie beim EPUB,
+   nur schlanker, weil ein PDF viel weniger zu entscheiden gibt: Autor
+   (Metadaten, geteilt mit dem EPUB), im Desktop die Lesezeichen, und ein
+   Blick auf das Seitenformat mit dem Sprung zum Formatdialog. "Drucken"
+   (Strg+P) bleibt ohne Dialog. */
+function exportPdf(){ pdfDialog(); }
+function pdfDialog(){
   flush();
-  withPrintFootnotes(()=>{
-    setPrintPage();
-    toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
-    setTimeout(()=>window.print(),500);
-  });
+  const d=doc(), f=fmtOf(d), pdf=d.pdf||{};
+  const desktop=!!(PQWD()&&PQWD().savePdf);
+  const feld=(lab,ctl)=>`<div style="display:flex;align-items:center;gap:10px;margin:9px 0">
+    <label style="flex:0 0 132px;font-size:13px;color:var(--ink-soft)">${lab}</label>
+    <div style="flex:1;min-width:0">${ctl}</div></div>`;
+  const masse=`${esc(f.n||tr("Eigene Maße"))} · ${toUnit(f.w)}&times;${toUnit(f.h)}&nbsp;${unitAbbr()}`
+    +` · ${tr("Ränder")} ${f.m.map(toUnit).join("/")}`;
+  overlay(`<div class="modal"><h3>${tr("Als PDF exportieren")}</h3>
+    <div class="pad">
+      <p class="iohint">${esc(tr(d.title))}</p>
+      ${feld(tr("Autor"),`<input type="text" id="pdfAuthor" autocomplete="off" value="${esc(pdf.author||S.settings.author||"")}" placeholder="${tr("Vorname Nachname")}">`)}
+      ${desktop?`<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink-soft);margin:11px 0 4px">
+        <input type="checkbox" id="pdfOutline" ${pdf.outline!==false?"checked":""} style="width:auto;margin-top:2px">
+        ${tr("Lesezeichen aus Überschriften")}</label>`:""}
+      <div class="iosep"></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span class="iohint" style="margin:0;flex:1;min-width:170px">${masse}</span>
+        <button class="btn" id="pdfFmt">${tr("Seitenformat ändern")}</button>
+      </div>
+      ${desktop?"":`<div class="iosep"></div>
+        <p class="iohint" style="margin:0">${tr("Im Druckdialog Als PDF speichern als Ziel wählen")}</p>`}
+    </div>
+    <div class="rowend">
+      <button class="btn" id="pdfCancel">${tr("Abbrechen")}</button>
+      <button class="btn pri" id="pdfGo">${tr("Exportieren")}</button>
+    </div></div>`);
+  $("#pdfCancel").onclick=closeOvl;
+  $("#pdfFmt").onclick=()=>{closeOvl();changeFormat()};
+  $("#pdfGo").onclick=()=>{
+    const author=$("#pdfAuthor").value.trim();
+    const outline=$("#pdfOutline")?$("#pdfOutline").checked:true;
+    d.pdf={author,outline};
+    if(author)S.settings.author=author;
+    save();closeOvl();
+    if(desktop)return exportPdfDesktop(PQWD(),{author,outline});
+    /* window.print() setzt Dateiname und PDF-Titel aus document.title - dort
+       hängt sonst " — PureQuill Writer" dran. Fürs Drucken kurz den reinen
+       Titel setzen und danach zurückstellen. */
+    const prev=document.title, meta=pdfAuthorMeta(author);
+    document.title=tr(d.title)||"Ohne Titel";
+    const zurueck=()=>{document.title=prev;meta&&meta();window.removeEventListener("afterprint",zurueck)};
+    window.addEventListener("afterprint",zurueck);
+    setTimeout(zurueck,120000);   /* Notnagel, falls afterprint ausbleibt */
+    withPrintFootnotes(()=>{
+      setPrintPage();
+      toast(tr("Im Druckdialog Als PDF speichern als Ziel wählen"));
+      setTimeout(()=>window.print(),500);
+    });
+  };
+}
+/* Best effort: Chromium übernimmt <meta name="author"> als /Author ins PDF.
+   Gibt eine Aufräumfunktion zurück (Attribut leeren bzw. das selbst angelegte
+   Tag entfernen). */
+function pdfAuthorMeta(author){
+  if(!author)return null;
+  let m=document.querySelector('meta[name="author"]');
+  const eigen=!m;
+  if(!m){m=document.createElement("meta");m.setAttribute("name","author");document.head.appendChild(m)}
+  const vorher=m.getAttribute("content");
+  m.setAttribute("content",author);
+  return ()=>{if(eigen)m.remove();else if(vorher==null)m.removeAttribute("content");else m.setAttribute("content",vorher)};
 }
 /* Electron schreibt das PDF ohne Druckdialog direkt in die gewählte Datei.
    Drei Dinge, die der Browserweg nicht sicherstellen kann:
@@ -8957,18 +9030,23 @@ function exportPdf(){
    Die Fußnotenliste wird wie beim Drucken vorher angehängt und danach wieder
    entfernt; withPrintFootnotes() räumt zeitgesteuert auf und passt deshalb
    nicht zu einem await. */
-async function exportPdfDesktop(D){
+async function exportPdfDesktop(D,opts={}){
   flush();
   const d=doc(),ed=$("#editor");
   const liste=footnoteListHtml(d,"fnprint");
   let node=null;
   if(liste&&ed){const w=document.createElement("div");w.innerHTML=liste;node=w.firstElementChild;ed.appendChild(node)}
+  /* printToPDF liest Titel und Autor des PDF aus der Seite (<title> bzw.
+     <meta name="author">), nicht aus Optionen - hier kurz beides setzen. */
+  const prevTitle=document.title, metaWeg=pdfAuthorMeta(opts.author||"");
+  document.title=tr(d.title)||"Ohne Titel";
   setPrintPage();
   try{
-    const r=await D.savePdf({suggestedName:safeName(tr(d.title))+".pdf"});
+    const r=await D.savePdf({suggestedName:safeName(tr(d.title))+".pdf",
+      outline:opts.outline!==false});
     if(r&&r.ok)toast(tr("Gespeichert"));
   }catch(e){toast(tr("Datei ließ sich nicht schreiben"))}
-  finally{if(node)node.remove()}
+  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg()}
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -15601,7 +15679,9 @@ Seiten gebaut, die du ohnehin siehst, deshalb können Vorschau und Papier nicht 
 <p><b>Zum Drucken</b> drückst du <kbd>Strg</kbd>+<kbd>P</kbd> oder nimmst
 <b>Datei &rsaquo; Drucken</b>.</p>
 <p><b>Für ein PDF</b> wählst du <b>Datei &rsaquo; Speichern als &rsaquo; PDF-Dokument</b>.
-Das öffnet denselben Druckdialog; als Ziel wählst du dort <i>Als PDF speichern</i>.</p>`}]},
+Ein kleines Fenster fragt nach dem Autor und zeigt das Seitenformat, dann geht es
+weiter: im Browser in den Druckdialog (dort als Ziel <i>Als PDF speichern</i> wählen),
+in der App-Fassung gleich in den Speichern-Dialog.</p>`}]},
 
 {b:"Arbeit an längeren Texten",t:[
  {t:"Notizen auf der Pinnwand",k:"notizen;pinnwand;zettel;farben",b:`

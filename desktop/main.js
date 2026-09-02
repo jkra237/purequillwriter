@@ -84,7 +84,7 @@ ipcMain.handle("pqw:savePdf", async (e, opts = {}) => {
   const data = await e.sender.printToPDF({
     printBackground: true,
     preferCSSPageSize: true,
-    generateDocumentOutline: true,
+    generateDocumentOutline: opts.outline !== false,
     generateTaggedPDF: true
   });
   await fs.writeFile(filePath, data);
