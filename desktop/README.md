@@ -49,7 +49,10 @@ Electron-Menü würde die Alt-Taste abfangen — genau die, auf der das Tastensc
 
 ## Vor der ersten Store-Einreichung
 
-- [ ] `build/icon.ico` (256×256, mehrere Größen) aus `../icon.svg` erzeugen
+- [ ] `build/icon.ico` (256×256, mehrere Größen) aus `../icon.svg` erzeugen —
+      ohne das nimmt der Build das Electron-Standardsymbol
+- [ ] Zielarchitekturen festlegen: der Store will meist **x64 und arm64**;
+      `build.win.target[].arch` steht derzeit auf `x64`
 - [ ] In `package.json` unter `build.appx` die drei `REPLACE-…`-Werte durch die
       Angaben aus dem Partner Center ersetzen (`identityName`, `publisher`,
       `publisherDisplayName`)
