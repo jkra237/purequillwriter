@@ -1,0 +1,28 @@
+Italian spell-check word list for PureQuill Writer
+=================================================
+
+it.dic is a flat list of Italian word forms extracted from the surface
+forms (column 1) of the Morph-it! morphological lexicon, version 0.4.8.
+Elision fragments (l, d, c, un, dell, all, nell, ...) and a small list of
+common present-day/technical terms were added on top.
+
+  Morph-it! — A free morphological lexicon for the Italian language
+  Copyright (C) 2004-2009 Marco Baroni and Eros Zanchetta
+  http://sslmit.unibo.it/morphit
+
+Morph-it! is dual-licensed. This derived word list is distributed under
+the Creative Commons Attribution-ShareAlike 2.0 licence, the same terms
+Morph-it! itself offers:
+
+  You are free to copy, distribute, display and make derivative works,
+  including commercial use, provided that:
+   - the original authors are credited (Marco Baroni and Eros Zanchetta);
+   - derivative works are distributed only under a licence identical to
+     this one;
+   - the licence terms are made clear to others.
+
+  Full text: https://creativecommons.org/licenses/by-sa/2.0/
+
+it.aff (the affix file) contains no Morph-it! data — only a character
+set declaration, a suggestion-ordering hint and a few replacement rules —
+and is released into the public domain.

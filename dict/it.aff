@@ -1,0 +1,15 @@
+SET UTF-8
+TRY eaionlrtscdupmgvhbfzqàèìéòùïkwyxjEAIONLRTSCDUPMGVHBFZQ'
+ICONV 1
+ICONV ’ '
+REP 10
+REP à a'
+REP è e'
+REP é e'
+REP ì i'
+REP ò o'
+REP ù u'
+REP zz z
+REP z zz
+REP cq qu
+REP nn n
