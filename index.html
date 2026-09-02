@@ -1160,6 +1160,15 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor,#editor *{visibility:visible!important}
   #editor{position:absolute!important;left:0;top:0;width:100%;padding:0!important;
     min-height:0!important;--zoom:1!important;color:#000!important}
+  /* Das Farbschema der App gehört nicht ins Dokument: Zitatrahmen und -tönung,
+     Links, das Anführungszeichen-Pseudoelement und die Verzeichnis-Füllpunkte
+     lesen alle var(--…). Auf Papier gelten feste, drucksichere Werte — sonst
+     käme das PDF je nach Schema mit blassgelben Links oder (auf den dunklen
+     Schemata) dunklen Kästen heraus. Die Tönung selbst bleibt gewollt (siehe
+     exportPdfDesktop: Hintergrundgrafiken sind im Druck immer an). */
+  #editor{--paper:#fff;--chrome:#f0f0f0;--chrome-2:#f3f3f3;
+    --ink:#000;--ink-soft:#333;--ink-faint:#767676;
+    --rule:#999;--stamp:#1A4E8A;--on-stamp:#fff;--err:#B00}
   .printhf{display:block!important;visibility:visible!important;position:fixed;
     left:0;right:0;font-family:Georgia,serif;font-size:9pt;color:#000!important;
     white-space:pre-wrap}
