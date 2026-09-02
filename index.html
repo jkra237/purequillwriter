@@ -9476,7 +9476,7 @@ async function zipBytes(buf,name){
   }
   return null;
 }
-const xesc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const xesc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const xattr=(el,n)=>el.getAttribute("w:"+n)||el.getAttribute(n)||
   el.getAttributeNS("http://schemas.openxmlformats.org/wordprocessingml/2006/main",n);
 
