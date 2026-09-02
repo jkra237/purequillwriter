@@ -6628,25 +6628,191 @@ function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="ve
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
 
 /* ---- Export ---- */
+/* Gemeinsam für TXT und Markdown: die Fußnoten stehen im Text als Marken, ihre
+   Nummern richten sich nach der Reihenfolge des ersten Auftretens (wie im
+   Editor, siehe renumberFootnotes) — der sichtbare Zifferntext in d.html kann
+   veraltet sein, deshalb hier neu aus der Reihenfolge bilden. */
+function fnNumMap(d){
+  return new Map(footnoteOrderFromHtml(d.html).map((id,i)=>[id,i+1]));
+}
+function fnListLines(d,fmt){
+  return footnoteOrderFromHtml(d.html).map((id,i)=>{
+    const f=(d.footnotes||[]).find(x=>x.id===id);
+    return fmt(i+1,(((f&&f.text)||"").replace(/\s*\n\s*/g," ").trim()));
+  });
+}
+
+/* ---- Markdown ---- */
+const mdText=s=>String(s).replace(/[\\`*_\[\]<]/g,c=>"\\"+c);
+/* Ein Absatz, der mit #, >, -, + oder "1." beginnt, wäre sonst eine Überschrift,
+   ein Zitat oder ein Listenpunkt — das erste Zeichen wird entschärft. */
+const mdGuardLeading=s=>s.replace(/^(\s*)([#>+-]|\d+[.)])(\s)/,"$1\\$2$3");
+function mdInline(node,fnNum){
+  let out="";
+  node.childNodes.forEach(n=>{
+    if(n.nodeType===3){out+=mdText(n.nodeValue);return}
+    if(n.nodeType!==1)return;
+    const tag=n.tagName.toLowerCase();
+    if(tag==="br"){out+="  \n";return}
+    if(tag==="img"){out+=`![${mdText(n.getAttribute("alt")||"")}](${n.getAttribute("src")||""})`;return}
+    if(tag==="sup"&&n.classList.contains("fn")&&n.dataset.fn){out+="[^"+(fnNum.get(n.dataset.fn)||"?")+"]";return}
+    if(tag==="code"){out+="`"+(n.textContent||"")+"`";return}
+    const inner=mdInline(n,fnNum);
+    if(tag==="a"){
+      const href=n.getAttribute("href")||"";
+      out+=inner.trim()?`[${inner}](${/\s/.test(href)?`<${href}>`:href})`:inner;
+      return;
+    }
+    let mark="";
+    if(tag==="strong"||tag==="b"||n.style.fontWeight==="bold"||parseInt(n.style.fontWeight)>=600)mark="**";
+    else if(tag==="em"||tag==="i")mark="*";
+    else if(tag==="s"||tag==="strike"||tag==="del")mark="~~";
+    if(mark){
+      const m=inner.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      out+= m[2] ? m[1]+mark+m[2]+mark+m[3] : inner;
+    }else out+=inner;
+  });
+  return out;
+}
+function mdList(list,fnNum,depth){
+  const pad="  ".repeat(depth),ol=list.tagName.toLowerCase()==="ol";
+  let i=1;const lines=[];
+  [...list.children].forEach(li=>{
+    if(li.tagName.toLowerCase()!=="li")return;
+    const sub=li.querySelector(":scope > ul, :scope > ol");
+    const clone=li.cloneNode(true);
+    clone.querySelectorAll(":scope > ul, :scope > ol").forEach(x=>x.remove());
+    lines.push(pad+(ol?(i++)+". ":"- ")+mdInline(clone,fnNum).trim().replace(/\n/g," "));
+    if(sub)lines.push(mdList(sub,fnNum,depth+1));
+  });
+  return lines.join("\n");
+}
+function mdTable(table,fnNum){
+  const rows=[...table.rows];if(!rows.length)return"";
+  const body=rows.map(r=>[...r.cells].map(td=>mdInline(td,fnNum).replace(/\n+/g," ").replace(/\|/g,"\\|").trim()||" "));
+  const cols=Math.max(...body.map(r=>r.length));
+  body.forEach(r=>{while(r.length<cols)r.push(" ")});
+  const out=["| "+body[0].join(" | ")+" |","| "+body[0].map(()=>"---").join(" | ")+" |"];
+  body.slice(1).forEach(r=>out.push("| "+r.join(" | ")+" |"));
+  return out.join("\n");
+}
+function mdBlocks(root,fnNum,depth){
+  const out=[];
+  [...root.children].forEach(el=>{
+    const tag=el.tagName.toLowerCase();
+    if(el.classList&&el.classList.contains("toc"))return;
+    if(el.hasAttribute&&el.hasAttribute("data-toc"))return;
+    if(/^h[1-6]$/.test(tag)){
+      const s=mdInline(el,fnNum).trim();if(s)out.push("#".repeat(+tag[1])+" "+s);
+    }else if(tag==="blockquote"){
+      const inner=el.querySelector("p,ul,ol,blockquote,h1,h2,h3")
+        ? mdBlocks(el,fnNum,0).join("\n\n") : mdInline(el,fnNum).trim();
+      if(inner)out.push(inner.split("\n").map(l=>l?"> "+l:">").join("\n"));
+    }else if(tag==="ul"||tag==="ol"){
+      const l=mdList(el,fnNum,depth);if(l)out.push(l);
+    }else if(tag==="table"){
+      const t=mdTable(el,fnNum);if(t)out.push(t);
+    }else if(tag==="figure"){
+      const img=el.querySelector("img"),cap=el.querySelector("figcaption");
+      let s=img?`![${mdText(img.getAttribute("alt")||"")}](${img.getAttribute("src")||""})`:"";
+      if(cap&&cap.textContent.trim())s+=(s?"\n\n":"")+"*"+mdInline(cap,fnNum).trim()+"*";
+      if(s)out.push(s);
+    }else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3,blockquote")){
+      out.push(...mdBlocks(el,fnNum,depth));
+    }else{
+      const s=mdInline(el,fnNum).trim();if(s)out.push(mdGuardLeading(s));
+    }
+  });
+  return out;
+}
+function exportMd(){
+  flush();const d=doc();
+  const root=document.createElement("div");root.innerHTML=d.html||"";
+  const fnNum=fnNumMap(d);
+  let out=mdBlocks(root,fnNum,0).filter(Boolean).join("\n\n");
+  const fn=fnListLines(d,(n,t)=>`[^${n}]: ${t}`);
+  if(fn.length)out+=(out?"\n\n":"")+fn.join("\n");
+  download(d.title+".md",out.trim()+"\n","text/markdown");
+}
+
+/* ---- Nur-Text ----
+   Bewusst reduziert, aber strukturtreu: Überschriften unterstrichen, Zitate
+   und Listen erkennbar eingerückt, Tabellen als ausgerichtetes Raster. Zeilen-
+   umbrüche innerhalb eines Absatzes bleiben, Blöcke trennt eine Leerzeile —
+   nur so kommt der Text beim Wiedereinlesen als Absätze zurück. Ausgabe mit
+   CRLF, damit auch ältere Windows-Editoren die Zeilen trennen. */
+function txtInline(el,fnNum){
+  const t=el.cloneNode(true);
+  t.querySelectorAll("br").forEach(b=>b.replaceWith("\n"));
+  t.querySelectorAll("sup.fn[data-fn]").forEach(s=>s.replaceWith("["+(fnNum.get(s.dataset.fn)||"*")+"]"));
+  return (t.textContent||"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").replace(/[ \t]+$/gm,"").trim();
+}
+function txtList(list,fnNum,depth){
+  const pad="  ".repeat(depth),ol=list.tagName.toLowerCase()==="ol";
+  let i=1;const lines=[];
+  [...list.children].forEach(li=>{
+    if(li.tagName.toLowerCase()!=="li")return;
+    const sub=li.querySelector(":scope > ul, :scope > ol");
+    const clone=li.cloneNode(true);
+    clone.querySelectorAll(":scope > ul, :scope > ol").forEach(x=>x.remove());
+    lines.push(pad+(ol?(i++)+". ":"- ")+txtInline(clone,fnNum).replace(/\n/g," "));
+    if(sub)lines.push(txtList(sub,fnNum,depth+1));
+  });
+  return lines.join("\n");
+}
+function txtTable(table,fnNum){
+  const rows=[...table.rows];if(!rows.length)return"";
+  const body=rows.map(r=>[...r.cells].map(td=>txtInline(td,fnNum).replace(/\n+/g," ")));
+  const cols=Math.max(...body.map(r=>r.length));
+  body.forEach(r=>{while(r.length<cols)r.push("")});
+  const w=[];for(let c=0;c<cols;c++)w[c]=Math.min(40,Math.max(1,...body.map(r=>r[c].length)));
+  const fmt=r=>r.map((v,c)=>(v.length>w[c]?v.slice(0,w[c]):v.padEnd(w[c]))).join("  |  ").replace(/\s+$/,"");
+  const out=[fmt(body[0]),w.map(x=>"-".repeat(x)).join("--+--")];
+  body.slice(1).forEach(r=>out.push(fmt(r)));
+  return out.join("\n");
+}
+function txtBlocks(root,fnNum,depth){
+  const out=[];
+  [...root.children].forEach(el=>{
+    const tag=el.tagName.toLowerCase();
+    if(el.classList&&el.classList.contains("toc"))return;
+    if(el.hasAttribute&&el.hasAttribute("data-toc"))return;
+    if(/^h[1-6]$/.test(tag)){
+      const s=txtInline(el,fnNum);if(!s)return;
+      if(tag==="h1")out.push(s+"\n"+"=".repeat(Math.min(s.length,60)));
+      else if(tag==="h2")out.push(s+"\n"+"-".repeat(Math.min(s.length,60)));
+      else out.push(s);
+    }else if(tag==="blockquote"){
+      const inner=el.querySelector("p,ul,ol,blockquote")
+        ? txtBlocks(el,fnNum,0).join("\n\n") : txtInline(el,fnNum);
+      if(inner)out.push(inner.split("\n").map(l=>l?"> "+l:">").join("\n"));
+    }else if(tag==="ul"||tag==="ol"){
+      const l=txtList(el,fnNum,depth);if(l)out.push(l);
+    }else if(tag==="table"){
+      const t=txtTable(el,fnNum);if(t)out.push(t);
+    }else if(tag==="figure"){
+      const img=el.querySelector("img"),cap=el.querySelector("figcaption");
+      const alt=(img&&img.getAttribute("alt"))||"",capT=cap?txtInline(cap,fnNum):"";
+      out.push("["+tr("Bild")+(capT||alt?": "+(capT||alt):"")+"]");
+    }else if(tag==="p"||tag==="div"){
+      const s=txtInline(el,fnNum);if(s)out.push(s);
+    }else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3,blockquote")){
+      out.push(...txtBlocks(el,fnNum,depth));
+    }else{
+      const s=txtInline(el,fnNum);if(s)out.push(s);
+    }
+  });
+  return out;
+}
 function exportTxt(){
   flush();const d=doc();
-  /* Blöcke durch Leerzeilen trennen, Zeilenumbrüche innerhalb eines Absatzes behalten —
-     nur so kommt der Text beim Wiedereinlesen als Absätze zurück. */
-  const t=document.createElement("div");t.innerHTML=d.html||"";
-  t.querySelectorAll("br").forEach(b=>b.replaceWith("\n"));
-  const bloecke=[];
-  [...t.children].forEach(el=>{
-    if(el.classList&&el.classList.contains("toc"))return;
-    if(/^(UL|OL)$/.test(el.tagName))
-      el.querySelectorAll("li").forEach(li=>{const s=(li.textContent||"").trim();if(s)bloecke.push(s)});
-    else{const s=(el.textContent||"").replace(/\n{2,}/g,"\n").trim();if(s)bloecke.push(s)}
-  });
-  const fnOrder=footnoteOrderFromHtml(d.html);
-  if(fnOrder.length){
-    bloecke.push(tr("Fußnoten")+":");
-    fnOrder.forEach((id,i)=>{const f=(d.footnotes||[]).find(x=>x.id===id);bloecke.push((i+1)+". "+((f&&f.text)||""))});
-  }
-  download(d.title+".txt",(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n");
+  const root=document.createElement("div");root.innerHTML=d.html||"";
+  const fnNum=fnNumMap(d);
+  const bloecke=txtBlocks(root,fnNum,0).filter(Boolean);
+  const fn=fnListLines(d,(n,t)=>n+". "+t);
+  if(fn.length){bloecke.push(tr("Fußnoten")+":");bloecke.push(fn.join("\n"))}
+  const text=(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n";
+  download(d.title+".txt",text.replace(/\r?\n/g,"\r\n"));
 }
 /* Eine exportierte Datei kennt die CSS-Variablen des Programms nicht. Die drei
    Zitatstile werden deshalb einmal in feste Werte aufgelöst, mit den Farben des
@@ -6956,27 +7122,6 @@ function palette(){
 }
 
 /* ---- Dateimenü ---- */
-function exportMd(){
-  flush();const d=doc();const t=document.createElement("div");t.innerHTML=d.html||"";
-  let out="";
-  t.childNodes.forEach(n=>{
-    if(n.nodeType===3){out+=n.textContent+"\n\n";return}
-    if(n.nodeType===1&&n.classList&&n.classList.contains("toc"))return;
-    const tag=(n.tagName||"").toLowerCase(),tx=(n.innerText||"").trim();
-    if(!tx&&tag!=="br")return;
-    if(tag==="h1")out+="# "+tx+"\n\n";
-    else if(tag==="h2")out+="## "+tx+"\n\n";
-    else if(tag==="h3")out+="### "+tx+"\n\n";
-    else if(tag==="ul")n.querySelectorAll("li").forEach(li=>out+="- "+li.innerText.trim()+"\n"),out+="\n";
-    else if(tag==="ol"){let i=1;n.querySelectorAll("li").forEach(li=>out+=(i++)+". "+li.innerText.trim()+"\n");out+="\n"}
-    else out+=tx+"\n\n"});
-  const fnOrder=footnoteOrderFromHtml(d.html);
-  if(fnOrder.length){
-    out+="---\n\n";
-    fnOrder.forEach((id,i)=>{const f=(d.footnotes||[]).find(x=>x.id===id);out+="["+(i+1)+"] "+((f&&f.text)||"")+"\n"});
-  }
-  download(d.title+".md",out.trim()+"\n","text/markdown");
-}
 /* ================= DOCX-Export ================= */
 /* Echtes OOXML statt des alten HTML-in-.doc-Tricks, den Word zwar öffnet,
    aber inzwischen mit einer Kompatibilitätswarnung quittiert, weil die Datei
