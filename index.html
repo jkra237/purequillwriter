@@ -7236,8 +7236,8 @@ function commandList(){
   add("Dokument","Als TXT exportieren","",exportTxt);
   add("Dokument","Als Markdown exportieren","",exportMd);
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
-  add("Dokument","Als EPUB exportieren","",exportEpub);
   add("Dokument","Als PDF exportieren","",exportPdf);
+  add("Dokument","Als EPUB exportieren","",exportEpub);
   add("Dokument","Als HTML exportieren","",exportHtml);
 
   add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
@@ -9654,8 +9654,8 @@ function fileMenu(){
        für eine Zustandsanzeige der falsche Ort, weil man sie dort nicht sieht. */
     if(a==="expmore")return openSubMenu(b,[
       {a:"docw",label:tr("Word-Dokument"),k:".docx"},
-      {a:"epub",label:tr("E-Book"),k:".epub"},
       {a:"pdf",label:tr("PDF-Dokument"),k:".pdf"},
+      {a:"epub",label:tr("E-Book"),k:".epub"},
       {a:"html",label:tr("Webseite"),k:".html"},
       {a:"md",label:"Markdown",k:".md"},
       {a:"txt",label:tr("Nur Text"),k:".txt"},
