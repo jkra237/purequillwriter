@@ -11531,11 +11531,26 @@ function pageFlag(){
   fl.classList.add("on");clearTimeout(flagTimer);
   flagTimer=setTimeout(()=>fl.classList.remove("on"),1100);
 }
+/* Dasselbe Band wie hfBand(), nur in Millimetern und ohne Zoom - das ist das
+   Maß, das im Druck gilt. .printhf steht auf 9pt, wie hier gerechnet. */
+function hfBandMm(d,which){
+  const v=hfOf(d,which);
+  if(!v.on)return 0;
+  const f=fmtOf(d);
+  const zeilen=String(v.text||"").split("\n").length;
+  return (which==="hdr"?f.hd:f.fd) + (9*25.4/72)*1.35*zeilen + 2;
+}
 function setPrintPage(){
   let st=document.getElementById("printpage");
   if(!st){st=document.createElement("style");st.id="printpage";document.head.appendChild(st)}
-  const f=fmtOf(doc());
-  st.textContent=`@page{size:${f.w}mm ${f.h}mm;margin:${f.m[0]}mm ${f.m[1]}mm ${f.m[2]}mm ${f.m[3]}mm}`;
+  const d=doc(),f=fmtOf(d);
+  /* Der Seitenrand muss das Kopf-/Fußzeilenband mit aufnehmen, sonst läuft der
+     Text darunter. Genau dieselbe Rechnung wie paginate() am Bildschirm
+     (mt/mb = max(Rand, Band)) - nur zählt hier der @page-Rand, weil er auf
+     JEDER Seite gilt. Ein padding an #editor wirkte im Fließtext nur einmal,
+     also nur auf Seite 1; genau das war die Überlagerung ab Seite 2. */
+  const mt=Math.max(f.m[0],hfBandMm(d,"hdr")), mb=Math.max(f.m[2],hfBandMm(d,"ftr"));
+  st.textContent=`@page{size:${f.w}mm ${f.h}mm;margin:${mt}mm ${f.m[1]}mm ${mb}mm ${f.m[3]}mm}`;
   setPrintHF();
 }
 
@@ -11890,10 +11905,19 @@ function setPrintHF(){
   ft.innerHTML=f.on?`<div style="text-align:${f.align}">${hfText(f.text,1,pageCount,true)}</div>`:"";
   let st=document.getElementById("printhfstyle");
   if(!st){st=document.createElement("style");st.id="printhfstyle";document.head.appendChild(st)}
-  /* Mehrzeilige Kopf-/Fußzeilen brauchen entsprechend mehr Platz im Druck */
-  const zeilen=t=>String(t||"").split("\n").length;
-  st.textContent=`@media print{#editor{padding-top:${h.on?(4+3*zeilen(h.text))+"mm":"0"}!important;
-    padding-bottom:${f.on?(4+3*zeilen(f.text))+"mm":"0"}!important}}`;
+  /* Gemessen (Headless-Chrome, Bildmatrix aus dem Contentstream): ein
+     position:fixed-Element liegt im Druck am SATZSPIEGEL, nicht am Blattrand -
+     top:0 saß also genau auf der ersten Textzeile. Der Platz dafür steckt
+     jetzt im @page-Rand (siehe setPrintPage), und die Zeile wird mit einem
+     negativen Versatz aus dem Satzspiegel heraus in dieses Band geschoben:
+     hd/fd Millimeter von der Blattkante, wie am Bildschirm. */
+  const fmt=fmtOf(d);
+  const mt=Math.max(fmt.m[0],hfBandMm(d,"hdr")), mb=Math.max(fmt.m[2],hfBandMm(d,"ftr"));
+  st.textContent=`@media print{`+
+    `#editor{padding-top:0!important;padding-bottom:0!important}`+
+    (h.on?`#printhdr{top:${(fmt.hd-mt).toFixed(2)}mm!important;bottom:auto!important}`:"")+
+    (f.on?`#printftr{bottom:${(fmt.fd-mb).toFixed(2)}mm!important;top:auto!important}`:"")+
+    `}`;
 }
 function hfDialog(){
   const d=doc();
