@@ -1197,6 +1197,13 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor figure.fig.free{left:var(--fpx)!important;top:var(--fpy)!important;
     width:var(--fpw)!important;height:var(--fph)!important}
   .fhwrap{display:none!important}
+  /* Ein Bild darf nicht über die Seitenkante laufen — Chromium malt es sonst
+     angeschnitten auf beide Seiten. Seitenverhältnis bleibt am Bild selbst
+     (Breite in %, Höhe auto); height:auto ist hier nur der Schutz davor, dass
+     eine geerbte Höhe es stauchen kann. */
+  #editor figure,#editor img{break-inside:avoid;page-break-inside:avoid}
+  #editor figure.fig:not(.free) img{max-width:100%!important;height:auto!important}
+  #editor h1,#editor h2,#editor h3{break-after:avoid;page-break-after:avoid}
   #editor .pgbreak{break-after:page;page-break-after:always;border:none!important;
     height:0!important;visibility:hidden!important}
   #editor td,#editor th{border:1px solid #000!important}
@@ -9047,6 +9054,7 @@ async function exportPdfDesktop(D,opts={}){
   /* printToPDF liest Titel und Autor des PDF aus der Seite (<title> bzw.
      <meta name="author">), nicht aus Optionen - hier kurz beides setzen. */
   const prevTitle=document.title, metaWeg=pdfAuthorMeta(opts.author||"");
+  const zurueck=stripScreenPagination(ed);
   document.title=tr(d.title)||"Ohne Titel";
   setPrintPage();
   try{
@@ -9054,7 +9062,7 @@ async function exportPdfDesktop(D,opts={}){
       outline:opts.outline!==false});
     if(r&&r.ok)toast(tr("Gespeichert"));
   }catch(e){toast(tr("Datei ließ sich nicht schreiben"))}
-  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg()}
+  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg();zurueck()}
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -12265,13 +12273,29 @@ function footnoteListHtml(d,cls){
   return `<div class="${cls||""}" style="margin-top:2em;padding-top:.6em;border-top:1px solid #999">
     <b style="font-size:.85em">${tr("Fußnoten")}</b>${items}</div>`;
 }
+/* paginate() drückt Blöcke mit einem inline margin-top auf die nächste
+   BILDSCHIRM-Seite und setzt #editor eine minHeight über alle Seiten. Im Druck
+   bricht @page selbst um - dort sind diese Pixelwerte nur noch Löcher im Text
+   (ein Dokument kam mit fünfzehn solcher Lücken heraus). Vor dem Drucken
+   abräumen, danach paginate() neu rechnen lassen. */
+function stripScreenPagination(ed){
+  if(!ed)return ()=>{};
+  const mh=ed.style.minHeight;
+  [...ed.children].forEach(b=>{
+    b.style.marginTop="";
+    if(b.classList.contains("pgbreak"))b.style.height="";
+  });
+  ed.style.minHeight="";
+  return ()=>{ed.style.minHeight=mh;if(S.mode==="write")paginate()};
+}
 function withPrintFootnotes(fn){
   const d=doc(),ed=$("#editor");
   const html=footnoteListHtml(d,"fnprint");
   let node=null;
   if(html&&ed){const wrap=document.createElement("div");wrap.innerHTML=html;node=wrap.firstElementChild;ed.appendChild(node)}
+  const zurueck=stripScreenPagination(ed);
   fn();
-  if(node)setTimeout(()=>node.remove(),1200);
+  setTimeout(()=>{if(node)node.remove();zurueck()},1200);
 }
 /* ================= Inhaltsverzeichnis =================
    Ein echter, aber größtenteils nicht bearbeitbarer Block im Text (wie eine
@@ -14897,7 +14921,7 @@ function printPreview(){
   w.querySelector(".pvinner").appendChild(box);
   w.classList.add("on");w.scrollTop=0;pvOn=true;
   $("#pvClose").onclick=pvClose;
-  $("#pvPrint").onclick=()=>{setPrintPage();setTimeout(()=>window.print(),60)};
+  $("#pvPrint").onclick=()=>{withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})};
 }
 function pvClose(){
   const w=$("#pvwrap");if(w){w.classList.remove("on");w.innerHTML=""}
