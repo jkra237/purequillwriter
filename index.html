@@ -1202,8 +1202,24 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
     left:0;right:0;font-family:Georgia,serif;font-size:9pt;color:#000!important;
     white-space:pre-wrap}
   .printhf *{visibility:visible!important}
+  /* Gemessen (Headless-Chrome, Markierungen im PDF nachgerechnet): bei einem
+     position:fixed-Element im Druck sind NUR top:0 und bottom:0 verlässlich.
+     Ein negatives top (oder margin, oder transform) schiebt die Zeile nicht in
+     den Rand, sondern ans Seitenende — daher stand die Kopfzeile plötzlich in
+     der Fußzeile. Der Platz für die Bänder kommt deshalb aus dem Rahmen
+     unten, nicht aus einem Versatz. */
   #printhdr{top:0}
   #printftr{bottom:0}
+  /* Der Druckrahmen: thead/tfoot wiederholt Chromium auf jeder Seite UND
+     reserviert ihre Höhe im Fluss - das ist die einzige Konstruktion, die den
+     Fließtext zuverlässig aus dem Kopf-/Fußzeilenband heraushält. Die Zellen
+     bleiben leer; die sichtbaren Zeilen sind die fixierten .printhf, damit sie
+     auch auf der letzten Seite unten am Blatt stehen (eine tfoot rutscht dort
+     sonst direkt hinter den Text). */
+  .printframe{width:100%!important;border-collapse:collapse!important;
+    table-layout:fixed!important;margin:0!important}
+  .printframe>thead>tr>td,.printframe>tfoot>tr>td,.printframe>tbody>tr>td{
+    padding:0!important;border:none!important;background:none!important;vertical-align:top}
   .pageno::after{content:counter(page)}
   .anch{background:none!important;border-bottom:none!important}
   /* Im Druck gibt es keinen Seitenzwischenraum und keinen Zoom: dort gelten
@@ -9069,6 +9085,7 @@ async function exportPdfDesktop(D,opts={}){
      <meta name="author">), nicht aus Optionen - hier kurz beides setzen. */
   const prevTitle=document.title, metaWeg=pdfAuthorMeta(opts.author||"");
   const zurueck=stripScreenPagination(ed);
+  const rahmenWeg=printFrame(ed);
   document.title=tr(d.title)||"Ohne Titel";
   setPrintPage();
   try{
@@ -9076,7 +9093,7 @@ async function exportPdfDesktop(D,opts={}){
       outline:opts.outline!==false});
     if(r&&r.ok)toast(tr("Gespeichert"));
   }catch(e){toast(tr("Datei ließ sich nicht schreiben"))}
-  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg();zurueck()}
+  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg();rahmenWeg();zurueck()}
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -11544,12 +11561,12 @@ function setPrintPage(){
   let st=document.getElementById("printpage");
   if(!st){st=document.createElement("style");st.id="printpage";document.head.appendChild(st)}
   const d=doc(),f=fmtOf(d);
-  /* Der Seitenrand muss das Kopf-/Fußzeilenband mit aufnehmen, sonst läuft der
-     Text darunter. Genau dieselbe Rechnung wie paginate() am Bildschirm
-     (mt/mb = max(Rand, Band)) - nur zählt hier der @page-Rand, weil er auf
-     JEDER Seite gilt. Ein padding an #editor wirkte im Fließtext nur einmal,
-     also nur auf Seite 1; genau das war die Überlagerung ab Seite 2. */
-  const mt=Math.max(f.m[0],hfBandMm(d,"hdr")), mb=Math.max(f.m[2],hfBandMm(d,"ftr"));
+  /* Der @page-Rand endet dort, wo die Kopf-/Fußzeile steht (hd/fd vom
+     Blattrand) - denn die fixierten Zeilen können nur an der Kante des
+     Satzspiegels sitzen (top:0/bottom:0, siehe Druck-CSS). Den Rest bis zum
+     Textanfang, also max(Seitenrand, Band) - hd, reserviert der Druckrahmen
+     mit thead/tfoot auf jeder Seite (printFrame). */
+  const mt=hfOf(d,"hdr").on?f.hd:f.m[0], mb=hfOf(d,"ftr").on?f.fd:f.m[2];
   st.textContent=`@page{size:${f.w}mm ${f.h}mm;margin:${mt}mm ${f.m[1]}mm ${mb}mm ${f.m[3]}mm}`;
   setPrintHF();
 }
@@ -11905,19 +11922,40 @@ function setPrintHF(){
   ft.innerHTML=f.on?`<div style="text-align:${f.align}">${hfText(f.text,1,pageCount,true)}</div>`:"";
   let st=document.getElementById("printhfstyle");
   if(!st){st=document.createElement("style");st.id="printhfstyle";document.head.appendChild(st)}
-  /* Gemessen (Headless-Chrome, Bildmatrix aus dem Contentstream): ein
-     position:fixed-Element liegt im Druck am SATZSPIEGEL, nicht am Blattrand -
-     top:0 saß also genau auf der ersten Textzeile. Der Platz dafür steckt
-     jetzt im @page-Rand (siehe setPrintPage), und die Zeile wird mit einem
-     negativen Versatz aus dem Satzspiegel heraus in dieses Band geschoben:
-     hd/fd Millimeter von der Blattkante, wie am Bildschirm. */
+  /* Die fixierten Zeilen bleiben auf top:0/bottom:0 (alles andere ist im
+     Druck unzuverlässig, siehe Druck-CSS). Hier steht nur, wie hoch die
+     Platzhalter im Druckrahmen sein müssen, damit der Text unterhalb des
+     Bandes beginnt: max(Seitenrand, Band) - hd bzw. - fd. */
   const fmt=fmtOf(d);
-  const mt=Math.max(fmt.m[0],hfBandMm(d,"hdr")), mb=Math.max(fmt.m[2],hfBandMm(d,"ftr"));
+  const kopf=h.on?Math.max(0,Math.max(fmt.m[0],hfBandMm(d,"hdr"))-fmt.hd):0;
+  const fuss=f.on?Math.max(0,Math.max(fmt.m[2],hfBandMm(d,"ftr"))-fmt.fd):0;
   st.textContent=`@media print{`+
     `#editor{padding-top:0!important;padding-bottom:0!important}`+
-    (h.on?`#printhdr{top:${(fmt.hd-mt).toFixed(2)}mm!important;bottom:auto!important}`:"")+
-    (f.on?`#printftr{bottom:${(fmt.fd-mb).toFixed(2)}mm!important;top:auto!important}`:"")+
+    `.printframe>thead>tr>td{height:${kopf.toFixed(2)}mm!important}`+
+    `.printframe>tfoot>tr>td{height:${fuss.toFixed(2)}mm!important}`+
     `}`;
+}
+/* Baut den Druckrahmen um #editor: eine Tabelle, deren thead/tfoot Chromium
+   auf jeder Seite wiederholt und deren Höhe es im Fluss freihält. Gibt die
+   Umkehrfunktion zurück. Die Schreibmarke wird gesichert, weil das Verschieben
+   von #editor die Auswahl verwirft. */
+function printFrame(ed){
+  if(!ed||!ed.parentNode)return ()=>{};
+  const sel=getSelection();
+  const merk=sel&&sel.rangeCount?sel.getRangeAt(0).cloneRange():null;
+  const tbl=document.createElement("table");
+  tbl.className="printframe";
+  tbl.innerHTML="<thead><tr><td></td></tr></thead><tfoot><tr><td></td></tr></tfoot>"+
+                "<tbody><tr><td></td></tr></tbody>";
+  const marke=document.createComment("editor");
+  ed.parentNode.insertBefore(marke,ed);
+  ed.parentNode.insertBefore(tbl,ed);
+  tbl.querySelector("tbody td").appendChild(ed);
+  return ()=>{
+    marke.parentNode.insertBefore(ed,marke);
+    marke.remove();tbl.remove();
+    if(merk){try{sel.removeAllRanges();sel.addRange(merk)}catch(e){}}
+  };
 }
 function hfDialog(){
   const d=doc();
@@ -12332,8 +12370,9 @@ function withPrintFootnotes(fn){
   let node=null;
   if(html&&ed){const wrap=document.createElement("div");wrap.innerHTML=html;node=wrap.firstElementChild;ed.appendChild(node)}
   const zurueck=stripScreenPagination(ed);
+  const rahmenWeg=printFrame(ed);
   fn();
-  setTimeout(()=>{if(node)node.remove();zurueck()},1200);
+  setTimeout(()=>{if(node)node.remove();rahmenWeg();zurueck()},1200);
 }
 /* ================= Inhaltsverzeichnis =================
    Ein echter, aber größtenteils nicht bearbeitbarer Block im Text (wie eine
