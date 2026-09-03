@@ -1160,8 +1160,14 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      dunklen Schemata ein blaues Blatt im PDF, weil Electron printBackground
      immer an hat. Papier ist weiß. */
   html,body{background:#fff!important;color:#000!important}
+  html,body{height:auto!important;overflow:visible!important}
   body *{visibility:hidden!important}
   #editor,#editor *{visibility:visible!important}
+  /* Alles neben dem Weg zum Editor muss WEG, nicht nur unsichtbar:
+     visibility:hidden lässt Breite und Höhe im Fluss stehen. */
+  .topbar,.rail,#tools,#status,#outline,#side,#findbar,#pageflag,#anchcol,#ruler,
+  #pagelayer,#hfhint,#hfedit,#hfgrip,#figrsz,
+  #imgbar,#pastebar,#hfbar,#focusbar,#ovl,#readview,#pvwrap,#toast{display:none!important}
   /* #editor bleibt im normalen Fluss (position:relative, NICHT absolute): nur
      so bricht Chromium / printToPDF den Text selbst über @page um. Absolut
      positioniert landete das ganze Dokument auf einer Seite und der Rest wurde
@@ -1169,11 +1175,19 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      zufällig erzwungen — und dafür leere Seiten angehängt). Dafür muss jede
      Höhen-, Overflow- und Flex-Begrenzung zwischen <body> und #editor weg, und
      das Bildschirmgerüst (Seitenflächen, Lineal, Anfasser) verschwindet ganz. */
-  #pane,#sheet,.pagewrap,.papercol,#paper{display:block!important;position:static!important;
-    overflow:visible!important;height:auto!important;max-height:none!important;
-    width:auto!important;padding:0!important;margin:0!important;flex:none!important;background:none!important}
-  #pagelayer,#ruler,#hfhint,#hfedit,#hfgrip,#figrsz,#anchcol{display:none!important}
-  #editor{position:relative!important;width:auto!important;padding:0!important;
+  /* Der ganze Weg von <body> bis #editor: keine Flexbox, keine eigene Breite,
+     kein Overflow, keine Höhe. .app/.body/.main/.work sind Flex-Container —
+     als Flex-Elemente richten sich ihre Kinder nach max-content, wodurch
+     #editor rund dreimal so breit wurde wie die Seite und ein Bild mit
+     width:70% entsprechend riesig (gemessen: 1301pt auf 596pt Seitenbreite,
+     es überdeckte den Text). width:100% statt auto bindet jede Ebene an die
+     Breite des @page-Satzspiegels. */
+  .app,.body,.main,.work,#pane,#sheet,.pagewrap,.papercol,#paper{
+    display:block!important;position:static!important;overflow:visible!important;
+    width:100%!important;max-width:none!important;min-width:0!important;
+    height:auto!important;max-height:none!important;min-height:0!important;
+    padding:0!important;margin:0!important;flex:none!important;background:none!important}
+  #editor{position:relative!important;width:100%!important;padding:0!important;
     min-height:0!important;--zoom:1!important;color:#000!important}
   /* Das Farbschema der App gehört nicht ins Dokument: Zitatrahmen und -tönung,
      Links, das Anführungszeichen-Pseudoelement und die Verzeichnis-Füllpunkte
