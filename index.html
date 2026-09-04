@@ -13143,15 +13143,27 @@ function spMake(A,words,idx){
     take(word.toLowerCase(),0);
     for(let i=0;i<word.length-1;i++)                         /* zwei Zeichen vertauscht */
       take(word.slice(0,i)+word[i+1]+word[i]+word.slice(i+2),1);
+    /* Eine Ersetzung, die einen Buchstaben AUSSERHALB von ASCII einführt, ist
+       keine phonetische Rateei (f/ph, t/d), sondern die Rückübersetzung einer
+       Behelfsschreibung: ue->ü, ss->ß, e->é, a->ą. Nur die darf vor die
+       generische Ein-Zeichen-Korrektur. Ohne den Unterschied lag „Haustür“
+       gleichauf mit „Haustauer“ und verlor am alphabetischen Stichentscheid. */
+    const nichtAscii=s=>Array.from(s).some(c=>c.codePointAt(0)>127);
+    const translit=(a,b)=>nichtAscii(b)&&!nichtAscii(a);
     for(const [a,b] of A.rep){                               /* typische Vertipper der Sprache */
+      const s=translit(a,b)?1.5:2;
       let i=word.indexOf(a);
-      while(i>=0){take(word.slice(0,i)+b+word.slice(i+a.length),2);i=word.indexOf(a,i+1)}
+      while(i>=0){take(word.slice(0,i)+b+word.slice(i+a.length),s);i=word.indexOf(a,i+1)}
     }
     const alpha=Array.from(new Set(Array.from(A.tryChars||"").filter(c=>/\p{L}/u.test(c))));
+    /* Mitten im Wort steht kein Großbuchstabe — „HaustEuer“ tippt niemand. Am
+       Wortanfang bleibt das ganze Alphabet (aus „aus“ wird „Haus“). */
+    const klein=alpha.filter(c=>c===c.toLowerCase());
+    const alphaAt=i=>i===0?alpha:klein;
     for(let i=0;i<word.length;i++)take(word.slice(0,i)+word.slice(i+1),2);          /* Zeichen zuviel */
-    for(let i=0;i<=word.length;i++)for(const ch of alpha)                            /* Zeichen fehlt */
+    for(let i=0;i<=word.length;i++)for(const ch of alphaAt(i))                       /* Zeichen fehlt */
       take(word.slice(0,i)+ch+word.slice(i),2);
-    for(let i=0;i<word.length;i++)for(const ch of alpha){                            /* falsches Zeichen */
+    for(let i=0;i<word.length;i++)for(const ch of alphaAt(i)){                       /* falsches Zeichen */
       if(ch===word[i])continue;
       take(word.slice(0,i)+ch+word.slice(i+1),3);
     }
