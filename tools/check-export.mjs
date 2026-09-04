@@ -54,7 +54,13 @@ const KONFIGS = [
   { id: "C", name: "A4, ohne Fußzeile", fmt: A4, kopf: 3, fuss: false },
   { id: "D", name: "A4, ohne beides", fmt: A4, kopf: 0, fuss: false },
   { id: "E", name: "Querformat, Kopf 1-zeilig", fmt: { w: 297, h: 210, m: [20, 25, 20, 25], hd: 10, fd: 10 }, kopf: 1, fuss: true },
-  { id: "F", name: "Word-Vorlage 25,4/12,7", fmt: { w: 210, h: 297, m: [25.4, 25.4, 25.4, 25.4], hd: 12.7, fd: 12.7 }, kopf: 3, fuss: true }
+  { id: "F", name: "Word-Vorlage 25,4/12,7", fmt: { w: 210, h: 297, m: [25.4, 25.4, 25.4, 25.4], hd: 12.7, fd: 12.7 }, kopf: 3, fuss: true },
+  /* Umbrechende Kopfzeile: hfBand() zählte früher nur die eingetippten
+     Zeilenumbrüche, eine lange Zeile galt als eine — das Band war zu schmal
+     und die Kopfzeile lief in den Text. Zeilenzahl kommt hier aus der App
+     (sie hängt an der Spaltenbreite), geprüft wird, dass das PDF sie einhält. */
+  { id: "G", name: "A4, umbrechende Kopfzeile", fmt: A4, kopf: null, fuss: true,
+    kopfText: "Sehr lange Kopfzeile" + " Wort".repeat(90) }
 ];
 
 /* ---------- Testdokument ----------
@@ -69,8 +75,9 @@ const setup = cfg => `(async()=>{
   const d=blankDoc("Pruefdokument");
   d.customTitle=true;
   d.fmt=${JSON.stringify({ n: "Prüfformat", key: "custom", ...cfg.fmt, d: "" })};
-  ${cfg.kopf ? `d.hdr={on:true,text:${JSON.stringify(["{datum}", "Kopf zwei", "Kopf drei"].slice(0, cfg.kopf).join("\n"))},align:"center"};`
-             : `d.hdr={on:false,text:"",align:"center"};`}
+  ${cfg.kopfText ? `d.hdr={on:true,text:${JSON.stringify(cfg.kopfText)},align:"center"};`
+    : cfg.kopf ? `d.hdr={on:true,text:${JSON.stringify(["{datum}", "Kopf zwei", "Kopf drei"].slice(0, cfg.kopf).join("\n"))},align:"center"};`
+               : `d.hdr={on:false,text:"",align:"center"};`}
   ${cfg.fuss ? `d.ftr={on:true,text:"Seite {seite} von {seiten}",align:"center"};`
              : `d.ftr={on:false,text:"",align:"center"};`}
   d.footnotes=[{id:"f1",text:'Fussnote mit "Zitat" und Apostroph \\u2019s.'}];
@@ -199,7 +206,16 @@ const DRUCKVORBEREITUNG = String.raw`(async()=>{
   setPrintPage();
   await new Promise(r=>setTimeout(r,300));
   const f=fmtOf(d);
-  return JSON.stringify({textspalteMm:f.w-f.m[1]-f.m[3],seitenAmBildschirm:pageCount});
+  /* Bandgrenzen und Zeilenzahl von der App erfragen statt sie nachzurechnen:
+     bei umbrechenden Zeilen haengt beides an der Spaltenbreite. Geprueft wird
+     dann, ob das PDF sich an die eigene Rechnung haelt. */
+  const zeile=(9*25.4/72)*1.3;
+  const zeilenVon=w=>hfOf(d,w).on?Math.round((hfTextHoehe(d,w,1)/MM(1))/zeile):0;
+  return JSON.stringify({
+    textspalteMm:f.w-f.m[1]-f.m[3], seitenAmBildschirm:pageCount,
+    bandObenMm:Math.max(f.m[0],hfBandMm(d,"hdr")),
+    bandUntenMm:Math.max(f.m[2],hfBandMm(d,"ftr")),
+    kopfZeilen:zeilenVon("hdr"), fussZeilen:zeilenVon("ftr")});
 })()`;
 
 /* ---------- Dateiserver ---------- */
@@ -348,7 +364,8 @@ try {
 
     if (cfg.voll) befunde.push(...JSON.parse(await auswerten(cdp.send, DATEIPRUEFUNG)));
 
-    const { textspalteMm, seitenAmBildschirm } = JSON.parse(await auswerten(cdp.send, DRUCKVORBEREITUNG));
+    const { textspalteMm, seitenAmBildschirm, bandObenMm, bandUntenMm, kopfZeilen, fussZeilen } =
+      JSON.parse(await auswerten(cdp.send, DRUCKVORBEREITUNG));
     const antwort = await cdp.send("Page.printToPDF", {
       printBackground: true, preferCSSPageSize: true,
       generateDocumentOutline: true, generateTaggedPDF: true
@@ -368,13 +385,18 @@ try {
     ok(P + "Seitenzahl passt zum Bildschirm", g.seiten.length >= seitenAmBildschirm,
        `${g.seiten.length} im PDF, ${seitenAmBildschirm} am Bildschirm`);
 
-    const bandOben = band(f.m[0], f.hd, cfg.kopf);
-    const bandUnten = band(f.m[2], f.fd, cfg.fuss ? 1 : 0);
-    const satzUnten = f.h - bandUnten;
+    /* Wo die App das Band sieht — der Druck muss sich daran halten. */
+    const bandOben = bandObenMm, satzUnten = f.h - bandUntenMm;
+    /* Wo die Zeilenzahl vorhersagbar ist, wird sie zusaetzlich gegen die
+       Erwartung geprueft: sonst wuerde eine falsch rechnende App ihren
+       eigenen Fehler bestaetigen. */
+    if (cfg.kopf !== null)
+      ok(P + `Kopfzeile zaehlt ${cfg.kopf} Zeile(n)`, kopfZeilen === cfg.kopf, `App meldet ${kopfZeilen}`);
+    ok(P + `Fusszeile zaehlt ${cfg.fuss ? 1 : 0} Zeile(n)`, fussZeilen === (cfg.fuss ? 1 : 0), `App meldet ${fussZeilen}`);
     /* Nach y entdoppeln: eine Fusszeile "Seite 1 von 8" besteht aus mehreren
        Textlaeufen (die Felder werden einzeln gesetzt), ist aber eine Zeile. */
     const zeilenAuf = ys => [...new Set(ys.map(y => y.toFixed(1)))];
-    const sollKopf = cfg.kopf, sollFuss = cfg.fuss ? 1 : 0;
+    const sollKopf = kopfZeilen, sollFuss = fussZeilen;
     let kopfFalsch = [], fussFalsch = [];
     g.seiten.forEach((s, i) => {
       const kopf = zeilenAuf(s.zeilen.filter(y => y < bandOben - 1));

@@ -1496,13 +1496,42 @@ function ownFmt(d){
 /* Höhe des Kopf-/Fußzeilenbandes in px: Abstand zur Kante plus Textzeilen
    plus etwas Luft. Word schiebt den Textkörper genauso nach unten, statt
    ihn von der Kopfzeile überschreiben zu lassen. */
+/* Wie hoch die Kopf-/Fußzeile TATSÄCHLICH baut — an einem unsichtbaren
+   Messelement mit derselben Breite, Schrift und Zeilenhöhe abgelesen, genau
+   wie ensureFnMeasurer() es für die Fußnoten tut. Vorher wurden nur die
+   eingetippten Zeilenumbrüche gezählt (text.split("\n")); eine lange Zeile,
+   die im Band umbricht, galt als eine — gemessen: fünf sichtbare Zeilen, als
+   eine gezählt, Band 18,3 mm, echtes Ende bei 32,8 mm, also mitten im Text. */
+let hfMessEl=null,hfMessCache=new Map();
+function ensureHfMeasurer(){
+  if(hfMessEl&&hfMessEl.isConnected)return hfMessEl;
+  hfMessEl=document.createElement("div");
+  hfMessEl.id="hfMeasure";hfMessEl.className="hf";
+  hfMessEl.style.cssText="position:absolute;visibility:hidden;pointer-events:none;left:-9999px;top:0";
+  document.body.appendChild(hfMessEl);
+  return hfMessEl;
+}
+function hfTextHoehe(d,which,z){
+  const v=hfOf(d,which),f=fmtOf(d);
+  const breite=MM(f.w-f.m[1]-f.m[3])*z, fs=(9*96/72)*z;
+  const html=hfText(v.text,1,Math.max(1,pageCount))||"&nbsp;";
+  /* paginate() fragt mehrfach je Durchlauf — ohne den Merker wäre das jedes
+     Mal ein erzwungenes Neuberechnen des Layouts. */
+  const key=which+"|"+z+"|"+breite+"|"+html;
+  if(hfMessCache.has(key))return hfMessCache.get(key);
+  const el=ensureHfMeasurer();
+  el.style.width=breite+"px";el.style.fontSize=fs+"px";
+  el.innerHTML=html;
+  const h=el.offsetHeight;
+  if(hfMessCache.size>40)hfMessCache.clear();
+  hfMessCache.set(key,h);
+  return h;
+}
 function hfBand(d,which,z){
   const v=hfOf(d,which);
   if(!v.on)return 0;
   const f=fmtOf(d);
-  const fs=(9*96/72)*z;
-  const zeilen=String(v.text||"").split("\n").length;
-  return MM(which==="hdr"?f.hd:f.fd)*z + fs*1.35*zeilen + MM(2)*z;
+  return MM(which==="hdr"?f.hd:f.fd)*z + hfTextHoehe(d,which,z) + MM(2)*z;
 }
 const THEMES=[
   {k:"azur",     n:"Azur",       d:"Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word", c:["#FFFFFF","#7F858C","#0F6CBD"]},
@@ -6585,13 +6614,14 @@ function drawWrite(){
   hb.addEventListener("keydown",e=>{
     if(e.key==="Enter"&&e.shiftKey){   /* zweite Zeile in der Kopf-/Fußzeile */
       e.preventDefault();document.execCommand("insertLineBreak");
-      setTimeout(()=>{placeHfGrip();drawHfBar()},0);return}
+      setTimeout(()=>{placeHfGrip();drawHfBar()},0);hfLive();return}
     if(e.key==="Enter"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
     if(e.key==="Escape"){e.preventDefault();hfEditClose();ed.focus();return}
     if(e.key==="Tab"){e.preventDefault();
       const other=hfEditing&&hfEditing.which==="hdr"?"ftr":"hdr",pg=hfEditing?hfEditing.page:0;
       hfEditCommit();hfEditClose();hfEditOpen(other,pg)}
   });
+  hb.addEventListener("input",hfLive);
   hb.addEventListener("blur",()=>{
     /* Klicks in der Leiste dürfen die Bearbeitung nicht beenden */
     setTimeout(()=>{if(hfEditing&&document.activeElement!==hb){hfEditCommit();hfEditClose()}},0);
@@ -11554,8 +11584,9 @@ function hfBandMm(d,which){
   const v=hfOf(d,which);
   if(!v.on)return 0;
   const f=fmtOf(d);
-  const zeilen=String(v.text||"").split("\n").length;
-  return (which==="hdr"?f.hd:f.fd) + (9*25.4/72)*1.35*zeilen + 2;
+  /* Dieselbe Messung wie am Bildschirm, nur bei Zoom 1 und in Millimetern —
+     sonst rechnete der Druck mit einem anderen Band als die Ansicht. */
+  return (which==="hdr"?f.hd:f.fd) + hfTextHoehe(d,which,1)/MM(1) + 2;
 }
 function setPrintPage(){
   let st=document.getElementById("printpage");
@@ -11689,8 +11720,7 @@ function hfRect(which,page){
   const f=fmtOf(doc()),z=S.zoom;
   const ph=MM(f.h)*z,stride=ph+GAP;
   const fs=(9*96/72)*z;
-  const zeilen=String(hfOf(doc(),which).text||"").split("\n").length;
-  const h=Math.max(fs*1.35*zeilen,16);
+  const h=Math.max(hfTextHoehe(doc(),which,z),16);
   const d=MM(which==="hdr"?f.hd:f.fd)*z;
   return {top:which==="hdr"?page*stride+d:page*stride+ph-d-h,
     left:MM(f.m[3])*z,right:MM(f.m[1])*z,h,fs};
@@ -11736,6 +11766,26 @@ function placeHfGrip(){
   grip.style.width=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z+"px";
   grip.style.top=(y-6)+"px";
   grip.classList.add("on");
+}
+/* Während des Tippens mitrechnen, wie in Google Docs: wächst die Kopfzeile
+   über den Seitenrand hinaus, rückt der Textkörper sofort nach — nicht erst
+   beim Verlassen des Feldes. Bewusst ohne commit(): ein Zwischenstand je
+   Tastendruck wäre unbrauchbar; gesichert wird weiterhin in hfEditCommit(). */
+let hfLiveTimer=null;
+function hfLive(){
+  if(!hfEditing)return;
+  clearTimeout(hfLiveTimer);
+  hfLiveTimer=setTimeout(()=>{
+    const box=$("#hfedit");
+    if(!hfEditing||!box)return;
+    const d=doc();
+    d[hfEditing.which]={...hfOf(d,hfEditing.which),text:(box.innerText||"").replace(/\n+$/,"")};
+    paginate();
+    /* Die Fußzeile wächst nach oben — ihr Eingabefeld muss mitwandern. */
+    const r=hfRect(hfEditing.which,hfEditing.page);
+    box.style.top=r.top+"px";box.style.minHeight=r.h+"px";
+    placeHfGrip();drawHfBar();
+  },160);
 }
 function hfEditCommit(){
   if(!hfEditing)return;
