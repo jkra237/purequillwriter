@@ -11318,13 +11318,33 @@ function paginate(){
       const contentH=contentHOf(p);
       if(b.classList.contains("pgbreak")){
         const nextStart=(p+1)*stride+mt;
-        b.style.height=Math.max(14,nextStart-top-1)+"px";
+        /* Ohne den frueheren Abzug von 1px: der Platzhalter traegt eine
+           1px-Trennlinie als border-top, und bei box-sizing:border-box steckt
+           die bereits in der gesetzten Hoehe. Der Abzug zog sie ein zweites
+           Mal ab, sodass der Absatz nach einem manuellen Umbruch 1px hoeher
+           begann als einer nach einem natuerlichen Seitenwechsel. */
+        b.style.height=Math.max(14,nextStart-top)+"px";
         return;
       }
       const limit=p*stride+mt+contentH;
       if(top+h>limit+1&&h<=contentH){
+        const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
-        b.style.marginTop=(base+((p+1)*stride+mt-top))+"px";
+        b.style.marginTop=(base+(ziel-top))+"px";
+        /* Nachmessen statt nur rechnen, wegen zusammenfallender Margen:
+           die Lage eines Blocks ist Vorgaenger-Unterkante + max(dessen
+           Untermarge, eigener Obermarge). Absaetze hier haben margin-top:0
+           und margin-bottom:13,12px — die Lage bestimmt also der Vorgaenger.
+           Ein Delta auf die eigene Obermarge zu addieren verschob den Block
+           dann nur um (Delta - 13,12px), und jeder auf eine Folgeseite
+           umgebrochene Absatz landete 13,12px zu hoch: bei knappem oberen
+           Rand lief der Text sichtbar in die Kopfzeile hinein. Sobald die
+           eigene Obermarge groesser als die des Vorgaengers ist, wirkt sie
+           linear, deshalb genuegt eine einzige Korrektur. Das kostet ein
+           erzwungenes Layout je tatsaechlich verschobenem Block — das sind
+           wenige pro Dokument, nicht einer je Absatz. */
+        const rest=ziel-(b.getBoundingClientRect().top-edTop);
+        if(Math.abs(rest)>0.5)b.style.marginTop=(base+(ziel-top)+rest)+"px";
         p++;
       }
       if(hasFn)b.querySelectorAll&&b.querySelectorAll(".fn[data-fn]").forEach(m=>{
