@@ -177,9 +177,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Dreieck bleibt: dass sich hier etwas aufklappt, ist im Web nicht gesetzt. */
 .filebtn{margin:0 0 4px 6px;padding:6px 7px;border:1px solid transparent;
   border-radius:var(--radius);background:transparent;
-  /* 400 (normal) als Nullpunkt der Fettung genommen: 500 war +100, davon 20%
-     zurückgenommen -> +80, also 480. */
-  font-weight:480;
+  /* Gemessen, nicht gerechnet: Segoe UI (und die Systemschriften daneben) hat
+     Stufen, keine stufenlose Achse. Dieselbe Zeile ist bei 400, 450 und 480
+     zeichengleich 163,19 px breit und springt erst bei 500 auf 168,60 px —
+     das frühere 480 („500 minus 20%") war also unsichtbar und rechnete sich
+     eine Fettung herbei, die nie ankam. 500 ist die nächste echte Stufe und
+     zugleich der Wert, den Google Docs für seine Menüzeile nimmt. */
+  font-weight:500;
   /* Gemessen statt geschätzt: reines --ink-soft bleibt auf „Papier" mit 4,24
      unter dem Richtwert 4,5 für 14px. Ein Viertel --ink hebt den schlechtesten
      Wert auf 5,65 und lässt die Titel trotzdem weicher als den aktiven Reiter. */
