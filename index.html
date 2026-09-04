@@ -9480,6 +9480,19 @@ function pasteTidy(){
     });
 }
 /* ZIP (.docx/.odt) und OLE (.doc) sind Binärformate und lassen sich hier nicht lesen */
+/* File.text() dekodiert immer als UTF-8. Eine .txt aus Windows-Notepad ist
+   aber oft Windows-1252 (ANSI) — dort werden die Umlaut-Bytes zu
+   Ersatzzeichen, und looksBinary() hielt die Datei danach fuer binaer und
+   lehnte sie ab. Deshalb: BOM auswerten, sonst UTF-8 streng versuchen und
+   bei einem Fehler auf Windows-1252 zurueckfallen. Das ist auch die
+   Ausweichkodierung, die HTML5 fuer "iso-8859-1" vorschreibt. */
+async function dateiText(f){
+  const b=new Uint8Array(await f.arrayBuffer());
+  if(b.length>1&&b[0]===0xFF&&b[1]===0xFE)return new TextDecoder("utf-16le").decode(b);
+  if(b.length>1&&b[0]===0xFE&&b[1]===0xFF)return new TextDecoder("utf-16be").decode(b);
+  try{return new TextDecoder("utf-8",{fatal:true}).decode(b)}
+  catch(e){return new TextDecoder("windows-1252").decode(b)}
+}
 function looksBinary(s){
   const kopf=String(s).slice(0,400);
   if(kopf.startsWith("PK"))return true;
@@ -9556,7 +9569,7 @@ async function ladeDokumente(dateien){
             bildFehlend+=erg.bilder.fehlend}
         }else abgelehnt++;
       }else{
-        if(importDocumentText(f.name,await f.text()))geladen++;else abgelehnt++;
+        if(importDocumentText(f.name,await dateiText(f)))geladen++;else abgelehnt++;
       }
     }catch(e){abgelehnt++}
   }
