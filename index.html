@@ -6314,6 +6314,19 @@ $("#tabbar").addEventListener("mousedown",e=>{
   document.addEventListener("mousemove",move);
   document.addEventListener("mouseup",up);
 });
+/* Doppelklick benennt um — dieselbe Geste wie bei Google-Docs-Reitern,
+   Excel-Blattreitern oder VS Code. Bisher führte nur das Kontextmenü dorthin,
+   und das findet nur, wer auf einem Reiter überhaupt rechtsklickt. Auf dem
+   Reiter ist der Doppelklick sonst unbelegt: er hieße zweimal "denselben
+   Reiter aktivieren". Nach einem Umsortieren zeichnet drawTabs() die Reiter
+   neu, der zweite Klick träfe ein anderes Element — dblclick feuert dann
+   ohnehin nicht, eine eigene Sperre über tabGezogen braucht es nicht. */
+$("#tabbar").addEventListener("dblclick",e=>{
+  if(e.target.closest("[data-close]")||e.target.closest("input"))return;
+  const t=e.target.closest(".tab");
+  if(!t)return;
+  e.preventDefault();renameTab(t.dataset.id);
+});
 $("#tabbar").addEventListener("contextmenu",e=>{
   const t=e.target.closest(".tab");
   if(!t)return;
@@ -6346,8 +6359,9 @@ function renameTab(id){
   const d=S.docs.find(x=>x.id===id);if(!d)return;
   const el=document.querySelector(`.tab[data-id="${id}"] span`);
   if(!el)return;
+  const start=d.title||"";
   const input=document.createElement("input");
-  input.value=d.title||"";input.maxLength=60;
+  input.value=start;input.maxLength=60;
   input.style.cssText="width:130px;border:none;background:rgba(255,255,255,.6);font:inherit;color:inherit;outline:none;border-radius:2px;padding:0 2px";
   el.replaceWith(input);input.focus();input.select();
   let done=false;
@@ -6358,7 +6372,13 @@ function renameTab(id){
       d.customTitle=false;
       const t=stripHtml(d.html).trim().split("\n")[0].slice(0,32);
       d.title=t||"Ohne Titel";
-    }else{d.title=v;d.customTitle=true}
+    }else if(v!==start){d.title=v;d.customTitle=true}
+    /* v===start heißt: nichts eingegeben, nur weggeklickt. Früher setzte auch
+       das customTitle=true und fror damit still die Titelautomatik ein — der
+       Reiter folgte der ersten Zeile nie wieder. Beim Kontextmenü war das
+       selten, per Doppelklick wäre es der häufigste Fehlgriff geworden. Wer
+       den Titel wirklich auf genau den automatischen Text festnageln will,
+       nimmt den Umweg über eine Änderung und zurück. */
     save();render();
   };
   input.addEventListener("blur",finish);
