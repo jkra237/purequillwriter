@@ -672,6 +672,9 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
   display:none;align-items:center;gap:7px;white-space:nowrap}
 .imgbar.on{display:flex}
 #hfbar{flex-wrap:wrap;max-width:calc(100vw - 20px);row-gap:5px}
+/* Beim Ziehen einer Kante tritt die Leiste zurück: man will in dem Moment
+   die Linie sehen, nicht die Knöpfe. */
+#hfbar.leise{opacity:.2;pointer-events:none}
 /* Einfügeoptionen: erscheint nach dem Einfügen neben dem Eingefügten und
    verschwindet beim nächsten Handgriff. Bewusst leiser als die Bildleiste —
    wer die Formatierung behalten will, soll ihn kaum bemerken. */
@@ -11884,7 +11887,21 @@ function drawHfBar(){
   const bw=bar.offsetWidth,bh=bar.offsetHeight;
   const r=box.getBoundingClientRect();
   bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bw-10))+"px";
-  bar.style.top=(r.bottom+8+bh<innerHeight-8?r.bottom+8:Math.max(8,r.top-bh-8))+"px";
+  /* Die Leiste darf nicht auf den Ziehkanten liegen — sonst verdeckt sie
+     genau das Bedienelement, das man als Nächstes braucht. Sie stand bisher
+     direkt unter dem Eingabefeld, und dort sitzt bei der Kopfzeile die
+     Textgrenze. Also: bei der Kopfzeile unter beide Kanten, bei der Fußzeile
+     über beide; die alten Plätze bleiben als Rückfall. */
+  const kanten=[$("#hfgrip"),$("#hfgrip2")]
+    .filter(g=>g&&g.classList.contains("on")).map(g=>g.getBoundingClientRect());
+  const unten=kanten.length?Math.max(...kanten.map(k=>k.bottom)):r.bottom;
+  const oben =kanten.length?Math.min(...kanten.map(k=>k.top)):r.top;
+  const passt=y=>y>=8&&y+bh<=innerHeight-8&&kanten.every(k=>y+bh<k.top-6||y>k.bottom+6);
+  const wahl=(hfEditing.which==="hdr"
+    ? [unten+10, oben-bh-10, r.bottom+8, r.top-bh-8]
+    : [oben-bh-10, unten+10, r.top-bh-8, r.bottom+8]).find(passt);
+  bar.style.top=(wahl!==undefined?wahl
+    :Math.max(8,Math.min(innerHeight-bh-8,r.bottom+8)))+"px";
 }
 /* Höhe des Kopf-/Fußzeilenbandes ziehen. Das verschiebt die Grenze, ab der
    Text steht — also den Seitenrand dieses Dokuments. Vorher verschob der Griff
@@ -11897,6 +11914,7 @@ function hfGripDrag(e,rolle){
   if(!hfEditing)return;
   e.preventDefault();
   const grip=$(rolle==="abstand"?"#hfgrip2":"#hfgrip");grip.classList.add("drag");
+  const bar=$("#hfbar");if(bar)bar.classList.add("leise");
   const k=hfEditing.which,pg=hfEditing.page,d=doc();
   const fm=ownFmt(d),idx=k==="hdr"?0:2;
   const z=S.zoom,ph=MM(fm.h)*z,stride=ph+GAP;
@@ -11927,6 +11945,7 @@ function hfGripDrag(e,rolle){
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
     grip.classList.remove("drag");
+    if(bar)bar.classList.remove("leise");
     commit();setPrintHF();drawHfBar();
   };
   document.addEventListener("mousemove",move);
