@@ -9649,10 +9649,19 @@ function importDocumentText(name,raw){
 }
 /* RTF ist reiner Text mit Steuerworten. Absätze, Auszeichnungen und
    Sonderzeichen decken ab, was Textverarbeitungen üblicherweise ausgeben. */
+/* \'xx ist ein BYTE in der Codepage der Datei (\ansicpg, in der Praxis fast
+   immer 1252) — kein Unicode-Zeichen. String.fromCharCode() liest es als
+   Latin-1; für Umlaute stimmt das zufällig, aber der Bereich 0x80–0x9F geht
+   verloren, und genau dort liegen in Windows-1252 die typografischen
+   Anführungszeichen, die Gedankenstriche und das Eurozeichen. Gemessen kamen
+   aus Word-RTF „Zitat“, – und € als unsichtbare Steuerzeichen an. Die
+   Tabelle liefert der Browser selbst. */
+const RTF_CP=(()=>{try{return new TextDecoder("windows-1252")}catch(e){return null}})();
+const rtfByte=b=>RTF_CP?RTF_CP.decode(new Uint8Array([b])):String.fromCharCode(b);
 function rtfToHtml(raw){
   let t=String(raw);
-  t=t.replace(/\\'([0-9a-f]{2})/gi,(m,h)=>String.fromCharCode(parseInt(h,16)));
-  t=t.replace(/\\u(-?\d+)\??/g,(m,n)=>String.fromCharCode(+n<0?+n+65536:+n));
+  t=t.replace(/\\'([0-9a-f]{2})/gi,(m,h)=>rtfByte(parseInt(h,16)));
+  t=t.replace(/\\u(-?\d+) ?\??/g,(m,n)=>String.fromCharCode(+n<0?+n+65536:+n));
   /* Gruppen, die nicht in den Text gehören */
   t=t.replace(/\{\\\*[^{}]*\}/g,"");
   t=t.replace(/\{\\(?:fonttbl|colortbl|stylesheet|info|generator)[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/gi,"");
