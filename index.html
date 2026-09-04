@@ -182,13 +182,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Dreieck bleibt: dass sich hier etwas aufklappt, ist im Web nicht gesetzt. */
 .filebtn{margin:0 0 4px 6px;padding:6px 7px;border:1px solid transparent;
   border-radius:var(--radius);background:transparent;
-  /* Gemessen, nicht gerechnet: Segoe UI (und die Systemschriften daneben) hat
-     Stufen, keine stufenlose Achse. Dieselbe Zeile ist bei 400, 450 und 480
-     zeichengleich 163,19 px breit und springt erst bei 500 auf 168,60 px —
-     das frühere 480 („500 minus 20%") war also unsichtbar und rechnete sich
-     eine Fettung herbei, die nie ankam. 500 ist die nächste echte Stufe und
-     zugleich der Wert, den Google Docs für seine Menüzeile nimmt. */
-  font-weight:500;
+  /* Bewusst 400, und bewusst ohne Zwischenwert: Segoe UI liefert nur Regular
+     und Semibold. Über die Tintenmenge gemessen (Deckkraft aller Pixel einer
+     Zeile, nicht die Laufweite — die ist als Maß für Strichdicke untauglich)
+     sind 400, 420, 440, 450, 460, 470 und 480 pixelgleich bei 282; erst 500
+     springt auf 378. "Segoe UI Variable" verhält sich genauso (283 -> 380),
+     eine stufenlose Achse steht hier also nicht zur Verfügung.
+     Etwas dazwischen ginge nur über -webkit-text-stroke (0,30px lag mit 336
+     fast genau in der Mitte), das ist aber Malerei statt Schriftschnitt: die
+     Kontur legt sich nach außen, verengt die Punzen und wirkt weicher. Nach
+     dem direkten Vergleich aller Stufen fiel die Wahl auf das schlichte 400. */
+  font-weight:400;
   /* Gemessen statt geschätzt: reines --ink-soft bleibt auf „Papier" mit 4,24
      unter dem Richtwert 4,5 für 14px. Ein Viertel --ink hebt den schlechtesten
      Wert auf 5,65 und lässt die Titel trotzdem weicher als den aktiven Reiter. */
