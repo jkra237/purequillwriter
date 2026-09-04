@@ -11890,7 +11890,12 @@ function drawHfBar(){
   bar.style.left="8px";bar.style.top="0px";
   const bw=bar.offsetWidth,bh=bar.offsetHeight;
   const r=box.getBoundingClientRect();
-  bar.style.left=Math.max(8,Math.min(r.left,innerWidth-bw-10))+"px";
+  /* Waagerecht auf die Verdickung der Ziehkante zentrieren (deren Griff sitzt
+     mittig über der Textspalte) — so stehen Leiste und Anfasser in einer
+     Achse, statt dass die Leiste linksbündig daneben klebt. */
+  const gm=$("#hfgrip"),gr=gm&&gm.classList.contains("on")?gm.getBoundingClientRect():r;
+  const mitte=gr.left+gr.width/2;
+  bar.style.left=Math.max(8,Math.min(mitte-bw/2,innerWidth-bw-10))+"px";
   /* Die Leiste darf nicht auf den Ziehkanten liegen — sonst verdeckt sie
      genau das Bedienelement, das man als Nächstes braucht. Sie stand bisher
      direkt unter dem Eingabefeld, und dort sitzt bei der Kopfzeile die
