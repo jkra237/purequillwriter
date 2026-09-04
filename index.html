@@ -2022,7 +2022,7 @@ en:{
   "Entfernen":"Remove",
   "Abstand zum Seitenrand ziehen":"Drag the distance to the page edge",
   "Ziehen, um die Bildgröße zu ändern":"Drag to resize the image",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Multiple lines are possible; in the document, Shift+Enter adds a line.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Multiple lines are possible; in the document, Enter adds a line.",
   "Links":"Left",
   "Mitte":"Center",
   "Rechts":"Right",
@@ -2741,7 +2741,7 @@ fr:{
   "Entfernen":"Supprimer",
   "Abstand zum Seitenrand ziehen":"Faire glisser la distance au bord de la page",
   "Ziehen, um die Bildgröße zu ändern":"Faire glisser pour redimensionner l'image",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Plusieurs lignes sont possibles ; dans le document, Maj+Entrée ajoute une ligne.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Plusieurs lignes sont possibles ; dans le document, Entrée ajoute une ligne.",
   "Links":"Gauche",
   "Mitte":"Centre",
   "Rechts":"Droite",
@@ -3460,7 +3460,7 @@ es:{
   "Entfernen":"Eliminar",
   "Abstand zum Seitenrand ziehen":"Arrastrar la distancia al borde de la página",
   "Ziehen, um die Bildgröße zu ändern":"Arrastra para cambiar el tamaño de la imagen",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Varias líneas son posibles; en el documento, Mayús+Intro añade una línea.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Varias líneas son posibles; en el documento, Intro añade una línea.",
   "Links":"Izquierda",
   "Mitte":"Centro",
   "Rechts":"Derecha",
@@ -4179,7 +4179,7 @@ pt:{
   "Entfernen":"Remover",
   "Abstand zum Seitenrand ziehen":"Arrastar a distância até a borda da página",
   "Ziehen, um die Bildgröße zu ändern":"Arraste para redimensionar a imagem",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Várias linhas são possíveis; no documento, Shift+Enter adiciona uma linha.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Várias linhas são possíveis; no documento, Enter adiciona uma linha.",
   "Links":"Esquerda",
   "Mitte":"Centro",
   "Rechts":"Direita",
@@ -4898,7 +4898,7 @@ pl:{
   "Entfernen":"Usuń",
   "Abstand zum Seitenrand ziehen":"Przeciągnij odstęp od krawędzi strony",
   "Ziehen, um die Bildgröße zu ändern":"Przeciągnij, aby zmienić rozmiar obrazu",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Możliwych jest kilka wierszy; w dokumencie Shift+Enter dodaje nowy wiersz.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Możliwych jest kilka wierszy; w dokumencie Enter dodaje nowy wiersz.",
   "Links":"Lewo",
   "Mitte":"Środek",
   "Rechts":"Prawo",
@@ -5623,7 +5623,7 @@ it:{
   "Entfernen":"Rimuovi",
   "Abstand zum Seitenrand ziehen":"Trascina la distanza dal bordo della pagina",
   "Ziehen, um die Bildgröße zu ändern":"Trascina per ridimensionare l'immagine",
-  "Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.":"Sono possibili più righe; nel documento Maiusc+Invio aggiunge una riga.",
+  "Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.":"Sono possibili più righe; nel documento Invio aggiunge una riga.",
   "Links":"Sinistra",
   "Mitte":"Centro",
   "Rechts":"Destra",
@@ -6612,11 +6612,15 @@ function drawWrite(){
   $("#figrsz").addEventListener("mousedown",figResizeDrag);
   const hb=$("#hfedit");
   hb.addEventListener("keydown",e=>{
-    if(e.key==="Enter"&&e.shiftKey){   /* zweite Zeile in der Kopf-/Fußzeile */
+    /* Eingabe bricht die Zeile um, wie in Google Docs — Kopf- und Fußzeilen
+       sind mehrzeilig gedacht, und die Eingabetaste ist dafür die naheliegende
+       Taste. Verlassen geht über Esc, Tab oder einen Klick daneben; alle drei
+       übernehmen den Text (er steht durch hfLive() ohnehin schon im
+       Dokument, nur der Zwischenstand fehlt noch). */
+    if(e.key==="Enter"){
       e.preventDefault();document.execCommand("insertLineBreak");
       setTimeout(()=>{placeHfGrip();drawHfBar()},0);hfLive();return}
-    if(e.key==="Enter"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
-    if(e.key==="Escape"){e.preventDefault();hfEditClose();ed.focus();return}
+    if(e.key==="Escape"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
     if(e.key==="Tab"){e.preventDefault();
       const other=hfEditing&&hfEditing.which==="hdr"?"ftr":"hdr",pg=hfEditing?hfEditing.page:0;
       hfEditCommit();hfEditClose();hfEditOpen(other,pg)}
@@ -12038,7 +12042,7 @@ function hfDialog(){
     `<div style="color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:6px">
       ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}<br>
       ${tr("Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.")}<br>
-      ${tr("Mehrere Zeilen sind möglich; im Dokument fügt Umschalt+Eingabe eine Zeile hinzu.")}</div>`;
+      ${tr("Mehrere Zeilen sind möglich; im Dokument fügt die Eingabetaste eine Zeile hinzu.")}</div>`;
   overlay(`<div class="modal"><h3>${tr("Kopf- und Fußzeile")}</h3>
     <div class="pad" id="hfbody">${body()}</div>
     <div class="rowend"><button class="btn" id="hfClose">${tr("Fertig")}</button></div></div>`);
@@ -15304,8 +15308,8 @@ the handle along that boundary, or type a value in the bar. Making the header ta
 the text down; it never runs underneath it.</p>
 <p><b>The distance from the paper edge</b> — where the line itself sits — belongs to the
 page format and is set under <b>File &rsaquo; Page format</b>, beside the margins.</p>
-<p><kbd>Shift</kbd>+<kbd>Enter</kbd> adds a second line. <kbd>Tab</kbd> jumps between header
-and footer. <kbd>Esc</kbd> finishes.</p>`},
+<p><kbd>Enter</kbd> adds a line. <kbd>Tab</kbd> jumps between header
+and footer. <kbd>Esc</kbd> finishes and keeps the text.</p>`},
 
  {t:"Page numbers",k:"page numbers;numbering;pagination",b:`
 <p><b>Format &rsaquo; Page numbers</b> switches a plain page number at the foot of each page
@@ -15852,8 +15856,8 @@ den Griff auf dieser Grenze, oder trag einen Wert in der Leiste ein. Eine höher
 schiebt den Text nach unten; sie läuft nie darunter hindurch.</p>
 <p><b>Der Abstand zur Papierkante</b> — wo die Zeile selbst sitzt — gehört zum Seitenformat und
 wird unter <b>Datei &rsaquo; Seitenformat</b> neben den Rändern eingestellt.</p>
-<p><kbd>⇧</kbd>+<kbd>Eingabe</kbd> fügt eine zweite Zeile hinzu. <kbd>Tab</kbd> springt
-zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet.</p>`},
+<p><kbd>Eingabe</kbd> fügt eine Zeile hinzu. <kbd>Tab</kbd> springt
+zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet und übernimmt.</p>`},
 
  {t:"Seitenzahlen",k:"seitenzahlen;nummerierung;paginierung",b:`
 <p><b>Format &rsaquo; Seitenzahlen</b> schaltet eine schlichte Seitenzahl am Fuß jeder Seite
@@ -16414,7 +16418,7 @@ Arrastra el tirador a lo largo de ese límite, o escribe un valor en la barra. H
 encabezado más alto empuja el texto hacia abajo; nunca queda por debajo.</p>
 <p><b>La distancia al borde del papel</b> —donde se sitúa la propia línea— pertenece al formato
 de página y se ajusta en <b>Archivo &rsaquo; Formato de página</b>, junto a los márgenes.</p>
-<p><kbd>Mayús</kbd>+<kbd>Intro</kbd> añade una segunda línea. <kbd>Tab</kbd> salta entre
+<p><kbd>Intro</kbd> añade una línea. <kbd>Tab</kbd> salta entre
 encabezado y pie. <kbd>Esc</kbd> termina.</p>`},
 
  {t:"Números de página",k:"números de página;numeración;paginación",b:`
@@ -16971,7 +16975,7 @@ ao longo desse limite, ou digite um valor na barra. Deixar o cabeçalho mais alt
 texto para baixo; ele nunca fica por baixo.</p>
 <p><b>A distância da borda do papel</b> —onde a própria linha fica— pertence ao formato de
 página e é definida em <b>Arquivo &rsaquo; Formato de página</b>, ao lado das margens.</p>
-<p><kbd>Shift</kbd>+<kbd>Enter</kbd> adiciona uma segunda linha. <kbd>Tab</kbd> pula entre
+<p><kbd>Enter</kbd> adiciona uma linha. <kbd>Tab</kbd> pula entre
 cabeçalho e rodapé. <kbd>Esc</kbd> conclui.</p>`},
 
  {t:"Números de página",k:"números de página;numeração;paginação",b:`
@@ -17540,7 +17544,7 @@ Faites glisser la poignée le long de cette limite, ou tapez une valeur dans la 
 l'en-tête pousse le texte vers le bas ; il ne passe jamais en dessous.</p>
 <p><b>La distance au bord du papier</b> — là où la ligne elle-même se place — appartient au
 format de page et se règle dans <b>Fichier &rsaquo; Format de page</b>, à côté des marges.</p>
-<p><kbd>Maj</kbd>+<kbd>Entrée</kbd> ajoute une deuxième ligne. <kbd>Tab</kbd> passe de l'en-tête
+<p><kbd>Entrée</kbd> ajoute une ligne. <kbd>Tab</kbd> passe de l'en-tête
 au pied de page. <kbd>Échap</kbd> termine.</p>`},
 
  {t:"Numéros de page",k:"numéros de page;numérotation;pagination",b:`
@@ -18106,7 +18110,7 @@ wzdłuż tej granicy albo wpisz wartość w pasku. Zwiększenie nagłówka przes
 nie wchodzi pod niego.</p>
 <p><b>Odległość od krawędzi papieru</b> — gdzie leży sama linia — należy do formatu strony i
 ustawia się w <b>Plik &rsaquo; Format strony</b>, obok marginesów.</p>
-<p><kbd>Shift</kbd>+<kbd>Enter</kbd> dodaje drugi wiersz. <kbd>Tab</kbd> przeskakuje między
+<p><kbd>Enter</kbd> dodaje wiersz. <kbd>Tab</kbd> przeskakuje między
 nagłówkiem a stopką. <kbd>Esc</kbd> kończy.</p>`},
 
  {t:"Numery stron",k:"numery stron;numeracja;paginacja",b:`
@@ -18663,7 +18667,7 @@ Trascina la maniglia lungo quel confine, o digita un valore nella barra. Alzare 
 spinge il testo verso il basso; non passa mai al di sotto.</p>
 <p><b>La distanza dal bordo della carta</b> — dove si trova la riga stessa — appartiene al
 formato pagina e si imposta in <b>File &rsaquo; Formato pagina</b>, accanto ai margini.</p>
-<p><kbd>Maiusc</kbd>+<kbd>Invio</kbd> aggiunge una seconda riga. <kbd>Tab</kbd> passa tra
+<p><kbd>Invio</kbd> aggiunge una riga. <kbd>Tab</kbd> passa tra
 intestazione e piè di pagina. <kbd>Esc</kbd> conclude.</p>`},
 
  {t:"Numeri di pagina",k:"numeri di pagina;numerazione;impaginazione",b:`
