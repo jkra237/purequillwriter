@@ -1812,6 +1812,7 @@ en:{
   "Rückgängig":"Undo",
   "Wiederholen":"Redo",
   "Rückgängig (Strg+Z)":"Undo (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Find and replace (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Redo (Ctrl+Y)",
   "Neues Dokument mit Format":"New document with format",
   "Kopf- und Fußzeile":"Header and footer",
@@ -2534,6 +2535,7 @@ fr:{
   "Rückgängig":"Annuler",
   "Wiederholen":"Rétablir",
   "Rückgängig (Strg+Z)":"Annuler (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Rechercher et remplacer (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Rétablir (Ctrl+Y)",
   "Neues Dokument mit Format":"Nouveau document avec format",
   "Kopf- und Fußzeile":"En-tête et pied de page",
@@ -3256,6 +3258,7 @@ es:{
   "Rückgängig":"Deshacer",
   "Wiederholen":"Rehacer",
   "Rückgängig (Strg+Z)":"Deshacer (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Buscar y reemplazar (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Rehacer (Ctrl+Y)",
   "Neues Dokument mit Format":"Nuevo documento con formato",
   "Kopf- und Fußzeile":"Encabezado y pie de página",
@@ -3978,6 +3981,7 @@ pt:{
   "Rückgängig":"Desfazer",
   "Wiederholen":"Refazer",
   "Rückgängig (Strg+Z)":"Desfazer (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Localizar e substituir (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Refazer (Ctrl+Y)",
   "Neues Dokument mit Format":"Novo documento com formato",
   "Kopf- und Fußzeile":"Cabeçalho e rodapé",
@@ -4700,6 +4704,7 @@ pl:{
   "Rückgängig":"Cofnij",
   "Wiederholen":"Ponów",
   "Rückgängig (Strg+Z)":"Cofnij (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Znajdź i zamień (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Ponów (Ctrl+Y)",
   "Neues Dokument mit Format":"Nowy dokument z formatem",
   "Kopf- und Fußzeile":"Nagłówek i stopka",
@@ -5429,6 +5434,7 @@ it:{
   "Rückgängig":"Annulla",
   "Wiederholen":"Ripeti",
   "Rückgängig (Strg+Z)":"Annulla (Ctrl+Z)",
+  "Suchen und ersetzen (Strg+F)":"Trova e sostituisci (Ctrl+F)",
   "Wiederholen (Strg+Y)":"Ripeti (Ctrl+Y)",
   "Neues Dokument mit Format":"Nuovo documento con formato",
   "Kopf- und Fußzeile":"Intestazione e piè di pagina",
@@ -6446,6 +6452,8 @@ function drawTools(){
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
       <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>
       <span style="display:flex;gap:7px;margin-left:auto">
+        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICO('<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
+        <div class="sep"></div>
         <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICO('<path d="M20 18a8 8 0 0 0-8-8H4"/><path d="M8 6 4 10l4 4"/>')}</button>
         <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICO('<path d="M4 18a8 8 0 0 1 8-8h8"/><path d="m16 6 4 4-4 4"/>')}</button>
       </span>`;
@@ -8167,8 +8175,8 @@ function commandList(){
   fmtCmd("Linksbündig","Alt ⇧ L",()=>document.execCommand("justifyLeft"));
   fmtCmd("Zentriert","Alt ⇧ E",()=>document.execCommand("justifyCenter"));
   fmtCmd("Bild einfügen","",pickImage);
-  fmtCmd("Suchen","Alt ⇧ F",()=>fdOpen(false));
-  fmtCmd("Suchen und ersetzen","Alt ⇧ H",()=>fdOpen(true));
+  fmtCmd("Suchen",tr("Strg")+" F",()=>fdOpen(false));
+  fmtCmd("Suchen und ersetzen",tr("Strg")+" H",()=>fdOpen(true));
   fmtCmd("Rechtsbündig","Alt ⇧ R",()=>document.execCommand("justifyRight"));
   fmtCmd("Blocksatz","",()=>document.execCommand("justifyFull"));
   fmtCmd("Link einfügen oder bearbeiten…","Alt ⇧ K",linkDialog);
@@ -10975,7 +10983,7 @@ function toolsMenu(){
   const m=document.createElement("div");m.className="menu";m.id="toolsmenu";
   const c=v=>v?"&#10003;":"";
   m.innerHTML=`
-    <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">Alt ⇧ H</span></button>
+    <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">${tr("Strg")} H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
@@ -19382,6 +19390,12 @@ document.addEventListener("keydown",e=>{
   if(as&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
   if(as&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
   if(as&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
+  /* Strg+F ist der Griff, den jeder zuerst macht — er war unbelegt und landete
+     dadurch in der Suche des Browsers, die nur das gerenderte DOM kennt, nichts
+     von Seiten weiß und nicht ersetzen kann. Alt+Umschalt+F/H bleiben daneben
+     bestehen. !e.shiftKey, damit Strg+Umschalt+F frei bleibt. */
+  if(c&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
+  if(c&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
   /* Nur die Absicht merken, nicht abfangen: das Einfügen macht danach der
      Browser, und erst der paste-Handler wertet die Marke aus. Mit
      preventDefault käme gar kein paste-Ereignis mehr, und die Zwischenablage
@@ -19445,6 +19459,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#pgbBtn")){insertPageBreak();return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
+  if(e.target.closest("#findBtn")){fdOpen(false);return}
   if(e.target.closest("#undoBtn")){undoRedo("undo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
   if(e.target.closest("#redoBtn")){undoRedo("redo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
   if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id,"titel");return}
