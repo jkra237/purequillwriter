@@ -13022,6 +13022,28 @@ function spMake(A,words,idx){
     }
     return false;
   }
+  /* igerman98 vergibt die Kompositions-Kennungen nur lückenhaft: „Drohnen“
+     trägt kein COMPOUNDBEGIN, „Abwehr“ kein COMPOUNDEND — „Drohnenabwehr“ fiel
+     deshalb durch, obwohl beide Teile im Wörterbuch stehen. Dieser zweite Weg
+     fragt nur: zwei echte Wörterbuchwörter, dazwischen ein Fugenzeichen.
+     Bewusst GENAU zwei Teile und keine Rekursion — über drei Teile entstehen
+     sonst wieder Wortruinen wie „Droh|Gen|Abwehr“. */
+  function plainCompound(word){
+    const min=Math.max(3,A.compoundMin);
+    if(word.length<min*2)return false;
+    const dictOk=w=>directOk(w)||directOk(w[0].toUpperCase()+w.slice(1));
+    for(let i=min;i<=word.length-min;i++){
+      const tail=word.slice(i);
+      if(!dictOk(tail))continue;
+      const kopf=word.slice(0,i),koepfe=[kopf];
+      /* Fugenzeichen: Arbeit-s-zeit, Drohne-n-abwehr, Sonne-n-schein */
+      if(/[sn]$/.test(kopf)&&kopf.length-1>=min)koepfe.push(kopf.slice(0,-1));
+      if(/en$/.test(kopf)&&kopf.length-2>=min)koepfe.push(kopf.slice(0,-2));
+      if(/e$/.test(kopf)&&kopf.length-1>=min)koepfe.push(kopf.slice(0,-1));
+      for(const k of koepfe)if(dictOk(k))return true;
+    }
+    return false;
+  }
   function iconv(s){for(const [a,b] of A.iconv)if(s.indexOf(a)>=0)s=s.split(a).join(b);return s}
   function caseOf(w){
     if(w===w.toLowerCase())return "lower";
@@ -13043,6 +13065,7 @@ function spMake(A,words,idx){
   function checkOne(word){
     if(directOk(word))return true;
     if(compoundOk(word,0))return true;
+    if(plainCompound(word))return true;
     const c=caseOf(word);
     if((c==="title"||c==="upper")&&compoundOk(word.toLowerCase(),0))return true;
     return false;
