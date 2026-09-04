@@ -145,7 +145,12 @@ body{
   background:var(--chrome); color:var(--ink);
   font-size:14px; overflow:hidden;
 }
-button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+/* padding gehört zu dem, was dieser Reset ohnehin geradezieht — es fehlte.
+   Die Browservorgabe für <button> ist 1px 6px, und bei box-sizing:border-box
+   frisst das von einem 26px breiten Symbolknopf 12px Inhaltsbreite: das 16px-
+   SVG schrumpfte als Flex-Element auf 14px. Betroffen war jeder Knopf mit
+   fester Größe und zentriertem Symbol (.tb, .rb, .toc-refresh, .obtn, .fb …). */
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;padding:0}
 input,select,textarea{font:inherit;color:inherit}
 /* Farbwechsel überblenden statt springen. Bewusst nur Farben und Schatten —
    keine Layout-Eigenschaften, die würden beim Neuzeichnen flackern.
