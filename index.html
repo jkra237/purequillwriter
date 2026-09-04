@@ -11922,7 +11922,11 @@ function hfEditClose(){
   document.body.classList.remove("hfmode");
   const box=$("#hfedit");if(box){box.classList.remove("on");box.textContent=""}
   const bar=$("#hfbar");if(bar)bar.classList.remove("on");
-  const grip=$("#hfgrip");if(grip)grip.classList.remove("on");
+  /* Beide Griffe, nicht nur den ersten: #hfgrip2 markiert den Abstand der
+     Zeile zum Blattrand und sitzt damit oberhalb der Kopfzeile. Er wurde hier
+     vergessen und blieb nach dem Verlassen des Feldes als Balken über der
+     Kopfzeile stehen — ohne Feld daneben, an dem er etwas verstellt hätte. */
+  [$("#hfgrip"),$("#hfgrip2")].forEach(g=>{if(g)g.classList.remove("on","drag")});
   hfEditing=null;
 }
 function drawHfBar(){
