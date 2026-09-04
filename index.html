@@ -12371,8 +12371,15 @@ function withPrintFootnotes(fn){
   if(html&&ed){const wrap=document.createElement("div");wrap.innerHTML=html;node=wrap.firstElementChild;ed.appendChild(node)}
   const zurueck=stripScreenPagination(ed);
   const rahmenWeg=printFrame(ed);
-  fn();
-  setTimeout(()=>{if(node)node.remove();rahmenWeg();zurueck()},1200);
+  /* Aufräumen muss auch dann laufen, wenn fn() wirft — printFrame() hat
+     #editor in eine Tabelle gehängt und stripScreenPagination() seine
+     Bildschirm-Umbrüche entfernt. Ohne diesen Zweig bliebe aus einem
+     Druckfehler eine dauerhaft kaputte Ansicht. Im Erfolgsfall wird
+     zeitgesteuert geräumt, weil window.print() nicht sofort fertig ist. */
+  const aufraeumen=()=>{if(node)node.remove();rahmenWeg();zurueck()};
+  try{fn()}
+  catch(e){aufraeumen();throw e}
+  setTimeout(aufraeumen,1200);
 }
 /* ================= Inhaltsverzeichnis =================
    Ein echter, aber größtenteils nicht bearbeitbarer Block im Text (wie eine
