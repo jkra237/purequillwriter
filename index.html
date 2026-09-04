@@ -427,6 +427,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   background:var(--stamp);border:2px solid var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.35)}
 .figrsz.on{display:block}
 .hfedit.on{display:block}
+/* Beim Bearbeiten der Kopf-/Fußzeile tritt der Textkörper zurück — so ist auf
+   einen Blick zu sehen, dass man in einer anderen Ebene der Seite ist. Der
+   dünne Rahmen um ein kleines Feld war als einziger Hinweis zu leise. */
+body.hfmode #editor{opacity:.45;transition:opacity .18s}
+@media print{body.hfmode #editor{opacity:1!important}}
 .printhf{display:none}
 .sheetpage .pn{position:absolute;font-family:var(--mono);color:var(--ink-soft)}
 #editor{
@@ -675,6 +680,10 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 /* Beim Ziehen einer Kante tritt die Leiste zurück: man will in dem Moment
    die Linie sehen, nicht die Knöpfe. */
 #hfbar.leise{opacity:.2;pointer-events:none}
+/* Wert an der gezogenen Kante — dasselbe Muster wie der Lineal-Hinweis. */
+.hftip{position:absolute;z-index:9;transform:translateX(-50%);background:var(--ink);
+  color:var(--paper);font-family:var(--mono);font-size:11px;padding:2px 7px;
+  border-radius:2px;display:none;pointer-events:none;white-space:nowrap}
 /* Einfügeoptionen: erscheint nach dem Einfügen neben dem Eingefügten und
    verschwindet beim nächsten Handgriff. Bewusst leiser als die Bildleiste —
    wer die Formatierung behalten will, soll ihn kaum bemerken. */
@@ -2042,6 +2051,7 @@ en:{
   "Gesamtseiten":"Total pages",
   "Titel":"Title",
   "Seitenzahl einfügen":"Insert page number",
+  "Platzhalter":"Placeholder",
   "Gesamtseiten einfügen":"Insert total pages",
   "Titel einfügen":"Insert title",
   "Datum einfügen":"Insert date",
@@ -2764,6 +2774,7 @@ fr:{
   "Gesamtseiten":"Total des pages",
   "Titel":"Titre",
   "Seitenzahl einfügen":"Insérer le numéro de page",
+  "Platzhalter":"Espace réservé",
   "Gesamtseiten einfügen":"Insérer le total des pages",
   "Titel einfügen":"Insérer le titre",
   "Datum einfügen":"Insérer la date",
@@ -3486,6 +3497,7 @@ es:{
   "Gesamtseiten":"Total de páginas",
   "Titel":"Título",
   "Seitenzahl einfügen":"Insertar número de página",
+  "Platzhalter":"Marcador",
   "Gesamtseiten einfügen":"Insertar total de páginas",
   "Titel einfügen":"Insertar título",
   "Datum einfügen":"Insertar fecha",
@@ -4208,6 +4220,7 @@ pt:{
   "Gesamtseiten":"Total de páginas",
   "Titel":"Título",
   "Seitenzahl einfügen":"Inserir número de página",
+  "Platzhalter":"Marcador",
   "Gesamtseiten einfügen":"Inserir total de páginas",
   "Titel einfügen":"Inserir título",
   "Datum einfügen":"Inserir data",
@@ -4930,6 +4943,7 @@ pl:{
   "Gesamtseiten":"Liczba stron",
   "Titel":"Tytuł",
   "Seitenzahl einfügen":"Wstaw numer strony",
+  "Platzhalter":"Symbol zastępczy",
   "Gesamtseiten einfügen":"Wstaw liczbę stron",
   "Titel einfügen":"Wstaw tytuł",
   "Datum einfügen":"Wstaw datę",
@@ -5658,6 +5672,7 @@ it:{
   "Gesamtseiten":"Pagine totali",
   "Titel":"Titolo",
   "Seitenzahl einfügen":"Inserisci numero di pagina",
+  "Platzhalter":"Segnaposto",
   "Gesamtseiten einfügen":"Inserisci pagine totali",
   "Titel einfügen":"Inserisci titolo",
   "Datum einfügen":"Inserisci data",
@@ -6457,6 +6472,7 @@ function drawWrite(){
         <div class="hfhint" id="hfhint"></div>
         <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
         <div class="hfgrip" id="hfgrip" title="${esc(tr("Ziehen: bis hierher bleibt die Seite frei von Text"))}"></div>
+        <div class="hftip" id="hftip"></div>
         <div class="hfgrip abstand" id="hfgrip2" title="${esc(tr("Ziehen: Abstand der Zeile zum Blattrand"))}"></div>
         <div class="figrsz" id="figrsz" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
       </div>
@@ -6663,7 +6679,7 @@ function drawWrite(){
     setTimeout(()=>{
       if(!hfEditing)return;
       const a=document.activeElement;
-      if(a===hb||(a&&a.closest&&a.closest("#hfbar,.hfgrip")))return;
+      if(a===hb||(a&&a.closest&&a.closest("#hfbar,.hfgrip,#submenu")))return;
       hfEditCommit();hfEditClose();
     },0);
   });
@@ -11786,6 +11802,7 @@ function hfEditOpen(which,page){
     `min-height:${r.h}px;font-size:${r.fs}px;text-align:${v.align}`;
   box.textContent=v.text||"";
   box.classList.add("on");
+  document.body.classList.add("hfmode");
   $("#hfhint").classList.remove("on");
   box.focus();
   const rg=document.createRange();rg.selectNodeContents(box);
@@ -11845,6 +11862,7 @@ function hfEditCommit(){
   commit();paginate();setPrintHF();
 }
 function hfEditClose(){
+  document.body.classList.remove("hfmode");
   const box=$("#hfedit");if(box){box.classList.remove("on");box.textContent=""}
   const bar=$("#hfbar");if(bar)bar.classList.remove("on");
   const grip=$("#hfgrip");if(grip)grip.classList.remove("on");
@@ -11864,23 +11882,9 @@ function drawHfBar(){
     ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
       title="${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}">${ICO(ic[a])}</button>`).join("")}
     <div class="sep"></div>
-    ${[["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],
-       ["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
-      `<button class="pill" data-hfp="${p}" title="${tr(n)}">${p}</button>`).join("")}
-    <div class="sep"></div>
-    <span style="color:var(--ink-soft);font-size:12px" title="${tr("Abstand der Zeile zum Blattrand")}">${tr("Abstand")}</span>
-    <input type="number" id="hfDist" value="${fmtOf(doc())[hfEditing.which==="hdr"?"hd":"fd"]}"
-      title="${tr("Abstand der Zeile zum Blattrand")}" style="width:50px;background:var(--paper);
-      border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
-    <span style="color:var(--ink-soft);font-size:11px">mm</span>
-    <span style="color:var(--ink-soft);font-size:12px" title="${tr("Bis hierher bleibt die Seite frei von Text")}">${tr("Höhe")}</span>
-    <input type="number" id="hfHeight" value="${fmtOf(doc()).m[hfEditing.which==="hdr"?0:2]}"
-      title="${tr("Bis hierher bleibt die Seite frei von Text")}" style="width:50px;background:var(--paper);
-      border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
-    <span style="color:var(--ink-soft);font-size:11px">mm</span>
-    <div class="sep"></div>
-    <button class="pill" data-hfx="del">${tr("Entfernen")}</button>
-    <button class="pill" data-hfx="done">${tr("Fertig")}</button>`;
+    <button class="pill" id="hfIns">${tr("Platzhalter")} &rsaquo;</button>
+    <button class="tb" id="hfMore" title="${esc(tr("Kopf- und Fußzeile"))}"
+      style="font-size:16px;line-height:1">&#8943;</button>`;
   bar.classList.add("on");
   /* Erst an den linken Rand setzen, damit Umbruch und Höhe korrekt gemessen werden */
   bar.style.left="8px";bar.style.top="0px";
@@ -11928,7 +11932,6 @@ function hfGripDrag(e,rolle){
       mm=Math.min(Math.round(fm.h/3),Math.max(0,mm));
       if(mm===(k==="hdr"?fm.hd:fm.fd))return;
       if(k==="hdr")fm.hd=mm;else fm.fd=mm;
-      const ai=$("#hfDist");if(ai)ai.value=mm;
     }else{
       /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
       const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
@@ -11936,9 +11939,18 @@ function hfGripDrag(e,rolle){
       mm=Math.min(maxMm,Math.max(minMm,mm));
       if(mm===fm.m[idx])return;
       fm.m[idx]=mm;
-      const di=$("#hfHeight");if(di)di.value=mm;
     }
     paginate();placeHfGrip();
+    /* Der Wert steht jetzt an der Linie statt in einem Zahlenfeld der Leiste —
+       dasselbe Muster wie beim Lineal (.rulertip). */
+    const tip=$("#hftip");
+    if(tip){
+      const gr=grip.getBoundingClientRect(),pa=paper.getBoundingClientRect();
+      tip.textContent=mm+" mm";
+      tip.style.left=(gr.left-pa.left+gr.width/2)+"px";
+      tip.style.top=(gr.top-pa.top-20)+"px";
+      tip.style.display="block";
+    }
     const box=$("#hfedit");if(box){const r=hfRect(k,pg);box.style.top=r.top+"px";box.style.minHeight=r.h+"px"}
   };
   const up=()=>{
@@ -11946,6 +11958,7 @@ function hfGripDrag(e,rolle){
     document.removeEventListener("mouseup",up);
     grip.classList.remove("drag");
     if(bar)bar.classList.remove("leise");
+    const tip2=document.getElementById("hftip");if(tip2)tip2.style.display="none";
     commit();setPrintHF();drawHfBar();
   };
   document.addEventListener("mousemove",move);
@@ -11958,37 +11971,22 @@ $("#hfbar").addEventListener("click",e=>{
   const al=e.target.closest("[data-hfa]");
   if(al){hfEditCommit();d[k]={...hfOf(d,k),align:al.dataset.hfa};
     $("#hfedit").style.textAlign=al.dataset.hfa;commit();paginate();drawHfBar();return}
-  const ph=e.target.closest("[data-hfp]");
-  if(ph){$("#hfedit").focus();document.execCommand("insertText",false,ph.dataset.hfp);return}
-  const x=e.target.closest("[data-hfx]");
-  if(!x)return;
-  if(x.dataset.hfx==="del"){d[k]={...hfOf(d,k),on:false};hfEditClose();
-    commit();paginate();setPrintHF();toast(tr(k==="hdr"?"Kopfzeile entfernt":"Fußzeile entfernt"));return}
-  hfEditCommit();hfEditClose();
-  const ed=$("#editor");ed&&ed.focus();
-});
-$("#hfbar").addEventListener("change",e=>{
-  if(!hfEditing)return;
-  const id=e.target.id;
-  if(id!=="hfHeight"&&id!=="hfDist")return;
-  const d=doc(),k=hfEditing.which;
-  const fm=ownFmt(d),idx=k==="hdr"?0:2;
-  if(id==="hfDist"){
-    const mm=Math.min(Math.round(fm.h/3),Math.max(0,+e.target.value||0));
-    if(k==="hdr")fm.hd=mm;else fm.fd=mm;
-    e.target.value=mm;
-  }else{
-    const minMm=Math.ceil(hfBand(d,k,S.zoom)/(MM(1)*S.zoom));
-    fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,+e.target.value||0));
-    e.target.value=fm.m[idx];
+  /* Die vier Platzhalter lagen als Pillen nebeneinander in der Leiste — in
+     einer wortreichen Sprache wie Deutsch wurde sie dadurch so breit, dass
+     sie umbrach und die Ziehkanten verdeckte. Jetzt ein Flyout über
+     openSubMenu(), den einen Menümechanismus des Programms. */
+  if(e.target.closest("#hfIns")){
+    openSubMenu(e.target.closest("#hfIns"),
+      [["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],
+       ["{title}","Titel einfügen"],["{date}","Datum einfügen"]]
+        .map(([p,n])=>({a:p,label:tr(n),k:p})),
+      a=>{$("#hfedit").focus();document.execCommand("insertText",false,a)});
+    return;
   }
-  commit();paginate();
-  const r=hfRect(k,hfEditing.page);
-  $("#hfedit").style.top=r.top+"px";$("#hfedit").style.minHeight=r.h+"px";
-  placeHfGrip();drawHfBar();
-  /* drawHfBar() baut die Leiste neu — den Fokus zurück ins Feld, sonst
-     springt er weg und die Bearbeitung sähe beendet aus. */
-  const wieder=$("#"+id);if(wieder)wieder.focus();
+  /* Alles Seltene — Ränder, Abstände, Entfernen — steht im Dialog, der das
+     ohnehin alles kann. Die Leiste trägt nur noch, was man beim Schreiben
+     der Zeile braucht. */
+  if(e.target.closest("#hfMore")){hfEditCommit();hfEditClose();hfDialog();return}
 });
 function hfHtml(i,total,ml,mr,z){
   const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr"),fm=fmtOf(d);
@@ -12121,6 +12119,12 @@ function hfDialog(){
         <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-di="${k}" value="${toUnit(fmtOf(d)[k==="hdr"?"hd":"fd"])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
         <span style="color:var(--ink-soft)">${unitAbbr()}</span>
       </div>
+      <div class="mmrow" style="margin-top:6px">
+        <label style="flex:0 0 84px;text-align:right">${tr("Höhe")}</label>
+        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-hh="${k}" value="${toUnit(fmtOf(d).m[k==="hdr"?0:2])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
+        <span style="color:var(--ink-soft)">${unitAbbr()}</span>
+        <span style="color:var(--ink-soft);font-size:12px;flex:1">${tr("Bis hierher bleibt die Seite frei von Text")}</span>
+      </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
         ${[["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
           `<button class="pill" data-ph="${k}:${p}" ${v.on?"":"disabled"} title="${tr(n)}">${p}</button>`).join("")}
@@ -12147,6 +12151,11 @@ function hfDialog(){
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.di,fm=ownFmt(d);
       fm[k==="hdr"?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
+    b.querySelectorAll("[data-hh]").forEach(el=>el.onchange=()=>{
+      const k=el.dataset.hh,fm=ownFmt(d),idx=k==="hdr"?0:2;
+      const minMm=Math.ceil(hfBandMm(d,k));
+      fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,fromUnit(el.value)));
+      repaint()});
     b.querySelectorAll("[data-al]").forEach(el=>el.onclick=()=>{
       const [k,a]=el.dataset.al.split(":");d[k]={...hfOf(d,k),align:a};repaint()});
     b.querySelectorAll("[data-ph]").forEach(el=>el.onclick=()=>{
