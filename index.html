@@ -417,6 +417,11 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   border-radius:4px;background:var(--stamp);opacity:.5}
 .hfgrip:hover::before,.hfgrip.drag::before{opacity:.95}
 .hfgrip:hover::after,.hfgrip.drag::after{opacity:.6}
+/* Die zweite Kante sitzt an der Oberkante der Kopfzeile (bzw. Unterkante der
+   Fußzeile) und verstellt deren Abstand zum Blattrand — gestrichelt und
+   schmaler, damit man sie nicht mit der Textgrenze verwechselt. */
+.hfgrip.abstand::after{background:none;border-top:1px dashed var(--stamp);height:0}
+.hfgrip.abstand::before{width:26px;margin-left:-13px;height:5px;top:4px;opacity:.35}
 /* Eckanfasser zum Skalieren des ausgewählten Bildes */
 .figrsz{position:absolute;z-index:8;display:none;width:15px;height:15px;border-radius:50%;
   background:var(--stamp);border:2px solid var(--paper);box-shadow:0 1px 3px rgba(0,0,0,.35)}
@@ -1674,6 +1679,9 @@ en:{
   "Kopf / Fuß":"Header / footer",
   "Von Rand":"From edge",
   "Höhe":"Height",
+  "Abstand der Zeile zum Blattrand":"Distance of the line from the paper edge",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Drag: the page stays free of text down to here",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Drag: distance of the line from the paper edge",
   "Bis hierher bleibt die Seite frei von Text":"The page stays free of text down to here",
   "Kopf-/Fußzeilenbereich ziehen":"Drag the header/footer area",
   "Schriftfarbe":"Text colour",
@@ -2393,6 +2401,9 @@ fr:{
   "Kopf / Fuß":"En-tête / Pied",
   "Von Rand":"Depuis le bord",
   "Höhe":"Hauteur",
+  "Abstand der Zeile zum Blattrand":"Distance de la ligne au bord de la feuille",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Faire glisser : la page reste sans texte jusqu'ici",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Faire glisser : distance de la ligne au bord de la feuille",
   "Bis hierher bleibt die Seite frei von Text":"Jusqu'ici, la page reste libre de texte",
   "Kopf-/Fußzeilenbereich ziehen":"Faire glisser la zone d'en-tête/pied de page",
   "Schriftfarbe":"Couleur du texte",
@@ -3112,6 +3123,9 @@ es:{
   "Kopf / Fuß":"Encab. / Pie",
   "Von Rand":"Desde el borde",
   "Höhe":"Altura",
+  "Abstand der Zeile zum Blattrand":"Distancia de la línea al borde del papel",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Arrastrar: la página queda libre de texto hasta aquí",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Arrastrar: distancia de la línea al borde del papel",
   "Bis hierher bleibt die Seite frei von Text":"Hasta aquí, la página permanece libre de texto",
   "Kopf-/Fußzeilenbereich ziehen":"Arrastrar la zona de encabezado/pie de página",
   "Schriftfarbe":"Color de texto",
@@ -3831,6 +3845,9 @@ pt:{
   "Kopf / Fuß":"Cabeç. / Rodapé",
   "Von Rand":"Da borda",
   "Höhe":"Altura",
+  "Abstand der Zeile zum Blattrand":"Distância da linha à borda do papel",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Arrastar: a página fica sem texto até aqui",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Arrastar: distância da linha à borda do papel",
   "Bis hierher bleibt die Seite frei von Text":"Até aqui, a página permanece livre de texto",
   "Kopf-/Fußzeilenbereich ziehen":"Arrastar a área de cabeçalho/rodapé",
   "Schriftfarbe":"Cor do texto",
@@ -4550,6 +4567,9 @@ pl:{
   "Kopf / Fuß":"Nagłówek / stopka",
   "Von Rand":"Od krawędzi",
   "Höhe":"Wysokość",
+  "Abstand der Zeile zum Blattrand":"Odległość wiersza od krawędzi arkusza",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Przeciągnij: do tego miejsca strona pozostaje bez tekstu",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Przeciągnij: odległość wiersza od krawędzi arkusza",
   "Bis hierher bleibt die Seite frei von Text":"Do tego miejsca strona pozostaje wolna od tekstu",
   "Kopf-/Fußzeilenbereich ziehen":"Przeciągnij obszar nagłówka/stopki",
   "Schriftfarbe":"Kolor tekstu",
@@ -5276,6 +5296,9 @@ it:{
   "Kopf / Fuß":"Intestazione / piè di pagina",
   "Von Rand":"Dal bordo",
   "Höhe":"Altezza",
+  "Abstand der Zeile zum Blattrand":"Distanza della riga dal bordo del foglio",
+  "Ziehen: bis hierher bleibt die Seite frei von Text":"Trascina: la pagina resta libera da testo fin qui",
+  "Ziehen: Abstand der Zeile zum Blattrand":"Trascina: distanza della riga dal bordo del foglio",
   "Bis hierher bleibt die Seite frei von Text":"Fin qui la pagina resta libera dal testo",
   "Kopf-/Fußzeilenbereich ziehen":"Trascina l'area di intestazione/piè di pagina",
   "Schriftfarbe":"Colore del testo",
@@ -6430,7 +6453,8 @@ function drawWrite(){
         <div id="editor" contenteditable="true" spellcheck="true" lang="${S.settings.lang}" data-doc-id="${d.id}"></div>
         <div class="hfhint" id="hfhint"></div>
         <div class="hfedit" id="hfedit" contenteditable="true" spellcheck="false"></div>
-        <div class="hfgrip" id="hfgrip" title="${esc(tr("Kopf-/Fußzeilenbereich ziehen"))}"></div>
+        <div class="hfgrip" id="hfgrip" title="${esc(tr("Ziehen: bis hierher bleibt die Seite frei von Text"))}"></div>
+        <div class="hfgrip abstand" id="hfgrip2" title="${esc(tr("Ziehen: Abstand der Zeile zum Blattrand"))}"></div>
         <div class="figrsz" id="figrsz" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
       </div>
     </div>
@@ -6608,7 +6632,8 @@ function drawWrite(){
     if(!zone)return;
     e.preventDefault();hfEditOpen(zone.which,zone.page);
   });
-  $("#hfgrip").addEventListener("mousedown",hfGripDrag);
+  $("#hfgrip").addEventListener("mousedown",e=>hfGripDrag(e,"rand"));
+  $("#hfgrip2").addEventListener("mousedown",e=>hfGripDrag(e,"abstand"));
   $("#figrsz").addEventListener("mousedown",figResizeDrag);
   const hb=$("#hfedit");
   hb.addEventListener("keydown",e=>{
@@ -6627,8 +6652,17 @@ function drawWrite(){
   });
   hb.addEventListener("input",hfLive);
   hb.addEventListener("blur",()=>{
-    /* Klicks in der Leiste dürfen die Bearbeitung nicht beenden */
-    setTimeout(()=>{if(hfEditing&&document.activeElement!==hb){hfEditCommit();hfEditClose()}},0);
+    /* Klicks in der Leiste dürfen die Bearbeitung nicht beenden. Für die
+       Knöpfe reichte das preventDefault auf mousedown, aber die Zahlenfelder
+       MÜSSEN den Fokus bekommen — dann stand hier ein fremdes activeElement
+       und die Bearbeitung schloss sich mitten im Verstellen. Deshalb wird
+       jetzt gefragt, WOHIN der Fokus gegangen ist. */
+    setTimeout(()=>{
+      if(!hfEditing)return;
+      const a=document.activeElement;
+      if(a===hb||(a&&a.closest&&a.closest("#hfbar,.hfgrip")))return;
+      hfEditCommit();hfEditClose();
+    },0);
   });
   ed.addEventListener("mousemove",e=>{
     if(tableDragActive)return;
@@ -11759,17 +11793,26 @@ function hfEditOpen(which,page){
 /* Der Griff liegt auf der Grenze zwischen Kopf-/Fußzeilenband und Textkörper —
    also dort, wo der Text beginnt. Ihn zu ziehen ändert die Höhe des Bandes. */
 function placeHfGrip(){
-  const grip=$("#hfgrip");
-  if(!hfEditing||!grip){if(grip)grip.classList.remove("on");return}
+  const grip=$("#hfgrip"),grip2=$("#hfgrip2");
+  if(!hfEditing||!grip){if(grip)grip.classList.remove("on");if(grip2)grip2.classList.remove("on");return}
   const d=doc(),f=fmtOf(d),z=S.zoom;
-  const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page;
+  const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page,hdr=hfEditing.which==="hdr";
   const mt=Math.max(MM(f.m[0])*z,hfBand(d,"hdr",z));
   const mb=Math.max(MM(f.m[2])*z,hfBand(d,"ftr",z));
-  const y=hfEditing.which==="hdr"?pg*stride+mt:pg*stride+ph-mb;
-  grip.style.left=MM(f.m[3])*z+"px";
-  grip.style.width=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z+"px";
+  const links=MM(f.m[3])*z, breit=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z;
+  /* Kante 1: wo der Textkörper beginnt (= Seitenrand). */
+  const y=hdr?pg*stride+mt:pg*stride+ph-mb;
+  grip.style.left=links+"px";grip.style.width=breit+"px";
   grip.style.top=(y-6)+"px";
   grip.classList.add("on");
+  /* Kante 2: Abstand der Zeile selbst zum Blattrand (hd bzw. fd). */
+  if(grip2){
+    const ab=MM(hdr?f.hd:f.fd)*z;
+    const y2=hdr?pg*stride+ab:pg*stride+ph-ab;
+    grip2.style.left=links+"px";grip2.style.width=breit+"px";
+    grip2.style.top=(y2-6)+"px";
+    grip2.classList.add("on");
+  }
 }
 /* Während des Tippens mitrechnen, wie in Google Docs: wächst die Kopfzeile
    über den Seitenrand hinaus, rückt der Textkörper sofort nach — nicht erst
@@ -11822,6 +11865,11 @@ function drawHfBar(){
        ["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
       `<button class="pill" data-hfp="${p}" title="${tr(n)}">${p}</button>`).join("")}
     <div class="sep"></div>
+    <span style="color:var(--ink-soft);font-size:12px" title="${tr("Abstand der Zeile zum Blattrand")}">${tr("Abstand")}</span>
+    <input type="number" id="hfDist" value="${fmtOf(doc())[hfEditing.which==="hdr"?"hd":"fd"]}"
+      title="${tr("Abstand der Zeile zum Blattrand")}" style="width:50px;background:var(--paper);
+      border:1px solid var(--rule);border-radius:var(--radius);padding:2px 4px">
+    <span style="color:var(--ink-soft);font-size:11px">mm</span>
     <span style="color:var(--ink-soft);font-size:12px" title="${tr("Bis hierher bleibt die Seite frei von Text")}">${tr("Höhe")}</span>
     <input type="number" id="hfHeight" value="${fmtOf(doc()).m[hfEditing.which==="hdr"?0:2]}"
       title="${tr("Bis hierher bleibt die Seite frei von Text")}" style="width:50px;background:var(--paper);
@@ -11842,10 +11890,13 @@ function drawHfBar(){
    Text steht — also den Seitenrand dieses Dokuments. Vorher verschob der Griff
    nur die Zeile selbst, was aussah, als ließe sich nichts vergrößern.
    Wird in drawWrite() gebunden, da #hfgrip bei jedem Render neu entsteht. */
-function hfGripDrag(e){
+/* Beide Kanten laufen über dieselbe Mechanik. rolle="rand" verschiebt den
+   Seitenrand (wo der Text beginnt), rolle="abstand" den Abstand der Zeile zum
+   Blattrand — in Google Docs sind das die beiden Werte unter „Kopfzeile“. */
+function hfGripDrag(e,rolle){
   if(!hfEditing)return;
   e.preventDefault();
-  const grip=$("#hfgrip");grip.classList.add("drag");
+  const grip=$(rolle==="abstand"?"#hfgrip2":"#hfgrip");grip.classList.add("drag");
   const k=hfEditing.which,pg=hfEditing.page,d=doc();
   const fm=ownFmt(d),idx=k==="hdr"?0:2;
   const z=S.zoom,ph=MM(fm.h)*z,stride=ph+GAP;
@@ -11853,15 +11904,24 @@ function hfGripDrag(e){
   const move=ev=>{
     const y=ev.clientY-paper.getBoundingClientRect().top-pg*stride;
     let mm=Math.round((k==="hdr"?y:ph-y)/(MM(1)*z));
-    /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
-    const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
-    const maxMm=Math.max(minMm,fm.h-fm.m[k==="hdr"?2:0]-30);
-    mm=Math.min(maxMm,Math.max(minMm,mm));
-    if(mm===fm.m[idx])return;
-    fm.m[idx]=mm;
+    if(rolle==="abstand"){
+      /* Nicht über die Blattkante hinaus und nicht so tief, dass für den Text
+         nichts bleibt; der Seitenrand weicht ohnehin über max(Rand, Band). */
+      mm=Math.min(Math.round(fm.h/3),Math.max(0,mm));
+      if(mm===(k==="hdr"?fm.hd:fm.fd))return;
+      if(k==="hdr")fm.hd=mm;else fm.fd=mm;
+      const ai=$("#hfDist");if(ai)ai.value=mm;
+    }else{
+      /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
+      const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
+      const maxMm=Math.max(minMm,fm.h-fm.m[k==="hdr"?2:0]-30);
+      mm=Math.min(maxMm,Math.max(minMm,mm));
+      if(mm===fm.m[idx])return;
+      fm.m[idx]=mm;
+      const di=$("#hfHeight");if(di)di.value=mm;
+    }
     paginate();placeHfGrip();
-    const box=$("#hfedit");if(box)box.style.top=hfRect(k,pg).top+"px";
-    const di=$("#hfHeight");if(di)di.value=mm;
+    const box=$("#hfedit");if(box){const r=hfRect(k,pg);box.style.top=r.top+"px";box.style.minHeight=r.h+"px"}
   };
   const up=()=>{
     document.removeEventListener("mousemove",move);
@@ -11889,16 +11949,27 @@ $("#hfbar").addEventListener("click",e=>{
   const ed=$("#editor");ed&&ed.focus();
 });
 $("#hfbar").addEventListener("change",e=>{
-  if(e.target.id!=="hfHeight"||!hfEditing)return;
+  if(!hfEditing)return;
+  const id=e.target.id;
+  if(id!=="hfHeight"&&id!=="hfDist")return;
   const d=doc(),k=hfEditing.which;
   const fm=ownFmt(d),idx=k==="hdr"?0:2;
-  const minMm=Math.ceil(hfBand(d,k,S.zoom)/(MM(1)*S.zoom));
-  fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,+e.target.value||0));
-  e.target.value=fm.m[idx];
+  if(id==="hfDist"){
+    const mm=Math.min(Math.round(fm.h/3),Math.max(0,+e.target.value||0));
+    if(k==="hdr")fm.hd=mm;else fm.fd=mm;
+    e.target.value=mm;
+  }else{
+    const minMm=Math.ceil(hfBand(d,k,S.zoom)/(MM(1)*S.zoom));
+    fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,+e.target.value||0));
+    e.target.value=fm.m[idx];
+  }
   commit();paginate();
   const r=hfRect(k,hfEditing.page);
-  $("#hfedit").style.top=r.top+"px";
-  drawHfBar();
+  $("#hfedit").style.top=r.top+"px";$("#hfedit").style.minHeight=r.h+"px";
+  placeHfGrip();drawHfBar();
+  /* drawHfBar() baut die Leiste neu — den Fokus zurück ins Feld, sonst
+     springt er weg und die Bearbeitung sähe beendet aus. */
+  const wieder=$("#"+id);if(wieder)wieder.focus();
 });
 function hfHtml(i,total,ml,mr,z){
   const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr"),fm=fmtOf(d);
