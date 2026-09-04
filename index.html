@@ -1845,7 +1845,6 @@ en:{
   "Als CSV exportieren":"Export as CSV",
   "Einfügen: ":"Insert: ",
   "Einstellungen öffnen":"Open settings",
-  "Datei laden":"Load file",
   "Weitere Formate":"More formats",
   "Sicherung":"Backup",
   "Alle unterstützten Dokumente":"All supported documents",
@@ -1855,7 +1854,7 @@ en:{
   "OpenDocument und RTF":"OpenDocument and RTF",
   "Sicherung erstellen":"Create backup",
   "Teilsicherung":"Partial backup",
-  "Dokument laden…":"Load a document…",
+  "Datei öffnen…":"Open file…",
   "Dokument geladen":"Document loaded",
   "geladen":"loaded",
   "Diese Datei ließ sich nicht lesen":"This file could not be read",
@@ -2568,7 +2567,6 @@ fr:{
   "Als CSV exportieren":"Exporter en CSV",
   "Einfügen: ":"Insérer : ",
   "Einstellungen öffnen":"Ouvrir les paramètres",
-  "Datei laden":"Charger un fichier",
   "Weitere Formate":"Autres formats",
   "Sicherung":"Sauvegarde",
   "Alle unterstützten Dokumente":"Tous les documents pris en charge",
@@ -2578,7 +2576,7 @@ fr:{
   "OpenDocument und RTF":"OpenDocument et RTF",
   "Sicherung erstellen":"Créer une sauvegarde",
   "Teilsicherung":"Sauvegarde partielle",
-  "Dokument laden…":"Charger un document…",
+  "Datei öffnen…":"Ouvrir un fichier…",
   "Dokument geladen":"Document chargé",
   "geladen":"chargé",
   "Diese Datei ließ sich nicht lesen":"Ce fichier n'a pas pu être lu",
@@ -3291,7 +3289,6 @@ es:{
   "Als CSV exportieren":"Exportar como CSV",
   "Einfügen: ":"Insertar: ",
   "Einstellungen öffnen":"Abrir configuración",
-  "Datei laden":"Cargar archivo",
   "Weitere Formate":"Más formatos",
   "Sicherung":"Copia de seguridad",
   "Alle unterstützten Dokumente":"Todos los documentos admitidos",
@@ -3301,7 +3298,7 @@ es:{
   "OpenDocument und RTF":"OpenDocument y RTF",
   "Sicherung erstellen":"Crear copia de seguridad",
   "Teilsicherung":"Copia de seguridad parcial",
-  "Dokument laden…":"Cargar documento…",
+  "Datei öffnen…":"Abrir archivo…",
   "Dokument geladen":"Documento cargado",
   "geladen":"cargado",
   "Diese Datei ließ sich nicht lesen":"Este archivo no se pudo leer",
@@ -4014,7 +4011,6 @@ pt:{
   "Als CSV exportieren":"Exportar como CSV",
   "Einfügen: ":"Inserir: ",
   "Einstellungen öffnen":"Abrir configurações",
-  "Datei laden":"Carregar arquivo",
   "Weitere Formate":"Mais formatos",
   "Sicherung":"Backup",
   "Alle unterstützten Dokumente":"Todos os documentos compatíveis",
@@ -4024,7 +4020,7 @@ pt:{
   "OpenDocument und RTF":"OpenDocument e RTF",
   "Sicherung erstellen":"Criar backup",
   "Teilsicherung":"Backup parcial",
-  "Dokument laden…":"Carregar documento…",
+  "Datei öffnen…":"Abrir arquivo…",
   "Dokument geladen":"Documento carregado",
   "geladen":"carregado",
   "Diese Datei ließ sich nicht lesen":"Não foi possível ler este arquivo",
@@ -4737,7 +4733,6 @@ pl:{
   "Als CSV exportieren":"Eksportuj jako CSV",
   "Einfügen: ":"Wstaw: ",
   "Einstellungen öffnen":"Otwórz ustawienia",
-  "Datei laden":"Wczytaj plik",
   "Weitere Formate":"Więcej formatów",
   "Sicherung":"Kopia zapasowa",
   "Alle unterstützten Dokumente":"Wszystkie obsługiwane dokumenty",
@@ -4747,7 +4742,7 @@ pl:{
   "OpenDocument und RTF":"OpenDocument i RTF",
   "Sicherung erstellen":"Utwórz kopię zapasową",
   "Teilsicherung":"Kopia częściowa",
-  "Dokument laden…":"Wczytaj dokument…",
+  "Datei öffnen…":"Otwórz plik…",
   "Dokument geladen":"Dokument wczytany",
   "geladen":"wczytano",
   "Diese Datei ließ sich nicht lesen":"Nie udało się odczytać tego pliku",
@@ -5466,7 +5461,6 @@ it:{
   "Als CSV exportieren":"Esporta come CSV",
   "Einfügen: ":"Inserisci: ",
   "Einstellungen öffnen":"Apri le impostazioni",
-  "Datei laden":"Carica file",
   "Weitere Formate":"Altri formati",
   "Sicherung":"Backup",
   "Alle unterstützten Dokumente":"Tutti i documenti supportati",
@@ -5476,7 +5470,7 @@ it:{
   "OpenDocument und RTF":"OpenDocument e RTF",
   "Sicherung erstellen":"Crea backup",
   "Teilsicherung":"Backup parziale",
-  "Dokument laden…":"Carica un documento…",
+  "Datei öffnen…":"Apri file…",
   "Dokument geladen":"Documento caricato",
   "geladen":"caricati",
   "Diese Datei ließ sich nicht lesen":"Impossibile leggere questo file",
@@ -6008,7 +6002,7 @@ function startupDialog(){
       ${tr("Wie möchtest du beginnen?")}</p>
     <div style="display:flex;gap:10px">
       <button class="btn pri" id="stNew" style="flex:1;padding:11px">${tr("Neues Dokument")}</button>
-      <button class="btn" id="stOpen" style="flex:1;padding:11px">${tr("Datei laden")}&hellip;</button>
+      <button class="btn" id="stOpen" style="flex:1;padding:11px">${tr("Datei öffnen")}&hellip;</button>
     </div>
     </div></div>`,true);
   const paintSwatch=k=>{
@@ -7977,7 +7971,7 @@ function exportGlossJson(){
   const gid=S.mode==="gloss"?curGView():doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
   /* Als reguläres Bündel, damit die Datei über „Sicherung laden“ und über den
-     Glossar-Import wieder hereinkommt. Über „Dokument laden“ ausdrücklich
+     Glossar-Import wieder hereinkommt. Über „Datei öffnen“ ausdrücklich
      nicht: dort stehen Fremdformate wie docx und odt, keine eigenen Bündel. */
   const b={pqw:PQW,kind:"glossary",saved:new Date().toISOString(),
     glossaries:coll?[coll]:[],glossary:S.glossary.filter(g=>g.gid===gid)};
@@ -8154,7 +8148,7 @@ function commandList(){
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
   add("Dokument","Neues Dokument mit Format","Alt ⇧ D",newDocument);
-  add("Dokument","Dokument laden…","",loadDocumentFile);
+  add("Dokument","Datei öffnen…","",loadDocumentFile);
   add("Dokument","Seitenformat ändern","",changeFormat);
   LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
     tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),"",()=>setLineHeight(v)));
@@ -10671,7 +10665,7 @@ function fileMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
-    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Dokument laden…")}</button>
+    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}</button>
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${K} P</span></button>
@@ -15577,7 +15571,7 @@ dims everything but the page and lets you keep writing.</p>`}]},
 
 {b:"Files, backups and settings",t:[
  {t:"Opening existing files",k:"open;import;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>File &rsaquo; Load document</b> opens files written elsewhere. Each becomes a new tab;
+<p><b>File &rsaquo; Open file</b> opens files written elsewhere. Each becomes a new tab;
 several can be opened at once.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -16131,7 +16125,7 @@ dämpft alles außer der Seite und lässt dich weiterschreiben.</p>`}]},
 
 {b:"Dateien, Sicherungen und Einstellungen",t:[
  {t:"Vorhandene Dateien öffnen",k:"öffnen;laden;import;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>Datei &rsaquo; Dokument laden</b> öffnet anderswo geschriebene Dateien. Jede wird ein
+<p><b>Datei &rsaquo; Datei öffnen</b> öffnet anderswo geschriebene Dateien. Jede wird ein
 neuer Reiter; mehrere lassen sich auf einmal öffnen.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -16692,7 +16686,7 @@ todo salvo la página y te deja seguir escribiendo.</p>`}]},
 
 {b:"Archivos, copias de seguridad y ajustes",t:[
  {t:"Abrir archivos existentes",k:"abrir;importar;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>Archivo &rsaquo; Cargar documento</b> abre archivos escritos en otro programa. Cada uno se
+<p><b>Archivo &rsaquo; Abrir archivo</b> abre archivos escritos en otro programa. Cada uno se
 convierte en una pestaña nueva; se pueden abrir varios a la vez.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -17247,7 +17241,7 @@ tudo menos a página e deixa você continuar escrevendo.</p>`}]},
 
 {b:"Arquivos, backups e configurações",t:[
  {t:"Abrir arquivos existentes",k:"abrir;importar;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>Arquivo &rsaquo; Carregar documento</b> abre arquivos escritos em outro programa. Cada um
+<p><b>Arquivo &rsaquo; Abrir arquivo</b> abre arquivos escritos em outro programa. Cada um
 vira uma aba nova; vários podem ser abertos de uma vez.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -17823,7 +17817,7 @@ tout sauf la page et vous laisse continuer à écrire.</p>`}]},
 
 {b:"Fichiers, sauvegardes et paramètres",t:[
  {t:"Ouvrir des fichiers existants",k:"ouvrir;importer;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>Fichier &rsaquo; Charger un document</b> ouvre des fichiers écrits ailleurs. Chacun
+<p><b>Fichier &rsaquo; Ouvrir un fichier</b> ouvre des fichiers écrits ailleurs. Chacun
 devient un nouvel onglet ; plusieurs peuvent être ouverts à la fois.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -18380,7 +18374,7 @@ wszystko poza stroną i pozwala dalej pisać.</p>`}]},
 
 {b:"Pliki, kopie zapasowe i ustawienia",t:[
  {t:"Otwieranie istniejących plików",k:"otwórz;importuj;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>Plik &rsaquo; Wczytaj dokument</b> otwiera pliki napisane gdzie indziej. Każdy staje się
+<p><b>Plik &rsaquo; Otwórz plik</b> otwiera pliki napisane gdzie indziej. Każdy staje się
 nową kartą; można otworzyć kilka naraz.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
@@ -18942,7 +18936,7 @@ cosa: attenua tutto tranne la pagina e ti lascia continuare a scrivere.</p>`}]},
 
 {b:"File, backup e impostazioni",t:[
  {t:"Aprire file esistenti",k:"aprire;importare;docx;odt;rtf;markdown;html;txt",b:`
-<p><b>File &rsaquo; Carica un documento</b> apre file scritti altrove. Ognuno diventa una nuova
+<p><b>File &rsaquo; Apri file</b> apre file scritti altrove. Ognuno diventa una nuova
 scheda; se ne possono aprire diversi in una volta.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
