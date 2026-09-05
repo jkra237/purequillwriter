@@ -11132,7 +11132,15 @@ function contextMenu(e){
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
       <button class="mi" data-c="unlink"><span class="chk"></span>${tr("Verknüpfung lösen")}</button>`:""}
     <div class="msep"></div>
-    <button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>
+    ${hasSel
+      /* Mit Markierung lohnt das Untermenue: dann sind beide Befehle sinnvoll.
+         Ohne Markierung ist "Als Glossareintrag anlegen" gegenstandslos, und
+         ein Untermenue mit einem einzigen brauchbaren Eintrag ist ein Umweg —
+         also steht das Nachschlagen direkt da. Ausblenden waere die schlechtere
+         Loesung gewesen: Nachschlagen braucht keine Markierung und wuerde dem
+         Rechtsklick verloren gehen. */
+      ?`<button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>`
+      :`<button class="mi" data-c="glolook"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">Alt ⇧ G</span></button>`}
     <div class="msep"></div>
     ${cell?`<button class="mi" data-c="tblmore"><span class="chk"></span>${tr("Tabelle")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>`
@@ -11182,7 +11190,7 @@ function contextMenu(e){
     if(a==="glomore"){
       const items=[
         {a:"look",label:tr("Im Glossar nachschlagen"),k:"Alt ⇧ G"},
-        {a:"newg",label:tr("Als Glossareintrag anlegen"),dis:!hasSel}
+        {a:"newg",label:tr("Als Glossareintrag anlegen")}
       ];
       openSubMenu(b,items,sub=>{ed.focus();glossAct(sub,selText)});
       return;
@@ -11226,6 +11234,7 @@ function contextMenu(e){
     if(a==="link")linkSelection();
     if(a==="goto"&&anchId)jumpTo(anchId,curOcc[anchId]||0);
     if(a==="unlink"&&onAnch){unwrap(onAnch);flush();commit();drawAnchors();toast(tr("Verknüpfung gelöst"))}
+    if(a==="glolook")glossSearch();
     if(a==="count")wordCount(selText);
 
   };
