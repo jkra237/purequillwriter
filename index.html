@@ -725,6 +725,36 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .imgbar .pct{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:38px}
 .glossterm{border-bottom:1.5px dotted var(--stamp);cursor:help}
 
+/* ---- Wortwiederholungen ----
+   Eine Liste, die man anfassen kann: jede Zeile ist ein Sprungziel, jede
+   Form darin ein eigenes. Die linke Kante traegt die Aussage — grau, wenn
+   die Wiederholungen weit auseinanderliegen, warm, wenn sie dicht stehen.
+   Genau das unterscheidet ein Wort, das ein Text nun einmal braucht, von
+   einem, das im selben Absatz viermal auftaucht. */
+.repopt{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding-bottom:11px;border-bottom:1px solid var(--rule);margin-bottom:9px}
+.repopt label{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:5px}
+.repopt input[type=number]{width:52px;text-align:right}
+.repopt input[type=checkbox]{width:auto}
+.rephint{font-size:11px;color:var(--ink-faint);margin:-3px 0 9px}
+.replist{max-height:320px;overflow:auto;margin:0 -3px;padding:0 3px}
+.reprow{padding:8px 10px;margin-bottom:5px;border:1px solid transparent;
+  border-left:3px solid var(--rule);border-radius:var(--radius);cursor:pointer;outline:none}
+.reprow:hover,.reprow:focus{background:var(--chrome-2);border-color:var(--rule)}
+.reprow.dicht{border-left-color:#DD6B20}
+.repkopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.repterm{font-size:14px;font-weight:600;color:var(--ink)}
+.repn{font-family:var(--mono);font-size:12px;color:var(--ink-soft);flex:none}
+.repformen{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px}
+.repform{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
+  border:1px solid var(--rule);border-radius:9px;padding:1px 7px;cursor:pointer}
+.repform:hover{border-color:var(--stamp);color:var(--stamp)}
+.repnah{font-size:11px;color:var(--ink-faint);margin-top:4px}
+.reprow.dicht .repnah{color:#B4590F}
+.repleer{padding:22px 6px;text-align:center;color:var(--ink-soft);font-size:13px}
+.repprog{height:4px;border-radius:2px;background:var(--rule);overflow:hidden;margin-top:7px}
+.repprog i{display:block;height:100%;width:0;background:var(--stamp);transition:width .2s}
+
 /* ---- Statuszeile ---- */
 .status{display:flex;align-items:center;gap:17px;padding:5px 13px;border-top:1px solid var(--rule);
   background:var(--chrome-2);font-size:12px;color:var(--ink-soft);flex:0 0 auto;
@@ -1718,6 +1748,15 @@ en:{
   "Zurücksetzen":"Reset",
   "Ausschalten":"Turn off",
   "Ziel aktiv":"Goal active",
+  "Wortwiederholungen":"Repeated words",
+  "Flektierte Formen zusammenfassen":"Group inflected forms",
+  "Mindestens":"At least",
+  "Vorkommen":"occurrences",
+  "Mindestlänge":"Minimum length",
+  "engster Abstand":"closest gap",
+  "Keine Wiederholungen gefunden.":"No repetitions found.",
+  "Wörterbuch laden":"Load dictionary",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Without a dictionary only identical forms are grouped.",
   "Verbleibend":"Remaining",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Counts what's been added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
@@ -2447,6 +2486,15 @@ fr:{
   "Zurücksetzen":"Réinitialiser",
   "Ausschalten":"Désactiver",
   "Ziel aktiv":"Objectif actif",
+  "Wortwiederholungen":"Répétitions",
+  "Flektierte Formen zusammenfassen":"Regrouper les formes fléchies",
+  "Mindestens":"Au moins",
+  "Vorkommen":"occurrences",
+  "Mindestlänge":"Longueur minimale",
+  "engster Abstand":"écart le plus court",
+  "Keine Wiederholungen gefunden.":"Aucune répétition trouvée.",
+  "Wörterbuch laden":"Charger le dictionnaire",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sans dictionnaire, seules les formes identiques sont regroupées.",
   "Verbleibend":"Restant",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Est compté ce qui s'est ajouté depuis l'activation ou la réinitialisation — tous documents confondus.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insérer un saut de page (Alt+⇧+Entrée)",
@@ -3176,6 +3224,15 @@ es:{
   "Zurücksetzen":"Restablecer",
   "Ausschalten":"Desactivar",
   "Ziel aktiv":"Objetivo activo",
+  "Wortwiederholungen":"Repeticiones",
+  "Flektierte Formen zusammenfassen":"Agrupar formas flexionadas",
+  "Mindestens":"Al menos",
+  "Vorkommen":"apariciones",
+  "Mindestlänge":"Longitud mínima",
+  "engster Abstand":"distancia mínima",
+  "Keine Wiederholungen gefunden.":"No se encontraron repeticiones.",
+  "Wörterbuch laden":"Cargar diccionario",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sin diccionario solo se agrupan formas idénticas.",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Se cuenta lo que se ha añadido desde que se activó o se restableció — en todos los documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insertar salto de página (Alt+⇧+Intro)",
@@ -3905,6 +3962,15 @@ pt:{
   "Zurücksetzen":"Redefinir",
   "Ausschalten":"Desativar",
   "Ziel aktiv":"Meta ativa",
+  "Wortwiederholungen":"Repetições",
+  "Flektierte Formen zusammenfassen":"Agrupar formas flexionadas",
+  "Mindestens":"Pelo menos",
+  "Vorkommen":"ocorrências",
+  "Mindestlänge":"Comprimento mínimo",
+  "engster Abstand":"distância mínima",
+  "Keine Wiederholungen gefunden.":"Nenhuma repetição encontrada.",
+  "Wörterbuch laden":"Carregar dicionário",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sem dicionário apenas formas idênticas são agrupadas.",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"É contado o que foi adicionado desde a ativação ou a redefinição — em todos os documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserir quebra de página (Alt+⇧+Enter)",
@@ -4634,6 +4700,15 @@ pl:{
   "Zurücksetzen":"Resetuj",
   "Ausschalten":"Wyłącz",
   "Ziel aktiv":"Cel aktywny",
+  "Wortwiederholungen":"Powtórzenia",
+  "Flektierte Formen zusammenfassen":"Grupuj formy odmienione",
+  "Mindestens":"Co najmniej",
+  "Vorkommen":"wystąpień",
+  "Mindestlänge":"Minimalna długość",
+  "engster Abstand":"najmniejszy odstęp",
+  "Keine Wiederholungen gefunden.":"Nie znaleziono powtórzeń.",
+  "Wörterbuch laden":"Wczytaj słownik",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Bez słownika grupowane są tylko identyczne formy.",
   "Verbleibend":"Pozostało",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Liczone jest to, co przybyło od włączenia lub zresetowania — we wszystkich dokumentach.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Wstaw podział strony (Alt+⇧+⏎)",
@@ -5370,6 +5445,15 @@ it:{
   "Zurücksetzen":"Azzera",
   "Ausschalten":"Disattiva",
   "Ziel aktiv":"Obiettivo attivo",
+  "Wortwiederholungen":"Ripetizioni",
+  "Flektierte Formen zusammenfassen":"Raggruppa forme flesse",
+  "Mindestens":"Almeno",
+  "Vorkommen":"occorrenze",
+  "Mindestlänge":"Lunghezza minima",
+  "engster Abstand":"distanza minima",
+  "Keine Wiederholungen gefunden.":"Nessuna ripetizione trovata.",
+  "Wörterbuch laden":"Carica dizionario",
+  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Senza dizionario vengono raggruppate solo forme identiche.",
   "Verbleibend":"Rimanente",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Si conta ciò che è stato aggiunto da quando hai attivato l'obiettivo o l'hai azzerato — in tutti i documenti.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserisci interruzione di pagina (Alt+⇧+Invio)",
@@ -11129,6 +11213,7 @@ function toolsMenu(){
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">${tr("Strg")} H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
+    <button class="mi" data-t="rep"><span class="chk"></span>${tr("Wortwiederholungen")}&hellip;</button>
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
@@ -11148,6 +11233,7 @@ function toolsMenu(){
     if(a==="goal")goalDialog();
     if(a==="find")fdOpen(true);
     if(a==="spell"){spellState="idle";spellDialog()}
+    if(a==="rep")repDialog();
     if(a==="clean")cleanDialog();
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
@@ -11993,6 +12079,125 @@ function wordCount(selText){
     </div><div class="rowend"><button class="btn" id="wcClose">${tr("Schließen")}</button></div></div>`);
   $("#wcClose").onclick=closeOvl;
 }
+/* ================= Wortwiederholungen =================
+   Zaehlt nicht nur, sondern gewichtet: ein Wort vierzigmal ueber einen Roman
+   verteilt ist harmlos, viermal im selben Absatz nicht. Deshalb geht der
+   engste Abstand zweier Vorkommen in die Reihenfolge ein.
+   Die Zusammenfassung flektierter Formen kommt aus dem Hunspell-Woerterbuch,
+   das fuer die Rechtschreibpruefung ohnehin vorliegt — kein zweiter
+   Sprachdatensatz, keine handgestrickten Endungslisten je Sprache. Ist kein
+   Woerterbuch geladen, wird nach genauen Formen gruppiert; das geht immer
+   und sofort. */
+let repOpt={min:3,len:4,flex:true};
+let repLaden=false;
+function repDictBereit(){return !!(SPELL&&SPELL.lang===S.settings.lang&&SPELL.eng.stem)}
+function repStamm(w){
+  if(!repOpt.flex||!repDictBereit())return w.toLowerCase();
+  const s=SPELL.eng.stem(w);
+  return (s||w).toLowerCase();
+}
+function repAnalyse(){
+  const ed=$("#editor");
+  const txt=ed?(ed.innerText||""):stripHtml(doc().html);
+  const rx=/[\p{L}][\p{L}\p{M}'’-]*/gu;
+  const gruppen=new Map();
+  let m,i=0;
+  while((m=rx.exec(txt))!==null){
+    const wort=m[0];i++;
+    if(wort.length<repOpt.len)continue;
+    const k=repStamm(wort);
+    let g=gruppen.get(k);
+    if(!g){g={n:0,formen:new Map(),pos:[]};gruppen.set(k,g)}
+    g.n++;g.pos.push(i);
+    g.formen.set(wort,(g.formen.get(wort)||0)+1);
+  }
+  const liste=[];
+  for(const g of gruppen.values()){
+    if(g.n<repOpt.min)continue;
+    let eng=Infinity;
+    for(let j=1;j<g.pos.length;j++)eng=Math.min(eng,g.pos[j]-g.pos[j-1]);
+    g.eng=eng;
+    /* Naehe wiegt schwerer als blosse Haeufigkeit. */
+    g.wert=g.n*(eng<=25?2.2:eng<=70?1.5:1);
+    liste.push(g);
+  }
+  liste.sort((a,b)=>b.wert-a.wert||b.n-a.n);
+  return liste;
+}
+function repRender(){
+  const box=$("#repList");if(!box)return;
+  const liste=repAnalyse();
+  if(!liste.length){
+    box.innerHTML=`<div class="repleer">${tr("Keine Wiederholungen gefunden.")}</div>`;return;
+  }
+  box.innerHTML=liste.slice(0,60).map(g=>{
+    const formen=[...g.formen.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+    const dicht=g.eng<=25;
+    return `<div class="reprow ${dicht?"dicht":""}" data-w="${esc(formen[0][0])}" tabindex="0">
+      <div class="repkopf"><span class="repterm">${esc(formen[0][0])}</span>
+        <span class="repn">${g.n}&times;</span></div>
+      <div class="repformen">${formen.map(([f,n])=>
+        `<span class="repform" data-w="${esc(f)}">${esc(f)}<span style="opacity:.6"> ${n}</span></span>`).join("")}</div>
+      <div class="repnah">${tr("engster Abstand")}: ${g.eng} ${tr("Wörter")}</div>
+    </div>`;
+  }).join("");
+}
+/* Ein Klick springt in den Text: dieselbe Mechanik wie die Suche, damit die
+   Fundstellen hervorgehoben sind und man mit den Pfeilen durchgehen kann. */
+function repSpringe(w){
+  closeOvl();
+  fdOpen(false);
+  const f=$("#fdQ");if(!f)return;
+  f.value=w;
+  const ww=$("#fdWw");if(ww&&!ww.checked&&repOpt.flex===false)ww.checked=true;
+  fdRun();
+}
+function repDialog(){
+  flush();
+  const bereit=repDictBereit();
+  overlay(`<div class="modal" style="max-width:520px"><h3>${tr("Wortwiederholungen")}</h3><div class="pad">
+    <div class="repopt">
+      <label><input type="checkbox" id="repFlex" ${repOpt.flex?"checked":""}>${tr("Flektierte Formen zusammenfassen")}</label>
+      <label>${tr("Mindestens")} <input type="number" id="repMin" min="2" max="99" value="${repOpt.min}"> ${tr("Vorkommen")}</label>
+      <label>${tr("Mindestlänge")} <input type="number" id="repLen" min="2" max="20" value="${repOpt.len}"></label>
+    </div>
+    ${repOpt.flex&&!bereit?`<div class="rephint" id="repHint">${tr("Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.")}
+      <button class="btn" id="repLoad" style="margin-left:6px">${tr("Wörterbuch laden")}</button>
+      <div class="repprog" id="repProg" style="display:none"><i></i></div></div>`:""}
+    <div class="replist" id="repList"></div>
+    </div><div class="rowend"><button class="btn" id="repClose">${tr("Schließen")}</button></div></div>`);
+  repRender();
+  const neu=()=>{closeOvl();repDialog()};
+  $("#repFlex").onchange=e=>{repOpt.flex=e.target.checked;neu()};
+  $("#repMin").onchange=e=>{repOpt.min=Math.max(2,Math.min(99,+e.target.value||3));repRender()};
+  $("#repLen").onchange=e=>{repOpt.len=Math.max(2,Math.min(20,+e.target.value||4));repRender()};
+  $("#repClose").onclick=closeOvl;
+  const lb=$("#repLoad");
+  if(lb)lb.onclick=async()=>{
+    if(repLaden)return;repLaden=true;
+    lb.disabled=true;
+    const pr=$("#repProg");if(pr)pr.style.display="block";
+    try{
+      const eng=await spellLoad(S.settings.lang,x=>{
+        const i=pr&&pr.firstElementChild;if(i)i.style.width=Math.round(x*100)+"%";});
+      SPELL={lang:S.settings.lang,eng};
+      repLaden=false;neu();
+    }catch(e){repLaden=false;lb.disabled=false;toast(tr("Wörterbuch nicht verfügbar"))}
+  };
+  const box=$("#repList");
+  box.onclick=e=>{
+    const f=e.target.closest(".repform");
+    if(f){repSpringe(f.dataset.w);return}
+    const r=e.target.closest(".reprow");
+    if(r)repSpringe(r.dataset.w);
+  };
+  box.onkeydown=e=>{
+    if(e.key!=="Enter"&&e.key!==" ")return;
+    const r=e.target.closest(".reprow");
+    if(r){e.preventDefault();repSpringe(r.dataset.w)}
+  };
+}
+
 /* ================= Kopf- und Fußzeile =================
    Platzhalter heißen {page}/{pages}/{title}/{date} - bewusst englisch, nicht
    an die Oberflächensprache gekoppelt, wie Feldnamen in einer Formel. Die
@@ -13719,7 +13924,78 @@ function spMake(A,words,idx){
     if(isTitle)out=out.map(s=>s[0]===s[0].toUpperCase()?s:s[0].toUpperCase()+s.slice(1));
     return Array.from(new Set(out)).slice(0,limit||7);
   }
-  return {check,suggest,addWord(w){user.add(w);memo.delete(w)},
+  /* Der Stamm hinter einer flektierten Form. Die Maschinerie dafuer gab es
+     laengst — sfxOf()/pfxOf() suchen zu einer Form den Woerterbucheintrag,
+     aus dem sie ableitbar ist; nur nach aussen gereicht wurde sie nie.
+     Genommen wird der kuerzeste Treffer, weil das die staerkste Reduktion
+     ist: "Haeuser" -> "Haus" und nicht auf halbem Weg stehenbleiben.
+     Ehrliche Grenze: das ist ein Rechtschreibpruefer, kein Lemmatisierer.
+     Unregelmaessiges, das als eigener Eintrag im Woerterbuch steht (etwa
+     "ging" neben "gehen"), bleibt getrennt. */
+  /* Der Stamm hinter einer flektierten Form. Die Maschinerie dafuer gab es
+     laengst — sfxOf()/pfxOf() suchen zu einer Form den Woerterbucheintrag,
+     aus dem sie ableitbar ist; nach aussen gereicht wurde sie nie.
+
+     Zwei Regeln machen aus dieser Zerlegung etwas Brauchbares:
+
+     Erstens ein Laengendeckel. Flexion tauscht ein paar Zeichen am Ende:
+     Haeusern -> Haus verliert 3, klapperten -> klappern 2. Ableitungen
+     greifen tiefer — eigentlich -> eigen verliert 5 und wuerde zwei ganz
+     verschiedene Woerter zusammenwerfen. Ab vier verlorenen Zeichen gilt der
+     Treffer deshalb nicht mehr als Flexion.
+
+     Zweitens wird auch dann zerlegt, wenn die Form selbst im Woerterbuch
+     steht. Sonst blieben ausgerechnet die deutschen Umlautplurale liegen:
+     Haeuser, Kinder, Frauen und Buecher sind eigene Eintraege und fanden
+     ihren Singular nie. Weil ein Grundwort seinerseits reduzierbar sein
+     kann, wird bis zum Stillstand wiederholt (hoechstens dreimal, hoechstens
+     vier Zeichen im Ganzen) — nur so landen Haus und Haeuser sicher auf
+     demselben Schluessel. Wie huebsch der ist, spielt keine Rolle: die Liste
+     zeigt die haeufigste tatsaechliche Form, nicht den Schluessel.
+
+     Ehrliche Grenze: das ist ein Rechtschreibpruefer, kein Lemmatisierer.
+     Unregelmaessiges mit eigenem Eintrag (ging neben gehen, lief neben
+     laufen) bleibt getrennt. */
+  const stemMemo=new Map();
+  function stemStep(word,budget){
+    let best=null;
+    const nimm=s=>{
+      if(!s||s===word)return;
+      if(word.length-s.length>budget)return;
+      if(!best||s.length<best.length)best=s;
+    };
+    for(const c of sfxOf(word,false))nimm(c.stem);
+    for(const pc of pfxOf(word)){
+      if(words.has(pc.inner))nimm(pc.inner);
+      if(pc.ent.cross)for(const c of sfxOf(pc.inner,true))nimm(c.stem);
+    }
+    return best;
+  }
+  function stemOf(raw){
+    const word=iconv(String(raw||"").trim());
+    if(!word)return null;
+    if(stemMemo.has(word))return stemMemo.get(word);
+    const klein=word.toLowerCase();
+    const gross=word.charAt(0).toUpperCase()+word.slice(1).toLowerCase();
+    let akt=null;
+    for(const w of [word,klein,gross]){
+      const s=stemStep(w,3);
+      if(s&&(!akt||s.length<akt.length))akt=s;
+    }
+    if(!akt)for(const w of [word,klein,gross])if(words.has(w)){akt=w;break}
+    if(akt){
+      let rest=4-(word.length-akt.length);
+      for(let i=0;i<2&&rest>0;i++){
+        const s=stemStep(akt,rest);
+        if(!s)break;
+        rest-=akt.length-s.length;akt=s;
+      }
+    }
+    if(stemMemo.size>20000)stemMemo.clear();
+    stemMemo.set(word,akt);
+    return akt;
+  }
+  return {check,suggest,stem:stemOf,addWord(w){user.add(w);memo.delete(w)},
           size:words.size};
 }
 /* Aufbau in Häppchen: die polnische .dic hat 300.000 Zeilen, am Stück
