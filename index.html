@@ -626,7 +626,11 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .toc[data-style="modern"] .toc-pg{background:var(--stamp);color:var(--on-stamp,#fff);
   border-radius:9px;padding:1px 8px}
 .toc[data-style="numbered"] .toc-num{color:var(--ink);font-weight:600;min-width:2.6em}
-.findbar{position:absolute;top:9px;right:16px;z-index:35;background:var(--paper);
+/* Breitengrenze: die Leiste schwebt ueber der Seite und waechst mit der
+   laengsten Beschriftung — auf Deutsch 427px. In einem schmalen Fenster lief
+   sie sonst links hinaus (bei 320px Fensterbreite bis -66px), auch schon vor
+   den ausfuehrlicheren Beschriftungen. */
+.findbar{max-width:calc(100vw - 32px);position:absolute;top:9px;right:16px;z-index:35;background:var(--paper);
   border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);
   padding:7px 9px;display:none;min-width:330px}
 .findbar.on{display:block}
@@ -640,6 +644,14 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
   display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .findbar .fb:hover{color:var(--ink);background:var(--chrome-2)}
 .findbar .fopt{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:4px}
+/* Beispielzeile: Die Beschriftungen sagen jetzt, was die Optionen tun, aber
+   drei Woerter koennen nicht zeigen, dass "Nur ganze Woerter" auch Hausberg
+   ausschliesst. Die Zeile holt das Beispiel aus dem eigenen Suchbegriff und,
+   wo es geht, aus dem eigenen Text. Der Platz ist dauerhaft reserviert, sonst
+   spraenge die Leiste beim Ueberfahren auf. */
+.findbar .fhint{min-height:15px;margin-top:5px;font-size:11px;color:var(--ink-faint);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.findbar .fhint b{color:var(--ink-soft);font-weight:600}
 #editor .hit{background:rgba(255,214,0,.42);border-radius:2px}
 #editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
 /* Rechtschreibfehler: dieselbe Wellenlinie, die der Browser selbst zeichnet —
@@ -1433,11 +1445,12 @@ body.focus .sheet{padding-top:9vh}
             <button class="btn" id="fdRepAll">Alle</button>
           </div>
           <div class="fr">
-            <label class="fopt" id="fdCsLbl"><input type="checkbox" id="fdCs" style="width:auto"> Groß-/Kleinschreibung</label>
-            <label class="fopt" id="fdWwLbl"><input type="checkbox" id="fdWw" style="width:auto"> Ganzes Wort</label>
+            <label class="fopt" id="fdCsLbl"><input type="checkbox" id="fdCs" style="width:auto"> Groß-/Kleinschreibung beachten</label>
+            <label class="fopt" id="fdWwLbl"><input type="checkbox" id="fdWw" style="width:auto"> Nur ganze Wörter</label>
             <div style="flex:1"></div>
             <button class="pill" id="fdToggleRep">Ersetzen &#9662;</button>
           </div>
+          <div class="fhint" id="fdHint"></div>
         </div>
       </div>
       <div class="status" id="status"></div>
@@ -1643,8 +1656,9 @@ en:{
   "Ersetzen durch":"Replace with",
   "Ersetzen":"Replace",
   "Alle":"All",
-  "Groß-/Kleinschreibung":"Match case",
-  "Ganzes Wort":"Whole word",
+  "Groß-/Kleinschreibung beachten":"Match case",
+  "findet %1 — nicht %2":"matches %1 — not %2",
+  "Nur ganze Wörter":"Whole words only",
   "Fokusmodus":"Focus mode",
   "verlassen (Esc)":"exit (Esc)",
   "Neues Dokument":"New document",
@@ -2368,8 +2382,9 @@ fr:{
   "Ersetzen durch":"Remplacer par",
   "Ersetzen":"Remplacer",
   "Alle":"Tout",
-  "Groß-/Kleinschreibung":"Respecter la casse",
-  "Ganzes Wort":"Mot entier",
+  "Groß-/Kleinschreibung beachten":"Respecter la casse",
+  "findet %1 — nicht %2":"trouve %1 — pas %2",
+  "Nur ganze Wörter":"Mots entiers uniquement",
   "Fokusmodus":"Mode focus",
   "verlassen (Esc)":"quitter (Échap)",
   "Neues Dokument":"Nouveau document",
@@ -3093,8 +3108,9 @@ es:{
   "Ersetzen durch":"Reemplazar por",
   "Ersetzen":"Reemplazar",
   "Alle":"Todo",
-  "Groß-/Kleinschreibung":"Distinguir mayúsculas",
-  "Ganzes Wort":"Palabra completa",
+  "Groß-/Kleinschreibung beachten":"Distinguir mayúsculas",
+  "findet %1 — nicht %2":"encuentra %1 — no %2",
+  "Nur ganze Wörter":"Solo palabras completas",
   "Fokusmodus":"Modo enfoque",
   "verlassen (Esc)":"salir (Esc)",
   "Neues Dokument":"Nuevo documento",
@@ -3818,8 +3834,9 @@ pt:{
   "Ersetzen durch":"Substituir por",
   "Ersetzen":"Substituir",
   "Alle":"Tudo",
-  "Groß-/Kleinschreibung":"Diferenciar maiúsculas/minúsculas",
-  "Ganzes Wort":"Palavra inteira",
+  "Groß-/Kleinschreibung beachten":"Diferenciar maiúsculas",
+  "findet %1 — nicht %2":"encontra %1 — não %2",
+  "Nur ganze Wörter":"Somente palavras inteiras",
   "Fokusmodus":"Modo de foco",
   "verlassen (Esc)":"sair (Esc)",
   "Neues Dokument":"Novo documento",
@@ -4543,8 +4560,9 @@ pl:{
   "Ersetzen durch":"Zamień na",
   "Ersetzen":"Zamień",
   "Alle":"Wszystkie",
-  "Groß-/Kleinschreibung":"Uwzględnij wielkość liter",
-  "Ganzes Wort":"Całe słowo",
+  "Groß-/Kleinschreibung beachten":"Uwzględnij wielkość liter",
+  "findet %1 — nicht %2":"znajduje %1 — nie %2",
+  "Nur ganze Wörter":"Tylko całe wyrazy",
   "Fokusmodus":"Tryb skupienia",
   "verlassen (Esc)":"zamknij (Esc)",
   "Neues Dokument":"Nowy dokument",
@@ -5268,8 +5286,9 @@ it:{
   "Ersetzen durch":"Sostituisci con",
   "Ersetzen":"Sostituisci",
   "Alle":"Tutti",
-  "Groß-/Kleinschreibung":"Maiuscole/minuscole",
-  "Ganzes Wort":"Parola intera",
+  "Groß-/Kleinschreibung beachten":"Distingui maiuscole",
+  "findet %1 — nicht %2":"trova %1 — non %2",
+  "Nur ganze Wörter":"Solo parole intere",
   "Fokusmodus":"Modalità concentrazione",
   "verlassen (Esc)":"esci (Esc)",
   "Neues Dokument":"Nuovo documento",
@@ -6012,9 +6031,9 @@ function applyStaticLabels(){
   $("#fdR").placeholder=tr("Ersetzen durch");
   $("#fdRep").textContent=tr("Ersetzen");
   $("#fdRepAll").textContent=tr("Alle");
-  $("#fdCsLbl").lastChild.textContent=" "+tr("Groß-/Kleinschreibung");
-  $("#fdWwLbl").lastChild.textContent=" "+tr("Ganzes Wort");
-  $("#fdToggleRep").innerHTML=`${tr("Ersetzen")} &#9662;`;
+  $("#fdCsLbl").lastChild.textContent=" "+tr("Groß-/Kleinschreibung beachten");
+  $("#fdWwLbl").lastChild.textContent=" "+tr("Nur ganze Wörter");
+  fdRepPfeil();
   $("#focusLabel").textContent=tr("Fokusmodus");
   $("#focusOut").textContent=tr("verlassen (Esc)");
   document.documentElement.lang=S.settings.uiLang||"de";
@@ -14393,6 +14412,7 @@ function fdOpen(withReplace){
   if(S.mode!=="write")setMode("write");
   const bar=$("#findbar");bar.classList.add("on");
   $("#fdRepRow").style.display=withReplace?"flex":$("#fdRepRow").style.display;
+  fdRepPfeil();fdHinweis(null);
   const sel=getSelection();
   if(sel.rangeCount&&!sel.isCollapsed){
     const t=sel.toString().trim();if(t&&t.length<60)$("#fdQ").value=t;
@@ -14439,10 +14459,54 @@ $("#fdRep").onclick=fdReplaceOne;
 $("#fdRepAll").onclick=fdReplaceAll;
 $("#fdCs").onchange=()=>fdRun();
 $("#fdWw").onchange=()=>fdRun();
+/* Ein Beispiel aus dem eigenen Text statt einer erfundenen Regel: gesucht
+   wird eine echte Stelle im Dokument, die die Option ausschliessen wuerde.
+   Findet sich keine, wird eine plausible gebildet. */
+function fdBeispiel(welche){
+  const q=($("#fdQ").value||"").trim();
+  if(!q)return "";
+  const ed=$("#editor"),txt=ed?(ed.innerText||""):"";
+  let gegen="";
+  if(welche==="cs"){
+    const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
+    let m;while((m=re.exec(txt))!==null){if(m[0]!==q){gegen=m[0];break}}
+    if(!gegen)gegen=(q===q.toLowerCase())?q.toUpperCase():q.toLowerCase();
+  }else{
+    const worte=txt.match(/[\p{L}\p{N}_-]+/gu)||[];
+    const kl=q.toLowerCase();
+    gegen=worte.find(w=>w.length>q.length&&w.toLowerCase().includes(kl))||(q+"\u2026");
+  }
+  return tr("findet %1 — nicht %2")
+    .replace("%1","<b>"+esc(q)+"</b>").replace("%2","<b>"+esc(gegen)+"</b>");
+}
+function fdHinweis(welche){
+  const el=$("#fdHint");if(!el)return;
+  el.innerHTML=welche?fdBeispiel(welche):"";
+}
+[["fdCsLbl","cs"],["fdWwLbl","ww"]].forEach(([id,welche])=>{
+  const el=document.getElementById(id);if(!el)return;
+  /* Nur die eingeblendete Zeile, kein zusaetzlicher Tooltip: derselbe Satz
+     zweimal ist eine Dopplung, und die Zeile ist der bessere der beiden Wege —
+     sie erscheint ohne die Verzoegerung des Systemtooltips, steht immer an
+     derselben Stelle und reagiert auch auf Tastaturfokus. */
+  const an=()=>fdHinweis(welche);
+  const aus=()=>fdHinweis(null);
+  el.addEventListener("mouseenter",an);el.addEventListener("mouseleave",aus);
+  el.addEventListener("focusin",an);el.addEventListener("focusout",aus);
+});
+/* Der Pfeil zeigt den Zustand: zugeklappt nach unten, aufgeklappt nach oben.
+   Ohne ihn standen zwei Knoepfe namens "Ersetzen" nebeneinander, von denen
+   der eine ersetzt und der andere nur eine Zeile ein- und ausblendet. */
+function fdRepPfeil(){
+  const b=$("#fdToggleRep"),r=$("#fdRepRow");if(!b||!r)return;
+  b.innerHTML=tr("Ersetzen")+" "+(r.style.display==="none"?"&#9662;":"&#9652;");
+}
 $("#fdToggleRep").onclick=()=>{
   const r=$("#fdRepRow");
-  r.style.display=r.style.display==="none"?"flex":"none";
-  if(r.style.display==="flex")$("#fdR").focus();
+  const auf=r.style.display==="none";
+  r.style.display=auf?"flex":"none";
+  fdRepPfeil();
+  if(auf)$("#fdR").focus();
 };
 
 /* ================= Schrägstrich-Menü ================= */
@@ -16419,8 +16483,9 @@ unangetastet; erst ab dem dritten wird gekürzt — und dann auf zwei, nicht auf
 <tr><td>Ersetzen</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>Eine Leiste erscheint über der Seite. Sie zählt die Treffer und geht mit <kbd>Eingabe</kbd>
-oder den Pfeilen durch sie hindurch. Zwei Schalter engen die Suche ein: <b>Groß- und
-Kleinschreibung</b> und <b>Ganzes Wort</b>.</p>
+oder den Pfeilen durch sie hindurch. Zwei Schalter engen die Suche ein: <b>Groß-/Kleinschreibung
+beachten</b> und <b>Nur ganze Wörter</b>. Wer mit dem Zeiger darauf verweilt, bekommt ein
+Beispiel aus dem eigenen Suchbegriff gezeigt.</p>
 <p>Ersetzen wirkt auf den aktuellen Treffer; <b>Alle</b> ersetzt sämtliche. <kbd>Esc</kbd>
 schließt die Leiste.</p>`},
 
