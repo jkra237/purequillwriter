@@ -9614,6 +9614,20 @@ function cleanPasteForeign(src){
   const komm=[];let k;while(k=w.nextNode())komm.push(k);
   komm.forEach(n=>n.remove());
 
+  /* Die Massangaben eines eingefuegten Bildes fallen gleich mit den uebrigen
+     Attributen — und damit weiss der Browser die Hoehe eines noch nicht
+     geladenen Bildes nicht mehr. Er misst 0, der Umbruch rechnet damit, und
+     der Text steht so lange falsch, bis die Datei aus dem Netz eintrifft.
+     Genau das war beim Einfuegen eines Zeitungsartikels zu sehen: drei
+     Bloecke ragten ueber die Seitenkante, bis die Bilder da waren. Das
+     Verhaeltnis von Breite zu Hoehe ueberlebt deshalb als aspect-ratio —
+     damit stimmt die Hoehe vom ersten Augenblick an, ohne dass ein einziges
+     Byte des Bildes vorliegt. */
+  const seitenverhaeltnis=new Map();
+  b.querySelectorAll("img").forEach(im=>{
+    const bw=parseFloat(im.getAttribute("width")),bh=parseFloat(im.getAttribute("height"));
+    if(bw>0&&bh>0)seitenverhaeltnis.set(im,bw/bh);
+  });
   b.querySelectorAll("*").forEach(el=>{
     [...el.attributes].forEach(a=>{
       const n=a.name.toLowerCase();
@@ -9634,6 +9648,10 @@ function cleanPasteForeign(src){
     if(el.tagName==="A"&&el.getAttribute("href")){
       el.setAttribute("target","_blank");el.setAttribute("rel","noopener");
     }
+  });
+  seitenverhaeltnis.forEach((v,im)=>{
+    const s=im.getAttribute("style")||"";
+    im.setAttribute("style",(s&&!/;\s*$/.test(s)?s+";":s)+"aspect-ratio:"+v.toFixed(4));
   });
   /* Hüllen auflösen. Von hinten nach vorn, damit verschachtelte Schachteln in
      einem Durchgang verschwinden und die Liste dabei gültig bleibt. */
