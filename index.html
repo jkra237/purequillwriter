@@ -2054,7 +2054,10 @@ en:{
   "Verknüpfte Datei öffnen…":"Open a linked file…",
   "PureQuill-Sicherungen":"PureQuill backups",
   "Bilder eingebettet":"Pictures embedded",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Pictures live inside the document itself, and therefore in the browser's storage, which is limited. Make a backup while everything is still saved — the status bar tells you where you stand.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"Pictures are stored inside the document and make it correspondingly large.",
+  "Ohne Bilder":"Without pictures",
+  "Bilder behalten":"Keep pictures",
+  "Bilder entfernt":"Pictures removed",
   "Weiter":"Continue",
   "Inhalt":"Contents",
   "Stichwortverzeichnis":"Index",
@@ -2792,7 +2795,10 @@ fr:{
   "Verknüpfte Datei öffnen…":"Ouvrir un fichier lié…",
   "PureQuill-Sicherungen":"Sauvegardes PureQuill",
   "Bilder eingebettet":"Images intégrées",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Les images se trouvent dans le document lui-même, donc dans le stockage du navigateur, qui est limité. Faites une sauvegarde tant que tout est enregistré — la barre d'état vous dit où vous en êtes.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"Les images sont enregistrées dans le document et l’agrandissent d’autant.",
+  "Ohne Bilder":"Sans images",
+  "Bilder behalten":"Garder les images",
+  "Bilder entfernt":"Images supprimées",
   "Weiter":"Continuer",
   "Inhalt":"Sommaire",
   "Stichwortverzeichnis":"Index",
@@ -3530,7 +3536,10 @@ es:{
   "Verknüpfte Datei öffnen…":"Abrir un archivo vinculado…",
   "PureQuill-Sicherungen":"Copias de seguridad PureQuill",
   "Bilder eingebettet":"Imágenes incrustadas",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Las imágenes están dentro del propio documento y por tanto en el almacenamiento del navegador, que es limitado. Cree una copia de seguridad mientras todo esté guardado — la barra de estado le dice cómo está.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"Las imágenes se guardan dentro del documento y lo agrandan en consecuencia.",
+  "Ohne Bilder":"Sin imágenes",
+  "Bilder behalten":"Conservar imágenes",
+  "Bilder entfernt":"Imágenes eliminadas",
   "Weiter":"Continuar",
   "Inhalt":"Contenido",
   "Stichwortverzeichnis":"Índice",
@@ -4268,7 +4277,10 @@ pt:{
   "Verknüpfte Datei öffnen…":"Abrir um arquivo vinculado…",
   "PureQuill-Sicherungen":"Backups PureQuill",
   "Bilder eingebettet":"Imagens incorporadas",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"As imagens ficam dentro do próprio documento e, portanto, no armazenamento do navegador, que é limitado. Crie um backup enquanto tudo está salvo — a barra de status mostra a situação.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"As imagens ficam guardadas no documento e aumentam o seu tamanho.",
+  "Ohne Bilder":"Sem imagens",
+  "Bilder behalten":"Manter imagens",
+  "Bilder entfernt":"Imagens removidas",
   "Weiter":"Continuar",
   "Inhalt":"Conteúdo",
   "Stichwortverzeichnis":"Índice",
@@ -5006,7 +5018,10 @@ pl:{
   "Verknüpfte Datei öffnen…":"Otwórz powiązany plik…",
   "PureQuill-Sicherungen":"Kopie zapasowe PureQuill",
   "Bilder eingebettet":"Obrazy osadzone",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Obrazy znajdują się w samym dokumencie, a więc w pamięci przeglądarki, która jest ograniczona. Utwórz kopię zapasową, póki wszystko jest zapisane — pasek stanu pokazuje stan.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"Obrazy są zapisywane w dokumencie i odpowiednio go powiększają.",
+  "Ohne Bilder":"Bez obrazów",
+  "Bilder behalten":"Zachowaj obrazy",
+  "Bilder entfernt":"Obrazy usunięte",
   "Weiter":"Dalej",
   "Inhalt":"Spis treści",
   "Stichwortverzeichnis":"Indeks",
@@ -5750,7 +5765,10 @@ it:{
   "Verknüpfte Datei öffnen…":"Apri un file collegato…",
   "PureQuill-Sicherungen":"Backup di PureQuill",
   "Bilder eingebettet":"Immagini incorporate",
-  "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist.":"Le immagini si trovano nel documento stesso e quindi nella memoria del browser, che è limitata. Fai un backup finché è tutto salvato — la barra di stato ti dice a che punto sei.",
+  "Bilder werden im Dokument gespeichert und vergrößern es entsprechend.":"Le immagini vengono salvate nel documento e lo ingrandiscono di conseguenza.",
+  "Ohne Bilder":"Senza immagini",
+  "Bilder behalten":"Mantieni immagini",
+  "Bilder entfernt":"Immagini rimosse",
   "Weiter":"Continua",
   "Inhalt":"Sommario",
   "Stichwortverzeichnis":"Indice analitico",
@@ -6737,6 +6755,7 @@ function drawWrite(){
   ed.addEventListener("load",e=>{
     if(e.target.tagName==="IMG"&&S.mode==="write")queuePaginate();
   },true);
+  wacheUeberUmbruch();
   ed.addEventListener("keydown",e=>{
     if(slashOn){
       if(e.key==="ArrowDown"){e.preventDefault();slashIdx=Math.min(slashIdx+1,slashHits.length-1);slashOpen(currentSlashQuery());return}
@@ -9816,7 +9835,7 @@ const DOKENDUNGEN=DOKFORMATE.flatMap(f=>f.e);
    um ein Drittel. */
 const BILD_WARNUNG=1500*1024;
 const mbText=b=>(b/1048576).toFixed(1).replace(".",PL(",",".",",",",",",",","))+" MB";
-function bildHinweis(zahl,bytes,fehlend){
+function bildHinweis(zahl,bytes,fehlend,docs){
   overlay(`<div class="modal"><h3>${esc(tr("Bilder eingebettet"))}</h3>
     <div class="pad">
       <p style="margin:0 0 10px;line-height:1.55">${esc(PL(
@@ -9827,7 +9846,7 @@ function bildHinweis(zahl,bytes,fehlend){
         zahl+" imagens vieram com o documento, "+mbText(bytes)+" no total.",
         "Wraz z dokumentem wczytano obrazy: "+zahl+", łącznie "+mbText(bytes)+"."))}</p>
       <p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(tr(
-        "Bilder liegen im Dokument selbst und damit im Speicher des Browsers, der begrenzt ist. Lege eine Sicherung an, solange alles gesichert ist — in der Statuszeile steht, woran du bist."))}</p>
+        "Bilder werden im Dokument gespeichert und vergrößern es entsprechend."))}</p>
       ${fehlend?`<p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(PL(
         fehlend+" Bilder ließen sich nicht lesen und fehlen im Text.",
         fehlend+" pictures could not be read and are missing from the text.",
@@ -9836,14 +9855,28 @@ function bildHinweis(zahl,bytes,fehlend){
         fehlend+" imagens não puderam ser lidas e faltam no texto.",
         "Nie udało się wczytać obrazów: "+fehlend+" — brakuje ich w tekście."))}</p>`:""}
     </div>
-    <div class="rowend"><button class="btn" id="biBackup">${esc(tr("Alles sichern"))}</button>
-      <button class="btn prim" id="biOk">${esc(tr("Weiter"))}</button></div></div>`);
+    <div class="rowend"><button class="btn" id="biOhne">${esc(tr("Ohne Bilder"))}</button>
+      <button class="btn prim" id="biOk">${esc(tr("Bilder behalten"))}</button></div></div>`);
   $("#biOk").onclick=closeOvl;
-  $("#biBackup").onclick=()=>{closeOvl();saveBundle("all")};
+  /* Eine Wahl statt eines Ratschlags: der frühere Text erklärte den
+     Browserspeicher und empfahl eine Sicherung — richtig, aber an dieser
+     Stelle für jemanden, der gerade eine Datei geöffnet hat, eine Frage mehr
+     statt einer Antwort. Wen die Bilder nicht interessieren, wird sie hier
+     einfach los. */
+  $("#biOhne").onclick=()=>{
+    for(const d of (docs||[])){
+      const t=document.createElement("div");t.innerHTML=d.html||"";
+      t.querySelectorAll("figure.fig,img").forEach(x=>x.remove());
+      d.html=t.innerHTML;
+    }
+    save();closeOvl();render();toast(tr("Bilder entfernt"));
+  };
 }
 async function ladeDokumente(dateien){
   if(!dateien.length)return;
   let geladen=0,abgelehnt=0,bildZahl=0,bildBytes=0,bildFehlend=0;
+  /* Fuer "Ohne Bilder": nur die eben entstandenen Dokumente anfassen. */
+  const vorherIds=new Set(S.docs.map(d=>d.id));
   for(const f of dateien){
     const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
     try{
@@ -9864,7 +9897,8 @@ async function ladeDokumente(dateien){
       }
     }catch(e){abgelehnt++}
   }
-  if(geladen&&bildBytes>BILD_WARNUNG)bildHinweis(bildZahl,bildBytes,bildFehlend);
+  if(geladen&&bildBytes>BILD_WARNUNG)
+    bildHinweis(bildZahl,bildBytes,bildFehlend,S.docs.filter(d=>!vorherIds.has(d.id)));
   else if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
   else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
 }
@@ -11558,6 +11592,51 @@ $("#pane").addEventListener("focusout",e=>{
 /* ================= Seitenumbruch ================= */
 const GAP=20;
 let pgTimer=null,pageCount=1;
+/* Der Umbruch misst den lebenden Text. Aendert sich dessen Hoehe, nachdem er
+   gelaufen ist, steht er falsch — und bis hierher fiel das nur auf, wenn ein
+   Bild dabei ein load-Ereignis ausloeste. Genau daran fehlte es: eine spaete
+   Groessenaenderung ohne load (nachgeladene Schrift, ein Bild, das seine
+   Darstellungsbreite wechselt, spaet greifende Auszeichnung aus eingefuegtem
+   Fremd-HTML) liess elf Bloecke ueber die Seitenkante ragen, ohne dass je
+   neu umbrochen wurde. Der Beobachter deckt die ganze Klasse ab, statt einen
+   einzelnen Ausloeser nachzureichen.
+   Keine Rueckkopplung: paginate() merkt sich die Hoehe, die es selbst
+   erzeugt hat; nur eine Abweichung davon stoesst neu an. */
+/* Nachkontrolle statt Ereignis: der Umbruch misst den lebenden Text, und
+   was sich danach noch bewegt, macht ihn falsch. Bisher fiel das nur auf,
+   wenn ein Bild dabei ein load-Ereignis ausloeste — eine spaete Aenderung
+   ohne load (ein Bild, das seine Darstellungsgroesse wechselt, nachgeladene
+   Schrift, spaet greifende Auszeichnung aus eingefuegtem Fremd-HTML) liess
+   gemessen elf Bloecke ueber die Seitenkante ragen, ohne dass je neu
+   umbrochen wurde.
+   Bewusst kein ResizeObserver: dessen Zustellung haengt am Rendering-Takt,
+   war im Pruefaufbau nicht zu belegen, und ein Beobachter auf #editor waere
+   ohnehin blind — der Kasten traegt eine min-height in Hoehe des
+   Seitenrasters (gemessen 6815px bei 6172px Inhalt) und aendert seine Hoehe
+   nicht, wenn ein Bild darin waechst.
+   Geprueft wird stattdessen die Unterkante des letzten Blocks: verschiebt
+   sich die, hat sich oberhalb etwas veraendert. Zwei Messwerte je Runde,
+   drei Runden nach jedem Umbruch — und jeder neue Umbruch setzt die Runden
+   zurueck, sodass sich nichts aufschaukelt. */
+let letzteUnterkante=0,umbruchPuls=null;
+function inhaltUnterkante(){
+  const ed=$("#editor");if(!ed)return 0;
+  const k=[...ed.children].filter(x=>!x.classList.contains("free"));
+  const l=k[k.length-1];
+  return l?l.getBoundingClientRect().bottom-ed.getBoundingClientRect().top:0;
+}
+function wacheUeberUmbruch(){
+  letzteUnterkante=inhaltUnterkante();
+  /* Dauerhaft, nicht auf ein paar Runden befristet: ein Bild aus dem Netz
+     kommt an, wann es ankommt. Eine befristete Nachkontrolle traf genau dann
+     daneben — gemessen blieben acht Bloecke ueber der Seitenkante stehen,
+     wenn die Aenderung nach dem letzten Fenster eintraf. */
+  if(umbruchPuls)return;
+  umbruchPuls=setInterval(()=>{
+    if(S.mode!=="write"||!$("#editor"))return;
+    if(Math.abs(inhaltUnterkante()-letzteUnterkante)>1)paginate();
+  },1200);
+}
 function queuePaginate(){
   queueRep();clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate();drawAnchors()},220)}
 function paginate(){
@@ -11656,6 +11735,7 @@ function paginate(){
   const last=blocks.length?blocks[blocks.length-1].getBoundingClientRect():null;
   const bottom=last?last.bottom-edTop:0;
   pageCount=Math.max(1,Math.ceil((bottom+mb)/stride));
+  wacheUeberUmbruch();
   if(bottom+mb+(fnHeights[pageCount-1]||0)>pageCount*stride-GAP)pageCount++;
   ed.style.minHeight=(pageCount*stride-GAP)+"px";
   paper.style.height=(pageCount*stride-GAP)+"px";
