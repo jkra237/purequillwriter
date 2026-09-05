@@ -747,6 +747,24 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
   background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
   animation:goalshine 1.3s ease-in-out 3 forwards}
 @keyframes goalshine{0%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+/* Derselbe Balken noch einmal in gross fuer den Dialog: bisher zeigte
+   ausgerechnet der Ort, an dem man ueber das Ziel nachdenkt, weniger als
+   die Statuszeile — dort nur die nackte Zahl "180 W". Bewusst dieselben
+   Phasenfarben, damit man beides als dieselbe Sache liest. */
+.goalprog{margin:12px 0 2px}
+.goalprog .zeile{display:flex;justify-content:space-between;align-items:baseline;
+  font-family:var(--mono);font-size:12px;color:var(--ink-soft);margin-bottom:5px}
+.goalprog .zeile b{color:var(--ink);font-weight:600}
+.goalbar.wide{width:100%;height:7px;border-radius:4px}
+.goalprog .rest{font-size:12px;color:var(--ink-faint);margin-top:7px;
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* Schnellziele: ein Klick statt Tippen. Rechtsbuendig unter dem Zahlenfeld,
+   damit sie sichtbar dazugehoeren. */
+.goalquick{display:flex;gap:6px;justify-content:flex-end;margin:8px 0 0}
+.goalquick button{font-family:var(--mono);font-size:11px;padding:3px 8px;
+  border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink-soft)}
+.goalquick button:hover{border-color:var(--ink-soft);color:var(--ink)}
+.goalquick button.on{background:var(--chrome);color:var(--stamp);border-color:var(--stamp)}
 .goalcheck{width:12px;height:12px;flex:none;fill:none;stroke:#D69E2E;stroke-width:3;
   stroke-linecap:round;stroke-linejoin:round;animation:goalpop .35s ease}
 @keyframes goalpop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
@@ -1681,6 +1699,8 @@ en:{
   "Zähleinheit":"Unit",
   "Zurücksetzen":"Reset",
   "Ausschalten":"Turn off",
+  "Ziel aktiv":"Goal active",
+  "Verbleibend":"Remaining",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Counts what's been added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note",
@@ -2404,6 +2424,8 @@ fr:{
   "Zähleinheit":"Unité de comptage",
   "Zurücksetzen":"Réinitialiser",
   "Ausschalten":"Désactiver",
+  "Ziel aktiv":"Objectif actif",
+  "Verbleibend":"Restant",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Est compté ce qui s'est ajouté depuis l'activation ou la réinitialisation — tous documents confondus.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insérer un saut de page (Alt+⇧+Entrée)",
   "Neue Notiz":"Nouvelle note",
@@ -3127,6 +3149,8 @@ es:{
   "Zähleinheit":"Unidad de recuento",
   "Zurücksetzen":"Restablecer",
   "Ausschalten":"Desactivar",
+  "Ziel aktiv":"Objetivo activo",
+  "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Se cuenta lo que se ha añadido desde que se activó o se restableció — en todos los documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insertar salto de página (Alt+⇧+Intro)",
   "Neue Notiz":"Nueva nota",
@@ -3850,6 +3874,8 @@ pt:{
   "Zähleinheit":"Unidade de contagem",
   "Zurücksetzen":"Redefinir",
   "Ausschalten":"Desativar",
+  "Ziel aktiv":"Meta ativa",
+  "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"É contado o que foi adicionado desde a ativação ou a redefinição — em todos os documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserir quebra de página (Alt+⇧+Enter)",
   "Neue Notiz":"Nova nota",
@@ -4573,6 +4599,8 @@ pl:{
   "Zähleinheit":"Jednostka",
   "Zurücksetzen":"Resetuj",
   "Ausschalten":"Wyłącz",
+  "Ziel aktiv":"Cel aktywny",
+  "Verbleibend":"Pozostało",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Liczone jest to, co przybyło od włączenia lub zresetowania — we wszystkich dokumentach.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Wstaw podział strony (Alt+⇧+⏎)",
   "Neue Notiz":"Nowa notatka",
@@ -5303,6 +5331,8 @@ it:{
   "Zähleinheit":"Unità di conteggio",
   "Zurücksetzen":"Azzera",
   "Ausschalten":"Disattiva",
+  "Ziel aktiv":"Obiettivo attivo",
+  "Verbleibend":"Rimanente",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Si conta ciò che è stato aggiunto da quando hai attivato l'obiettivo o l'hai azzerato — in tutti i documenti.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserisci interruzione di pagina (Alt+⇧+Invio)",
   "Neue Notiz":"Nuova nota",
@@ -7556,7 +7586,11 @@ function goalHtml(txt){
   const anteil=Math.min(100,Math.round(geschafft/g.target*100));
   const done=geschafft>=g.target;
   const phase=anteil<=20?1:anteil<=40?2:anteil<=60?3:anteil<=80?4:5;
-  return `<span class="goal" id="goalBox" title="${tr("Schreibziel einstellen")}">
+  /* Der Tooltip nannte nur "Schreibziel einstellen" — die Zahl, die man in
+     dem Moment wissen will, ist aber der Rest bis zum Ziel. */
+  const rest=Math.max(0,g.target-geschafft);
+  const tip=(done?"":tr("Verbleibend")+": "+goalFmtNum(rest,unit)+" "+goalUnitAbbr(unit)+" — ")+tr("Schreibziel einstellen");
+  return `<span class="goal" id="goalBox" title="${esc(tip)}">
     ${goalFmtNum(geschafft,unit)} / ${goalFmtNum(g.target,unit)} ${goalUnitAbbr(unit)}${done?
       '<svg class="goalcheck" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>':""}
     <span class="goalbar phase${phase} ${done?"done":""}"><i style="width:${anteil}%"></i></span></span>`;
@@ -11029,7 +11063,10 @@ function toolsMenu(){
     const b=e.target.closest("[data-t]");if(!b)return;
     closeMenu();
     const a=b.dataset.t;
-    if(a==="goal"){if(S.goal&&S.goal.on)goalDialog();else{setGoal(true);goalDialog()}}
+    /* Nur oeffnen, nicht einschalten. Vorher lief hier setGoal(true) vor dem
+       Dialog: das Ziel war an, sobald man den Menueeintrag anklickte, und ein
+       Abbruch mit Escape liess es an. Eingeschaltet wird jetzt im Dialog. */
+    if(a==="goal")goalDialog();
     if(a==="find")fdOpen(true);
     if(a==="spell"){spellState="idle";spellDialog()}
     if(a==="clean")cleanDialog();
@@ -15364,32 +15401,55 @@ function drawMemo(){
   bindPanelResize($("#sideResize"),side,"--side-w",260,640,"left",persistSideWidth);
 }
 const GOAL_DEFAULT_TARGET={words:1000,charsSp:6000,charsNoSp:5000,pages:2};
+/* Schnellziele je Einheit — der haeufigste Griff ist eine runde Zahl. */
+const GOAL_QUICK={words:[250,500,1000,2000],charsSp:[3000,6000,10000,20000],
+  charsNoSp:[2500,5000,8000,16000],pages:[1,2,5,10]};
 function goalDialog(){
   flush();
   const g=S.goal,unit=g.unit||"words",isPages=unit==="pages";
   const geschafft=Math.max(0,goalTotal(goalMetric(stripHtml(doc().html),unit))-(g.base||0));
+  const anteil=Math.min(100,Math.round(geschafft/g.target*100));
+  const rest=Math.max(0,g.target-geschafft);
+  const phase=anteil<=20?1:anteil<=40?2:anteil<=60?3:anteil<=80?4:5;
+  const fertig=geschafft>=g.target;
+  /* Der Fortschritt steht nur da, wenn das Ziel laeuft — ohne Basis waere
+     die Zahl bedeutungslos. */
+  const fortschritt=g.on?
+    `<div class="goalprog">
+      <div class="zeile"><span><b>${goalFmtNum(geschafft,unit)}</b> / ${goalFmtNum(g.target,unit)} ${goalUnitAbbr(unit)}</span>
+        <span>${anteil} %</span></div>
+      <span class="goalbar wide phase${phase} ${fertig?"done":""}"><i style="width:${anteil}%"></i></span>
+      <div class="rest"><span>${tr("Verbleibend")}: ${goalFmtNum(rest,unit)} ${goalUnitAbbr(unit)}</span><button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div>
+    </div>`:"";
+  const schnell=(GOAL_QUICK[unit]||[]).map(v=>
+    `<button data-q="${v}" class="${v===g.target?"on":""}">${goalFmtNum(v,unit)}</button>`).join("");
   overlay(`<div class="modal"><h3>${tr("Schreibziel")}</h3><div class="pad">
+    <div class="setrow"><label>${tr("Ziel aktiv")}</label><div class="ctl">
+      <input type="checkbox" id="glOn" ${g.on?"checked":""} style="width:auto"></div></div>
     <div class="setrow"><label>${tr("Zähleinheit")}</label><div class="ctl">
       <select id="glUnit">${GOAL_UNITS.map(u=>
         `<option value="${u.k}" ${unit===u.k?"selected":""}>${tr(u.label)}</option>`).join("")}</select></div></div>
     <div class="setrow"><label>${tr("Ziel in dieser Sitzung")}</label><div class="ctl">
       <input type="number" id="glTarget" min="${isPages?"0.5":"1"}" step="${isPages?"0.5":"1"}" max="100000" value="${g.target}"></div></div>
-    <div class="setrow"><label>${tr("Bereits geschafft")}</label><div class="ctl">
-      <span style="font-family:var(--mono)">${goalFmtNum(geschafft,unit)} ${goalUnitAbbr(unit)}</span>
-      <button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div></div>
+    <div class="goalquick" id="glQuick">${schnell}</div>
+    ${fortschritt}
     <div class="fmttip">${tr("Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.")}</div>
     </div>
     <div class="rowend">
-      <button class="btn" style="margin-right:auto" id="glOff">${tr("Ausschalten")}</button>
       <button class="btn pri" id="glOk">${tr("Fertig")}</button></div></div>`);
   const lies=()=>+$("#glTarget").value||GOAL_DEFAULT_TARGET[unit];
-  $("#glUnit").onchange=e=>{setGoal(undefined,GOAL_DEFAULT_TARGET[e.target.value],e.target.value);closeOvl();goalDialog()};
-  $("#glTarget").onchange=()=>setGoal(undefined,lies());
-  $("#glReset").onclick=()=>{goalReset();closeOvl();goalDialog()};
-  $("#glOff").onclick=()=>{setGoal(false);closeOvl()};
-  $("#glOk").onclick=()=>{setGoal(undefined,lies());closeOvl()};
+  /* Jede Aenderung wirkt sofort — der Dialog ist ein Schalterbrett, kein
+     Formular. Frueher stand darunter ein blaues "Fertig", das eine
+     Bestaetigung versprach, die es nie gab; es schliesst jetzt nur noch. */
+  const neuZeichnen=()=>{closeOvl();goalDialog()};
+  $("#glOn").onchange=e=>{setGoal(e.target.checked);neuZeichnen()};
+  $("#glUnit").onchange=e=>{setGoal(undefined,GOAL_DEFAULT_TARGET[e.target.value],e.target.value);neuZeichnen()};
+  $("#glTarget").onchange=()=>{setGoal(undefined,lies());neuZeichnen()};
+  $("#glQuick").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;
+    setGoal(undefined,+b.dataset.q);neuZeichnen()};
+  const rb=$("#glReset");if(rb)rb.onclick=()=>{goalReset();neuZeichnen()};
+  $("#glOk").onclick=closeOvl;
 }
-
 /* ================= Leseansicht ================= */
 let readOn=false;
 function readView(){
