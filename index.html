@@ -1585,6 +1585,14 @@ const THEMES=[
 ];
 const ICOSZ=(p,px,sw)=>`<svg viewBox="0 0 24 24" style="width:${px}px;height:${px}px;fill:none;stroke:currentColor;stroke-width:${sw};stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const ICO=p=>ICOSZ(p,16,1.6);
+/* Symbolknoepfe (.tb) sind 26x24 gross, das Symbol darin mass 16px — das
+   liess 5px seitlich und 4px oben und unten ungenutzt und wirkte verloren.
+   20px fuellt den Knopf und laesst noch 3 bzw. 2px Luft; 22px beruehrt den
+   Rand fast. Am Layout aendert das nichts, weil .tb eine feste Groesse hat.
+   Die Strichstaerke muss mitwandern: sichtbare Dicke ist sw*px/24, also
+   1.6*16/24 = 1.07px bisher — 1.3 bei 20px trifft das (1.08px), sonst
+   waere das Symbol nicht nur groesser, sondern auch fetter geworden. */
+const ICOTB=p=>ICOSZ(p,20,1.3);
 const KEY="lw.v1";
 let mem=null;
 
@@ -6405,6 +6413,22 @@ function setMode(m){flush();selectFig(null);if(m!=="notes"&&openNoteId)closeNote
 document.querySelectorAll(".rb[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 
 /* ================= Werkzeugleisten ================= */
+/* Radierer statt eines diagonal durchgestrichenen A fuer "Formatierung
+   entfernen": das alte Symbol war eine Glyphe mit einem Strich hindurch —
+   dieselbe Bildidee wie der Knopf "Durchgestrichen" gleich daneben, der ein
+   durchgestrichenes D ist; bei 16px waren beide kaum auseinanderzuhalten.
+   Ein A schied als Ersatz aus, weil die Schriftfarbe bereits ein A mit
+   Farbbalken ist, ein Pinsel ebenso, weil das die Texthervorhebung ist.
+   Die korallfarbene Flaeche liegt als eigener Pfad halbtransparent unter
+   der Kontur, traegt dadurch auf hellem wie dunklem Grund und macht den
+   Unterschied schon als Farbfleck sichtbar, bevor man die Form liest.
+   Bewusst hier draussen und nicht am Knopf: die Werkzeugleiste ist eine
+   HTML-Zeichenkette, ein Kommentar darin waere sichtbarer Text — genau das
+   ist beim ersten Versuch passiert. */
+const ICO_RADIERER=
+  '<path d="M7.5 9.5 15 17 8.5 20.5 3.5 15.5z" fill="#E8927C" stroke="none" opacity=".55"/>'+
+  '<path d="M8.5 20.5 3.5 15.5a2 2 0 0 1 0-2.8l8.5-8.5a2 2 0 0 1 2.8 0l4.4 4.4a2 2 0 0 1 0 2.8l-9 9z"/>'+
+  '<path d="M7.5 9.5 15 17"/><path d="M9 20.5h11"/>';
 function drawTools(){
   const T=$("#tools"),d=doc();
   if(S.mode==="write"){
@@ -6425,38 +6449,38 @@ function drawTools(){
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
         <span class="gl">${ICOSZ('<path d="M4 19h5l8.5-8.5a1.9 1.9 0 0 0-2.7-2.7L6.3 16z"/><path d="M13.6 7.7 16.3 10.4"/>',14,1.7)}</span>
         <i style="background:${S.settings.markColor||MARKCOLORS[0].c}"></i></button>
-      <button class="tb" data-cmd="removeFormat" title="${tr("Formatierung entfernen")}" aria-label="${tr("Formatierung entfernen")}">${ICO('<path d="M6 19 12 5l6 14"/><path d="M8.5 13h7"/><path d="M3 21 21 3"/>')}</button>
+      <button class="tb" data-cmd="removeFormat" title="${tr("Formatierung entfernen")}" aria-label="${tr("Formatierung entfernen")}">${ICOTB(ICO_RADIERER)}</button>
       <div class="sep"></div>
       <select id="fBlock" title="${tr("Absatzformat")}">
         <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
         <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option>
         ${QUOTESTYLES.map(([lab,k],i)=>
           `<option value="blockquote${k?":"+k:""}" title="${tr(lab)}">${tr("Zitat")} ${i+1}</option>`).join("")}</select>
-      <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICO('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
-      <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICO('<path d="M9 6h11M9 12h11M9 18h11"/><path d="M3.2 4.6 4.6 4v4M2.9 12.2c0-.7.6-1.2 1.3-1.2s1.2.5 1.2 1.1c0 1.1-2.5 1.5-2.5 2.9h2.6M2.9 16.6c.2-.5.7-.7 1.3-.7.7 0 1.2.4 1.2 1s-.5 1-1.1 1c.7 0 1.3.4 1.3 1.1 0 .7-.6 1.1-1.4 1.1-.6 0-1.1-.2-1.3-.7"/>')}</button>
+      <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICOTB('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
+      <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICOTB('<path d="M10.5 6h10M10.5 12h10M10.5 18h10"/>'+'<text x="7.6" y="6" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">1</text>'+'<text x="7.6" y="12" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">2</text>'+'<text x="7.6" y="18" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">3</text>')}</button>
       <span style="display:flex;gap:7px">
-        <button class="tb" id="outdentBtn" title="${tr("Ausrücken (⇧ Tab)")}">${ICO('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M7.5 9 4.5 12l3 3"/>')}</button>
-        <button class="tb" id="indentBtn" title="${tr("Einrücken (Tab)")}">${ICO('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M4.5 9 7.5 12l-3 3"/>')}</button>
+        <button class="tb" id="outdentBtn" title="${tr("Ausrücken (⇧ Tab)")}">${ICOTB('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M7.5 9 4.5 12l3 3"/>')}</button>
+        <button class="tb" id="indentBtn" title="${tr("Einrücken (Tab)")}">${ICOTB('<path d="M4 6h16M4 18h16M11 12h9"/><path d="M4.5 9 7.5 12l-3 3"/>')}</button>
       </span>
       <div class="sep"></div>
-      <button class="tb" data-cmd="justifyLeft" title="${tr("Linksbündig")}">${ICO('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
-      <button class="tb" data-cmd="justifyCenter" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
-      <button class="tb" data-cmd="justifyRight" title="${tr("Rechtsbündig (Alt+⇧+R)")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
-      <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICO('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
+      <button class="tb" data-cmd="justifyLeft" title="${tr("Linksbündig")}">${ICOTB('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
+      <button class="tb" data-cmd="justifyCenter" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
+      <button class="tb" data-cmd="justifyRight" title="${tr("Rechtsbündig (Alt+⇧+R)")}">${ICOTB('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
+      <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICOTB('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}"><svg viewBox="0 0 24 24"
-        style="width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">
+        style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round">
         <rect x="3" y="4.5" width="18" height="15" rx="2"/>
         <circle cx="8.4" cy="9.4" r="1.7" fill="#A96C0C" stroke="none"/>
         <path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6" stroke="#4E8C6A"/></svg></button>
-      <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICO('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
-      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
-      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICO('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>
+      <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICOTB('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
+      <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICOTB('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
+      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICOTB('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>
       <span style="display:flex;gap:7px;margin-left:auto">
-        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICO('<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
+        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB('<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
         <div class="sep"></div>
-        <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICO('<path d="M20 18a8 8 0 0 0-8-8H4"/><path d="M8 6 4 10l4 4"/>')}</button>
-        <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICO('<path d="M4 18a8 8 0 0 1 8-8h8"/><path d="m16 6 4 4-4 4"/>')}</button>
+        <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICOTB('<path d="M20 18a8 8 0 0 0-8-8H4"/><path d="M8 6 4 10l4 4"/>')}</button>
+        <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICOTB('<path d="M4 18a8 8 0 0 1 8-8h8"/><path d="m16 6 4 4-4 4"/>')}</button>
       </span>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
@@ -12402,7 +12426,7 @@ function drawTblBar(){
      innerHTML-Neuaufbau risse dabei ein offenes Untermenue weg. */
   if(t!==tblBarFuer||kopf!==tblBarKopf){
     tblBarFuer=t;tblBarKopf=kopf;
-    const kn=(a,titel,d)=>`<button class="tb" data-tb="${a}" title="${esc(tr(titel))}">${ICO(d)}</button>`;
+    const kn=(a,titel,d)=>`<button class="tb" data-tb="${a}" title="${esc(tr(titel))}">${ICOTB(d)}</button>`;
     bar.innerHTML=
       kn("rowAbove","Zeile darüber einfügen",
         '<path d="M12 2.5v5M9.5 5h5"/><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 15.5h18M9.5 10v11M14.5 10v11"/>')+
@@ -12426,11 +12450,11 @@ function drawTblBar(){
          tragen, und die vorhandene .on-Darstellung zeigt seinen Zustand. */
       `<div class="sep"></div>
       <button class="tb" data-tb="del" title="${esc(tr("Löschen"))}">`+
-        ICO('<path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/><path d="M17.6 18.6 19.8 21.4 22 18.6"/>')+
+        ICOTB('<path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/><path d="M17.6 18.6 19.8 21.4 22 18.6"/>')+
       `</button>
       <div class="sep"></div>
       <button class="tb ${kopf?"on":""}" data-tb="headToggle" title="${esc(tr("Kopfzeile umschalten"))}">`+
-        ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3.6 5.2h16.8v4H3.6z" fill="currentColor" stroke="none" opacity=".5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>')+
+        ICOTB('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3.6 5.2h16.8v4H3.6z" fill="currentColor" stroke="none" opacity=".5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>')+
       `</button>`;
   }
   bar.classList.add("on");
@@ -14877,9 +14901,9 @@ function drawImgBar(){
     <input type="range" id="ibW" min="10" max="100" step="5" value="${w}" title="${tr("Breite")}">
     <span class="pct" id="ibP">${w} %</span>
     <div class="sep"></div>
-    <button class="tb ${al==="left"?"on":""}" data-ia="left" title="${tr("Links")}">${ICO('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
-    <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICO('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
-    <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICO('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
+    <button class="tb ${al==="left"?"on":""}" data-ia="left" title="${tr("Links")}">${ICOTB('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
+    <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
+    <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICOTB('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
     <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Bildunterschrift")}</button>
     <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>
