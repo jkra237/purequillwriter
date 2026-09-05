@@ -1659,6 +1659,7 @@ en:{
   "Groß-/Kleinschreibung beachten":"Match case",
   "findet %1 — nicht %2":"matches %1 — not %2",
   "Nur ganze Wörter":"Whole words only",
+  "hier ohne Wirkung":"no effect here",
   "Fokusmodus":"Focus mode",
   "verlassen (Esc)":"exit (Esc)",
   "Neues Dokument":"New document",
@@ -2385,6 +2386,7 @@ fr:{
   "Groß-/Kleinschreibung beachten":"Respecter la casse",
   "findet %1 — nicht %2":"trouve %1 — pas %2",
   "Nur ganze Wörter":"Mots entiers uniquement",
+  "hier ohne Wirkung":"sans effet ici",
   "Fokusmodus":"Mode focus",
   "verlassen (Esc)":"quitter (Échap)",
   "Neues Dokument":"Nouveau document",
@@ -3111,6 +3113,7 @@ es:{
   "Groß-/Kleinschreibung beachten":"Distinguir mayúsculas",
   "findet %1 — nicht %2":"encuentra %1 — no %2",
   "Nur ganze Wörter":"Solo palabras completas",
+  "hier ohne Wirkung":"sin efecto aquí",
   "Fokusmodus":"Modo enfoque",
   "verlassen (Esc)":"salir (Esc)",
   "Neues Dokument":"Nuevo documento",
@@ -3837,6 +3840,7 @@ pt:{
   "Groß-/Kleinschreibung beachten":"Diferenciar maiúsculas",
   "findet %1 — nicht %2":"encontra %1 — não %2",
   "Nur ganze Wörter":"Somente palavras inteiras",
+  "hier ohne Wirkung":"sem efeito aqui",
   "Fokusmodus":"Modo de foco",
   "verlassen (Esc)":"sair (Esc)",
   "Neues Dokument":"Novo documento",
@@ -4563,6 +4567,7 @@ pl:{
   "Groß-/Kleinschreibung beachten":"Uwzględnij wielkość liter",
   "findet %1 — nicht %2":"znajduje %1 — nie %2",
   "Nur ganze Wörter":"Tylko całe wyrazy",
+  "hier ohne Wirkung":"bez efektu tutaj",
   "Fokusmodus":"Tryb skupienia",
   "verlassen (Esc)":"zamknij (Esc)",
   "Neues Dokument":"Nowy dokument",
@@ -5289,6 +5294,7 @@ it:{
   "Groß-/Kleinschreibung beachten":"Distingui maiuscole",
   "findet %1 — nicht %2":"trova %1 — non %2",
   "Nur ganze Wörter":"Solo parole intere",
+  "hier ohne Wirkung":"nessun effetto qui",
   "Fokusmodus":"Modalità concentrazione",
   "verlassen (Esc)":"esci (Esc)",
   "Neues Dokument":"Nuovo documento",
@@ -14466,6 +14472,15 @@ function fdBeispiel(welche){
   const q=($("#fdQ").value||"").trim();
   if(!q)return "";
   const ed=$("#editor"),txt=ed?(ed.innerText||""):"";
+  /* Wo die Option nichts bewirkt, waere ein Beispiel schlicht falsch: Ziffern
+     und Satzzeichen kennen keine Schreibweise, und ein Satzzeichen ist kein
+     Wort. Vorher stand dort "findet 2024 — nicht 2024". Geschwiegen wird
+     trotzdem nicht — dass eine Option hier folgenlos bleibt, ist ebenso eine
+     Auskunft wie ein Beispiel. */
+  const folgenlos="<b>"+tr("hier ohne Wirkung")+"</b>";
+  if(welche==="cs"&&q.toLowerCase()===q.toUpperCase())return folgenlos;
+  const hatWortzeichen=[...q].some(c=>c.toLowerCase()!==c.toUpperCase()||(c>="0"&&c<="9"));
+  if(welche==="ww"&&!hatWortzeichen)return folgenlos;
   let gegen="";
   if(welche==="cs"){
     const re=new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"gi");
