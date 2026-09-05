@@ -731,13 +731,27 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
    die Wiederholungen weit auseinanderliegen, warm, wenn sie dicht stehen.
    Genau das unterscheidet ein Wort, das ein Text nun einmal braucht, von
    einem, das im selben Absatz viermal auftaucht. */
-.repopt{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding-bottom:11px;border-bottom:1px solid var(--rule);margin-bottom:9px}
+/* Eine eigene Leiste, kein Fenster: Wiederholungen geht man durch, und ein
+   Fenster, das bei jedem Klick zufaellt, ist dafuer das falsche Gefaess.
+   Eigenstaendig von .side (rechts, ein Slot je Modus), damit sie neben dem
+   Dokument-Memo offen bleiben kann — dieselbe Ueberlegung wie bei der
+   Gliederung, nur an der anderen Kante. */
+.repside{flex:0 0 var(--rep-w,300px);border-left:1px solid var(--rule);display:none;
+  flex-direction:column;background:var(--chrome-2);position:relative}
+.repside.on{display:flex}
+.repside-resize{position:absolute;top:0;left:-3px;width:6px;height:100%;cursor:col-resize;z-index:5}
+.repside-resize:hover,.repside-resize.active{background:var(--stamp);opacity:.5}
+.repside .rhead{display:flex;align-items:center;gap:7px;padding:9px 11px;
+  border-bottom:1px solid var(--rule);flex:none}
+.repside .rhead b{flex:1;font-size:13px}
+.repside .rbody{flex:1;overflow:auto;padding:10px 11px}
+body.focus .repside{display:none}
+.repopt{display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  padding-bottom:10px;border-bottom:1px solid var(--rule);margin-bottom:9px}
 .repopt label{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:5px}
 .repopt input[type=number]{width:52px;text-align:right}
 .repopt input[type=checkbox]{width:auto}
-.rephint{font-size:11px;color:var(--ink-faint);margin:-3px 0 9px}
-.replist{max-height:320px;overflow:auto;margin:0 -3px;padding:0 3px}
+.replist{margin:0 -3px;padding:0 3px}
 .reprow{padding:8px 10px;margin-bottom:5px;border:1px solid transparent;
   border-left:3px solid var(--rule);border-radius:var(--radius);cursor:pointer;outline:none}
 .reprow:hover,.reprow:focus{background:var(--chrome-2);border-color:var(--rule)}
@@ -1464,6 +1478,7 @@ body.focus .sheet{padding-top:9vh}
         <aside class="outline" id="outline"></aside>
         <div class="pane" id="pane"></div>
         <aside class="side" id="side"></aside>
+        <aside class="repside" id="repside"></aside>
         <div class="findbar" id="findbar">
           <div class="fr">
             <input type="text" id="fdQ" placeholder="Suchen">
@@ -1749,14 +1764,14 @@ en:{
   "Ausschalten":"Turn off",
   "Ziel aktiv":"Goal active",
   "Wortwiederholungen":"Repeated words",
-  "Flektierte Formen zusammenfassen":"Group inflected forms",
+  "zählt Haus, Hauses und Häuser als ein Wort":"counts house and houses as one word",
+  "Wortformen zusammenfassen":"Group word forms",
   "Mindestens":"At least",
   "Vorkommen":"occurrences",
   "Mindestlänge":"Minimum length",
   "engster Abstand":"closest gap",
   "Keine Wiederholungen gefunden.":"No repetitions found.",
   "Wörterbuch laden":"Load dictionary",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Without a dictionary only identical forms are grouped.",
   "Verbleibend":"Remaining",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Counts what's been added since you switched the goal on or reset it — across all documents.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
@@ -2487,14 +2502,14 @@ fr:{
   "Ausschalten":"Désactiver",
   "Ziel aktiv":"Objectif actif",
   "Wortwiederholungen":"Répétitions",
-  "Flektierte Formen zusammenfassen":"Regrouper les formes fléchies",
+  "zählt Haus, Hauses und Häuser als ein Wort":"compte maison et maisons comme un seul mot",
+  "Wortformen zusammenfassen":"Regrouper les formes d’un mot",
   "Mindestens":"Au moins",
   "Vorkommen":"occurrences",
   "Mindestlänge":"Longueur minimale",
   "engster Abstand":"écart le plus court",
   "Keine Wiederholungen gefunden.":"Aucune répétition trouvée.",
   "Wörterbuch laden":"Charger le dictionnaire",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sans dictionnaire, seules les formes identiques sont regroupées.",
   "Verbleibend":"Restant",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Est compté ce qui s'est ajouté depuis l'activation ou la réinitialisation — tous documents confondus.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insérer un saut de page (Alt+⇧+Entrée)",
@@ -3225,14 +3240,14 @@ es:{
   "Ausschalten":"Desactivar",
   "Ziel aktiv":"Objetivo activo",
   "Wortwiederholungen":"Repeticiones",
-  "Flektierte Formen zusammenfassen":"Agrupar formas flexionadas",
+  "zählt Haus, Hauses und Häuser als ein Wort":"cuenta casa y casas como una sola palabra",
+  "Wortformen zusammenfassen":"Agrupar formas de la palabra",
   "Mindestens":"Al menos",
   "Vorkommen":"apariciones",
   "Mindestlänge":"Longitud mínima",
   "engster Abstand":"distancia mínima",
   "Keine Wiederholungen gefunden.":"No se encontraron repeticiones.",
   "Wörterbuch laden":"Cargar diccionario",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sin diccionario solo se agrupan formas idénticas.",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Se cuenta lo que se ha añadido desde que se activó o se restableció — en todos los documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insertar salto de página (Alt+⇧+Intro)",
@@ -3963,14 +3978,14 @@ pt:{
   "Ausschalten":"Desativar",
   "Ziel aktiv":"Meta ativa",
   "Wortwiederholungen":"Repetições",
-  "Flektierte Formen zusammenfassen":"Agrupar formas flexionadas",
+  "zählt Haus, Hauses und Häuser als ein Wort":"conta casa e casas como uma só palavra",
+  "Wortformen zusammenfassen":"Agrupar formas da palavra",
   "Mindestens":"Pelo menos",
   "Vorkommen":"ocorrências",
   "Mindestlänge":"Comprimento mínimo",
   "engster Abstand":"distância mínima",
   "Keine Wiederholungen gefunden.":"Nenhuma repetição encontrada.",
   "Wörterbuch laden":"Carregar dicionário",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Sem dicionário apenas formas idênticas são agrupadas.",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"É contado o que foi adicionado desde a ativação ou a redefinição — em todos os documentos.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserir quebra de página (Alt+⇧+Enter)",
@@ -4701,14 +4716,14 @@ pl:{
   "Ausschalten":"Wyłącz",
   "Ziel aktiv":"Cel aktywny",
   "Wortwiederholungen":"Powtórzenia",
-  "Flektierte Formen zusammenfassen":"Grupuj formy odmienione",
+  "zählt Haus, Hauses und Häuser als ein Wort":"liczy dom i domy jako jedno słowo",
+  "Wortformen zusammenfassen":"Grupuj formy wyrazu",
   "Mindestens":"Co najmniej",
   "Vorkommen":"wystąpień",
   "Mindestlänge":"Minimalna długość",
   "engster Abstand":"najmniejszy odstęp",
   "Keine Wiederholungen gefunden.":"Nie znaleziono powtórzeń.",
   "Wörterbuch laden":"Wczytaj słownik",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Bez słownika grupowane są tylko identyczne formy.",
   "Verbleibend":"Pozostało",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Liczone jest to, co przybyło od włączenia lub zresetowania — we wszystkich dokumentach.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Wstaw podział strony (Alt+⇧+⏎)",
@@ -5446,14 +5461,14 @@ it:{
   "Ausschalten":"Disattiva",
   "Ziel aktiv":"Obiettivo attivo",
   "Wortwiederholungen":"Ripetizioni",
-  "Flektierte Formen zusammenfassen":"Raggruppa forme flesse",
+  "zählt Haus, Hauses und Häuser als ein Wort":"conta casa e case come una sola parola",
+  "Wortformen zusammenfassen":"Raggruppa forme della parola",
   "Mindestens":"Almeno",
   "Vorkommen":"occorrenze",
   "Mindestlänge":"Lunghezza minima",
   "engster Abstand":"distanza minima",
   "Keine Wiederholungen gefunden.":"Nessuna ripetizione trovata.",
   "Wörterbuch laden":"Carica dizionario",
-  "Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.":"Senza dizionario vengono raggruppate solo forme identiche.",
   "Verbleibend":"Rimanente",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Si conta ciò che è stato aggiunto da quando hai attivato l'obiettivo o l'hai azzerato — in tutti i documenti.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserisci interruzione di pagina (Alt+⇧+Invio)",
@@ -11233,7 +11248,7 @@ function toolsMenu(){
     if(a==="goal")goalDialog();
     if(a==="find")fdOpen(true);
     if(a==="spell"){spellState="idle";spellDialog()}
-    if(a==="rep")repDialog();
+    if(a==="rep")toggleRep();
     if(a==="clean")cleanDialog();
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
@@ -11543,7 +11558,8 @@ $("#pane").addEventListener("focusout",e=>{
 /* ================= Seitenumbruch ================= */
 const GAP=20;
 let pgTimer=null,pageCount=1;
-function queuePaginate(){clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate();drawAnchors()},220)}
+function queuePaginate(){
+  queueRep();clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate();drawAnchors()},220)}
 function paginate(){
   const ed=$("#editor"),paper=$("#paper"),layer=$("#pagelayer");
   if(!ed||!paper)return;
@@ -12088,7 +12104,10 @@ function wordCount(selText){
    Sprachdatensatz, keine handgestrickten Endungslisten je Sprache. Ist kein
    Woerterbuch geladen, wird nach genauen Formen gruppiert; das geht immer
    und sofort. */
-let repOpt={min:3,len:4,flex:true};
+/* flex=null heisst: noch nicht entschieden. Beim ersten Oeffnen richtet sich
+   der Schalter danach, ob ein Woerterbuch schon bereitliegt — dann wirkt er
+   sofort, statt angehakt dazustehen und nichts zu tun. */
+let repOpt={min:3,len:4,flex:null};
 let repLaden=false;
 function repDictBereit(){return !!(SPELL&&SPELL.lang===S.settings.lang&&SPELL.eng.stem)}
 function repStamm(w){
@@ -12145,59 +12164,85 @@ function repRender(){
 /* Ein Klick springt in den Text: dieselbe Mechanik wie die Suche, damit die
    Fundstellen hervorgehoben sind und man mit den Pfeilen durchgehen kann. */
 function repSpringe(w){
-  closeOvl();
   fdOpen(false);
   const f=$("#fdQ");if(!f)return;
   f.value=w;
   const ww=$("#fdWw");if(ww&&!ww.checked&&repOpt.flex===false)ww.checked=true;
   fdRun();
 }
-function repDialog(){
-  flush();
+function toggleRep(){
+  S.repOpen=!S.repOpen;save();
+  drawRep();
+  /* Das Papier wird schmaler — dieselbe Nachfuehrung wie bei der Gliederung. */
+  if(S.mode==="write"&&S.fitPage!==false){fitZoom();paginate()}
+}
+function drawRep(){
+  const box=$("#repside");if(!box)return;
+  if(S.mode!=="write"||!S.repOpen){box.className="repside";box.innerHTML="";return}
+  box.className="repside on";
   const bereit=repDictBereit();
-  overlay(`<div class="modal" style="max-width:520px"><h3>${tr("Wortwiederholungen")}</h3><div class="pad">
-    <div class="repopt">
-      <label><input type="checkbox" id="repFlex" ${repOpt.flex?"checked":""}>${tr("Flektierte Formen zusammenfassen")}</label>
-      <label>${tr("Mindestens")} <input type="number" id="repMin" min="2" max="99" value="${repOpt.min}"> ${tr("Vorkommen")}</label>
-      <label>${tr("Mindestlänge")} <input type="number" id="repLen" min="2" max="20" value="${repOpt.len}"></label>
-    </div>
-    ${repOpt.flex&&!bereit?`<div class="rephint" id="repHint">${tr("Ohne Wörterbuch werden nur genau gleiche Formen zusammengefasst.")}
-      <button class="btn" id="repLoad" style="margin-left:6px">${tr("Wörterbuch laden")}</button>
-      <div class="repprog" id="repProg" style="display:none"><i></i></div></div>`:""}
-    <div class="replist" id="repList"></div>
-    </div><div class="rowend"><button class="btn" id="repClose">${tr("Schließen")}</button></div></div>`);
+  if(repOpt.flex===null)repOpt.flex=bereit;
+  box.innerHTML=`<div class="repside-resize" id="repResize" title="${tr("Breite ziehen")}"></div>
+    <div class="rhead"><b>${tr("Wortwiederholungen")}</b>
+      <button class="obtn" id="repClose" title="${tr("Schließen")}">${ICO('<path d="M6 6l12 12M18 6 6 18"/>')}</button></div>
+    <div class="rbody">
+      <div class="repopt">
+        <label title="${esc(tr("zählt Haus, Hauses und Häuser als ein Wort"))}">
+<input type="checkbox" id="repFlex" ${repOpt.flex&&bereit?"checked":""}>${tr("Wortformen zusammenfassen")}</label>
+        <label>${tr("Mindestens")} <input type="number" id="repMin" min="2" max="99" value="${repOpt.min}"> ${tr("Vorkommen")}</label>
+        <label>${tr("Mindestlänge")} <input type="number" id="repLen" min="2" max="20" value="${repOpt.len}"></label>
+      </div>
+      <div class="repprog" id="repProg" style="display:none"><i></i></div>
+      <div class="replist" id="repList"></div>
+    </div>`;
   repRender();
-  const neu=()=>{closeOvl();repDialog()};
-  $("#repFlex").onchange=e=>{repOpt.flex=e.target.checked;neu()};
-  $("#repMin").onchange=e=>{repOpt.min=Math.max(2,Math.min(99,+e.target.value||3));repRender()};
-  $("#repLen").onchange=e=>{repOpt.len=Math.max(2,Math.min(20,+e.target.value||4));repRender()};
-  $("#repClose").onclick=closeOvl;
-  const lb=$("#repLoad");
-  if(lb)lb.onclick=async()=>{
-    if(repLaden)return;repLaden=true;
-    lb.disabled=true;
+  $("#repClose").onclick=()=>toggleRep();
+  bindPanelResize($("#repResize"),box,"--rep-w",220,520,"left",()=>save());
+  /* Ein Bedienpunkt: der Haken traegt die Entscheidung, das Laden des
+     Woerterbuchs ist bloss seine Folge. */
+  $("#repFlex").onchange=async e=>{
+    const an=e.target.checked;
+    if(!an){repOpt.flex=false;drawRep();return}
+    if(repDictBereit()){repOpt.flex=true;drawRep();return}
+    if(repLaden)return;
+    repLaden=true;e.target.disabled=true;
     const pr=$("#repProg");if(pr)pr.style.display="block";
     try{
       const eng=await spellLoad(S.settings.lang,x=>{
         const i=pr&&pr.firstElementChild;if(i)i.style.width=Math.round(x*100)+"%";});
       SPELL={lang:S.settings.lang,eng};
-      repLaden=false;neu();
-    }catch(e){repLaden=false;lb.disabled=false;toast(tr("Wörterbuch nicht verfügbar"))}
+      repLaden=false;repOpt.flex=true;drawRep();
+    }catch(err){
+      repLaden=false;repOpt.flex=false;
+      toast(tr("Wörterbuch nicht verfügbar"));drawRep();
+    }
   };
-  const box=$("#repList");
-  box.onclick=e=>{
+  $("#repMin").onchange=e=>{repOpt.min=Math.max(2,Math.min(99,+e.target.value||3));repRender()};
+  $("#repLen").onchange=e=>{repOpt.len=Math.max(2,Math.min(20,+e.target.value||4));repRender()};
+  const liste=$("#repList");
+  /* Der Klick springt in den Text, und die Leiste bleibt stehen — genau das
+     war am Fenster falsch: es nahm bei jedem Treffer die ganze Liste mit. */
+  liste.onclick=e=>{
     const f=e.target.closest(".repform");
     if(f){repSpringe(f.dataset.w);return}
     const r=e.target.closest(".reprow");
     if(r)repSpringe(r.dataset.w);
   };
-  box.onkeydown=e=>{
+  liste.onkeydown=e=>{
     if(e.key!=="Enter"&&e.key!==" ")return;
     const r=e.target.closest(".reprow");
     if(r){e.preventDefault();repSpringe(r.dataset.w)}
   };
 }
-
+/* Waehrend die Leiste offen ist, laeuft sie dem Text nach — aber traege:
+   eine Neuauswertung geht ueber den ganzen Text und durch den Stammbildner,
+   das gehoert nicht an jeden Tastendruck. */
+let repTimer=null;
+function queueRep(){
+  if(!S.repOpen||S.mode!=="write")return;
+  clearTimeout(repTimer);
+  repTimer=setTimeout(()=>{if(S.repOpen&&$("#repList"))repRender()},1200);
+}
 /* ================= Kopf- und Fußzeile =================
    Platzhalter heißen {page}/{pages}/{title}/{date} - bewusst englisch, nicht
    an die Oberflächensprache gekoppelt, wie Feldnamen in einer Formel. Die
@@ -20211,6 +20256,7 @@ function render(){
   else drawGloss();
   drawMemo();   /* blendet sich außerhalb des Schreibmodus selbst aus */
   drawOutline();   /* blendet sich ebenso selbst aus, wenn nicht Schreibmodus/nicht offen */
+  drawRep();       /* desgleichen */
   drawStatus();
 }
 applyTheme();applyStaticLabels();resetTimer();
