@@ -1423,6 +1423,7 @@ body.focus .sheet{padding-top:9vh}
 <div class="imgbar" id="imgbar"></div>
 <div class="imgbar pastebar" id="pastebar"></div>
 <div class="imgbar" id="hfbar"></div>
+<div class="imgbar" id="tblbar"></div>
 <div class="printhf" id="printhdr"></div>
 <div class="printhf" id="printftr"></div>
 <div class="focusbar" id="focusbar"><span id="focusLabel">Fokusmodus</span> <button id="focusOut">verlassen (Esc)</button></div>
@@ -6400,7 +6401,7 @@ function renameTab(id){
 
 /* ================= Modus ================= */
 function setMode(m){flush();selectFig(null);if(m!=="notes"&&openNoteId)closeNote();
-  S.mode=m;save();render()}
+  S.mode=m;save();render();drawTblBar()}
 document.querySelectorAll(".rb[data-mode]").forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 
 /* ================= Werkzeugleisten ================= */
@@ -6668,7 +6669,7 @@ function drawWrite(){
   });
   ed.addEventListener("keyup",e=>{
     if(["ArrowUp","ArrowDown","PageUp","PageDown","Enter"].includes(e.key))typewriter()});
-  $("#sheet").addEventListener("scroll",()=>{pageFlag();if(hfEditing)drawHfBar();if(selFig)drawImgBar();updateOutlineActive()});
+  $("#sheet").addEventListener("scroll",()=>{pageFlag();if(hfEditing)drawHfBar();if(selFig)drawImgBar();drawTblBar();updateOutlineActive()});
   /* #pane ist der Container, der bei langen Dokumenten tatsächlich scrollt
      (siehe updateOutlineActive) - #sheet selbst bleibt in der Praxis meist
      so groß wie sein Inhalt und scrollt dann gar nicht. Beide Listener zu
@@ -11042,15 +11043,7 @@ function contextMenu(e){
     <div class="msep"></div>
     <button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
-    ${cell?`<div class="mlabel">${tr("Tabelle")}</div>
-    <button class="mi" data-c="rowAbove"><span class="chk"></span>${tr("Zeile darüber einfügen")}</button>
-    <button class="mi" data-c="rowBelow"><span class="chk"></span>${tr("Zeile darunter einfügen")}</button>
-    <button class="mi" data-c="colLeft"><span class="chk"></span>${tr("Spalte links einfügen")}</button>
-    <button class="mi" data-c="colRight"><span class="chk"></span>${tr("Spalte rechts einfügen")}</button>
-    <button class="mi" data-c="headToggle"><span class="chk"></span>${tr("Kopfzeile umschalten")}</button>
-    <button class="mi" data-c="rowDel"><span class="chk"></span>${tr("Zeile löschen")}</button>
-    <button class="mi" data-c="colDel"><span class="chk"></span>${tr("Spalte löschen")}</button>
-    <button class="mi" data-c="tblDel"><span class="chk"></span>${tr("Tabelle löschen")}</button>
+    ${cell?`<button class="mi" data-c="tblmore"><span class="chk"></span>${tr("Tabelle")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>`
     :""}
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen…")}</button>`;
@@ -11070,6 +11063,29 @@ function contextMenu(e){
         {a:"fn",label:tr("Fußnote einfügen")}
       ];
       openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
+      return;
+    }
+    /* Acht Tabelleneintraege standen bisher flach im Menue — in einer Zelle
+       waren das 18 Eintraege auf 636px, gut neun Zehntel der Fensterhoehe.
+       Seit es die Tabellenleiste gibt, sind sie ausserdem der zweite Weg zu
+       denselben Befehlen; ein Untermenue behaelt ihn, ohne die volle Hoehe
+       dafuer zu bezahlen. Ein zusaetzlicher Klick entsteht nicht:
+       armHoverSubs() klappt Pfeil-Eintraege schon beim Ueberfahren auf. */
+    if(a==="tblmore"){
+      openSubMenu(b,[
+        {a:"rowAbove",label:tr("Zeile darüber einfügen")},
+        {a:"rowBelow",label:tr("Zeile darunter einfügen")},
+        {a:"colLeft",label:tr("Spalte links einfügen")},
+        {a:"colRight",label:tr("Spalte rechts einfügen")},
+        {a:"rowDel",label:tr("Zeile löschen")},
+        {a:"colDel",label:tr("Spalte löschen")},
+        {a:"tblDel",label:tr("Tabelle löschen")},
+        {a:"headToggle",label:tr("Kopfzeile umschalten")}
+      ],sub=>{
+        ed.focus();
+        if(cell&&ed.contains(cell))tableCmdMitMarke(sub,cell);
+        drawTblBar();setTimeout(drawTblBar,260);
+      });
       return;
     }
     if(a==="glomore"){
@@ -11120,8 +11136,7 @@ function contextMenu(e){
     if(a==="goto"&&anchId)jumpTo(anchId,curOcc[anchId]||0);
     if(a==="unlink"&&onAnch){unwrap(onAnch);flush();commit();drawAnchors();toast(tr("Verknüpfung gelöst"))}
     if(a==="count")wordCount(selText);
-    if(["rowAbove","rowBelow","colLeft","colRight","rowDel","colDel","tblDel","headToggle"].includes(a))
-      tableCmd(a,cell);
+
   };
 }
 function undoRedo(which){document.execCommand(which);dirty=true;queuePaginate();queueAnchors()}
@@ -12362,6 +12377,118 @@ function tableCmd(a,cell){
   }
   flush();dirty=true;commit();queuePaginate();drawAnchors();
 }
+/* ---- Tabellenleiste ----
+   Dasselbe Muster wie #imgbar (Bild ausgewaehlt) und #hfbar (Kopfzeile in
+   Bearbeitung): sie erscheint, sobald die Schreibmarke in einer Tabelle
+   steht, und verschwindet, sobald sie die Tabelle verlaesst. Bis hierher
+   waren bestehende Tabellen ausschliesslich ueber das Kontextmenue zu
+   bearbeiten — in einer Zelle standen dort 18 Eintraege auf 647px Hoehe,
+   acht davon fuer die Tabelle.
+   Die drei Loeschbefehle liegen bewusst in einem Untermenue: das haelt die
+   Leiste in jeder Sprache schmal (Deutsch ist die laengste) und legt vor die
+   nicht umkehrbaren Befehle einen Schritt. */
+let tblBarFuer=null,tblBarKopf=null;
+function drawTblBar(){
+  const bar=$("#tblbar");if(!bar)return;
+  const ed=$("#editor");
+  const zelle=S.mode==="write"?curCell():null;
+  const t=(zelle&&ed&&ed.contains(zelle))?zelle.closest("table"):null;
+  /* Nicht gleichzeitig mit der Bild- oder Kopfzeilenleiste: die belegen
+     dieselbe Ecke und meinen etwas anderes. */
+  if(!t||hfEditing||selFig){bar.classList.remove("on");tblBarFuer=null;return}
+  const kopf=!!(t.rows[0]&&t.rows[0].children[0]&&t.rows[0].children[0].tagName==="TH");
+  /* Nur neu aufbauen, wenn sich Tabelle oder Kopfzeilenzustand geaendert
+     haben. selectionchange feuert bei jedem Tastendruck, und ein
+     innerHTML-Neuaufbau risse dabei ein offenes Untermenue weg. */
+  if(t!==tblBarFuer||kopf!==tblBarKopf){
+    tblBarFuer=t;tblBarKopf=kopf;
+    const kn=(a,titel,d)=>`<button class="tb" data-tb="${a}" title="${esc(tr(titel))}">${ICO(d)}</button>`;
+    bar.innerHTML=
+      kn("rowAbove","Zeile darüber einfügen",
+        '<path d="M12 2.5v5M9.5 5h5"/><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 15.5h18M9.5 10v11M14.5 10v11"/>')+
+      kn("rowBelow","Zeile darunter einfügen",
+        '<rect x="3" y="3" width="18" height="11" rx="1.5"/><path d="M3 8.5h18M9.5 3v11M14.5 3v11"/><path d="M12 16.5v5M9.5 19h5"/>')+
+      `<div class="sep"></div>`+
+      kn("colLeft","Spalte links einfügen",
+        '<path d="M2.5 12h5M5 9.5v5"/><rect x="10" y="3" width="11" height="18" rx="1.5"/><path d="M15.5 3v18M10 9.5h11M10 14.5h11"/>')+
+      kn("colRight","Spalte rechts einfügen",
+        '<rect x="3" y="3" width="11" height="18" rx="1.5"/><path d="M8.5 3v18M3 9.5h11M3 14.5h11"/><path d="M16.5 12h5M19 9.5v5"/>')+
+      /* Auch diese beiden als Symbol: eine Leiste aus vier Symbolen, einem
+         Wortschalter und einem Wortmenue liest sich als drei verschiedene
+         Bedienarten nebeneinander. Gleiche Form fuer gleiche Sache — und
+         nebenbei haengt die Breite damit nicht mehr an der Sprache.
+         Reihenfolge nach Sachnaehe: erst die vier Einfuegebefehle, dann das
+         Loeschen — beides betrifft Zeilen und Spalten und gehoert zusammen.
+         Das Umschalten der Kopfzeile aendert nichts am Zuschnitt der Tabelle
+         und steht deshalb abgesetzt am Ende.
+         Die Kopfreihe ist gefuellt gezeichnet: das unterscheidet den
+         Umschalter von den vier Einfuege-Symbolen, die dieselbe Gitterform
+         tragen, und die vorhandene .on-Darstellung zeigt seinen Zustand. */
+      `<div class="sep"></div>
+      <button class="tb" data-tb="del" title="${esc(tr("Löschen"))}">`+
+        ICO('<path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/><path d="M17.6 18.6 19.8 21.4 22 18.6"/>')+
+      `</button>
+      <div class="sep"></div>
+      <button class="tb ${kopf?"on":""}" data-tb="headToggle" title="${esc(tr("Kopfzeile umschalten"))}">`+
+        ICO('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3.6 5.2h16.8v4H3.6z" fill="currentColor" stroke="none" opacity=".5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>')+
+      `</button>`;
+  }
+  bar.classList.add("on");
+  const r=t.getBoundingClientRect();
+  /* Unter die Tabelle, mit Anker: reicht der Platz darunter nicht, klappt die
+     Leiste darueber auf, statt die Tabelle zu verdecken. */
+  menuPlatzieren(bar,r.left,r.bottom+6,r);
+}
+/* Ein Tabellenbefehl kann die Zelle unter der Schreibmarke aufloesen:
+   "Kopfzeile umschalten" ersetzt die td der ersten Reihe durch th, Loeschen
+   nimmt Zeile oder Spalte ganz weg. Ohne Marke faende sich die Leiste nicht
+   mehr in einer Tabelle und klappte weg, und der naechste Klick liefe ins
+   Leere. Ueber Zeilen- und Spaltenindex landet die Marke danach wieder an
+   derselben Stelle — oder, wenn die weggefallen ist, an der naechstbesten.
+   Betrifft Leiste und Kontextmenue gleichermassen, deshalb hier gemeinsam. */
+function tableCmdMitMarke(a,zelle){
+  const tab=zelle.closest("table");if(!tab)return;
+  const zi=[...tab.rows].indexOf(zelle.parentElement);
+  const si=[...zelle.parentElement.children].indexOf(zelle);
+  tableCmd(a,zelle);
+  const ed=$("#editor");
+  if(ed&&ed.contains(tab)&&!ed.contains(zelle)){
+    const reihe=tab.rows[Math.min(zi,Math.max(0,tab.rows.length-1))];
+    const nz=reihe&&reihe.children[Math.min(si,Math.max(0,reihe.children.length-1))];
+    if(nz)putCaret(nz);
+  }
+}
+/* Der Klick darf die Schreibmarke nicht aus der Zelle nehmen — sonst wuesste
+   tableCmd() nicht mehr, welche Zeile gemeint ist. */
+$("#tblbar").addEventListener("mousedown",e=>{if(e.target.closest("button"))e.preventDefault()});
+$("#tblbar").addEventListener("click",e=>{
+  const b=e.target.closest("[data-tb]");if(!b)return;
+  const zelle=curCell();if(!zelle)return;
+  const nach=()=>{drawTblBar();setTimeout(drawTblBar,260)};
+  if(b.dataset.tb==="del"){
+    /* Die Zelle jetzt festhalten, nicht erst im Rueckruf: das Untermenue
+       haengt am <body>, ein Klick darauf nimmt den Fokus aus dem Editor, und
+       curCell() liefert danach nichts mehr — der Loeschbefehl liefe ins
+       Leere. */
+    const zelleFest=zelle;
+    openSubMenu(b,[{a:"rowDel",label:tr("Zeile löschen")},
+                   {a:"colDel",label:tr("Spalte löschen")},
+                   {a:"tblDel",label:tr("Tabelle löschen")}],
+      a=>{
+        const ed=$("#editor");
+        if(ed&&ed.contains(zelleFest))tableCmdMitMarke(a,zelleFest);
+        if(ed)ed.focus();
+        nach();
+      });
+    return;
+  }
+  tableCmdMitMarke(b.dataset.tb,zelle);
+  /* Sofort neu setzen und nach dem verzoegerten Umbruch noch einmal: die
+     Tabelle ist gerade hoeher oder schmaler geworden. */
+  nach();
+});
+document.addEventListener("selectionchange",drawTblBar);
+
 /* ---- Spalten und Zeilen durch Ziehen anpassen ---- */
 /* Spaltenbreiten stecken als Prozentwerte in einer <colgroup> (überlebt Zoom
    von selbst, weil sie sich auf die Tabellenbreite bezieht, nicht auf Pixel).
