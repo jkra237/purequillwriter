@@ -326,7 +326,13 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 
 /* ---- Werkzeugleiste ---- */
-.tools{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap;flex:0 0 auto}
+/* Spalten- und Zeilenabstand getrennt: gap:8px setzte beides, ein
+   Verkleinern haette also auch die beiden umbrochenen Zeilen zusammengerueckt.
+   Die Gruppierung leidet nicht darunter, im Gegenteil — sie entsteht aus dem
+   Kontrast zwischen normalem Abstand und Gruppenuebergang, und .sep bleibt
+   mit 12px unberuehrt: 8px ergaben 28px am Uebergang (3,50:1), 6px ergeben
+   24px (4,00:1). Die Leiste wird dabei 48px schmaler (1160 -> 1112px). */
+.tools{display:flex;align-items:center;column-gap:6px;row-gap:8px;padding:8px 12px;border-bottom:1px solid var(--rule);flex-wrap:wrap;flex:0 0 auto}
 .tools select,.tools input[type=text]{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);padding:3px 5px}
 /* Ohne appearance:none zeichnet Windows das Auswahlfeld selbst und übergeht
    dabei die gesetzte Papierfarbe. Der Pfeil wird deshalb aus zwei Verläufen
@@ -6443,7 +6449,6 @@ function drawTools(){
       <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>F</b></button>
       <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
       <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
-      <button class="tb" data-cmd="strikeThrough" title="${tr("Durchgestrichen")}"><s>D</s></button>
       <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
         <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
@@ -15543,7 +15548,7 @@ to the selected text, or to what you type next if nothing is selected.</p>
 <tr><td>Bold</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Italic</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Underline</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Strikethrough</td><td>toolbar only</td></tr>
+<tr><td>Strikethrough</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
 </table>
 <p><b>Font size</b> is an editable box: pick a listed size from the arrow beside it, or
 type any value between 4 and 200 and press <kbd>Enter</kbd>. The arrow keys step it.</p>
@@ -16081,7 +16086,7 @@ markierten Text — oder für das, was du als Nächstes tippst, wenn nichts mark
 <tr><td>Fett</td><td><kbd>Strg</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Kursiv</td><td><kbd>Strg</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Unterstrichen</td><td><kbd>Strg</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Durchgestrichen</td><td>nur über die Leiste</td></tr>
+<tr><td>Durchgestrichen</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
 </table>
 <p><b>Die Schriftgröße</b> ist ein beschreibbares Feld: Über den Pfeil daneben wählst du einen
 der vorgegebenen Werte, oder du tippst eine beliebige Zahl zwischen 4 und 200 und drückst
@@ -16641,7 +16646,7 @@ aplica al texto seleccionado, o a lo que escribas a continuación si no hay nada
 <tr><td>Negrita</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Cursiva</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Subrayado</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Tachado</td><td>solo barra de herramientas</td></tr>
+<tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
 </table>
 <p>El <b>tamaño de fuente</b> es un cuadro editable: elige un tamaño de la lista con la flecha
 que hay al lado, o escribe cualquier valor entre 4 y 200 y pulsa <kbd>Intro</kbd>. Las flechas
@@ -17200,7 +17205,7 @@ ao texto selecionado, ou ao que você digitar em seguida se nada estiver selecio
 <tr><td>Negrito</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Itálico</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Sublinhado</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Tachado</td><td>somente na barra de ferramentas</td></tr>
+<tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
 </table>
 <p>O <b>tamanho da fonte</b> é uma caixa editável: escolha um tamanho da lista na seta ao lado,
 ou digite qualquer valor entre 4 e 200 e pressione <kbd>Enter</kbd>. As setas ajustam de um em
@@ -17763,7 +17768,7 @@ sélectionné.</p>
 <tr><td>Gras</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Italique</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Souligné</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Barré</td><td>barre d'outils uniquement</td></tr>
+<tr><td>Barré</td><td><b>Format</b> &rarr; <b>Texte</b></td></tr>
 </table>
 <p>La <b>taille de police</b> est un champ modifiable : choisissez une taille de la liste avec
 la flèche à côté, ou tapez n'importe quelle valeur entre 4 et 200 et appuyez sur
@@ -18340,7 +18345,7 @@ zaznaczonego tekstu albo do tego, co napiszesz dalej, jeśli nic nie jest zaznac
 <tr><td>Pogrubienie</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Kursywa</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Podkreślenie</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Przekreślenie</td><td>tylko pasek narzędzi</td></tr>
+<tr><td>Przekreślenie</td><td><b>Format</b> &rarr; <b>Tekst</b></td></tr>
 </table>
 <p><b>Rozmiar czcionki</b> to pole edytowalne: wybierz rozmiar z listy przy strzałce obok albo
 wpisz dowolną wartość od 4 do 200 i naciśnij <kbd>Enter</kbd>. Strzałki zmieniają go co
@@ -18887,7 +18892,7 @@ selezionato.</p>
 <tr><td>Grassetto</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
 <tr><td>Corsivo</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
 <tr><td>Sottolineato</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
-<tr><td>Barrato</td><td>solo barra degli strumenti</td></tr>
+<tr><td>Barrato</td><td><b>Formato</b> &rarr; <b>Testo</b></td></tr>
 </table>
 <p>La <b>dimensione del carattere</b> è un campo modificabile: scegli una dimensione dall'elenco
 con la freccia accanto, oppure digita un valore qualsiasi tra 4 e 200 e premi <kbd>Invio</kbd>.
