@@ -164,33 +164,194 @@ const DATEIPRUEFUNG = String.raw`(async()=>{
     }catch(e){ ok("docx: Umlauf ist ein Fixpunkt",false,String(e)); }
   }
 
-  /* ================= EPUB ================= */
-  try{
-    const blob=await epubBauen(doc(),{author:"Pruefer",split:1,titlepage:true});
-    const epub=new Uint8Array(await blob.arrayBuffer());
-    ok("epub: Datei erzeugt",epub.length>0,epub.length+" Bytes");
-    const teile=entpacke(epub);
-    ok("epub: mimetype zuerst und ungepackt",
-       Object.keys(teile)[0]==="mimetype"&&teile.mimetype.m===0);
-    ok("epub: container.xml vorhanden",!!teile["META-INF/container.xml"]);
-    const opfName=Object.keys(teile).find(n=>n.endsWith(".opf"));
-    ok("epub: package.opf vorhanden",!!opfName);
-    for(const [n,e] of Object.entries(teile)){
-      if(!/\.(xhtml|opf|ncx|xml)$/.test(n))continue;
-      ok("epub: "+n+" wohlgeformt",wohlgeformt(await text(e)));
-    }
-    if(opfName){
-      const opf=P.parseFromString(await text(teile[opfName]),"application/xml");
-      const basis=opfName.replace(/[^/]+$/,"");
-      const items=[...opf.querySelectorAll("manifest > item")];
-      const fehlend=items.map(i=>basis+i.getAttribute("href")).filter(h=>!teile[h]);
-      ok("epub: Manifest deckt sich mit dem Archiv",fehlend.length===0,fehlend.join(", "));
-      const ids=new Set(items.map(i=>i.getAttribute("id")));
-      const spine=[...opf.querySelectorAll("spine > itemref")].map(r=>r.getAttribute("idref"));
-      ok("epub: Spine verweist nur auf Manifest-Eintraege",spine.every(id=>ids.has(id)));
-      ok("epub: keine doppelten ids",ids.size===items.length);
-    }
-  }catch(e){ ok("epub: Datei erzeugt",false,String(e)); }
+  /* ================= EPUB =================
+     Matrix statt eines einzelnen Dokuments: epubBauen() verzweigt an vier
+     Stellen (Kapiteltrennung, Titelseite, Cover, ISBN gegen erzeugte UUID),
+     und genau diese Zweige bestimmen Manifest, Spine und Metadaten.
+     Geprueft wird, woran epubcheck ein Archiv zurueckweisen wuerde. Das
+     Programm selbst laeuft hier nicht: es ist in Java geschrieben und wuerde
+     eine Laufzeitumgebung voraussetzen, die dieses Projekt sonst nicht
+     braucht. Kein voller Ersatz — die Schemapruefung der Inhaltsdokumente
+     gegen die EPUB-Grammatik fehlt; die Strukturfehler, die man sich beim
+     Selbstbauen einhandelt, deckt es ab. */
+  const coverPng=await (async()=>{
+    const c=document.createElement("canvas");c.width=c.height=8;
+    const x=c.getContext("2d");x.fillStyle="#334455";x.fillRect(0,0,8,8);
+    const b=await new Promise(r=>c.toBlob(r,"image/png"));
+    return new Uint8Array(await b.arrayBuffer());
+  })();
+  /* Eigenes Pruefdokument: das Dokument der Druckmatrix traegt nur eine
+     Ueberschrift, damit liefe jede Trennstufe auf dasselbe eine Kapitel
+     hinaus und die Matrix pruefte an dieser Stelle nichts. Zwei H1 und ein
+     H2 trennen die Stufen unterscheidbar, das eingebettete Bild deckt den
+     Bildpfad des Manifests ab. Bewusst ein eigenes Objekt statt einer
+     Aenderung am offenen Dokument — danach wird noch gedruckt gemessen. */
+  const bildUrl=(()=>{const c=document.createElement("canvas");c.width=c.height=8;
+    const x=c.getContext("2d");x.fillStyle="#884422";x.fillRect(0,0,8,8);
+    return c.toDataURL("image/png")})();
+  const EPUBDOK=Object.assign({},doc(),{title:"Pruefbuch",footnotes:[],
+    html:'<h1>Erstes Kapitel</h1><p>Absatz eins.</p>'+
+         '<h2>Unterkapitel</h2><p>Absatz zwei.</p>'+
+         '<h1>Zweites Kapitel</h1><p>Absatz drei. <img src="'+bildUrl+'" alt="Punkt"/></p>'});
+  const ENDUNGEN={"application/xhtml+xml":["xhtml"],"text/css":["css"],
+    "application/x-dtbncx+xml":["ncx"],"image/png":["png"],
+    "image/jpeg":["jpg","jpeg"],"image/gif":["gif"],"image/svg+xml":["svg"]};
+  const EPUBFAELLE=[
+    {id:"a",name:"Trennung bei H1, mit Titelseite",kap:2,o:{author:"Pruefer",split:1,titlepage:true}},
+    {id:"b",name:"Trennung bei H1+H2, ohne Titelseite",kap:3,o:{author:"Pruefer",split:2,titlepage:false}},
+    {id:"c",name:"ohne Kapiteltrennung",kap:1,o:{author:"Pruefer",split:0,titlepage:true}},
+    {id:"d",name:"Cover, ISBN, Verlag",kap:2,o:{author:"Pruefer",split:1,titlepage:true,
+      coverBytes:coverPng,coverExt:"png",isbn:"978-3-16-148410-0",publisher:"Verlag",year:"2026"}}
+  ];
+  for(const f of EPUBFAELLE){
+    const V="epub "+f.id+" ("+f.name+"): ";
+    try{
+      const blob=await epubBauen(EPUBDOK,f.o);
+      const epub=new Uint8Array(await blob.arrayBuffer());
+      ok(V+"Datei erzeugt",epub.length>0,epub.length+" Bytes");
+      const teile=entpacke(epub);
+      const namen=Object.keys(teile);
+      /* Der mimetype muss der erste Eintrag sein, ungepackt und zeichengenau,
+         sonst erkennen Lesegeraete das Archiv nicht als EPUB. */
+      ok(V+"mimetype zuerst und ungepackt",namen[0]==="mimetype"&&teile.mimetype.m===0);
+      const mtTxt=await text(teile.mimetype);
+      ok(V+"mimetype zeichengenau",mtTxt==="application/epub+zip",JSON.stringify(mtTxt));
+      const kapDateien=namen.filter(n=>/\/chap\d+\.xhtml$/.test(n));
+      ok(V+"Kapitelzahl passt zur Trennstufe",kapDateien.length===f.kap,
+         kapDateien.length+" statt "+f.kap);
+      const boese=namen.filter(n=>n.startsWith("/")||n.split("/").includes("..")||n.includes("\\"));
+      ok(V+"keine unsicheren Pfade im Archiv",boese.length===0,boese.join(", "));
+
+      const cont=teile["META-INF/container.xml"];
+      ok(V+"container.xml vorhanden",!!cont);
+      let opfName=null;
+      if(cont){
+        const cx=P.parseFromString(await text(cont),"application/xml");
+        const rf=cx.querySelector("rootfile");
+        opfName=rf&&rf.getAttribute("full-path");
+        ok(V+"rootfile zeigt auf eine vorhandene Datei",!!(opfName&&teile[opfName]),opfName||"kein rootfile");
+        ok(V+"rootfile traegt den richtigen media-type",
+           !!rf&&rf.getAttribute("media-type")==="application/oebps-package+xml");
+      }
+      for(const n of namen){
+        if(!/\.(xhtml|opf|ncx|xml)$/.test(n))continue;
+        const t=await text(teile[n]);
+        ok(V+n+" wohlgeformt",wohlgeformt(t),wohlgeformt(t)?"":t.slice(0,120));
+      }
+      for(const n of namen){
+        if(!/\.xhtml$/.test(n))continue;
+        const dx=P.parseFromString(await text(teile[n]),"application/xml");
+        ok(V+n+" im XHTML-Namensraum",
+           !!dx.documentElement&&dx.documentElement.namespaceURI==="http://www.w3.org/1999/xhtml");
+      }
+
+      if(opfName&&teile[opfName]){
+        const opf=P.parseFromString(await text(teile[opfName]),"application/xml");
+        const basis=opfName.replace(/[^/]+$/,"");
+        const items=[...opf.querySelectorAll("manifest > item")];
+        const ids=new Set(items.map(i=>i.getAttribute("id")));
+        ok(V+"keine doppelten ids",ids.size===items.length);
+
+        /* Pflichtangaben aus EPUB 3 — fehlt eine, weist epubcheck ab. */
+        const meta=[...opf.querySelectorAll("metadata > *")];
+        const lok=ln=>meta.filter(e=>e.localName===ln);
+        const uid=opf.documentElement.getAttribute("unique-identifier");
+        const idEl=meta.find(e=>e.localName==="identifier"&&e.getAttribute("id")===uid);
+        ok(V+"unique-identifier zeigt auf eine dc:identifier",!!idEl,uid||"kein unique-identifier");
+        const idText=idEl?idEl.textContent.trim():"";
+        ok(V+"dc:identifier gefuellt",idText.length>0,idText);
+        ok(V+"dc:title gefuellt",lok("title").some(e=>e.textContent.trim().length>0));
+        const spr=(lok("language")[0]||{textContent:""}).textContent.trim();
+        ok(V+"dc:language ist ein Sprachkennzeichen",/^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(spr),spr||"leer");
+        const mod=meta.find(e=>e.getAttribute("property")==="dcterms:modified");
+        ok(V+"dcterms:modified vorhanden und im richtigen Format",
+           !!mod&&/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(mod.textContent.trim()),
+           mod?mod.textContent.trim():"fehlt");
+        /* Mit ISBN muss die Kennung die ISBN sein, ohne eine erzeugte UUID. */
+        ok(V+"Kennung passt zur Quelle",
+           f.o.isbn?idText.startsWith("urn:isbn:"):idText.startsWith("urn:uuid:"),idText);
+
+        const hrefs=items.map(i=>basis+decodeURIComponent(i.getAttribute("href")||""));
+        const fehlend=hrefs.filter(h=>!teile[h]);
+        ok(V+"Manifest deckt sich mit dem Archiv",fehlend.length===0,fehlend.join(", "));
+        /* Auch die Gegenrichtung: eine mitgelieferte, aber nicht deklarierte
+           Datei ist fuer epubcheck ein Fehler, nicht bloss Ballast. */
+        const erlaubt=new Set(hrefs.concat(["mimetype","META-INF/container.xml",opfName]));
+        const verwaist=namen.filter(n=>!erlaubt.has(n));
+        ok(V+"keine Datei ausserhalb des Manifests",verwaist.length===0,verwaist.join(", "));
+
+        const falschTyp=items.filter(i=>{
+          const end=(i.getAttribute("href")||"").split(".").pop().toLowerCase();
+          const erl=ENDUNGEN[i.getAttribute("media-type")];
+          return erl&&!erl.includes(end);
+        }).map(i=>i.getAttribute("href")+" als "+i.getAttribute("media-type"));
+        ok(V+"media-type passt zur Endung",falschTyp.length===0,falschTyp.join(", "));
+
+        const bilder=items.filter(i=>(i.getAttribute("media-type")||"").startsWith("image/"));
+        ok(V+"eingebettetes Bild steht im Manifest",bilder.length>=1,bilder.length+" Bild(er)");
+        const navItems=items.filter(i=>(i.getAttribute("properties")||"").split(/\s+/).includes("nav"));
+        ok(V+"genau ein Navigationsdokument",navItems.length===1,navItems.length+" gefunden");
+        if(navItems.length===1){
+          const navPfad=basis+navItems[0].getAttribute("href");
+          const navRoh=teile[navPfad];
+          ok(V+"Navigationsdokument vorhanden",!!navRoh,navPfad);
+          if(navRoh){
+            const navDoc=P.parseFromString(await text(navRoh),"application/xml");
+            const tocNav=[...navDoc.querySelectorAll("nav")].find(n=>
+              n.getAttributeNS("http://www.idpf.org/2007/ops","type")==="toc");
+            ok(V+"nav traegt epub:type=toc",!!tocNav);
+            const navBasis=navPfad.replace(/[^/]+$/,"");
+            const ziele=[...navDoc.querySelectorAll("a[href]")].map(a=>a.getAttribute("href"))
+              .filter(h=>h&&!/^[a-z][a-z0-9+.-]*:/i.test(h)&&!h.startsWith("#"))
+              .map(h=>navBasis+decodeURIComponent(h.split("#")[0]));
+            const tot=[...new Set(ziele)].filter(h=>!teile[h]);
+            ok(V+"alle Verweise im Inhaltsverzeichnis fuehren irgendwohin",tot.length===0,tot.join(", "));
+          }
+        }
+
+        const refs=[...opf.querySelectorAll("spine > itemref")].map(r=>r.getAttribute("idref"));
+        ok(V+"Spine nicht leer",refs.length>0,refs.length+" Eintraege");
+        ok(V+"Spine verweist nur auf Manifest-Eintraege",refs.every(id=>ids.has(id)));
+        ok(V+"keine doppelten Spine-Eintraege",new Set(refs).size===refs.length);
+        const nachId=new Map(items.map(i=>[i.getAttribute("id"),i]));
+        const nichtXhtml=refs.map(id=>nachId.get(id)).filter(Boolean)
+          .filter(i=>i.getAttribute("media-type")!=="application/xhtml+xml")
+          .map(i=>i.getAttribute("href"));
+        ok(V+"Spine enthaelt nur XHTML",nichtXhtml.length===0,nichtXhtml.join(", "));
+        /* EPUB-2-Vertraeglichkeit: aeltere Lesegeraete folgen der NCX, und die
+           finden sie nur ueber spine@toc. */
+        const ncxItem=items.find(i=>i.getAttribute("media-type")==="application/x-dtbncx+xml");
+        if(ncxItem){
+          const sp=opf.querySelector("spine"),tocId=sp&&sp.getAttribute("toc");
+          ok(V+"spine@toc zeigt auf die NCX",tocId===ncxItem.getAttribute("id"),
+             (tocId||"fehlt")+" gegen "+ncxItem.getAttribute("id"));
+        }
+        if(f.o.coverBytes){
+          const cov=items.filter(i=>(i.getAttribute("properties")||"").split(/\s+/).includes("cover-image"));
+          ok(V+"Cover als cover-image ausgezeichnet",cov.length===1,cov.length+" gefunden");
+        }
+
+        /* Der haeufigste Ablehnungsgrund ueberhaupt: eine Datei wird von einem
+           Inhaltsdokument benutzt, fehlt aber im Archiv oder im Manifest. */
+        const imManifest=new Set(hrefs);
+        const offen=[];
+        for(const n of namen){
+          if(!/\.xhtml$/.test(n))continue;
+          const dx=P.parseFromString(await text(teile[n]),"application/xml");
+          const nb=n.replace(/[^/]+$/,"");
+          for(const el of dx.querySelectorAll("[src],[href]")){
+            const h=el.getAttribute("src")||el.getAttribute("href");
+            if(!h||/^[a-z][a-z0-9+.-]*:/i.test(h)||h.startsWith("#"))continue;
+            const ziel=nb+decodeURIComponent(h.split("#")[0]);
+            if(!teile[ziel])offen.push(n+" -> "+h+" (fehlt im Archiv)");
+            else if(!imManifest.has(ziel))offen.push(n+" -> "+h+" (nicht im Manifest)");
+          }
+        }
+        ok(V+"alle benutzten Dateien sind vorhanden und deklariert",offen.length===0,
+           offen.slice(0,3).join("; "));
+      }
+    }catch(e){ ok(V+"Datei erzeugt",false,String(e)); }
+  }
   return JSON.stringify(befunde);
 })()`;
 
