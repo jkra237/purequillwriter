@@ -59,7 +59,7 @@
       "publisherDisplayName": "REPLACE-WITH-PUBLISHER-DISPLAY-NAME",
       "applicationId": "PureQuillWriter",
       "displayName": "PureQuill Writer",
-      "backgroundColor": "#ffffff",
+      "backgroundColor": "#8C3B2E",
       "languages": ["de-DE", "en-US", "es-ES", "fr-FR", "it-IT", "pl-PL", "pt-BR"]
     }
   }
