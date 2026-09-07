@@ -6175,10 +6175,11 @@ const LOC=()=>({en:"en-US",fr:"fr-FR",es:"es-ES",it:"it-IT",pt:"pt-BR",pl:"pl-PL
 /* Kurzauswahl für Stellen, die tr() nicht abdeckt: zusammengesetzte Sätze mit
    Pluralformen oder eingebetteten Zahlen, wo eine feste Wörterbuchzeile nicht
    ausreicht. Fällt auf Deutsch zurück, wenn eine Sprache fehlt. */
-function PL(de,en,fr,es,pt,pl){const m={de,en,fr,es,pt,pl};const v=m[S.settings.uiLang];return v===undefined?de:v}
+function PL(de,en,fr,es,pt,pl,it){const m={de,en,fr,es,pt,pl,it};const v=m[S.settings.uiLang];return v===undefined?de:v}
 /* Das wiederkehrende „3 von 12“ / „3 of 12“ — eigene Funktion, weil es an
    sieben Stellen im Code vorkommt. */
-const OFWORD=()=>PL("von","of","sur","de","de","z");
+const OFWORD=()=>PL("von","of","sur","de","de","z",
+  "di");
 function applyStaticLabels(){
   $("#fileBtn").textContent=tr("Datei");
   $("#viewBtn").textContent=tr("Ansicht");
@@ -6457,7 +6458,8 @@ function closeDoc(id){
       anker+(anker>1?" notes liées restent":" note liée reste"),
       anker+(anker>1?" notas vinculadas permanecen":" nota vinculada permanece"),
       anker+(anker>1?" notas vinculadas permanecem":" nota vinculada permanece"),
-      anker+(anker>1?" powiązane notatki zostają zachowane":" powiązana notatka zostaje zachowana")));
+      anker+(anker>1?" powiązane notatki zostają zachowane":" powiązana notatka zostaje zachowana"),
+      anker+(anker>1?" note collegate restano":" nota collegata resta")));
   };
   if(leer){kill();return}
   overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
@@ -6467,7 +6469,8 @@ function closeDoc(id){
         `« ${esc(d.title)} » n'est pas vide. La fermeture supprime le document.`,
         `"${esc(d.title)}" no está vacío. Al cerrarlo se elimina el documento.`,
         `"${esc(d.title)}" não está vazio. Ao fechar, o documento é removido.`,
-        `„${esc(d.title)}" nie jest pusty. Zamknięcie usuwa dokument.`)}</p>
+        `„${esc(d.title)}" nie jest pusty. Zamknięcie usuwa dokument.`,
+        `« ${esc(d.title)} » non è vuoto. Chiudendolo, il documento viene rimosso.`)}</p>
     ${anker?`<p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">
       ${PL(`${anker}&nbsp;Notiz${anker>1?"en sind":" ist"} mit Stellen darin verknüpft.
       ${anker>1?"Sie bleiben":"Sie bleibt"} auf der Pinnwand erhalten und ${anker>1?"verlieren":"verliert"} nur die Verknüpfung.`,
@@ -6480,7 +6483,9 @@ function closeDoc(id){
         `${anker}&nbsp;nota${anker>1?"s estão vinculadas":" está vinculada"} a trechos deste documento.
         ${anker>1?"Elas permanecem":"Ela permanece"} no quadro e ${anker>1?"só perdem":"só perde"} o vínculo.`,
         `${anker}&nbsp;notatk${anker>1?"i są":"a jest"} powiązan${anker>1?"e":"a"} z miejscami w tym dokumencie.
-        ${anker>1?"Pozostają":"Pozostaje"} na tablicy i ${anker>1?"tracą":"traci"} tylko powiązanie.`)}</p>`:""}
+        ${anker>1?"Pozostają":"Pozostaje"} na tablicy i ${anker>1?"tracą":"traci"} tylko powiązanie.`,
+        `${anker}&nbsp;${anker>1?"note sono collegate":"nota è collegata"} a punti di questo documento.
+        ${anker>1?"Restano":"Resta"} nella bacheca e ${anker>1?"perdono":"perde"} solo il collegamento.`)}</p>`:""}
     </div>
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="cdSave">${tr("Vorher speichern")}</button>
@@ -7249,7 +7254,8 @@ function noteCardInner(n){
             anchorCount(n.id)+(anchorCount(n.id)>1?" passages dans le texte":" passage dans le texte"),
             anchorCount(n.id)+(anchorCount(n.id)>1?" lugares en el texto":" lugar en el texto"),
             anchorCount(n.id)+(anchorCount(n.id)>1?" trechos no texto":" trecho no texto"),
-            anchorCount(n.id)+(anchorCount(n.id)>1?" miejsc w tekście":" miejsce w tekście"))}</div>`:""}
+            anchorCount(n.id)+(anchorCount(n.id)>1?" miejsc w tekście":" miejsce w tekście"),
+          anchorCount(n.id)+(anchorCount(n.id)>1?" punti nel testo":" punto nel testo"))}</div>`:""}
         ${n._here?`<div class="src">${n._here}&times; ${tr("hier")}</div>`:""}
         ${n.title?`<div class="ntitle">${esc(n.title)}</div>`:""}
         <div class="nbody" data-hint="${esc(tr("Leere Notiz — anklicken zum Öffnen"))}">${noteBody(n)}</div>
@@ -7593,13 +7599,15 @@ function delGlossColl(id){
         "La suppression retire les entrées ; un glossaire vide subsiste.",
         "Al eliminar desaparecen las entradas; queda un glosario vacío.",
         "Ao excluir, as entradas desaparecem; um glossário vazio permanece.",
-        "Usunięcie kasuje wpisy; pozostaje pusty słowniczek.")
+        "Usunięcie kasuje wpisy; pozostaje pusty słowniczek.",
+      "Con l’eliminazione spariscono le voci; resta un glossario vuoto.")
     :PL("Beim Löschen verschwinden die Einträge; betroffene Dokumente wechseln zu einem anderen Glossar.",
         "Deleting removes the entries; affected documents switch to another glossary.",
         "La suppression retire les entrées ; les documents concernés passent à un autre glossaire.",
         "Al eliminar desaparecen las entradas; los documentos afectados pasan a otro glosario.",
         "Ao excluir, as entradas desaparecem; os documentos afetados passam a usar outro glossário.",
-        "Usunięcie kasuje wpisy; dotknięte dokumenty przechodzą do innego słowniczka.");
+        "Usunięcie kasuje wpisy; dotknięte dokumenty przechodzą do innego słowniczka.",
+      "Con l’eliminazione spariscono le voci; i documenti interessati passano a un altro glossario.");
   overlay(`<div class="modal"><h3>${tr("Glossar löschen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
       ${PL(`„${esc(tr(c.name))}" enthält ${n} ${n===1?"Eintrag":"Einträge"}${wirkt>1?`, verwendet von ${wirkt} Dokumenten`:""}. ${folge}`,
@@ -7607,7 +7615,8 @@ function delGlossColl(id){
         `« ${esc(tr(c.name))} » contient ${n} ${n===1?"entrée":"entrées"}${wirkt>1?`, utilisé par ${wirkt} documents`:""}. ${folge}`,
         `"${esc(tr(c.name))}" contiene ${n} ${n===1?"entrada":"entradas"}${wirkt>1?`, usado por ${wirkt} documentos`:""}. ${folge}`,
         `"${esc(tr(c.name))}" contém ${n} ${n===1?"entrada":"entradas"}${wirkt>1?`, usado por ${wirkt} documentos`:""}. ${folge}`,
-        `„${esc(tr(c.name))}" zawiera ${n} ${n===1?"wpis":"wpisów"}${wirkt>1?`, używany przez ${wirkt} dokumentów`:""}. ${folge}`)}</p>
+        `„${esc(tr(c.name))}" zawiera ${n} ${n===1?"wpis":"wpisów"}${wirkt>1?`, używany przez ${wirkt} dokumentów`:""}. ${folge}`,
+        `« ${esc(tr(c.name))} » contiene ${n} ${n===1?"voce":"voci"}${wirkt>1?`, usato da ${wirkt} documenti`:""}. ${folge}`)}</p>
     </div>
     <div class="rowend">
       <button class="btn" id="dgCancel">${tr("Abbrechen")}</button>
@@ -7695,7 +7704,8 @@ function drawGloss(){
         `Entrée dans « ${esc(tr(coll?coll.name:"Glossar"))} »`,
         `Entrada en "${esc(tr(coll?coll.name:"Glossar"))}"`,
         `Entrada em "${esc(tr(coll?coll.name:"Glossar"))}"`,
-        `Wpis w „${esc(tr(coll?coll.name:"Glossar"))}"`)}</p>
+        `Wpis w „${esc(tr(coll?coll.name:"Glossar"))}"`,
+        `Voce in « ${esc(tr(coll?coll.name:"Glossar"))} »`)}</p>
       <input id="gTerm" placeholder="${tr("Begriff")}">
       <textarea id="gDef" placeholder="${tr("Definition")}"></textarea>
       <input id="gCat" placeholder="${tr("Kategorie (optional)")}">
@@ -7720,7 +7730,8 @@ function drawGloss(){
          `Aucune entrée dans « ${esc(tr(coll?coll.name:"Glossar"))} » ne correspond à « ${esc(q)} ».`,
          `Ninguna entrada en "${esc(tr(coll?coll.name:"Glossar"))}" coincide con "${esc(q)}".`,
          `Nenhuma entrada em "${esc(tr(coll?coll.name:"Glossar"))}" corresponde a "${esc(q)}".`,
-         `Brak wpisu w „${esc(tr(coll?coll.name:"Glossar"))}" pasującego do „${esc(q)}".`)}</div>`
+         `Brak wpisu w „${esc(tr(coll?coll.name:"Glossar"))}" pasującego do „${esc(q)}".`,
+        `Nessuna voce in « ${esc(tr(coll?coll.name:"Glossar"))} » corrisponde a « ${esc(q)} ».`)}</div>`
       :`<div class="empty">${tr("Das Glossar ist leer.<br>Lege Begriffe an, die in deinen Texten wiederkehren — sie lassen sich danach im Text markieren und mit <b>Alt+⇧+G</b> jederzeit nachschlagen.")}</div>`}
   </div>`;
 }
@@ -7752,7 +7763,8 @@ function goalUnitAbbr(unit){
              {charsSp:"car",charsNoSp:"car⁻",pages:"ms",words:"m"},
              {charsSp:"car",charsNoSp:"car⁻",pages:"ms",words:"p"},
              {charsSp:"car",charsNoSp:"car⁻",pages:"ms",words:"p"},
-             {charsSp:"zn",charsNoSp:"zn⁻",pages:"ns",words:"sł"});
+             {charsSp:"zn",charsNoSp:"zn⁻",pages:"ns",words:"sł"},
+    {charsSp:"car",charsNoSp:"car⁻",pages:"cart",words:"p"});
   if(unit==="charsSp")return T.charsSp;
   if(unit==="charsNoSp")return T.charsNoSp;
   if(unit==="pages")return T.pages;
@@ -7793,9 +7805,11 @@ function drawStatus(){
     ${goalHtml(txt)}
     <span>${S.mode==="write"?(pageCount+" "+PL("Seite"+(pageCount>1?"n":""),
       pageCount>1?"pages":"page",pageCount>1?"pages":"page",pageCount>1?"páginas":"página",
-      pageCount>1?"páginas":"página",pageCount>1?"strony":"strona")):pages+" "+tr("Normseiten")}</span>
+      pageCount>1?"páginas":"página",pageCount>1?"strony":"strona",
+      pageCount>1?"pagine":"pagina")):pages+" "+tr("Normseiten")}</span>
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
-    <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki")}</span>
+    <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki",
+      "note")}</span>
     <span class="grow"></span>
     <span title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über Datei → Alles sichern."))}"
       ${storageOk?"":'class="savefail"'}>
@@ -8359,7 +8373,8 @@ function glossIO(){
         `« ${nm} » · ${n} ${n===1?"entrée":"entrées"}`,
         `"${nm}" · ${n} ${n===1?"entrada":"entradas"}`,
         `"${nm}" · ${n} ${n===1?"entrada":"entradas"}`,
-        `„${nm}" · ${n} ${n===1?"wpis":"wpisów"}`)}</p>
+        `„${nm}" · ${n} ${n===1?"wpis":"wpisów"}`,
+        `« ${nm} » · ${n} ${n===1?"voce":"voci"}`)}</p>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn" id="ioCsv" ${n?"":"disabled"}>${tr("Als Tabelle")} <span class="ioext">.csv</span></button>
         <button class="btn" id="ioJson" ${n?"":"disabled"}>${tr("Als Sicherung")} <span class="ioext">.json</span></button>
@@ -8369,7 +8384,8 @@ function glossIO(){
       <p class="iohint">${tr("Tabelle mit Begriff, Definition, Kategorie je Spalte — oder eine hier gesicherte .json-Datei.")}</p>
       <div class="ioradio">
         <label><input type="radio" name="ioZiel" value="hier" checked>
-          <span>${PL(`In „${nm}" einfügen`,`Add to "${nm}"`,`Ajouter à « ${nm} »`,`Añadir a "${nm}"`,`Adicionar a "${nm}"`,`Dodaj do „${nm}"`)}</span></label>
+          <span>${PL(`In „${nm}" einfügen`,`Add to "${nm}"`,`Ajouter à « ${nm} »`,`Añadir a "${nm}"`,`Adicionar a "${nm}"`,`Dodaj do „${nm}"`,
+            `Aggiungi a « ${nm} »`)}</span></label>
         <label><input type="radio" name="ioZiel" value="neu">
           <span>${tr("Als neues Glossar anlegen")}</span></label>
       </div>
@@ -9878,7 +9894,8 @@ const DOKENDUNGEN=DOKFORMATE.flatMap(f=>f.e);
    darüber ist es der Anfang des Problems. Als data:-URI wächst jedes Bild
    um ein Drittel. */
 const BILD_WARNUNG=1500*1024;
-const mbText=b=>(b/1048576).toFixed(1).replace(".",PL(",",".",",",",",",",","))+" MB";
+const mbText=b=>(b/1048576).toFixed(1).replace(".",PL(",",".",",",",",",",",",
+  ","))+" MB";
 function bildHinweis(zahl,bytes,fehlend,docs){
   overlay(`<div class="modal"><h3>${esc(tr("Bilder eingebettet"))}</h3>
     <div class="pad">
@@ -9888,7 +9905,8 @@ function bildHinweis(zahl,bytes,fehlend,docs){
         zahl+" images ont été repris avec le document, "+mbText(bytes)+" au total.",
         zahl+" imágenes se cargaron con el documento, "+mbText(bytes)+" en total.",
         zahl+" imagens vieram com o documento, "+mbText(bytes)+" no total.",
-        "Wraz z dokumentem wczytano obrazy: "+zahl+", łącznie "+mbText(bytes)+"."))}</p>
+        "Wraz z dokumentem wczytano obrazy: "+zahl+", łącznie "+mbText(bytes)+".",
+        zahl+" immagini sono state caricate con il documento, "+mbText(bytes)+" in totale."))}</p>
       <p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(tr(
         "Bilder werden im Dokument gespeichert und vergrößern es entsprechend."))}</p>
       ${fehlend?`<p style="margin:0 0 10px;line-height:1.55;color:var(--ink-soft)">${esc(PL(
@@ -9897,7 +9915,8 @@ function bildHinweis(zahl,bytes,fehlend,docs){
         fehlend+" images n'ont pas pu être lues et manquent dans le texte.",
         fehlend+" imágenes no se pudieron leer y faltan en el texto.",
         fehlend+" imagens não puderam ser lidas e faltam no texto.",
-        "Nie udało się wczytać obrazów: "+fehlend+" — brakuje ich w tekście."))}</p>`:""}
+        "Nie udało się wczytać obrazów: "+fehlend+" — brakuje ich w tekście.",
+        fehlend+" immagini non sono state lette e mancano nel testo."))}</p>`:""}
     </div>
     <div class="rowend"><button class="btn" id="biOhne">${esc(tr("Ohne Bilder"))}</button>
       <button class="btn prim" id="biOk">${esc(tr("Bilder behalten"))}</button></div></div>`);
@@ -10988,7 +11007,8 @@ function confirmReplace(onOk){
       `Actuellement ici : ${S.docs.length} documents, ${S.notes.length} notes, ${S.glossary.length} entrées de glossaire.`,
       `Actualmente aquí: ${S.docs.length} documentos, ${S.notes.length} notas, ${S.glossary.length} entradas de glosario.`,
       `Atualmente aqui: ${S.docs.length} documentos, ${S.notes.length} notas, ${S.glossary.length} entradas de glossário.`,
-      `Aktualnie tutaj: ${S.docs.length} dokumentów, ${S.notes.length} notatek, ${S.glossary.length} wpisów w słowniczku.`)}</div>
+      `Aktualnie tutaj: ${S.docs.length} dokumentów, ${S.notes.length} notatek, ${S.glossary.length} wpisów w słowniczku.`,
+      `Attualmente qui: ${S.docs.length} documenti, ${S.notes.length} note, ${S.glossary.length} voci di glossario.`)}</div>
     </div>
     <div class="rowend">
       <button class="btn" id="crCancel">${tr("Abbrechen")}</button>
@@ -11519,16 +11539,19 @@ function linkSelection(){
     hits=[{neu:true,label:v
         ?PL(`Neue Notiz „${v.slice(0,30)}" an dieser Stelle`,`New note "${v.slice(0,30)}" at this spot`,
             `Nouvelle note « ${v.slice(0,30)} » à cet endroit`,`Nueva nota "${v.slice(0,30)}" en este punto`,
-            `Nova nota "${v.slice(0,30)}" neste trecho`,`Nowa notatka „${v.slice(0,30)}" w tym miejscu`)
+            `Nova nota "${v.slice(0,30)}" neste trecho`,`Nowa notatka „${v.slice(0,30)}" w tym miejscu`,
+          `Nuova nota « ${v.slice(0,30)} » in questo punto`)
         :PL("Neue Notiz an dieser Stelle","New note at this spot",
-            "Nouvelle note à cet endroit","Nueva nota en este punto","Nova nota neste trecho","Nowa notatka w tym miejscu")},
+            "Nouvelle note à cet endroit","Nueva nota en este punto","Nova nota neste trecho","Nowa notatka w tym miejscu",
+          "Nuova nota in questo punto")},
       ...found.map(n=>({n,label:((n.title||noteText(n).trim())||tr("Leere Notiz")).slice(0,52)}))];
     idx=Math.min(idx,hits.length-1);
     l.innerHTML=hits.map((h,i)=>`<div class="pickitem ${i===idx?"on":""}" data-i="${i}">
       <span class="dotc" style="background:${h.neu?"transparent":(h.n.color||NOTECOLORS[0].c)};${h.neu?"border-style:dashed":""}"></span>
       <span style="flex:1">${esc(h.label)}</span>
       ${h.neu?`<span class="kbd">${tr("neu")}</span>`:(anchorCount(h.n.id)?`<span class="kbd">${anchorCount(h.n.id)} ${
-        PL("Stellen","spots","passages","lugares","trechos","miejsc")}</span>`:"")}</div>`).join("");
+        PL("Stellen","spots","passages","lugares","trechos","miejsc",
+          "punti")}</span>`:"")}</div>`).join("");
     const on=l.querySelector(".pickitem.on");if(on)on.scrollIntoView({block:"nearest"})};
   const go=()=>{const h=hits[idx];if(!h)return;
     const title=q.value.trim();closeOvl();
@@ -12111,7 +12134,8 @@ function pageFlag(){
   const f=fmtOf(doc()),stride=MM(f.h)*S.zoom+GAP;
   const p=Math.min(pageCount,Math.max(1,Math.floor((sh.scrollTop+sh.clientHeight*.4)/stride)+1));
   fl.textContent=PL(`Seite ${p} von ${pageCount}`,`Page ${p} of ${pageCount}`,
-    `Page ${p} sur ${pageCount}`,`Página ${p} de ${pageCount}`,`Página ${p} de ${pageCount}`,`Strona ${p} z ${pageCount}`);
+    `Page ${p} sur ${pageCount}`,`Página ${p} de ${pageCount}`,`Página ${p} de ${pageCount}`,`Strona ${p} z ${pageCount}`,
+    `Pagina ${p} di ${pageCount}`);
   fl.classList.add("on");clearTimeout(flagTimer);
   flagTimer=setTimeout(()=>fl.classList.remove("on"),1100);
 }
@@ -12208,7 +12232,8 @@ function wordCount(selText){
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Absätze")}</td><td style="text-align:right">${d.paras.toLocaleString(LOC())}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Seiten")}</td><td style="text-align:right">${pageCount}</td></tr>
       <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Normseiten (1500 Z.)")}</td><td style="text-align:right">${nsp}</td></tr>
-      <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Lesedauer (≈ 180 W/min)")}</td><td style="text-align:right">${mins} ${PL("Min.","min","min","min","min","min")}</td></tr>
+      <tr><td style="padding:4px 0;color:var(--ink-soft)">${tr("Lesedauer (≈ 180 W/min)")}</td><td style="text-align:right">${mins} ${PL("Min.","min","min","min","min","min",
+        "min")}</td></tr>
     </table>
     ${s?`<div style="margin-top:11px;padding-top:9px;border-top:1px solid var(--rule)">
       <div class="mlabel" style="padding-left:0">${tr("Markierte Auswahl")}</div>
@@ -14773,7 +14798,8 @@ function cleanDialog(){
           `${n} paragraphes vides consécutifs seront réduits à deux.`,
           `${n} párrafos vacíos consecutivos se reducirán a dos.`,
           `${n} parágrafos vazios consecutivos serão reduzidos a dois.`,
-          `${n} kolejnych pustych akapitów zostanie skróconych do dwóch.`)}</div>`;
+          `${n} kolejnych pustych akapitów zostanie skróconych do dwóch.`,
+          `${n} paragrafi vuoti consecutivi verranno ridotti a due.`)}</div>`;
     }
     const c=cleanContextText(h);
     return kopf+`<div class="spellsub">${KIND[h.kind]()}</div>
@@ -15069,7 +15095,8 @@ function fdReplaceAll(){
     n+(n===1?" occurrence remplacée":" occurrences remplacées"),
     n+(n===1?" coincidencia reemplazada":" coincidencias reemplazadas"),
     n+(n===1?" ocorrência substituída":" ocorrências substituídas"),
-    n+(n===1?" wystąpienie zamienione":" wystąpień zamienionych")));
+    n+(n===1?" wystąpienie zamienione":" wystąpień zamienionych"),
+    n+(n===1?" occorrenza sostituita":" occorrenze sostituite")));
 }
 $("#fdQ").addEventListener("input",()=>fdRun());
 $("#fdQ").addEventListener("keydown",e=>{
@@ -15186,7 +15213,8 @@ function slashOpen(q){
   let m=$("#smenu");
   if(!m){m=document.createElement("div");m.className="menu ctx";m.id="smenu";
     m.style.minWidth="216px";document.body.appendChild(m);slashIdx=0}
-  m.innerHTML=`<div class="mlabel">${PL("Einfügen","Insert","Insérer","Insertar","Inserir","Wstaw")}</div>`+slashHits.map((x,i)=>
+  m.innerHTML=`<div class="mlabel">${PL("Einfügen","Insert","Insérer","Insertar","Inserir","Wstaw",
+    "Inserisci")}</div>`+slashHits.map((x,i)=>
     `<button class="mi ${i===slashIdx?"on":""}" data-s="${i}" style="${i===slashIdx?"background:var(--chrome)":""}">
       <span class="chk"></span>${tr(x.n)}</button>`).join("");
   const r=slashBlock.getBoundingClientRect();
@@ -15288,7 +15316,9 @@ async function embedRemoteImages(bilder){
     fehl===1?"1 imagem não pôde ser incorporada e permanece vinculada à origem."
             :fehl+" imagens não puderam ser incorporadas e permanecem vinculadas à origem.",
     fehl===1?"1 obrazu nie udało się osadzić i pozostaje powiązany ze źródłem."
-            :fehl+" obrazów nie udało się osadzić i pozostają powiązane ze źródłem."));
+            :fehl+" obrazów nie udało się osadzić i pozostają powiązane ze źródłem.",
+    fehl===1?"1 immagine non è stata incorporata e resta collegata alla sua origine."
+            :fehl+" immagini non sono state incorporate e restano collegate alla loro origine."));
 }
 function insertFigure(src,alt){
   const ed=$("#editor");if(!ed)return;
@@ -20166,14 +20196,16 @@ function helpAnzahl(n){return PL(
   n+" rubrique"+(n>1?"s":"")+" trouvée"+(n>1?"s":""),
   n+" tema"+(n>1?"s":"")+" encontrado"+(n>1?"s":""),
   n+" tópico"+(n>1?"s":"")+" encontrado"+(n>1?"s":""),
-  "Znaleziono tematy: "+n)}
+  "Znaleziono tematy: "+n,
+  n+(n===1?" argomento trovato":" argomenti trovati"))}
 function helpNichts(q){return PL(
   "Nichts gefunden für \u201E"+q+"\u201C.",
   "Nothing found for \u201C"+q+"\u201D.",
   "Aucun résultat pour \u00AB\u202F"+q+"\u202F\u00BB.",
   "No se encontró nada para \u00AB"+q+"\u00BB.",
   "Nada encontrado para \u201C"+q+"\u201D.",
-  "Nic nie znaleziono dla \u201E"+q+"\u201D.")}
+  "Nic nie znaleziono dla \u201E"+q+"\u201D.",
+  "Nessun risultato per \u00AB\u202F"+q+"\u202F\u00BB.")}
 /* Die Bücher-Symbole von WinHelp: gelbes geschlossenes Buch, aufgeschlagenes
    Buch, und die Seite mit dem Fragezeichen für ein einzelnes Thema. Bewusst
    feste Gelbtöne statt Schemafarben — das Gelb ist der Wiedererkennungswert. */
