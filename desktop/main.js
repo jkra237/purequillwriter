@@ -50,7 +50,16 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true
+      sandbox: true,
+      /* Chromium bringt eine eigene Rechtschreibprüfung mit. Im Browser greift
+         sie auf die Wörterbücher des Systems zu; unter pqw:// hat sie keine
+         und unterringelt dann JEDES Wort rot — im Programm sah es aus, als
+         könne es kein Deutsch. Nachladen wäre keine Lösung: Electron holt
+         seine Wörterbücher von einem Google-Server, und eine App, die mit
+         „vollständig offline, kein Server" wirbt, holt sich beim Tippen keine
+         Dateien aus dem Netz. Die Prüfung des Programms selbst bleibt davon
+         unberührt — sie bringt ihre Wörterbücher mit (dict/, spellLoad). */
+      spellcheck: false
     }
   });
   win.once("ready-to-show", () => win.show());
