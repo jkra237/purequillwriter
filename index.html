@@ -751,6 +751,13 @@ body.focus .repside{display:none}
 .repopt label{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:5px}
 .repopt input[type=number]{width:52px;text-align:right}
 .repopt input[type=checkbox]{width:auto}
+/* Ausgegrauter Haken samt Begruendung darunter. --ink-faint ist hier zulaessig:
+   ein deaktiviertes Bedienelement auszugrauen IST die Aussage, und
+   Kontrastregeln nehmen deaktivierte Elemente aus. Der Begruendungstext
+   daneben teilt dagegen etwas mit und steht darum auf --ink-soft. */
+.repopt label.aus{color:var(--ink-faint);cursor:default}
+.repopt .repwarum{font-size:11.5px;line-height:1.45;color:var(--ink-soft);
+  margin:-2px 0 1px 19px;max-width:26em}
 .replist{margin:0 -3px;padding:0 3px}
 .reprow{padding:8px 10px;margin-bottom:5px;border:1px solid transparent;
   border-left:3px solid var(--rule);border-radius:var(--radius);cursor:pointer;outline:none}
@@ -1770,6 +1777,8 @@ en:{
   "Vorkommen":"occurrences",
   "Mindestlänge":"Minimum length",
   "Auch Füllwörter zeigen":"Show function words too",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"This language’s dictionary is a list of finished word forms and holds no rules for tracing them back.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"Not possible for this language — the dictionary holds no word forms.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Articles, pronouns and prepositions would otherwise sit at the top",
   "engster Abstand":"closest gap",
   "Keine Wiederholungen gefunden.":"No repetitions found.",
@@ -2512,6 +2521,8 @@ fr:{
   "Vorkommen":"occurrences",
   "Mindestlänge":"Longueur minimale",
   "Auch Füllwörter zeigen":"Afficher aussi les mots outils",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"Le dictionnaire de cette langue est une liste de formes toutes faites et ne contient aucune règle pour les ramener à leur base.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"Impossible pour cette langue — le dictionnaire ne connaît pas les formes.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Sinon les articles, pronoms et prépositions occupent le haut de la liste",
   "engster Abstand":"écart le plus court",
   "Keine Wiederholungen gefunden.":"Aucune répétition trouvée.",
@@ -3254,6 +3265,8 @@ es:{
   "Vorkommen":"apariciones",
   "Mindestlänge":"Longitud mínima",
   "Auch Füllwörter zeigen":"Mostrar también las palabras funcionales",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"El diccionario de este idioma es una lista de formas ya flexionadas y no contiene reglas para reducirlas.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"No es posible en este idioma: el diccionario no conoce las formas.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Si no, artículos, pronombres y preposiciones encabezan la lista",
   "engster Abstand":"distancia mínima",
   "Keine Wiederholungen gefunden.":"No se encontraron repeticiones.",
@@ -3996,6 +4009,8 @@ pt:{
   "Vorkommen":"ocorrências",
   "Mindestlänge":"Comprimento mínimo",
   "Auch Füllwörter zeigen":"Mostrar também as palavras funcionais",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"O dicionário deste idioma é uma lista de formas prontas e não contém regras para reduzi-las.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"Não é possível neste idioma — o dicionário não conhece as formas.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Caso contrário, artigos, pronomes e preposições ficam no topo da lista",
   "engster Abstand":"distância mínima",
   "Keine Wiederholungen gefunden.":"Nenhuma repetição encontrada.",
@@ -4738,6 +4753,8 @@ pl:{
   "Vorkommen":"wystąpień",
   "Mindestlänge":"Minimalna długość",
   "Auch Füllwörter zeigen":"Pokaż też wyrazy funkcyjne",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"Słownik tego języka to lista gotowych form wyrazowych i nie zawiera reguł pozwalających sprowadzić je do podstawy.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"Niemożliwe w tym języku — słownik nie zna form wyrazowych.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Inaczej zaimki, przyimki i spójniki zajmują czoło listy",
   "engster Abstand":"najmniejszy odstęp",
   "Keine Wiederholungen gefunden.":"Nie znaleziono powtórzeń.",
@@ -5487,6 +5504,8 @@ it:{
   "Vorkommen":"occorrenze",
   "Mindestlänge":"Lunghezza minima",
   "Auch Füllwörter zeigen":"Mostra anche le parole funzionali",
+  "Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.":"Il dizionario di questa lingua è un elenco di forme già flesse e non contiene regole per ricondurle alla base.",
+  "Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.":"Non possibile in questa lingua: il dizionario non conosce le forme.",
   "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Altrimenti articoli, pronomi e preposizioni stanno in cima all’elenco",
   "engster Abstand":"distanza minima",
   "Keine Wiederholungen gefunden.":"Nessuna ripetizione trovata.",
@@ -12295,8 +12314,15 @@ for(const k in REP_STOPP_ROH)REP_STOPP[k]=new Set(REP_STOPP_ROH[k].split(/\s+/).
 let repOpt={min:3,len:4,flex:null,fuell:false};
 let repLaden=false;
 function repDictBereit(){return !!(SPELL&&SPELL.lang===S.settings.lang&&SPELL.eng.stem)}
+/* Ein geladenes Woerterbuch heisst noch nicht, dass es Formen zurueckfuehren
+   kann. Italienisch besteht aus Vollformen ohne eine einzige Affixregel — der
+   Haken liesse sich dort setzen und taete nichts. Statt das zu verschweigen,
+   fragt die Leiste hier nach und graut ihn aus. Geprueft wird die Faehigkeit,
+   nicht die Sprache: bekaeme Italienisch je eine richtige .aff, wirkte der
+   Haken sofort, ohne dass hier etwas zu aendern waere. */
+function repStammMoeglich(){return repDictBereit()&&SPELL.eng.affixe>0}
 function repStamm(w){
-  if(!repOpt.flex||!repDictBereit())return w.toLowerCase();
+  if(!repOpt.flex||!repStammMoeglich())return w.toLowerCase();
   const s=SPELL.eng.stem(w);
   return (s||w).toLowerCase();
 }
@@ -12373,14 +12399,20 @@ function drawRep(){
   if(S.mode!=="write"||!S.repOpen){box.className="repside";box.innerHTML="";return}
   box.className="repside on";
   const bereit=repDictBereit();
-  if(repOpt.flex===null)repOpt.flex=bereit;
+  /* Woerterbuch liegt vor, kann aber keine Formen zurueckfuehren */
+  const ohneFormen=bereit&&!repStammMoeglich();
+  if(ohneFormen)repOpt.flex=false;
+  if(repOpt.flex===null)repOpt.flex=repStammMoeglich();
   box.innerHTML=`<div class="repside-resize" id="repResize" title="${tr("Breite ziehen")}"></div>
     <div class="rhead"><b>${tr("Wortwiederholungen")}</b>
       <button class="obtn" id="repClose" title="${tr("Schließen")}">${ICO('<path d="M6 6l12 12M18 6 6 18"/>')}</button></div>
     <div class="rbody">
       <div class="repopt">
-        <label title="${esc(tr("zählt Haus, Hauses und Häuser als ein Wort"))}">
-<input type="checkbox" id="repFlex" ${repOpt.flex&&bereit?"checked":""}>${tr("Wortformen zusammenfassen")}</label>
+        <label class="${ohneFormen?"aus":""}" title="${esc(ohneFormen
+          ?tr("Das Wörterbuch dieser Sprache besteht aus fertigen Wortformen und kennt keine Regeln, um sie zurückzuführen.")
+          :tr("zählt Haus, Hauses und Häuser als ein Wort"))}">
+<input type="checkbox" id="repFlex" ${repOpt.flex&&bereit&&!ohneFormen?"checked":""} ${ohneFormen?"disabled":""}>${tr("Wortformen zusammenfassen")}</label>
+        ${ohneFormen?`<div class="repwarum">${tr("Für diese Sprache nicht möglich — das Wörterbuch kennt keine Wortformen.")}</div>`:""}
         <label>${tr("Mindestens")} <input type="number" id="repMin" min="2" max="99" value="${repOpt.min}"> ${tr("Vorkommen")}</label>
         <label>${tr("Mindestlänge")} <input type="number" id="repLen" min="2" max="20" value="${repOpt.len}"></label>
         <label title="${esc(tr("Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste"))}">
@@ -12397,7 +12429,7 @@ function drawRep(){
   $("#repFlex").onchange=async e=>{
     const an=e.target.checked;
     if(!an){repOpt.flex=false;drawRep();return}
-    if(repDictBereit()){repOpt.flex=true;drawRep();return}
+    if(repDictBereit()){repOpt.flex=repStammMoeglich();drawRep();return}
     if(repLaden)return;
     repLaden=true;e.target.disabled=true;
     const pr=$("#repProg");if(pr)pr.style.display="block";
@@ -12405,7 +12437,10 @@ function drawRep(){
       const eng=await spellLoad(S.settings.lang,x=>{
         const i=pr&&pr.firstElementChild;if(i)i.style.width=Math.round(x*100)+"%";});
       SPELL={lang:S.settings.lang,eng};
-      repLaden=false;repOpt.flex=true;drawRep();
+      /* Erst nach dem Laden ist zu sehen, ob das Woerterbuch ueberhaupt
+         Formen kennt. Kann es das nicht, faellt der Haken zurueck und
+         drawRep() setzt an seine Stelle die Begruendung. */
+      repLaden=false;repOpt.flex=repStammMoeglich();drawRep();
     }catch(err){
       repLaden=false;repOpt.flex=false;
       toast(tr("Wörterbuch nicht verfügbar"));drawRep();
@@ -14235,8 +14270,14 @@ function spMake(A,words,idx){
     stemMemo.set(word,akt);
     return akt;
   }
+  /* Ohne Affixregeln kann stemOf() nichts zurueckfuehren — es gibt dann keine
+     Beziehung zwischen „mulino“ und „mulini“, beide stehen als eigene
+     Eintraege in der .dic. Genau so ist das italienische Woerterbuch gebaut
+     (Vollformen aus Morph-it!, it.aff hat 0 Regeln), und wer darauf aufbaut,
+     muss das wissen koennen, statt es an ausbleibender Wirkung zu merken. */
   return {check,suggest,stem:stemOf,addWord(w){user.add(w);memo.delete(w)},
-          size:words.size};
+          size:words.size,
+          affixe:(A.pfx?A.pfx.size:0)+(A.sfx?A.sfx.size:0)};
 }
 /* Aufbau in Häppchen: die polnische .dic hat 300.000 Zeilen, am Stück
    geparst stünde die Oberfläche eine Sekunde lang still und der
