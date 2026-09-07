@@ -1769,6 +1769,8 @@ en:{
   "Mindestens":"At least",
   "Vorkommen":"occurrences",
   "Mindestlänge":"Minimum length",
+  "Auch Füllwörter zeigen":"Show function words too",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Articles, pronouns and prepositions would otherwise sit at the top",
   "engster Abstand":"closest gap",
   "Keine Wiederholungen gefunden.":"No repetitions found.",
   "Wörterbuch laden":"Load dictionary",
@@ -2510,6 +2512,8 @@ fr:{
   "Mindestens":"Au moins",
   "Vorkommen":"occurrences",
   "Mindestlänge":"Longueur minimale",
+  "Auch Füllwörter zeigen":"Afficher aussi les mots outils",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Sinon les articles, pronoms et prépositions occupent le haut de la liste",
   "engster Abstand":"écart le plus court",
   "Keine Wiederholungen gefunden.":"Aucune répétition trouvée.",
   "Wörterbuch laden":"Charger le dictionnaire",
@@ -3251,6 +3255,8 @@ es:{
   "Mindestens":"Al menos",
   "Vorkommen":"apariciones",
   "Mindestlänge":"Longitud mínima",
+  "Auch Füllwörter zeigen":"Mostrar también las palabras funcionales",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Si no, artículos, pronombres y preposiciones encabezan la lista",
   "engster Abstand":"distancia mínima",
   "Keine Wiederholungen gefunden.":"No se encontraron repeticiones.",
   "Wörterbuch laden":"Cargar diccionario",
@@ -3992,6 +3998,8 @@ pt:{
   "Mindestens":"Pelo menos",
   "Vorkommen":"ocorrências",
   "Mindestlänge":"Comprimento mínimo",
+  "Auch Füllwörter zeigen":"Mostrar também as palavras funcionais",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Caso contrário, artigos, pronomes e preposições ficam no topo da lista",
   "engster Abstand":"distância mínima",
   "Keine Wiederholungen gefunden.":"Nenhuma repetição encontrada.",
   "Wörterbuch laden":"Carregar dicionário",
@@ -4733,6 +4741,8 @@ pl:{
   "Mindestens":"Co najmniej",
   "Vorkommen":"wystąpień",
   "Mindestlänge":"Minimalna długość",
+  "Auch Füllwörter zeigen":"Pokaż też wyrazy funkcyjne",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Inaczej zaimki, przyimki i spójniki zajmują czoło listy",
   "engster Abstand":"najmniejszy odstęp",
   "Keine Wiederholungen gefunden.":"Nie znaleziono powtórzeń.",
   "Wörterbuch laden":"Wczytaj słownik",
@@ -5481,6 +5491,8 @@ it:{
   "Mindestens":"Almeno",
   "Vorkommen":"occorrenze",
   "Mindestlänge":"Lunghezza minima",
+  "Auch Füllwörter zeigen":"Mostra anche le parole funzionali",
+  "Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste":"Altrimenti articoli, pronomi e preposizioni stanno in cima all’elenco",
   "engster Abstand":"distanza minima",
   "Keine Wiederholungen gefunden.":"Nessuna ripetizione trovata.",
   "Wörterbuch laden":"Carica dizionario",
@@ -12202,16 +12214,100 @@ function wordCount(selText){
    Sprachdatensatz, keine handgestrickten Endungslisten je Sprache. Ist kein
    Woerterbuch geladen, wird nach genauen Formen gruppiert; das geht immer
    und sofort. */
+/* Fuellwoerter — Artikel, Pronomen, Praepositionen, Konjunktionen, Hilfsverben.
+   Ohne sie stand bei echtem Text „einem/eine/einer/eines/einen" mit 10x an der
+   Spitze, vor „Muehle" und „Papier". Drei Dinge wirken da zusammen: die
+   Mindestlaenge greift nicht (einem hat fuenf Zeichen), die Formen-Gruppierung
+   zaehlt ein halbes Paradigma zusammen, und der Naehe-Faktor feuert
+   zuverlaessig, weil Funktionswoerter naturgemaess dicht beieinander stehen.
+   Wer „einem" fuenfmal auf einer Seite schreibt, hat kein Stilproblem.
+
+   Geprueft wird gegen den Stamm, nicht gegen die Schreibung — dann genuegt ein
+   Eintrag fuer ein ganzes Paradigma. Weil ohne geladenes Woerterbuch aber nach
+   genauen Formen gruppiert wird, stehen die haeufigen Vollformen mit in der
+   Liste. Sprachen ohne Liste filtern nicht. */
+const REP_STOPP_ROH={
+  de:`ein eine einer eines einem einen der die das des dem den dieser diese dieses diesem diesen
+      jener jene jenes welcher welche welches ich mich mir du dich dir er ihn ihm sie ihr ihnen es
+      wir uns euch sich selbst mein meine meiner meines meinem meinen dein deine sein seine seiner
+      seines seinem seinen unser unsere euer eure und oder aber denn sondern doch dass weil wenn
+      falls obwohl waehrend während bevor nachdem damit sobald als wie also auch nur noch schon
+      nicht kein keine keiner keines keinem keinen man jemand niemand etwas nichts alle alles allem
+      allen aller in im ins an am ans auf aus bei beim von vom zu zum zur mit nach ueber über unter
+      vor zwischen durch fuer für gegen ohne um seit bis hinter neben statt trotz wegen sind war
+      waren wird werden wurde wurden worden haben hat hatte hatten habe bin bist ist seid gewesen
+      kann koennen können konnte konnten koennte könnte muss muessen müssen musste mussten soll
+      sollen sollte sollten will wollen wollte wollten darf duerfen dürfen mag moegen mögen moechte
+      möchte dann dort hier immer wieder`,
+  en:`a an the this that these those i me my mine myself you your yours he him his she her hers it
+      its we us our ours they them their theirs who whom whose which what and or but nor so yet if
+      when while because although though unless until after before since as than then there here
+      now not no none never ever also only just even still is are was were be been being am have
+      has had having do does did doing will would shall should can could may might must of in on at
+      to from by with about into over under between through during against without within all any
+      some each every both few many much more most other another such same`,
+  fr:`le la les un une des du de au aux ce cet cette ces celui celle ceux celles je me moi tu te toi
+      il lui elle nous vous ils elles leur leurs se soi mon ma mes ton ta tes son sa ses notre nos
+      votre vos qui que quoi dont lequel laquelle et ou mais donc car ni si quand lorsque parce
+      comme puisque bien pendant apres après avant depuis ne pas plus moins tres très aussi encore
+      deja déjà toujours jamais rien tout tous toute toutes dans sur sous pour par avec sans chez
+      vers entre contre selon est sont etait était etaient étaient ete été etre être suis sommes
+      sera seront ont avait avaient avoir ai avons avez aura auront eu peut peuvent pouvoir doit
+      doivent devoir fait faire`,
+  es:`el la los las un una unos unas lo al del de este esta estos estas ese esa esos esas aquel
+      aquella yo me tu ti el ella ello nosotros vosotros ustedes ellos ellas se si mi mis tus su sus
+      nuestro nuestra nuestros nuestras que quien quienes cual cuales cuyo cuando donde como y o
+      pero sino aunque porque pues mientras despues después antes desde hasta no ni tambien también
+      tampoco muy mas más menos ya aun aún todavia todavía siempre nunca nada todo todos toda todas
+      en a con por para sin sobre entre contra tras bajo es son era eran ser fue fueron sido soy
+      eres somos esta está estan están estaba estaban estar estado ha han habia había haber hay he
+      hemos puede pueden podia podía poder debe deben deber hace hacen hacer`,
+  it:`il lo la i gli le un uno una del dello della dei degli delle al allo alla ai agli alle dal
+      dalla dai nel nella nei negli nelle sul sulla sui questo questa questi queste quel quello
+      quella quei quegli quelle io me mi tu te ti lui lei esso essa noi ci voi vi loro se si mio mia
+      miei mie tuo tua tuoi suo sua suoi sue nostro nostra vostro vostra che chi cui quale quali
+      quando dove come e ed o oppure ma pero però anche perche perché poiche poiché mentre dopo
+      prima non ne piu più meno molto gia già ancora sempre mai nulla niente tutto tutti tutta tutte
+      in a da con per su tra fra senza sotto sopra contro sono era erano essere stato stata stati
+      state sia siano ha hanno aveva avevano avere ho hai abbiamo avete puo può possono potere deve
+      devono dovere fa fanno fare`,
+  pl:`i a ale oraz lub albo czy ze że aby zeby żeby bo poniewaz ponieważ gdy kiedy jesli jeśli
+      jezeli jeżeli choc choć chociaz chociaż w we na do od z ze za po przed pod nad przy o u dla
+      bez przez miedzy między obok okolo około ja mnie mi mna mną ty ciebie ci toba tobą on jego
+      jemu nim ona jej nia nią ono my nas nam wy was wam oni one ich im nimi sie się sobie siebie
+      soba sobą moj mój moja moje mojego twoj twój twoja twoje nasz nasza nasze wasz wasza wasze ten
+      ta to tego tej tym te ci tamten tamta tamto ktory który ktora która ktore które ktorego którego
+      jest sa są byl był byla była bylo było byli byly były byc być bedzie będzie beda będą jestem
+      jestes jesteś ma maja mają mial miał miala miała mialo miało mieli miec mieć mam masz mamy
+      moze może moga mogą mogl mógł mogla mogła moc móc nie tak tez też takze także juz już jeszcze
+      bardzo wiecej więcej mniej tylko nawet wszystko wszyscy co kto gdzie jak dlaczego`,
+  pt:`o a os as um uma uns umas do da dos das no na nos nas ao aos pelo pela pelos pelas este esta
+      estes estas esse essa esses essas aquele aquela aquilo isso isto eu me mim voce você te tu ele
+      ela nos vos voces vocês eles elas se si lhe lhes meu minha meus minhas teu tua seu sua seus
+      suas nosso nossa nossos nossas que quem qual quais cujo quando onde como e ou mas porem porém
+      porque pois se embora enquanto depois antes desde ate até nao não nem sim tambem também ja já
+      ainda sempre nunca nada tudo todo toda todos todas em de para por com sem sobre entre contra
+      apos após durante son sao são era eram ser foi foram sido sou somos esta está estao estão
+      estava estavam estar tem tinha tinham ter ha há havia haver pode podem poder deve devem dever
+      faz fazem fazer mais menos muito muitos pouco`
+};
+const REP_STOPP={};
+for(const k in REP_STOPP_ROH)REP_STOPP[k]=new Set(REP_STOPP_ROH[k].split(/\s+/).filter(Boolean));
+
 /* flex=null heisst: noch nicht entschieden. Beim ersten Oeffnen richtet sich
    der Schalter danach, ob ein Woerterbuch schon bereitliegt — dann wirkt er
    sofort, statt angehakt dazustehen und nichts zu tun. */
-let repOpt={min:3,len:4,flex:null};
+let repOpt={min:3,len:4,flex:null,fuell:false};
 let repLaden=false;
 function repDictBereit(){return !!(SPELL&&SPELL.lang===S.settings.lang&&SPELL.eng.stem)}
 function repStamm(w){
   if(!repOpt.flex||!repDictBereit())return w.toLowerCase();
   const s=SPELL.eng.stem(w);
   return (s||w).toLowerCase();
+}
+function stoppWort(k){
+  const l=REP_STOPP[S.settings.lang];
+  return !!l&&l.has(k);
 }
 function repAnalyse(){
   const ed=$("#editor");
@@ -12223,6 +12319,9 @@ function repAnalyse(){
     const wort=m[0];i++;
     if(wort.length<repOpt.len)continue;
     const k=repStamm(wort);
+    /* Erst stammen, dann aussortieren: gegen den Stamm genuegt ein Eintrag
+       fuer „eine/einer/eines/einen/einem" statt fuenf. */
+    if(!repOpt.fuell&&stoppWort(k))continue;
     let g=gruppen.get(k);
     if(!g){g={n:0,formen:new Map(),pos:[]};gruppen.set(k,g)}
     g.n++;g.pos.push(i);
@@ -12289,6 +12388,8 @@ function drawRep(){
 <input type="checkbox" id="repFlex" ${repOpt.flex&&bereit?"checked":""}>${tr("Wortformen zusammenfassen")}</label>
         <label>${tr("Mindestens")} <input type="number" id="repMin" min="2" max="99" value="${repOpt.min}"> ${tr("Vorkommen")}</label>
         <label>${tr("Mindestlänge")} <input type="number" id="repLen" min="2" max="20" value="${repOpt.len}"></label>
+        <label title="${esc(tr("Artikel, Pronomen und Präpositionen stehen sonst oben in der Liste"))}">
+<input type="checkbox" id="repFuell" ${repOpt.fuell?"checked":""}>${tr("Auch Füllwörter zeigen")}</label>
       </div>
       <div class="repprog" id="repProg" style="display:none"><i></i></div>
       <div class="replist" id="repList"></div>
@@ -12317,6 +12418,7 @@ function drawRep(){
   };
   $("#repMin").onchange=e=>{repOpt.min=Math.max(2,Math.min(99,+e.target.value||3));repRender()};
   $("#repLen").onchange=e=>{repOpt.len=Math.max(2,Math.min(20,+e.target.value||4));repRender()};
+  $("#repFuell").onchange=e=>{repOpt.fuell=e.target.checked;repRender()};
   const liste=$("#repList");
   /* Der Klick springt in den Text, und die Leiste bleibt stehen — genau das
      war am Fenster falsch: es nahm bei jedem Treffer die ganze Liste mit. */
