@@ -1113,9 +1113,13 @@ body.focus .outline{display:none}
   .helpsplit{flex-direction:column;height:min(70vh,560px)}
   .helpnav{flex:0 0 180px;border-right:none;border-bottom:1px solid var(--rule)}
 }
-.modal h3{margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;
+.modal h3{position:relative;margin:0;padding:12px 16px;border-bottom:1px solid var(--rule);font-size:12px;font-weight:600;
   letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .modal .pad{padding:16px}
+.modalx{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:26px;height:26px;
+  display:flex;align-items:center;justify-content:center;border:0;background:none;
+  color:var(--ink-faint);font-size:19px;line-height:1;cursor:pointer;border-radius:var(--radius)}
+.modalx:hover{background:var(--chrome-2);color:var(--ink)}
 .modal input,.modal textarea,.modal select{width:100%;background:var(--paper);border:1px solid var(--rule);
   border-radius:var(--radius);padding:6px 8px}
 .hit{padding:7px 9px;border-bottom:1px solid var(--rule);cursor:pointer}
@@ -2360,6 +2364,7 @@ en:{
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Skip — start writing with the default settings",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"You can also back it up on your computer, or automatically into a cloud folder:",
   "Ohne Titel":"Untitled",
@@ -3106,6 +3111,7 @@ fr:{
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Passer — écrire avec les réglages par défaut",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Vous pouvez en plus le sauvegarder sur votre ordinateur ou automatiquement dans un dossier cloud :",
   "Ohne Titel":"Sans titre",
@@ -3852,6 +3858,7 @@ es:{
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Omitir — escribir con los ajustes predeterminados",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Además puedes guardarlo en tu ordenador o automáticamente en una carpeta de la nube:",
   "Ohne Titel":"Sin título",
@@ -4598,6 +4605,7 @@ pt:{
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Pular — escrever com as configurações padrão",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Você também pode salvá-lo no seu computador ou automaticamente numa pasta da nuvem:",
   "Ohne Titel":"Sem título",
@@ -5344,6 +5352,7 @@ pl:{
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Pomiń — pisz z ustawieniami domyślnymi",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Możesz go dodatkowo zapisywać na swoim komputerze albo automatycznie w folderze chmury:",
   "Ohne Titel":"Bez tytułu",
@@ -6101,6 +6110,7 @@ it:{
   "Willkommen":"Benvenuto",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
+  "Überspringen — mit den Voreinstellungen schreiben":"Salta — scrivi con le impostazioni predefinite",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Puoi salvarlo anche sul tuo computer o automaticamente in una cartella cloud:",
   "Ohne Titel":"Senza titolo",
@@ -6240,6 +6250,7 @@ const hatInhalt=h=>{
   const e=document.createElement("div");e.innerHTML=h||"";
   return !!((e.innerText||"").trim()||e.querySelector("figure,img,table"));
 };
+function startSkip(){lockedOvl=false;zurueckZumWillkommen=false;closeOvl();render()}
 function startNew(){
   lockedOvl=false;closeOvl();
   if(S.docs.length===1&&!hatInhalt(S.docs[0].html)){
@@ -6250,7 +6261,7 @@ function mpfad(...schluessel){
   return schluessel.map(k=>tr(k).replace(/…$/,"")).join(" › ");
 }
 function startupDialog(){
-  overlay(`<div class="modal"><h3>${tr("Willkommen")}</h3><div class="pad">
+  overlay(`<div class="modal"><h3>${tr("Willkommen")}<button class="modalx" id="stSkip" title="${esc(tr("Überspringen — mit den Voreinstellungen schreiben"))}">&times;</button></h3><div class="pad">
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
       <label>${tr("Sprache")}</label><div class="ctl">
         <select id="stLang">${UI_LANGS.map(([v,n])=>
@@ -6293,6 +6304,7 @@ function startupDialog(){
     save();applyStaticLabels();startupDialog()};
   $("#stTheme").onchange=()=>{
     S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
+  $("#stSkip").onclick=startSkip;
   $("#stNew").onclick=startNew;
   $("#stOpen").onclick=loadDocumentFile;
   $("#stHelp").onclick=()=>{zurueckZumWillkommen=true;helpDialog(helpErstes())};
@@ -20415,6 +20427,7 @@ document.addEventListener("keydown",e=>{
   if(as&&e.key.toLowerCase()==="b"){e.preventDefault();readView();return}
   if(as&&e.key.toLowerCase()==="v"){e.preventDefault();printPreview();return}
   if(e.key==="Escape"){
+    if($("#stSkip")){startSkip();return}
     if(pasteOpt){pasteBarClose();return}
     if(pvOn){pvClose();return}
     if(readOn){readClose();return}
