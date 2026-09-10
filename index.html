@@ -16338,8 +16338,9 @@ function zoomPresets(){
 const HELPTEXTE={en:[
 {b:"Getting started",t:[
  {t:"About PureQuill Writer",k:"about;overview;introduction",b:`
-<p>PureQuill Writer is a word processor that runs entirely in your browser. There is
-nothing to install and nothing to sign in to. Your text is not sent anywhere.</p>
+<p><nur-b>PureQuill Writer is a word processor that runs entirely in your browser. There is
+nothing to install and nothing to sign in to.</nur-b><nur-a>PureQuill Writer is a word processor for your own machine. There is nothing to
+sign in to, and it works without an internet connection.</nur-a> Your text is not sent anywhere.</p>
 <p>It is built for long-form writing — manuscripts, reports, theses — rather than short
 memos. Three things set it apart from a plain text editor:</p>
 <ul>
@@ -16376,12 +16377,13 @@ affects only the document you are in.</p>`},
 and the status bar at the bottom right always says where things stand.</p>
 <p>Work is kept in <b>three places</b>, numbered in <b>Settings &rsaquo; Saving</b>:</p>
 <ol>
-<li><b>This browser</b> — always, and everything. Tied to the address you opened the
-program from, and lost if you clear your browser data.</li>
+<li><b><nur-b>This browser</nur-b><nur-a>This program</nur-a></b> — always, and everything.<nur-b> Tied to the address you opened the
+program from, and lost if you clear your browser data.</nur-b><nur-a> Kept with the program's data on this machine, and lost if you
+uninstall the program.</nur-a></li>
 <li><b>A file on disk</b> — optional, and only the document you are in, together with
 the notes pinned to it. Set up through <b>File &rsaquo; Save everything &rsaquo; Link to a
-file</b>; from then on it is written along on every save. On another machine — or after the
-browser storage has been cleared — <b>Open a linked file</b> brings it back.</li>
+file</b>; from then on it is written along on every save. On another machine — or after <nur-b>the
+browser storage has been cleared</nur-b><nur-a>the program has been set up afresh</nur-a> — <b>Open a linked file</b> brings it back.</li>
 <li><b>Automatic backup</b> — optional, and the whole program state: every document,
 note, glossary and setting.</li>
 </ol>
@@ -16389,7 +16391,7 @@ note, glossary and setting.</li>
 everything</b>. And inside place 1 the program also keeps
 <a data-goto="Version history and snapshots">snapshots</a> per document — points you can go
 back to.</p>
-<p>If the status bar ever reads <b>Not saved</b> in red, the browser has refused to store
+<p>If the status bar ever reads <b>Not saved</b> in red, <nur-b>the browser</nur-b><nur-a>storage</nur-a> has refused to store
 anything further. Make a backup at once and free some space.</p>
 <p>See also: <a data-goto="Automatic backup">Automatic backup</a>.</p>`}]},
 
@@ -16455,7 +16457,7 @@ are kept as percentages, so they survive zooming and a change of page format.</p
  {t:"Pictures",k:"image;picture;photo;caption;alt text;resize",b:`
 <p>Insert a picture from the toolbar, or type <code>/image</code>. The file is embedded in
 the document, so it travels with your backups — bear in mind that several large
-photographs will fill the browser's storage quickly. The same goes for pictures that arrive with a loaded Word
+photographs will fill <nur-b>the browser's storage</nur-b><nur-a>storage</nur-a> quickly. The same goes for pictures that arrive with a loaded Word
 document.</p>
 <p><b>Click a picture</b> to select it. A small bar appears with alignment, a caption,
 alternative text for screen readers, and delete. Drag the round corner handle to resize.</p>
@@ -16536,7 +16538,7 @@ exactly as it will be printed — page numbers, headers, margins and all. It is 
 the pages you already see, so preview and paper cannot differ. <kbd>Esc</kbd> closes it.</p>
 <p><b>To print</b>, press <kbd>Ctrl</kbd>+<kbd>P</kbd> or use <b>File &rsaquo; Print</b>.</p>
 <p><b>To make a PDF</b>, choose <b>File &rsaquo; Save as &rsaquo; PDF document</b>. This
-opens the same print dialog; pick <i>Save as PDF</i> as the destination.</p>`}]},
+<nur-b>opens the same print dialog; pick <i>Save as PDF</i> as the destination</nur-b><nur-a>goes straight to the save dialog</nur-a>.</p>`}]},
 
 {b:"Working on longer texts",t:[
  {t:"Notes on the pinboard",k:"notes;pinboard;sticky notes;colours",b:`
@@ -16636,9 +16638,9 @@ is open. Seven languages are available: German, English, French, Spanish, Italia
 and Polish. The language is set under <b>Settings &rsaquo; General</b>.</p>
 <p>For each word you can accept a suggestion, type a correction of your own, ignore it once,
 or add it to your own words — those are remembered across all documents.</p>
-<p><b>The dictionaries need a real address.</b> If you opened the file by double-clicking it,
+<nur-b><p><b>The dictionaries need a real address.</b> If you opened the file by double-clicking it,
 the spell check cannot fetch them. Serving the program from a web address or a local server
-solves this.</p>`},
+solves this.</p></nur-b>`},
 
  {t:"Cleaning up the text",k:"clean;tidy;double spaces;non-breaking space;empty paragraphs",b:`
 <p><b>Tools &rsaquo; Clean up text</b> finds the small mess that accumulates in a long
@@ -16699,7 +16701,7 @@ become this program's placeholders, so <code>{page}</code> keeps counting instea
 as the fixed number that happened to be stored in the file. Table column widths are read from
 the document and held as proportions, so they survive a change of paper size.</p>
 <p><b>Pictures come across too</b>, at the width they had in Word. They are embedded in the
-document, which means they sit in the browser's storage — so when a file brings a lot of them,
+document, which means they sit in <nur-b>the browser's storage</nur-b><nur-a>the program's storage</nur-a> — so when a file brings a lot of them,
 you are told how much was added and offered a backup on the spot. Pictures a Word document only
 links to, rather than containing, cannot come along: they live on someone else's machine.</p>
 <p>What does not come across: comments, tracked changes, text boxes, shapes and equations.
@@ -16735,7 +16737,7 @@ use a backup.</p>`},
 
  {t:"Version history and snapshots",k:"version;history;snapshot;undo;restore;earlier;revert",b:`
 <p>While you write, the program keeps <b>snapshots</b> of the document you are in — points you
-can go back to. They are not the same as saving: your text goes into the browser continuously
+can go back to. They are not the same as saving: your text goes into <nur-b>the browser</nur-b><nur-a>storage</nur-a> continuously
 and needs no command at all.</p>
 <p>One is taken by itself at the interval set under <b>File &rsaquo; Snapshots &rsaquo;
 Automatic</b>, but only when something has actually changed. <b>Take a snapshot</b>
@@ -16744,18 +16746,18 @@ rewrite a passage you might want back.</p>
 <p><b>File &rsaquo; Snapshots &rsaquo; Version history</b> lists them, newest first, each with
 its time and word count so you can recognise the one you want. <i>Restore</i> puts that version
 back in place of the current text.</p>
-<p>The <b>last twelve</b> are kept per document; older ones fall away. They sit in the browser
+<p>The <b>last twelve</b> are kept per document; older ones fall away. They sit <nur-b>in the browser</nur-b><nur-a>in storage</nur-a>
 beside the document, so they travel along inside a backup — but they are no substitute for one.
-A snapshot helps you take a step back while writing; a backup is for the day the browser is
+A snapshot helps you take a step back while writing; a backup is for the day <nur-b>the browser</nur-b><nur-a>this machine</nur-a> is
 gone.</p>
 <p>See also: <a data-goto="Backups">Backups</a>.</p>`},
 
  {t:"Backups",k:"backup;restore;bundle;save everything",b:`
 <p>A backup, unlike an export, can be read back in complete.</p>
 <p>It is also a different thing from a <b>snapshot</b>. A snapshot is a point in this
-document's own history, kept inside the browser. A backup is a file on your disk holding
+document's own history, kept <nur-b>inside the browser</nur-b><nur-a>in the program's storage</nur-a>. A backup is a file on your disk holding
 everything at once. The first is for taking a step back while writing; the second is for the
-day the browser is gone.</p>
+day <nur-b>the browser</nur-b><nur-a>this machine</nur-a> is gone.</p>
 <p><b>File &rsaquo; Save everything</b> holds all of this. Its first entry —
 <i>Everything: documents, notes, glossaries, settings</i> — writes the whole program state
 into one file. <b>Load a backup</b> reads it in again; a full backup replaces what is
@@ -16763,8 +16765,8 @@ currently there and asks first.</p>
 <p>Two partial backups are offered as well: this document with its pinned notes, and the
 notes and glossaries on their own. Partial backups are added to what you have rather than
 replacing it.</p>
-<p>Make one before anything drastic, and before moving to a different address — the browser
-keeps its storage separately for each.</p>`},
+<p>Make one before anything drastic<nur-b>, and before moving to a different address — the browser
+keeps its storage separately for each</nur-b>.</p>`},
 
  {t:"Automatic backup",k:"automatic backup;google drive;dropbox;onedrive;cloud;sync",b:`
 <p>The third card under <b>Settings &rsaquo; Saving</b> writes the whole program state to a
@@ -16776,7 +16778,7 @@ services; the sync client does the rest. This works with any provider.</p>
 wrote. <b>Write now</b> writes immediately.</p>
 <p>Nothing is written when nothing has changed, so a file in a synced folder is not touched
 needlessly.</p>
-<p>This needs Chrome or Edge. Other browsers are limited to backups made by hand.</p>`},
+<nur-b><p>This needs Chrome or Edge. Other browsers are limited to backups made by hand.</p></nur-b>`},
 
  {t:"Appearance",k:"theme;colour scheme;appearance;dark mode;typewriter scrolling",b:`
 <p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers seventeen schemes with live
@@ -16805,8 +16807,8 @@ what you want when writing in one language with the program set to another.</p>
 {b:"Reference",t:[
  {t:"Keyboard shortcuts",k:"shortcuts;keys;keyboard;hotkeys",b:`
 <p>Program commands use <kbd>Alt</kbd>+<kbd>Shift</kbd>, because plain <kbd>Ctrl</kbd>
-combinations are largely spoken for by the browser itself. The editing shortcuts the browser
-leaves alone keep their usual keys.</p>
+combinations are largely spoken for<nur-b> by the browser itself</nur-b>. The editing shortcuts<nur-b> the browser
+leaves alone</nur-b> keep their usual keys.</p>
 <p class="hsec">Views</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Write / Notes / Glossary</td></tr>
@@ -16855,19 +16857,21 @@ footnote, a page break, today's date. Arrow keys choose, <kbd>Enter</kbd> insert
 
  {t:"When something goes wrong",k:"problems;troubleshooting;not saved;storage full;missing",b:`
 <p class="hsec">The status bar says "Not saved" in red</p>
-<p>The browser has refused to store anything further, usually because its storage is full —
+<p><nur-b>The browser has refused to store anything further, usually because its storage is full</nur-b><nur-a>Storage has refused to take anything further, usually because it is full</nur-a> —
 embedded pictures fill it quickly. Nothing more is being written. Make a backup at once, then
 remove large pictures or old documents.</p>
-<p class="hsec">The spell check will not start</p>
+<nur-b><p class="hsec">The spell check will not start</p>
 <p>Its dictionaries have to be fetched, which is not possible when the file was opened by
-double-clicking it. Serve the program from a web address or a local server.</p>
+double-clicking it. Serve the program from a web address or a local server.</p></nur-b>
 <p class="hsec">My documents are gone</p>
-<p>Storage is kept separately for each address. Opening the program from a different address —
+<nur-b><p>Storage is kept separately for each address. Opening the program from a different address —
 or a different browser, or a private window — shows an empty program, not a lost one. Return
-to the address you were using, or load a backup.</p>
-<p class="hsec">"File on disk" is greyed out</p>
+to the address you were using, or load a backup.</p></nur-b><nur-a><p>Storage belongs to the program and to your account on this machine. A second installation,
+or a different account, therefore shows an empty program, not a lost one. Load a backup there to
+bring your work along.</p></nur-a>
+<nur-b><p class="hsec">"File on disk" is greyed out</p>
 <p>Reading and writing real files needs Chrome or Edge. In other browsers, use <b>Create a
-backup</b> and <b>Load a backup</b> instead.</p>`}]}
+backup</b> and <b>Load a backup</b> instead.</p></nur-b>`}]}
 ],
 de:[
 {b:"Erste Schritte",t:[
@@ -17437,8 +17441,9 @@ du stattdessen <b>Alles sichern</b> und <b>Sicherung laden</b>.</p></nur-b>`}]}
 es:[
 {b:"Primeros pasos",t:[
  {t:"Acerca de PureQuill Writer",k:"acerca de;información;introducción;qué es",b:`
-<p>PureQuill Writer es un procesador de textos que funciona por completo en el navegador. No hay
-nada que instalar y nada donde iniciar sesión. Tu texto no se envía a ningún sitio.</p>
+<p><nur-b>PureQuill Writer es un procesador de textos que funciona por completo en el navegador. No hay
+nada que instalar y nada donde iniciar sesión.</nur-b><nur-a>PureQuill Writer es un procesador de textos para tu propio equipo. No hay nada
+donde iniciar sesión, y funciona sin conexión a internet.</nur-a> Tu texto no se envía a ningún sitio.</p>
 <p>Está pensado para textos largos —manuscritos, informes, trabajos de fin de estudios— y no
 para notas breves. Tres cosas lo distinguen de un editor de texto sencillo:</p>
 <ul>
@@ -17478,12 +17483,13 @@ recordar, y la barra de estado abajo a la derecha siempre indica cómo está la 
 <p>El trabajo se conserva en <b>tres lugares</b>, numerados en <b>Configuración &rsaquo;
 Guardado</b>:</p>
 <ol>
-<li><b>Este navegador</b>: siempre, y todo. Ligado a la dirección desde la que abriste el
-programa, y se pierde si borras los datos del navegador.</li>
+<li><b><nur-b>Este navegador</nur-b><nur-a>Este programa</nur-a></b>: siempre, y todo.<nur-b> Ligado a la dirección desde la que abriste el
+programa, y se pierde si borras los datos del navegador.</nur-b><nur-a> Se guarda con los datos del programa en este equipo, y se
+pierde si desinstalas el programa.</nur-a></li>
 <li><b>Un archivo en el disco</b>: opcional, y solo el documento en el que estás, junto con las
 notas fijadas a él. Se configura en <b>Archivo &rsaquo; Guardar todo &rsaquo; Vincular a un
 archivo</b>; a partir de entonces se escribe en cada guardado. En otro equipo —o después de
-borrar el almacenamiento del navegador— <b>Abrir un archivo vinculado</b> lo recupera.</li>
+<nur-b>borrar el almacenamiento del navegador</nur-b><nur-a>volver a instalar el programa</nur-a>— <b>Abrir un archivo vinculado</b> lo recupera.</li>
 <li><b>Copia de seguridad automática</b>: opcional, y todo el estado del programa: cada
 documento, nota, glosario y ajuste.</li>
 </ol>
@@ -17491,7 +17497,7 @@ documento, nota, glosario y ajuste.</li>
 dentro del lugar 1 el programa conserva además
 <a data-goto="Historial de versiones e instantáneas">instantáneas</a> por documento: puntos a
 los que puedes volver.</p>
-<p>Si la barra de estado llega a marcar <b>No guardado</b> en rojo, el navegador se ha negado a
+<p>Si la barra de estado llega a marcar <b>No guardado</b> en rojo, <nur-b>el navegador</nur-b><nur-a>el almacenamiento</nur-a> se ha negado a
 almacenar nada más. Haz una copia de seguridad de inmediato y libera espacio.</p>
 <p>Véase también: <a data-goto="Copia de seguridad automática">Copia de seguridad automática</a>.</p>`}]},
 
@@ -17563,7 +17569,7 @@ formato de página.</p>`},
  {t:"Imágenes",k:"imagen;foto;pie de imagen;texto alternativo;redimensionar",b:`
 <p>Inserta una imagen desde la barra de herramientas o escribe <code>/imagen</code>. El archivo
 queda incrustado en el documento, así que viaja con tus copias de seguridad; ten en cuenta que
-varias fotografías grandes llenan el almacenamiento del navegador enseguida. Lo mismo vale para
+varias fotografías grandes llenan <nur-b>el almacenamiento del navegador</nur-b><nur-a>el almacenamiento</nur-a> enseguida. Lo mismo vale para
 las imágenes que llegan con un documento de Word.</p>
 <p><b>Haz clic en una imagen</b> para seleccionarla. Aparece una pequeña barra con alineación,
 un pie de imagen, texto alternativo para lectores de pantalla y eliminar. Arrastra el tirador
@@ -17651,8 +17657,8 @@ construye a partir de las páginas que ya ves, así que la vista previa y el pap
 diferir. <kbd>Esc</kbd> la cierra.</p>
 <p><b>Para imprimir</b>, pulsa <kbd>Ctrl</kbd>+<kbd>P</kbd> o usa <b>Archivo &rsaquo;
 Imprimir</b>.</p>
-<p><b>Para hacer un PDF</b>, elige <b>Archivo &rsaquo; Guardar como &rsaquo; PDF</b>. Se abre el
-mismo cuadro de impresión; elige <i>Guardar como PDF</i> como destino.</p>`}]},
+<p><b>Para hacer un PDF</b>, elige <b>Archivo &rsaquo; Guardar como &rsaquo; PDF</b>. <nur-b>Se abre el
+mismo cuadro de impresión; elige <i>Guardar como PDF</i> como destino</nur-b><nur-a>Se va directo al cuadro de guardado</nur-a>.</p>`}]},
 
 {b:"Trabajar en textos largos",t:[
  {t:"Notas en el tablero",k:"notas;tablero;notas adhesivas;colores",b:`
@@ -17756,9 +17762,9 @@ abierto. Hay siete idiomas disponibles: alemán, inglés, francés, español, it
 polaco. El idioma se ajusta en <b>Configuración &rsaquo; General</b>.</p>
 <p>Para cada palabra puedes aceptar una sugerencia, escribir tu propia corrección, ignorarla una
 vez o añadirla a tus palabras propias: esas se recuerdan en todos los documentos.</p>
-<p><b>Los diccionarios necesitan una dirección real.</b> Si abriste el archivo haciendo doble
+<nur-b><p><b>Los diccionarios necesitan una dirección real.</b> Si abriste el archivo haciendo doble
 clic en él, el corrector no puede descargarlos. Servir el programa desde una dirección web o un
-servidor local lo resuelve.</p>`},
+servidor local lo resuelve.</p></nur-b>`},
 
  {t:"Limpiar el texto",k:"limpiar;ordenar;espacios dobles;espacio de no separación;párrafos vacíos",b:`
 <p><b>Herramientas &rsaquo; Limpiar texto</b> encuentra el pequeño desorden que se acumula en un
@@ -17819,7 +17825,7 @@ sigue contando en lugar de llegar como el número fijo que quedó guardado en el
 de las columnas de las tablas se lee del documento y se mantiene como proporción, así que
 sobrevive a un cambio de tamaño de papel.</p>
 <p><b>Las imágenes también vienen</b>, al ancho que tenían en Word. Quedan incrustadas en el
-documento, lo que significa que ocupan el almacenamiento del navegador: por eso, cuando un
+documento, lo que significa que ocupan <nur-b>el almacenamiento del navegador</nur-b><nur-a>el almacenamiento del programa</nur-a>: por eso, cuando un
 archivo trae muchas, se te dice cuánto se ha añadido y se te ofrece una copia de seguridad al
 momento. Las imágenes a las que un documento de Word solo enlaza, en vez de contenerlas, no
 pueden venir: viven en el equipo de otra persona.</p>
@@ -17856,7 +17862,7 @@ una copia de seguridad.</p>`},
 
  {t:"Historial de versiones e instantáneas",k:"versión;historial;instantánea;deshacer;restaurar;antes;revertir",b:`
 <p>Mientras escribes, el programa conserva <b>instantáneas</b> del documento en el que estás:
-puntos a los que puedes volver. No es lo mismo que guardar: tu texto va al navegador de forma
+puntos a los que puedes volver. No es lo mismo que guardar: tu texto va <nur-b>al navegador</nur-b><nur-a>al almacenamiento</nur-a> de forma
 continua y no necesita ningún comando.</p>
 <p>Una se toma sola en el intervalo fijado en <b>Archivo &rsaquo; Puntos de restauración
 &rsaquo; Automático</b>, pero solo cuando algo ha cambiado de verdad. <b>Crear un punto de
@@ -17865,18 +17871,18 @@ hacerlo antes de reescribir un pasaje que quizá quieras recuperar.</p>
 <p><b>Archivo &rsaquo; Puntos de restauración &rsaquo; Historial de versiones</b> los lista, del
 más reciente al más antiguo, cada uno con su hora y su recuento de palabras para que reconozcas
 el que buscas. <i>Restaurar</i> pone esa versión en lugar del texto actual.</p>
-<p>Se conservan los <b>doce últimos</b> por documento; los más antiguos se descartan. Están en
-el navegador junto al documento, así que viajan dentro de una copia de seguridad, pero no la
+<p>Se conservan los <b>doce últimos</b> por documento; los más antiguos se descartan. Están <nur-b>en
+el navegador</nur-b><nur-a>en el almacenamiento</nur-a> junto al documento, así que viajan dentro de una copia de seguridad, pero no la
 sustituyen. Una instantánea te ayuda a dar un paso atrás mientras escribes; una copia de
-seguridad es para el día en que el navegador ya no esté.</p>
+seguridad es para el día en que <nur-b>el navegador</nur-b><nur-a>este equipo</nur-a> ya no esté.</p>
 <p>Véase también: <a data-goto="Copias de seguridad">Copias de seguridad</a>.</p>`},
 
  {t:"Copias de seguridad",k:"copia de seguridad;restaurar;paquete;guardar todo",b:`
 <p>Una copia de seguridad, a diferencia de una exportación, se puede volver a leer completa.</p>
 <p>También es distinta de una <b>instantánea</b>. Una instantánea es un punto en el historial
-propio de este documento, guardado dentro del navegador. Una copia de seguridad es un archivo en
+propio de este documento, guardado <nur-b>dentro del navegador</nur-b><nur-a>en el almacenamiento del programa</nur-a>. Una copia de seguridad es un archivo en
 tu disco con todo a la vez. La primera es para dar un paso atrás mientras escribes; la segunda
-es para el día en que el navegador ya no esté.</p>
+es para el día en que <nur-b>el navegador</nur-b><nur-a>este equipo</nur-a> ya no esté.</p>
 <p><b>Archivo &rsaquo; Guardar todo</b> abarca todo esto. Su primera entrada —<i>Todo:
 documentos, notas, glosarios, ajustes</i>— escribe todo el estado del programa en un solo
 archivo. <b>Cargar copia de seguridad</b> lo vuelve a leer; una copia completa sustituye lo que
@@ -17884,8 +17890,8 @@ haya y pregunta antes.</p>
 <p>También se ofrecen dos copias parciales: este documento con sus notas fijadas, y las notas y
 los glosarios por su cuenta. Las copias parciales se añaden a lo que tienes en lugar de
 sustituirlo.</p>
-<p>Haz una antes de cualquier cosa drástica, y antes de pasar a otra dirección: el navegador
-guarda su almacenamiento por separado para cada una.</p>`},
+<p>Haz una antes de cualquier cosa drástica<nur-b>, y antes de pasar a otra dirección: el navegador
+guarda su almacenamiento por separado para cada una</nur-b>.</p>`},
 
  {t:"Copia de seguridad automática",k:"copia de seguridad automática;google drive;dropbox;onedrive;nube;sincronización",b:`
 <p>La tercera tarjeta de <b>Configuración &rsaquo; Guardado</b> escribe todo el estado del
@@ -17897,7 +17903,7 @@ el cliente de sincronización hace el resto. Funciona con cualquier proveedor.</
 cuándo escribió por última vez. <b>Escribir ahora</b> escribe de inmediato.</p>
 <p>No se escribe nada cuando nada ha cambiado, así que un archivo en una carpeta sincronizada no
 se toca sin necesidad.</p>
-<p>Esto necesita Chrome o Edge. Los demás navegadores se limitan a las copias hechas a mano.</p>`},
+<nur-b><p>Esto necesita Chrome o Edge. Los demás navegadores se limitan a las copias hechas a mano.</p></nur-b>`},
 
  {t:"Apariencia",k:"tema;esquema de color;apariencia;modo oscuro;desplazamiento de máquina de escribir",b:`
 <p><b>Configuración &rsaquo; General &rsaquo; Esquema de color</b> ofrece diecisiete esquemas con
@@ -17928,8 +17934,8 @@ muestra la versión en inglés con un aviso.</p>`}]},
 {b:"Referencia",t:[
  {t:"Atajos de teclado",k:"atajos;teclas;teclado",b:`
 <p>Los comandos del programa usan <kbd>Alt</kbd>+<kbd>Mayús</kbd>, porque las combinaciones de
-<kbd>Ctrl</kbd> solo están, en su mayoría, ocupadas por el propio navegador. Los atajos de
-edición que el navegador deja libres conservan sus teclas de siempre.</p>
+<kbd>Ctrl</kbd> solo están, en su mayoría, ocupadas<nur-b> por el propio navegador</nur-b>. Los atajos de
+edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de siempre.</p>
 <p class="hsec">Vistas</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Escribir / Notas / Glosario</td></tr>
@@ -17979,25 +17985,28 @@ inserta, <kbd>Esc</kbd> descarta.</p>`},
 
  {t:"Cuando algo va mal",k:"problemas;solución de problemas;no guardado;almacenamiento lleno;desaparecido",b:`
 <p class="hsec">La barra de estado marca «No guardado» en rojo</p>
-<p>El navegador se ha negado a almacenar nada más, normalmente porque su almacenamiento está
-lleno: las imágenes incrustadas lo llenan enseguida. No se está escribiendo nada más. Haz una
+<p><nur-b>El navegador se ha negado a almacenar nada más, normalmente porque su almacenamiento está
+lleno</nur-b><nur-a>El almacenamiento se ha negado a aceptar nada más, normalmente porque está lleno</nur-a>: las imágenes incrustadas lo llenan enseguida. No se está escribiendo nada más. Haz una
 copia de seguridad de inmediato y luego quita imágenes grandes o documentos antiguos.</p>
-<p class="hsec">El corrector ortográfico no arranca</p>
+<nur-b><p class="hsec">El corrector ortográfico no arranca</p>
 <p>Sus diccionarios tienen que descargarse, y eso no es posible cuando el archivo se abrió
-haciendo doble clic en él. Sirve el programa desde una dirección web o un servidor local.</p>
+haciendo doble clic en él. Sirve el programa desde una dirección web o un servidor local.</p></nur-b>
 <p class="hsec">Mis documentos han desaparecido</p>
-<p>El almacenamiento se guarda por separado para cada dirección. Abrir el programa desde otra
+<nur-b><p>El almacenamiento se guarda por separado para cada dirección. Abrir el programa desde otra
 dirección —u otro navegador, o una ventana privada— muestra un programa vacío, no uno perdido.
-Vuelve a la dirección que usabas, o carga una copia de seguridad.</p>
-<p class="hsec">«Archivo en el disco» está en gris</p>
+Vuelve a la dirección que usabas, o carga una copia de seguridad.</p></nur-b><nur-a><p>El almacenamiento pertenece al programa y a tu cuenta en este equipo. Una segunda
+instalación, o una cuenta distinta, muestra por eso un programa vacío, no uno perdido. Carga
+allí una copia de seguridad para llevarte tu trabajo.</p></nur-a>
+<nur-b><p class="hsec">«Archivo en el disco» está en gris</p>
 <p>Leer y escribir archivos reales necesita Chrome o Edge. En otros navegadores, usa <b>Crear
-copia de seguridad</b> y <b>Cargar copia de seguridad</b> en su lugar.</p>`}]}
+copia de seguridad</b> y <b>Cargar copia de seguridad</b> en su lugar.</p></nur-b>`}]}
 ],
 pt:[
 {b:"Primeiros passos",t:[
  {t:"Sobre o PureQuill Writer",k:"sobre;visão geral;introdução;o que é",b:`
-<p>O PureQuill Writer é um processador de texto que funciona inteiramente no navegador. Não há
-nada para instalar e nada em que fazer login. Seu texto não é enviado a lugar nenhum.</p>
+<p><nur-b>O PureQuill Writer é um processador de texto que funciona inteiramente no navegador. Não há
+nada para instalar e nada em que fazer login.</nur-b><nur-a>O PureQuill Writer é um processador de texto para o seu computador. Não há nada
+em que fazer login, e ele funciona sem conexão com a internet.</nur-a> Seu texto não é enviado a lugar nenhum.</p>
 <p>Ele foi feito para textos longos —manuscritos, relatórios, trabalhos de conclusão— e não para
 anotações curtas. Três coisas o distinguem de um editor de texto simples:</p>
 <ul>
@@ -18037,12 +18046,13 @@ lembrar, e a barra de status embaixo à direita sempre mostra a situação.</p>
 <p>O trabalho fica em <b>três lugares</b>, numerados em <b>Configurações &rsaquo;
 Salvamento</b>:</p>
 <ol>
-<li><b>Este navegador</b>: sempre, e tudo. Ligado ao endereço de onde você abriu o programa, e
-perdido se você limpar os dados do navegador.</li>
+<li><b><nur-b>Este navegador</nur-b><nur-a>Este programa</nur-a></b>: sempre, e tudo.<nur-b> Ligado ao endereço de onde você abriu o programa, e
+perdido se você limpar os dados do navegador.</nur-b><nur-a> Fica junto dos dados do programa neste computador, e é
+perdido se você desinstalar o programa.</nur-a></li>
 <li><b>Um arquivo no disco</b>: opcional, e apenas o documento em que você está, junto com as
 notas fixadas nele. Configurado em <b>Arquivo &rsaquo; Salvar tudo &rsaquo; Vincular a um
-arquivo</b>; a partir daí, ele é gravado a cada salvamento. Em outro computador —ou depois que o
-armazenamento do navegador foi limpo— <b>Abrir um arquivo vinculado</b> traz de volta.</li>
+arquivo</b>; a partir daí, ele é gravado a cada salvamento. Em outro computador —ou depois que <nur-b>o
+armazenamento do navegador foi limpo</nur-b><nur-a>o programa foi instalado de novo</nur-a>— <b>Abrir um arquivo vinculado</b> traz de volta.</li>
 <li><b>Backup automático</b>: opcional, e todo o estado do programa: cada documento, nota,
 glossário e ajuste.</li>
 </ol>
@@ -18050,7 +18060,7 @@ glossário e ajuste.</li>
 dentro do lugar 1 o programa também mantém
 <a data-goto="Histórico de versões e pontos de restauração">pontos de restauração</a> por
 documento: pontos aos quais você pode voltar.</p>
-<p>Se a barra de status chegar a mostrar <b>Não salvo</b> em vermelho, o navegador se recusou a
+<p>Se a barra de status chegar a mostrar <b>Não salvo</b> em vermelho, <nur-b>o navegador</nur-b><nur-a>o armazenamento</nur-a> se recusou a
 armazenar qualquer coisa a mais. Faça um backup na hora e libere espaço.</p>
 <p>Veja também: <a data-goto="Backup automático">Backup automático</a>.</p>`}]},
 
@@ -18122,7 +18132,7 @@ formato de página.</p>`},
  {t:"Imagens",k:"imagem;foto;legenda;texto alternativo;redimensionar",b:`
 <p>Insira uma imagem pela barra de ferramentas ou digite <code>/imagem</code>. O arquivo fica
 embutido no documento, então viaja com seus backups; tenha em mente que várias fotografias
-grandes enchem o armazenamento do navegador rapidamente. O mesmo vale para imagens que chegam
+grandes enchem <nur-b>o armazenamento do navegador</nur-b><nur-a>o armazenamento</nur-a> rapidamente. O mesmo vale para imagens que chegam
 com um documento do Word.</p>
 <p><b>Clique numa imagem</b> para selecioná-la. Aparece uma pequena barra com alinhamento, uma
 legenda, texto alternativo para leitores de tela e excluir. Arraste a alça redonda do canto
@@ -18208,8 +18218,8 @@ montada a partir das páginas que você já vê, então a visualização e o pap
 <kbd>Esc</kbd> fecha.</p>
 <p><b>Para imprimir</b>, pressione <kbd>Ctrl</kbd>+<kbd>P</kbd> ou use <b>Arquivo &rsaquo;
 Imprimir</b>.</p>
-<p><b>Para fazer um PDF</b>, escolha <b>Arquivo &rsaquo; Salvar como &rsaquo; PDF</b>. Isso abre
-o mesmo diálogo de impressão; escolha <i>Salvar como PDF</i> como destino.</p>`}]},
+<p><b>Para fazer um PDF</b>, escolha <b>Arquivo &rsaquo; Salvar como &rsaquo; PDF</b>. <nur-b>Isso abre
+o mesmo diálogo de impressão; escolha <i>Salvar como PDF</i> como destino</nur-b><nur-a>Isso vai direto para o diálogo de salvamento</nur-a>.</p>`}]},
 
 {b:"Trabalhar em textos longos",t:[
  {t:"Notas no quadro",k:"notas;quadro;lembretes;cores",b:`
@@ -18311,9 +18321,9 @@ sete idiomas disponíveis: alemão, inglês, francês, espanhol, italiano, portu
 idioma é definido em <b>Configurações &rsaquo; Geral</b>.</p>
 <p>Para cada palavra você pode aceitar uma sugestão, digitar a sua própria correção, ignorá-la
 uma vez ou adicioná-la às suas palavras próprias: essas são lembradas em todos os documentos.</p>
-<p><b>Os dicionários precisam de um endereço de verdade.</b> Se você abriu o arquivo com um
+<nur-b><p><b>Os dicionários precisam de um endereço de verdade.</b> Se você abriu o arquivo com um
 duplo clique, o corretor não consegue baixá-los. Servir o programa a partir de um endereço da
-web ou de um servidor local resolve isso.</p>`},
+web ou de um servidor local resolve isso.</p></nur-b>`},
 
  {t:"Limpar o texto",k:"limpar;organizar;espaços duplos;espaço inquebrável;parágrafos vazios",b:`
 <p><b>Ferramentas &rsaquo; Limpar texto</b> encontra a pequena bagunça que se acumula num
@@ -18374,7 +18384,7 @@ em vez de chegar como o número fixo que ficou guardado no arquivo. A largura da
 tabelas é lida do documento e mantida como proporção, então sobrevive a uma mudança de tamanho
 de papel.</p>
 <p><b>As imagens também vêm</b>, na largura que tinham no Word. Elas ficam embutidas no
-documento, o que significa que ocupam o armazenamento do navegador: por isso, quando um arquivo
+documento, o que significa que ocupam <nur-b>o armazenamento do navegador</nur-b><nur-a>o armazenamento do programa</nur-a>: por isso, quando um arquivo
 traz muitas, você é avisado de quanto foi adicionado e recebe a oferta de um backup na hora. As
 imagens às quais um documento do Word apenas faz link, em vez de contê-las, não podem vir: elas
 vivem no computador de outra pessoa.</p>
@@ -18410,8 +18420,8 @@ use um backup.</p>`},
 
  {t:"Histórico de versões e pontos de restauração",k:"versão;histórico;ponto de restauração;desfazer;restaurar;antes;reverter",b:`
 <p>Enquanto você escreve, o programa mantém <b>pontos de restauração</b> do documento em que
-você está: pontos aos quais você pode voltar. Não é o mesmo que salvar: seu texto vai para o
-navegador continuamente e não precisa de nenhum comando.</p>
+você está: pontos aos quais você pode voltar. Não é o mesmo que salvar: seu texto vai para <nur-b>o
+navegador</nur-b><nur-a>o armazenamento</nur-a> continuamente e não precisa de nenhum comando.</p>
 <p>Um é feito sozinho no intervalo definido em <b>Arquivo &rsaquo; Pontos de restauração
 &rsaquo; Automático</b>, mas só quando algo realmente mudou. <b>Criar um ponto de restauração</b>
 (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>) faz um na hora: vale a pena antes de reescrever um
@@ -18419,18 +18429,18 @@ trecho que você talvez queira de volta.</p>
 <p><b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Histórico de versões</b> lista todos, do
 mais recente ao mais antigo, cada um com a hora e a contagem de palavras para você reconhecer o
 que procura. <i>Restaurar</i> põe aquela versão no lugar do texto atual.</p>
-<p>Os <b>doze últimos</b> são mantidos por documento; os mais antigos caem fora. Eles ficam no
-navegador junto do documento, então viajam dentro de um backup, mas não o substituem. Um ponto
-de restauração ajuda a dar um passo atrás enquanto você escreve; um backup é para o dia em que o
-navegador não estiver mais lá.</p>
+<p>Os <b>doze últimos</b> são mantidos por documento; os mais antigos caem fora. Eles ficam <nur-b>no
+navegador</nur-b><nur-a>no armazenamento</nur-a> junto do documento, então viajam dentro de um backup, mas não o substituem. Um ponto
+de restauração ajuda a dar um passo atrás enquanto você escreve; um backup é para o dia em que <nur-b>o
+navegador</nur-b><nur-a>este computador</nur-a> não estiver mais lá.</p>
 <p>Veja também: <a data-goto="Backups">Backups</a>.</p>`},
 
  {t:"Backups",k:"backup;restaurar;pacote;salvar tudo",b:`
 <p>Um backup, ao contrário de uma exportação, pode ser lido de volta completo.</p>
 <p>Ele também é diferente de um <b>ponto de restauração</b>. Um ponto de restauração é um ponto
-no histórico próprio deste documento, guardado dentro do navegador. Um backup é um arquivo no
+no histórico próprio deste documento, guardado <nur-b>dentro do navegador</nur-b><nur-a>no armazenamento do programa</nur-a>. Um backup é um arquivo no
 seu disco com tudo de uma vez. O primeiro é para dar um passo atrás enquanto você escreve; o
-segundo é para o dia em que o navegador não estiver mais lá.</p>
+segundo é para o dia em que <nur-b>o navegador</nur-b><nur-a>este computador</nur-a> não estiver mais lá.</p>
 <p><b>Arquivo &rsaquo; Salvar tudo</b> abrange tudo isso. A primeira entrada dele —<i>Tudo:
 documentos, notas, glossários, ajustes</i>— grava todo o estado do programa num único arquivo.
 <b>Carregar backup</b> lê de volta; um backup completo substitui o que houver e pergunta
@@ -18438,8 +18448,8 @@ antes.</p>
 <p>Dois backups parciais também são oferecidos: este documento com as notas fixadas nele, e as
 notas e os glossários por conta própria. Os backups parciais são adicionados ao que você tem em
 vez de substituí-lo.</p>
-<p>Faça um antes de qualquer coisa drástica, e antes de mudar para outro endereço: o navegador
-guarda o armazenamento dele separado para cada um.</p>`},
+<p>Faça um antes de qualquer coisa drástica<nur-b>, e antes de mudar para outro endereço: o navegador
+guarda o armazenamento dele separado para cada um</nur-b>.</p>`},
 
  {t:"Backup automático",k:"backup automático;google drive;dropbox;onedrive;nuvem;sincronização",b:`
 <p>O terceiro cartão em <b>Configurações &rsaquo; Salvamento</b> grava todo o estado do programa
@@ -18452,8 +18462,8 @@ provedor.</p>
 quando ele gravou pela última vez. <b>Gravar agora</b> grava na hora.</p>
 <p>Nada é gravado quando nada mudou, então um arquivo numa pasta sincronizada não é tocado sem
 necessidade.</p>
-<p>Isso precisa do Chrome ou do Edge. Os outros navegadores ficam limitados aos backups feitos
-à mão.</p>`},
+<nur-b><p>Isso precisa do Chrome ou do Edge. Os outros navegadores ficam limitados aos backups feitos
+à mão.</p></nur-b>`},
 
  {t:"Aparência",k:"tema;esquema de cores;aparência;modo escuro;rolagem de máquina de escrever",b:`
 <p><b>Configurações &rsaquo; Geral &rsaquo; Esquema de cores</b> oferece dezessete esquemas com
@@ -18483,8 +18493,8 @@ mostrada a versão em inglês com um aviso.</p>`}]},
 {b:"Referência",t:[
  {t:"Atalhos de teclado",k:"atalhos;teclas;teclado",b:`
 <p>Os comandos do programa usam <kbd>Alt</kbd>+<kbd>Shift</kbd>, porque as combinações só com
-<kbd>Ctrl</kbd> estão, em boa parte, tomadas pelo próprio navegador. Os atalhos de edição que o
-navegador deixa em paz mantêm as teclas de sempre.</p>
+<kbd>Ctrl</kbd> estão, em boa parte, tomadas<nur-b> pelo próprio navegador</nur-b>. Os atalhos de edição<nur-b> que o
+navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
 <p class="hsec">Visões</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Escrever / Notas / Glossário</td></tr>
@@ -18535,26 +18545,29 @@ link, uma nota de rodapé, uma quebra de página, a data de hoje. As setas escol
 
  {t:"Quando algo dá errado",k:"problemas;solução de problemas;não salvo;armazenamento cheio;sumiu",b:`
 <p class="hsec">A barra de status mostra «Não salvo» em vermelho</p>
-<p>O navegador se recusou a armazenar mais nada, normalmente porque o armazenamento dele está
-cheio: as imagens embutidas o enchem depressa. Nada mais está sendo gravado. Faça um backup na
+<p><nur-b>O navegador se recusou a armazenar mais nada, normalmente porque o armazenamento dele está
+cheio</nur-b><nur-a>O armazenamento se recusou a aceitar mais nada, normalmente porque está cheio</nur-a>: as imagens embutidas o enchem depressa. Nada mais está sendo gravado. Faça um backup na
 hora e depois tire imagens grandes ou documentos antigos.</p>
-<p class="hsec">A verificação ortográfica não começa</p>
+<nur-b><p class="hsec">A verificação ortográfica não começa</p>
 <p>Os dicionários dela precisam ser baixados, e isso não é possível quando o arquivo foi aberto
 com um duplo clique. Sirva o programa a partir de um endereço da web ou de um servidor
-local.</p>
+local.</p></nur-b>
 <p class="hsec">Meus documentos sumiram</p>
-<p>O armazenamento é guardado separado para cada endereço. Abrir o programa de outro endereço
+<nur-b><p>O armazenamento é guardado separado para cada endereço. Abrir o programa de outro endereço
 —ou de outro navegador, ou de uma janela anônima— mostra um programa vazio, não um perdido.
-Volte para o endereço que você usava, ou carregue um backup.</p>
-<p class="hsec">«Arquivo no disco» está esmaecido</p>
+Volte para o endereço que você usava, ou carregue um backup.</p></nur-b><nur-a><p>O armazenamento pertence ao programa e à sua conta neste computador. Uma segunda
+instalação, ou outra conta, mostra por isso um programa vazio, não um perdido. Carregue um
+backup lá para levar seu trabalho junto.</p></nur-a>
+<nur-b><p class="hsec">«Arquivo no disco» está esmaecido</p>
 <p>Ler e gravar arquivos de verdade precisa do Chrome ou do Edge. Em outros navegadores, use
-<b>Criar backup</b> e <b>Carregar backup</b> no lugar.</p>`}]}
+<b>Criar backup</b> e <b>Carregar backup</b> no lugar.</p></nur-b>`}]}
 ],
 fr:[
 {b:"Premiers pas",t:[
  {t:"À propos de PureQuill Writer",k:"à propos;aperçu;introduction;qu'est-ce que c'est",b:`
-<p>PureQuill Writer est un traitement de texte qui fonctionne entièrement dans le navigateur. Il
-n'y a rien à installer et aucun compte à créer. Votre texte n'est envoyé nulle part.</p>
+<p><nur-b>PureQuill Writer est un traitement de texte qui fonctionne entièrement dans le navigateur. Il
+n'y a rien à installer et aucun compte à créer.</nur-b><nur-a>PureQuill Writer est un traitement de texte pour votre propre machine. Il n'y a
+aucun compte à créer, et il fonctionne sans connexion internet.</nur-a> Votre texte n'est envoyé nulle part.</p>
 <p>Il est conçu pour les textes longs — manuscrits, rapports, mémoires — et non pour de courtes
 notes. Trois choses le distinguent d'un éditeur de texte ordinaire :</p>
 <ul>
@@ -18597,12 +18610,13 @@ choses.</p>
 <p>Le travail est conservé à <b>trois endroits</b>, numérotés dans <b>Paramètres &rsaquo;
 Enregistrement</b> :</p>
 <ol>
-<li><b>Ce navigateur</b> : toujours, et tout. Lié à l'adresse depuis laquelle vous avez ouvert
-le programme, et perdu si vous effacez les données du navigateur.</li>
+<li><b><nur-b>Ce navigateur</nur-b><nur-a>Ce programme</nur-a></b> : toujours, et tout.<nur-b> Lié à l'adresse depuis laquelle vous avez ouvert
+le programme, et perdu si vous effacez les données du navigateur.</nur-b><nur-a> Conservé avec les données du programme sur cette
+machine, et perdu si vous désinstallez le programme.</nur-a></li>
 <li><b>Un fichier sur le disque</b> : facultatif, et uniquement le document dans lequel vous
 êtes, avec les notes qui y sont épinglées. Se configure dans <b>Fichier &rsaquo; Tout
 enregistrer &rsaquo; Lier à un fichier</b> ; à partir de là, il est écrit à chaque
-enregistrement. Sur une autre machine — ou après l'effacement du stockage du navigateur —
+enregistrement. Sur une autre machine — ou après <nur-b>l'effacement du stockage du navigateur</nur-b><nur-a>une nouvelle installation du programme</nur-a> —
 <b>Ouvrir un fichier lié</b> le récupère.</li>
 <li><b>Sauvegarde automatique</b> : facultative, et tout l'état du programme : chaque document,
 note, glossaire et réglage.</li>
@@ -18611,7 +18625,7 @@ note, glossaire et réglage.</li>
 Et à l'intérieur de l'endroit 1, le programme conserve aussi des
 <a data-goto="Historique des versions et points de restauration">points de restauration</a> par
 document : des points auxquels vous pouvez revenir.</p>
-<p>Si la barre d'état affiche un jour <b>Non enregistré</b> en rouge, le navigateur a refusé de
+<p>Si la barre d'état affiche un jour <b>Non enregistré</b> en rouge, <nur-b>le navigateur</nur-b><nur-a>le stockage</nur-a> a refusé de
 stocker quoi que ce soit de plus. Faites une sauvegarde tout de suite et libérez de
 l'espace.</p>
 <p>Voir aussi : <a data-goto="Sauvegarde automatique">Sauvegarde automatique</a>.</p>`}]},
@@ -18687,7 +18701,7 @@ au zoom et à un changement de format de page.</p>`},
  {t:"Images",k:"image;photo;légende;texte alternatif;redimensionner",b:`
 <p>Insérez une image depuis la barre d'outils, ou tapez <code>/image</code>. Le fichier est
 intégré dans le document, il voyage donc avec vos sauvegardes — gardez à l'esprit que plusieurs
-grandes photographies remplissent vite le stockage du navigateur. Il en va de même pour les
+grandes photographies remplissent vite <nur-b>le stockage du navigateur</nur-b><nur-a>le stockage</nur-a>. Il en va de même pour les
 images qui arrivent avec un document Word.</p>
 <p><b>Cliquez sur une image</b> pour la sélectionner. Une petite barre apparaît avec
 l'alignement, une légende, un texte alternatif pour les lecteurs d'écran, et supprimer. Faites
@@ -18778,8 +18792,8 @@ différer. <kbd>Échap</kbd> le ferme.</p>
 <p><b>Pour imprimer</b>, appuyez sur <kbd>Ctrl</kbd>+<kbd>P</kbd> ou utilisez <b>Fichier &rsaquo;
 Imprimer</b>.</p>
 <p><b>Pour faire un PDF</b>, choisissez <b>Fichier &rsaquo; Enregistrer sous &rsaquo; PDF</b>.
-Cela ouvre la même boîte de dialogue d'impression ; choisissez <i>Enregistrer au format PDF</i>
-comme destination.</p>`}]},
+<nur-b>Cela ouvre la même boîte de dialogue d'impression ; choisissez <i>Enregistrer au format PDF</i>
+comme destination</nur-b><nur-a>Cela va directement à la boîte de dialogue d'enregistrement</nur-a>.</p>`}]},
 
 {b:"Travailler sur des textes longs",t:[
  {t:"Notes sur le tableau",k:"notes;tableau;pense-bêtes;couleurs",b:`
@@ -18885,9 +18899,9 @@ ouvert. Sept langues sont disponibles : allemand, anglais, français, espagnol, 
 portugais et polonais. La langue se règle dans <b>Paramètres &rsaquo; Général</b>.</p>
 <p>Pour chaque mot, vous pouvez accepter une suggestion, taper une correction à vous, l'ignorer
 une fois, ou l'ajouter à vos mots à soi — ceux-ci sont retenus sur tous les documents.</p>
-<p><b>Les dictionnaires ont besoin d'une vraie adresse.</b> Si vous avez ouvert le fichier en
+<nur-b><p><b>Les dictionnaires ont besoin d'une vraie adresse.</b> Si vous avez ouvert le fichier en
 double-cliquant dessus, le correcteur ne peut pas les télécharger. Servir le programme depuis
-une adresse web ou un serveur local résout cela.</p>`},
+une adresse web ou un serveur local résout cela.</p></nur-b>`},
 
  {t:"Nettoyer le texte",k:"nettoyer;ranger;espaces doubles;espace insécable;paragraphes vides",b:`
 <p><b>Outils &rsaquo; Nettoyer le texte</b> repère le petit désordre qui s'accumule dans un long
@@ -18951,7 +18965,7 @@ continue donc de compter au lieu d'arriver comme le nombre fixe qui se trouvait 
 le fichier. La largeur des colonnes des tableaux est lue depuis le document et conservée en
 proportions, elle survit donc à un changement de taille de papier.</p>
 <p><b>Les images viennent aussi</b>, à la largeur qu'elles avaient dans Word. Elles sont
-intégrées dans le document, ce qui veut dire qu'elles occupent le stockage du navigateur — donc
+intégrées dans le document, ce qui veut dire qu'elles occupent <nur-b>le stockage du navigateur</nur-b><nur-a>le stockage du programme</nur-a> — donc
 quand un fichier en apporte beaucoup, on vous indique combien a été ajouté et on vous propose
 une sauvegarde sur-le-champ. Les images auxquelles un document Word ne fait que renvoyer par un
 lien, sans les contenir, ne peuvent pas venir : elles vivent sur la machine de quelqu'un
@@ -18991,7 +19005,7 @@ sauvegarde.</p>`},
  {t:"Historique des versions et points de restauration",k:"version;historique;point de restauration;annuler;restaurer;plus tôt;revenir",b:`
 <p>Pendant que vous écrivez, le programme conserve des <b>points de restauration</b> du document
 dans lequel vous êtes — des points auxquels vous pouvez revenir. Ce n'est pas la même chose
-qu'enregistrer : votre texte va dans le navigateur en continu et ne demande aucune commande.</p>
+qu'enregistrer : votre texte va dans <nur-b>le navigateur</nur-b><nur-a>le stockage</nur-a> en continu et ne demande aucune commande.</p>
 <p>Un est pris tout seul à l'intervalle réglé dans <b>Fichier &rsaquo; Points de restauration
 &rsaquo; Automatique</b>, mais seulement quand quelque chose a réellement changé. <b>Créer un
 point de restauration</b> (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd>) en fait un sur-le-champ —
@@ -19001,17 +19015,17 @@ plus récent au plus ancien, chacun avec son heure et son nombre de mots pour qu
 reconnaissiez celui que vous voulez. <i>Restaurer</i> remet cette version à la place du texte
 actuel.</p>
 <p>Les <b>douze derniers</b> sont conservés par document ; les plus anciens disparaissent. Ils
-se trouvent dans le navigateur à côté du document, ils voyagent donc à l'intérieur d'une
+se trouvent <nur-b>dans le navigateur</nur-b><nur-a>dans le stockage</nur-a> à côté du document, ils voyagent donc à l'intérieur d'une
 sauvegarde — mais ils ne la remplacent pas. Un point de restauration vous aide à prendre du
-recul en écrivant ; une sauvegarde est pour le jour où le navigateur ne sera plus là.</p>
+recul en écrivant ; une sauvegarde est pour le jour où <nur-b>le navigateur</nur-b><nur-a>cette machine</nur-a> ne sera plus là.</p>
 <p>Voir aussi : <a data-goto="Sauvegardes">Sauvegardes</a>.</p>`},
 
  {t:"Sauvegardes",k:"sauvegarde;restaurer;paquet;tout enregistrer",b:`
 <p>Une sauvegarde, contrairement à un export, peut être relue intégralement.</p>
 <p>C'est aussi autre chose qu'un <b>point de restauration</b>. Un point de restauration est un
-point dans l'historique propre de ce document, conservé dans le navigateur. Une sauvegarde est
+point dans l'historique propre de ce document, conservé <nur-b>dans le navigateur</nur-b><nur-a>dans le stockage du programme</nur-a>. Une sauvegarde est
 un fichier sur votre disque qui contient tout à la fois. Le premier sert à prendre du recul en
-écrivant ; la seconde est pour le jour où le navigateur ne sera plus là.</p>
+écrivant ; la seconde est pour le jour où <nur-b>le navigateur</nur-b><nur-a>cette machine</nur-a> ne sera plus là.</p>
 <p><b>Fichier &rsaquo; Tout enregistrer</b> couvre tout cela. Sa première entrée — <i>Tout :
 documents, notes, glossaires, réglages</i> — écrit tout l'état du programme dans un seul
 fichier. <b>Charger une sauvegarde</b> le relit ; une sauvegarde complète remplace ce qui est là
@@ -19019,8 +19033,8 @@ et demande d'abord.</p>
 <p>Deux sauvegardes partielles sont également proposées : ce document avec ses notes épinglées,
 et les notes et glossaires seuls. Les sauvegardes partielles s'ajoutent à ce que vous avez au
 lieu de le remplacer.</p>
-<p>Faites-en une avant toute chose radicale, et avant de passer à une autre adresse — le
-navigateur garde son stockage séparément pour chacune.</p>`},
+<p>Faites-en une avant toute chose radicale<nur-b>, et avant de passer à une autre adresse — le
+navigateur garde son stockage séparément pour chacune</nur-b>.</p>`},
 
  {t:"Sauvegarde automatique",k:"sauvegarde automatique;google drive;dropbox;onedrive;nuage;synchronisation",b:`
 <p>La troisième carte dans <b>Paramètres &rsaquo; Enregistrement</b> écrit tout l'état du
@@ -19034,8 +19048,8 @@ ensuite quand elle a écrit pour la dernière fois. <b>Écrire maintenant</b> é
 immédiatement.</p>
 <p>Rien n'est écrit quand rien n'a changé, un fichier dans un dossier synchronisé n'est donc pas
 touché sans nécessité.</p>
-<p>Cela demande Chrome ou Edge. Les autres navigateurs se limitent aux sauvegardes faites à la
-main.</p>`},
+<nur-b><p>Cela demande Chrome ou Edge. Les autres navigateurs se limitent aux sauvegardes faites à la
+main.</p></nur-b>`},
 
  {t:"Apparence",k:"thème;thème de couleurs;apparence;mode sombre;défilement machine à écrire",b:`
 <p><b>Paramètres &rsaquo; Général &rsaquo; Thème de couleurs</b> propose dix-sept thèmes avec des
@@ -19066,8 +19080,8 @@ version anglaise s'affiche avec un avis.</p>`}]},
 {b:"Référence",t:[
  {t:"Raccourcis clavier",k:"raccourcis;touches;clavier",b:`
 <p>Les commandes du programme utilisent <kbd>Alt</kbd>+<kbd>Maj</kbd>, parce que les
-combinaisons de <kbd>Ctrl</kbd> seules sont en grande partie déjà prises par le navigateur
-lui-même. Les raccourcis d'édition que le navigateur laisse tranquilles gardent leurs touches
+combinaisons de <kbd>Ctrl</kbd> seules sont en grande partie déjà prises<nur-b> par le navigateur
+lui-même</nur-b>. Les raccourcis d'édition<nur-b> que le navigateur laisse tranquilles</nur-b> gardent leurs touches
 habituelles.</p>
 <p class="hsec">Vues</p>
 <table class="hkeys">
@@ -19119,25 +19133,28 @@ de page, un saut de page, la date du jour. Les flèches choisissent, <kbd>Entré
 
  {t:"Quand quelque chose ne va pas",k:"problèmes;dépannage;non enregistré;stockage plein;disparu",b:`
 <p class="hsec">La barre d'état affiche « Non enregistré » en rouge</p>
-<p>Le navigateur a refusé de stocker quoi que ce soit de plus, généralement parce que son
-stockage est plein — les images intégrées le remplissent vite. Plus rien n'est écrit. Faites une
+<p><nur-b>Le navigateur a refusé de stocker quoi que ce soit de plus, généralement parce que son
+stockage est plein</nur-b><nur-a>Le stockage a refusé d'accepter quoi que ce soit de plus, généralement parce qu'il est plein</nur-a> — les images intégrées le remplissent vite. Plus rien n'est écrit. Faites une
 sauvegarde tout de suite, puis retirez de grandes images ou de vieux documents.</p>
-<p class="hsec">La vérification orthographique ne démarre pas</p>
+<nur-b><p class="hsec">La vérification orthographique ne démarre pas</p>
 <p>Ses dictionnaires doivent être téléchargés, ce qui n'est pas possible quand le fichier a été
-ouvert par un double-clic. Servez le programme depuis une adresse web ou un serveur local.</p>
+ouvert par un double-clic. Servez le programme depuis une adresse web ou un serveur local.</p></nur-b>
 <p class="hsec">Mes documents ont disparu</p>
-<p>Le stockage est gardé séparément pour chaque adresse. Ouvrir le programme depuis une autre
+<nur-b><p>Le stockage est gardé séparément pour chaque adresse. Ouvrir le programme depuis une autre
 adresse — ou un autre navigateur, ou une fenêtre privée — montre un programme vide, pas un
-programme perdu. Revenez à l'adresse que vous utilisiez, ou chargez une sauvegarde.</p>
-<p class="hsec">« Fichier sur le disque » est grisé</p>
+programme perdu. Revenez à l'adresse que vous utilisiez, ou chargez une sauvegarde.</p></nur-b><nur-a><p>Le stockage appartient au programme et à votre compte sur cette machine. Une deuxième
+installation, ou un autre compte, montre donc un programme vide, pas un programme perdu.
+Chargez-y une sauvegarde pour emporter votre travail.</p></nur-a>
+<nur-b><p class="hsec">« Fichier sur le disque » est grisé</p>
 <p>Lire et écrire de vrais fichiers demande Chrome ou Edge. Dans les autres navigateurs, servez-
-vous de <b>Créer une sauvegarde</b> et <b>Charger une sauvegarde</b> à la place.</p>`}]}
+vous de <b>Créer une sauvegarde</b> et <b>Charger une sauvegarde</b> à la place.</p></nur-b>`}]}
 ],
 pl:[
 {b:"Pierwsze kroki",t:[
  {t:"O programie PureQuill Writer",k:"o programie;przegląd;wprowadzenie;co to jest",b:`
-<p>PureQuill Writer to edytor tekstu, który działa w całości w przeglądarce. Nie ma nic do
-zainstalowania ani żadnego logowania. Twój tekst nie jest nigdzie wysyłany.</p>
+<p><nur-b>PureQuill Writer to edytor tekstu, który działa w całości w przeglądarce. Nie ma nic do
+zainstalowania ani żadnego logowania.</nur-b><nur-a>PureQuill Writer to edytor tekstu na Twój komputer. Nie ma żadnego logowania,
+a program działa bez połączenia z internetem.</nur-a> Twój tekst nie jest nigdzie wysyłany.</p>
 <p>Powstał do długich tekstów — manuskryptów, raportów, prac dyplomowych — a nie do krótkich
 notatek. Trzy rzeczy odróżniają go od zwykłego edytora tekstu:</p>
 <ul>
@@ -19177,12 +19194,13 @@ zapamiętania, a pasek stanu w prawym dolnym rogu zawsze pokazuje, jak stoją sp
 <p>Praca jest przechowywana w <b>trzech miejscach</b>, ponumerowanych w <b>Ustawienia &rsaquo;
 Zapisywanie</b>:</p>
 <ol>
-<li><b>Ta przeglądarka</b> — zawsze i wszystko. Powiązane z adresem, spod którego otworzono
-program, i utracone po wyczyszczeniu danych przeglądarki.</li>
+<li><b><nur-b>Ta przeglądarka</nur-b><nur-a>Ten program</nur-a></b> — zawsze i wszystko.<nur-b> Powiązane z adresem, spod którego otworzono
+program, i utracone po wyczyszczeniu danych przeglądarki.</nur-b><nur-a> Leży przy danych programu na tym komputerze i przepada,
+gdy program zostanie odinstalowany.</nur-a></li>
 <li><b>Plik na dysku</b> — opcjonalnie i tylko dokument, w którym jesteś, wraz z przypiętymi do
 niego notatkami. Ustawiane w <b>Plik &rsaquo; Zapisz wszystko &rsaquo; Powiąż z plikiem</b>; od
-tej pory jest zapisywany przy każdym zapisie. Na innym komputerze — albo po wyczyszczeniu
-pamięci przeglądarki — <b>Otwórz powiązany plik</b> przywraca go.</li>
+tej pory jest zapisywany przy każdym zapisie. Na innym komputerze — albo po <nur-b>wyczyszczeniu
+pamięci przeglądarki</nur-b><nur-a>ponownej instalacji programu</nur-a> — <b>Otwórz powiązany plik</b> przywraca go.</li>
 <li><b>Automatyczna kopia zapasowa</b> — opcjonalnie i cały stan programu: każdy dokument,
 notatka, słowniczek i ustawienie.</li>
 </ol>
@@ -19190,7 +19208,7 @@ notatka, słowniczek i ustawienie.</li>
 wewnątrz miejsca 1 program przechowuje też
 <a data-goto="Historia wersji i punkty przywracania">punkty przywracania</a> dla każdego
 dokumentu — miejsca, do których można wrócić.</p>
-<p>Jeśli pasek stanu kiedykolwiek pokaże <b>Nie zapisano</b> na czerwono, przeglądarka odmówiła
+<p>Jeśli pasek stanu kiedykolwiek pokaże <b>Nie zapisano</b> na czerwono, <nur-b>przeglądarka</nur-b><nur-a>pamięć</nur-a> odmówiła
 zapisania czegokolwiek więcej. Zrób od razu kopię zapasową i zwolnij trochę miejsca.</p>
 <p>Zobacz też: <a data-goto="Automatyczna kopia zapasowa">Automatyczna kopia zapasowa</a>.</p>`}]},
 
@@ -19257,8 +19275,8 @@ formatu strony.</p>`},
 
  {t:"Obrazy",k:"obraz;zdjęcie;podpis;tekst alternatywny;zmiana rozmiaru",b:`
 <p>Wstaw obraz z paska narzędzi albo wpisz <code>/obraz</code>. Plik jest osadzony w dokumencie,
-więc podróżuje z kopiami zapasowymi — pamiętaj, że kilka dużych zdjęć szybko zapełni pamięć
-przeglądarki. To samo dotyczy obrazów, które przychodzą z dokumentem Word.</p>
+więc podróżuje z kopiami zapasowymi — pamiętaj, że kilka dużych zdjęć szybko zapełni <nur-b>pamięć
+przeglądarki</nur-b><nur-a>pamięć</nur-a>. To samo dotyczy obrazów, które przychodzą z dokumentem Word.</p>
 <p><b>Kliknij obraz</b>, aby go zaznaczyć. Pojawia się mały pasek z wyrównaniem, podpisem,
 tekstem alternatywnym dla czytników ekranu i usuwaniem. Przeciągnij okrągły uchwyt narożnika,
 aby zmienić rozmiar.</p>
@@ -19343,8 +19361,8 @@ budowany ze stron, które już widzisz, więc podgląd i papier nie mogą się r
 go zamyka.</p>
 <p><b>Aby wydrukować</b>, naciśnij <kbd>Ctrl</kbd>+<kbd>P</kbd> albo użyj <b>Plik &rsaquo;
 Drukuj</b>.</p>
-<p><b>Aby zrobić PDF</b>, wybierz <b>Plik &rsaquo; Zapisz jako &rsaquo; PDF</b>. Otwiera to to
-samo okno drukowania; wybierz <i>Zapisz jako PDF</i> jako miejsce docelowe.</p>`}]},
+<p><b>Aby zrobić PDF</b>, wybierz <b>Plik &rsaquo; Zapisz jako &rsaquo; PDF</b>. <nur-b>Otwiera to to
+samo okno drukowania; wybierz <i>Zapisz jako PDF</i> jako miejsce docelowe</nur-b><nur-a>Przechodzi to od razu do okna zapisu</nur-a>.</p>`}]},
 
 {b:"Praca nad dłuższymi tekstami",t:[
  {t:"Notatki na tablicy",k:"notatki;tablica;karteczki;kolory",b:`
@@ -19444,9 +19462,9 @@ Dostępnych jest siedem języków: niemiecki, angielski, francuski, hiszpański,
 portugalski i polski. Język ustawia się w <b>Ustawienia &rsaquo; Ogólne</b>.</p>
 <p>Dla każdego słowa możesz przyjąć podpowiedź, wpisać własną poprawkę, zignorować je raz albo
 dodać do własnych słów — te są zapamiętywane we wszystkich dokumentach.</p>
-<p><b>Słowniki potrzebują prawdziwego adresu.</b> Jeśli otworzyłeś plik przez dwukrotne
+<nur-b><p><b>Słowniki potrzebują prawdziwego adresu.</b> Jeśli otworzyłeś plik przez dwukrotne
 kliknięcie, korektor nie może ich pobrać. Serwowanie programu spod adresu internetowego albo z
-serwera lokalnego to rozwiązuje.</p>`},
+serwera lokalnego to rozwiązuje.</p></nur-b>`},
 
  {t:"Czyszczenie tekstu",k:"czyszczenie;porządkowanie;podwójne spacje;spacja nierozdzielająca;puste akapity",b:`
 <p><b>Narzędzia &rsaquo; Wyczyść tekst</b> znajduje drobny bałagan, który gromadzi się w długim
@@ -19506,7 +19524,7 @@ się znacznikami tego programu, więc <code>{page}</code> nadal liczy, zamiast p
 stała liczba, która akurat była zapisana w pliku. Szerokość kolumn tabel jest odczytywana z
 dokumentu i trzymana jako proporcje, więc przetrwa zmianę rozmiaru papieru.</p>
 <p><b>Obrazy też przychodzą</b>, w szerokości, którą miały w Wordzie. Są osadzone w dokumencie,
-co oznacza, że zajmują pamięć przeglądarki — więc gdy plik przynosi ich dużo, dowiadujesz się,
+co oznacza, że zajmują <nur-b>pamięć przeglądarki</nur-b><nur-a>pamięć programu</nur-a> — więc gdy plik przynosi ich dużo, dowiadujesz się,
 ile dodano, i od razu proponowana jest kopia zapasowa. Obrazy, do których dokument Word tylko
 odsyła linkiem, zamiast je zawierać, nie mogą przyjść: żyją na komputerze kogoś innego.</p>
 <p>Czego nie ma: komentarzy, śledzenia zmian, pól tekstowych, kształtów i równań. Scalone
@@ -19541,7 +19559,7 @@ służy kopia zapasowa.</p>`},
 
  {t:"Historia wersji i punkty przywracania",k:"wersja;historia;punkt przywracania;cofnij;przywróć;wcześniej;odwróć",b:`
 <p>Podczas pisania program przechowuje <b>punkty przywracania</b> dokumentu, w którym jesteś —
-miejsca, do których można wrócić. To nie to samo co zapis: tekst trafia do przeglądarki na
+miejsca, do których można wrócić. To nie to samo co zapis: tekst trafia <nur-b>do przeglądarki</nur-b><nur-a>do pamięci</nur-a> na
 bieżąco i nie potrzebuje żadnego polecenia.</p>
 <p>Jeden powstaje sam w odstępie ustawionym w <b>Plik &rsaquo; Punkty przywracania &rsaquo;
 Automatycznie</b>, ale tylko gdy coś naprawdę się zmieniło. <b>Utwórz punkt przywracania</b>
@@ -19550,18 +19568,18 @@ fragmentu, który być może zechcesz odzyskać.</p>
 <p><b>Plik &rsaquo; Punkty przywracania &rsaquo; Historia wersji</b> wymienia je, od najnowszego
 do najstarszego, każdy z godziną i liczbą słów, żebyś rozpoznał ten, którego chcesz.
 <i>Przywróć</i> stawia tę wersję na miejsce bieżącego tekstu.</p>
-<p><b>Dwanaście ostatnich</b> jest przechowywanych na dokument; starsze odpadają. Leżą w
-przeglądarce obok dokumentu, więc podróżują wewnątrz kopii zapasowej — ale jej nie zastępują.
+<p><b>Dwanaście ostatnich</b> jest przechowywanych na dokument; starsze odpadają. Leżą <nur-b>w
+przeglądarce</nur-b><nur-a>w pamięci</nur-a> obok dokumentu, więc podróżują wewnątrz kopii zapasowej — ale jej nie zastępują.
 Punkt przywracania pomaga zrobić krok wstecz podczas pisania; kopia zapasowa jest na dzień, w
-którym przeglądarki już nie będzie.</p>
+którym <nur-b>przeglądarki</nur-b><nur-a>tego komputera</nur-a> już nie będzie.</p>
 <p>Zobacz też: <a data-goto="Kopie zapasowe">Kopie zapasowe</a>.</p>`},
 
  {t:"Kopie zapasowe",k:"kopia zapasowa;przywracanie;pakiet;zapisz wszystko",b:`
 <p>Kopię zapasową, w przeciwieństwie do eksportu, można wczytać z powrotem w całości.</p>
 <p>To też co innego niż <b>punkt przywracania</b>. Punkt przywracania to miejsce we własnej
-historii tego dokumentu, przechowywane w przeglądarce. Kopia zapasowa to plik na Twoim dysku z
+historii tego dokumentu, przechowywane <nur-b>w przeglądarce</nur-b><nur-a>w pamięci programu</nur-a>. Kopia zapasowa to plik na Twoim dysku z
 wszystkim naraz. Pierwsze służy do zrobienia kroku wstecz podczas pisania; druga jest na dzień,
-w którym przeglądarki już nie będzie.</p>
+w którym <nur-b>przeglądarki</nur-b><nur-a>tego komputera</nur-a> już nie będzie.</p>
 <p><b>Plik &rsaquo; Zapisz wszystko</b> obejmuje to wszystko. Jego pierwsza pozycja — <i>Wszystko:
 dokumenty, notatki, słowniczki, ustawienia</i> — zapisuje cały stan programu do jednego pliku.
 <b>Wczytaj kopię zapasową</b> odczytuje ją z powrotem; pełna kopia zastępuje to, co jest, i
@@ -19569,8 +19587,8 @@ pyta najpierw.</p>
 <p>Oferowane są też dwie kopie częściowe: ten dokument z przypiętymi do niego notatkami oraz
 same notatki i słowniczki. Kopie częściowe są dodawane do tego, co masz, zamiast to
 zastępować.</p>
-<p>Zrób jedną przed czymkolwiek drastycznym oraz przed przejściem na inny adres — przeglądarka
-trzyma swoją pamięć osobno dla każdego.</p>`},
+<p>Zrób jedną przed czymkolwiek drastycznym<nur-b> oraz przed przejściem na inny adres — przeglądarka
+trzyma swoją pamięć osobno dla każdego</nur-b>.</p>`},
 
  {t:"Automatyczna kopia zapasowa",k:"automatyczna kopia zapasowa;google drive;dropbox;onedrive;chmura;synchronizacja",b:`
 <p>Trzecia karta w <b>Ustawienia &rsaquo; Zapisywanie</b> zapisuje cały stan programu do
@@ -19582,8 +19600,8 @@ tych usług; klient synchronizacji robi resztę. Działa to z dowolnym dostawcą
 zapisała ostatnio. <b>Zapisz teraz</b> zapisuje natychmiast.</p>
 <p>Nic nie jest zapisywane, gdy nic się nie zmieniło, więc plik w zsynchronizowanym folderze nie
 jest ruszany bez potrzeby.</p>
-<p>To wymaga Chrome albo Edge. Pozostałe przeglądarki są ograniczone do kopii robionych
-ręcznie.</p>`},
+<nur-b><p>To wymaga Chrome albo Edge. Pozostałe przeglądarki są ograniczone do kopii robionych
+ręcznie.</p></nur-b>`},
 
  {t:"Wygląd",k:"motyw;schemat kolorów;wygląd;tryb ciemny;przewijanie maszyny do pisania",b:`
 <p><b>Ustawienia &rsaquo; Ogólne &rsaquo; Schemat kolorów</b> oferuje siedemnaście schematów z
@@ -19613,8 +19631,8 @@ się wersja angielska z informacją.</p>`}]},
 {b:"Informacje",t:[
  {t:"Skróty klawiszowe",k:"skróty;klawisze;klawiatura",b:`
 <p>Polecenia programu używają <kbd>Alt</kbd>+<kbd>Shift</kbd>, ponieważ same kombinacje z
-<kbd>Ctrl</kbd> są w większości już zajęte przez samą przeglądarkę. Skróty edycji, które
-przeglądarka zostawia w spokoju, zachowują swoje zwykłe klawisze.</p>
+<kbd>Ctrl</kbd> są w większości już zajęte<nur-b> przez samą przeglądarkę</nur-b>. Skróty edycji<nur-b>, które
+przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 <p class="hsec">Widoki</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Pisanie / Notatki / Słowniczek</td></tr>
@@ -19663,25 +19681,28 @@ dzisiejsza data. Strzałki wybierają, <kbd>Enter</kbd> wstawia, <kbd>Esc</kbd> 
 
  {t:"Gdy coś idzie nie tak",k:"problemy;rozwiązywanie problemów;nie zapisano;pamięć pełna;zniknęło",b:`
 <p class="hsec">Pasek stanu pokazuje „Nie zapisano” na czerwono</p>
-<p>Przeglądarka odmówiła zapisania czegokolwiek więcej, zwykle dlatego, że jej pamięć jest pełna
+<p><nur-b>Przeglądarka odmówiła zapisania czegokolwiek więcej, zwykle dlatego, że jej pamięć jest pełna</nur-b><nur-a>Pamięć odmówiła przyjęcia czegokolwiek więcej, zwykle dlatego, że jest pełna</nur-a>
 — osadzone obrazy zapełniają ją szybko. Nic więcej nie jest zapisywane. Zrób od razu kopię
 zapasową, a potem usuń duże obrazy albo stare dokumenty.</p>
-<p class="hsec">Sprawdzanie pisowni nie startuje</p>
+<nur-b><p class="hsec">Sprawdzanie pisowni nie startuje</p>
 <p>Jego słowniki muszą zostać pobrane, a to nie jest możliwe, gdy plik otwarto przez dwukrotne
-kliknięcie. Serwuj program spod adresu internetowego albo z serwera lokalnego.</p>
+kliknięcie. Serwuj program spod adresu internetowego albo z serwera lokalnego.</p></nur-b>
 <p class="hsec">Moje dokumenty zniknęły</p>
-<p>Pamięć jest trzymana osobno dla każdego adresu. Otwarcie programu spod innego adresu — albo z
+<nur-b><p>Pamięć jest trzymana osobno dla każdego adresu. Otwarcie programu spod innego adresu — albo z
 innej przeglądarki, albo z okna prywatnego — pokazuje pusty program, a nie utracony. Wróć do
-adresu, którego używałeś, albo wczytaj kopię zapasową.</p>
-<p class="hsec">„Plik na dysku” jest wyszarzony</p>
+adresu, którego używałeś, albo wczytaj kopię zapasową.</p></nur-b><nur-a><p>Pamięć należy do programu i do Twojego konta na tym komputerze. Druga instalacja albo inne
+konto pokazuje dlatego pusty program, a nie utracony. Wczytaj tam kopię zapasową, aby zabrać
+swoją pracę ze sobą.</p></nur-a>
+<nur-b><p class="hsec">„Plik na dysku” jest wyszarzony</p>
 <p>Czytanie i zapisywanie prawdziwych plików wymaga Chrome albo Edge. W innych przeglądarkach
-użyj zamiast tego <b>Utwórz kopię zapasową</b> i <b>Wczytaj kopię zapasową</b>.</p>`}]}
+użyj zamiast tego <b>Utwórz kopię zapasową</b> i <b>Wczytaj kopię zapasową</b>.</p></nur-b>`}]}
 ],
 it:[
 {b:"Per iniziare",t:[
  {t:"Informazioni su PureQuill Writer",k:"informazioni;panoramica;introduzione;cos'è",b:`
-<p>PureQuill Writer è un elaboratore di testo che funziona interamente nel browser. Non c'è
-niente da installare e nessun accesso da effettuare. Il tuo testo non viene inviato da nessuna
+<p><nur-b>PureQuill Writer è un elaboratore di testo che funziona interamente nel browser. Non c'è
+niente da installare e nessun accesso da effettuare.</nur-b><nur-a>PureQuill Writer è un elaboratore di testo per il tuo computer. Non c'è nessun
+accesso da effettuare, e funziona senza connessione a internet.</nur-a> Il tuo testo non viene inviato da nessuna
 parte.</p>
 <p>È pensato per testi lunghi — manoscritti, relazioni, tesi — non per note brevi. Tre cose lo
 distinguono da un semplice editor di testo:</p>
@@ -19723,12 +19744,13 @@ da ricordare, e la barra di stato in basso a destra indica sempre come stanno le
 <p>Il lavoro è conservato in <b>tre luoghi</b>, numerati in <b>Impostazioni &rsaquo;
 Salvataggio</b>:</p>
 <ol>
-<li><b>Questo browser</b>: sempre, e tutto. Legato all'indirizzo da cui hai aperto il programma,
-e perso se cancelli i dati del browser.</li>
+<li><b><nur-b>Questo browser</nur-b><nur-a>Questo programma</nur-a></b>: sempre, e tutto.<nur-b> Legato all'indirizzo da cui hai aperto il programma,
+e perso se cancelli i dati del browser.</nur-b><nur-a> Si trova insieme ai dati del programma su questo computer,
+e va perso se disinstalli il programma.</nur-a></li>
 <li><b>Un file sul disco</b>: facoltativo, e solo il documento in cui ti trovi, insieme alle
 note fissate ad esso. Si configura in <b>File &rsaquo; Salva tutto &rsaquo; Collega a un
-file</b>; da allora viene scritto a ogni salvataggio. Su un altro computer — o dopo che la
-memoria del browser è stata cancellata — <b>Apri un file collegato</b> lo recupera.</li>
+file</b>; da allora viene scritto a ogni salvataggio. Su un altro computer — o dopo <nur-b>che la
+memoria del browser è stata cancellata</nur-b><nur-a>una nuova installazione del programma</nur-a> — <b>Apri un file collegato</b> lo recupera.</li>
 <li><b>Backup automatico</b>: facoltativo, e tutto lo stato del programma: ogni documento, nota,
 glossario e impostazione.</li>
 </ol>
@@ -19736,7 +19758,7 @@ glossario e impostazione.</li>
 E all'interno del luogo 1 il programma conserva anche
 <a data-goto="Cronologia versioni e punti di ripristino">punti di ripristino</a> per ogni
 documento: punti a cui puoi tornare.</p>
-<p>Se la barra di stato mostra <b>Non salvato</b> in rosso, il browser ha rifiutato di
+<p>Se la barra di stato mostra <b>Non salvato</b> in rosso, <nur-b>il browser</nur-b><nur-a>la memoria</nur-a> ha rifiutato di
 archiviare qualcosa in più. Fai subito un backup e libera dello spazio.</p>
 <p>Vedi anche: <a data-goto="Backup automatico">Backup automatico</a>.</p>`}]},
 
@@ -19811,7 +19833,7 @@ cambio di formato pagina.</p>`},
  {t:"Immagini",k:"immagine;foto;didascalia;testo alternativo;ridimensionare",b:`
 <p>Inserisci un'immagine dalla barra degli strumenti, oppure digita <code>/immagine</code>. Il
 file viene incorporato nel documento, quindi viaggia con i tuoi backup — tieni presente che
-diverse fotografie grandi riempiono in fretta la memoria del browser. Lo stesso vale per le
+diverse fotografie grandi riempiono in fretta <nur-b>la memoria del browser</nur-b><nur-a>la memoria</nur-a>. Lo stesso vale per le
 immagini che arrivano con un documento Word.</p>
 <p><b>Fai clic su un'immagine</b> per selezionarla. Compare una piccola barra con allineamento,
 una didascalia, un testo alternativo per i lettori di schermo, ed elimina. Trascina la maniglia
@@ -19899,8 +19921,8 @@ documento esattamente come sarà stampato — numeri di pagina, intestazioni, ma
 costruita dalle pagine che già vedi, quindi anteprima e carta non possono differire.
 <kbd>Esc</kbd> la chiude.</p>
 <p><b>Per stampare</b>, premi <kbd>Ctrl</kbd>+<kbd>P</kbd> o usa <b>File &rsaquo; Stampa</b>.</p>
-<p><b>Per fare un PDF</b>, scegli <b>File &rsaquo; Salva come &rsaquo; PDF</b>. Si apre la stessa
-finestra di stampa; scegli <i>Salva come PDF</i> come destinazione.</p>`}]},
+<p><b>Per fare un PDF</b>, scegli <b>File &rsaquo; Salva come &rsaquo; PDF</b>. <nur-b>Si apre la stessa
+finestra di stampa; scegli <i>Salva come PDF</i> come destinazione</nur-b><nur-a>Si va dritti alla finestra di salvataggio</nur-a>.</p>`}]},
 
 {b:"Lavorare su testi lunghi",t:[
  {t:"Note sulla bacheca",k:"note;bacheca;promemoria;colori",b:`
@@ -20005,9 +20027,9 @@ aperto. Sono disponibili sette lingue: tedesco, inglese, francese, spagnolo, ita
 portoghese e polacco. La lingua si imposta in <b>Impostazioni &rsaquo; Generale</b>.</p>
 <p>Per ogni parola puoi accettare un suggerimento, digitare una tua correzione, ignorarla una
 volta, o aggiungerla alle tue parole proprie: queste vengono ricordate in tutti i documenti.</p>
-<p><b>I dizionari hanno bisogno di un vero indirizzo.</b> Se hai aperto il file con un doppio
+<nur-b><p><b>I dizionari hanno bisogno di un vero indirizzo.</b> Se hai aperto il file con un doppio
 clic, il correttore non può scaricarli. Servire il programma da un indirizzo web o da un server
-locale risolve la cosa.</p>`},
+locale risolve la cosa.</p></nur-b>`},
 
  {t:"Pulire il testo",k:"pulire;sistemare;spazi doppi;spazio unificatore;paragrafi vuoti",b:`
 <p><b>Strumenti &rsaquo; Pulisci il testo</b> individua il piccolo disordine che si accumula in
@@ -20070,7 +20092,7 @@ campi del numero di pagina di Word diventano i segnaposto di questo programma, q
 salvato nel file. La larghezza delle colonne delle tabelle viene letta dal documento e tenuta
 come proporzione, quindi sopravvive a un cambio di dimensione della carta.</p>
 <p><b>Anche le immagini vengono</b>, nella larghezza che avevano in Word. Sono incorporate nel
-documento, il che significa che occupano la memoria del browser — quindi quando un file ne porta
+documento, il che significa che occupano <nur-b>la memoria del browser</nur-b><nur-a>la memoria del programma</nur-a> — quindi quando un file ne porta
 molte, ti viene detto quanto è stato aggiunto e ti viene proposto un backup all'istante. Le
 immagini a cui un documento Word rimanda soltanto con un link, invece di contenerle, non possono
 venire: vivono sul computer di qualcun altro.</p>
@@ -20107,7 +20129,7 @@ si usa un backup.</p>`},
 
  {t:"Cronologia versioni e punti di ripristino",k:"versione;cronologia;punto di ripristino;annulla;ripristina;prima;tornare indietro",b:`
 <p>Mentre scrivi, il programma conserva <b>punti di ripristino</b> del documento in cui ti trovi
-— punti a cui puoi tornare. Non è la stessa cosa del salvataggio: il tuo testo va nel browser di
+— punti a cui puoi tornare. Non è la stessa cosa del salvataggio: il tuo testo va <nur-b>nel browser</nur-b><nur-a>nella memoria</nur-a> di
 continuo e non ha bisogno di alcun comando.</p>
 <p>Uno viene fatto da solo nell'intervallo impostato in <b>File &rsaquo; Punti di ripristino
 &rsaquo; Automatico</b>, ma solo quando qualcosa è davvero cambiato. <b>Crea un punto di
@@ -20116,18 +20138,18 @@ prima di riscrivere un passaggio che potresti voler recuperare.</p>
 <p><b>File &rsaquo; Punti di ripristino &rsaquo; Cronologia versioni</b> li elenca, dal più
 recente al più vecchio, ciascuno con l'ora e il conteggio delle parole per farti riconoscere
 quello che vuoi. <i>Ripristina</i> rimette quella versione al posto del testo corrente.</p>
-<p>Gli <b>ultimi dodici</b> sono conservati per documento; i più vecchi cadono. Si trovano nel
-browser accanto al documento, quindi viaggiano dentro un backup — ma non lo sostituiscono. Un
+<p>Gli <b>ultimi dodici</b> sono conservati per documento; i più vecchi cadono. Si trovano <nur-b>nel
+browser</nur-b><nur-a>nella memoria</nur-a> accanto al documento, quindi viaggiano dentro un backup — ma non lo sostituiscono. Un
 punto di ripristino aiuta a fare un passo indietro mentre si scrive; un backup è per il giorno
-in cui il browser non ci sarà più.</p>
+in cui <nur-b>il browser</nur-b><nur-a>questo computer</nur-a> non ci sarà più.</p>
 <p>Vedi anche: <a data-goto="Backup">Backup</a>.</p>`},
 
  {t:"Backup",k:"backup;ripristino;pacchetto;salva tutto",b:`
 <p>Un backup, a differenza di un'esportazione, può essere riletto per intero.</p>
 <p>È anche un'altra cosa rispetto a un <b>punto di ripristino</b>. Un punto di ripristino è un
-punto nella cronologia propria di questo documento, conservato nel browser. Un backup è un file
+punto nella cronologia propria di questo documento, conservato <nur-b>nel browser</nur-b><nur-a>nella memoria del programma</nur-a>. Un backup è un file
 sul tuo disco con tutto in una volta. Il primo serve a fare un passo indietro mentre si scrive;
-il secondo è per il giorno in cui il browser non ci sarà più.</p>
+il secondo è per il giorno in cui <nur-b>il browser</nur-b><nur-a>questo computer</nur-a> non ci sarà più.</p>
 <p><b>File &rsaquo; Salva tutto</b> copre tutto questo. La sua prima voce — <i>Tutto: documenti,
 note, glossari, impostazioni</i> — scrive tutto lo stato del programma in un unico file.
 <b>Carica un backup</b> lo rilegge; un backup completo sostituisce ciò che c'è e chiede
@@ -20135,8 +20157,8 @@ prima.</p>
 <p>Vengono proposti anche due backup parziali: questo documento con le note fissate ad esso, e
 le note e i glossari da soli. I backup parziali si aggiungono a ciò che hai invece di
 sostituirlo.</p>
-<p>Fanne uno prima di qualsiasi cosa drastica, e prima di passare a un altro indirizzo — il
-browser tiene la sua memoria separata per ciascuno.</p>`},
+<p>Fanne uno prima di qualsiasi cosa drastica<nur-b>, e prima di passare a un altro indirizzo — il
+browser tiene la sua memoria separata per ciascuno</nur-b>.</p>`},
 
  {t:"Backup automatico",k:"backup automatico;google drive;dropbox;onedrive;cloud;sincronizzazione",b:`
 <p>La terza scheda in <b>Impostazioni &rsaquo; Salvataggio</b> scrive tutto lo stato del
@@ -20149,7 +20171,7 @@ fornitore.</p>
 scritto l'ultima volta. <b>Salva ora</b> scrive all'istante.</p>
 <p>Non viene scritto nulla quando nulla è cambiato, quindi un file in una cartella sincronizzata
 non viene toccato senza necessità.</p>
-<p>Questo richiede Chrome o Edge. Gli altri browser sono limitati ai backup fatti a mano.</p>`},
+<nur-b><p>Questo richiede Chrome o Edge. Gli altri browser sono limitati ai backup fatti a mano.</p></nur-b>`},
 
  {t:"Aspetto",k:"tema;tema colori;aspetto;modalità scura;scorrimento a macchina da scrivere",b:`
 <p><b>Impostazioni &rsaquo; Generale &rsaquo; Tema colori</b> offre diciassette temi con
@@ -20180,8 +20202,8 @@ mostrata la versione inglese con un avviso.</p>`}]},
 {b:"Riferimento",t:[
  {t:"Scorciatoie da tastiera",k:"scorciatoie;tasti;tastiera",b:`
 <p>I comandi del programma usano <kbd>Alt</kbd>+<kbd>Maiusc</kbd>, perché le combinazioni con il
-solo <kbd>Ctrl</kbd> sono in gran parte già occupate dal browser stesso. Le scorciatoie di
-modifica che il browser lascia in pace mantengono i loro tasti abituali.</p>
+solo <kbd>Ctrl</kbd> sono in gran parte già occupate<nur-b> dal browser stesso</nur-b>. Le scorciatoie di
+modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti abituali.</p>
 <p class="hsec">Viste</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Scrittura / Note / Glossario</td></tr>
@@ -20231,19 +20253,21 @@ scelgono, <kbd>Invio</kbd> inserisce, <kbd>Esc</kbd> chiude.</p>`},
 
  {t:"Quando qualcosa va storto",k:"problemi;risoluzione dei problemi;non salvato;memoria piena;sparito",b:`
 <p class="hsec">La barra di stato mostra «Non salvato» in rosso</p>
-<p>Il browser ha rifiutato di archiviare qualcosa in più, di solito perché la sua memoria è
-piena — le immagini incorporate la riempiono in fretta. Non viene più scritto nulla. Fai subito
+<p><nur-b>Il browser ha rifiutato di archiviare qualcosa in più, di solito perché la sua memoria è
+piena</nur-b><nur-a>La memoria ha rifiutato di accogliere qualcosa in più, di solito perché è piena</nur-a> — le immagini incorporate la riempiono in fretta. Non viene più scritto nulla. Fai subito
 un backup, poi togli immagini grandi o documenti vecchi.</p>
-<p class="hsec">Il controllo ortografico non parte</p>
+<nur-b><p class="hsec">Il controllo ortografico non parte</p>
 <p>I suoi dizionari devono essere scaricati, e non è possibile quando il file è stato aperto con
-un doppio clic. Servi il programma da un indirizzo web o da un server locale.</p>
+un doppio clic. Servi il programma da un indirizzo web o da un server locale.</p></nur-b>
 <p class="hsec">I miei documenti sono spariti</p>
-<p>La memoria è tenuta separata per ogni indirizzo. Aprire il programma da un altro indirizzo —
+<nur-b><p>La memoria è tenuta separata per ogni indirizzo. Aprire il programma da un altro indirizzo —
 o da un altro browser, o da una finestra privata — mostra un programma vuoto, non uno perso.
-Torna all'indirizzo che usavi, o carica un backup.</p>
-<p class="hsec">«File sul disco» è in grigio</p>
+Torna all'indirizzo che usavi, o carica un backup.</p></nur-b><nur-a><p>La memoria appartiene al programma e al tuo account su questo computer. Una seconda
+installazione, o un altro account, mostra perciò un programma vuoto, non uno perso. Carica lì un
+backup per portarti dietro il tuo lavoro.</p></nur-a>
+<nur-b><p class="hsec">«File sul disco» è in grigio</p>
 <p>Leggere e scrivere file veri richiede Chrome o Edge. Negli altri browser, usa invece
-<b>Crea backup</b> e <b>Carica backup</b>.</p>`}]}
+<b>Crea backup</b> e <b>Carica backup</b>.</p></nur-b>`}]}
 ]
 };
 
