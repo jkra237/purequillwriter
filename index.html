@@ -2366,7 +2366,6 @@ en:{
   "Wie möchtest du beginnen?":"How would you like to start?",
   "kein Dokument offen":"no document open",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Once a document is open, you can keep it as a file here as well.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Skip — start writing with the default settings",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"You can also back it up on your computer, or automatically into a cloud folder:",
   "Ohne Titel":"Untitled",
@@ -3115,7 +3114,6 @@ fr:{
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
   "kein Dokument offen":"aucun document ouvert",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Dès qu'un document est ouvert, vous pouvez aussi le conserver ici sous forme de fichier.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Passer — écrire avec les réglages par défaut",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Vous pouvez en plus le sauvegarder sur votre ordinateur ou automatiquement dans un dossier cloud :",
   "Ohne Titel":"Sans titre",
@@ -3864,7 +3862,6 @@ es:{
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
   "kein Dokument offen":"ningún documento abierto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"En cuanto haya un documento abierto, aquí puedes guardarlo además como archivo.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Omitir — escribir con los ajustes predeterminados",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Además puedes guardarlo en tu ordenador o automáticamente en una carpeta de la nube:",
   "Ohne Titel":"Sin título",
@@ -4613,7 +4610,6 @@ pt:{
   "Wie möchtest du beginnen?":"Como você quer começar?",
   "kein Dokument offen":"nenhum documento aberto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Assim que um documento estiver aberto, você pode guardá-lo aqui também como arquivo.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Pular — escrever com as configurações padrão",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Você também pode salvá-lo no seu computador ou automaticamente numa pasta da nuvem:",
   "Ohne Titel":"Sem título",
@@ -5362,7 +5358,6 @@ pl:{
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
   "kein Dokument offen":"żaden dokument nie jest otwarty",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Gdy dokument jest otwarty, można go tutaj dodatkowo zapisać jako plik.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Pomiń — pisz z ustawieniami domyślnymi",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Możesz go dodatkowo zapisywać na swoim komputerze albo automatycznie w folderze chmury:",
   "Ohne Titel":"Bez tytułu",
@@ -6122,7 +6117,6 @@ it:{
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
   "kein Dokument offen":"nessun documento aperto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Non appena un documento è aperto, qui puoi conservarlo anche come file.",
-  "Überspringen — mit den Voreinstellungen schreiben":"Salta — scrivi con le impostazioni predefinite",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Puoi salvarlo anche sul tuo computer o automaticamente in una cartella cloud:",
   "Ohne Titel":"Senza titolo",
@@ -6262,7 +6256,7 @@ const hatInhalt=h=>{
   const e=document.createElement("div");e.innerHTML=h||"";
   return !!((e.innerText||"").trim()||e.querySelector("figure,img,table"));
 };
-function startSkip(){lockedOvl=false;zurueckZumWillkommen=false;closeOvl();render()}
+function startSkip(){lockedOvl=false;zurueckZumWillkommen=false;closeOvl()}
 function startNew(){
   lockedOvl=false;closeOvl();
   if(S.docs.length===1&&!hatInhalt(S.docs[0].html)){
@@ -6273,7 +6267,7 @@ function mpfad(...schluessel){
   return schluessel.map(k=>tr(k).replace(/…$/,"")).join(" › ");
 }
 function startupDialog(){
-  overlay(`<div class="modal"><h3>${tr("Willkommen")}<button class="modalx" id="stSkip" title="${esc(tr("Überspringen — mit den Voreinstellungen schreiben"))}">&times;</button></h3><div class="pad">
+  overlay(`<div class="modal"><h3>${tr("Willkommen")}<button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad">
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
       <label>${tr("Sprache")}</label><div class="ctl">
         <select id="stLang">${UI_LANGS.map(([v,n])=>
@@ -16878,8 +16872,9 @@ backup</b> and <b>Load a backup</b> instead.</p>`}]}
 de:[
 {b:"Erste Schritte",t:[
  {t:"Über PureQuill Writer",k:"über;überblick;einführung;was ist das",b:`
-<p>PureQuill Writer ist eine Textverarbeitung, die vollständig im Browser läuft. Es gibt
-nichts zu installieren und nichts anzumelden. Dein Text wird nirgendwohin gesendet.</p>
+<p><nur-b>PureQuill Writer ist eine Textverarbeitung, die vollständig im Browser läuft. Es gibt
+nichts zu installieren und nichts anzumelden.</nur-b><nur-a>PureQuill Writer ist eine Textverarbeitung für deinen Rechner. Es gibt nichts
+anzumelden, und sie arbeitet ohne Internetverbindung.</nur-a> Dein Text wird nirgendwohin gesendet.</p>
 <p>Das Programm ist für lange Texte gebaut — Manuskripte, Berichte, Abschlussarbeiten —
 und nicht für kurze Notizen. Drei Dinge unterscheiden es von einem einfachen Editor:</p>
 <ul>
@@ -16918,13 +16913,14 @@ man denken müsste, und die Statuszeile unten rechts sagt jederzeit, woran man i
 <p>Die Arbeit liegt an <b>drei Orten</b>, im Einstellungsdialog unter <b>Speichern</b>
 durchnummeriert:</p>
 <ol>
-<li><b>Dieser Browser</b> — immer, und alles. Hier liegt der Arbeitsstand. Er hängt an der
+<li><b><nur-b>Dieser Browser</nur-b><nur-a>Dieses Programm</nur-a></b> — immer, und alles. Hier liegt der Arbeitsstand.<nur-b> Er hängt an der
 Adresse, von der du das Programm geöffnet hast, und geht verloren, wenn du die Browserdaten
-löschst.</li>
+löschst.</nur-b><nur-a> Er liegt bei den Programmdaten auf diesem Rechner und geht verloren, wenn du das
+Programm deinstallierst.</nur-a></li>
 <li><b>Eine Datei auf der Festplatte</b> — freiwillig, und nur das Dokument, in dem du bist,
 samt der daran angehefteten Notizen. Eingerichtet über <b>Datei &rsaquo; Alles sichern &rsaquo;
 Mit Datei verknüpfen</b>; von da an wird sie bei jedem Sichern mitgeschrieben. An einem anderen
-Rechner — oder nachdem der Browserspeicher geleert wurde — holst du sie mit
+Rechner — oder nachdem <nur-b>der Browserspeicher geleert wurde</nur-b><nur-a>das Programm neu eingerichtet wurde</nur-a> — holst du sie mit
 <b>Verknüpfte Datei öffnen</b> zurück.</li>
 <li><b>Automatische Sicherung</b> — freiwillig, und der ganze Programmstand: alle Dokumente,
 Notizen, Glossare und Einstellungen.</li>
@@ -16933,7 +16929,7 @@ Notizen, Glossare und Einstellungen.</li>
 Und innerhalb von Ort 1 hält das Programm zusätzlich
 <a data-goto="Versionsverlauf und Zwischenstände">Zwischenstände</a> je Dokument — Punkte, zu
 denen du zurückkehren kannst.</p>
-<p>Steht in der Statuszeile jemals <b>Nicht gesichert</b> in Rot, nimmt der Browser nichts
+<p>Steht in der Statuszeile jemals <b>Nicht gesichert</b> in Rot, nimmt <nur-b>der Browser</nur-b><nur-a>der Speicher</nur-a> nichts
 mehr an. Dann sofort eine Sicherung anlegen und Platz schaffen.</p>
 <p>Siehe auch: <a data-goto="Automatische Sicherung">Automatische Sicherung</a>.</p>`}]},
 
@@ -17004,7 +17000,7 @@ des Seitenformats.</p>`},
  {t:"Bilder",k:"bild;foto;grafik;bildunterschrift;alternativtext;größe ändern",b:`
 <p>Ein Bild fügst du über die Werkzeugleiste ein oder mit <code>/bild</code>. Die Datei wird im
 Dokument eingebettet und wandert damit in jede Sicherung mit — bedenke, dass einige große
-Fotos den Browserspeicher rasch füllen. Dasselbe gilt für Bilder, die mit einem geladenen
+Fotos <nur-b>den Browserspeicher</nur-b><nur-a>den Speicher</nur-a> rasch füllen. Dasselbe gilt für Bilder, die mit einem geladenen
 Word-Dokument hereinkommen.</p>
 <p><b>Ein Klick auf ein Bild</b> wählt es aus. Eine kleine Leiste erscheint mit Ausrichtung,
 Bildunterschrift, Alternativtext für Screenreader und Löschen. Am runden Eckanfasser ziehst du
@@ -17093,8 +17089,7 @@ Seiten gebaut, die du ohnehin siehst, deshalb können Vorschau und Papier nicht 
 <b>Datei &rsaquo; Drucken</b>.</p>
 <p><b>Für ein PDF</b> wählst du <b>Datei &rsaquo; Speichern als &rsaquo; PDF-Dokument</b>.
 Ein kleines Fenster fragt nach dem Autor und zeigt das Seitenformat, dann geht es
-weiter: im Browser in den Druckdialog (dort als Ziel <i>Als PDF speichern</i> wählen),
-in der App-Fassung gleich in den Speichern-Dialog.</p>`}]},
+weiter<nur-b>: in den Druckdialog des Browsers — dort als Ziel <i>Als PDF speichern</i> wählen</nur-b><nur-a> gleich in den Speichern-Dialog</nur-a>.</p>`}]},
 
 {b:"Arbeit an längeren Texten",t:[
  {t:"Notizen auf der Pinnwand",k:"notizen;pinnwand;zettel;farben",b:`
@@ -17196,9 +17191,9 @@ offen ist. Sieben Sprachen gibt es: Deutsch, Englisch, Französisch, Spanisch, I
 Portugiesisch und Polnisch. Eingestellt wird sie unter <b>Einstellungen &rsaquo; Allgemein</b>.</p>
 <p>Zu jedem Wort kannst du einen Vorschlag übernehmen, eine eigene Korrektur eintippen, es
 einmal übergehen oder es zu deinen eigenen Wörtern legen — die gelten über alle Dokumente.</p>
-<p><b>Die Wörterbücher brauchen eine echte Adresse.</b> Wurde die Datei per Doppelklick
+<nur-b><p><b>Die Wörterbücher brauchen eine echte Adresse.</b> Wurde die Datei per Doppelklick
 geöffnet, kann die Prüfung sie nicht holen. Das Programm über eine Webadresse oder einen
-lokalen Server aufzurufen löst das.</p>`},
+lokalen Server aufzurufen löst das.</p></nur-b>`},
 
  {t:"Text bereinigen",k:"bereinigen;aufräumen;doppelte leerzeichen;geschütztes leerzeichen;leere absätze",b:`
 <p><b>Werkzeuge &rsaquo; Text bereinigen</b> findet die kleinen Unsauberkeiten, die sich in
@@ -17262,7 +17257,7 @@ weiter, statt als die eine Zahl anzukommen, die zufällig in der Datei stand.
 Spaltenbreiten von Tabellen werden gelesen und als Verhältnis gehalten, sie überstehen
 deshalb einen Wechsel des Seitenformats.</p>
 <p><b>Bilder kommen ebenfalls mit</b>, in der Breite, die sie in Word hatten. Sie werden ins
-Dokument eingebettet und liegen damit im Browserspeicher — bringt eine Datei viele davon mit,
+Dokument eingebettet und liegen damit <nur-b>im Browserspeicher</nur-b><nur-a>im Speicher des Programms</nur-a> — bringt eine Datei viele davon mit,
 sagt dir das Programm, wie viel dazugekommen ist, und bietet gleich eine Sicherung an. Bilder,
 die ein Word-Dokument nur verknüpft statt sie zu enthalten, können nicht mit: sie liegen auf
 einem fremden Rechner.</p>
@@ -17300,7 +17295,7 @@ nimmst du eine Sicherung.</p>`},
  {t:"Versionsverlauf und Zwischenstände",k:"version;verlauf;zwischenstand;zurück;wiederherstellen;früher",b:`
 <p>Während du schreibst, legt das Programm <b>Zwischenstände</b> des Dokuments an, in dem du
 gerade bist — Punkte, zu denen du zurückkehren kannst. Das ist nicht dasselbe wie Sichern:
-dein Text geht ohnehin fortlaufend in den Browser und braucht dafür keinen Befehl.</p>
+dein Text geht ohnehin fortlaufend in <nur-b>den Browser</nur-b><nur-a>den Speicher</nur-a> und braucht dafür keinen Befehl.</p>
 <p>Einer entsteht von selbst im Takt, der unter <b>Datei &rsaquo; Zwischenstände &rsaquo;
 Automatisch</b> eingestellt ist — aber nur, wenn sich wirklich etwas geändert hat.
 <b>Zwischenstand anlegen</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd>) legt sofort einen an;
@@ -17308,18 +17303,18 @@ das lohnt sich, bevor du eine Passage umschreibst, die du vielleicht zurückhabe
 <p><b>Datei &rsaquo; Zwischenstände &rsaquo; Versionsverlauf</b> zeigt sie, den neuesten zuerst,
 je mit Uhrzeit und Wortzahl — daran erkennst du den, den du suchst. <i>Wiederherstellen</i>
 setzt diesen Stand an die Stelle des aktuellen Textes.</p>
-<p>Aufgehoben werden die <b>letzten zwölf</b> je Dokument, ältere fallen weg. Sie liegen im
-Browser neben dem Dokument und wandern deshalb in einer Sicherung mit — ersetzen sie aber
+<p>Aufgehoben werden die <b>letzten zwölf</b> je Dokument, ältere fallen weg. Sie liegen <nur-b>im
+Browser</nur-b><nur-a>im Speicher</nur-a> neben dem Dokument und wandern deshalb in einer Sicherung mit — ersetzen sie aber
 nicht. Ein Zwischenstand hilft beim Schreiben einen Schritt zurück; eine Sicherung ist für den
-Tag, an dem der Browser weg ist.</p>
+Tag, an dem <nur-b>der Browser</nur-b><nur-a>dieser Rechner</nur-a> weg ist.</p>
 <p>Siehe auch: <a data-goto="Sicherungen">Sicherungen</a>.</p>`},
 
  {t:"Sicherungen",k:"sicherung;wiederherstellen;alles sichern",b:`
 <p>Eine Sicherung lässt sich, anders als ein Export, vollständig wieder einlesen.</p>
 <p>Sie ist auch etwas anderes als ein <b>Zwischenstand</b>. Ein Zwischenstand ist ein Punkt im
-Verlauf dieses einen Dokuments und liegt im Browser. Eine Sicherung ist eine Datei auf deiner
+Verlauf dieses einen Dokuments und liegt <nur-b>im Browser</nur-b><nur-a>im Speicher des Programms</nur-a>. Eine Sicherung ist eine Datei auf deiner
 Festplatte, die alles auf einmal enthält. Das erste ist zum Zurückgehen beim Schreiben, das
-zweite für den Tag, an dem der Browser weg ist.</p>
+zweite für den Tag, an dem <nur-b>der Browser</nur-b><nur-a>dieser Rechner</nur-a> weg ist.</p>
 <p><b>Datei &rsaquo; Alles sichern</b> fasst das zusammen. Der erste Eintrag darin —
 <i>Alles: Dokumente, Notizen, Glossare, Einstellungen</i> — schreibt den gesamten
 Programmstand in eine Datei. <b>Sicherung laden</b> liest sie wieder ein; eine Vollsicherung
@@ -17327,8 +17322,8 @@ ersetzt den vorhandenen Bestand und fragt vorher.</p>
 <p>Zwei Teilsicherungen gibt es außerdem: dieses Dokument mit seinen angehefteten Notizen, und
 die Notizen und Glossare für sich. Teilsicherungen werden dem Bestand hinzugefügt, statt ihn zu
 ersetzen.</p>
-<p>Leg eine an, bevor du etwas Einschneidendes tust, und bevor du die Adresse wechselst — der
-Browser hält seinen Speicher je Adresse getrennt.</p>`},
+<p>Leg eine an, bevor du etwas Einschneidendes tust<nur-b>, und bevor du die Adresse wechselst — der
+Browser hält seinen Speicher je Adresse getrennt</nur-b>.</p>`},
 
  {t:"Automatische Sicherung",k:"automatische sicherung;google drive;dropbox;onedrive;cloud",b:`
 <p>Die dritte Karte unter <b>Einstellungen &rsaquo; Speichern</b> schreibt den ganzen
@@ -17341,7 +17336,7 @@ Anbieter.</p>
 zuletzt geschrieben wurde. <b>Jetzt schreiben</b> schreibt sofort.</p>
 <p>Hat sich nichts geändert, wird nichts geschrieben — eine Datei in einem Cloud-Ordner wird
 also nicht ohne Grund angefasst.</p>
-<p>Dafür braucht es Chrome oder Edge. In anderen Browsern bleibt es bei Sicherungen von Hand.</p>`},
+<nur-b><p>Dafür braucht es Chrome oder Edge. In anderen Browsern bleibt es bei Sicherungen von Hand.</p></nur-b>`},
 
  {t:"Darstellung",k:"farbschema;darstellung;dunkelmodus;schreibmaschinen-scrollen",b:`
 <p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet siebzehn Schemata mit
@@ -17371,8 +17366,8 @@ erscheint die englische Fassung mit einem Hinweis.</p>`}]},
 {b:"Nachschlagen",t:[
  {t:"Tastenkürzel",k:"kürzel;tasten;tastatur;tastenkombinationen",b:`
 <p>Programmbefehle nutzen <kbd>Alt</kbd>+<kbd>⇧</kbd>, weil reine <kbd>Strg</kbd>-Kombinationen
-größtenteils schon vom Browser belegt sind. Die Bearbeiten-Kürzel, die der Browser in Ruhe
-lässt, behalten ihre gewohnten Tasten.</p>
+größtenteils schon<nur-b> vom Browser</nur-b> belegt sind. Die Bearbeiten-Kürzel<nur-b>, die der Browser in Ruhe
+lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 <p class="hsec">Ansichten</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Schreiben / Notizen / Glossar</td></tr>
@@ -17422,20 +17417,22 @@ Fußnote, Seitenumbruch, heutiges Datum. Pfeiltasten wählen, <kbd>Eingabe</kbd>
 
  {t:"Wenn etwas nicht stimmt",k:"probleme;fehler;nicht gesichert;speicher voll;verschwunden",b:`
 <p class="hsec">In der Statuszeile steht „Nicht gesichert" in Rot</p>
-<p>Der Browser nimmt nichts mehr an, meist weil sein Speicher voll ist — eingebettete Bilder
+<p><nur-b>Der Browser nimmt nichts mehr an, meist weil sein Speicher voll ist</nur-b><nur-a>Der Speicher nimmt nichts mehr an, meist weil er voll ist</nur-a> — eingebettete Bilder
 füllen ihn rasch. Es wird nichts mehr geschrieben. Lege sofort über
 <b>Datei &rsaquo; Alles sichern</b> eine Sicherung an und entferne dann große Bilder oder alte
 Dokumente.</p>
-<p class="hsec">Die Rechtschreibprüfung startet nicht</p>
+<nur-b><p class="hsec">Die Rechtschreibprüfung startet nicht</p>
 <p>Ihre Wörterbücher müssen geholt werden, und das geht nicht, wenn die Datei per Doppelklick
-geöffnet wurde. Rufe das Programm über eine Webadresse oder einen lokalen Server auf.</p>
+geöffnet wurde. Rufe das Programm über eine Webadresse oder einen lokalen Server auf.</p></nur-b>
 <p class="hsec">Meine Dokumente sind weg</p>
-<p>Der Speicher wird je Adresse getrennt gehalten. Das Programm von einer anderen Adresse zu
+<nur-b><p>Der Speicher wird je Adresse getrennt gehalten. Das Programm von einer anderen Adresse zu
 öffnen — oder aus einem anderen Browser oder einem privaten Fenster — zeigt ein leeres
-Programm, kein verlorenes. Kehre zur bisherigen Adresse zurück oder lade eine Sicherung.</p>
-<p class="hsec">„Datei auf der Festplatte" ist ausgegraut</p>
+Programm, kein verlorenes. Kehre zur bisherigen Adresse zurück oder lade eine Sicherung.</p></nur-b><nur-a><p>Der Speicher gehört zum Programm und zu deinem Benutzerkonto auf diesem Rechner. Eine
+zweite Installation oder ein anderes Konto zeigt deshalb ein leeres Programm, kein verlorenes.
+Lade dort eine Sicherung, um deine Arbeit mitzunehmen.</p></nur-a>
+<nur-b><p class="hsec">„Datei auf der Festplatte" ist ausgegraut</p>
 <p>Echte Dateien zu lesen und zu schreiben braucht Chrome oder Edge. In anderen Browsern nimmst
-du stattdessen <b>Alles sichern</b> und <b>Sicherung laden</b>.</p>`}]}
+du stattdessen <b>Alles sichern</b> und <b>Sicherung laden</b>.</p></nur-b>`}]}
 ],
 es:[
 {b:"Primeros pasos",t:[
@@ -20284,8 +20281,45 @@ const HELPICO={
   auf:'<svg viewBox="0 0 16 16" class="hicon"><path d="M8 4.4C6.6 3.3 4.7 3 2.5 3.3v8.6C4.7 11.6 6.6 11.9 8 13z" fill="#E8BC4F" stroke="#7A5810"/><path d="M8 4.4C9.4 3.3 11.3 3 13.5 3.3v8.6C11.3 11.6 9.4 11.9 8 13z" fill="#F5DA96" stroke="#7A5810"/></svg>',
   seite:'<svg viewBox="0 0 16 16" class="hicon"><path d="M4 2.5h5l3 3v8H4z" fill="var(--paper)" stroke="var(--ink-faint)"/><path d="M9 2.5v3h3" fill="none" stroke="var(--ink-faint)"/><text x="8" y="11.6" text-anchor="middle" font-size="7" font-weight="700" fill="var(--stamp)">?</text></svg>'
 };
+/* Ein Hilfetext, zwei Fassungen. Browser- und App-Fassung unterscheiden sich
+   an rund zehn Themen je Sprache — meist nur im Wort ("im Browser" gegen "im
+   Programm"), an sechs Stellen aber in der Aussage selbst: es gibt nichts zu
+   installieren, der Speicher haengt an der Adresse, dafuer braucht es Chrome
+   oder Edge. Zwei Hilfefassungen zu pflegen hiesse sieben Sprachen mal
+   neununddreissig Themen mal zwei — und die eine Fassung ist allein in dieser
+   Sitzung an vierzehn Stellen auseinandergelaufen. Also steht beides im selben
+   Text, in <nur-b> und <nur-a>, und beim Lesen bleibt eines davon stehen.
+
+   Aufgeloest wird in helpAlleThemen(), weil dort alles durchgeht: Anzeige,
+   Stichwortverzeichnis und Volltextsuche. Wuerde erst beim Anzeigen
+   aufgeloest, faende die Suche Saetze, die niemand zu sehen bekommt. Die
+   Stichwortliste geht denselben Weg, damit Marken dort genauso wirken — die
+   Woerter darin sind unsichtbare Suchhilfen, und "Browserspeicher" darf als
+   solche ruhig stehen bleiben, wer aus der Web-Fassung kommt, sucht danach.
+
+   Bewusst ohne regulaeren Ausdruck: die Marken duerfen einander nicht
+   verschachteln, und reines Suchen nach den Zeichenketten kann an einem
+   Winkelzeichen im Fliesstext nicht danebengreifen. */
+const istApp=()=>!!PQWD();
+function helpAufloesen(html){
+  const app=istApp();
+  const samtInhalt=(s,tag)=>{
+    const auf="<nur-"+tag+">", zu="</nur-"+tag+">";
+    for(let i;(i=s.indexOf(auf))>=0;){
+      const j=s.indexOf(zu,i);
+      s = j<0 ? s.slice(0,i)+s.slice(i+auf.length) : s.slice(0,i)+s.slice(j+zu.length);
+      if(j<0)break;
+    }
+    return s;
+  };
+  const nurMarken=(s,tag)=>
+    s.split("<nur-"+tag+">").join("").split("</nur-"+tag+">").join("");
+  return nurMarken(samtInhalt(html, app?"b":"a"), app?"a":"b");
+}
 function helpAlleThemen(){
-  const a=[];helpBooks().forEach((bk,bi)=>bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp})));
+  const a=[];helpBooks().forEach((bk,bi)=>
+    bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp,
+      b:helpAufloesen(tp.b), k:helpAufloesen(tp.k)})));
   return a;
 }
 function helpFinde(titel){return helpAlleThemen().find(x=>x.t===titel)||null}
