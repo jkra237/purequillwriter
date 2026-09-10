@@ -8035,6 +8035,7 @@ function closeOvl(){if(lockedOvl)return;
      beide Wege kommen hier vorbei, der Knopf im Dialog nicht allein. */
   if($("#spBody"))spellDone();
   if($("#clBody"))cleanDone();
+  if($("#fnText"))fnAbbruch();
   /* Die Schemawahl zeigt beim Überfahren ein Schema nur vorübergehend an.
      Escape und der Klick daneben kommen hier vorbei, ohne dass ein
      mouseleave feuert — ohne diese Zeile bliebe das zuletzt überfahrene
@@ -13395,7 +13396,7 @@ function insertFootnote(){
   document.execCommand("insertHTML",false,
     `<sup class="fn" data-fn="${id}" title="${esc(tr("Fußnote ohne Text"))}">*</sup>`);
   flush();dirty=true;commit();queuePaginate();
-  setTimeout(()=>editFootnote(id),30);
+  setTimeout(()=>editFootnote(id,true),30);
 }
 function deleteFootnote(id){
   const ed=$("#editor");if(!ed)return;
@@ -13403,9 +13404,23 @@ function deleteFootnote(id){
   const d=doc();d.footnotes=(d.footnotes||[]).filter(f=>f.id!==id);
   flush();dirty=true;commit();queuePaginate();
 }
-function editFootnote(id){
+/* Eine gerade erst angelegte Fussnote steht schon im Text, bevor jemand ein
+   Wort dazu geschrieben hat — insertFootnote setzt die Marke und oeffnet erst
+   danach den Dialog. Wer dort abbricht, wollte keine Fussnote; ohne diesen
+   Merker bliebe eine Marke ohne Text stehen, die niemand bestellt hat. Eine
+   schon vorhandene leere Fussnote wird nicht angetastet: die hat jemand einmal
+   bewusst mit "Uebernehmen" bestaetigt. */
+let fnFrisch=null;
+function fnAbbruch(){
+  const id=fnFrisch;fnFrisch=null;
+  if(!id)return;
+  const fn=(doc().footnotes||[]).find(f=>f.id===id);
+  if(fn&&!(fn.text||"").trim())deleteFootnote(id);
+}
+function editFootnote(id,frisch){
   const d=doc();const fn=(d.footnotes||[]).find(f=>f.id===id);
   if(!fn)return;
+  fnFrisch=frisch?id:null;
   overlay(`<div class="modal"><h3>${tr("Fußnote")}</h3>
     <div class="pad"><textarea id="fnText" rows="4" placeholder="${tr("Fußnotentext")}"
       style="width:100%;resize:vertical;font:inherit;background:var(--paper);color:var(--ink);
@@ -13417,9 +13432,12 @@ function editFootnote(id){
     </div></div>`);
   const ta=$("#fnText");ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
   const finish=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
-  $("#fnOk").onclick=()=>{fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();
+  /* "Uebernehmen" bestaetigt die Fussnote — auch eine ohne Text, den Fall
+     kennt die Marke mit ihrem Titel "Fussnote ohne Text" ausdruecklich. */
+  $("#fnOk").onclick=()=>{fnFrisch=null;fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();
     if(S.mode==="write")paginate();finish()};
-  $("#fnDel").onclick=()=>{deleteFootnote(id);finish()};
+  $("#fnDel").onclick=()=>{fnFrisch=null;deleteFootnote(id);finish()};
+  $("#fnClose").onclick=finish;
   ta.addEventListener("keydown",e=>{
     if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#fnOk").click()}
   });
