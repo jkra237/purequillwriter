@@ -2364,6 +2364,8 @@ en:{
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"The text has not been applied yet. Discard it?",
+  "Weiter bearbeiten":"Keep editing",
   "kein Dokument offen":"no document open",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Once a document is open, you can keep it as a file here as well.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
@@ -3112,6 +3114,8 @@ fr:{
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"Le texte n'a pas encore été appliqué. Le supprimer ?",
+  "Weiter bearbeiten":"Continuer la modification",
   "kein Dokument offen":"aucun document ouvert",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Dès qu'un document est ouvert, vous pouvez aussi le conserver ici sous forme de fichier.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
@@ -3860,6 +3864,8 @@ es:{
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"El texto todavía no se ha aplicado. ¿Descartarlo?",
+  "Weiter bearbeiten":"Seguir editando",
   "kein Dokument offen":"ningún documento abierto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"En cuanto haya un documento abierto, aquí puedes guardarlo además como archivo.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
@@ -4608,6 +4614,8 @@ pt:{
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"O texto ainda não foi aplicado. Descartar?",
+  "Weiter bearbeiten":"Continuar editando",
   "kein Dokument offen":"nenhum documento aberto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Assim que um documento estiver aberto, você pode guardá-lo aqui também como arquivo.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
@@ -5356,6 +5364,8 @@ pl:{
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"Tekst nie został jeszcze zastosowany. Odrzucić?",
+  "Weiter bearbeiten":"Edytuj dalej",
   "kein Dokument offen":"żaden dokument nie jest otwarty",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Gdy dokument jest otwarty, można go tutaj dodatkowo zapisać jako plik.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
@@ -6115,6 +6125,8 @@ it:{
   "Willkommen":"Benvenuto",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
+  "Der Text ist noch nicht übernommen. Verwerfen?":"Il testo non è ancora stato applicato. Scartarlo?",
+  "Weiter bearbeiten":"Continua a modificare",
   "kein Dokument offen":"nessun documento aperto",
   "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Non appena un documento è aperto, qui puoi conservarlo anche come file.",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
@@ -8035,7 +8047,7 @@ function closeOvl(){if(lockedOvl)return;
      beide Wege kommen hier vorbei, der Knopf im Dialog nicht allein. */
   if($("#spBody"))spellDone();
   if($("#clBody"))cleanDone();
-  if($("#fnText"))fnAbbruch();
+  if($("#fnText")&&fnAbbruch())return;
   /* Die Schemawahl zeigt beim Überfahren ein Schema nur vorübergehend an.
      Escape und der Klick daneben kommen hier vorbei, ohne dass ein
      mouseleave feuert — ohne diese Zeile bliebe das zuletzt überfahrene
@@ -13435,17 +13447,57 @@ function deleteFootnote(id){
    Merker bliebe eine Marke ohne Text stehen, die niemand bestellt hat. Eine
    schon vorhandene leere Fussnote wird nicht angetastet: die hat jemand einmal
    bewusst mit "Uebernehmen" bestaetigt. */
-let fnFrisch=null;
+let fnFrisch=null,fnOffen=null;
+/* Gibt true zurueck, wenn das Schliessen anzuhalten ist. Das ist der einzige
+   Weg, eine Rueckfrage einzuschieben: alle vier Auswege — Knopf, Kreuz,
+   Escape, Klick daneben — laufen durch closeOvl(), und nur dort laesst sich
+   einer aufhalten, ohne dass die anderen anders reagieren. */
 function fnAbbruch(){
-  const id=fnFrisch;fnFrisch=null;
-  if(!id)return;
-  const fn=(doc().footnotes||[]).find(f=>f.id===id);
-  if(fn&&!(fn.text||"").trim())deleteFootnote(id);
+  const ta=$("#fnText");
+  const fn=(doc().footnotes||[]).find(f=>f.id===fnOffen);
+  const getippt=ta?ta.value.trim():"";
+  /* Ungesicherter Text: fragen, statt ihn wortlos wegzuwerfen. Bei leerem
+     Feld gibt es nichts zu verlieren, da wird nicht gefragt — das ist der
+     haeufige Fall, versehentlich eine Fussnote angelegt zu haben. */
+  if(fn&&getippt&&getippt!==(fn.text||"").trim()){
+    fnFrage(fnOffen,fnFrisch===fnOffen,getippt);
+    return true;
+  }
+  const id=fnFrisch;fnFrisch=null;fnOffen=null;
+  if(!id)return false;
+  const f=(doc().footnotes||[]).find(x=>x.id===id);
+  if(f&&!(f.text||"").trim())deleteFootnote(id);
+  return false;
+}
+/* Bewusst gesperrt: die Frage hat zwei Antworten und keine dritte. Waere sie
+   es nicht, fuehrte Escape darauf in den schlechtesten Ausgang von allen —
+   der getippte Text weg und die leere Fussnote trotzdem im Dokument. */
+function fnFrage(id,frisch,entwurf){
+  overlay(`<div class="modal"><h3>${tr("Fußnote")}</h3>
+    <div class="pad"><p style="margin:0;font-family:Georgia,serif;font-size:14px;line-height:1.55">
+      ${tr("Der Text ist noch nicht übernommen. Verwerfen?")}</p></div>
+    <div class="rowend">
+      <button class="btn" id="fnDrop">${tr("Verwerfen")}</button>
+      <button class="btn pri" id="fnBack">${tr("Weiter bearbeiten")}</button>
+    </div></div>`,true);
+  $("#fnBack").onclick=()=>{
+    editFootnote(id,frisch);
+    const ta=$("#fnText");ta.value=entwurf;ta.focus();
+    ta.setSelectionRange(ta.value.length,ta.value.length);
+  };
+  $("#fnDrop").onclick=()=>{
+    const f=(doc().footnotes||[]).find(x=>x.id===id);
+    const weg=frisch&&f&&!(f.text||"").trim();
+    fnFrisch=null;fnOffen=null;
+    lockedOvl=false;closeOvl();
+    if(weg)deleteFootnote(id);
+    const ed=$("#editor");ed&&ed.focus();
+  };
 }
 function editFootnote(id,frisch){
   const d=doc();const fn=(d.footnotes||[]).find(f=>f.id===id);
   if(!fn)return;
-  fnFrisch=frisch?id:null;
+  fnFrisch=frisch?id:null;fnOffen=id;
   overlay(`<div class="modal"><h3>${tr("Fußnote")}</h3>
     <div class="pad"><textarea id="fnText" rows="4" placeholder="${tr("Fußnotentext")}"
       style="width:100%;resize:vertical;font:inherit;background:var(--paper);color:var(--ink);
@@ -13459,9 +13511,9 @@ function editFootnote(id,frisch){
   const finish=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
   /* "Uebernehmen" bestaetigt die Fussnote — auch eine ohne Text, den Fall
      kennt die Marke mit ihrem Titel "Fussnote ohne Text" ausdruecklich. */
-  $("#fnOk").onclick=()=>{fnFrisch=null;fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();
+  $("#fnOk").onclick=()=>{fnFrisch=null;fnOffen=null;fn.text=ta.value.trim();updateFootnoteTitles();flush();dirty=true;commit();
     if(S.mode==="write")paginate();finish()};
-  $("#fnDel").onclick=()=>{fnFrisch=null;deleteFootnote(id);finish()};
+  $("#fnDel").onclick=()=>{fnFrisch=null;fnOffen=null;deleteFootnote(id);finish()};
   $("#fnClose").onclick=finish;
   ta.addEventListener("keydown",e=>{
     if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#fnOk").click()}
