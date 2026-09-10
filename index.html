@@ -2360,6 +2360,8 @@ en:{
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"You can put a backup copy on your computer here:",
   "Ohne Titel":"Untitled",
   "Notizen":"Notes",
   "Strg":"Ctrl",
@@ -3104,6 +3106,8 @@ fr:{
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Vous pouvez créer une copie de sauvegarde sur votre ordinateur ici :",
   "Ohne Titel":"Sans titre",
   "Notizen":"Notes",
   "Strg":"Ctrl",
@@ -3848,6 +3852,8 @@ es:{
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Aquí puedes crear una copia de seguridad en tu ordenador:",
   "Ohne Titel":"Sin título",
   "Notizen":"Notas",
   "Strg":"Ctrl",
@@ -4592,6 +4598,8 @@ pt:{
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Aqui você cria uma cópia de segurança no seu computador:",
   "Ohne Titel":"Sem título",
   "Notizen":"Notas",
   "Strg":"Ctrl",
@@ -5336,6 +5344,8 @@ pl:{
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Kopię zapasową na swoim komputerze utworzysz tutaj:",
   "Ohne Titel":"Bez tytułu",
   "Notizen":"Notatki",
   "Strg":"Ctrl",
@@ -6091,6 +6101,8 @@ it:{
   "Willkommen":"Benvenuto",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
+  "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
+  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Una copia di sicurezza sul tuo computer la crei qui:",
   "Ohne Titel":"Senza titolo",
   "Notizen":"Note",
   "Strg":"Ctrl",
@@ -6234,6 +6246,15 @@ function startNew(){
     formatDialog("new",val=>{S.docs[0].fmt=val;save();render()});
   }else newDocument();
 }
+/* Der Weg zur eigenen Datei, aus denselben Schluesseln gebaut, die das
+   Dateimenue benutzt — ein uebersetzter Pfad wuerde sonst frueher oder spaeter
+   neben den echten Menuepunkten stehen. Ohne File System Access API (Firefox,
+   Safari) gibt es „Mit Datei verknuepfen" nicht, dann endet der Pfad frueher. */
+function dateiPfad(){
+  const p=[tr("Datei"),tr("Alles sichern")];
+  if(hatDateien())p.push(tr("Mit Datei verknüpfen…").replace(/…$/,""));
+  return p.join(" › ");
+}
 function startupDialog(){
   overlay(`<div class="modal"><h3>${tr("Willkommen")}</h3><div class="pad">
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
@@ -6251,6 +6272,13 @@ function startupDialog(){
     <div style="display:flex;gap:10px">
       <button class="btn pri" id="stNew" style="flex:1;padding:11px">${tr("Neues Dokument")}</button>
       <button class="btn" id="stOpen" style="flex:1;padding:11px">${tr("Datei öffnen")}&hellip;</button>
+    </div>
+    <div style="border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;
+      font-family:Georgia,serif;font-size:13px;line-height:1.5;color:var(--ink-soft)">
+      <p style="margin:0">${tr("Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.")}
+        ${tr("Eine Sicherungskopie auf deinem Computer legst du hier an:")} <b>${esc(dateiPfad())}</b>.</p>
+      <p style="margin:7px 0 0">${esc(tr("Neu hier? Beginne mit"))}
+        <a id="stHelp" style="color:var(--stamp);text-decoration:underline;cursor:pointer">${esc(helpErstes())}</a>.</p>
     </div>
     </div></div>`,true);
   const paintSwatch=k=>{
@@ -6271,6 +6299,7 @@ function startupDialog(){
     S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
   $("#stNew").onclick=startNew;
   $("#stOpen").onclick=loadDocumentFile;
+  $("#stHelp").onclick=()=>{hilfeAusWillkommen=true;helpDialog(helpErstes())};
 }
 
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}
@@ -7977,6 +8006,11 @@ function resetTimer(){clearInterval(timer);
 
 /* ================= Overlays ================= */
 let lockedOvl=false;
+/* Die Hilfe aus dem Willkommensfenster heraus ist der einzige Ort, an dem ein
+   Overlay ein anderes ersetzt, hinter dem nichts steht: beim Start gibt es noch
+   kein Dokument. Ohne diesen Merker landet man nach dem Schliessen der Hilfe auf
+   einer leeren Huelle ohne Knopf (das galt bisher schon fuer F1 beim Start). */
+let hilfeAusWillkommen=false;
 function closeOvl(){if(lockedOvl)return;
   /* Der Rechtschreibdialog hinterlässt Markierungen im Text. Sie müssen auch
      dann verschwinden, wenn er über Escape oder einen Klick daneben zugeht —
@@ -7989,7 +8023,11 @@ function closeOvl(){if(lockedOvl)return;
      Schema stehen, obwohl gespeichert ein anderes ist. Der Handler an #ovl
      muss mit weg: das Element selbst bleibt bestehen, nur sein Inhalt geht. */
   if($("#thInfo")){applyTheme();$("#ovl").onmouseleave=null}
-  $("#ovl").innerHTML="";const ed=$("#editor");ed&&ed.focus()}
+  const zurueck=hilfeAusWillkommen&&!!$("#helpWin");
+  hilfeAusWillkommen=false;
+  $("#ovl").innerHTML="";
+  if(zurueck)return startupDialog();
+  const ed=$("#editor");ed&&ed.focus()}
 function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
   if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
 
@@ -20331,7 +20369,8 @@ document.addEventListener("keydown",e=>{
   const c=e.ctrlKey||e.metaKey;
   const as=e.altKey&&e.shiftKey&&!c;
   /* F1 ohne Zusatztaste — die Hilfetaste seit Windows 3.1 */
-  if(e.key==="F1"){e.preventDefault();lockedOvl=false;closeOvl();helpDialog();return}
+  if(e.key==="F1"){e.preventDefault();const vonW=!!$("#stNew");
+    lockedOvl=false;closeOvl();hilfeAusWillkommen=vonW;helpDialog();return}
   if(as&&e.key.toLowerCase()==="p"){e.preventDefault();
     if($("#ovl").innerHTML)closeOvl();else palette();return}
   if(as&&e.key.toLowerCase()==="m"){e.preventDefault();linkSelection();return}
