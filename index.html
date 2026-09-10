@@ -2361,7 +2361,7 @@ en:{
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"You can put a backup copy on your computer here:",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"You can also back it up on your computer, or automatically into a cloud folder:",
   "Ohne Titel":"Untitled",
   "Notizen":"Notes",
   "Strg":"Ctrl",
@@ -3107,7 +3107,7 @@ fr:{
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Vous pouvez créer une copie de sauvegarde sur votre ordinateur ici :",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Vous pouvez en plus le sauvegarder sur votre ordinateur ou automatiquement dans un dossier cloud :",
   "Ohne Titel":"Sans titre",
   "Notizen":"Notes",
   "Strg":"Ctrl",
@@ -3853,7 +3853,7 @@ es:{
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Aquí puedes crear una copia de seguridad en tu ordenador:",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Además puedes guardarlo en tu ordenador o automáticamente en una carpeta de la nube:",
   "Ohne Titel":"Sin título",
   "Notizen":"Notas",
   "Strg":"Ctrl",
@@ -4599,7 +4599,7 @@ pt:{
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Aqui você cria uma cópia de segurança no seu computador:",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Você também pode salvá-lo no seu computador ou automaticamente numa pasta da nuvem:",
   "Ohne Titel":"Sem título",
   "Notizen":"Notas",
   "Strg":"Ctrl",
@@ -5345,7 +5345,7 @@ pl:{
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Kopię zapasową na swoim komputerze utworzysz tutaj:",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Możesz go dodatkowo zapisywać na swoim komputerze albo automatycznie w folderze chmury:",
   "Ohne Titel":"Bez tytułu",
   "Notizen":"Notatki",
   "Strg":"Ctrl",
@@ -6102,7 +6102,7 @@ it:{
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
-  "Eine Sicherungskopie auf deinem Computer legst du hier an:":"Una copia di sicurezza sul tuo computer la crei qui:",
+  "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Puoi salvarlo anche sul tuo computer o automaticamente in una cartella cloud:",
   "Ohne Titel":"Senza titolo",
   "Notizen":"Note",
   "Strg":"Ctrl",
@@ -6246,17 +6246,8 @@ function startNew(){
     formatDialog("new",val=>{S.docs[0].fmt=val;save();render()});
   }else newDocument();
 }
-/* Der Weg zur eigenen Datei, aus denselben Schluesseln gebaut, die das
-   Dateimenue benutzt — ein uebersetzter Pfad wuerde sonst frueher oder spaeter
-   neben den echten Menuepunkten stehen. Ohne File System Access API (Firefox,
-   Safari) gibt es „Mit Datei verknuepfen" nicht, dann endet der Pfad frueher. */
 function mpfad(...schluessel){
   return schluessel.map(k=>tr(k).replace(/…$/,"")).join(" › ");
-}
-function dateiPfad(){
-  return hatDateien()
-    ? mpfad("Datei","Alles sichern","Mit Datei verknüpfen…")
-    : mpfad("Datei","Alles sichern");
 }
 function startupDialog(){
   overlay(`<div class="modal"><h3>${tr("Willkommen")}</h3><div class="pad">
@@ -6279,7 +6270,9 @@ function startupDialog(){
     <div style="border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;
       font-family:Georgia,serif;font-size:13px;line-height:1.5;color:var(--ink-soft)">
       <p style="margin:0">${tr("Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.")}
-        ${tr("Eine Sicherungskopie auf deinem Computer legst du hier an:")} <b>${esc(dateiPfad())}</b>.</p>
+        ${tr("Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:")}
+        <a id="stSave" style="color:var(--stamp);text-decoration:underline;cursor:pointer;font-weight:600"
+          >${esc(mpfad("Einstellungen","Speichern"))}</a></p>
       <p style="margin:7px 0 0">${esc(tr("Neu hier? Beginne mit"))}
         <a id="stHelp" style="color:var(--stamp);text-decoration:underline;cursor:pointer">${esc(helpErstes())}</a>.</p>
     </div>
@@ -6302,7 +6295,8 @@ function startupDialog(){
     S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
   $("#stNew").onclick=startNew;
   $("#stOpen").onclick=loadDocumentFile;
-  $("#stHelp").onclick=()=>{hilfeAusWillkommen=true;helpDialog(helpErstes())};
+  $("#stHelp").onclick=()=>{zurueckZumWillkommen=true;helpDialog(helpErstes())};
+  $("#stSave").onclick=()=>{zurueckZumWillkommen=true;setTab="save";settings()};
 }
 
 function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}
@@ -8009,11 +8003,14 @@ function resetTimer(){clearInterval(timer);
 
 /* ================= Overlays ================= */
 let lockedOvl=false;
-/* Die Hilfe aus dem Willkommensfenster heraus ist der einzige Ort, an dem ein
-   Overlay ein anderes ersetzt, hinter dem nichts steht: beim Start gibt es noch
-   kein Dokument. Ohne diesen Merker landet man nach dem Schliessen der Hilfe auf
-   einer leeren Huelle ohne Knopf (das galt bisher schon fuer F1 beim Start). */
-let hilfeAusWillkommen=false;
+/* Hilfe und Einstellungen aus dem Willkommensfenster heraus sind die einzigen
+   Orte, an denen ein Overlay ein anderes ersetzt, hinter dem nichts steht: beim
+   Start gibt es noch kein Dokument. Ohne diesen Merker landet man nach dem
+   Schliessen auf einer leeren Huelle ohne Knopf (das galt bisher schon fuer F1
+   beim Start). Geprueft wird zusaetzlich, welcher Dialog gerade zugeht — die
+   Knoepfe im Einstellungsdialog schliessen ihn teils selbst (sBackup,
+   sRestore), und auch dann ist das Willkommensfenster das richtige Ziel. */
+let zurueckZumWillkommen=false;
 function closeOvl(){if(lockedOvl)return;
   /* Der Rechtschreibdialog hinterlässt Markierungen im Text. Sie müssen auch
      dann verschwinden, wenn er über Escape oder einen Klick daneben zugeht —
@@ -8026,8 +8023,8 @@ function closeOvl(){if(lockedOvl)return;
      Schema stehen, obwohl gespeichert ein anderes ist. Der Handler an #ovl
      muss mit weg: das Element selbst bleibt bestehen, nur sein Inhalt geht. */
   if($("#thInfo")){applyTheme();$("#ovl").onmouseleave=null}
-  const zurueck=hilfeAusWillkommen&&!!$("#helpWin");
-  hilfeAusWillkommen=false;
+  const zurueck=zurueckZumWillkommen&&!!($("#helpWin")||$("#setClose"));
+  zurueckZumWillkommen=false;
   $("#ovl").innerHTML="";
   if(zurueck)return startupDialog();
   const ed=$("#editor");ed&&ed.focus()}
@@ -20373,7 +20370,7 @@ document.addEventListener("keydown",e=>{
   const as=e.altKey&&e.shiftKey&&!c;
   /* F1 ohne Zusatztaste — die Hilfetaste seit Windows 3.1 */
   if(e.key==="F1"){e.preventDefault();const vonW=!!$("#stNew");
-    lockedOvl=false;closeOvl();hilfeAusWillkommen=vonW;helpDialog();return}
+    lockedOvl=false;closeOvl();zurueckZumWillkommen=vonW;helpDialog();return}
   if(as&&e.key.toLowerCase()==="p"){e.preventDefault();
     if($("#ovl").innerHTML)closeOvl();else palette();return}
   if(as&&e.key.toLowerCase()==="m"){e.preventDefault();linkSelection();return}
