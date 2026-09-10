@@ -8047,8 +8047,33 @@ function closeOvl(){if(lockedOvl)return;
   $("#ovl").innerHTML="";
   if(zurueck)return startupDialog();
   const ed=$("#editor");ed&&ed.focus()}
+/* Das Schliesskreuz entsteht hier, nicht in den achtundzwanzig Dialogen
+   einzeln: eine Titelzeile, die mal eines hat und mal nicht, sieht nach
+   Versehen aus, und ein von Hand eingesetztes waere achtundzwanzigmal die
+   Gelegenheit, den Handler zu vergessen — genau der Fehler, der im
+   Fussnotendialog jahrelang stand.
+
+   Es bedeutet ueberall dasselbe wie Escape, also closeOvl(), und damit
+   greifen auch die Aufraeumwege dort (spellDone, cleanDone, fnAbbruch). Wo ein
+   Dialog etwas zu entscheiden gibt, bleibt der textliche Abbrechen-Knopf
+   daneben stehen: ein Kreuz ist eine zu schwache Zusage, um getippte Arbeit zu
+   verwerfen.
+
+   Gesperrte Overlays bekommen keines. closeOvl() kommt dort nicht durch, das
+   Kreuz waere also tot. Der Startbildschirm — das einzige gesperrte — bringt
+   sein eigenes mit, das startSkip() ruft. */
 function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
-  if(!lock)$("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()}}
+  if(lock)return;
+  $("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()};
+  const kopf=$("#ovl").querySelector(".modal>h3");
+  if(!kopf||kopf.querySelector(".modalx"))return;
+  const x=document.createElement("button");
+  x.type="button";x.className="modalx";x.innerHTML="&times;";
+  x.title=tr("Schließen");x.setAttribute("aria-label",tr("Schließen"));
+  x.onclick=closeOvl;
+  /* Platz fuer das Kreuz, damit ein langer Titel nicht darunter laeuft. */
+  kopf.style.paddingRight="38px";
+  kopf.appendChild(x);}
 
 /* ---- Export ---- */
 /* Die Desktop-Fassung (Electron) legt über preload.js ein kleines, geprüftes
