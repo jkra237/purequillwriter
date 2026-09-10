@@ -2364,6 +2364,8 @@ en:{
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
+  "kein Dokument offen":"no document open",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Once a document is open, you can keep it as a file here as well.",
   "Überspringen — mit den Voreinstellungen schreiben":"Skip — start writing with the default settings",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Your text is saved continuously on this device and will still be there the next time you start.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"You can also back it up on your computer, or automatically into a cloud folder:",
@@ -3111,6 +3113,8 @@ fr:{
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "kein Dokument offen":"aucun document ouvert",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Dès qu'un document est ouvert, vous pouvez aussi le conserver ici sous forme de fichier.",
   "Überspringen — mit den Voreinstellungen schreiben":"Passer — écrire avec les réglages par défaut",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Votre texte est enregistré en continu sur cet appareil et sera de nouveau là au prochain démarrage.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Vous pouvez en plus le sauvegarder sur votre ordinateur ou automatiquement dans un dossier cloud :",
@@ -3858,6 +3862,8 @@ es:{
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "kein Dokument offen":"ningún documento abierto",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"En cuanto haya un documento abierto, aquí puedes guardarlo además como archivo.",
   "Überspringen — mit den Voreinstellungen schreiben":"Omitir — escribir con los ajustes predeterminados",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Tu texto se guarda continuamente en este dispositivo y volverá a estar ahí en el próximo inicio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Además puedes guardarlo en tu ordenador o automáticamente en una carpeta de la nube:",
@@ -4605,6 +4611,8 @@ pt:{
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
+  "kein Dokument offen":"nenhum documento aberto",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Assim que um documento estiver aberto, você pode guardá-lo aqui também como arquivo.",
   "Überspringen — mit den Voreinstellungen schreiben":"Pular — escrever com as configurações padrão",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Seu texto é salvo continuamente neste dispositivo e estará lá de novo na próxima vez que iniciar.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Você também pode salvá-lo no seu computador ou automaticamente numa pasta da nuvem:",
@@ -5352,6 +5360,8 @@ pl:{
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
+  "kein Dokument offen":"żaden dokument nie jest otwarty",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Gdy dokument jest otwarty, można go tutaj dodatkowo zapisać jako plik.",
   "Überspringen — mit den Voreinstellungen schreiben":"Pomiń — pisz z ustawieniami domyślnymi",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Twój tekst jest zapisywany na bieżąco na tym urządzeniu i będzie na miejscu przy następnym uruchomieniu.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Możesz go dodatkowo zapisywać na swoim komputerze albo automatycznie w folderze chmury:",
@@ -6110,6 +6120,8 @@ it:{
   "Willkommen":"Benvenuto",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
+  "kein Dokument offen":"nessun documento aperto",
+  "Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.":"Non appena un documento è aperto, qui puoi conservarlo anche come file.",
   "Überspringen — mit den Voreinstellungen schreiben":"Salta — scrivi con le impostazioni predefinite",
   "Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.":"Il tuo testo viene salvato di continuo su questo dispositivo e sarà di nuovo qui al prossimo avvio.",
   "Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:":"Puoi salvarlo anche sul tuo computer o automaticamente in una cartella cloud:",
@@ -16001,6 +16013,14 @@ async function download(name,text,mime){
    sehen. Wer in seinen Dropbox-Ordner speichert, hat damit auch Dropbox. */
 function dateiKarte(){
   const d=doc();
+  /* Vom Willkommensbildschirm aus gibt es noch kein Dokument — dann redet
+     "dieses Dokument" ueber etwas, das es nicht gibt. Gemessen am Editor, denn
+     ein leeres, aber geoeffnetes Dokument laesst sich sehr wohl verknuepfen. */
+  if(!$("#editor"))return `<div class="storecard" style="margin-top:8px;opacity:.75">
+    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
+      <span><b>${tr("Datei auf der Festplatte")}</b><br>
+      <span class="storecount">${tr("kein Dokument offen")}</span></span></div>
+    <p class="storenote">${tr("Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.")}</p></div>`;
   if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
     <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
       <span><b>${tr("Datei auf der Festplatte")}</b><br>
@@ -16618,8 +16638,8 @@ in the text and never in an export, but they do travel with backups.</p>`}]},
 <p><b>Tools &rsaquo; Spell check</b> goes through the document and lists what it does not
 recognise, with suggestions.</p>
 <p>The dictionary is downloaded once per language and stays ready for as long as the program
-is open. Six languages are available: German, English, French, Spanish, Portuguese and
-Polish. The language is set under <b>Settings &rsaquo; General</b>.</p>
+is open. Seven languages are available: German, English, French, Spanish, Italian, Portuguese
+and Polish. The language is set under <b>Settings &rsaquo; General</b>.</p>
 <p>For each word you can accept a suggestion, type a correction of your own, ignore it once,
 or add it to your own words — those are remembered across all documents.</p>
 <p><b>The dictionaries need a real address.</b> If you opened the file by double-clicking it,
@@ -16779,8 +16799,8 @@ stop. It starts switched off.</li>
  {t:"Languages",k:"language;interface;spelling language;translation",b:`
 <p>Two languages are set separately under <b>Settings &rsaquo; General</b>:</p>
 <ul>
-<li>The <b>interface</b> language — menus and dialogs. Six are available: English, German,
-French, Spanish, Portuguese and Polish.</li>
+<li>The <b>interface</b> language — menus and dialogs. Seven are available: English, German,
+French, Spanish, Italian, Portuguese and Polish.</li>
 <li>The <b>spelling</b> language — what the spell check and AutoCorrect work with.</li>
 </ul>
 <p>Changing the interface language moves the spelling language with it, provided a dictionary
@@ -17172,8 +17192,8 @@ einem Export auf, wandert aber in jede Sicherung mit.</p>`}]},
 <p><b>Werkzeuge &rsaquo; Rechtschreibprüfung</b> geht das Dokument durch und listet auf, was
 sie nicht kennt, mit Vorschlägen.</p>
 <p>Das Wörterbuch wird je Sprache einmal geladen und steht dann bereit, solange das Programm
-offen ist. Sechs Sprachen gibt es: Deutsch, Englisch, Französisch, Spanisch, Portugiesisch und
-Polnisch. Eingestellt wird sie unter <b>Einstellungen &rsaquo; Allgemein</b>.</p>
+offen ist. Sieben Sprachen gibt es: Deutsch, Englisch, Französisch, Spanisch, Italienisch,
+Portugiesisch und Polnisch. Eingestellt wird sie unter <b>Einstellungen &rsaquo; Allgemein</b>.</p>
 <p>Zu jedem Wort kannst du einen Vorschlag übernehmen, eine eigene Korrektur eintippen, es
 einmal übergehen oder es zu deinen eigenen Wörtern legen — die gelten über alle Dokumente.</p>
 <p><b>Die Wörterbücher brauchen eine echte Adresse.</b> Wurde die Datei per Doppelklick
@@ -17338,8 +17358,8 @@ sie zurück, sobald du innehältst. Es ist zunächst ausgeschaltet.</li>
  {t:"Sprachen",k:"sprache;oberfläche;rechtschreibsprache;übersetzung",b:`
 <p>Zwei Sprachen werden getrennt eingestellt, unter <b>Einstellungen &rsaquo; Allgemein</b>:</p>
 <ul>
-<li>Die Sprache der <b>Oberfläche</b> — Menüs und Dialoge. Sechs stehen zur Wahl: Englisch,
-Deutsch, Französisch, Spanisch, Portugiesisch und Polnisch.</li>
+<li>Die Sprache der <b>Oberfläche</b> — Menüs und Dialoge. Sieben stehen zur Wahl: Englisch,
+Deutsch, Französisch, Spanisch, Italienisch, Portugiesisch und Polnisch.</li>
 <li>Die <b>Rechtschreibsprache</b> — womit Prüfung und Autokorrektur arbeiten.</li>
 </ul>
 <p>Die Oberflächensprache zu wechseln zieht die Rechtschreibsprache mit, sofern es dafür ein
@@ -17735,8 +17755,8 @@ en el texto ni en una exportación, pero sí viaja con las copias de seguridad.<
 <p><b>Herramientas &rsaquo; Revisión ortográfica</b> recorre el documento y lista lo que no
 reconoce, con sugerencias.</p>
 <p>El diccionario se descarga una vez por idioma y queda listo mientras el programa está
-abierto. Hay seis idiomas disponibles: alemán, inglés, francés, español, portugués y polaco. El
-idioma se ajusta en <b>Configuración &rsaquo; General</b>.</p>
+abierto. Hay siete idiomas disponibles: alemán, inglés, francés, español, italiano, portugués y
+polaco. El idioma se ajusta en <b>Configuración &rsaquo; General</b>.</p>
 <p>Para cada palabra puedes aceptar una sugerencia, escribir tu propia corrección, ignorarla una
 vez o añadirla a tus palabras propias: esas se recuerdan en todos los documentos.</p>
 <p><b>Los diccionarios necesitan una dirección real.</b> Si abriste el archivo haciendo doble
@@ -17898,8 +17918,8 @@ de vuelta cuando paras. Viene desactivado.</li>
  {t:"Idiomas",k:"idioma;interfaz;idioma de ortografía;traducción",b:`
 <p>Se ajustan dos idiomas por separado en <b>Configuración &rsaquo; General</b>:</p>
 <ul>
-<li>El idioma de la <b>interfaz</b>: menús y cuadros de diálogo. Hay seis: inglés, alemán,
-francés, español, portugués y polaco.</li>
+<li>El idioma de la <b>interfaz</b>: menús y cuadros de diálogo. Hay siete: inglés, alemán,
+francés, español, italiano, portugués y polaco.</li>
 <li>El idioma de <b>ortografía</b>: con qué trabajan el corrector y la autocorrección.</li>
 </ul>
 <p>Cambiar el idioma de la interfaz arrastra el de ortografía, siempre que exista un diccionario
@@ -18290,8 +18310,8 @@ texto nem numa exportação, mas viaja com os backups.</p>`}]},
 <p><b>Ferramentas &rsaquo; Verificação ortográfica</b> percorre o documento e lista o que não
 reconhece, com sugestões.</p>
 <p>O dicionário é baixado uma vez por idioma e fica pronto enquanto o programa está aberto. Há
-seis idiomas disponíveis: alemão, inglês, francês, espanhol, português e polonês. O idioma é
-definido em <b>Configurações &rsaquo; Geral</b>.</p>
+sete idiomas disponíveis: alemão, inglês, francês, espanhol, italiano, português e polonês. O
+idioma é definido em <b>Configurações &rsaquo; Geral</b>.</p>
 <p>Para cada palavra você pode aceitar uma sugestão, digitar a sua própria correção, ignorá-la
 uma vez ou adicioná-la às suas palavras próprias: essas são lembradas em todos os documentos.</p>
 <p><b>Os dicionários precisam de um endereço de verdade.</b> Se você abriu o arquivo com um
@@ -18453,8 +18473,8 @@ de volta quando você para. Vem desligado.</li>
  {t:"Idiomas",k:"idioma;interface;idioma de ortografia;tradução",b:`
 <p>Dois idiomas são definidos separadamente em <b>Configurações &rsaquo; Geral</b>:</p>
 <ul>
-<li>O idioma da <b>interface</b>: menus e diálogos. Há seis: inglês, alemão, francês, espanhol,
-português e polonês.</li>
+<li>O idioma da <b>interface</b>: menus e diálogos. Há sete: inglês, alemão, francês, espanhol,
+italiano, português e polonês.</li>
 <li>O idioma de <b>ortografia</b>: com o que o corretor e a correção automática trabalham.</li>
 </ul>
 <p>Mudar o idioma da interface leva junto o de ortografia, desde que exista um dicionário para
@@ -18864,8 +18884,8 @@ jamais dans le texte ni dans un export, mais il voyage avec les sauvegardes.</p>
 <p><b>Outils &rsaquo; Vérification orthographique</b> parcourt le document et liste ce qu'il ne
 reconnaît pas, avec des suggestions.</p>
 <p>Le dictionnaire est téléchargé une fois par langue et reste prêt tant que le programme est
-ouvert. Six langues sont disponibles : allemand, anglais, français, espagnol, portugais et
-polonais. La langue se règle dans <b>Paramètres &rsaquo; Général</b>.</p>
+ouvert. Sept langues sont disponibles : allemand, anglais, français, espagnol, italien,
+portugais et polonais. La langue se règle dans <b>Paramètres &rsaquo; Général</b>.</p>
 <p>Pour chaque mot, vous pouvez accepter une suggestion, taper une correction à vous, l'ignorer
 une fois, ou l'ajouter à vos mots à soi — ceux-ci sont retenus sur tous les documents.</p>
 <p><b>Les dictionnaires ont besoin d'une vraie adresse.</b> Si vous avez ouvert le fichier en
@@ -19035,8 +19055,8 @@ ramène quand vous vous arrêtez. Cela commence désactivé.</li>
  {t:"Langues",k:"langue;interface;langue d'orthographe;traduction",b:`
 <p>Deux langues se règlent séparément dans <b>Paramètres &rsaquo; Général</b> :</p>
 <ul>
-<li>La langue de l'<b>interface</b> — menus et boîtes de dialogue. Six sont disponibles :
-anglais, allemand, français, espagnol, portugais et polonais.</li>
+<li>La langue de l'<b>interface</b> — menus et boîtes de dialogue. Sept sont disponibles :
+anglais, allemand, français, espagnol, italien, portugais et polonais.</li>
 <li>La langue d'<b>orthographe</b> — ce avec quoi la vérification et la correction automatique
 travaillent.</li>
 </ul>
@@ -19423,8 +19443,8 @@ eksporcie, ale podróżuje z kopiami zapasowymi.</p>`}]},
 <p><b>Narzędzia &rsaquo; Sprawdzanie pisowni</b> przechodzi przez dokument i wymienia to, czego
 nie rozpoznaje, z podpowiedziami.</p>
 <p>Słownik jest pobierany raz na język i pozostaje gotowy tak długo, jak program jest otwarty.
-Dostępnych jest sześć języków: niemiecki, angielski, francuski, hiszpański, portugalski i
-polski. Język ustawia się w <b>Ustawienia &rsaquo; Ogólne</b>.</p>
+Dostępnych jest siedem języków: niemiecki, angielski, francuski, hiszpański, włoski,
+portugalski i polski. Język ustawia się w <b>Ustawienia &rsaquo; Ogólne</b>.</p>
 <p>Dla każdego słowa możesz przyjąć podpowiedź, wpisać własną poprawkę, zignorować je raz albo
 dodać do własnych słów — te są zapamiętywane we wszystkich dokumentach.</p>
 <p><b>Słowniki potrzebują prawdziwego adresu.</b> Jeśli otworzyłeś plik przez dwukrotne
@@ -19583,8 +19603,8 @@ przestajesz. Zaczyna wyłączone.</li>
  {t:"Języki",k:"język;interfejs;język pisowni;tłumaczenie",b:`
 <p>Dwa języki ustawia się osobno w <b>Ustawienia &rsaquo; Ogólne</b>:</p>
 <ul>
-<li>Język <b>interfejsu</b> — menu i okna dialogowe. Dostępnych jest sześć: angielski,
-niemiecki, francuski, hiszpański, portugalski i polski.</li>
+<li>Język <b>interfejsu</b> — menu i okna dialogowe. Dostępnych jest siedem: angielski,
+niemiecki, francuski, hiszpański, włoski, portugalski i polski.</li>
 <li>Język <b>pisowni</b> — to, z czym pracują sprawdzanie pisowni i autokorekta.</li>
 </ul>
 <p>Zmiana języka interfejsu pociąga za sobą język pisowni, o ile istnieje dla niego słownik.
@@ -19984,8 +20004,8 @@ testo né in un'esportazione, ma viaggia con i backup.</p>`}]},
 <p><b>Strumenti &rsaquo; Controllo ortografico</b> percorre il documento ed elenca ciò che non
 riconosce, con suggerimenti.</p>
 <p>Il dizionario viene scaricato una volta per lingua e resta pronto finché il programma è
-aperto. Sono disponibili sei lingue: tedesco, inglese, francese, spagnolo, italiano e polacco.
-La lingua si imposta in <b>Impostazioni &rsaquo; Generale</b>.</p>
+aperto. Sono disponibili sette lingue: tedesco, inglese, francese, spagnolo, italiano,
+portoghese e polacco. La lingua si imposta in <b>Impostazioni &rsaquo; Generale</b>.</p>
 <p>Per ogni parola puoi accettare un suggerimento, digitare una tua correzione, ignorarla una
 volta, o aggiungerla alle tue parole proprie: queste vengono ricordate in tutti i documenti.</p>
 <p><b>I dizionari hanno bisogno di un vero indirizzo.</b> Se hai aperto il file con un doppio
@@ -20149,8 +20169,8 @@ riporta quando ti fermi. Parte disattivato.</li>
  {t:"Lingue",k:"lingua;interfaccia;lingua di ortografia;traduzione",b:`
 <p>Due lingue si impostano separatamente in <b>Impostazioni &rsaquo; Generale</b>:</p>
 <ul>
-<li>La lingua dell'<b>interfaccia</b> — menu e finestre di dialogo. Ne sono disponibili sei:
-inglese, tedesco, francese, spagnolo, italiano e polacco.</li>
+<li>La lingua dell'<b>interfaccia</b> — menu e finestre di dialogo. Ne sono disponibili sette:
+inglese, tedesco, francese, spagnolo, italiano, portoghese e polacco.</li>
 <li>La lingua di <b>ortografia</b> — ciò con cui lavorano il correttore e la correzione
 automatica.</li>
 </ul>
