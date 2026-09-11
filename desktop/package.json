@@ -3,7 +3,7 @@
   "productName": "PureQuill Writer",
   "version": "1.0.0",
   "description": "PureQuill Writer as a Windows desktop application",
-  "author": "jkra237",
+  "author": "Suvantra",
   "license": "UNLICENSED",
   "private": true,
   "main": "main.js",
@@ -19,9 +19,9 @@
     "electron-builder": "^25.1.8"
   },
   "build": {
-    "appId": "com.jkra237.purequillwriter",
+    "appId": "eu.suvantra.purequillwriter",
     "productName": "PureQuill Writer",
-    "copyright": "Copyright © jkra237",
+    "copyright": "Copyright © 2026 Suvantra",
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -42,7 +42,8 @@
     "win": {
       "icon": "build/icon.ico",
       "target": [
-        { "target": "nsis", "arch": ["x64"] }
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "appx", "arch": ["x64", "arm64"] }
       ]
     },
     "nsis": {
@@ -56,10 +57,12 @@
     "appx": {
       "identityName": "REPLACE-WITH-PARTNER-CENTER-IDENTITY",
       "publisher": "CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER",
-      "publisherDisplayName": "REPLACE-WITH-PUBLISHER-DISPLAY-NAME",
+      "publisherDisplayName": "Suvantra",
       "applicationId": "PureQuillWriter",
       "displayName": "PureQuill Writer",
       "backgroundColor": "#8C3B2E",
+      "minVersion": "10.0.17763.0",
+      "maxVersionTested": "10.0.22621.0",
       "languages": ["de-DE", "en-US", "es-ES", "fr-FR", "it-IT", "pl-PL", "pt-BR"]
     }
   }
