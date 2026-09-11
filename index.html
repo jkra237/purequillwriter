@@ -11169,16 +11169,16 @@ function fileMenu(){
   const m=document.createElement("div");m.className="menu";m.id="fmenu";
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
-    <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">Alt ⇧ D</span></button>
+    <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">${kz("neuDok")}</span></button>
     <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}</button>
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
-    <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${K} P</span></button>
+    <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${kz("drucken")}</span></button>
     <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Zwischenstände")}</div>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
-    <button class="mi" data-act="save"><span class="chk"></span>${tr("Zwischenstand anlegen")}<span class="k">Alt ⇧ S</span></button>
+    <button class="mi" data-act="save"><span class="chk"></span>${tr("Zwischenstand anlegen")}<span class="k">${kz("stand")}</span></button>
     <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch")}
       <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}</span></button>
     <div class="msep"></div>
@@ -11186,7 +11186,7 @@ function fileMenu(){
     <button class="mi" data-act="bmore"><span class="chk"></span>${tr("Alles sichern")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="set"><span class="chk"></span>${tr("Einstellungen&hellip;")}</button>
-    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">Alt ⇧ P</span></button>
+    <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">${kz("palette")}</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="help"><span class="chk"></span>${tr("Hilfe")}<span class="k">F1</span></button>`;
   $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
@@ -11273,18 +11273,18 @@ function viewMenu(){
     <button class="mi" data-v="guides"><span class="chk">${c(S.guides)}</span>${tr("Seitenränder")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Struktur")}</div>
-    <button class="mi" data-v="outline"><span class="chk">${c(S.outlineOpen)}</span>${tr("Gliederung")}<span class="k">Alt ⇧ O</span></button>
+    <button class="mi" data-v="outline"><span class="chk">${c(S.outlineOpen)}</span>${tr("Gliederung")}<span class="k">${kz("gliederung")}</span></button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Notizen")}</div>
     <button class="mi" data-v="col"><span class="chk">${c(S.showCol)}</span>${tr("Notizen am Seitenrand")}</button>
     <button class="mi" data-v="amark"><span class="chk">${c(S.showAnchMarks!==false)}</span>${tr("Markierungen im Text")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Darstellung")}</div>
-    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">Alt ⇧ Z</span></button>
-    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>
-    <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">Alt ⇧ B</span></button>
-    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">Alt ⇧ V</span></button>
-    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">Alt ⇧ T</span></button>
+    <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">${kz("fokus")}</span></button>
+    <button class="mi" data-v="fit"><span class="chk"></span>${tr("Seitenbreite einpassen")}<span class="k">${kz("einpassen")}</span></button>
+    <button class="mi" data-v="read"><span class="chk"></span>${tr("Leseansicht")}<span class="k">${kz("lesen")}</span></button>
+    <button class="mi" data-v="pv"><span class="chk"></span>${tr("Druckvorschau")}<span class="k">${kz("vorschau")}</span></button>
+    <button class="mi" data-v="memo"><span class="chk">${c(S.memoOpen)}</span>${tr("Dokument-Memo")}<span class="k">${kz("memo")}</span></button>
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
     <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>`;
@@ -11425,7 +11425,7 @@ function toolsMenu(){
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
     <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
-    <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">Alt ⇧ I</span></button>
+    <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">${kz("toc")}</span></button>
     ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
@@ -11475,7 +11475,7 @@ function contextMenu(e){
     ${onHeading?`<button class="mi" data-c="tocvis"><span class="chk"></span>${headingHidden
       ?tr("Im Inhaltsverzeichnis einblenden"):tr("Im Inhaltsverzeichnis ausblenden")}</button>`:""}
     <div class="msep"></div>
-    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">Alt ⇧ M</span></button>
+    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">${kz("notizHeft")}</span></button>
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
       <button class="mi" data-c="unlink"><span class="chk"></span>${tr("Verknüpfung lösen")}</button>`:""}
     <div class="msep"></div>
@@ -11487,7 +11487,7 @@ function contextMenu(e){
          Loesung gewesen: Nachschlagen braucht keine Markierung und wuerde dem
          Rechtsklick verloren gehen. */
       ?`<button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>`
-      :`<button class="mi" data-c="glolook"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">Alt ⇧ G</span></button>`}
+      :`<button class="mi" data-c="glolook"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">${kz("glossSuch")}</span></button>`}
     <div class="msep"></div>
     ${cell?`<button class="mi" data-c="tblmore"><span class="chk"></span>${tr("Tabelle")}<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>`
@@ -16404,7 +16404,7 @@ function zoomPresets(){
   const m=document.createElement("div");m.className="menu ctx";m.id="zmenu";
   const istVorgabe=vals.includes(Math.round(S.zoom*100));
   m.innerHTML=vals.map(v=>`<button class="mi" data-z="${v}"><span class="chk">${Math.round(S.zoom*100)===v?"&#10003;":""}</span>${v} %</button>`).join("")
-    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">Alt ⇧ 0</span></button>`
+    +`<div class="msep"></div><button class="mi" data-z="fit"><span class="chk">${S.fitPage!==false?"&#10003;":""}</span>${tr("Seitenbreite einpassen")}<span class="k">${kz("einpassen")}</span></button>`
     +`<button class="mi" data-z="custom"><span class="chk">${(!istVorgabe&&S.fitPage===false)?"&#10003;":""}</span>${tr("Eigene Größe&hellip;")}</button>`;
   document.body.appendChild(m);
   const r=$("#zVal").getBoundingClientRect();
@@ -20550,55 +20550,100 @@ function helpDialog(titel){
 }
 
 /* ================= Tastatur ================= */
+/* ================= Tastenkuerzel =================
+   Eine Tabelle als Quelle. Vorher stand jede Belegung an drei Stellen: im
+   Tastenhandler, als fester Text in der Menuespalte und noch einmal in der
+   Hilfe. Wer eine aendert und eine der drei vergisst, erzeugt eine Abweichung,
+   die niemandem auffaellt — das Menue verspricht dann eine Taste, die nichts
+   tut. Genau das ist hier schon passiert: Strg+F und Strg+H sind belegt, die
+   Hilfe nennt an ihrer Stelle bis heute nur Alt+Umschalt+F und +H.
+
+   m  Zusatztasten: "as" Alt+Umschalt · "c" Strg · "alt" Alt · "" keine
+   k  der Tastenname, wie ihn KeyboardEvent.key liefert
+   auch  weitere Kombinationen, die dasselbe ausloesen, aber nicht angezeigt
+         werden — Zweitbelegungen und Tastaturvarianten wie + gegen =
+   roh  ohne preventDefault: Strg+P soll den Druckdialog aufgehen lassen
+
+   tun steht ueberall als Pfeilfunktion, damit der Name erst beim Druecken
+   aufgeloest wird. Die Tabelle steht vor manchen dieser Funktionen; ein
+   direkter Verweis waere beim Auswerten der Tabelle noch undefined. */
+const KUERZEL=[
+  {id:"palette",  m:"as", k:"p", tun:()=>{if($("#ovl").innerHTML)closeOvl();else palette()}},
+  {id:"notizHeft",m:"as", k:"m", tun:()=>linkSelection()},
+  {id:"link",     m:"as", k:"k", tun:()=>linkDialog()},
+  /* Strg+F ist der Griff, den jeder zuerst macht — unbelegt landete er in der
+     Suche des Browsers, die nur das gerenderte DOM kennt, nichts von Seiten
+     weiss und nicht ersetzen kann. Alt+Umschalt+F bleibt daneben bestehen. */
+  {id:"suchen",   m:"c",  k:"f", auch:[["as","f"]], tun:()=>fdOpen(false)},
+  {id:"ersetzen", m:"c",  k:"h", auch:[["as","h"]], tun:()=>fdOpen(true)},
+  /* F7 statt Alt+Umschalt: die Taste ist fuer die Rechtschreibpruefung seit
+     Jahrzehnten gesetzt und wird vom Browser nicht beansprucht. */
+  {id:"recht",    m:"",   k:"F7", tun:()=>{spellState="idle";spellDialog()}},
+  {id:"links",    m:"as", k:"l", tun:()=>cmd("justifyLeft")},
+  {id:"mitte",    m:"as", k:"e", tun:()=>cmd("justifyCenter")},
+  {id:"rechts",   m:"as", k:"r", tun:()=>cmd("justifyRight")},
+  {id:"notiz",    m:"as", k:"n", tun:()=>quickNote()},
+  {id:"neuDok",   m:"as", k:"d", tun:()=>newDocument()},
+  {id:"ansSchr",  m:"alt",k:"1", tun:()=>setMode("write")},
+  {id:"ansNotiz", m:"alt",k:"2", tun:()=>setMode("notes")},
+  {id:"ansGloss", m:"alt",k:"3", tun:()=>setMode("gloss")},
+  {id:"umbruch",  m:"as", k:"Enter", tun:()=>insertPageBreak()},
+  {id:"glossSuch",m:"as", k:"g", tun:()=>glossSearch()},
+  {id:"gliederung",m:"as",k:"o", tun:()=>toggleOutline()},
+  {id:"toc",      m:"as", k:"i", tun:()=>insertToc()},
+  {id:"drucken",  m:"c",  k:"p", roh:true, tun:()=>{flush();withPrintFootnotes(setPrintPage)}},
+  {id:"stand",    m:"as", k:"s", tun:()=>{commit();toast(tr("Gesichert"))}},
+  {id:"zoomAuf",  m:"as", k:"+", auch:[["as","="]], tun:()=>setZoom(S.zoom+.1)},
+  {id:"zoomAb",   m:"as", k:"-", auch:[["as","_"]], tun:()=>setZoom(S.zoom-.1)},
+  {id:"einpassen",m:"as", k:"0", tun:()=>toggleFitPage()},
+  {id:"fokus",    m:"as", k:"z", tun:()=>{document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus()}},
+  {id:"memo",     m:"as", k:"t", tun:()=>toggleMemo()},
+  {id:"lesen",    m:"as", k:"b", tun:()=>readView()},
+  {id:"vorschau", m:"as", k:"v", tun:()=>printPreview()},
+];
+/* Namen, die anders heissen als der Tastenwert des Ereignisses. */
+const KZ_ZEIGE={Enter:"Eingabe","-":"−"};
+const kzTaste=k=>k.length===1?(KZ_ZEIGE[k]||k.toUpperCase()):(KZ_ZEIGE[k]||k);
+/* Die Menuespalte schreibt das Umschaltzeichen unuebersetzt, wie bisher —
+   die Hilfe schreibt es je Sprache aus, das ist ein Unterschied von jeher. */
+function kz(id){
+  const x=KUERZEL.find(y=>y.id===id);if(!x)return "";
+  const zus=x.m==="as"?["Alt","⇧"]:x.m==="c"?[tr("Strg")]:x.m==="alt"?["Alt"]:[];
+  return [...zus,kzTaste(x.k)].join(" ");
+}
+function kzModus(e){
+  const c=e.ctrlKey||e.metaKey;
+  if(e.altKey&&e.shiftKey&&!c)return "as";
+  if(c&&!e.altKey&&!e.shiftKey)return "c";
+  if(e.altKey&&!e.shiftKey&&!c)return "alt";
+  if(!c&&!e.altKey&&!e.shiftKey)return "";
+  return null;
+}
+function kzFinde(e){
+  const m=kzModus(e);if(m===null)return null;
+  const gl=(a,b)=>(a.length===1?a.toLowerCase():a)===(b.length===1?b.toLowerCase():b);
+  return KUERZEL.find(x=>
+    (x.m===m&&gl(x.k,e.key))||
+    (x.auch||[]).some(p=>p[0]===m&&gl(p[1],e.key))) || null;
+}
+
 document.addEventListener("keydown",e=>{
   const c=e.ctrlKey||e.metaKey;
-  const as=e.altKey&&e.shiftKey&&!c;
   /* F1 ohne Zusatztaste — die Hilfetaste seit Windows 3.1 */
   if(e.key==="F1"){e.preventDefault();const vonW=!!$("#stNew");
     lockedOvl=false;closeOvl();zurueckZumWillkommen=vonW;helpDialog();return}
-  if(as&&e.key.toLowerCase()==="p"){e.preventDefault();
-    if($("#ovl").innerHTML)closeOvl();else palette();return}
-  if(as&&e.key.toLowerCase()==="m"){e.preventDefault();linkSelection();return}
-  if(as&&e.key.toLowerCase()==="k"){e.preventDefault();linkDialog();return}
-  if(as&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
-  if(as&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
-  /* Strg+F ist der Griff, den jeder zuerst macht — er war unbelegt und landete
-     dadurch in der Suche des Browsers, die nur das gerenderte DOM kennt, nichts
-     von Seiten weiß und nicht ersetzen kann. Alt+Umschalt+F/H bleiben daneben
-     bestehen. !e.shiftKey, damit Strg+Umschalt+F frei bleibt. */
-  if(c&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==="f"){e.preventDefault();fdOpen(false);return}
-  if(c&&!e.altKey&&!e.shiftKey&&e.key.toLowerCase()==="h"){e.preventDefault();fdOpen(true);return}
   /* Nur die Absicht merken, nicht abfangen: das Einfügen macht danach der
      Browser, und erst der paste-Handler wertet die Marke aus. Mit
      preventDefault käme gar kein paste-Ereignis mehr, und die Zwischenablage
      ließe sich nur noch über die asynchrone Berechtigungs-API lesen.
-     Der Rückfall nach kurzer Zeit fängt den Fall ab, dass gar nichts folgt. */
+     Der Rückfall nach kurzer Zeit fängt den Fall ab, dass gar nichts folgt.
+     Steht vor der Tabelle, weil es kein Kürzel ist, sondern eine Vormerkung —
+     und weil es gerade nicht abbrechen darf. */
   if(c&&e.shiftKey&&e.key.toLowerCase()==="v"){
     plainPaste=true;setTimeout(()=>{plainPaste=false},900);
   }
-  /* F7 statt Alt+Umschalt: die Taste ist für die Rechtschreibprüfung seit
-     Jahrzehnten gesetzt und wird vom Browser nicht beansprucht. */
-  if(e.key==="F7"&&!c&&!e.altKey){e.preventDefault();spellState="idle";spellDialog();return}
-  if(as&&e.key.toLowerCase()==="l"){e.preventDefault();cmd("justifyLeft");return}
-  if(as&&e.key.toLowerCase()==="e"){e.preventDefault();cmd("justifyCenter");return}
-  if(as&&e.key.toLowerCase()==="r"){e.preventDefault();cmd("justifyRight");return}
-  if(as&&e.key.toLowerCase()==="n"){e.preventDefault();quickNote();return}
-  if(as&&e.key.toLowerCase()==="d"){e.preventDefault();newDocument();return}
-  if(e.altKey&&!e.shiftKey&&!c&&["1","2","3"].includes(e.key)){e.preventDefault();setMode({1:"write",2:"notes",3:"gloss"}[e.key]);return}
-  if(as&&e.key==="Enter"){e.preventDefault();insertPageBreak();return}
-  if(as&&e.key.toLowerCase()==="g"){e.preventDefault();glossSearch();return}
-  if(as&&e.key.toLowerCase()==="o"){e.preventDefault();toggleOutline();return}
-  if(as&&e.key.toLowerCase()==="i"){e.preventDefault();insertToc();return}
-  if(c&&e.key.toLowerCase()==="p"){flush();withPrintFootnotes(setPrintPage);return}
-  if(as&&e.key.toLowerCase()==="s"){e.preventDefault();commit();toast(tr("Gesichert"));return}
-  if(as&&(e.key==="+"||e.key==="=")){e.preventDefault();setZoom(S.zoom+.1);return}
-  if(as&&(e.key==="-"||e.key==="_")){e.preventDefault();setZoom(S.zoom-.1);return}
-  if(as&&e.key==="0"){e.preventDefault();toggleFitPage();return}
-  if(as&&e.key.toLowerCase()==="z"){e.preventDefault();
-    document.body.classList.toggle("focus");const ed=$("#editor");ed&&ed.focus();return}
-  if(as&&e.key.toLowerCase()==="t"){e.preventDefault();toggleMemo();return}
-  if(as&&e.key.toLowerCase()==="b"){e.preventDefault();readView();return}
-  if(as&&e.key.toLowerCase()==="v"){e.preventDefault();printPreview();return}
+  const kuerzel=kzFinde(e);
+  if(kuerzel){if(!kuerzel.roh)e.preventDefault();kuerzel.tun();return}
   if(e.key==="Escape"){
     if($("#stSkip")){startSkip();return}
     if(pasteOpt){pasteBarClose();return}
