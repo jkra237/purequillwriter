@@ -11170,11 +11170,11 @@ function fileMenu(){
   m.innerHTML=`
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">${kz("neuDok")}</span></button>
-    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}</button>
+    <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}<span class="k">${kz("dateiAuf")}</span></button>
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${kz("drucken")}</span></button>
-    <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}</button>
+    <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}<span class="k">${kz("dokZu")}</span></button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Zwischenstände")}</div>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
@@ -16517,7 +16517,7 @@ from, so use them rather than merely making a line bigger and bold.</p>
 <table class="hkeys">
 <tr><td>Align left</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centre</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Align right</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Align right</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Justify</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>To indent a paragraph</b>, press <kbd>Tab</kbd> at the start of it;
@@ -16917,7 +16917,7 @@ leaves alone</nur-b> keep their usual keys.</p>
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Bold / italic / underline</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Undo / redo</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Left / centre / justified</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Left / centre<nur-a> / right</nur-a> / justified</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Left / centre / right</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Indent / outdent (in tables: next cell)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Page break</td></tr>
@@ -16926,7 +16926,9 @@ leaves alone</nur-b> keep their usual keys.</p>
 </table>
 <p class="hsec">Documents and notes</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>New document</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>New document</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Open file</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close document</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>New note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Pin a note to the selection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Look up in the glossary</td></tr>
@@ -17063,7 +17065,7 @@ also sie, statt eine Zeile nur größer und fett zu machen.</p>
 <table class="hkeys">
 <tr><td>Linksbündig</td><td><kbd>Strg</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Zentriert</td><td><kbd>Strg</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Rechtsbündig</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Rechtsbündig</td><td><nur-a><kbd>Strg</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Blocksatz</td><td><kbd>Strg</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Zum Einrücken</b> drückst du <kbd>Tab</kbd> am Absatzanfang;
@@ -17482,7 +17484,7 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 <table class="hkeys">
 <tr><td><kbd>Strg</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Fett / kursiv / unterstrichen</td></tr>
 <tr><td><kbd>Strg</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Rückgängig / Wiederholen</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Links / zentriert / Blocksatz</td></tr>
+<tr><td><kbd>Strg</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Links / zentriert<nur-a> / rechts</nur-a> / Blocksatz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Links / zentriert / rechts</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>⇧</kbd>+<kbd>Tab</kbd></td><td>Ein- / ausrücken (in Tabellen: nächste Zelle)</td></tr>
 <tr><td><kbd>Strg</kbd>+<kbd>Eingabe</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Eingabe</kbd></td><td>Seitenumbruch</td></tr>
@@ -17491,7 +17493,9 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 </table>
 <p class="hsec">Dokumente und Notizen</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd></td><td>Neues Dokument</td></tr>
+<tr><td><nur-a><kbd>Strg</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd></td><td>Neues Dokument</td></tr>
+<tr><td><kbd>Strg</kbd>+<kbd>O</kbd></td><td>Datei öffnen</td></tr>
+<nur-a><tr><td><kbd>Strg</kbd>+<kbd>W</kbd></td><td>Dokument schließen</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd></td><td>Neue Notiz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd></td><td>Notiz an die Markierung heften</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd></td><td>Im Glossar nachschlagen</td></tr>
@@ -17629,7 +17633,7 @@ lugar de limitarte a hacer una línea más grande y en negrita.</p>
 <table class="hkeys">
 <tr><td>Alinear a la izquierda</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centrar</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Alinear a la derecha</td><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Alinear a la derecha</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Justificar</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Para sangrar un párrafo</b>, pulsa <kbd>Tab</kbd> al principio;
@@ -18048,7 +18052,7 @@ edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de sie
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Negrita / cursiva / subrayado</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Deshacer / rehacer</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Izquierda / centro / justificado</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Izquierda / centro<nur-a> / derecha</nur-a> / justificado</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Izquierda / centro / derecha</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Mayús</kbd>+<kbd>Tab</kbd></td><td>Sangrar / reducir sangría (en tablas: siguiente celda)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Intro</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>Intro</kbd></td><td>Salto de página</td></tr>
@@ -18057,7 +18061,9 @@ edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de sie
 </table>
 <p class="hsec">Documentos y notas</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd></td><td>Nuevo documento</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd></td><td>Nuevo documento</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Abrir archivo</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>N</kbd></td><td>Nueva nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>M</kbd></td><td>Fijar una nota a la selección</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>G</kbd></td><td>Consultar en el glosario</td></tr>
@@ -18194,7 +18200,7 @@ use-os em vez de apenas deixar uma linha maior e em negrito.</p>
 <table class="hkeys">
 <tr><td>Alinhar à esquerda</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centralizar</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Alinhar à direita</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Alinhar à direita</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Justificar</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Para recuar um parágrafo</b>, pressione <kbd>Tab</kbd> no começo dele;
@@ -18609,7 +18615,7 @@ navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Negrito / itálico / sublinhado</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Desfazer / refazer</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Esquerda / centro / justificado</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Esquerda / centro<nur-a> / direita</nur-a> / justificado</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Esquerda / centro / direita</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Recuar / reduzir recuo (em tabelas: próxima célula)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Quebra de página</td></tr>
@@ -18618,7 +18624,9 @@ navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
 </table>
 <p class="hsec">Documentos e notas</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Novo documento</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Novo documento</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Abrir arquivo</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Fechar documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Fixar uma nota à seleção</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Consultar no glossário</td></tr>
@@ -18765,7 +18773,7 @@ mettre en gras.</p>
 <table class="hkeys">
 <tr><td>Aligner à gauche</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centrer</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Aligner à droite</td><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Aligner à droite</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Justifier</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Pour mettre un paragraphe en retrait</b>, appuyez sur <kbd>Tab</kbd> au début ;
@@ -19199,7 +19207,7 @@ habituelles.</p>
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Gras / italique / souligné</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annuler / rétablir</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Gauche / centre / justifié</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Gauche / centre<nur-a> / droite</nur-a> / justifié</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Gauche / centre / droite</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maj</kbd>+<kbd>Tab</kbd></td><td>Retrait / retrait négatif (dans les tableaux : cellule suivante)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Entrée</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>Entrée</kbd></td><td>Saut de page</td></tr>
@@ -19208,7 +19216,9 @@ habituelles.</p>
 </table>
 <p class="hsec">Documents et notes</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd></td><td>Nouveau document</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd></td><td>Nouveau document</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Ouvrir un fichier</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Fermer le document</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>N</kbd></td><td>Nouvelle note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>M</kbd></td><td>Épingler une note à la sélection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>G</kbd></td><td>Consulter le glossaire</td></tr>
@@ -19345,7 +19355,7 @@ zamiast po prostu powiększać wiersz i pogrubiać.</p>
 <table class="hkeys">
 <tr><td>Wyrównaj do lewej</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Wyśrodkuj</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Wyrównaj do prawej</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Wyrównaj do prawej</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Wyjustuj</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Aby zrobić wcięcie akapitu</b>, naciśnij <kbd>Tab</kbd> na jego początku;
@@ -19751,7 +19761,7 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Pogrubienie / kursywa / podkreślenie</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Cofnij / ponów</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Lewo / środek / wyjustowany</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Lewo / środek<nur-a> / prawo</nur-a> / wyjustowany</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Lewo / środek / prawo</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Wcięcie / cofnięcie wcięcia (w tabelach: następna komórka)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Podział strony</td></tr>
@@ -19760,7 +19770,9 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 </table>
 <p class="hsec">Dokumenty i notatki</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Nowy dokument</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Nowy dokument</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Otwórz plik</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Zamknij dokument</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nowa notatka</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Przypnij notatkę do zaznaczenia</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Wyszukaj w słowniczku</td></tr>
@@ -19901,7 +19913,7 @@ sommario, quindi usali invece di limitarti a ingrandire una riga e metterla in g
 <table class="hkeys">
 <tr><td>Allinea a sinistra</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centra</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Allinea a destra</td><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Allinea a destra</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>R</kbd></td></tr>
 <tr><td>Giustifica</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
 </table>
 <p><b>Per rientrare un paragrafo</b>, premi <kbd>Tab</kbd> all'inizio;
@@ -20324,7 +20336,7 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 <table class="hkeys">
 <tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Grassetto / corsivo / sottolineato</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annulla / ripeti</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>J</kbd></td><td>Sinistra / centro / giustificato</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Sinistra / centro<nur-a> / destra</nur-a> / giustificato</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Sinistra / centro / destra</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maiusc</kbd>+<kbd>Tab</kbd></td><td>Aumenta / riduci rientro (nelle tabelle: cella successiva)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Invio</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>Invio</kbd></td><td>Interruzione di pagina</td></tr>
@@ -20333,7 +20345,9 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 </table>
 <p class="hsec">Documenti e note</p>
 <table class="hkeys">
-<tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd></td><td>Nuovo documento</td></tr>
+<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd></td><td>Nuovo documento</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Apri file</td></tr>
+<nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Chiudi documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>N</kbd></td><td>Nuova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>M</kbd></td><td>Fissa una nota alla selezione</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>G</kbd></td><td>Consulta il glossario</td></tr>
@@ -20577,6 +20591,13 @@ function helpDialog(titel){
    auch  weitere Kombinationen, die dasselbe ausloesen, aber nicht angezeigt
          werden — Zweitbelegungen und Tastaturvarianten wie + gegen =
    roh  ohne preventDefault: Strg+P soll den Druckdialog aufgehen lassen
+   app  andere Erstbelegung in der Desktop-Fassung. Vier Tasten gehoeren im
+        Browser dem Fenster und erreichen die Seite nie — Strg+N, Strg+W und
+        Strg+R —, in der App dagegen schon: desktop/main.js setzt
+        Menu.setApplicationMenu(null), es gibt also kein Anwendungsmenue, das
+        sie als Accelerator wegfinge. Wo app steht, bleibt die Browser-
+        Belegung in der App als Zweitweg bestehen; niemand verlernt etwas.
+   nurApp  Kuerzel, das es nur in der App gibt und im Browser gar nicht
 
    tun steht ueberall als Pfeilfunktion, damit der Name erst beim Druecken
    aufgeloest wird. Die Tabelle steht vor manchen dieser Funktionen; ein
@@ -20605,10 +20626,15 @@ const KUERZEL=[
      aber eine Belegung, die sich je Fassung unterscheidet. */
   {id:"links",    m:"c",  k:"l", auch:[["as","l"]], tun:()=>cmd("justifyLeft")},
   {id:"mitte",    m:"c",  k:"e", auch:[["as","e"]], tun:()=>cmd("justifyCenter")},
-  {id:"rechts",   m:"as", k:"r", tun:()=>cmd("justifyRight")},
+  {id:"rechts",   m:"as", k:"r", app:{m:"c",k:"r"}, tun:()=>cmd("justifyRight")},
   {id:"blocksatz",m:"c",  k:"j", tun:()=>cmd("justifyFull")},
   {id:"notiz",    m:"as", k:"n", tun:()=>quickNote()},
-  {id:"neuDok",   m:"as", k:"d", tun:()=>newDocument()},
+  {id:"neuDok",   m:"as", k:"d", app:{m:"c",k:"n"}, tun:()=>newDocument()},
+  /* Strg+O erreicht die Seite auch im Browser — gemessen, und andere
+     Schreibprogramme im Netz belegen es ebenso. Darum keine App-Sonderrolle. */
+  {id:"dateiAuf", m:"c",  k:"o", tun:()=>loadDocumentFile()},
+  /* Strg+W schliesst im Browser den Reiter und ist dort nicht zu haben. */
+  {id:"dokZu",    m:"c",  k:"w", nurApp:true, tun:()=>closeDoc(S.active)},
   {id:"ansSchr",  m:"alt",k:"1", tun:()=>setMode("write")},
   {id:"ansNotiz", m:"alt",k:"2", tun:()=>setMode("notes")},
   {id:"ansGloss", m:"alt",k:"3", tun:()=>setMode("gloss")},
@@ -20631,10 +20657,15 @@ const KZ_ZEIGE={Enter:"Eingabe","-":"−"};
 const kzTaste=k=>k.length===1?(KZ_ZEIGE[k]||k.toUpperCase()):(KZ_ZEIGE[k]||k);
 /* Die Menuespalte schreibt das Umschaltzeichen unuebersetzt, wie bisher —
    die Hilfe schreibt es je Sprache aus, das ist ein Unterschied von jeher. */
+/* Die Erstbelegung dieser Fassung. In der App gewinnt x.app, sofern da ist. */
+function kzErst(x){return (istApp()&&x.app)?x.app:{m:x.m,k:x.k}}
+function kzGilt(x){return !x.nurApp||istApp()}
 function kz(id){
-  const x=KUERZEL.find(y=>y.id===id);if(!x)return "";
-  const zus=x.m==="as"?["Alt","⇧"]:x.m==="c"?[tr("Strg")]:x.m==="alt"?["Alt"]:[];
-  return [...zus,kzTaste(x.k)].join(" ");
+  const x=KUERZEL.find(y=>y.id===id);
+  if(!x||!kzGilt(x))return "";
+  const e=kzErst(x);
+  const zus=e.m==="as"?["Alt","⇧"]:e.m==="c"?[tr("Strg")]:e.m==="alt"?["Alt"]:[];
+  return [...zus,kzTaste(e.k)].join(" ");
 }
 function kzModus(e){
   const c=e.ctrlKey||e.metaKey;
@@ -20647,9 +20678,13 @@ function kzModus(e){
 function kzFinde(e){
   const m=kzModus(e);if(m===null)return null;
   const gl=(a,b)=>(a.length===1?a.toLowerCase():a)===(b.length===1?b.toLowerCase():b);
-  return KUERZEL.find(x=>
-    (x.m===m&&gl(x.k,e.key))||
-    (x.auch||[]).some(p=>p[0]===m&&gl(p[1],e.key))) || null;
+  return KUERZEL.find(x=>{
+    if(!kzGilt(x))return false;
+    const paare=[kzErst(x),...(x.auch||[]).map(p=>({m:p[0],k:p[1]}))];
+    /* In der App bleibt die Browser-Belegung als Zweitweg bestehen. */
+    if(istApp()&&x.app)paare.push({m:x.m,k:x.k});
+    return paare.some(p=>p.m===m&&gl(p.k,e.key));
+  }) || null;
 }
 
 document.addEventListener("keydown",e=>{
