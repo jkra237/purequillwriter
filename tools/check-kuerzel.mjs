@@ -74,11 +74,13 @@ for (const x of KUERZEL) {
 /* --- Die Hilfe auslesen: <kbd>-Folgen und Klartext wie "Alt+Umschalt+N" --- */
 function ausHilfe(html) {
   const gefunden = new Set();
-  /* Folgen von <kbd>…</kbd>, durch + getrennt */
+  /* Folgen von <kbd>…</kbd>, durch + getrennt — eine Folge der Laenge eins
+     zaehlt mit, sonst faende der Pruefer Einzeltasten wie F7 nie. Meldung 2
+     stoert das nicht: sie sieht nur Kombinationen, die mit alt beginnen. */
   for (const m of html.matchAll(/(?:<kbd>[^<]*<\/kbd>\s*\+\s*)*<kbd>[^<]*<\/kbd>/g)) {
     const teile = [...m[0].matchAll(/<kbd>([^<]*)<\/kbd>/g)].map(x => x[1]);
     const n = norm(teile);
-    if (n && n.includes("+")) gefunden.add(n);
+    if (n) gefunden.add(n);
   }
   /* Klartext, etwa <b>Alt+Shift+N</b> */
   const roh = html.replace(/<[^>]*>/g, " ");
