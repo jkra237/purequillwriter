@@ -8535,14 +8535,18 @@ function importGloss(dateiname,liste,ziel){
 /* ---- Kommandopalette ---- */
 function commandList(){
   const c=[];
+  /* Die Hinweise kommen aus kz() und sind damit schon uebersetzt und je
+     Fassung richtig. Die Ersetzung bleibt fuer die Handvoll geerbter
+     Browserkuerzel (Strg B/I/U, Strg Z/Y), die nicht in KUERZEL stehen, weil
+     das Programm sie nicht setzt. */
   const add=(grp,label,hint,run)=>c.push({grp:tr(grp),label:tr(label),hint:hint?hint.replace(/Strg/,tr("Strg")):hint,run});
-  add("Ansicht","Schreiben","Alt 1",()=>setMode("write"));
-  add("Ansicht","Notizen","Alt 2",()=>setMode("notes"));
-  add("Ansicht","Glossar","Alt 3",()=>setMode("gloss"));
-  add("Ansicht","Fokusmodus umschalten","Alt ⇧ Z",()=>{document.body.classList.toggle("focus")});
-  add("Ansicht","Dokument-Memo","Alt ⇧ T",toggleMemo);
-  add("Ansicht","Leseansicht","Alt ⇧ B",readView);
-  add("Ansicht","Druckvorschau","Alt ⇧ V",printPreview);
+  add("Ansicht","Schreiben",kz("ansSchr"),()=>setMode("write"));
+  add("Ansicht","Notizen",kz("ansNotiz"),()=>setMode("notes"));
+  add("Ansicht","Glossar",kz("ansGloss"),()=>setMode("gloss"));
+  add("Ansicht","Fokusmodus umschalten",kz("fokus"),()=>{document.body.classList.toggle("focus")});
+  add("Ansicht","Dokument-Memo",kz("memo"),toggleMemo);
+  add("Ansicht","Leseansicht",kz("lesen"),readView);
+  add("Ansicht","Druckvorschau",kz("vorschau"),printPreview);
   add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
   add("Ansicht","Farbschema wählen","",themeDialog);
   THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
@@ -8550,9 +8554,9 @@ function commandList(){
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")});
   add("Ansicht","Seitenzahlen umschalten","",()=>{S.pagenum=S.pagenum===false;save();
     if(S.mode==="write")paginate()});
-  add("Ansicht","Vergrößern","Alt ⇧ +",()=>setZoom(S.zoom+.1));
-  add("Ansicht","Verkleinern","Alt ⇧ −",()=>setZoom(S.zoom-.1));
-  add("Ansicht","Seitenbreite einpassen","Alt ⇧ 0",toggleFitPage);
+  add("Ansicht","Vergrößern",kz("zoomAuf"),()=>setZoom(S.zoom+.1));
+  add("Ansicht","Verkleinern",kz("zoomAb"),()=>setZoom(S.zoom-.1));
+  add("Ansicht","Seitenbreite einpassen",kz("einpassen"),toggleFitPage);
 
   const fmtCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
     if(S.mode!=="write")setMode("write");
@@ -8569,24 +8573,24 @@ function commandList(){
     if(S.mode!=="write"){setMode("write");setTimeout(fn,40)}else fn()});
   blockCmd("Einrücken","Tab",()=>indentBlocks(1));
   blockCmd("Ausrücken","⇧ Tab",()=>indentBlocks(-1));
-  fmtCmd("Linksbündig","Alt ⇧ L",()=>document.execCommand("justifyLeft"));
-  fmtCmd("Zentriert","Alt ⇧ E",()=>document.execCommand("justifyCenter"));
+  fmtCmd("Linksbündig",kz("links"),()=>document.execCommand("justifyLeft"));
+  fmtCmd("Zentriert",kz("mitte"),()=>document.execCommand("justifyCenter"));
   fmtCmd("Bild einfügen","",pickImage);
-  fmtCmd("Suchen",tr("Strg")+" F",()=>fdOpen(false));
-  fmtCmd("Suchen und ersetzen",tr("Strg")+" H",()=>fdOpen(true));
-  fmtCmd("Rechtsbündig","Alt ⇧ R",()=>document.execCommand("justifyRight"));
-  fmtCmd("Blocksatz","",()=>document.execCommand("justifyFull"));
-  fmtCmd("Link einfügen oder bearbeiten…","Alt ⇧ K",linkDialog);
-  fmtCmd("Seitenumbruch einfügen","Alt ⇧ ⏎",insertPageBreak);
+  fmtCmd("Suchen",kz("suchen"),()=>fdOpen(false));
+  fmtCmd("Suchen und ersetzen",kz("ersetzen"),()=>fdOpen(true));
+  fmtCmd("Rechtsbündig",kz("rechts"),()=>document.execCommand("justifyRight"));
+  fmtCmd("Blocksatz",kz("blocksatz"),()=>document.execCommand("justifyFull"));
+  fmtCmd("Link einfügen oder bearbeiten…",kz("link"),linkDialog);
+  fmtCmd("Seitenumbruch einfügen",kz("umbruch"),insertPageBreak);
   fmtCmd("Fußnote einfügen","",insertFootnote);
-  fmtCmd("Inhaltsverzeichnis einfügen","Alt ⇧ I",insertToc);
+  fmtCmd("Inhaltsverzeichnis einfügen",kz("toc"),insertToc);
   if(S.settings.tofEnabled)fmtCmd("Abbildungsverzeichnis einfügen","",insertTof);
   fmtCmd("Formatierung entfernen","",()=>document.execCommand("removeFormat"));
   fmtCmd("Rückgängig","Strg Z",()=>document.execCommand("undo"));
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
-  add("Dokument","Neues Dokument mit Format","Alt ⇧ D",newDocument);
-  add("Dokument","Datei öffnen…","",loadDocumentFile);
+  add("Dokument","Neues Dokument mit Format",kz("neuDok"),newDocument);
+  add("Dokument","Datei öffnen…",kz("dateiAuf"),loadDocumentFile);
   add("Dokument","Seitenformat ändern","",changeFormat);
   LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
     tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),"",()=>setLineHeight(v)));
@@ -8594,12 +8598,12 @@ function commandList(){
     tr("Absatzabstand")+" "+tr(lab).toLowerCase(),"",()=>setParSpace(v)));
   add("Dokument","Tabelle einfügen","",()=>{if(S.mode!=="write")setMode("write");setTimeout(tablePicker,40)});
   add("Dokument","Kopf- und Fußzeile","",hfDialog);
-  add("Dokument","Dokument schließen","",()=>closeDoc(S.active));
+  add("Dokument","Dokument schließen",kz("dokZu"),()=>closeDoc(S.active));
   S.docs.filter(d=>d.id!==S.active).forEach(d=>
     add("Dokument",tr("Wechseln zu: ")+tr(d.title),"",()=>{flush();S.active=d.id;save();render()}));
-  add("Dokument","Zwischenstand anlegen","Alt ⇧ S",()=>{commit();toast(tr("Zwischenstand angelegt"))});
+  add("Dokument","Zwischenstand anlegen",kz("stand"),()=>{commit();toast(tr("Zwischenstand angelegt"))});
   add("Dokument","Versionsverlauf","",history);
-  add("Dokument","Drucken","Strg P",()=>{flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})});
+  add("Dokument","Drucken",kz("drucken"),()=>{flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})});
   add("Dokument","Als TXT exportieren","",exportTxt);
   add("Dokument","Als Markdown exportieren","",exportMd);
   add("Dokument","Als Word-Dokument exportieren","",exportDoc);
@@ -8607,8 +8611,8 @@ function commandList(){
   add("Dokument","Als EPUB exportieren","",exportEpub);
   add("Dokument","Als HTML exportieren","",exportHtml);
 
-  add("Notiz","Neue Notiz","Alt ⇧ N",()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
-  add("Notiz","Markierte Stelle mit Notiz verknüpfen","Alt ⇧ M",linkSelection);
+  add("Notiz","Neue Notiz",kz("notiz"),()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
+  add("Notiz","Markierte Stelle mit Notiz verknüpfen",kz("notizHeft"),linkSelection);
   add("Notiz","Notizen am Seitenrand umschalten","",()=>{S.showCol=!S.showCol;save();
     if(S.mode==="write")drawAnchors()});
   add("Notiz","Markierungen im Text umschalten","",()=>{S.showAnchMarks=S.showAnchMarks===false;save();
@@ -8620,7 +8624,7 @@ function commandList(){
     const disp=(raw==="Leere Notiz"?tr("Leere Notiz"):raw).slice(0,44);
     add("Notiz",tr("Öffnen: ")+disp,"",()=>{setMode("notes");openNote(n.id)})});
 
-  add("Glossar","Nachschlagen","Alt ⇧ G",glossSearch);
+  add("Glossar","Nachschlagen",kz("glossSuch"),glossSearch);
   add("Glossar","Neuer Eintrag","",()=>{setMode("gloss");setTimeout(()=>openGForm(null),40)});
   add("Glossar","Neues Glossar anlegen","",()=>{setMode("gloss");newGlossColl()});
   add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{

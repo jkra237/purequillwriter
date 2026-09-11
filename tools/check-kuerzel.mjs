@@ -159,7 +159,24 @@ for (const [name, alsApp] of [["Browser-Fassung", false], ["App-Fassung", true]]
   console.log("");
 }
 
+/* --- 3. Die Kommandopalette darf keine Taste von Hand behaupten ---
+   Sie war die vierte Quelle und fiel bei der Umstellung durch: ihre Hinweise
+   standen als fester Text und versprachen sieben Tasten, die inzwischen etwas
+   anderes tun. Jeder Hinweis kommt jetzt aus kz(); ein handgeschriebener im
+   Alt-Bereich waere ein Rueckfall. Strg B/I/U und Strg Z/Y duerfen bleiben,
+   die erbt das Programm vom Browser und setzt sie nicht. */
+let palette = 0;
+console.log("=== Kommandopalette: Kuerzel von Hand eingetragen ===");
+const liste = code.match(/function commandList\(\)\{[\s\S]*?\n\}/);
+if (!liste) { console.log("  (commandList nicht gefunden)"); palette++; }
+else for (const m of liste[0].matchAll(/"((?:Alt|F\d)[^"]*)"/g)) {
+  palette++;
+  console.log(`  ${m[1]}  — gehoert in KUERZEL und ueber kz(id) geholt`);
+}
+if (!palette) console.log("  (nichts)");
+console.log("");
+
 console.log(`Tabelle: ${KUERZEL.length} Kuerzel`);
 console.log(offen ? `${offen} nicht dokumentiert` : "Alle dokumentiert, in beiden Fassungen");
 console.log(falsch ? `${falsch} FALSCHE Angaben in der Hilfe` : "Keine falschen Angaben");
-process.exit(falsch ? 1 : 0);
+process.exit((falsch+palette) ? 1 : 0);
