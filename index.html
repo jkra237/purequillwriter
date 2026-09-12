@@ -14516,7 +14516,28 @@ function spellLangName(k){
    beim ersten Prüfen von der Webadresse nachgeladen. Der Rückfall greift
    allein über den fehlgeschlagenen Abruf, also ohne Schalter und ohne dass
    die Browserfassung etwas davon merkt. */
-const DICT_REMOTE="https://jkra237.github.io/purequillwriter/dict/";
+/* Zwei Quellen statt einer, in dieser Reihenfolge. Die erste ist die eigene
+   Domain — sie gehoert uns, und nur dann stimmt der Satz in der
+   Datenschutzerklaerung, das Woerterbuch komme von unserem Webserver. GitHub
+   Pages bleibt als Auffangnetz stehen, weil ein ausgeliefertes Programm nicht
+   an einem einzigen Dienst haengen soll: faellt eine Quelle aus, reicht das
+   sonst, um in jeder installierten Kopie die deutsche Rechtschreibpruefung zu
+   toeten, und reparieren liesse sich das nur mit einem Store-Update.
+
+   GitHub selbst sagt, Pages sei nicht als kostenloser Hoster fuer ein
+   Onlinegeschaeft gedacht; ein bezahlter Plan aendert daran nichts, der bringt
+   Pages fuer private Repositories und mehr Actions-Minuten. Deshalb ist es hier
+   nur noch der zweite Weg und soll spaeter ganz entfallen — dann bleibt eine
+   Zeile uebrig.
+
+   Der Abruf ist ursprungsfremd: die App laeuft unter pqw://local, die
+   Browser-Fassung unter ihrer eigenen Adresse. Jede Quelle muss deshalb
+   Access-Control-Allow-Origin mitschicken, sonst kommt die Datei nicht an,
+   obwohl der Server sie ausliefert. */
+const DICT_REMOTE=[
+  "https://suvantra.eu/dict/",
+  "https://jkra237.github.io/purequillwriter/dict/",
+];
 async function dictText(lang,ext){
   /* 1. Im Paket? Sechs der sieben Sprachen liegen dort und kosten kein Netz. */
   try{const r=await fetch("dict/"+lang+ext);if(r.ok)return await r.text()}catch(e){}
@@ -14526,9 +14547,16 @@ async function dictText(lang,ext){
   if(dictPlausibel(abgelegt,ext))return abgelegt;
   if(abgelegt)await dictCacheDel(schl);
   /* 3. Holen — und behalten. */
-  const r=await fetch(DICT_REMOTE+lang+ext);
-  if(!r.ok)throw new Error(r.status);
-  const text=await r.text();
+  let text=null,letzter=null;
+  for(const quelle of DICT_REMOTE){
+    try{
+      const r=await fetch(quelle+lang+ext);
+      if(!r.ok){letzter=new Error(quelle+" "+r.status);continue}
+      text=await r.text();
+      break;
+    }catch(e){letzter=e}          /* Netzfehler und CORS landen beide hier */
+  }
+  if(text===null)throw letzter||new Error("keine Quelle erreichbar");
   if(dictPlausibel(text,ext))await dictCachePut(schl,text);
   return text;
 }
