@@ -10856,10 +10856,36 @@ const hatDateien=()=>typeof window.showSaveFilePicker==="function";
    Warten anzeigen kann. */
 const FSDB="pqw.files";
 function idb(){return new Promise((ok,fail)=>{
-  const r=indexedDB.open(FSDB,1);
-  r.onupgradeneeded=()=>r.result.createObjectStore("handles");
+  const r=indexedDB.open(FSDB,2);
+  r.onupgradeneeded=()=>{const db=r.result;
+    if(!db.objectStoreNames.contains("handles"))db.createObjectStore("handles");
+    if(!db.objectStoreNames.contains("dict"))db.createObjectStore("dict");
+  };
   r.onsuccess=()=>ok(r.result);r.onerror=()=>fail(r.error);
 })}
+/* Ein geholtes Woerterbuch bleibt liegen. Das ist keine Lizenzfrage: geladen
+   hat es der Benutzer selbst, und es auf seinem eigenen Rechner zu behalten
+   ist keine Weitergabe. Ohne diese Ablage braucht die deutsche Pruefung bei
+   JEDEM Start Netz und laedt jedes Mal 1,1 MB — die Fassung fuer den Store
+   verspricht aber, ohne Internetverbindung zu arbeiten. */
+async function dictCacheGet(k){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("dict","readonly");const q=t.objectStore("dict").get(k);
+  q.onsuccess=()=>ok(q.result||null);q.onerror=()=>ok(null)})}catch(e){return null}}
+async function dictCachePut(k,v){try{const db=await idb();await new Promise(ok=>{
+  const t=db.transaction("dict","readwrite");t.objectStore("dict").put(v,k);
+  t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+async function dictCacheDel(k){try{const db=await idb();await new Promise(ok=>{
+  const t=db.transaction("dict","readwrite");t.objectStore("dict").delete(k);
+  t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+/* Billige Echtheitspruefung, damit eine abgebrochene oder verfaelschte Ablage
+   nicht dauerhaft haengen bleibt: eine .dic beginnt mit der Wortzahl, eine
+   .aff nennt ihre Kodierung. Faellt eine durch, wird sie verworfen und neu
+   geholt — sonst waere die Rechtschreibpruefung fuer immer kaputt, ohne dass
+   irgendjemand wuesste, warum. */
+function dictPlausibel(text,ext){
+  if(!text||text.length<200)return false;
+  return ext===".dic" ? /^\s*\d+/.test(text) : /(^|\n)SET\s+\S/.test(text);
+}
 async function handleSet(id,h){const db=await idb();return new Promise((ok,fail)=>{
   const t=db.transaction("handles","readwrite");t.objectStore("handles").put(h,id);
   t.oncomplete=()=>ok();t.onerror=()=>fail(t.error)})}
@@ -14492,10 +14518,19 @@ function spellLangName(k){
    die Browserfassung etwas davon merkt. */
 const DICT_REMOTE="https://jkra237.github.io/purequillwriter/dict/";
 async function dictText(lang,ext){
+  /* 1. Im Paket? Sechs der sieben Sprachen liegen dort und kosten kein Netz. */
   try{const r=await fetch("dict/"+lang+ext);if(r.ok)return await r.text()}catch(e){}
+  /* 2. Schon einmal geholt? */
+  const schl=lang+ext;
+  const abgelegt=await dictCacheGet(schl);
+  if(dictPlausibel(abgelegt,ext))return abgelegt;
+  if(abgelegt)await dictCacheDel(schl);
+  /* 3. Holen — und behalten. */
   const r=await fetch(DICT_REMOTE+lang+ext);
   if(!r.ok)throw new Error(r.status);
-  return await r.text();
+  const text=await r.text();
+  if(dictPlausibel(text,ext))await dictCachePut(schl,text);
+  return text;
 }
 async function spellLoad(lang,onProg){
   const [aff,dic]=await Promise.all([dictText(lang,".aff"),dictText(lang,".dic")]);
@@ -16439,7 +16474,8 @@ const HELPTEXTE={en:[
  {t:"About PureQuill Writer",k:"about;overview;introduction",b:`
 <p><nur-b>PureQuill Writer is a word processor that runs entirely in your browser. There is
 nothing to install and nothing to sign in to.</nur-b><nur-a>PureQuill Writer is a word processor for your own machine. There is nothing to
-sign in to, and it works without an internet connection.</nur-a> Your text is not sent anywhere.</p>
+sign in to, and it works without an internet connection — apart from the German
+dictionary, which is fetched once and then kept.</nur-a> Your text is not sent anywhere.</p>
 <p>It is built for long-form writing — manuscripts, reports, theses — rather than short
 memos. Three things set it apart from a plain text editor:</p>
 <ul>
@@ -16737,6 +16773,9 @@ is open. Seven languages are available: German, English, French, Spanish, Italia
 and Polish. The language is set under <b>Settings &rsaquo; General</b>.</p>
 <p>For each word you can accept a suggestion, type a correction of your own, ignore it once,
 or add it to your own words — those are remembered across all documents.</p>
+<nur-a><p><b>The German dictionary is fetched once.</b> Its licence does not allow it
+to travel inside the Store package, so the first German check downloads it. After
+that it stays on your machine and the check works offline like the others.</p></nur-a>
 <nur-b><p><b>The dictionaries need a real address.</b> If you opened the file by double-clicking it,
 the spell check cannot fetch them. Serving the program from a web address or a local server
 solves this.</p></nur-b>`},
@@ -16981,7 +17020,8 @@ de:[
  {t:"Über PureQuill Writer",k:"über;überblick;einführung;was ist das",b:`
 <p><nur-b>PureQuill Writer ist eine Textverarbeitung, die vollständig im Browser läuft. Es gibt
 nichts zu installieren und nichts anzumelden.</nur-b><nur-a>PureQuill Writer ist eine Textverarbeitung für deinen Rechner. Es gibt nichts
-anzumelden, und sie arbeitet ohne Internetverbindung.</nur-a> Dein Text wird nirgendwohin gesendet.</p>
+anzumelden, und sie arbeitet ohne Internetverbindung — bis auf das deutsche Wörterbuch,
+das einmalig geladen und danach behalten wird.</nur-a> Dein Text wird nirgendwohin gesendet.</p>
 <p>Das Programm ist für lange Texte gebaut — Manuskripte, Berichte, Abschlussarbeiten —
 und nicht für kurze Notizen. Drei Dinge unterscheiden es von einem einfachen Editor:</p>
 <ul>
@@ -17298,6 +17338,10 @@ offen ist. Sieben Sprachen gibt es: Deutsch, Englisch, Französisch, Spanisch, I
 Portugiesisch und Polnisch. Eingestellt wird sie unter <b>Einstellungen &rsaquo; Allgemein</b>.</p>
 <p>Zu jedem Wort kannst du einen Vorschlag übernehmen, eine eigene Korrektur eintippen, es
 einmal übergehen oder es zu deinen eigenen Wörtern legen — die gelten über alle Dokumente.</p>
+<nur-a><p><b>Das deutsche Wörterbuch wird einmal geholt.</b> Seine Lizenz erlaubt es
+nicht, im Store-Paket mitzureisen, deshalb lädt es die erste deutsche Prüfung
+herunter. Danach bleibt es auf deinem Rechner, und die Prüfung arbeitet ohne Netz
+wie bei den anderen Sprachen.</p></nur-a>
 <nur-b><p><b>Die Wörterbücher brauchen eine echte Adresse.</b> Wurde die Datei per Doppelklick
 geöffnet, kann die Prüfung sie nicht holen. Das Programm über eine Webadresse oder einen
 lokalen Server aufzurufen löst das.</p></nur-b>`},
@@ -17550,7 +17594,8 @@ es:[
  {t:"Acerca de PureQuill Writer",k:"acerca de;información;introducción;qué es",b:`
 <p><nur-b>PureQuill Writer es un procesador de textos que funciona por completo en el navegador. No hay
 nada que instalar y nada donde iniciar sesión.</nur-b><nur-a>PureQuill Writer es un procesador de textos para tu propio equipo. No hay nada
-donde iniciar sesión, y funciona sin conexión a internet.</nur-a> Tu texto no se envía a ningún sitio.</p>
+donde iniciar sesión, y funciona sin conexión a internet — salvo el diccionario alemán, que se
+descarga una vez y luego se conserva.</nur-a> Tu texto no se envía a ningún sitio.</p>
 <p>Está pensado para textos largos —manuscritos, informes, trabajos de fin de estudios— y no
 para notas breves. Tres cosas lo distinguen de un editor de texto sencillo:</p>
 <ul>
@@ -17869,6 +17914,10 @@ abierto. Hay siete idiomas disponibles: alemán, inglés, francés, español, it
 polaco. El idioma se ajusta en <b>Configuración &rsaquo; General</b>.</p>
 <p>Para cada palabra puedes aceptar una sugerencia, escribir tu propia corrección, ignorarla una
 vez o añadirla a tus palabras propias: esas se recuerdan en todos los documentos.</p>
+<nur-a><p><b>El diccionario alemán se descarga una vez.</b> Su licencia no permite
+que viaje dentro del paquete de la Store, así que la primera revisión en alemán lo
+descarga. Después se queda en tu equipo y la revisión funciona sin red, como con
+los demás idiomas.</p></nur-a>
 <nur-b><p><b>Los diccionarios necesitan una dirección real.</b> Si abriste el archivo haciendo doble
 clic en él, el corrector no puede descargarlos. Servir el programa desde una dirección web o un
 servidor local lo resuelve.</p></nur-b>`},
@@ -18117,7 +18166,8 @@ pt:[
  {t:"Sobre o PureQuill Writer",k:"sobre;visão geral;introdução;o que é",b:`
 <p><nur-b>O PureQuill Writer é um processador de texto que funciona inteiramente no navegador. Não há
 nada para instalar e nada em que fazer login.</nur-b><nur-a>O PureQuill Writer é um processador de texto para o seu computador. Não há nada
-em que fazer login, e ele funciona sem conexão com a internet.</nur-a> Seu texto não é enviado a lugar nenhum.</p>
+em que fazer login, e ele funciona sem conexão com a internet — exceto o dicionário alemão, que é
+baixado uma vez e depois fica guardado.</nur-a> Seu texto não é enviado a lugar nenhum.</p>
 <p>Ele foi feito para textos longos —manuscritos, relatórios, trabalhos de conclusão— e não para
 anotações curtas. Três coisas o distinguem de um editor de texto simples:</p>
 <ul>
@@ -18432,6 +18482,10 @@ sete idiomas disponíveis: alemão, inglês, francês, espanhol, italiano, portu
 idioma é definido em <b>Configurações &rsaquo; Geral</b>.</p>
 <p>Para cada palavra você pode aceitar uma sugestão, digitar a sua própria correção, ignorá-la
 uma vez ou adicioná-la às suas palavras próprias: essas são lembradas em todos os documentos.</p>
+<nur-a><p><b>O dicionário alemão é baixado uma vez.</b> A licença dele não permite
+viajar dentro do pacote da Store, então a primeira verificação em alemão o baixa.
+Depois ele fica no seu computador e a verificação funciona sem rede, como nos
+outros idiomas.</p></nur-a>
 <nur-b><p><b>Os dicionários precisam de um endereço de verdade.</b> Se você abriu o arquivo com um
 duplo clique, o corretor não consegue baixá-los. Servir o programa a partir de um endereço da
 web ou de um servidor local resolve isso.</p></nur-b>`},
@@ -18682,7 +18736,8 @@ fr:[
  {t:"À propos de PureQuill Writer",k:"à propos;aperçu;introduction;qu'est-ce que c'est",b:`
 <p><nur-b>PureQuill Writer est un traitement de texte qui fonctionne entièrement dans le navigateur. Il
 n'y a rien à installer et aucun compte à créer.</nur-b><nur-a>PureQuill Writer est un traitement de texte pour votre propre machine. Il n'y a
-aucun compte à créer, et il fonctionne sans connexion internet.</nur-a> Votre texte n'est envoyé nulle part.</p>
+aucun compte à créer, et il fonctionne sans connexion internet — sauf le dictionnaire allemand, qui
+est téléchargé une fois puis conservé.</nur-a> Votre texte n'est envoyé nulle part.</p>
 <p>Il est conçu pour les textes longs — manuscrits, rapports, mémoires — et non pour de courtes
 notes. Trois choses le distinguent d'un éditeur de texte ordinaire :</p>
 <ul>
@@ -19014,6 +19069,10 @@ ouvert. Sept langues sont disponibles : allemand, anglais, français, espagnol, 
 portugais et polonais. La langue se règle dans <b>Paramètres &rsaquo; Général</b>.</p>
 <p>Pour chaque mot, vous pouvez accepter une suggestion, taper une correction à vous, l'ignorer
 une fois, ou l'ajouter à vos mots à soi — ceux-ci sont retenus sur tous les documents.</p>
+<nur-a><p><b>Le dictionnaire allemand est téléchargé une fois.</b> Sa licence ne lui
+permet pas de voyager dans le paquet du Store, c'est donc la première vérification
+en allemand qui le télécharge. Ensuite il reste sur votre machine et la
+vérification fonctionne hors ligne, comme pour les autres langues.</p></nur-a>
 <nur-b><p><b>Les dictionnaires ont besoin d'une vraie adresse.</b> Si vous avez ouvert le fichier en
 double-cliquant dessus, le correcteur ne peut pas les télécharger. Servir le programme depuis
 une adresse web ou un serveur local résout cela.</p></nur-b>`},
@@ -19273,7 +19332,8 @@ pl:[
  {t:"O programie PureQuill Writer",k:"o programie;przegląd;wprowadzenie;co to jest",b:`
 <p><nur-b>PureQuill Writer to edytor tekstu, który działa w całości w przeglądarce. Nie ma nic do
 zainstalowania ani żadnego logowania.</nur-b><nur-a>PureQuill Writer to edytor tekstu na Twój komputer. Nie ma żadnego logowania,
-a program działa bez połączenia z internetem.</nur-a> Twój tekst nie jest nigdzie wysyłany.</p>
+a program działa bez połączenia z internetem — poza słownikiem niemieckim,
+który jest pobierany raz i potem zostaje na dysku.</nur-a> Twój tekst nie jest nigdzie wysyłany.</p>
 <p>Powstał do długich tekstów — manuskryptów, raportów, prac dyplomowych — a nie do krótkich
 notatek. Trzy rzeczy odróżniają go od zwykłego edytora tekstu:</p>
 <ul>
@@ -19581,6 +19641,10 @@ Dostępnych jest siedem języków: niemiecki, angielski, francuski, hiszpański,
 portugalski i polski. Język ustawia się w <b>Ustawienia &rsaquo; Ogólne</b>.</p>
 <p>Dla każdego słowa możesz przyjąć podpowiedź, wpisać własną poprawkę, zignorować je raz albo
 dodać do własnych słów — te są zapamiętywane we wszystkich dokumentach.</p>
+<nur-a><p><b>Słownik niemiecki pobiera się raz.</b> Jego licencja nie pozwala mu
+podróżować w pakiecie ze Store, więc pobiera go pierwsze sprawdzanie po niemiecku.
+Potem zostaje na Twoim komputerze, a sprawdzanie działa bez sieci, jak w
+pozostałych językach.</p></nur-a>
 <nur-b><p><b>Słowniki potrzebują prawdziwego adresu.</b> Jeśli otworzyłeś plik przez dwukrotne
 kliknięcie, korektor nie może ich pobrać. Serwowanie programu spod adresu internetowego albo z
 serwera lokalnego to rozwiązuje.</p></nur-b>`},
@@ -19825,7 +19889,8 @@ it:[
  {t:"Informazioni su PureQuill Writer",k:"informazioni;panoramica;introduzione;cos'è",b:`
 <p><nur-b>PureQuill Writer è un elaboratore di testo che funziona interamente nel browser. Non c'è
 niente da installare e nessun accesso da effettuare.</nur-b><nur-a>PureQuill Writer è un elaboratore di testo per il tuo computer. Non c'è nessun
-accesso da effettuare, e funziona senza connessione a internet.</nur-a> Il tuo testo non viene inviato da nessuna
+accesso da effettuare, e funziona senza connessione a internet — tranne il dizionario tedesco, che
+viene scaricato una volta e poi resta sul computer.</nur-a> Il tuo testo non viene inviato da nessuna
 parte.</p>
 <p>È pensato per testi lunghi — manoscritti, relazioni, tesi — non per note brevi. Tre cose lo
 distinguono da un semplice editor di testo:</p>
@@ -20150,6 +20215,10 @@ aperto. Sono disponibili sette lingue: tedesco, inglese, francese, spagnolo, ita
 portoghese e polacco. La lingua si imposta in <b>Impostazioni &rsaquo; Generale</b>.</p>
 <p>Per ogni parola puoi accettare un suggerimento, digitare una tua correzione, ignorarla una
 volta, o aggiungerla alle tue parole proprie: queste vengono ricordate in tutti i documenti.</p>
+<nur-a><p><b>Il dizionario tedesco viene scaricato una volta.</b> La sua licenza non
+gli permette di viaggiare nel pacchetto dello Store, quindi lo scarica il primo
+controllo in tedesco. Poi resta sul tuo computer e il controllo funziona senza
+rete, come per le altre lingue.</p></nur-a>
 <nur-b><p><b>I dizionari hanno bisogno di un vero indirizzo.</b> Se hai aperto il file con un doppio
 clic, il correttore non può scaricarli. Servire il programma da un indirizzo web o da un server
 locale risolve la cosa.</p></nur-b>`},
