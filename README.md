@@ -2,7 +2,7 @@
 
 Minimalistische Textverarbeitung mit Sticky Notes und integriertem Glossar. Eine einzige HTML-Datei, keine Installation, keine Abhängigkeiten.
 
-**Testumgebung:** https://jkra237.github.io/purequillwriter/
+**Browser-Fassung:** https://suvantra.eu/app/
 
 ---
 

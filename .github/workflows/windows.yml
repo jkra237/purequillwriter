@@ -1,7 +1,10 @@
 name: Windows-Fassung bauen
 
-# Baut die Desktop-Fassung. Die Webfassung ist davon unberührt — sie wird
-# unverändert aus dem Wurzelverzeichnis über GitHub Pages ausgeliefert.
+# Baut die Desktop-Fassung. Die Webfassung ist davon unberührt — sie liegt
+# seit 2026-09-13 unter https://suvantra.eu/app/ und wird von Hand dorthin
+# kopiert (index.html, icon.svg, manifest.webmanifest und der ganze Ordner
+# dict/). GitHub Pages gibt es nicht mehr: das Repository ist privat, und im
+# kostenlosen Tarif liefert Pages nur aus öffentlichen Repositories.
 on:
   push:
     tags: ["desktop-v*"]
