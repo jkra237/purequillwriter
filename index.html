@@ -2364,6 +2364,7 @@ en:{
   "Willkommen":"Welcome",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"The German dictionary is fetched from the network the first time — that needs a connection once. After that it stays on your machine. Try again later.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"The text has not been applied yet. Discard it?",
   "Weiter bearbeiten":"Keep editing",
   "kein Dokument offen":"no document open",
@@ -3114,6 +3115,7 @@ fr:{
   "Willkommen":"Bienvenue",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"Le dictionnaire allemand est téléchargé la première fois — cela demande une connexion, une seule fois. Ensuite il reste sur votre machine. Réessayez plus tard.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"Le texte n'a pas encore été appliqué. Le supprimer ?",
   "Weiter bearbeiten":"Continuer la modification",
   "kein Dokument offen":"aucun document ouvert",
@@ -3864,6 +3866,7 @@ es:{
   "Willkommen":"Bienvenido",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"El diccionario alemán se descarga la primera vez — para eso hace falta una conexión, una sola vez. Después se queda en tu equipo. Inténtalo más tarde.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"El texto todavía no se ha aplicado. ¿Descartarlo?",
   "Weiter bearbeiten":"Seguir editando",
   "kein Dokument offen":"ningún documento abierto",
@@ -4614,6 +4617,7 @@ pt:{
   "Willkommen":"Bem-vindo",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"O dicionário alemão é baixado na primeira vez — para isso é preciso uma conexão, uma única vez. Depois ele fica no seu computador. Tente de novo mais tarde.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"O texto ainda não foi aplicado. Descartar?",
   "Weiter bearbeiten":"Continuar editando",
   "kein Dokument offen":"nenhum documento aberto",
@@ -5364,6 +5368,7 @@ pl:{
   "Willkommen":"Witamy",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"Słownik niemiecki pobiera się za pierwszym razem — potrzebne jest do tego jednorazowe połączenie. Potem zostaje na Twoim komputerze. Spróbuj później.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"Tekst nie został jeszcze zastosowany. Odrzucić?",
   "Weiter bearbeiten":"Edytuj dalej",
   "kein Dokument offen":"żaden dokument nie jest otwarty",
@@ -6125,6 +6130,7 @@ it:{
   "Willkommen":"Benvenuto",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
+  "Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.":"Il dizionario tedesco viene scaricato la prima volta — serve una connessione, una volta sola. Poi resta sul tuo computer. Riprova più tardi.",
   "Der Text ist noch nicht übernommen. Verwerfen?":"Il testo non è ancora stato applicato. Scartarlo?",
   "Weiter bearbeiten":"Continua a modificare",
   "kein Dokument offen":"nessun documento aperto",
@@ -14516,27 +14522,28 @@ function spellLangName(k){
    beim ersten Prüfen von der Webadresse nachgeladen. Der Rückfall greift
    allein über den fehlgeschlagenen Abruf, also ohne Schalter und ohne dass
    die Browserfassung etwas davon merkt. */
-/* Zwei Quellen statt einer, in dieser Reihenfolge. Die erste ist die eigene
-   Domain — sie gehoert uns, und nur dann stimmt der Satz in der
-   Datenschutzerklaerung, das Woerterbuch komme von unserem Webserver. GitHub
-   Pages bleibt als Auffangnetz stehen, weil ein ausgeliefertes Programm nicht
-   an einem einzigen Dienst haengen soll: faellt eine Quelle aus, reicht das
-   sonst, um in jeder installierten Kopie die deutsche Rechtschreibpruefung zu
-   toeten, und reparieren liesse sich das nur mit einem Store-Update.
+/* Eine Quelle: die eigene Domain. Nur so stimmt der Satz in der
+   Datenschutzerklaerung, das Woerterbuch komme von unserem Webserver.
 
-   GitHub selbst sagt, Pages sei nicht als kostenloser Hoster fuer ein
-   Onlinegeschaeft gedacht; ein bezahlter Plan aendert daran nichts, der bringt
-   Pages fuer private Repositories und mehr Actions-Minuten. Deshalb ist es hier
-   nur noch der zweite Weg und soll spaeter ganz entfallen — dann bleibt eine
-   Zeile uebrig.
+   Bis 2026-09-13 stand GitHub Pages als zweite Quelle daneben. Mit dem
+   privaten Repository ist sie tot (404) — und ein toter Ersatzweg ist
+   schlechter als gar keiner, weil man sich auf eine Absicherung verlaesst,
+   die es nicht gibt. Darum raus. Es bleibt eine Liste: eine zweite Quelle
+   waere ein Eintrag, kein Umbau.
+
+   Was das kostet, offen gesagt: faellt suvantra.eu aus, bekommt eine neue
+   Installation fuer Deutsch keine Rechtschreibpruefung, bis der Server wieder
+   da ist. Bereits geladene Kopien merken nichts — das Woerterbuch liegt dann
+   in ihrer Ablage. Deshalb sagt der Fehlerhinweis in der App jetzt auch, dass
+   es sich um einen einmaligen Abruf handelt und spaeter wieder geht.
 
    Der Abruf ist ursprungsfremd: die App laeuft unter pqw://local, die
-   Browser-Fassung unter ihrer eigenen Adresse. Jede Quelle muss deshalb
+   Browser-Fassung unter ihrer eigenen Adresse. Die Quelle muss deshalb
    Access-Control-Allow-Origin mitschicken, sonst kommt die Datei nicht an,
-   obwohl der Server sie ausliefert. */
+   obwohl der Server sie ausliefert — bei suvantra.eu erledigt das eine
+   .htaccess im Ordner dict/. */
 const DICT_REMOTE=[
   "https://suvantra.eu/dict/",
-  "https://jkra237.github.io/purequillwriter/dict/",
 ];
 async function dictText(lang,ext){
   /* 1. Im Paket? Sechs der sieben Sprachen liegen dort und kosten kein Netz. */
@@ -14659,7 +14666,9 @@ function spellDialog(startAt){
         <div class="spellprog"><i id="spProg" style="width:${Math.round(spellProg*100)}%"></i></div>`;
     if(spellState==="fail")
       return sel+`<div class="spellbig">${tr("Das Wörterbuch ließ sich nicht laden.")}</div>
-        <div class="fmttip">${tr("Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.")}</div>`;
+        <div class="fmttip">${istApp()
+          ? tr("Das deutsche Wörterbuch wird beim ersten Mal aus dem Netz geladen — dafür braucht es einmalig eine Verbindung. Danach liegt es auf deinem Rechner. Versuch es später noch einmal.")
+          : tr("Beim direkten Öffnen der Datei von der Festplatte sperrt der Browser den Zugriff auf den Ordner „dict“. Über eine Adresse geöffnet — oder in der Windows-App — funktioniert es.")}</div>`;
     if(spellState==="clean")
       return sel+`<div class="spellbig">${tr("Keine Fehler gefunden.")}</div>
         <div class="fmttip">${tr("Geprüft wurde der laufende Text. Verzeichnisse und Kopf- und Fußzeilen bleiben außen vor.")}</div>`;
