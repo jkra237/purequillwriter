@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld("pqwDesktop", {
   /* Öffnet den Speichern-Dialog und schreibt das PDF direkt. */
   savePdf: (opts) => ipcRenderer.invoke("pqw:savePdf", opts),
 
+  /* Die Programmversion fuer das Ueber-Fenster. */
+  version: () => ipcRenderer.sendSync("pqw:version"),
+
   /* {html, text} der Zwischenablage — synchron, siehe main.js. */
   clipboardHtmlSync: () => ipcRenderer.sendSync("pqw:clipboard"),
 

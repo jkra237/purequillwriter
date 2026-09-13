@@ -102,6 +102,11 @@ ipcMain.handle("pqw:savePdf", async (e, opts = {}) => {
 
 /* Synchron, damit zwischen Menüklick und dem Einfügen nichts passiert, was
    die Schreibmarke verlieren könnte. Der Lesevorgang selbst ist sofort da. */
+/* Die Programmversion kommt aus package.json — dieselbe Quelle, aus der
+   electron-builder das Paket baut. Synchron wie die Zwischenablage, weil sie
+   genau einmal beim Oeffnen des Ueber-Fensters gebraucht wird. */
+ipcMain.on("pqw:version", (e) => { e.returnValue = app.getVersion(); });
+
 ipcMain.on("pqw:clipboard", (e) => {
   e.returnValue = { html: clipboard.readHTML() || "", text: clipboard.readText() || "" };
 });
