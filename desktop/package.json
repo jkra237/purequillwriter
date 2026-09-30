@@ -10,9 +10,9 @@
   "scripts": {
     "prepare-app": "node scripts/prepare.mjs",
     "start": "npm run prepare-app && electron .",
-    "dist": "npm run prepare-app && electron-builder --win nsis",
-    "dist:store": "npm run prepare-app && electron-builder --win appx",
-    "dist:all": "npm run prepare-app && electron-builder --win nsis appx"
+    "dist": "npm run prepare-app && electron-builder --win nsis --x64",
+    "dist:store": "npm run prepare-app && electron-builder --win appx --x64 --arm64",
+    "dist:all": "npm run dist && npm run dist:store"
   },
   "devDependencies": {
     "electron": "^33.0.0",
