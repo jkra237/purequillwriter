@@ -55,8 +55,8 @@
       "installerLanguages": ["de_DE", "en_US", "es_ES", "fr_FR", "it_IT", "pl_PL", "pt_BR"]
     },
     "appx": {
-      "identityName": "REPLACE-WITH-PARTNER-CENTER-IDENTITY",
-      "publisher": "CN=REPLACE-WITH-PARTNER-CENTER-PUBLISHER",
+      "identityName": "Anrede.PureQuillWriter",
+      "publisher": "CN=46D2EB28-AC45-4F73-ABEB-F2221D008BAB",
       "publisherDisplayName": "Suvantra",
       "applicationId": "PureQuillWriter",
       "displayName": "PureQuill Writer",
