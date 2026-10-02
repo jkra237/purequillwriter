@@ -4,7 +4,9 @@ Ein einziges HTML-File (`index.html`) als vollständige Textverarbeitung — kei
 
 Einzige Ausnahme vom Ein-File-Prinzip ist `dict/` — die Hunspell-Wörterbücher der Rechtschreibprüfung (je Sprache `.dic` + `.aff` + Lizenztext, zusammen ~19 MB: de/en/es/fr/it/pl/pt — Italienisch, Polnisch und Portugiesisch machen davon allein 15 MB aus, siehe die Anmerkung zum Stemming weiter unten). Das sind Daten, kein Code: die Prüf-Engine selbst steckt wie alles andere inline in `index.html`, und geladen werden die Dateien erst beim ersten Prüfen. `fetch()` auf `dict/` scheitert beim direkten Öffnen per `file://` — die Rechtschreibprüfung braucht eine echte Adresse (suvantra.eu/app/, ein lokaler Server, die Electron-Fassung).
 
-Kommunikation mit dem Nutzer läuft auf Deutsch. Commit-Nachrichten sind bewusst auf Englisch und ausführlich — sie tragen die Begründung hinter jeder Entscheidung, nicht nur das Diff. Bei Unklarheiten zu einer vergangenen Änderung: `git log` und die jeweilige Commit-Message lesen, bevor man rät.
+Kommunikation mit dem Nutzer läuft auf Deutsch. **Commit-Nachrichten ebenfalls** — deutsch, im Imperativ, und ausführlich: sie tragen die Begründung hinter jeder Entscheidung, nicht nur das Diff. (Bis 2026-10-02 stand hier „auf Englisch"; das war nie die Praxis, der ganze Verlauf ist deutsch. Das Repository ist privat, es gibt keine fremden Mitleser, für die Englisch die Brücke wäre.) Bei Unklarheiten zu einer vergangenen Änderung: `git log` und die jeweilige Commit-Message lesen, bevor man rät.
+
+Was sich zwischen zwei Veröffentlichungen ansammelt, steht in [`CHANGELOG.md`](CHANGELOG.md) — dort auch die Versionsregel und der Ablauf einer Veröffentlichung.
 
 ## Architektur
 
