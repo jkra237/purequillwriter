@@ -6360,11 +6360,25 @@ function isTrulyEmpty(){
    Werkzeugleiste) - nur die graue Arbeitsfläche, dieselbe Farbe wie hinter
    dem Papier beim eigentlichen Schreiben (.sheet{background:var(--canvas)}),
    damit es nicht wie ein andersartiger, leerer Bildschirm wirkt. */
+let ohneDokument=false;
 function clearShell(){
+  ohneDokument=true;
   $("#tabbar").innerHTML="";$("#tools").innerHTML="";
   $("#pane").innerHTML='<div class="sheet"></div>';
   $("#status").innerHTML="";
   document.title="PureQuill Writer";
+}
+/* Hinter der leeren Arbeitsfläche liegt trotzdem ein Dokument: S.docs darf
+   nie leer sein (doc() und viele andere verlassen sich darauf), darum lässt
+   closeDoc() beim letzten Reiter einen leeren Platzhalter zurück, und beim
+   allerersten Start ist es das Anfangsdokument. Sichtbar ist er nicht.
+   Wer von dort aus ein Dokument anlegt oder öffnet, meint es als erstes —
+   vorher kam es neben den Platzhalter, und es standen plötzlich zwei Reiter
+   da, einer davon leer. Aufzurufen direkt vor dem S.docs.push(). Nimmt den
+   Platzhalter nur, solange wirklich nichts angezeigt wird und er leer ist. */
+function platzhalterAbloesen(){
+  if(ohneDokument&&S.docs.length===1&&!hatInhalt(S.docs[0].html)&&!S.docs[0].customTitle)
+    S.docs.length=0;
 }
 /* Ein Dokument kann auch ohne ein einziges Wort Inhalt haben: eine frei
    platzierte Signatur, ein Bild oder eine Tabelle zählen genauso. Wer nur den
@@ -10252,6 +10266,7 @@ function neuesDokumentAus(name,erg){
   if(b.ftr)d.ftr=b.ftr;
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
   d.glossaryId=defaultGlossId();
+  platzhalterAbloesen();
   S.docs.push(d);S.active=d.id;
   save();render();
   return true;
@@ -11297,6 +11312,7 @@ function applyBundle(b){
   (b.glossaries||[]).forEach(c=>{if(c&&c.id&&!cIds.has(c.id)){S.glossaries.push(c);cIds.add(c.id)}});
   const gIds=new Set(S.glossary.map(g=>g.id));
   (b.glossary||[]).forEach(g=>{if(g&&g.id&&!gIds.has(g.id)){S.glossary.push(g);gIds.add(g.id);nG++}});
+  if((b.docs||[]).some(Boolean))platzhalterAbloesen();
   const dIds=new Set(S.docs.map(d=>d.id));
   (b.docs||[]).forEach(d=>{
     if(!d)return;
@@ -12322,7 +12338,8 @@ function formatDialog(mode,onDone){
 }
 function newDocument(){
   formatDialog("new",(val,lh)=>{
-    flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();S.docs.push(d);S.active=d.id;save();render()});
+    flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();
+    platzhalterAbloesen();S.docs.push(d);S.active=d.id;save();render()});
 }
 function changeFormat(){
   formatDialog("change",(val,lh)=>{doc().fmt=val;doc().lh=lh;commit();render();toast(tr("Format geändert"))});
@@ -21262,6 +21279,7 @@ $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
 
 /* ================= Render ================= */
 function render(){
+  ohneDokument=false;
   hfEditClose();
   recalcGoalOthers();
   document.title=tr(doc().title||"Ohne Titel")+" — PureQuill Writer";

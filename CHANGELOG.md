@@ -106,6 +106,23 @@ immer genau einen Commit, der sie anfasst.
   speichern, die Leerzeichen stecken noch im Dokument, werden aber nicht
   mehr exportiert.
 
+- **Ein neues Dokument kam doppelt.** Alle Reiter schließen, das
+  Willkommensfenster mit × schließen, dann *Datei › Neu* — es standen zwei
+  leere Reiter da. Ursache: `S.docs` darf nie leer sein, darum liegt hinter
+  der leeren Arbeitsfläche ein unsichtbarer, leerer Platzhalter, und das neue
+  Dokument kam daneben statt an seine Stelle. Dasselbe beim **Öffnen einer
+  Datei** aus diesem Zustand — und damit auch beim allerersten Start:
+  Willkommen › *Datei öffnen* ließ neben der Datei einen leeren Reiter
+  „Ohne Titel“ stehen. Ebenso beim Hinzuladen einer `.pqw`.
+  `platzhalterAbloesen()` nimmt den Platzhalter jetzt heraus, bevor das
+  neue Dokument dazukommt — aber nur, solange wirklich kein Reiter angezeigt
+  wird (`ohneDokument`, gesetzt von `clearShell()`, gelöscht von
+  `render()`) und er leer ist. Ein sichtbarer leerer Reiter bleibt stehen
+  wie bisher. Geprüft: fünf Wege aus dem leeren Zustand (darunter der
+  gemeldete und der Kaltstart mit leerem Speicher) ergeben je einen Reiter,
+  drei Gegenproben mit sichtbaren Reitern verhalten sich unverändert, keine
+  Fehler.
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.1.
