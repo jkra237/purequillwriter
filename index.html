@@ -12663,8 +12663,12 @@ function repAnalyse(){
     if(wort.length<repOpt.len)continue;
     const k=repStamm(wort);
     /* Erst stammen, dann aussortieren: gegen den Stamm genuegt ein Eintrag
-       fuer „eine/einer/eines/einen/einem" statt fuenf. */
-    if(!repOpt.fuell&&stoppWort(k))continue;
+       fuer „eine/einer/eines/einen/einem" statt fuenf. Zusaetzlich gegen die
+       geschriebene Form: ein mehrdeutiges Wort kann auf einen fremden Stamm
+       fuehren — portugiesisch „pela“ (durch die) wird zu „pelar“ (schaelen),
+       „eram“ (waren) zu „erar“ — und rutschte dann trotz Eintrag in der
+       Liste durch. */
+    if(!repOpt.fuell&&(stoppWort(k)||stoppWort(wort.toLowerCase())))continue;
     let g=gruppen.get(k);
     if(!g){g={n:0,formen:new Map(),pos:[]};gruppen.set(k,g)}
     g.n++;g.pos.push(i);

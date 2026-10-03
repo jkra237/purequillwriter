@@ -78,17 +78,35 @@ immer genau einen Commit, der sie anfasst.
   Das Farbschema-Ladenbild zeigt Papier gewählt und trug darum den alten
   Text; es ist für alle sieben Sprachen noch am selben Tag neu aufgenommen.
 
+- **Wortwiederholungen zeigten Füllwörter, obwohl sie ausgeblendet waren**
+  — gemessen im Portugiesischen: „pela/pelo“ (durch die/den) und „eram“
+  (waren). Die Füllwortprüfung lief nur am Stamm, und das Wörterbuch führt
+  mehrdeutige Wörter mitunter auf einen fremden Stamm zurück („pela“ →
+  „pelar“, schälen; „eram“ → „erar“), der nicht in der Liste steht. Jetzt
+  wird zusätzlich die geschriebene Form geprüft. Die Prüfung am Stamm bleibt,
+  es kommt nur ein Filter hinzu, und er greift nur bei Wörtern, die wörtlich
+  in der Liste stehen. Vergleich vorher/nachher mit der echten
+  `repAnalyse()` über die Beispieltexte aller sieben Sprachen: in de, en,
+  es, fr, it, pl keine einzige Änderung; in pt fallen genau „pela/pelo“ und
+  „eram“ heraus. Mit eingeschalteten Füllwörtern erscheinen sie weiter.
+
 ### Beim Aufnehmen gefunden, noch nicht behoben
 
-- **Wortformen-Gruppierung fasst Fremdes zusammen.** Französisch: „d’abord“
-  landet bei „bord“ (die Elision „d’“ wird abgetrennt, dann passt „abord“ als
-  Form). Portugiesisch: „pela“, „pelo“ und „peles“ werden ein Wort —
-  Präposition und „Häute“. Zugleich steht „pela/pelo“ offenbar nicht in der
-  portugiesischen Füllwortliste, sonst wäre es bei ausgeschalteten
-  Füllwörtern gar nicht erschienen.
-- **Portugiesisch: „marca-d’água“ gilt als Fehler**, mit typografischem
-  Apostroph. Nicht geprüft, ob es mit geradem `'` durchgeht — falls ja,
-  behandelt die Prüfung `’` in Wörtern nicht wie `'`.
+- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.1.
+  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
+  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
+  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
+  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
+  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
+  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
+  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
+  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
+  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
+  unter „Behoben“.
+- **Portugiesisch: „marca-d’água“ gilt als Fehler** mit typografischem
+  Apostroph, mit geradem `'` nicht (gemessen). Die Prüfung setzt `’`
+  nicht mit `'` gleich. Französisch `d’abord` geht trotzdem durch, das
+  dortige Wörterbuch kennt beide Zeichen selbst.
 - **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
