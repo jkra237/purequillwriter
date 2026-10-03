@@ -48,16 +48,34 @@ immer genau einen Commit, der sie anfasst.
 ### Behoben
 
 - **Werkzeugleiste zeigt in allen Sprachen die deutschen Buchstaben.** Auf den
-  Knöpfen steht fest verdrahtet `<b>F</b>`, `<i>K</i>`, `<u>U</u>` (Fett,
-  Kursiv, Unterstrichen); übersetzt ist nur der Tooltip. Betrifft sechs von
-  sieben Sprachen — Englisch erwartet B/I/U, Französisch G/I/S, Italienisch
-  G/C/S, Spanisch N/C/S. Zu sehen auch auf den Store-Bildern.
-  Braucht drei neue Übersetzungsschlüssel in sechs Sprachen und je eine Zeile
-  bei `data-cmd="bold"`/`"italic"`/`"underline"` (um Zeile 6831).
-  **Danach müssen die Bildschirmfotos neu aufgenommen werden**, die alten
-  zeigen dann das Falsche.
+  Knöpfen stand fest verdrahtet `F`/`K`/`U`; übersetzt war nur der Tooltip.
+  Jetzt tragen sie die Buchstaben, die Word in der jeweiligen Sprache zeigt:
+
+  | | de | en | fr | es | it | pt | pl |
+  |---|---|---|---|---|---|---|---|
+  | Fett | F | B | G | N | G | N | B |
+  | Kursiv | K | I | I | K | C | I | I |
+  | Unterstrichen | U | U | S | S | S | S | U |
+
+  Spanisch ist wirklich **K** für *cursiva*, nicht C — so steht es in Word.
+  Gelöst über `PL()` statt über drei neue `tr()`-Schlüssel: ein einzelner
+  Buchstabe als Wörterbuchschlüssel wäre mehrdeutig.
+  Die Tastenkürzel bleiben in allen Sprachen Strg+B/I/U (die erbt das
+  Programm vom Browser); die Tooltips sagten das schon vorher richtig.
+  **Die Bildschirmfotos müssen neu aufgenommen werden**, die alten zeigen
+  noch F/K/U.
 
 ### Offen, noch nicht entschieden
+
+- **Tastenkürzel für Fett/Kursiv/Unterstrichen je Sprache** — Kandidat für
+  1.1, nicht für 1.0.x. Die Knöpfe zeigen seit dem Fix oben Words Buchstaben,
+  die Kürzel sind aber überall Strg+B/I/U (vom Browser geerbt). Word belegt
+  in Spanisch und Portugiesisch **Strg+N/K/S**, in Italienisch und
+  Französisch ebenfalls eigene. Wer aus Gewohnheit Strg+N drückt, bekommt in
+  der Desktop-Fassung ein neues Dokument statt Fett. Zu klären: Kürzel je
+  Sprache in `KUERZEL` aufnehmen (stehen dort bisher bewusst nicht), und was
+  dann mit Strg+N (neues Dokument) und Strg+S (Zwischenstand) passiert.
+  Vorher für it/fr nachschlagen statt annehmen.
 
 - **Bildschirmfotos nur für de und en.** Die Listings für fr, es, it, pl und pt
   tragen den englischen Satz. Die Aufnahmewerkzeuge liegen in

@@ -6828,9 +6828,9 @@ function drawTools(){
         <button class="cbdrop" id="fSizeList" aria-label="${tr("Größe wählen")}"></button>
       </span>
       <div class="sep"></div>
-      <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>F</b></button>
-      <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>K</i></button>
-      <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>U</u></button>
+      <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>${PL("F","B","G","N","N","B","G")}</b></button>
+      <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>${PL("K","I","I","K","I","I","C")}</i></button>
+      <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>${PL("U","U","S","S","S","U","S")}</u></button>
       <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
         <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
