@@ -90,7 +90,23 @@ immer genau einen Commit, der sie anfasst.
   es, fr, it, pl keine einzige Änderung; in pt fallen genau „pela/pelo“ und
   „eram“ heraus. Mit eingeschalteten Füllwörtern erscheinen sie weiter.
 
-### Beim Aufnehmen gefunden, noch nicht behoben
+- **Word-Export rückte Zeilen ein, die im Editor bündig standen.** Gemeldet
+  an einem echten Bewerbungsschreiben: zwei Adresszeilen eines importierten
+  Briefs begannen mit 9 bzw. 23 gewöhnlichen Leerzeichen. Der Editor zeigt
+  sie nicht (CSS fasst Leerraum zusammen und lässt ihn am Zeilenanfang weg),
+  der Export schrieb sie wörtlich, Word zeigte sie — das Programm zeigte also
+  etwas anderes, als es speicherte. `inlineAblaufen()` behandelt Leerraum
+  jetzt wie der Editor: Folgen aus Leerzeichen/Tab/Zeilenumbruch werden ein
+  Leerzeichen, am Absatzanfang und nach `<br>` fällt es weg. Ausgenommen:
+  das geschützte Leerzeichen (bleibt auch im Editor stehen), `<pre>`
+  (pre-wrap) sowie Kopf- und Fußzeile (pre-wrap, laufen nicht hier durch).
+  Geprüft: sieben Fälle, Word-Text gegen `innerText` des Editors, alle
+  gleich; `check-export.mjs` 252/252.
+  Wer das Dokument schon mit 1.0.0 gespeichert hat: Datei mit 1.0.1 erneut
+  speichern, die Leerzeichen stecken noch im Dokument, werden aber nicht
+  mehr exportiert.
+
+### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.1.
   `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
@@ -107,6 +123,9 @@ immer genau einen Commit, der sie anfasst.
   Apostroph, mit geradem `'` nicht (gemessen). Die Prüfung setzt `’`
   nicht mit `'` gleich. Französisch `d’abord` geht trotzdem durch, das
   dortige Wörterbuch kennt beide Zeichen selbst.
+- **`<pre>` im Word-Export:** Zeilenumbrüche darin landen als rohes
+  Zeilenende in `<w:t>`; Word macht daraus keine neue Zeile. Älter als der Leerraum-Fix,
+  dort unverändert gelassen.
 - **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.

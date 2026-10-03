@@ -9025,10 +9025,28 @@ function farbHex(css){
 }
 /* Läuft Inline-Inhalt eines Blocks ab und sammelt Läufe (Runs) auf - <br>
    wird zum weichen Zeilenumbruch INNERHALB desselben Absatzes, nicht zu
-   einem neuen, weil das der optischen Wirkung im Editor entspricht. */
-function inlineAblaufen(node,st,runs,links,ctx){
+   einem neuen, weil das der optischen Wirkung im Editor entspricht.
+
+   Leerraum wie im Editor: dort fasst CSS (white-space:normal) Folgen aus
+   Leerzeichen, Tabs und Zeilenumbrüchen zu einem Leerzeichen zusammen und
+   lässt sie am Zeilenanfang ganz weg. Word dagegen zeigt jedes Zeichen.
+   Ein importierter Brief mit „         Neuer Wall 35“ stand im Editor bündig
+   und in Word eingerückt — das Programm zeigte etwas anderes, als es
+   speicherte. ws.vorn heißt „davor steht nichts Sichtbares oder schon ein
+   Leerzeichen“; das geschützte Leerzeichen (U+00A0) zählt nicht als
+   Leerraum, das bleibt auch im Editor stehen. In <pre> gilt pre-wrap,
+   dort bleibt alles wörtlich (ws.roh). */
+function inlineAblaufen(node,st,runs,links,ctx,ws){
+  if(!ws)ws={vorn:true,roh:false};
   node.childNodes.forEach(n=>{
-    if(n.nodeType===3){runs.push(runeXml(n.nodeValue,st));return}
+    if(n.nodeType===3){
+      let t=n.nodeValue;
+      if(!ws.roh){
+        t=t.replace(/[ \t\n\r\f]+/g," ");
+        if(ws.vorn&&t[0]===" ")t=t.slice(1);
+        if(t)ws.vorn=t[t.length-1]===" ";
+      }
+      runs.push(runeXml(t,st));return}
     if(n.nodeType!==1)return;
     const tag=n.tagName.toLowerCase();
     /* Eine echte Fußnote statt der generischen sup-Behandlung weiter unten -
@@ -9045,9 +9063,10 @@ function inlineAblaufen(node,st,runs,links,ctx){
         ctx.footnotes.push({id:fid,text:(ctx.footnoteLookup&&ctx.footnoteLookup.get(n.dataset.fn))||""});
       }
       runs.push(`<w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="${fid}"/></w:r>`);
+      ws.vorn=false;
       return;
     }
-    if(tag==="br"){runs.push("<w:r><w:br/></w:r>");return}
+    if(tag==="br"){runs.push("<w:r><w:br/></w:r>");ws.vorn=true;return}
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
     if(tag==="b"||tag==="strong"||n.style?.fontWeight>="600")neu.b=true;
@@ -9060,13 +9079,14 @@ function inlineAblaufen(node,st,runs,links,ctx){
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
     if(tag==="a"){neu.link=true;links.push({href:n.getAttribute("href")||"",start:runs.length})}
-    inlineAblaufen(n,neu,runs,links,ctx);
+    inlineAblaufen(n,neu,runs,links,ctx,ws);
     if(tag==="a")links[links.length-1].end=runs.length;
   });
 }
 function absatzXml(el,pPrExtra,basisStil,ctx){
   const runs=[],links=[];
-  inlineAblaufen(el,basisStil||{},runs,links,ctx);
+  const roh=!!(el.closest&&el.closest("pre"))||!!(el.querySelector&&el.querySelector("pre"));
+  inlineAblaufen(el,basisStil||{},runs,links,ctx,{vorn:true,roh});
   /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
      merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
      und der Gesamtliste der Beziehungen hinzufügen kann. */
