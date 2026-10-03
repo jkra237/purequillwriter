@@ -62,8 +62,36 @@ immer genau einen Commit, der sie anfasst.
   Buchstabe als Wörterbuchschlüssel wäre mehrdeutig.
   Die Tastenkürzel bleiben in allen Sprachen Strg+B/I/U (die erbt das
   Programm vom Browser); die Tooltips sagten das schon vorher richtig.
-  **Die Bildschirmfotos müssen neu aufgenommen werden**, die alten zeigen
-  noch F/K/U.
+  Die Bildschirmfotos sind am 2026-10-03 neu aufgenommen — jetzt für alle
+  **sieben** Listings, vorher trugen fr/es/it/pl/pt die englischen. Liegen in
+  `suvantra-site/store-einreichung/<locale>/` und `store-screenshots.zip`;
+  **im Partner Center hochzuladen** mit der 1.0.1-Einreichung. Werkzeug:
+  `cc test/werkzeuge/bilder/screenshots.js <sprache>`.
+
+- **Der Farbschema-Dialog nannte „Papier“ den Standard** („Warmes Naturweiß,
+  Standard“, in allen sieben Sprachen), obwohl neue Nutzer Azur bekommen.
+  Der Hinweis steht jetzt nicht mehr in einer Beschreibung, sondern hängt
+  sich an das Schema in `STANDARD_THEMA` — dieselbe Konstante speist die
+  Voreinstellung und das Sicherheitsnetz für unbekannte Schemata, die drei
+  Stellen können nicht mehr auseinanderlaufen. Kein neuer
+  Übersetzungsschlüssel, `tr("Standard")` gab es schon.
+  Das Farbschema-Ladenbild zeigt Papier gewählt und trug darum den alten
+  Text; es ist für alle sieben Sprachen noch am selben Tag neu aufgenommen.
+
+### Beim Aufnehmen gefunden, noch nicht behoben
+
+- **Wortformen-Gruppierung fasst Fremdes zusammen.** Französisch: „d’abord“
+  landet bei „bord“ (die Elision „d’“ wird abgetrennt, dann passt „abord“ als
+  Form). Portugiesisch: „pela“, „pelo“ und „peles“ werden ein Wort —
+  Präposition und „Häute“. Zugleich steht „pela/pelo“ offenbar nicht in der
+  portugiesischen Füllwortliste, sonst wäre es bei ausgeschalteten
+  Füllwörtern gar nicht erschienen.
+- **Portugiesisch: „marca-d’água“ gilt als Fehler**, mit typografischem
+  Apostroph. Nicht geprüft, ob es mit geradem `'` durchgeht — falls ja,
+  behandelt die Prüfung `’` in Wörtern nicht wie `'`.
+- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
+  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
+  Haken samt Hinweis — ehrlich, aber kein Werbebild.
 
 ### Offen, noch nicht entschieden
 
@@ -77,10 +105,6 @@ immer genau einen Commit, der sie anfasst.
   dann mit Strg+N (neues Dokument) und Strg+S (Zwischenstand) passiert.
   Vorher für it/fr nachschlagen statt annehmen.
 
-- **Bildschirmfotos nur für de und en.** Die Listings für fr, es, it, pl und pt
-  tragen den englischen Satz. Die Aufnahmewerkzeuge liegen in
-  `cc test/werkzeuge/bilder/` (`screenshots-de.js`, `screenshots-en.js`), fünf
-  weitere Sprachen wären eine Abwandlung davon.
 - **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
   Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
   (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;

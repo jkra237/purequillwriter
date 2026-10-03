@@ -1671,7 +1671,7 @@ const THEMES=[
   {k:"salbei",   n:"Salbei",     d:"Pastellgrünes Salbei, wie eine Wiese im Morgennebel", c:["#F6F8F3","#C9D4C3","#4F7A52"]},
   {k:"lavendelfeld",n:"Lavendelfeld",d:"Salbeigrün mit lavendelfarbenem Akzent, wie Lavendel im Kräuterbeet", c:["#F7F8F3","#C7CDBE","#6E5A96"]},
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
-  {k:"papier",   n:"Papier",     d:"Warmes Naturweiß, Standard",        c:["#FCFBF8","#8B8F94","#8C3B2E"]},
+  {k:"papier",   n:"Papier",     d:"Warmes Naturweiß",                  c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
   {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
@@ -1679,6 +1679,10 @@ const THEMES=[
   {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
   {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]}
 ];
+/* Das Schema neuer Nutzer. Eine Stelle für Voreinstellung, Sicherheitsnetz und
+   den Hinweis „Standard“ im Farbschema-Dialog — der stand vorher fest in der
+   Beschreibung von Papier, obwohl neue Nutzer längst Azur bekamen. */
+const STANDARD_THEMA="azur";
 const ICOSZ=(p,px,sw)=>`<svg viewBox="0 0 24 24" style="width:${px}px;height:${px}px;fill:none;stroke:currentColor;stroke-width:${sw};stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const ICO=p=>ICOSZ(p,16,1.6);
 /* Symbolknoepfe (.tb) sind 26x24 gross, das Symbol darin mass 16px — das
@@ -2342,7 +2346,7 @@ en:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"The browser reset access after the restart. Connect once and writing resumes.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"This document is also written to the file on every save.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Keep this document as a file as well. From then on every save writes to it too — including into a folder that Dropbox or OneDrive syncs.",
-  "Warmes Naturweiß, Standard":"Warm natural white, standard",
+  "Warmes Naturweiß":"Warm natural white",
   "Azur":"Azure",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Light system grey of modern Mac apps — reminiscent of Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Neutral off-white of current Windows word processors — reminiscent of Word",
@@ -3109,7 +3113,7 @@ fr:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"Le navigateur a réinitialisé l'accès après le redémarrage. Connectez-vous une fois et l'écriture reprend.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Ce document est aussi écrit dans le fichier à chaque enregistrement.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Conserver aussi ce document sous forme de fichier. Dès lors, chaque enregistrement y écrit également — y compris dans un dossier synchronisé par Dropbox ou OneDrive.",
-  "Warmes Naturweiß, Standard":"Blanc naturel chaud, standard",
+  "Warmes Naturweiß":"Blanc naturel chaud",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris système clair des applications Mac modernes — rappelle Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Gris-blanc neutre des traitements de texte Windows actuels — rappelle Word",
@@ -3876,7 +3880,7 @@ es:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"El navegador restableció el acceso tras el reinicio. Conecta una vez y se sigue escribiendo.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Este documento también se escribe en el archivo cada vez que se guarda.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Guardar este documento también como archivo. A partir de entonces cada guardado escribe en él — también en una carpeta que Dropbox u OneDrive sincroniza.",
-  "Warmes Naturweiß, Standard":"Blanco natural cálido, estándar",
+  "Warmes Naturweiß":"Blanco natural cálido",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Gris de sistema claro de las apps Mac modernas — recuerda a Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Gris blanquecino neutro de los procesadores de texto Windows actuales — recuerda a Word",
@@ -4643,7 +4647,7 @@ pt:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"O navegador redefiniu o acesso após reiniciar. Conecte uma vez e a gravação continua.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Este documento também é gravado no arquivo a cada salvamento.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Manter este documento também como arquivo. A partir daí, cada salvamento grava nele — inclusive numa pasta que o Dropbox ou o OneDrive sincroniza.",
-  "Warmes Naturweiß, Standard":"Branco natural quente, padrão",
+  "Warmes Naturweiß":"Branco natural quente",
   "Azur":"Azur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Cinza de sistema claro dos apps Mac modernos — lembra o Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Cinza-branco neutro dos processadores de texto Windows atuais — lembra o Word",
@@ -5410,7 +5414,7 @@ pl:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"Przeglądarka zresetowała dostęp po ponownym uruchomieniu. Połącz raz, a zapis będzie kontynuowany.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Ten dokument jest zapisywany także do pliku przy każdym zapisie.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Zachowaj ten dokument także jako plik. Od tej pory każdy zapis trafia również tam — także do folderu synchronizowanego przez Dropbox lub OneDrive.",
-  "Warmes Naturweiß, Standard":"Ciepła naturalna biel, standard",
+  "Warmes Naturweiß":"Ciepła naturalna biel",
   "Azur":"Lazur",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Jasny systemowy szary nowoczesnych aplikacji Mac — przypomina Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Neutralna biało-szara barwa dzisiejszych edytorów Windows — przypomina Word",
@@ -6187,7 +6191,7 @@ it:{
   "Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.":"Il browser ha reimpostato l'accesso dopo il riavvio. Collega una volta e la scrittura riprende.",
   "Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben.":"Questo documento viene scritto anche nel file a ogni salvataggio.",
   "Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.":"Conserva questo documento anche come file. Da quel momento ogni salvataggio scrive anche lì — anche in una cartella sincronizzata da Dropbox o OneDrive.",
-  "Warmes Naturweiß, Standard":"Bianco naturale caldo, predefinito",
+  "Warmes Naturweiß":"Bianco naturale caldo",
   "Azur":"Azzurro",
   "Helles Systemgrau moderner Mac-Programme — erinnert an Pages":"Grigio di sistema chiaro delle app Mac moderne — ricorda Pages",
   "Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word":"Bianco-grigio neutro degli elaboratori di testo Windows attuali — ricorda Word",
@@ -6475,7 +6479,7 @@ const SYS_SPELL_LANGS=["de","en","fr","es","it","pt","pl"];
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
   settings:{font:"Georgia",size:12,autosave:true,interval:30,
-    lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:"azur"},
+    lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA},
   gsort:"alpha",marks:false,zoom:1.2,fitPage:false,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
@@ -6505,10 +6509,10 @@ if(S.settings&&S.settings.theme==="brotkasten")S.settings.theme="enzian";/* beid
 if(S.settings&&(S.settings.theme==="sonnenaufgang"||S.settings.theme==="sonnenuntergang"))S.settings.theme="papier";/* beide: warmes Naturweiß mit Farbakzent */
 if(S.settings&&(S.settings.theme==="hercules"||S.settings.theme==="solar"))S.settings.theme="tinte";
 /* Sicherheitsnetz: ein unbekanntes Schema hätte keine Farben, aber einen Namen */
-if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme="azur";
+if(S.settings&&!THEMES.some(t=>t.k===S.settings.theme))S.settings.theme=STANDARD_THEMA;
 if(S.guides===undefined)S.guides=true;
 if(!S.active)S.active=S.docs[0].id;
-if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:"azur"};
+if(!S.settings)S.settings={font:"Georgia",size:12,autosave:true,interval:30,lang:"en",uiLang:"en",theme:STANDARD_THEMA};
 /* Fehlt die Oberflächensprache ganz (sehr alter Zustand von vor dem Feld), gab
    es nie eine Wahl — dann darf die Systemsprache einspringen wie beim Erststart. */
 if(S.settings&&!S.settings.uiLang)S.settings.uiLang=SYS_LANG;
@@ -16464,7 +16468,7 @@ function themeDialog(){
      es ins Leere. */
   const info=k=>{const el=$("#thInfo");if(!el)return;
     const t=THEMES.find(x=>x.k===k)||THEMES[0];
-    el.innerHTML=`<b>${tr(t.n)}</b> · ${tr(t.d)}`};
+    el.innerHTML=`<b>${tr(t.n)}</b> · ${tr(t.d)}${t.k===STANDARD_THEMA?", "+tr("Standard"):""}`};
   info(gewaehlt);
   const zeige=k=>{document.documentElement.dataset.theme=k};
   $("#ovl").querySelectorAll("[data-t]").forEach(b=>{
