@@ -45,8 +45,54 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
-Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
-(Versionsregel oben).
+### Nebenbei gefunden, noch nicht behoben
+
+- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
+  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
+  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
+  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
+  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
+  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
+  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
+  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
+  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
+  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
+  unter „Behoben“.
+- **Englische Vorschläge übersehen fehlende Apostrophe:** für „doesnt“
+  kommen „doesant“, „doesent“ …, nicht „doesn’t“. Bestand schon vorher.
+- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
+  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
+  Haken samt Hinweis — ehrlich, aber kein Werbebild.
+
+### Offen, noch nicht entschieden
+
+- **Tastenkürzel für Fett/Kursiv/Unterstrichen je Sprache** — Kandidat für
+  1.2, nicht für 1.1.x. Die Knöpfe zeigen seit 1.1.0 Words Buchstaben,
+  die Kürzel sind aber überall Strg+B/I/U (vom Browser geerbt). Word belegt
+  in Spanisch und Portugiesisch **Strg+N/K/S**, in Italienisch und
+  Französisch ebenfalls eigene. Wer aus Gewohnheit Strg+N drückt, bekommt in
+  der Desktop-Fassung ein neues Dokument statt Fett. Zu klären: Kürzel je
+  Sprache in `KUERZEL` aufnehmen (stehen dort bisher bewusst nicht), und was
+  dann mit Strg+N (neues Dokument) und Strg+S passiert — seit 1.1.0 ist
+  Strg+S „Speichern“, Unterstrichen auf Strg+S würde also das Speichern
+  verdrängen.
+  Vorher für it/fr nachschlagen statt annehmen.
+
+- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
+  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
+  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
+  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
+  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
+  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
+
+---
+
+## 1.1.0 — 2026-10-04
+
+Erste Folgeversion im Store. Tag `v1.1.0` auf `631d692`, Pakete x64 und
+arm64 in einer Einreichung, „Neuigkeiten“ in sieben Sprachen
+(`suvantra-site/store-einreichung/Neuigkeiten-1.1.0.txt`). 1.1.0 statt
+1.0.1, weil mit „Speichern“ eine neue Funktion dabei ist.
 
 ### Neu
 
@@ -272,44 +318,6 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
   gemeldete und der Kaltstart mit leerem Speicher) ergeben je einen Reiter,
   drei Gegenproben mit sichtbaren Reitern verhalten sich unverändert, keine
   Fehler.
-
-### Nebenbei gefunden, noch nicht behoben
-
-- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.1.
-  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
-  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
-  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
-  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
-  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
-  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
-  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
-  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
-  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
-  unter „Behoben“.
-- **Englische Vorschläge übersehen fehlende Apostrophe:** für „doesnt“
-  kommen „doesant“, „doesent“ …, nicht „doesn’t“. Bestand schon vorher.
-- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
-  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
-  Haken samt Hinweis — ehrlich, aber kein Werbebild.
-
-### Offen, noch nicht entschieden
-
-- **Tastenkürzel für Fett/Kursiv/Unterstrichen je Sprache** — Kandidat für
-  1.1, nicht für 1.0.x. Die Knöpfe zeigen seit dem Fix oben Words Buchstaben,
-  die Kürzel sind aber überall Strg+B/I/U (vom Browser geerbt). Word belegt
-  in Spanisch und Portugiesisch **Strg+N/K/S**, in Italienisch und
-  Französisch ebenfalls eigene. Wer aus Gewohnheit Strg+N drückt, bekommt in
-  der Desktop-Fassung ein neues Dokument statt Fett. Zu klären: Kürzel je
-  Sprache in `KUERZEL` aufnehmen (stehen dort bisher bewusst nicht), und was
-  dann mit Strg+N (neues Dokument) und Strg+S (Zwischenstand) passiert.
-  Vorher für it/fr nachschlagen statt annehmen.
-
-- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
-  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
-  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
-  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
-  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
-  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
 
 ---
 
