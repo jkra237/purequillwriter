@@ -11335,7 +11335,11 @@ async function zipDokument(name,buf){
    Sicherungen sind im Gegensatz zu Exporten wieder einlesbar. Eine Vollsicherung
    ersetzt den Bestand, Teilsicherungen werden hinzugefügt. */
 const PQW=1;
-const safeName=s=>String(s||"").replace(/[\\/:*?"<>|\n]/g,"-").trim().slice(0,60)||"PureQuill";
+/* Satzzeichen am Ende fallen weg, wie bei Word: der Titel kommt oft aus der
+   ersten Zeile, und aus „Sehr geehrte Damen und Herren,“ wurde sonst
+   „…Herren,.docx“. Windows verträgt ohnehin keinen Punkt am Namensende. */
+const safeName=s=>String(s||"").replace(/[\\/:*?"<>|\n]/g,"-").trim().slice(0,60)
+  .replace(/[\s.,;:!?…–—-]+$/,"")||"PureQuill";
 function notesOfDoc(d){
   const t=document.createElement("div");t.innerHTML=d.html||"";
   const ids=new Set();t.querySelectorAll(".anch").forEach(s=>ids.add(s.dataset.n));

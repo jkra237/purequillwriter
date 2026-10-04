@@ -134,6 +134,9 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
   Umlauf geprüft: `line="259" after="160"` hinein und genauso wieder heraus.
   Dabei: `psOf()` ließ einen Absatzabstand von 0 als „nicht gesetzt“
   durchfallen (`||`) — jetzt gilt 0.
+- **Dateiname beim Speichern** endete auf das Satzzeichen der ersten Zeile
+  („Sehr geehrte Damen und Herren,.docx“). `safeName()` streicht Satzzeichen
+  am Ende, wie Word; gilt für alle Exporte und Sicherungen.
 - **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
   (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
   Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
