@@ -9190,6 +9190,18 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
         t=t.replace(/[ \t\n\r\f]+/g," ");
         if(ws.vorn&&t[0]===" ")t=t.slice(1);
         if(t)ws.vorn=t[t.length-1]===" ";
+      }else if(/[\n\t]/.test(t)){
+        /* In <pre> sind Zeilenende und Tab echte Zeichen. In <w:t> wären
+           sie bloßer Leerraum, Word zeigte den ganzen Block in einer Zeile —
+           darum als <w:br/> und <w:tab/> eigener Läufe. */
+        t.replace(/\r\n?/g,"\n").split("\n").forEach((zeile,i)=>{
+          if(i)runs.push("<w:r><w:br/></w:r>");
+          zeile.split("\t").forEach((teil,j)=>{
+            if(j)runs.push(`<w:r>${rPrXml(st)}<w:tab/></w:r>`);
+            runs.push(runeXml(teil,st));
+          });
+        });
+        return;
       }
       runs.push(runeXml(t,st));return}
     if(n.nodeType!==1)return;

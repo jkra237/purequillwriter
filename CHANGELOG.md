@@ -142,6 +142,9 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
   französische Wörterbuch bringt dafür eine ICONV-Umsetzung mit. `check()`
   versucht jetzt die andere Apostroph-Form; Vorschläge kommen im Apostroph des
   Textes.
+- **Code-Blöcke (`<pre>`) im Word-Export:** Zeilenenden und Tabs landeten
+  als Leerraum in `<w:t>`, Word zeigte alles in einer Zeile. Jetzt
+  `<w:br/>` und `<w:tab/>`.
 - **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
   (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
   Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
