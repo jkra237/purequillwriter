@@ -126,6 +126,14 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
 
 ### Behoben
 
+- **Zeilen- und Absatzabstand aus Word-Dateien** wurden nicht gelesen: eine
+  Datei mit 1,08 und 8 pt ging beim Speichern mit der eigenen Voreinstellung
+  zurück. `docxAbstand()` liest `w:spacing` (nur `lineRule="auto"`,
+  „exakt“/„mindestens“ bleiben außen vor) aus Vorgaben, Vorlagenkette und
+  Absatz; `docxGrundschrift()` nimmt den Wert, der am meisten Text trägt.
+  Umlauf geprüft: `line="259" after="160"` hinein und genauso wieder heraus.
+  Dabei: `psOf()` ließ einen Absatzabstand von 0 als „nicht gesetzt“
+  durchfallen (`||`) — jetzt gilt 0.
 - **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
   (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
   Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
@@ -245,13 +253,10 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
   trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
   Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
   unter „Behoben“.
-- **Portugiesisch: „marca-d’água“ gilt als Fehler** mit typografischem
-  Apostroph, mit geradem `'` nicht (gemessen). Die Prüfung setzt `’`
-  nicht mit `'` gleich. Französisch `d’abord` geht trotzdem durch, das
-  dortige Wörterbuch kennt beide Zeichen selbst.
-- **`<pre>` im Word-Export:** Zeilenumbrüche darin landen als rohes
-  Zeilenende in `<w:t>`; Word macht daraus keine neue Zeile. Älter als der Leerraum-Fix,
-  dort unverändert gelassen.
+- **Englische Vorschläge übersehen fehlende Apostrophe:** für „doesnt“
+  kommen „doesant“, „doesent“ …, nicht „doesn’t“. Bestand schon vorher.
+- **ODT- und RTF-Dateien** bekommen Schrift und Größe noch nicht aus der
+  Datei, nur `.docx`.
 - **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.

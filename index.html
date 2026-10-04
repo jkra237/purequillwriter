@@ -1637,7 +1637,9 @@ const ALTE_VORGABEN={font:"Georgia",size:12,lh:1.62,fmt:"a4"};
    Falle. Eine kurze Liste sinnvoller Werte nimmt die Entscheidung ab. */
 const SNAPSHOTS=[["alle 30 Sekunden",30],["jede Minute",60],["alle 2 Minuten",120],["alle 5 Minuten",300]];
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
-const psOf=d=>d.ps||S.settings.ps||.82;
+/* 0 ist ein gültiger Absatzabstand (häufig in Word-Dateien) — darum nicht
+   „||“, das 0 als „nicht gesetzt“ durchfallen ließe. */
+const psOf=d=>d.ps!=null?d.ps:(S.settings.ps!=null?S.settings.ps:.82);
 /* Zitatstile in der Reihenfolge „Zitat 1/2/3". Der leere Schlüssel ist der
    Grundstil: er steht als gar kein Attribut am Zitat, siehe CSS oben.
    Der Name steht im Format-Menü, die Nummer in der Werkzeugleiste — beides
@@ -9494,7 +9496,7 @@ const SPEICHERN=()=>PL("Speichern","Save","Enregistrer","Guardar","Salvar","Zapi
    die Datei nicht als „geändert“ melden. */
 function dokStand(d){
   const s=JSON.stringify([d.html||"",d.fmt||null,d.hdr||null,d.ftr||null,
-    d.footnotes||null,d.size||null,d.font||null,d.lh||null,d.ps||null]);
+    d.footnotes||null,d.size||null,d.font||null,d.lh||null,d.ps!=null?d.ps:null]);
   let h=0x811c9dc5;
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}
   return (h>>>0).toString(36)+":"+s.length;
@@ -10524,6 +10526,9 @@ function neuesDokumentAus(name,erg){
      auch so zurück. */
   if(b.size)d.size=b.size;
   if(b.font)d.font=b.font;
+  /* Ebenso die Abstände: sonst ginge eine 1,08-Datei mit 1,15 zurück */
+  if(b.lh)d.lh=b.lh;
+  if(b.ps!=null)d.ps=b.ps;
   d.glossaryId=defaultGlossId();
   platzhalterAbloesen();
   S.docs.push(d);S.active=d.id;
@@ -10709,16 +10714,38 @@ function docxSchriftInListe(n){
   const k=String(n).trim().toLowerCase();
   return FONTS.find(f=>f.toLowerCase()===k)||SCHRIFT_NAEHE[k]||null;
 }
+/* w:spacing: Zeilenabstand als Vielfaches (lineRule auto oder fehlend:
+   line/240 — dieselbe Rechnung, die PureQuill seit 1.1 hat) und Abstand nach
+   dem Absatz in Punkt. „exakt“ und „mindestens“ lassen sich nicht als
+   Vielfaches ausdrücken und bleiben außen vor. */
+function docxAbstand(sp){
+  const o={};if(!sp)return o;
+  const line=parseInt(xattr(sp,"line"),10),regel=String(xattr(sp,"lineRule")||"auto");
+  if(line>0&&regel==="auto")o.lh=line/240;
+  const nach=parseInt(xattr(sp,"after"),10);
+  if(nach>=0&&!isNaN(nach))o.nachPt=nach/20;
+  return o;
+}
+function docxAbstandKette(stile,id){
+  const o={};docxKette(stile,id).forEach(s=>Object.assign(o,s.sp||{}));return o;
+}
 /* Grundschrift = was im Fließtext am meisten Text trägt, nicht bloß die
    Vorgabe in docDefaults: in echten Dateien steht dort oft Calibri, während
    jeder Lauf ausdrücklich Arial trägt. Überschriften zählen nicht mit. */
 function docxGrundschrift(body,def,stile,thema){
-  const gr=new Map(),sch=new Map();
+  const gr=new Map(),sch=new Map(),zab=new Map(),nab=new Map();
   const plus=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
   for(const p of body.getElementsByTagNameNS("*","p")){
-    const vorlage=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
+    const pPr=KIND(p,"pPr");
+    const vorlage=xattrN(KIND(pPr,"pStyle"),"val")||"";
     if(docxUeberschrift(stile,vorlage))continue;
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
+    /* Absatzabstände: Vorgaben, Vorlagenkette, direkte Angabe am Absatz.
+       Gewichtet mit der Textmenge des Absatzes, Leerabsätze zählen nicht. */
+    const sp=Object.assign({},def._sp||{},docxAbstandKette(stile,vorlage),docxAbstand(KIND(pPr,"spacing")));
+    let laenge=0;for(const t of p.getElementsByTagNameNS("*","t"))laenge+=t.textContent.length;
+    if(laenge){if(sp.lh)plus(zab,Math.round(sp.lh*100)/100,laenge);
+      if(sp.nachPt!==undefined)plus(nab,sp.nachPt,laenge)}
     for(const r of p.getElementsByTagNameNS("*","r")){
       let n=0;for(const t of r.children)if(t.localName==="t")n+=t.textContent.length;
       if(!n)continue;
@@ -10731,9 +10758,15 @@ function docxGrundschrift(body,def,stile,thema){
     }
   }
   const top=m=>[...m.entries()].sort((a,b)=>b[1]-a[1])[0];
-  const g=top(gr),f=top(sch);
-  return {size:g?Math.min(FS_MAX,Math.max(FS_MIN,Math.round(g[0]*2)/2)):null,
-    font:f?docxSchriftInListe(f[0]):null,quelle:f?f[0]:null};
+  const g=top(gr),f=top(sch),z=top(zab),n=top(nab);
+  const size=g?Math.min(FS_MAX,Math.max(FS_MIN,Math.round(g[0]*2)/2)):null;
+  /* Absatzabstand führt PureQuill in em der Schriftgröße (psOf). Die
+     Rechnung beim Export (ps * Größe * 20 Twips) gibt den Wert unverändert
+     zurück. Ohne bekannte Größe keine Umrechnung. */
+  const bezug=size||S.settings.size||11;
+  return {size,font:f?docxSchriftInListe(f[0]):null,quelle:f?f[0]:null,
+    lh:z?Math.min(3,Math.max(0.8,z[0])):null,
+    ps:n?Math.round(n[0]/bezug*1000)/1000:null};
 }
 const KIND=(el,n)=>el?[...el.children].find(c=>c.localName===n):null;
 const xattrN=(el,n)=>el?xattr(el,n):null;
@@ -10747,6 +10780,9 @@ function docxStile(xml){
   const wurzel=dom.documentElement;
   const dd=KIND(wurzel,"docDefaults");
   const def=docxRPr(KIND(KIND(dd,"rPrDefault"),"rPr"));
+  /* Absatzabstände der Vorgaben hängen als _sp an def, damit sie dieselben
+     Wege gehen wie die Zeichenformate (siehe docxGrundschrift). */
+  def._sp=docxAbstand(KIND(KIND(KIND(dd,"pPrDefault"),"pPr"),"spacing"));
   const stile={};
   [...wurzel.children].filter(e=>e.localName==="style").forEach(e=>{
     const id=xattr(e,"styleId");if(!id)return;
@@ -10756,6 +10792,7 @@ function docxStile(xml){
       name:String(xattrN(KIND(e,"name"),"val")||""),
       erbt:xattrN(KIND(e,"basedOn"),"val")||"",
       rPr:docxRPr(KIND(e,"rPr")),
+      sp:docxAbstand(KIND(pPr,"spacing")),
       gliederung:ol?parseInt(xattr(ol,"val"),10):null
     };
   });
@@ -11187,7 +11224,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
     bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
     hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer"),
-    size:gs.size,font:gs.font};
+    size:gs.size,font:gs.font,lh:gs.lh,ps:gs.ps};
 }
 
 /* --- OpenDocument (LibreOffice) --- */
@@ -12508,7 +12545,7 @@ function formatDialog(mode,onDone){
      Einstellungen erbte, steht hier sichtbar zur Wahl (wie Word es
      vorbelegt). Beim Ändern des Seitenformats gehören Schrift und Abstände
      in die Werkzeugleiste und das Format-Menü. */
-  let schrift=S.settings.font||"Calibri",groesse=S.settings.size||11,abs=S.settings.ps||.82;
+  let schrift=S.settings.font||"Calibri",groesse=S.settings.size||11,abs=S.settings.ps!=null?S.settings.ps:.82;
   /* Eigene Maße lassen sich ohne die Felder nicht eingeben - dort von
      vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
   let offen=sel==="custom";
