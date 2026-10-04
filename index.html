@@ -14934,6 +14934,15 @@ function spMake(A,words,idx){
         const parts=word.split(b).filter(Boolean);
         if(parts.length>1&&parts.every(p=>checkOne(p)||user.has(p))){ok=true;break}
       }
+      /* Typografischer und gerader Apostroph sind dasselbe Zeichen für den
+         Leser, aber nicht für das Wörterbuch. Das französische bringt eine
+         ICONV-Umsetzung mit, das portugiesische, deutsche, spanische und
+         polnische nicht — dort galt „marca-d’água“ als Fehler, „marca-d'água“
+         nicht. Und die Autokorrektur setzt den typografischen. */
+      if(!ok&&/['’]/.test(word)){
+        const anders=/’/.test(word)?word.replace(/’/g,"'"):word.replace(/'/g,"’");
+        if(user.has(anders)||checkOne(anders))ok=true;
+      }
       if(!ok&&/['’]/.test(word)){
         const parts=word.split(/['’]/).filter(Boolean);
         if(parts.length>1&&parts.every(p=>checkOne(p)))ok=true;
@@ -15109,7 +15118,15 @@ function spMake(A,words,idx){
      Eintraege in der .dic. Genau so ist das italienische Woerterbuch gebaut
      (Vollformen aus Morph-it!, it.aff hat 0 Regeln), und wer darauf aufbaut,
      muss das wissen koennen, statt es an ausbleibender Wirkung zu merken. */
-  return {check,suggest,stem:stemOf,addWord(w){user.add(w);memo.delete(w)},
+  /* Vorschläge im Apostroph des Textes: wer „d’agua“ schreibt, soll nicht
+     „d'água“ angeboten bekommen. Gesucht wird mit dem geraden, den die
+     Wörterbücher führen. */
+  function suggestTypo(raw,limit){
+    const typo=/’/.test(String(raw));
+    const res=suggest(typo?String(raw).replace(/’/g,"'"):raw,limit);
+    return typo?res.map(x=>x.replace(/'/g,"’")):res;
+  }
+  return {check,suggest:suggestTypo,stem:stemOf,addWord(w){user.add(w);memo.delete(w)},
           size:words.size,
           affixe:(A.pfx?A.pfx.size:0)+(A.sfx?A.sfx.size:0)};
 }

@@ -137,6 +137,11 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
 - **Dateiname beim Speichern** endete auf das Satzzeichen der ersten Zeile
   („Sehr geehrte Damen und Herren,.docx“). `safeName()` streicht Satzzeichen
   am Ende, wie Word; gilt für alle Exporte und Sicherungen.
+- **Typografischer Apostroph in der Rechtschreibprüfung:** „marca-d’água“,
+  „don’t“ galten als Fehler, mit geradem Apostroph nicht. Nur das
+  französische Wörterbuch bringt dafür eine ICONV-Umsetzung mit. `check()`
+  versucht jetzt die andere Apostroph-Form; Vorschläge kommen im Apostroph des
+  Textes.
 - **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
   (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
   Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
