@@ -145,6 +145,17 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
 - **Code-Blöcke (`<pre>`) im Word-Export:** Zeilenenden und Tabs landeten
   als Leerraum in `<w:t>`, Word zeigte alles in einer Zeile. Jetzt
   `<w:br/>` und `<w:tab/>`.
+- **ODT- und RTF-Dateien** bekamen Schrift, Größe und Abstände nicht aus der
+  Datei, nur .docx. `odtGrundschrift()` liest `styles.xml` (Vorgabe je
+  Familie, Standardvorlage) und die automatischen Vorlagen aus
+  `content.xml` samt Elternkette, `fo:line-height` in Prozent und
+  `fo:margin-bottom`; `rtfGrundschrift()` liest `\fonttbl`, verfolgt
+  `\f`/`\fs`/`\plain`/`\sl`+`\slmult`/`\sa` je Gruppe und überspringt
+  Kopfdaten, Bilder, Kopf-/Fußzeilen und `\*`-Gruppen. Beide zählen nach
+  Textmenge ohne Überschriften und gehen durch dieselbe Schriftzuordnung
+  (Liberation Serif → Times New Roman usw.). Geprüft mit einer RTF wie aus
+  Word (Arial 11, 1,15, 10 pt; Times im Titel der Kopfdaten zählt nicht) und
+  einer ODT wie aus LibreOffice (Liberation Serif 12, 115 %, 0,247 cm).
 - **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
   (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
   Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
@@ -266,8 +277,6 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
   unter „Behoben“.
 - **Englische Vorschläge übersehen fehlende Apostrophe:** für „doesnt“
   kommen „doesant“, „doesent“ …, nicht „doesn’t“. Bestand schon vorher.
-- **ODT- und RTF-Dateien** bekommen Schrift und Größe noch nicht aus der
-  Datei, nur `.docx`.
 - **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
