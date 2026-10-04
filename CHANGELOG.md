@@ -115,6 +115,17 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
     Läuft beim Start, beim Laden einer Vollsicherung von vor 1.1 und für
     jedes Dokument aus einer älteren Teilsicherung. Gemessen: 25,92 → 25,90
     px und 24,27 → 24,26 px Zeilenhöhe.
+  - **„Als Standard“ ersetzt** — nach Rückmeldung: der Haken sagte weder,
+    was zum Standard wird, noch wofür. Jetzt erscheint im Dialog nur dann
+    eine Zeile, wenn die Wahl vom Standard abweicht: „Neue Dokumente
+    beginnen sonst mit DIN A4 · Calibri 11 · Zeilenabstand 1,15.
+    *Künftig immer so beginnen*“ — ein Klick übernimmt es, eine Meldung
+    bestätigt, was neue Dokumente jetzt bekommen. Im Dialog „Seitenformat“
+    eines bestehenden Dokuments erst, wenn man dort etwas verstellt.
+  - **Einstellungen › Allgemein › Neue Dokumente**: Schrift, Größe,
+    Zeilen- und Absatzabstand, Seitenformat — der Ort, an dem man den
+    Standard sieht und ändert — und „Auf Word-Standard zurücksetzen“
+    (`WORD_VORGABE`).
   - Schriften fallen passend zurück (`schriftStapel()`): serifenlose auf
     Carlito/Arial, nicht mehr auf Serif — Calibri auf einem Rechner ohne
     Calibri erschien sonst als Times.

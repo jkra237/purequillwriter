@@ -1632,6 +1632,17 @@ function dokAufWordWerte(d,alt){
   d.lhw=1;
 }
 const ALTE_VORGABEN={font:"Georgia",size:12,lh:1.62,fmt:"a4"};
+/* Der Word-Standard, auf den „Auf Word-Standard zurücksetzen“ führt */
+const WORD_VORGABE={font:"Calibri",size:11,lh:1.15,ps:.82,fmt:"a4"};
+const zahlText=v=>S.settings.uiLang==="en"?String(v):String(v).replace(".",",");
+/* Was ein neues Dokument gerade bekommt, als kurze Zeile — für den Hinweis im
+   Dialog und die Bestätigung. Ein konkretes Beispiel statt des Worts
+   „Standard“, das neue Nutzer nicht einordnen konnten. */
+function vorgabeText(){
+  const st=S.settings,f=fmtOf({});
+  return tr(f.n)+" · "+(st.font||WORD_VORGABE.font)+" "+zahlText(st.size||WORD_VORGABE.size)+
+    " · "+tr("Zeilenabstand")+" "+zahlText(st.lh||LH_STD);
+}
 /* Abstände für die Zwischenstände des Versionsverlaufs. Vorher ein nacktes
    Zahlenfeld von 5 bis 600 Sekunden — 5 Sekunden ist sinnlos, 600 wäre eine
    Falle. Eine kurze Liste sinnvoller Werte nimmt die Entscheidung ab. */
@@ -2229,6 +2240,11 @@ en:{
   "Standard":"default",
   "Zeilenabstand und Maße":"Line spacing and dimensions",
   "Ränder und Maße":"Margins and dimensions",
+  "Neue Dokumente":"New documents",
+  "Neue Dokumente beginnen sonst mit {x}.":"New documents otherwise start with {x}.",
+  "Künftig immer so beginnen":"Always start like this",
+  "Neue Dokumente beginnen jetzt mit {x}.":"New documents now start with {x}.",
+  "Auf Word-Standard zurücksetzen":"Reset to Word defaults",
   "Als Standard":"As default",
   "Dieses Format für neue Dokumente voreinstellen":"Preset this format for new documents",
   "Nur bei „Eigene Maße“ änderbar":"Only editable with \"Custom size\"",
@@ -3002,6 +3018,11 @@ fr:{
   "Standard":"par défaut",
   "Zeilenabstand und Maße":"Interligne et dimensions",
   "Ränder und Maße":"Marges et dimensions",
+  "Neue Dokumente":"Nouveaux documents",
+  "Neue Dokumente beginnen sonst mit {x}.":"Les nouveaux documents commencent sinon avec {x}.",
+  "Künftig immer so beginnen":"Toujours commencer ainsi",
+  "Neue Dokumente beginnen jetzt mit {x}.":"Les nouveaux documents commencent désormais avec {x}.",
+  "Auf Word-Standard zurücksetzen":"Rétablir les valeurs de Word",
   "Als Standard":"Par défaut",
   "Dieses Format für neue Dokumente voreinstellen":"Prédéfinir ce format pour les nouveaux documents",
   "Nur bei „Eigene Maße“ änderbar":"Modifiable uniquement avec « Dimensions personnalisées »",
@@ -3775,6 +3796,11 @@ es:{
   "Standard":"predeterminado",
   "Zeilenabstand und Maße":"Interlineado y medidas",
   "Ränder und Maße":"Márgenes y medidas",
+  "Neue Dokumente":"Documentos nuevos",
+  "Neue Dokumente beginnen sonst mit {x}.":"Si no, los documentos nuevos empiezan con {x}.",
+  "Künftig immer so beginnen":"Empezar siempre así",
+  "Neue Dokumente beginnen jetzt mit {x}.":"Los documentos nuevos empiezan ahora con {x}.",
+  "Auf Word-Standard zurücksetzen":"Restablecer los valores de Word",
   "Als Standard":"Como predeterminado",
   "Dieses Format für neue Dokumente voreinstellen":"Preestablecer este formato para nuevos documentos",
   "Nur bei „Eigene Maße“ änderbar":"Solo se puede modificar con «Medidas personalizadas»",
@@ -4548,6 +4574,11 @@ pt:{
   "Standard":"padrão",
   "Zeilenabstand und Maße":"Espaçamento entre linhas e medidas",
   "Ränder und Maße":"Margens e medidas",
+  "Neue Dokumente":"Novos documentos",
+  "Neue Dokumente beginnen sonst mit {x}.":"Caso contrário, novos documentos começam com {x}.",
+  "Künftig immer so beginnen":"Sempre começar assim",
+  "Neue Dokumente beginnen jetzt mit {x}.":"Novos documentos agora começam com {x}.",
+  "Auf Word-Standard zurücksetzen":"Restaurar os padrões do Word",
   "Als Standard":"Como padrão",
   "Dieses Format für neue Dokumente voreinstellen":"Predefinir este formato para novos documentos",
   "Nur bei „Eigene Maße“ änderbar":"Só pode ser alterado com \"Medidas personalizadas\"",
@@ -5321,6 +5352,11 @@ pl:{
   "Standard":"domyślny",
   "Zeilenabstand und Maße":"Interlinia i wymiary",
   "Ränder und Maße":"Marginesy i wymiary",
+  "Neue Dokumente":"Nowe dokumenty",
+  "Neue Dokumente beginnen sonst mit {x}.":"W przeciwnym razie nowe dokumenty zaczynają się od {x}.",
+  "Künftig immer so beginnen":"Zawsze zaczynaj tak",
+  "Neue Dokumente beginnen jetzt mit {x}.":"Nowe dokumenty zaczynają się teraz od {x}.",
+  "Auf Word-Standard zurücksetzen":"Przywróć ustawienia Worda",
   "Als Standard":"Jako domyślny",
   "Dieses Format für neue Dokumente voreinstellen":"Ustaw ten format domyślnie dla nowych dokumentów",
   "Nur bei „Eigene Maße“ änderbar":"Można zmienić tylko przy „Własne wymiary”",
@@ -6101,6 +6137,11 @@ it:{
   "Standard":"predefinito",
   "Zeilenabstand und Maße":"Interlinea e dimensioni",
   "Ränder und Maße":"Margini e dimensioni",
+  "Neue Dokumente":"Nuovi documenti",
+  "Neue Dokumente beginnen sonst mit {x}.":"Altrimenti i nuovi documenti iniziano con {x}.",
+  "Künftig immer so beginnen":"Inizia sempre così",
+  "Neue Dokumente beginnen jetzt mit {x}.":"I nuovi documenti ora iniziano con {x}.",
+  "Auf Word-Standard zurücksetzen":"Ripristina i valori di Word",
   "Als Standard":"Come predefinito",
   "Dieses Format für neue Dokumente voreinstellen":"Preimposta questo formato per i nuovi documenti",
   "Nur bei „Eigene Maße“ änderbar":"Modificabile solo con «Dimensioni personalizzate»",
@@ -12832,11 +12873,9 @@ function formatDialog(mode,onDone){
     <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`:""}`;
   overlay(`<div class="modal wide"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
     <div class="pad" id="fbody">${body()}</div>
+    <div id="fStd" style="padding:0 16px"></div>
     <div class="rowend">
       <button class="btn" style="margin-right:auto" id="fHf">${tr("Kopf- und Fußzeile&hellip;")}</button>
-      <label style="color:var(--ink-soft);display:flex;align-items:center;gap:6px;margin-right:8px"
-        title="${tr("Dieses Format für neue Dokumente voreinstellen")}">
-        <input type="checkbox" id="fDef" style="width:auto"> ${tr("Als Standard")}</label>
       <button class="btn" id="fCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="fOk">${isNew?tr("Anlegen"):tr("Übernehmen")}</button></div></div>`);
   /* Ein Rand darf nie mehr als die Hälfte der Seite minus 5mm Mindest-
@@ -12854,7 +12893,7 @@ function formatDialog(mode,onDone){
     cfg.fd=Math.max(0,Math.min(cfg.h/3,fromDisp($("#cfd").value)));
     if(sel==="custom"){cfg.w=fromDisp($("#cw").value)||210;cfg.h=fromDisp($("#ch").value)||297}};
   const repaint=()=>{$("#fbody").innerHTML=body();bind()};
-  const bind=()=>{
+  let bind=()=>{
     $("#fbody").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
       readM();const k=b.dataset.f;savingName=false;
       /* „Eigene Maße" ohne sichtbare Felder wäre eine Sackgasse */
@@ -12901,6 +12940,45 @@ function formatDialog(mode,onDone){
       if(ev.key==="Escape"){ev.preventDefault();$("#cfSaveCancel").click()}
     });
   };
+  /* Variante B: Weicht die Wahl vom Standard ab, sagt eine Zeile, womit neue
+     Dokumente sonst beginnen, und bietet an, es künftig so zu halten. Wer
+     nichts ändert, sieht nichts. Ersetzt den Haken „Als Standard“, der weder
+     sagte, was Standard wird, noch wofür. */
+  const gleichFmt=(a,b)=>a.w===b.w&&a.h===b.h&&a.hd===b.hd&&a.fd===b.fd&&a.m.join()===b.m.join();
+  /* Beim Ändern eines bestehenden Dokuments erst, wenn man im Dialog
+     wirklich etwas verstellt hat — dass das Dokument selbst anders aussieht
+     als der Standard, ist dort keine Frage, die sich stellt. */
+  const anfang=JSON.stringify([cfg.w,cfg.h,cfg.m,cfg.hd,cfg.fd,lh]);
+  const weichtAb=()=>{
+    readM();const st=S.settings;
+    if(!isNew&&JSON.stringify([cfg.w,cfg.h,cfg.m,cfg.hd,cfg.fd,lh])===anfang)return false;
+    if(!gleichFmt(cfg,fmtOf({})))return true;
+    if(Math.abs(lh-(st.lh||LH_STD))>0.001)return true;
+    if(isNew&&(schrift!==st.font||groesse!=st.size||Math.abs(abs-psOf({}))>0.001))return true;
+    return false;
+  };
+  const zeigeStd=()=>{
+    const box=$("#fStd");if(!box)return;
+    if(!weichtAb()){box.innerHTML="";return}
+    box.innerHTML=`<div class="fmttip" style="margin:0 0 10px;padding:8px 10px;border-radius:var(--radius);
+      background:color-mix(in srgb,var(--stamp) 9%,transparent)">
+      ${esc(tr("Neue Dokumente beginnen sonst mit {x}.").replace("{x}",vorgabeText()))}
+      <a id="fStdSet" style="color:var(--stamp);text-decoration:underline;cursor:pointer;white-space:nowrap">${tr("Künftig immer so beginnen")}</a></div>`;
+    $("#fStdSet").onclick=()=>{
+      readM();const st=S.settings;
+      st.fmt={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
+      if(FORMATS[cfg.key]&&gleichFmt(cfg,{...FORMATS[cfg.key]}))st.fmt=cfg.key;
+      st.lh=lh;
+      if(isNew){st.font=schrift;st.size=groesse;st.ps=abs}
+      save();
+      toast(tr("Neue Dokumente beginnen jetzt mit {x}.").replace("{x}",vorgabeText()));
+      zeigeStd();
+    };
+  };
+  const bindAlt=bind;
+  bind=()=>{bindAlt();
+    ["cFont","cSize","cLh","cPs"].forEach(id=>{const e=$("#"+id);if(e){const vor=e.onchange;e.onchange=()=>{if(vor)vor();zeigeStd()}}});
+    zeigeStd()};
   bind();
   $("#fCancel").onclick=closeOvl;
   $("#fHf").onclick=()=>{
@@ -12912,8 +12990,6 @@ function formatDialog(mode,onDone){
   $("#fOk").onclick=()=>{
     readM();
     const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
-    if($("#fDef").checked){S.settings.fmt=val;S.settings.lh=lh;
-      if(isNew){S.settings.font=schrift;S.settings.size=groesse;S.settings.ps=abs}save()}
     closeOvl();onDone(val,lh,isNew?{font:schrift,size:groesse,ps:abs}:null);
   };
 }
@@ -16832,10 +16908,21 @@ function settings(){
     <div class="setsec">${tr("Schreiben")}</div>
     ${zeile(tr("Schreibmaschinen-Scrollen"),haken("sTw",s.typewriter!==false,tr("aktive Zeile bleibt mittig")))}
     ${zeile(tr("Oberfläche beim Schreiben"),haken("sDim",s.dimUi,tr("tritt zurück")))}
-    <div class="setsec">${tr("Dokument")}</div>
-    ${zeile(tr("Standardschrift"),
+    <div class="setsec">${tr("Neue Dokumente")}</div>
+    ${zeile(tr("Schriftart"),
       `<select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
-       <select id="sSize" style="flex:0 0 62px">${SIZES.map(x=>`<option ${s.size==x?"selected":""}>${x}</option>`).join("")}</select>`)}
+       <select id="sSize" style="flex:0 0 62px">${[...new Set([...SIZES,s.size])].sort((x,y)=>x-y).map(x=>
+         `<option value="${x}" ${s.size==x?"selected":""}>${zahlText(x)}</option>`).join("")}</select>`)}
+    ${zeile(tr("Zeilenabstand"),`<select id="sLh">${[...new Set([...LINEHEIGHTS.map(x=>x[1]),s.lh||LH_STD])].sort((x,y)=>x-y).map(v=>
+      `<option value="${v}" ${Math.abs((s.lh||LH_STD)-v)<0.001?"selected":""}>${zahlText(v)}</option>`).join("")}</select>`)}
+    ${zeile(tr("Absatzabstand"),`<select id="sPs">${(PARSPACES.some(([,v])=>Math.abs(v-psOf({}))<0.001)?PARSPACES:[...PARSPACES,[zahlText(Math.round(psOf({})*100)/100),psOf({})]]).map(([lab,v])=>
+      `<option value="${v}" ${Math.abs(psOf({})-v)<0.001?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
+    ${(()=>{const f=s.fmt||"a4",key=typeof f==="string"?f:null;
+      return zeile(tr("Seitenformat"),`<select id="sFmt">${Object.entries(FORMATS).map(([k,o])=>
+        `<option value="${k}" ${key===k?"selected":""}>${tr(o.n)}</option>`).join("")}${key?"":
+        `<option value="eigen" selected>${esc(tr(f.n||"Eigene Maße"))}</option>`}</select>`)})()}
+    ${zeile("",`<button class="btn" id="sStdReset">${tr("Auf Word-Standard zurücksetzen")}</button>`)}
+    <div class="setsec">${tr("Dokument")}</div>
     ${zeile(tr("Maßsystem"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
       <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
     ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("als Einfügeoption anbieten")))}`;
@@ -16889,6 +16976,8 @@ function settings(){
     return e?(e.type==="checkbox"?e.checked:e.value):rueck};
   const app=()=>{
     s.font=v("sFont",s.font);s.size=+v("sSize",s.size);s.unit=v("sUnit",s.unit);
+    s.lh=+v("sLh",s.lh)||s.lh;s.ps=$("#sPs")?+$("#sPs").value:s.ps;
+    const fmtWahl=v("sFmt",null);if(fmtWahl&&fmtWahl!=="eigen")s.fmt=fmtWahl;
     s.autosave=v("sAuto",s.autosave);
     s.interval=+v("sInt",s.interval)||60;s.lang=v("sLang",s.lang);
     /* Ohne Zwischenstände ist der Abstand gegenstandslos — das Feld wird grau,
@@ -16908,12 +16997,17 @@ function settings(){
     a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof",
+  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof",
    "acQuotes","acDash","acCap","acLists"]
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
     setTab=b.dataset.tab;settings()});
   const anTh=$("#sThemeBtn");if(anTh)anTh.onclick=themeDialog;
+  /* Zurück auf Word: der Weg zurück, falls man sich verklickt hat */
+  const stdR=$("#sStdReset");if(stdR)stdR.onclick=()=>{
+    Object.assign(s,{font:WORD_VORGABE.font,size:WORD_VORGABE.size,lh:WORD_VORGABE.lh,
+      ps:WORD_VORGABE.ps,fmt:WORD_VORGABE.fmt});
+    save();toast(tr("Neue Dokumente beginnen jetzt mit {x}.").replace("{x}",vorgabeText()));settings()};
   /* Die Sicherung war vorher nur als Satz beschrieben („über Datei → …"). Ein
      Knopf an der Stelle, an der man über den Speicherort nachdenkt, erspart
      das Suchen im Menü. Beide Wege führen zu denselben Funktionen. */
