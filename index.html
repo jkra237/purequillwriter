@@ -10205,6 +10205,12 @@ async function ladeDokumente(dateien){
       }
     }catch(e){abgelehnt++}
   }
+  /* Kam der Aufruf aus dem Willkommensfenster („Datei öffnen…“), ist es mit
+     dem geladenen Dokument erledigt. Es ist gesperrt (lockedOvl) und blieb
+     darum vor dem Dokument stehen — schon seit 1.0.0; nur der .pqw-Weg über
+     applyBundle schloss es selbst. Ohne Erfolg bleibt es offen, damit man
+     es noch einmal versuchen kann. */
+  if(geladen&&$("#stOpen")){lockedOvl=false;closeOvl()}
   if(geladen&&bildBytes>BILD_WARNUNG)
     bildHinweis(bildZahl,bildBytes,bildFehlend,S.docs.filter(d=>!vorherIds.has(d.id)));
   else if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));

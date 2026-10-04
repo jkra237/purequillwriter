@@ -47,6 +47,14 @@ immer genau einen Commit, der sie anfasst.
 
 ### Behoben
 
+- **Willkommensfenster blieb nach „Datei öffnen…“ stehen.** Das Dokument
+  wurde geladen, das Fenster davor blieb offen (es ist gesperrt, `lockedOvl`).
+  Steckte schon in 1.0.0 — nur der `.pqw`-Weg über `applyBundle` schloss es
+  selbst. Gemeldet beim Testen von „Speichern“ in der Desktop-Fassung.
+  Beim Prüfen des Fixes für das doppelte Dokument (eb8e8d3) war es nicht
+  aufgefallen, weil das Testskript das Fenster selbst geschlossen hatte —
+  der Test verdeckte genau diesen Fehler. `ladeDokumente()` schließt es
+  jetzt, sobald etwas geladen wurde; ist die Datei unlesbar, bleibt es offen.
 - **Werkzeugleiste zeigt in allen Sprachen die deutschen Buchstaben.** Auf den
   Knöpfen stand fest verdrahtet `F`/`K`/`U`; übersetzt war nur der Tooltip.
   Jetzt tragen sie die Buchstaben, die Word in der jeweiligen Sprache zeigt:
