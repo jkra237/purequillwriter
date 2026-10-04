@@ -95,6 +95,25 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
 
 ### Behoben
 
+- **Text aus Word-Dateien und Eingefügtes wirkte zu groß.** Zwei Ursachen:
+  (1) Der Word-Import las Schriftart und -größe der Datei gar nicht; eine
+  Datei in Arial/Calibri 11 erschien in der eigenen Voreinstellung (Georgia
+  12) — und ging beim Speichern auch so zurück. Jetzt bestimmt
+  `docxGrundschrift()` die Schrift, die im Fließtext am meisten Text trägt
+  (Überschriften zählen nicht; Vorgaben, Vorlagenkette, Zeichenvorlage und
+  direkte Angabe wie bei Fett/Kursiv), löst Designschriften über
+  `theme1.xml` auf und setzt `d.font`/`d.size`. Schriften außerhalb der
+  Programmliste werden der nächsten zugeordnet (`SCHRIFT_NAEHE`, z. B. Aptos
+  → Calibri, Helvetica → Arial); unbekannte lassen die Voreinstellung stehen.
+  Die gemessene Größe dient auch der em-Umrechnung von Tabellenzeilen.
+  (2) Der Zoom stand für neue Nutzer auf 120 %, Word zeigt 100 %. Jetzt 100 %;
+  wer schon eine Stufe gewählt hat, behält sie. Zusammen ergab das rund das
+  1,3-Fache der Größe in Word. Eingefügter Text übernimmt weiterhin bewusst
+  die Größe des Dokuments.
+  Geprüft: fünf gebaute Testdateien (Arial-Läufe gegen Calibri-Vorgabe,
+  nur Designschrift Aptos, Überschrift und unbekannte Schrift, ohne Angaben,
+  Übernahme bis in Werkzeugleiste und Editor) und eine echte Word-Datei
+  (Arial 11 erkannt); `check-export.mjs` 252/252.
 - **Willkommensfenster blieb nach „Datei öffnen…“ stehen.** Das Dokument
   wurde geladen, das Fenster davor blieb offen (es ist gesperrt, `lockedOvl`).
   Steckte schon in 1.0.0 — nur der `.pqw`-Weg über `applyBundle` schloss es

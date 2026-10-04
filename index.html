@@ -6524,7 +6524,11 @@ let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
   settings:{font:"Georgia",size:12,autosave:true,interval:30,
     lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA},
-  gsort:"alpha",marks:false,zoom:1.2,fitPage:false,guides:true,showCol:true
+  /* Zoom 100 % wie in Word: die Seite in echter Größe. Bis 1.0 waren es 120 %,
+     dazu Georgia 12 statt Calibri 11 — Text aus Word-Dateien und Eingefügtes
+     wirkte rund 1,3-mal so groß wie in der Quelle. Wer schon eine Stufe hat,
+     behält sie; das betrifft nur neue Nutzer. */
+  gsort:"alpha",marks:false,zoom:1,fitPage:false,guides:true,showCol:true
 };
 if(S.showCol===undefined)S.showCol=true;
 if(!S.notes){
@@ -6540,7 +6544,7 @@ if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
    abschalten; wer es danach anschaltet, behält es. */
 if(S.settings&&!S.dimUiAus){S.settings.dimUi=false;S.dimUiAus=true}
 if(S.settings)S.settings.dimUi=S.settings.dimUi===true;
-if(!S.zoom)S.zoom=1.2;
+if(!S.zoom)S.zoom=1;
 if(S.settings&&(S.settings.theme==="hell"||!S.settings.theme))S.settings.theme="papier";
 if(S.settings&&S.settings.theme==="dunkel")S.settings.theme="tinte";
 /* Entfernte Schemata auf das jeweils nächstliegende umstellen */
@@ -10456,6 +10460,11 @@ function neuesDokumentAus(name,erg){
   if(b.hdr)d.hdr=b.hdr;
   if(b.ftr)d.ftr=b.ftr;
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
+  /* Schrift und Größe der Datei statt der eigenen Voreinstellung — sonst
+     erschien eine Calibri-11-Datei in Georgia 12 und ging beim Speichern
+     auch so zurück. */
+  if(b.size)d.size=b.size;
+  if(b.font)d.font=b.font;
   d.glossaryId=defaultGlossId();
   platzhalterAbloesen();
   S.docs.push(d);S.active=d.id;
@@ -10595,7 +10604,77 @@ function docxSchalter(pr,n){
 function docxRPr(pr){
   const o={};["b","i","u","strike"].forEach(n=>{
     const v=docxSchalter(pr,n);if(v!==undefined)o[n]=v});
+  /* Größe und Schrift laufen mit durch dieselbe Vererbungskette, werden aber
+     nicht am Lauf ausgezeichnet — sie bestimmen nur die Grundschrift des
+     Dokuments (docxGrundschrift). w:sz steht in Halbpunkten. Eine Designschrift
+     (asciiTheme) wird als „@minor“/„@major“ vermerkt und erst mit theme1.xml
+     aufgelöst; ein ausdrücklicher Name daneben hat Vorrang. */
+  const sz=KIND(pr,"sz");
+  if(sz){const v=parseInt(xattr(sz,"val"),10);if(v>0)o.sz=v/2}
+  const rf=KIND(pr,"rFonts");
+  if(rf){
+    const name=xattr(rf,"ascii")||xattr(rf,"hAnsi");
+    const thema=xattr(rf,"asciiTheme")||xattr(rf,"hAnsiTheme");
+    if(name)o.font=String(name);
+    else if(thema)o.font=/^major/i.test(thema)?"@major":"@minor";
+  }
   return o;
+}
+/* theme1.xml: die beiden Designschriften (Überschrift/Text). Seit Word 365
+   stehen viele Dokumente nur so in ihrer Schrift — „Aptos“ als Textschrift. */
+function docxThema(xml){
+  const o={};if(!xml)return o;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return o;
+  for(const [k,tag] of [["@minor","minorFont"],["@major","majorFont"]]){
+    const f=dom.getElementsByTagNameNS("*",tag)[0];
+    const lat=f&&[...f.children].find(c=>c.localName==="latin");
+    const n=lat&&lat.getAttribute("typeface");
+    if(n)o[k]=n;
+  }
+  return o;
+}
+/* Word-Schriften, die nicht in FONTS stehen, auf die nächste dort abbilden.
+   Ohne Abbildung zeigte die Auswahl eine Schrift an, die nicht gilt, und der
+   Editor fiele auf irgendeine Serifenschrift zurück. Unbekanntes bleibt null:
+   dann gilt die eigene Voreinstellung wie bisher. */
+const SCHRIFT_NAEHE={"aptos":"Calibri","aptos display":"Calibri","calibri light":"Calibri",
+  "carlito":"Calibri","helvetica":"Arial","helvetica neue":"Arial","arial nova":"Arial",
+  "liberation sans":"Arial","arimo":"Arial","times":"Times New Roman",
+  "liberation serif":"Times New Roman","tinos":"Times New Roman","caladea":"Cambria",
+  "segoe ui light":"Segoe UI","segoe ui semilight":"Segoe UI","palatino":"Palatino Linotype",
+  "garamond premier pro":"Garamond","eb garamond":"Garamond","liberation mono":"Courier New",
+  "courier":"Courier New","cousine":"Courier New"};
+function docxSchriftInListe(n){
+  if(!n)return null;
+  const k=String(n).trim().toLowerCase();
+  return FONTS.find(f=>f.toLowerCase()===k)||SCHRIFT_NAEHE[k]||null;
+}
+/* Grundschrift = was im Fließtext am meisten Text trägt, nicht bloß die
+   Vorgabe in docDefaults: in echten Dateien steht dort oft Calibri, während
+   jeder Lauf ausdrücklich Arial trägt. Überschriften zählen nicht mit. */
+function docxGrundschrift(body,def,stile,thema){
+  const gr=new Map(),sch=new Map();
+  const plus=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
+  for(const p of body.getElementsByTagNameNS("*","p")){
+    const vorlage=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
+    if(docxUeberschrift(stile,vorlage))continue;
+    const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
+    for(const r of p.getElementsByTagNameNS("*","r")){
+      let n=0;for(const t of r.children)if(t.localName==="t")n+=t.textContent.length;
+      if(!n)continue;
+      const pr=KIND(r,"rPr");
+      const w=Object.assign({},grund,
+        docxVorlageWirkung(stile,xattrN(KIND(pr,"rStyle"),"val")||""),docxRPr(pr));
+      if(w.sz)plus(gr,w.sz,n);
+      const f=w.font&&w.font[0]==="@"?thema[w.font]:w.font;
+      if(f)plus(sch,f,n);
+    }
+  }
+  const top=m=>[...m.entries()].sort((a,b)=>b[1]-a[1])[0];
+  const g=top(gr),f=top(sch);
+  return {size:g?Math.min(FS_MAX,Math.max(FS_MIN,Math.round(g[0]*2)/2)):null,
+    font:f?docxSchriftInListe(f[0]):null,quelle:f?f[0]:null};
 }
 const KIND=(el,n)=>el?[...el.children].find(c=>c.localName===n):null;
 const xattrN=(el,n)=>el?xattr(el,n):null;
@@ -10951,7 +11030,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const {def,stile}=docxStile(stilXml);
   const nummern=docxNummern(numXml);
   const z=zubehoer||{};
-  const grundGroesse=z.groesse||S.settings.size||11;
+  const gs=docxGrundschrift(body,def,stile,z.thema||{});
+  const grundGroesse=gs.size||z.groesse||S.settings.size||11;
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   let out="";
@@ -11047,7 +11127,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const sect=docxSect(body);
   return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
     bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
-    hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer")};
+    hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer"),
+    size:gs.size,font:gs.font};
 }
 
 /* --- OpenDocument (LibreOffice) --- */
@@ -11136,8 +11217,9 @@ async function zipDokument(name,buf){
         .documentElement.children].find(e=>e.localName==="body")||{children:[]});
       const vorabFmt=docxFormat(vorabSect);
       const breiteMm=vorabFmt?vorabFmt.w-vorabFmt.m[1]-vorabFmt.m[3]:170;
+      const thema=docxThema(await hol("word/theme/theme1.xml"));
       const erg=docxToHtml(xml,stil,num,
-        {fussnoten:docxFussnoten(fuss),bilder,breiteMm});
+        {fussnoten:docxFussnoten(fuss),bilder,breiteMm,thema});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
