@@ -27,6 +27,6 @@ contextBridge.exposeInMainWorld("pqwDesktop", {
      System Access API, deren Electron-Umsetzung Binärdaten verbiegt. */
   writeFile: (path, bytes) => ipcRenderer.invoke("pqw:writeFile", path, bytes),
 
-  /* Nativer Öffnen-Dialog. Liefert [{name, bytes:ArrayBuffer}] oder []. */
+  /* Nativer Öffnen-Dialog. Liefert [{name, pfad, bytes:ArrayBuffer}] oder []. */
   openFiles: (opts) => ipcRenderer.invoke("pqw:openFiles", opts)
 });

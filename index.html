@@ -2075,6 +2075,11 @@ en:{
   "Datei ließ sich nicht schreiben":"The file could not be written",
   "PDF-Dokument":"PDF document",
   "Speichern als":"Save as",
+  "Nicht speichern":"Don't save",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Changes since the last save. Click or press Ctrl+S to write them to the file.",
+  "Die Datei ist auf dem neuesten Stand.":"The file is up to date.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"The file could not be written — is it still open in another program?",
+  "Wörterbuch nicht verfügbar":"Dictionary not available",
   "Mit Datei verknüpfen…":"Link to a file…",
   "Mit anderer Datei verknüpfen…":"Link to another file…",
   "Verknüpfte Datei öffnen…":"Open a linked file…",
@@ -2842,6 +2847,11 @@ fr:{
   "Datei ließ sich nicht schreiben":"Le fichier n'a pas pu être écrit",
   "PDF-Dokument":"Document PDF",
   "Speichern als":"Enregistrer sous",
+  "Nicht speichern":"Ne pas enregistrer",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Modifications depuis le dernier enregistrement. Cliquez ou appuyez sur Ctrl+S pour les écrire dans le fichier.",
+  "Die Datei ist auf dem neuesten Stand.":"Le fichier est à jour.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"Impossible d’écrire le fichier — est-il encore ouvert dans un autre programme ?",
+  "Wörterbuch nicht verfügbar":"Dictionnaire non disponible",
   "Mit Datei verknüpfen…":"Lier à un fichier…",
   "Mit anderer Datei verknüpfen…":"Lier à un autre fichier…",
   "Verknüpfte Datei öffnen…":"Ouvrir un fichier lié…",
@@ -3609,6 +3619,11 @@ es:{
   "Datei ließ sich nicht schreiben":"No se pudo escribir el archivo",
   "PDF-Dokument":"Documento PDF",
   "Speichern als":"Guardar como",
+  "Nicht speichern":"No guardar",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Cambios desde el último guardado. Haz clic o pulsa Ctrl+S para escribirlos en el archivo.",
+  "Die Datei ist auf dem neuesten Stand.":"El archivo está actualizado.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"No se pudo escribir el archivo: ¿sigue abierto en otro programa?",
+  "Wörterbuch nicht verfügbar":"Diccionario no disponible",
   "Mit Datei verknüpfen…":"Vincular a un archivo…",
   "Mit anderer Datei verknüpfen…":"Vincular a otro archivo…",
   "Verknüpfte Datei öffnen…":"Abrir un archivo vinculado…",
@@ -4376,6 +4391,11 @@ pt:{
   "Datei ließ sich nicht schreiben":"Não foi possível gravar o arquivo",
   "PDF-Dokument":"Documento PDF",
   "Speichern als":"Salvar como",
+  "Nicht speichern":"Não salvar",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Alterações desde o último salvamento. Clique ou pressione Ctrl+S para gravá-las no arquivo.",
+  "Die Datei ist auf dem neuesten Stand.":"O arquivo está atualizado.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"Não foi possível gravar o arquivo — ele ainda está aberto em outro programa?",
+  "Wörterbuch nicht verfügbar":"Dicionário não disponível",
   "Mit Datei verknüpfen…":"Vincular a um arquivo…",
   "Mit anderer Datei verknüpfen…":"Vincular a outro arquivo…",
   "Verknüpfte Datei öffnen…":"Abrir um arquivo vinculado…",
@@ -5143,6 +5163,11 @@ pl:{
   "Datei ließ sich nicht schreiben":"Nie udało się zapisać pliku",
   "PDF-Dokument":"Dokument PDF",
   "Speichern als":"Zapisz jako",
+  "Nicht speichern":"Nie zapisuj",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Zmiany od ostatniego zapisu. Kliknij lub naciśnij Ctrl+S, aby zapisać je w pliku.",
+  "Die Datei ist auf dem neuesten Stand.":"Plik jest aktualny.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"Nie udało się zapisać pliku — czy jest nadal otwarty w innym programie?",
+  "Wörterbuch nicht verfügbar":"Słownik niedostępny",
   "Mit Datei verknüpfen…":"Powiąż z plikiem…",
   "Mit anderer Datei verknüpfen…":"Powiąż z innym plikiem…",
   "Verknüpfte Datei öffnen…":"Otwórz powiązany plik…",
@@ -5917,6 +5942,11 @@ it:{
   "Datei ließ sich nicht schreiben":"Impossibile scrivere il file",
   "PDF-Dokument":"Documento PDF",
   "Speichern als":"Salva come",
+  "Nicht speichern":"Non salvare",
+  "Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.":"Modifiche dall’ultimo salvataggio. Fai clic o premi Ctrl+S per scriverle nel file.",
+  "Die Datei ist auf dem neuesten Stand.":"Il file è aggiornato.",
+  "Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?":"Impossibile scrivere il file: è ancora aperto in un altro programma?",
+  "Wörterbuch nicht verfügbar":"Dizionario non disponibile",
   "Mit Datei verknüpfen…":"Collega a un file…",
   "Mit anderer Datei verknüpfen…":"Collega a un altro file…",
   "Verknüpfte Datei öffnen…":"Apri un file collegato…",
@@ -6643,7 +6673,38 @@ function closeDoc(id){
       anker+(anker>1?" powiązane notatki zostają zachowane":" powiązana notatka zostaje zachowana"),
       anker+(anker>1?" note collegate restano":" nota collegata resta")));
   };
-  if(leer){kill();return}
+  /* Hat das Dokument eine Word-Datei, entscheidet die über die Rückfrage:
+     ist sie auf dem neuesten Stand, steckt alles darin, und es schließt
+     ohne Frage wie in Word. Sonst geht beim Schließen echt etwas verloren —
+     das Programm behält das Dokument danach ja nicht mehr. */
+  const offen=zielGeaendert(d,true);
+  if(d.ziel&&!offen){kill();return}
+  if(leer&&!offen){kill();return}
+  /* Speichern wirkt auf das aktive Dokument; der geschlossene Reiter muss
+     es nicht sein (Kreuz an einem anderen Reiter). */
+  const speichernFuer=async()=>{const keep=S.active;S.active=id;
+    let ok=false;try{ok=await speichern()}finally{if(S.docs.some(x=>x.id===keep))S.active=keep}
+    return ok};
+  if(offen){
+    overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
+      <p style="margin:0;font-family:Georgia,serif;font-size:14px;line-height:1.55">
+        ${PL(`Die Änderungen an „${esc(d.title)}“ sind noch nicht in ${esc(d.ziel.name)} gespeichert.`,
+          `The changes to "${esc(d.title)}" have not been saved to ${esc(d.ziel.name)} yet.`,
+          `Les modifications de « ${esc(d.title)} » ne sont pas encore enregistrées dans ${esc(d.ziel.name)}.`,
+          `Los cambios de "${esc(d.title)}" aún no se han guardado en ${esc(d.ziel.name)}.`,
+          `As alterações em "${esc(d.title)}" ainda não foram salvas em ${esc(d.ziel.name)}.`,
+          `Zmiany w „${esc(d.title)}” nie zostały jeszcze zapisane w ${esc(d.ziel.name)}.`,
+          `Le modifiche a « ${esc(d.title)} » non sono ancora salvate in ${esc(d.ziel.name)}.`)}</p>
+      </div>
+      <div class="rowend">
+        <button class="btn" style="margin-right:auto" id="cdNo">${tr("Nicht speichern")}</button>
+        <button class="btn" id="cdCancel">${tr("Abbrechen")}</button>
+        <button class="btn pri" id="cdSave">${SPEICHERN()}</button></div></div>`);
+    $("#cdCancel").onclick=closeOvl;
+    $("#cdNo").onclick=()=>{closeOvl();kill()};
+    $("#cdSave").onclick=async()=>{if(await speichernFuer()){closeOvl();kill()}};
+    return;
+  }
   overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
     <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
       ${PL(`„${esc(d.title)}" ist nicht leer. Beim Schließen wird das Dokument entfernt.`,
@@ -6674,7 +6735,9 @@ function closeDoc(id){
       <button class="btn" id="cdCancel">${tr("Abbrechen")}</button>
       <button class="btn pri" id="cdOk">${tr("Schließen")}</button></div></div>`);
   $("#cdCancel").onclick=closeOvl;
-  $("#cdSave").onclick=()=>{const keep=S.active;S.active=id;exportDoc();S.active=keep};
+  /* Speichert und schließt dann — vorher legte „Vorher speichern“ nur eine
+     Datei an und ließ den Dialog offen. */
+  $("#cdSave").onclick=async()=>{if(await speichernFuer()){closeOvl();kill()}};
   $("#cdOk").onclick=()=>{closeOvl();kill()};
 }
 $("#tabbar").onclick=e=>{
@@ -7993,6 +8056,7 @@ function drawStatus(){
     <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki",
       "note")}</span>
     <span class="grow"></span>
+    ${d.ziel?`<span id="zielHint" style="cursor:pointer" title="${esc(zielHinweis(d))}"><span class="dot ${zielGeaendert(d)?"dirty":""}"></span>${esc(d.ziel.name)}</span>`:""}
     <span title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über {pfad}.").replace("{pfad}",mpfad("Datei","Alles sichern")))}"
       ${storageOk?"":'class="savefail"'}>
       <span class="dot ${storageOk?(dirty?"dirty":""):"fail"}"></span>${
@@ -8007,6 +8071,7 @@ function drawStatus(){
   const ph=$("#pHint");if(ph)ph.onclick=palette;
   const gb=$("#goalBox");if(gb)gb.onclick=goalDialog;
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
+  const zh=$("#zielHint");if(zh)zh.onclick=speichern;
   const wh=$("#wcHint");if(wh)wh.onclick=()=>{
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")};
   zaehlerAktualisieren();
@@ -8727,6 +8792,7 @@ function commandList(){
   add("Dokument","Dokument schließen",kz("dokZu"),()=>closeDoc(S.active));
   S.docs.filter(d=>d.id!==S.active).forEach(d=>
     add("Dokument",tr("Wechseln zu: ")+tr(d.title),"",()=>{flush();S.active=d.id;save();render()}));
+  add("Dokument",SPEICHERN(),kz("speichern"),speichern);
   add("Dokument","Zwischenstand anlegen",kz("stand"),()=>{commit();toast(tr("Zwischenstand angelegt"))});
   add("Dokument","Versionsverlauf","",history);
   add("Dokument","Über PureQuill Writer","",aboutDialog);
@@ -9259,12 +9325,28 @@ async function figurXml(fig,ctx){
     +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>`
     +`<wp:docPr id="${nr}" name="${name}"/>${frameLock}${graphic}</wp:inline></w:drawing></w:r></w:p>`;
 }
+/* „Speichern als › Word“. Wie in Word wird die gewählte Datei danach zur
+   Datei des Dokuments: „Speichern“ schreibt ab dann dorthin. Gibt zurück,
+   ob geschrieben wurde — der Schließen-Dialog schließt nur dann. */
 async function exportDoc(){
   flush();const d=doc();
   /* Erst der Ort, dann die Arbeit — siehe dateiZiel() */
   let ziel=null;
-  try{ziel=await dateiZiel(safeName(tr(d.title))+".docx")}
-  catch(e){if(e&&e.name==="AbortError")return;ziel=null}
+  try{ziel=await dateiZiel(zielVorschlag(d))}
+  catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
+  const blob=await docxBlob(d);
+  try{await dateiAblegen(safeName(tr(d.title))+".docx",blob,null,ziel)}
+  catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
+  if(ziel)await zielMerken(d,ziel);
+  /* Speichern legt immer auch einen Zwischenstand an — Strg+S tat bis
+     Version 1.0 nur das, und wer es gewohnt ist, verliert damit nichts.
+     commit() sichert zugleich in den Programmspeicher. */
+  commit();
+  return true;
+}
+/* Das Word-Dokument als Blob, ohne Dialog — gemeinsam für „Speichern“ und
+   „Speichern als“. */
+async function docxBlob(d){
   const f=fmtOf(d);
   const container=document.createElement("div");container.innerHTML=d.html||"";
   docxEinebnen(container);
@@ -9324,8 +9406,105 @@ ${relEintraege.join(String.fromCharCode(10))}
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
     ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[])
   ];
-  const blob=await zipSchreiben(eintraege);
-  await dateiAblegen(safeName(tr(d.title))+".docx",blob,null,ziel);
+  return await zipSchreiben(eintraege);
+}
+/* ================= Speichern =================
+   „Speichern“ schreibt das offene Dokument in seine Word-Datei — nur dieses,
+   nur auf Befehl. Das laufende Sichern in den Programmspeicher bleibt davon
+   unberührt; verloren geht ohne Speichern nichts, die Datei ist dann nur
+   nicht auf dem neuesten Stand. Die .pqw-Verknüpfung (d.file) ist etwas
+   anderes und bleibt daneben bestehen: eine laufend mitgeschriebene
+   Sicherung im eigenen Format.
+
+   d.ziel = {name, pfad?, stand, at}
+   - pfad: nur in der Desktop-Fassung, dort schreibt main.js über den Pfad.
+   - im Browser liegt stattdessen ein Datei-Handle in der IndexedDB unter
+     ZIELKEY(d.id) — getrennt vom Handle der .pqw-Verknüpfung (Schlüssel d.id).
+   - stand: Fingerabdruck dessen, was zuletzt in die Datei ging; daran misst
+     zielGeaendert(), ob ungespeicherte Änderungen vorliegen. */
+const ZIELKEY=id=>"ziel:"+id;
+/* Das Verb. tr("Speichern") ist schon vergeben — als Substantiv, der Reiter
+   in den Einstellungen („Saving“, „Enregistrement“) —, darum eigene Fassungen. */
+const SPEICHERN=()=>PL("Speichern","Save","Enregistrer","Guardar","Salvar","Zapisz","Salva");
+/* FNV-1a über alles, was in die Word-Datei einfließt. Der Titel gehört nicht
+   dazu: er steht nur in den Metadaten, und ein Umbenennen des Reiters soll
+   die Datei nicht als „geändert“ melden. */
+function dokStand(d){
+  const s=JSON.stringify([d.html||"",d.fmt||null,d.hdr||null,d.ftr||null,
+    d.footnotes||null,d.size||null,d.font||null,d.lh||null,d.ps||null]);
+  let h=0x811c9dc5;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}
+  return (h>>>0).toString(36)+":"+s.length;
+}
+let standMerk={html:null,d:null,fp:null};
+/* genau=true vergleicht nur den Fingerabdruck — für Aufrufer, die eben
+   flush() gemacht haben (Schließen). Sonst zählt Tippen seit dem letzten
+   Sichern sofort als geändert, damit die Anzeige dem Text nicht ein paar
+   Sekunden nachläuft. */
+function zielGeaendert(d,genau){
+  if(!d||!d.ziel)return false;
+  if(!genau&&d.id===S.active&&dirty)return true;
+  if(standMerk.d!==d||standMerk.html!==d.html)standMerk={html:d.html,d,fp:dokStand(d)};
+  return standMerk.fp!==d.ziel.stand;
+}
+/* Die Datei in der Statuszeile: Punkt wie beim Sichern daneben — grün heißt
+   „steht so in der Datei“, rostrot „Änderungen noch nicht gespeichert“.
+   Die Erklärung steckt im Tooltip, nicht als zweite Zelle. */
+function zielHinweis(d){
+  return zielGeaendert(d)
+    ?tr("Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.")
+    :tr("Die Datei ist auf dem neuesten Stand.");
+}
+function zielVorschlag(d){
+  return d.ziel?d.ziel.name:safeName(tr(d.title))+".docx";
+}
+/* Nach einem Schreiben (oder Öffnen) festhalten, wohin das Dokument gehört.
+   ziel ist ein Handle (Browser) oder {__pfad} (Desktop). */
+async function zielMerken(d,ziel,name){
+  flush();
+  if(ziel&&ziel.__pfad){
+    d.ziel={name:name||ziel.__pfad.split(/[\\/]/).pop(),pfad:ziel.__pfad};
+  }else if(ziel){
+    try{await handleSet(ZIELKEY(d.id),ziel)}catch(e){return}
+    d.ziel={name:name||ziel.name};
+  }else return;
+  d.ziel.stand=dokStand(d);d.ziel.at=Date.now();
+  /* merkeGesichert statt nur drawStatus: es setzt dirty zurück. Sonst stünde
+     eine eben geöffnete Datei als „geändert“ da, weil dirty noch vom Tippen
+     im vorigen Dokument übrig war. */
+  if(save())merkeGesichert();else drawStatus();
+}
+async function speichern(){
+  flush();const d=doc();
+  const z=d.ziel;
+  /* Noch keine Datei: einmal fragen, wohin — danach ist es eine. */
+  if(!z)return await exportDoc();
+  let ziel=null;
+  if(z.pfad&&PQWD()&&PQWD().writeFile)ziel={__pfad:z.pfad};
+  else if(hatDateien()){
+    /* Erst den Zugriff klären, dann bauen: die Freigabe gilt nur kurz nach
+       dem Klick, ein großes Dokument zu bauen dauert länger (vgl. dateiZiel). */
+    const h=await handleGet(ZIELKEY(d.id));
+    if(h&&await fileOk(h,true))ziel=h;
+  }
+  /* Datei nicht mehr erreichbar (anderer Rechner, Zugriff verweigert, Handle
+     verloren): wie beim ersten Mal nach dem Ort fragen. */
+  if(!ziel)return await exportDoc();
+  try{
+    const blob=await docxBlob(d);
+    if(ziel.__pfad)await PQWD().writeFile(ziel.__pfad,new Uint8Array(await blob.arrayBuffer()));
+    else{const w=await ziel.createWritable();await w.write(blob);await w.close()}
+  }catch(e){
+    /* Häufigster Grund: die Datei ist gerade in Word offen, Windows sperrt
+       sie dann. Sagen, woran es liegt, und gleich einen anderen Ort anbieten,
+       statt den Text mit einer bloßen Fehlermeldung stehen zu lassen. */
+    toast(tr("Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?"));
+    return await exportDoc();
+  }
+  z.stand=dokStand(d);z.at=Date.now();
+  commit();
+  toast(tr("Gespeichert")+": "+z.name);
+  return true;
 }
 /* ================= EPUB-Export =================
    EPUB 3 mit ncx-Rückfall, damit auch ältere Reader und „An Kindle senden" die
@@ -10197,6 +10376,11 @@ async function ladeDokumente(dateien){
       if(ZIPFORMATE.includes(ext)){
         const erg=await zipDokument(f.name,await f.arrayBuffer());
         if(neuesDokumentAus(f.name,erg)){geladen++;
+          /* Eine geöffnete .docx ist die Datei des Dokuments: „Speichern“
+             schreibt dorthin zurück. Andere Formate kann der Export nicht
+             schreiben — dort fragt das erste Speichern nach einer .docx. */
+          if(ext==="docx"&&(f.pqwPfad||f.pqwHandle))
+            await zielMerken(doc(),f.pqwPfad?{__pfad:f.pqwPfad}:f.pqwHandle,f.name);
           if(erg&&erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes;
             bildFehlend+=erg.bilder.fehlend}
         }else abgelehnt++;
@@ -10228,7 +10412,7 @@ function loadDocumentFile(){
       ...DOKFORMATE.map(f=>({name:tr(f.n),extensions:f.e.map(roh)}))
     ]}).then(files=>{
       if(!files||!files.length)return;
-      ladeDokumente(files.map(x=>new File([x.bytes],x.name)));
+      ladeDokumente(files.map(x=>{const f=new File([x.bytes],x.name);f.pqwPfad=x.pfad||null;return f}));
     }).catch(()=>{});
     return;
   }
@@ -10242,7 +10426,8 @@ function loadDocumentFile(){
     const gruppen=DOKFORMATE.map(f=>({description:tr(f.n),
       accept:{"application/octet-stream":f.e}}));
     window.showOpenFilePicker({multiple:true,types:[alle,...gruppen]})
-      .then(async handles=>ladeDokumente(await Promise.all(handles.map(h=>h.getFile()))))
+      .then(async handles=>ladeDokumente(await Promise.all(handles.map(async h=>{
+        const f=await h.getFile();f.pqwHandle=h;return f}))))
       /* Abbrechen wirft AbortError — das ist keine Störung, sondern die
          Antwort des Nutzers, und darf keine Meldung auslösen. */
       .catch(err=>{if(err&&err.name!=="AbortError")dateiEingabeDialog()});
@@ -11425,6 +11610,7 @@ function fileMenu(){
     <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch")}
       <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}</span></button>
     <div class="msep"></div>
+    <button class="mi" data-act="speichern"><span class="chk"></span>${SPEICHERN()}<span class="k">${kz("speichern")}</span></button>
     <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Speichern als")}&hellip;<span class="k">&rsaquo;</span></button>
     <button class="mi" data-act="bmore"><span class="chk"></span>${tr("Alles sichern")}&hellip;<span class="k">&rsaquo;</span></button>
     <div class="msep"></div>
@@ -11493,6 +11679,7 @@ function runFileAct(a){
   if(a==="fileas")fileSaveAs();
   if(a==="open")importJson();
   if(a==="save"){commit();toast(tr("Zwischenstand angelegt"))}
+  if(a==="speichern")speichern();
   if(a==="bdoc")saveBundle("doc");
   if(a==="bnotes")saveBundle("notes");
   if(a==="ball")saveBundle("all");
@@ -17116,6 +17303,7 @@ of the last one, since a document here has one page format rather than one per s
 binary .doc format from before 2007 cannot be read.</p>`},
 
  {t:"Saving as",k:"save;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
+<p><b>File &rsaquo; Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx you opened is written back directly. The dot next to the file name in the status bar shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
 <p><b>File &rsaquo; Save as</b> writes the document out as a file. The Word format comes
 first because it is the ordinary case — it can be read anywhere, with or without this
 program.</p>
@@ -17249,7 +17437,8 @@ leaves alone</nur-b> keep their usual keys.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>New note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Pin a note to the selection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Look up in the glossary</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Take a snapshot</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save (to the Word file)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Take a snapshot</td></tr>
 </table>
 <p class="hsec">Finding and viewing</p>
 <table class="hkeys">
@@ -17692,6 +17881,7 @@ behalten den Aufbau des letzten, denn hier hat ein Dokument ein Seitenformat und
 Abschnitt. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
 
  {t:"Speichern als",k:"speichern;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
+<p><b>Datei &rsaquo; Speichern</b> (<kbd>Strg</kbd>+<kbd>S</kbd>) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx wird direkt zurückgeschrieben. Der Punkt neben dem Dateinamen in der Statuszeile zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
 <p><b>Datei &rsaquo; Speichern als</b> schreibt das Dokument als Datei heraus. Das
 Word-Format steht oben, weil es der Regelfall ist — es liest sich überall, auch ohne dieses
 Programm.</p>
@@ -17828,7 +18018,8 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd></td><td>Neue Notiz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd></td><td>Notiz an die Markierung heften</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd></td><td>Im Glossar nachschlagen</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd></td><td>Zwischenstand anlegen</td></tr>
+<tr><td><kbd>Strg</kbd>+<kbd>S</kbd></td><td>Speichern (in die Word-Datei)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd></td><td>Zwischenstand anlegen</td></tr>
 </table>
 <p class="hsec">Finden und Ansehen</p>
 <table class="hkeys">
@@ -18272,6 +18463,7 @@ secciones conservan la configuración de la última, ya que aquí un documento t
 página y no uno por sección. El antiguo formato binario .doc anterior a 2007 no se puede leer.</p>`},
 
  {t:"Guardar como",k:"guardar;exportar;word;docx;epub;libro electrónico;kindle;pdf;html;markdown;texto;csv",b:`
+<p><b>Archivo &rsaquo; Guardar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx que hayas abierto se vuelve a escribir directamente. El punto junto al nombre del archivo en la barra de estado indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
 <p><b>Archivo &rsaquo; Guardar como</b> escribe el documento como archivo. El formato Word va
 primero porque es el caso habitual: se puede leer en cualquier parte, con o sin este
 programa.</p>
@@ -18408,7 +18600,8 @@ edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de sie
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>N</kbd></td><td>Nueva nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>M</kbd></td><td>Fijar una nota a la selección</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>G</kbd></td><td>Consultar en el glosario</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>S</kbd></td><td>Crear un punto de restauración</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Guardar (en el archivo de Word)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>S</kbd></td><td>Crear un punto de restauración</td></tr>
 </table>
 <p class="hsec">Buscar y ver</p>
 <table class="hkeys">
@@ -18847,6 +19040,7 @@ mantêm a configuração da última, já que aqui um documento tem um formato de
 seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>`},
 
  {t:"Salvar como",k:"salvar;exportar;word;docx;epub;livro eletrônico;e-book;kindle;pdf;html;markdown;texto;csv",b:`
+<p><b>Arquivo &rsaquo; Salvar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx que você abriu é regravado diretamente. O ponto ao lado do nome do arquivo na barra de status mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
 <p><b>Arquivo &rsaquo; Salvar como</b> grava o documento como arquivo. O formato Word vem
 primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem este programa.</p>
 <table class="hkeys">
@@ -18983,7 +19177,8 @@ navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Fixar uma nota à seleção</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Consultar no glossário</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Criar um ponto de restauração</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Salvar (no arquivo do Word)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Criar um ponto de restauração</td></tr>
 </table>
 <p class="hsec">Localizar e ver</p>
 <table class="hkeys">
@@ -19447,6 +19642,7 @@ un format de page et non un par section. L'ancien format binaire .doc d'avant 20
 être lu.</p>`},
 
  {t:"Enregistrer sous",k:"enregistrer;exporter;word;docx;epub;livre numérique;liseuse;kindle;pdf;html;markdown;texte;csv",b:`
+<p><b>Fichier &rsaquo; Enregistrer</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx que vous avez ouvert est réécrit directement. Le point à côté du nom du fichier dans la barre d’état indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
 <p><b>Fichier &rsaquo; Enregistrer sous</b> écrit le document sous forme de fichier. Le format
 Word vient en premier parce que c'est le cas courant : il se lit partout, avec ou sans ce
 programme.</p>
@@ -19588,7 +19784,8 @@ habituelles.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>N</kbd></td><td>Nouvelle note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>M</kbd></td><td>Épingler une note à la sélection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>G</kbd></td><td>Consulter le glossaire</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd></td><td>Créer un point de restauration</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Enregistrer (dans le fichier Word)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd></td><td>Créer un point de restauration</td></tr>
 </table>
 <p class="hsec">Rechercher et afficher</p>
 <table class="hkeys">
@@ -20019,6 +20216,7 @@ ustawienia ostatniej, ponieważ tutaj dokument ma jeden format strony, a nie jed
 Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>`},
 
  {t:"Zapisz jako",k:"zapisz;eksportuj;word;docx;epub;e-book;czytnik;kindle;pdf;html;markdown;tekst;csv",b:`
+<p><b>Plik &rsaquo; Zapisz</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx jest zapisywany z powrotem bezpośrednio. Kropka obok nazwy pliku na pasku stanu pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
 <p><b>Plik &rsaquo; Zapisz jako</b> zapisuje dokument jako plik. Format Word jest pierwszy,
 ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym programem lub bez niego.</p>
 <table class="hkeys">
@@ -20154,7 +20352,8 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nowa notatka</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Przypnij notatkę do zaznaczenia</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Wyszukaj w słowniczku</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Utwórz punkt przywracania</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Zapisz (do pliku Word)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Utwórz punkt przywracania</td></tr>
 </table>
 <p class="hsec">Wyszukiwanie i podgląd</p>
 <table class="hkeys">
@@ -20605,6 +20804,7 @@ l'impostazione dell'ultima, dato che qui un documento ha un solo formato pagina 
 sezione. Il vecchio formato binario .doc precedente al 2007 non può essere letto.</p>`},
 
  {t:"Salvare come",k:"salvare;esportare;word;docx;epub;e-book;lettore;kindle;pdf;html;markdown;testo;csv",b:`
+<p><b>File &rsaquo; Salva</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx che hai aperto viene riscritto direttamente. Il punto accanto al nome del file nella barra di stato indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
 <p><b>File &rsaquo; Salva come</b> scrive il documento come file. Il formato Word viene per primo
 perché è il caso normale: si legge ovunque, con o senza questo programma.</p>
 <table class="hkeys">
@@ -20742,7 +20942,8 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>N</kbd></td><td>Nuova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>M</kbd></td><td>Fissa una nota alla selezione</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>G</kbd></td><td>Consulta il glossario</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>S</kbd></td><td>Crea un punto di ripristino</td></tr>
+<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Salva (nel file Word)</td></tr>
+<tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>S</kbd></td><td>Crea un punto di ripristino</td></tr>
 </table>
 <p class="hsec">Cercare e visualizzare</p>
 <table class="hkeys">
@@ -21085,7 +21286,12 @@ const KUERZEL=[
   {id:"gliederung",m:"as",k:"o", tun:()=>toggleOutline()},
   {id:"toc",      m:"as", k:"i", tun:()=>insertToc()},
   {id:"drucken",  m:"c",  k:"p", roh:true, tun:()=>{flush();withPrintFootnotes(setPrintPage)}},
-  {id:"stand",    m:"c",  k:"s", auch:[["as","s"]], tun:()=>{commit();toast(tr("Gesichert"))}},
+  /* Strg+S legte bis 1.0 einen Zwischenstand an und meldete „Gesichert“ —
+     wer es aus Gewohnheit drückte, glaubte eine Datei gespeichert zu haben.
+     Jetzt speichert es wirklich (und legt dabei weiterhin einen Zwischenstand
+     an); der Zwischenstand allein behält Alt+Umschalt+S. */
+  {id:"speichern",m:"c",  k:"s", tun:()=>speichern()},
+  {id:"stand",    m:"as", k:"s", tun:()=>{commit();toast(tr("Zwischenstand angelegt"))}},
   {id:"zoomAuf",  m:"as", k:"+", auch:[["as","="]], tun:()=>setZoom(S.zoom+.1)},
   {id:"zoomAb",   m:"as", k:"-", auch:[["as","_"]], tun:()=>setZoom(S.zoom-.1)},
   {id:"einpassen",m:"as", k:"0", tun:()=>toggleFitPage()},

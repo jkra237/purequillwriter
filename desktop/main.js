@@ -153,7 +153,8 @@ ipcMain.handle("pqw:openFiles", async (e, opts = {}) => {
   const out = [];
   for (const fp of filePaths) {
     const buf = await fs.readFile(fp);
-    out.push({ name: require("node:path").basename(fp), bytes: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
+    /* pfad: damit „Speichern“ in eine geöffnete .docx zurückschreiben kann. */
+    out.push({ name: require("node:path").basename(fp), pfad: fp, bytes: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
   }
   return out;
 });

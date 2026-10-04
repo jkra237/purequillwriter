@@ -45,6 +45,54 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
+(Versionsregel oben).
+
+### Neu
+
+- **Datei › Speichern (Strg+S)** — gewünscht nach einem Nutzertest: neben
+  „Speichern als“ fehlte das gewohnte Speichern, obwohl das Programm laufend
+  sichert. Schreibt das offene Dokument in seine Word-Datei, nur dieses und
+  nur auf Befehl. Beim ersten Mal wird nach dem Ort gefragt (`.docx`), danach
+  ohne Rückfrage überschrieben. Eine geöffnete `.docx` ist sofort die Datei
+  des Dokuments und wird zurückgeschrieben; andere geöffnete Formate fragen
+  beim ersten Speichern nach einer `.docx`. *Speichern als › Word* macht die
+  gewählte Datei ebenfalls zur Datei des Dokuments, wie in Word.
+  - Jedes Speichern legt zusätzlich einen Zwischenstand an.
+  - **Strg+S** speichert jetzt; bis 1.0 legte es nur einen Zwischenstand an
+    und meldete „Gesichert“ — wer es aus Gewohnheit drückte, glaubte eine
+    Datei gespeichert zu haben. Der Zwischenstand allein liegt auf Alt+⇧+S.
+  - **Statuszeile:** Dateiname mit Punkt (grün = aktuell, Akzentfarbe =
+    Änderungen noch nicht in der Datei), Erklärung im Tooltip, Klick
+    speichert.
+  - **Schließen** eines Dokuments mit ungespeicherten Änderungen fragt
+    „Speichern / Nicht speichern / Abbrechen“. Ist die Datei aktuell, schließt
+    es ohne Frage. „Vorher speichern“ im bisherigen Dialog speichert jetzt
+    und schließt dann, statt den Dialog offen zu lassen.
+  - Ist die Datei gesperrt (meist: noch in Word offen), sagt das Programm das
+    und fragt nach einem anderen Ort.
+  - Beim Beenden des Programms wird nicht gefragt: dort geht nichts verloren,
+    der Text bleibt im Programm und ist beim nächsten Start wieder da.
+  - Die `.pqw`-Verknüpfung (*Alles sichern › Mit Datei verknüpfen*) bleibt
+    unverändert daneben bestehen — laufend mitgeschrieben, eigenes Format.
+  - Technisch: `d.ziel` (Name, Pfad in der Desktop-Fassung, Fingerabdruck
+    des zuletzt Gespeicherten); im Browser der Datei-Handle in der IndexedDB
+    unter `ziel:<id>`, getrennt vom `.pqw`-Handle. `exportDoc()` ist in
+    `docxBlob()` (bauen) und den Dialogteil zerlegt. `desktop/main.js`
+    liefert beim Öffnen den Pfad mit.
+  - Geprüft in der Browser-Vorschau mit einer Attrappe der Desktop-Brücke:
+    erstes Speichern fragt einmal, Strg+S danach schreibt ohne Frage an
+    denselben Pfad und unterdrückt das Browser-Speichern, Statuspunkt
+    wechselt korrekt, Alt+⇧+S nur Zwischenstand, Schließen-Dialog in de/en/fr,
+    gesperrte Datei → Meldung und neuer Ort, geöffnete `.docx` → Datei des
+    Dokuments und zurückgeschrieben, Ergebnis wieder lesbar.
+    `check-export.mjs` 252/252, Hilfe-Marken und Kürzel-Prüfung grün.
+    **Nicht live geprüft:** der Browserweg über Datei-Handles (Chrome/Edge auf
+    suvantra.eu/app) und die echte Desktop-Fassung — vor dem Einreichen von
+    Hand durchspielen.
+- Hilfe: Absatz zu *Speichern* im Thema „Speichern als“, Kürzeltabelle in
+  allen sieben Sprachen angepasst.
+
 ### Behoben
 
 - **Willkommensfenster blieb nach „Datei öffnen…“ stehen.** Das Dokument
@@ -55,6 +103,9 @@ immer genau einen Commit, der sie anfasst.
   aufgefallen, weil das Testskript das Fenster selbst geschlossen hatte —
   der Test verdeckte genau diesen Fehler. `ladeDokumente()` schließt es
   jetzt, sobald etwas geladen wurde; ist die Datei unlesbar, bleibt es offen.
+- **„Wörterbuch nicht verfügbar“ war in keiner Sprache übersetzt** und
+  erschien überall deutsch. Beim Prüfen der neuen Texte aufgefallen.
+
 - **Werkzeugleiste zeigt in allen Sprachen die deutschen Buchstaben.** Auf den
   Knöpfen stand fest verdrahtet `F`/`K`/`U`; übersetzt war nur der Tooltip.
   Jetzt tragen sie die Buchstaben, die Word in der jeweiligen Sprache zeigt:
