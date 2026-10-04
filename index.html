@@ -1562,7 +1562,9 @@ const MARKINK="#22242A";   /* wie bei den Notizen: dunkle Schrift auf Pastell */
 /* hd/fd: Abstand der Kopf- bzw. Fußzeile zur Papierkante, wie Word es unter
    „Layout → Von Rand“ führt. Je Format vorbelegt, im Seitenformat änderbar. */
 const FORMATS={
-  a4:   {n:"DIN A4",           w:210, h:297, m:[25,20,25,25], hd:12, fd:12, d:"Standard für alles"},
+  /* Ränder wie Word (oben, rechts, unten, links). Bis 1.0 waren rechts und
+     unten vertauscht: 25/20/25/25 — A4_ALT hält das für die Umstellung fest. */
+  a4:   {n:"DIN A4",           w:210, h:297, m:[25,25,20,25], hd:12, fd:12, d:"Standard für alles"},
   brief:{n:"Brief DIN 5008",   w:210, h:297, m:[45,20,25,25], hd:12, fd:12, d:"Anschriftfeld oben"},
   manu: {n:"Normseite",        w:210, h:297, m:[30,20,30,30], hd:15, fd:15, d:"Manuskript für Verlage"},
   a5:   {n:"DIN A5",           w:148, h:210, m:[18,15,18,18], hd:10, fd:10, d:"Broschüre, Heft"},
@@ -1578,8 +1580,58 @@ const unitOf=()=>S.settings.unit||"mm";
 const toUnit=mm=>unitOf()==="in"?Math.round((mm||0)/25.4*100)/100:Math.round(mm||0);
 const fromUnit=v=>unitOf()==="in"?Math.round((+v||0)*25.4):Math.round(+v||0);
 const unitAbbr=()=>unitOf()==="in"?"in":"mm";
-const LINEHEIGHTS=[["1",1],["1,15",1.15],["1,3",1.3],["1,5",1.5],["1,62",1.62],["2",2]];
-const lhOf=d=>d.lh||S.settings.lh||1.62;
+const A4_ALT={n:"DIN A4",w:210,h:297,m:[25,20,25,25],hd:12,fd:12,key:"a4"};
+/* Zeilenabstand wie in Word: ein Vielfaches der natürlichen Zeilenhöhe der
+   Schrift, nicht der Schriftgröße. „1,15“ bedeutet so dasselbe wie in Word
+   und wird unverändert als w:line exportiert. Bis 1.0 war es ein Vielfaches
+   der Schriftgröße — bei Calibri rund 20 % enger als dieselbe Zahl in Word.
+   Die Liste ist die von Word. */
+const LINEHEIGHTS=[["1",1],["1,08",1.08],["1,15",1.15],["1,5",1.5],["2",2],["2,5",2.5]];
+const LH_STD=1.15;
+const lhOf=d=>d.lh||S.settings.lh||LH_STD;
+/* Natürliche Zeilenhöhe einer Schrift (Vielfaches der Größe), gemessen statt
+   tabelliert: Chromium setzt line-height:normal aus denselben Metriken, die
+   Word für „einfach“ nimmt. Calibri ≈ 1,22, Georgia ≈ 1,14, Arial ≈ 1,15. */
+function lhNatur(font){
+  const c=lhNatur.c||(lhNatur.c={});
+  if(c[font])return c[font];
+  let v=1.2;
+  try{
+    const m=document.createElement("div");
+    m.style.cssText="position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;"+
+      "font-size:100px;line-height:normal;padding:0;border:0;font-family:"+schriftStapel(font);
+    m.textContent="Hg";document.body.appendChild(m);
+    const h=m.getBoundingClientRect().height/100;m.remove();
+    if(h>0.8&&h<2)v=Math.round(h*1000)/1000;
+  }catch(e){}
+  return c[font]=v;
+}
+/* Rückfall einer Schrift, die auf dem Rechner fehlt: serifenlose auf
+   serifenlos, sonst auf Serif — vorher fiel jede auf Serif (Calibri auf einem
+   Mac erschien als Times). */
+const SCHRIFT_OHNE_SERIFEN=new Set(["Segoe UI","Arial","Verdana","Tahoma","Calibri","Trebuchet MS"]);
+function schriftStapel(f){
+  const q='"'+String(f).replace(/"/g,"")+'"';
+  if(f==="Courier New"||f==="Consolas")return q+",monospace";
+  return q+(SCHRIFT_OHNE_SERIFEN.has(f)?",Carlito,Arial,sans-serif":",serif");
+}
+/* Wie ein Dokument aussieht, wird beim Umstieg festgeschrieben: Schrift,
+   Größe und Format kamen bisher oft aus den Einstellungen, und die stehen ab
+   jetzt auf Word-Werten. Der Zeilenabstand wird in die Word-Rechnung
+   umgerechnet, damit derselbe Abstand herauskommt. d.lhw markiert erledigte
+   Dokumente — auch solche aus älteren Sicherungen laufen hier durch. */
+function dokAufWordWerte(d,alt){
+  if(!d||d.lhw)return;
+  const font=d.font||alt.font,size=d.size||alt.size;
+  d.font=font;d.size=size;
+  const L=d.lh||alt.lh;
+  d.lh=Math.round(L/lhNatur(font)*100)/100;
+  let f=d.fmt||alt.fmt||"a4";
+  if(typeof f==="string")f=f==="a4"?{...A4_ALT}:{...(FORMATS[f]||A4_ALT),key:f};
+  d.fmt=f;
+  d.lhw=1;
+}
+const ALTE_VORGABEN={font:"Georgia",size:12,lh:1.62,fmt:"a4"};
 /* Abstände für die Zwischenstände des Versionsverlaufs. Vorher ein nacktes
    Zahlenfeld von 5 bis 600 Sekunden — 5 Sekunden ist sinnlos, 600 wäre eine
    Falle. Eine kurze Liste sinnvoller Werte nimmt die Entscheidung ab. */
@@ -2174,6 +2226,7 @@ en:{
   "Sehr weit":"Extra wide",
   "Standard":"default",
   "Zeilenabstand und Maße":"Line spacing and dimensions",
+  "Ränder und Maße":"Margins and dimensions",
   "Als Standard":"As default",
   "Dieses Format für neue Dokumente voreinstellen":"Preset this format for new documents",
   "Nur bei „Eigene Maße“ änderbar":"Only editable with \"Custom size\"",
@@ -2946,6 +2999,7 @@ fr:{
   "Sehr weit":"Très large",
   "Standard":"par défaut",
   "Zeilenabstand und Maße":"Interligne et dimensions",
+  "Ränder und Maße":"Marges et dimensions",
   "Als Standard":"Par défaut",
   "Dieses Format für neue Dokumente voreinstellen":"Prédéfinir ce format pour les nouveaux documents",
   "Nur bei „Eigene Maße“ änderbar":"Modifiable uniquement avec « Dimensions personnalisées »",
@@ -3718,6 +3772,7 @@ es:{
   "Sehr weit":"Muy amplio",
   "Standard":"predeterminado",
   "Zeilenabstand und Maße":"Interlineado y medidas",
+  "Ränder und Maße":"Márgenes y medidas",
   "Als Standard":"Como predeterminado",
   "Dieses Format für neue Dokumente voreinstellen":"Preestablecer este formato para nuevos documentos",
   "Nur bei „Eigene Maße“ änderbar":"Solo se puede modificar con «Medidas personalizadas»",
@@ -4490,6 +4545,7 @@ pt:{
   "Sehr weit":"Muito amplo",
   "Standard":"padrão",
   "Zeilenabstand und Maße":"Espaçamento entre linhas e medidas",
+  "Ränder und Maße":"Margens e medidas",
   "Als Standard":"Como padrão",
   "Dieses Format für neue Dokumente voreinstellen":"Predefinir este formato para novos documentos",
   "Nur bei „Eigene Maße“ änderbar":"Só pode ser alterado com \"Medidas personalizadas\"",
@@ -5262,6 +5318,7 @@ pl:{
   "Sehr weit":"Bardzo szeroki",
   "Standard":"domyślny",
   "Zeilenabstand und Maße":"Interlinia i wymiary",
+  "Ränder und Maße":"Marginesy i wymiary",
   "Als Standard":"Jako domyślny",
   "Dieses Format für neue Dokumente voreinstellen":"Ustaw ten format domyślnie dla nowych dokumentów",
   "Nur bei „Eigene Maße“ änderbar":"Można zmienić tylko przy „Własne wymiary”",
@@ -6041,6 +6098,7 @@ it:{
   "Sehr weit":"Molto ampia",
   "Standard":"predefinito",
   "Zeilenabstand und Maße":"Interlinea e dimensioni",
+  "Ränder und Maße":"Margini e dimensioni",
   "Als Standard":"Come predefinito",
   "Dieses Format für neue Dokumente voreinstellen":"Preimposta questo formato per i nuovi documenti",
   "Nur bei „Eigene Maße“ änderbar":"Modificabile solo con «Dimensioni personalizzate»",
@@ -6419,11 +6477,12 @@ const hatInhalt=h=>{
   return !!((e.innerText||"").trim()||e.querySelector("figure,img,table"));
 };
 function startSkip(){lockedOvl=false;zurueckZumWillkommen=false;closeOvl()}
+/* Derselbe Weg wie Datei › Neu: der unsichtbare Platzhalter hinter dem
+   Willkommen wird von platzhalterAbloesen() ersetzt. Vorher übernahm dieser
+   Weg nur das Seitenformat und verlor Zeilenabstand, Schrift und Größe. */
 function startNew(){
   lockedOvl=false;closeOvl();
-  if(S.docs.length===1&&!hatInhalt(S.docs[0].html)){
-    formatDialog("new",val=>{S.docs[0].fmt=val;save();render()});
-  }else newDocument();
+  newDocument();
 }
 function mpfad(...schluessel){
   return schluessel.map(k=>tr(k).replace(/…$/,"")).join(" › ");
@@ -6499,7 +6558,7 @@ function save(){if(datenGeloescht)return false;
   }}
 
 const uid=()=>Math.random().toString(36).slice(2,9);
-function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],font:null,size:null}}
+function blankDoc(t){return{id:uid(),title:t||"Ohne Titel",html:"",history:[],font:null,size:null,lhw:1}}
 
 /* Beim allerersten Start (load() liefert nichts) die Oberflächensprache aus der
    Anzeigesprache des Systems vorbelegen. navigator.languages spiegelt sie — im
@@ -6522,13 +6581,13 @@ const SYS_LANG=systemUiLang();
 const SYS_SPELL_LANGS=["de","en","fr","es","it","pt","pl"];
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
-  settings:{font:"Georgia",size:12,autosave:true,interval:30,
+  settings:{font:"Calibri",size:11,lh:1.15,autosave:true,interval:30,
     lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA},
   /* Zoom 100 % wie in Word: die Seite in echter Größe. Bis 1.0 waren es 120 %,
      dazu Georgia 12 statt Calibri 11 — Text aus Word-Dateien und Eingefügtes
      wirkte rund 1,3-mal so groß wie in der Quelle. Wer schon eine Stufe hat,
      behält sie; das betrifft nur neue Nutzer. */
-  gsort:"alpha",marks:false,zoom:1,fitPage:false,guides:true,showCol:true
+  gsort:"alpha",marks:false,zoom:1,fitPage:false,guides:true,showCol:true,wordWerte:1
 };
 if(S.showCol===undefined)S.showCol=true;
 if(!S.notes){
@@ -7018,9 +7077,9 @@ function drawWrite(){
      jedem Selektor, der gezielt "p" statt "div" listet (Bereinigen, Export). */
   document.execCommand("defaultParagraphSeparator",false,"p");
   ed.innerHTML=d.html||"<p><br></p>";
-  ed.style.fontFamily=(d.font||S.settings.font)+",serif";
+  ed.style.fontFamily=schriftStapel(d.font||S.settings.font);
   ed.style.setProperty("--fs",(d.size||S.settings.size)+"pt");
-  ed.style.setProperty("--lh",lhOf(d));
+  ed.style.setProperty("--lh",lhOf(d)*lhNatur(d.font||S.settings.font));
   ed.style.setProperty("--ps",psOf(d)+"em");
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
@@ -8495,7 +8554,7 @@ function exportCss(d){
 *{box-sizing:border-box}
 html{color-scheme:light}
 body{margin:0;background:${paper};color:${ink};
-  font-family:${font},"Georgia","Times New Roman",serif;font-size:${size}pt;line-height:${lh};
+  font-family:${schriftStapel(font)};font-size:${size}pt;line-height:${Math.round(lh*lhNatur(font)*1000)/1000};
   -webkit-text-size-adjust:100%}
 main{max-width:40em;margin:0 auto;padding:6vh 24px 16vh}
 h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.25;margin:1.1em 0 .4em}
@@ -11572,6 +11631,8 @@ function applyBundle(b){
     confirmReplace(()=>{
       const neu={...b};delete neu.pqw;delete neu.kind;delete neu.saved;
       S=neu;
+      /* Eine Vollsicherung von vor 1.1 bringt die alten Vorgaben mit */
+      aufWordWerteUmstellen();
       ensureGlossaries();
       lockedOvl=false;closeOvl();
       save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"));
@@ -11590,6 +11651,7 @@ function applyBundle(b){
   (b.docs||[]).forEach(d=>{
     if(!d)return;
     if(dIds.has(d.id))d.id=uid();      /* schon vorhanden: als Kopie einfügen */
+    dokAufWordWerte(d,ALTE_VORGABEN);  /* aus einer Sicherung von vor 1.1 */
     dIds.add(d.id);S.docs.push(d);S.active=d.id;nD++;
   });
   ensureGlossaries();
@@ -12441,7 +12503,12 @@ function formatDialog(mode,onDone){
   let cfg={n:start.n,w:start.w,h:start.h,m:[...start.m],key:sel,
     hd:start.hd!==undefined?start.hd:(FORMATS[sel]||FORMATS.a4).hd,
     fd:start.fd!==undefined?start.fd:(FORMATS[sel]||FORMATS.a4).fd};
-  let lh=isNew?(S.settings.lh||1.62):lhOf(doc());
+  let lh=isNew?(S.settings.lh||LH_STD):lhOf(doc());
+  /* Nur beim Anlegen: was ein neues Dokument sonst still aus den
+     Einstellungen erbte, steht hier sichtbar zur Wahl (wie Word es
+     vorbelegt). Beim Ändern des Seitenformats gehören Schrift und Abstände
+     in die Werkzeugleiste und das Format-Menü. */
+  let schrift=S.settings.font||"Calibri",groesse=S.settings.size||11,abs=S.settings.ps||.82;
   /* Eigene Maße lassen sich ohne die Felder nicht eingeben - dort von
      vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
   let offen=sel==="custom";
@@ -12450,7 +12517,7 @@ function formatDialog(mode,onDone){
   const unit=unitOf,toDisp=toUnit,fromDisp=fromUnit;
   const kurzfassung=()=>{
     const z=S.settings.uiLang==="en"?String(lh):String(lh).replace(".",",");
-    return `${toDisp(cfg.w)}&times;${toDisp(cfg.h)} ${unitAbbr()} · ${cfg.m.map(toDisp).join("/")} · ${z}`;
+    return `${toDisp(cfg.w)}&times;${toDisp(cfg.h)} ${unitAbbr()} · ${cfg.m.map(toDisp).join("/")}${isNew?"":" · "+z}`;
   };
   const pagePreview=()=>{
     const sc=100/Math.max(cfg.w||1,cfg.h||1);
@@ -12487,18 +12554,38 @@ function formatDialog(mode,onDone){
       <button class="pill ${!quer()?"on":""}" data-o="hoch" style="flex:1">${tr("Hochformat")}</button>
       <button class="pill ${quer()?"on":""}" data-o="quer" style="flex:1">${tr("Querformat")}</button>
     </div>
-    <button class="fmtmore" id="fMore" aria-expanded="${offen}">
-      ${ICO(offen?'<path d="m6 9 6 6 6-6"/>':'<path d="m9 6 6 6-6 6"/>')}
-      <span>${tr("Zeilenabstand und Maße")}</span>
-      <span class="sum">${offen?"":kurzfassung()}</span>
-    </button>
-    ${offen?`
-    <div class="mmrow" style="margin-bottom:11px">
+    ${isNew?`
+    <div class="mmrow" style="margin-bottom:7px">
+      <label>${tr("Schriftart")}</label>
+      <select id="cFont" style="flex:1">${FONTS.map(f=>
+        `<option ${schrift===f?"selected":""} style="font-family:'${f}'">${f}</option>`).join("")}</select>
+      <select id="cSize" style="flex:0 0 64px" title="${tr("Schriftgröße")}">${
+        [...new Set([...SIZES,groesse])].sort((a,b)=>a-b).map(x=>
+        `<option value="${x}" ${groesse==x?"selected":""}>${S.settings.uiLang==="en"?x:String(x).replace(".",",")}</option>`).join("")}</select>
+    </div>
+    <div class="mmrow" style="margin-bottom:7px">
       <label>${tr("Zeilenabstand")}</label>
       <select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
         `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
-          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===1.62?" · "+tr("Standard"):""}</option>`).join("")}</select>
+          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===LH_STD?" · "+tr("Standard"):""}</option>`).join("")}</select>
     </div>
+    <div class="mmrow" style="margin-bottom:7px">
+      <label>${tr("Absatzabstand")}</label>
+      <select id="cPs" style="flex:1">${PARSPACES.map(([lab,v])=>
+        `<option value="${v}" ${Math.abs(abs-v)<0.001?"selected":""}>${tr(lab)}</option>`).join("")}</select>
+    </div>`:""}
+    <button class="fmtmore" id="fMore" aria-expanded="${offen}">
+      ${ICO(offen?'<path d="m6 9 6 6 6-6"/>':'<path d="m9 6 6 6-6 6"/>')}
+      <span>${isNew?tr("Ränder und Maße"):tr("Zeilenabstand und Maße")}</span>
+      <span class="sum">${offen?"":kurzfassung()}</span>
+    </button>
+    ${offen?`
+    ${isNew?"":`<div class="mmrow" style="margin-bottom:11px">
+      <label>${tr("Zeilenabstand")}</label>
+      <select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
+        `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
+          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===LH_STD?" · "+tr("Standard"):""}</option>`).join("")}</select>
+    </div>`}
     <div class="mmrow" style="margin-bottom:11px">
       <label>${tr("Maßsystem")}</label>
       <button class="pill ${unit()!=="in"?"on":""}" data-u="mm" style="flex:1">mm</button>
@@ -12578,7 +12665,10 @@ function formatDialog(mode,onDone){
     $("#fbody").querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{
       readM();S.settings.unit=b.dataset.u;save();repaint()});
     ["cw","ch","c0","c1","c2","c3"].forEach(id=>{const el=$("#"+id);if(el)el.onchange=()=>{readM();repaint()}});
-    const lhSel=$("#cLh");if(lhSel)lhSel.onchange=()=>{lh=+lhSel.value||1.62};
+    const lhSel=$("#cLh");if(lhSel)lhSel.onchange=()=>{lh=+lhSel.value||LH_STD};
+    const fSel=$("#cFont");if(fSel)fSel.onchange=()=>{schrift=fSel.value};
+    const gSel=$("#cSize");if(gSel)gSel.onchange=()=>{groesse=+gSel.value||11};
+    const aSel=$("#cPs");if(aSel)aSel.onchange=()=>{abs=+aSel.value||.82};
     const mehr=$("#fMore");if(mehr)mehr.onclick=()=>{readM();offen=!offen;repaint()};
     const cfStart=$("#cfSaveStart");if(cfStart)cfStart.onclick=()=>{readM();savingName=true;repaint();
       const inp=$("#cfName");if(inp)inp.focus()};
@@ -12601,20 +12691,28 @@ function formatDialog(mode,onDone){
   $("#fHf").onclick=()=>{
     readM();const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
     closeOvl();
-    if(isNew){const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();S.docs.push(d);S.active=d.id;save();render()}
+    if(isNew)leeresDokument(val,lh,{font:schrift,size:groesse,ps:abs});
     else{doc().fmt=val;doc().lh=lh;commit();render()}
     hfDialog();};
   $("#fOk").onclick=()=>{
     readM();
     const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
-    if($("#fDef").checked){S.settings.fmt=val;S.settings.lh=lh}
-    closeOvl();onDone(val,lh);
+    if($("#fDef").checked){S.settings.fmt=val;S.settings.lh=lh;
+      if(isNew){S.settings.font=schrift;S.settings.size=groesse;S.settings.ps=abs}save()}
+    closeOvl();onDone(val,lh,isNew?{font:schrift,size:groesse,ps:abs}:null);
   };
 }
+/* Schrift, Größe und Abstände werden am Dokument festgeschrieben, nicht aus
+   den Einstellungen geerbt — sonst änderte ein späteres „Als Standard“ alle
+   älteren Dokumente mit. */
+function leeresDokument(val,lh,x){
+  flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();
+  if(x){d.font=x.font;d.size=x.size;d.ps=x.ps}
+  platzhalterAbloesen();S.docs.push(d);S.active=d.id;save();render();
+  return d;
+}
 function newDocument(){
-  formatDialog("new",(val,lh)=>{
-    flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();
-    platzhalterAbloesen();S.docs.push(d);S.active=d.id;save();render()});
+  formatDialog("new",(val,lh,x)=>leeresDokument(val,lh,x));
 }
 function changeFormat(){
   formatDialog("change",(val,lh)=>{doc().fmt=val;doc().lh=lh;commit();render();toast(tr("Format geändert"))});
@@ -21588,6 +21686,20 @@ function render(){
   drawRep();       /* desgleichen */
   drawStatus();
 }
+/* Einmaliger Umstieg auf Word-Werte (1.1): erst jedes Dokument mit den
+   bisherigen Vorgaben festschreiben, dann die Vorgaben selbst umstellen —
+   in dieser Reihenfolge, sonst nähmen die Dokumente schon die neuen. Eine
+   eigene, als Objekt gespeicherte Seitenvorgabe („Als Standard“) bleibt. */
+function aufWordWerteUmstellen(){
+  if(S.wordWerte)return;
+  const alt={font:S.settings.font||ALTE_VORGABEN.font,size:S.settings.size||ALTE_VORGABEN.size,
+    lh:S.settings.lh||ALTE_VORGABEN.lh,fmt:S.settings.fmt||ALTE_VORGABEN.fmt};
+  S.docs.forEach(d=>dokAufWordWerte(d,alt));
+  S.settings.font="Calibri";S.settings.size=11;S.settings.lh=LH_STD;
+  if(typeof S.settings.fmt!=="object")S.settings.fmt="a4";
+  S.wordWerte=1;save();
+}
+aufWordWerteUmstellen();
 applyTheme();applyStaticLabels();resetTimer();
 if(isTrulyEmpty()){clearShell();startupDialog();}else render();
 /* Die Sicherung anlaufen lassen. Der erste Versuch prüft nur nach, ob der

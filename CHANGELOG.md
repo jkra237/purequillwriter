@@ -92,6 +92,37 @@ Wird **1.1.0**, nicht 1.0.1: mit „Speichern“ ist eine neue Funktion dabei
     Hand durchspielen.
 - Hilfe: Absatz zu *Speichern* im Thema „Speichern als“, Kürzeltabelle in
   allen sieben Sprachen angepasst.
+- **Neue Dokumente wie in Word.** Bisher Georgia 12, Zeilenabstand 1,62,
+  A4-Ränder 25/20/25/25 mm, Schrift und Größe nur in den Einstellungen.
+  Jetzt **Calibri 11, Zeilenabstand 1,15, Ränder 25/25/20/25 mm** (oben,
+  rechts, unten, links) — für alle, auch bestehende Installationen.
+  - **Dialog „Neues Dokument“** zeigt Schrift, Größe, Zeilen- und
+    Absatzabstand sichtbar und mit diesen Werten vorbelegt; Ränder darunter
+    einklappbar. „Als Standard“ merkt sich auch Schrift, Größe und
+    Absatzabstand. Die Werte werden am Dokument festgeschrieben
+    (`leeresDokument()`), nicht aus den Einstellungen geerbt. Der Weg aus
+    dem Willkommensfenster ist derselbe wie Datei › Neu — vorher übernahm er
+    nur das Seitenformat.
+  - **Zeilenabstand rechnet wie Word:** Vielfaches der natürlichen
+    Zeilenhöhe der Schrift (`lhNatur()`, gemessen: Calibri 1,22, Georgia
+    1,14, Arial 1,15, Segoe UI 1,33), nicht der Schriftgröße. „1,15“ sieht
+    damit aus wie in Word und geht unverändert als `w:line` hinaus; vorher
+    war Word-1,15 rund 20 % weiter. Liste wie Word: 1 · 1,08 · 1,15 · 1,5 ·
+    2 · 2,5.
+  - **Bestehende Dokumente sehen unverändert aus:** `dokAufWordWerte()`
+    schreibt einmalig Schrift, Größe und Format fest (A4 mit den alten
+    Rändern) und rechnet den Zeilenabstand um (`d.lhw` markiert erledigte).
+    Läuft beim Start, beim Laden einer Vollsicherung von vor 1.1 und für
+    jedes Dokument aus einer älteren Teilsicherung. Gemessen: 25,92 → 25,90
+    px und 24,27 → 24,26 px Zeilenhöhe.
+  - Schriften fallen passend zurück (`schriftStapel()`): serifenlose auf
+    Carlito/Arial, nicht mehr auf Serif — Calibri auf einem Rechner ohne
+    Calibri erschien sonst als Times.
+  - Geprüft: Umstellung eines 1.0-Speicherstands (zwei Dokumente,
+    geerbte und eigene Werte), Dialogvorbelegung, neues Dokument mit genau
+    Word-Zeilenhöhe (20,58 px bei Calibri 11), „Als Standard“, Dialog
+    „Seitenformat“ ohne Schriftfelder; `check-export.mjs` 252/252,
+    check-i18n grün.
 
 ### Behoben
 
