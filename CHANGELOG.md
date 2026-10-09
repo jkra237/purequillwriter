@@ -45,6 +45,16 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Behoben
+
+- **Schriftwechsel über die Werkzeugleiste** setzte `Schrift,serif` statt
+  `schriftStapel()`: Eine fehlende serifenlose Schrift (unter Linux Verdana,
+  Tahoma, Segoe UI, Trebuchet; auf dem Mac Calibri) erschien bis zum
+  nächsten Öffnen mit Serifen. Und der Zeilenabstand blieb auf der Höhe der
+  alten Schrift stehen, auch unter Windows: Calibri → Georgia stand im Editor
+  bei 1,15 × 1,22 statt 1,15 × 1,15, rund 6 % weiter als im Export, bis das
+  Dokument neu geöffnet wurde.
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.

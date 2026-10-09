@@ -21926,7 +21926,11 @@ $("#tools").addEventListener("keydown",e=>{
     const f=$("#fSize");if(f){f.focus();f.select()}}
 });
 $("#tools").addEventListener("change",e=>{
-  if(e.target.id==="fFont"){doc().font=e.target.value;$("#editor").style.fontFamily=e.target.value+",serif";commit()}
+  /* Derselbe Stapel und dieselbe Zeilenhöhe wie beim Öffnen des Dokuments —
+     sonst fiel eine fehlende serifenlose Schrift hier auf Serif, und der
+     Zeilenabstand blieb bis zum nächsten Öffnen bei der alten Schrift. */
+  if(e.target.id==="fFont"){const d=doc(),ed=$("#editor");d.font=e.target.value;
+    ed.style.fontFamily=schriftStapel(d.font);ed.style.setProperty("--lh",lhOf(d)*lhNatur(d.font));commit()}
   if(e.target.id==="fSize")setFontSize(e.target.value);
   if(e.target.id==="fBlock"){
     /* „blockquote:toent" trägt Absatzart und Zitatstil in einem Wert — der
