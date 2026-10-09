@@ -28,5 +28,11 @@ contextBridge.exposeInMainWorld("pqwDesktop", {
   writeFile: (path, bytes) => ipcRenderer.invoke("pqw:writeFile", path, bytes),
 
   /* Nativer Öffnen-Dialog. Liefert [{name, pfad, bytes:ArrayBuffer}] oder []. */
-  openFiles: (opts) => ipcRenderer.invoke("pqw:openFiles", opts)
+  openFiles: (opts) => ipcRenderer.invoke("pqw:openFiles", opts),
+
+  /* Per Doppelklick übergebene Dateien, gleiche Form wie openFiles.
+     startDateien holt die vom ersten Start ab (einmalig), onDateien meldet
+     die eines zweiten Starts, während das Fenster schon offen ist. */
+  startDateien: () => ipcRenderer.invoke("pqw:startDateien"),
+  onDateien: (cb) => { ipcRenderer.on("pqw:dateien", (_e, list) => cb(list)); }
 });

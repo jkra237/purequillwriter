@@ -10531,6 +10531,12 @@ async function ladeDokumente(dateien){
   else if(geladen)toast(geladen===1?tr("Dokument geladen"):geladen+" "+tr("Dokumente")+" "+tr("geladen"));
   else if(abgelehnt)toast(tr("Diese Datei ließ sich nicht lesen"));
 }
+/* Was main.js an Dateien liefert ({name,pfad,bytes}) — aus dem Öffnen-Dialog
+   oder per Doppelklick —, geht wie ein <input type=file> in ladeDokumente. */
+function desktopDateienLaden(files){
+  if(!files||!files.length)return;
+  ladeDokumente(files.map(x=>{const f=new File([x.bytes],x.name);f.pqwPfad=x.pfad||null;return f}));
+}
 function loadDocumentFile(){
   /* Desktop: nativer Öffnen-Dialog, Dateien kommen gleich als Bytes zurück
      und werden wie ein <input type=file> weitergereicht - so geht nichts
@@ -10541,10 +10547,7 @@ function loadDocumentFile(){
     D.openFiles({multiple:true,filters:[
       {name:tr("Alle unterstützten Dokumente"),extensions:DOKENDUNGEN.map(roh)},
       ...DOKFORMATE.map(f=>({name:tr(f.n),extensions:f.e.map(roh)}))
-    ]}).then(files=>{
-      if(!files||!files.length)return;
-      ladeDokumente(files.map(x=>{const f=new File([x.bytes],x.name);f.pqwPfad=x.pfad||null;return f}));
-    }).catch(()=>{});
+    ]}).then(desktopDateienLaden).catch(()=>{});
     return;
   }
   /* Chrome und Edge können benannte Formatgruppen im Dateidialog zeigen.
@@ -22045,6 +22048,14 @@ function aufWordWerteUmstellen(){
 aufWordWerteUmstellen();
 applyTheme();applyStaticLabels();resetTimer();
 if(isTrulyEmpty()){clearShell();startupDialog();}else render();
+/* Desktop: per Doppelklick oder „Öffnen mit“ übergebene Dateien. Beim ersten
+   Start lagen sie schon vor dem Fenster bereit und werden abgeholt; läuft das
+   Programm schon, schickt main.js sie herüber. Erst hier, nach dem Aufbau —
+   ladeDokumente schließt dabei auch das Willkommensfenster. */
+(()=>{const D=PQWD();if(!D)return;
+  if(D.startDateien)D.startDateien().then(desktopDateienLaden).catch(()=>{});
+  if(D.onDateien)D.onDateien(desktopDateienLaden);
+})();
 /* Die Sicherung anlaufen lassen. Der erste Versuch prüft nur nach, ob der
    Zugriff noch gilt — gefragt wird nie ungefragt, sondern erst, wenn der
    Benutzer in den Einstellungen auf „Verbinden" klickt. */

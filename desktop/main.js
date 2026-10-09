@@ -6,7 +6,8 @@
 const { app, BrowserWindow, Menu, dialog, ipcMain, clipboard, protocol, net, shell } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs/promises");
-const { pathToFileURL } = require("node:url");
+const { statSync } = require("node:fs");
+const { pathToFileURL, fileURLToPath } = require("node:url");
 
 const APP_DIR = path.join(__dirname, "app");
 
@@ -150,24 +151,60 @@ ipcMain.handle("pqw:openFiles", async (e, opts = {}) => {
     filters: opts.filters || [{ name: "Alle Dateien", extensions: ["*"] }]
   });
   if (canceled) return [];
+  return Promise.all(filePaths.map(leseDatei));
+});
+
+/* pfad: damit „Speichern“ in eine geöffnete .docx zurückschreiben kann. */
+async function leseDatei(fp) {
+  const buf = await fs.readFile(fp);
+  return { name: path.basename(fp), pfad: fp, bytes: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) };
+}
+
+/* Dateien aus einer Befehlszeile — so kommt ein Doppelklick auf eine .pqw
+   an, unter Windows als Pfad, unter Linux je nach Dateimanager auch als
+   file://-Adresse (die .desktop-Datei übergibt %U). Schalter fallen weg, und
+   was keine vorhandene Datei ist ebenso: das ist beim Entwickeln das „.“
+   hinter electron. */
+function dateienAus(argv, cwd) {
   const out = [];
-  for (const fp of filePaths) {
-    const buf = await fs.readFile(fp);
-    /* pfad: damit „Speichern“ in eine geöffnete .docx zurückschreiben kann. */
-    out.push({ name: require("node:path").basename(fp), pfad: fp, bytes: buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) });
+  for (const a of argv.slice(1)) {
+    if (!a || a.startsWith("-")) continue;
+    let fp = a;
+    try { if (/^file:/i.test(a)) fp = fileURLToPath(a); } catch { continue; }
+    fp = path.resolve(cwd || process.cwd(), fp);
+    if (fp.startsWith(__dirname + path.sep)) continue;   /* das Programm selbst */
+    try { if (statSync(fp).isFile()) out.push(fp); } catch {}
   }
   return out;
+}
+async function leseAlle(pfade) {
+  const out = [];
+  for (const fp of pfade) { try { out.push(await leseDatei(fp)); } catch {} }
+  return out;
+}
+
+/* Beim ersten Start ist das Fenster noch nicht da, wenn die Datei übergeben
+   wird — index.html holt sie ab, sobald es aufgebaut ist, und genau einmal. */
+let startPfade = dateienAus(process.argv, process.cwd());
+ipcMain.handle("pqw:startDateien", () => {
+  const p = startPfade; startPfade = [];
+  return leseAlle(p);
 });
 
 /* Ein zweiter Start (etwa per Doppelklick auf eine .pqw) holt das
    vorhandene Fenster nach vorn, statt ein zweites zu öffnen — sonst liefen
-   zwei Programme auf demselben Browserspeicher. */
+   zwei Programme auf demselben Browserspeicher. Die übergebene Datei wird
+   an das laufende Fenster weitergereicht. */
 if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
-  app.on("second-instance", () => {
+  app.on("second-instance", async (_e, argv, cwd) => {
     const [win] = BrowserWindow.getAllWindows();
-    if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
+    if (!win) return;
+    if (win.isMinimized()) win.restore();
+    win.focus();
+    const dateien = await leseAlle(dateienAus(argv, cwd));
+    if (dateien.length) win.webContents.send("pqw:dateien", dateien);
   });
   app.whenReady().then(() => {
     serveApp();

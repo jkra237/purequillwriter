@@ -75,6 +75,15 @@ immer genau einen Commit, der sie anfasst.
   alten Schrift stehen, auch unter Windows: Calibri → Georgia stand im Editor
   bei 1,15 × 1,22 statt 1,15 × 1,15, rund 6 % weiter als im Export, bis das
   Dokument neu geöffnet wurde.
+- **Doppelklick auf eine `.pqw` öffnete nur das Programm, nicht die Datei** —
+  unter Windows wie Linux, seit 1.0.0. `main.js` liest jetzt die Befehlszeile
+  (`dateienAus()`, unter Linux auch `file://`-Adressen): beim ersten Start
+  holt `index.html` die Dateien ab, sobald es aufgebaut ist
+  (`pqw:startDateien`); läuft das Programm schon, schickt `second-instance`
+  sie hinüber (`pqw:dateien`). Beides geht durch `ladeDokumente()`, also
+  schließt sich auch das Willkommensfenster, und eine Vollsicherung fragt
+  vorher nach. Geprüft unter Linux (arm64-Paket) und Windows, mit
+  Leerzeichen im Dateinamen.
 
 ### Nebenbei gefunden, noch nicht behoben
 
