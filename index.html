@@ -1610,10 +1610,23 @@ function lhNatur(font){
    serifenlos, sonst auf Serif — vorher fiel jede auf Serif (Calibri auf einem
    Mac erschien als Times). */
 const SCHRIFT_OHNE_SERIFEN=new Set(["Segoe UI","Arial","Verdana","Tahoma","Calibri","Trebuchet MS"]);
+/* Freie Doppelgänger, vor allem für Linux: Chromium ersetzt dort nur
+   maßgleiche Schriften selbst (Calibri→Carlito, Cambria→Caladea, Arial/Times/
+   Courier→Liberation), die übrigen fielen alle auf dieselbe Grundschrift.
+   Greift nur, wo das Original fehlt; der Name im Dokument und im Word-Export
+   bleibt das Original. Palatino für den Mac, P052/Pagella aus Ghostscript-
+   bzw. TeX-Paketen, Book Antiqua ist selbst ein Palatino-Nachbau. */
+const SCHRIFT_ERSATZ={
+  "Georgia":["Gelasio"],
+  "Garamond":["EB Garamond"],
+  "Palatino Linotype":["Palatino","P052","TeX Gyre Pagella","URW Palladio L"],
+  "Book Antiqua":["Palatino Linotype","Palatino","P052","TeX Gyre Pagella","URW Palladio L"],
+  "Verdana":["DejaVu Sans"]};
 function schriftStapel(f){
-  const q='"'+String(f).replace(/"/g,"")+'"';
-  if(f==="Courier New"||f==="Consolas")return q+",monospace";
-  return q+(SCHRIFT_OHNE_SERIFEN.has(f)?",Carlito,Arial,sans-serif":",serif");
+  const q=n=>'"'+String(n).replace(/"/g,"")+'"';
+  const kette=[f,...(SCHRIFT_ERSATZ[f]||[])].map(q).join(",");
+  if(f==="Courier New"||f==="Consolas")return kette+",monospace";
+  return kette+(SCHRIFT_OHNE_SERIFEN.has(f)?",Carlito,Arial,sans-serif":",serif");
 }
 /* Wie ein Dokument aussieht, wird beim Umstieg festgeschrieben: Schrift,
    Größe und Format kamen bisher oft aus den Einstellungen, und die stehen ab

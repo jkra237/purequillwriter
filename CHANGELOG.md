@@ -59,6 +59,12 @@ immer genau einen Commit, der sie anfasst.
   Kopierschutz des Stores verträgt; die Linux-Pakete gehen ohne Store
   hinaus, also prüft Deutsch dort ab dem ersten Start ohne Netz. Lizenztext
   liegt daneben.
+- **Freie Ersatzschriften** in `schriftStapel()` (`SCHRIFT_ERSATZ`): Palatino
+  Linotype und Book Antiqua → Palatino/P052/TeX Gyre Pagella, Garamond → EB
+  Garamond, Georgia → Gelasio, Verdana → DejaVu Sans. Unter Linux fielen diese
+  Schriften vorher auf die Grundschrift bzw. Carlito. Greift nur, wo das
+  Original fehlt; Windows und der Word-Export behalten den Originalnamen. Das
+  .deb empfiehlt die Pakete dazu.
 
 ### Behoben
 
