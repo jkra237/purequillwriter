@@ -3,3 +3,6 @@
 # eigener Lizenz (siehe dict/*.LICENSE.txt) und sollen auch so nachweisbar sein.
 dict/*.dic -text
 dict/*.aff -text
+
+# Shell-Skripte laufen in WSL/Linux; ein CRLF dort bricht bash ab.
+*.sh text eol=lf

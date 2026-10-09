@@ -1,4 +1,4 @@
-# PureQuill Writer — Windows-Fassung
+# PureQuill Writer — Desktop-Fassung (Windows und Linux)
 
 Electron-Hülle um dieselbe `index.html`, die auch die Webfassung ist. Es gibt
 **keine zweite Kopie des Programms**: `scripts/prepare.mjs` stellt vor jedem
@@ -17,6 +17,37 @@ npm start          # zum Ausprobieren
 npm run dist       # NSIS-Installer (Direkt-Download)  -> release/
 npm run dist:store # APPX/MSIX fürs Microsoft Store     -> release/
 ```
+
+### Linux (AppImage + .deb)
+
+Gebaut wird in WSL (Ubuntu), nicht unter Windows: electron-builder kann die
+Linux-Pakete dort nicht zuverlässig erzeugen. Aus PowerShell:
+
+```powershell
+wsl -d Ubuntu -- bash "/mnt/c/Users/jkraj/cc test/purequillwriter/desktop/scripts/linux-bauen.sh"
+```
+
+Das Skript kopiert das Repo nach `~/pqw-build` (eigene `node_modules`, denn
+die hier in `desktop/` gehören Windows), baut AppImage und .deb je für x64
+und arm64 und legt die vier Pakete nach `release/linux/`. Es **zählt nach**
+und bricht ab, wenn nicht genau vier ankommen: Eine ausgefallene Architektur
+meldet electron-builder nicht.
+
+Einmalig in Ubuntu nötig (fpm, weil electron-builder es nur als x64-Programm
+mitbringt und dieser Rechner arm64 ist; die Bibliotheken und Schriften, damit
+man die App in WSL auch starten kann):
+
+```bash
+sudo apt install -y nodejs npm ruby ruby-dev build-essential libfuse2t64 libnss3 libgtk-3-0t64 libasound2t64 libgbm1 libxss1 libxtst6 libnotify4 libsecret-1-0 fonts-crosextra-carlito fonts-crosextra-caladea fonts-liberation
+sudo gem install fpm --no-document
+```
+
+**Testen:** In WSL läuft nur die arm64-Fassung, sie öffnet ein normales
+Fenster unter Windows: `~/pqw-build/desktop/release/linux-arm64-unpacked/purequillwriter`.
+Die x64-Pakete lassen sich auf diesem Rechner bauen, aber nicht ausprobieren.
+
+`build/icon.png` (512×512) ist das Symbol für Linux, aus `../icon.svg`
+gerendert.
 
 ### Wenn PowerShell npm blockiert
 
@@ -38,7 +69,7 @@ Browser — läuft alles wie bisher.
 |---|---|---|
 | **PDF** | Druckdialog, Nutzer muss *Als PDF speichern* und *Hintergrundgrafiken* wählen | `printToPDF` direkt in die Datei: Hintergründe immer an, `@page`-Format exakt, PDF-Lesezeichen aus den Überschriften, getaggtes PDF |
 | **Rechtsklick → Einfügen** | nur Text (`clipboard.readText`), Formatierung geht verloren | HTML aus der Zwischenablage durch dieselbe Bereinigung wie Strg+V — Formatierung bleibt |
-| **Deutsches Wörterbuch** | liegt in `dict/` | nicht im Paket, wird beim ersten Prüfen von GitHub Pages geladen |
+| **Deutsches Wörterbuch** | liegt in `dict/` | Windows: nicht im Paket (GPL gegen Store-Kopierschutz), wird beim ersten Prüfen von suvantra.eu geladen. Linux: im Paket |
 
 Strg+C / Strg+V verhalten sich in beiden Fassungen gleich — das war nie das
 Problem.

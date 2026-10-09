@@ -45,6 +45,21 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Neu
+
+- **Linux-Fassung**: AppImage und .deb, je x64 und arm64, gebaut in WSL mit
+  `desktop/scripts/linux-bauen.sh` (siehe `desktop/README.md`). Derselbe
+  Electron-Code wie unter Windows, kein eigener Zweig. Das .deb empfiehlt
+  Carlito, Caladea und Liberation: Chromium setzt diese unter Linux selbst für
+  Calibri, Cambria, Times New Roman, Arial und Courier New ein (gemessen
+  2026-10-08), sie sind maßgleich, Umbrüche und Seitenzahl bleiben wie in Word.
+  Verbreitet wird sie über suvantra.eu, nicht über einen Store.
+- **Deutsches Wörterbuch in den Linux-Paketen** (`prepare.mjs --linux`).
+  Unter Windows bleibt es draußen, weil sich die GPL nicht mit dem
+  Kopierschutz des Stores verträgt; die Linux-Pakete gehen ohne Store
+  hinaus, also prüft Deutsch dort ab dem ersten Start ohne Netz. Lizenztext
+  liegt daneben.
+
 ### Behoben
 
 - **Schriftwechsel über die Werkzeugleiste** setzte `Schrift,serif` statt

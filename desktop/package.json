@@ -2,8 +2,9 @@
   "name": "purequillwriter-desktop",
   "productName": "PureQuill Writer",
   "version": "1.1.0",
-  "description": "PureQuill Writer as a Windows desktop application",
+  "description": "PureQuill Writer as a desktop application for Windows and Linux",
   "author": "Suvantra",
+  "homepage": "https://suvantra.eu",
   "license": "UNLICENSED",
   "private": true,
   "main": "main.js",
@@ -12,7 +13,8 @@
     "start": "npm run prepare-app && electron .",
     "dist": "npm run prepare-app && electron-builder --win nsis --x64",
     "dist:store": "npm run prepare-app && electron-builder --win appx --x64 --arm64",
-    "dist:all": "npm run dist && npm run dist:store"
+    "dist:all": "npm run dist && npm run dist:store",
+    "dist:linux": "node scripts/prepare.mjs --linux && electron-builder --linux AppImage deb --x64 --arm64"
   },
   "devDependencies": {
     "electron": "^33.0.0",
@@ -36,7 +38,8 @@
         "ext": "pqw",
         "name": "PureQuill Document",
         "description": "PureQuill Writer document",
-        "role": "Editor"
+        "role": "Editor",
+        "mimeType": "application/x-purequill"
       }
     ],
     "win": {
@@ -64,6 +67,25 @@
       "minVersion": "10.0.17763.0",
       "maxVersionTested": "10.0.22621.0",
       "languages": ["de-DE", "en-US", "es-ES", "fr-FR", "it-IT", "pl-PL", "pt-BR"]
+    },
+    "linux": {
+      "icon": "build/icon.png",
+      "category": "Office",
+      "executableName": "purequillwriter",
+      "synopsis": "Distraction-free word processor",
+      "description": "PureQuill Writer is a calm, offline word processor with Word import and export, notes, glossaries and spell checking in seven languages.",
+      "maintainer": "Suvantra <support@suvantra.eu>",
+      "vendor": "Suvantra",
+      "artifactName": "PureQuill-Writer-${version}-${arch}.${ext}",
+      "target": [
+        { "target": "AppImage", "arch": ["x64", "arm64"] },
+        { "target": "deb", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "deb": {
+      "packageName": "purequillwriter",
+      "packageCategory": "editors",
+      "recommends": ["fonts-crosextra-carlito", "fonts-crosextra-caladea", "fonts-liberation", "fonts-dejavu-core", "fonts-urw-base35", "fonts-ebgaramond"]
     }
   }
 }

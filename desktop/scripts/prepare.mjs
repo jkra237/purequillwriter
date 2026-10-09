@@ -9,6 +9,10 @@
       Kopierschutz, den der Microsoft Store über ein Paket legt. index.html
       lädt es beim ersten deutschen Rechtschreib-Durchlauf von der Webadresse
       nach (siehe dictText()).
+      Mit --linux kommt es doch mit: die Linux-Pakete gehen als Download
+      von suvantra.eu hinaus, ohne Store und ohne Kopierschutz — dort spricht
+      nichts gegen die GPL, und Deutsch prüft dann auch ohne Netz. Der
+      Lizenztext liegt daneben (dict/de.LICENSE.txt).
 
    2. Das PWA-Manifest fliegt raus, samt seiner Verknüpfung im <head>. Es hat
       in einer Desktop-App keine Funktion, und unter dem pqw://-Schema kann
@@ -24,10 +28,11 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..", "..");
 const out = path.resolve(here, "..", "app");
 
+const LINUX = process.argv.includes("--linux");
 /* Sprachen, deren Wörterbuch mit ins Paket darf */
-const BUNDLED_DICTS = ["en", "es", "fr", "it", "pl", "pt"];
+const BUNDLED_DICTS = ["en", "es", "fr", "it", "pl", "pt", ...(LINUX ? ["de"] : [])];
 /* Nicht gebündelt, wird zur Laufzeit geholt */
-const REMOTE_DICTS = ["de"];
+const REMOTE_DICTS = LINUX ? [] : ["de"];
 
 await rm(out, { recursive: true, force: true });
 await mkdir(path.join(out, "dict"), { recursive: true });
@@ -52,5 +57,5 @@ for (const name of await readdir(path.join(root, "dict"))) {
 
 console.log("app/ zusammengestellt");
 console.log("  Wörterbücher im Paket : " + BUNDLED_DICTS.join(", ") + "  (" + (bytes / 1048576).toFixed(1) + " MB)");
-console.log("  zur Laufzeit geladen  : " + REMOTE_DICTS.join(", ") + "  (GPL, siehe dict/de.LICENSE.txt)");
+console.log("  zur Laufzeit geladen  : " + (REMOTE_DICTS.length ? REMOTE_DICTS.join(", ") + "  (GPL, siehe dict/de.LICENSE.txt)" : "keine (Linux: de mit Lizenztext im Paket)"));
 console.log("  PWA-Manifest          : entfernt (in einer Desktop-App ohne Funktion)");
