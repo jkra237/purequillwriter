@@ -84,6 +84,14 @@ immer genau einen Commit, der sie anfasst.
   schließt sich auch das Willkommensfenster, und eine Vollsicherung fragt
   vorher nach. Geprüft unter Linux (arm64-Paket) und Windows, mit
   Leerzeichen im Dateinamen.
+- **Zeichenzahl zählte Absatzwechsel mit** — in Statusleiste, Auswahlanzeige,
+  „Wörter zählen“ und beim Schreibziel in Zeichen. Ein leeres Dokument stand
+  bei „1 Zeichen“, drei Absätze bei vier zu viel. Dazu rechneten Statusleiste
+  (innerText) und Dialog (stripHtml) getrennt und zeigten für denselben Text
+  verschiedene Zahlen (32 gegen 31, Word: 28). Jetzt zählt nur noch
+  countStats(), ohne Zeilen- und Absatzwechsel wie Word; gemessen an sechs
+  Fällen (leer, ein und drei Absätze, Leerzeile, Überschrift, Liste) und an
+  einer Auswahl über zwei Absätze, alle gleich Word. Bestand schon in 1.0.0.
 
 ### Nebenbei gefunden, noch nicht behoben
 

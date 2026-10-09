@@ -8158,8 +8158,9 @@ function goalHtml(txt){
 function drawStatus(){
   const ed=$("#editor");const d=doc();
   const txt=ed?(ed.innerText||""):stripHtml(d.html);
-  const words=txt.trim()?txt.trim().split(/\s+/).length:0;
-  const chars=txt.length;
+  /* Dieselbe Zählung wie der Dialog „Wörter zählen“ — vorher rechneten beide
+     getrennt und zeigten für denselben Text verschiedene Zahlen. */
+  const {words,chars}=countStats(txt);
   const pages=S.settings.uiLang==="en"?(chars/1500).toFixed(1):(chars/1500).toFixed(1).replace(".",",");
   /* Fuer die Auswahlanzeige gemerkt: sie darf nicht bei jeder Bewegung der
      Schreibmarke den ganzen Text neu durchzaehlen. */
@@ -13224,9 +13225,13 @@ function drawRuler(){
     document.addEventListener("mouseup",up);
   });
 }
+/* Zeichen wie in Word: Absatz- und Zeilenwechsel zählen nicht mit. innerText
+   und stripHtml liefern zwischen Blöcken ein oder zwei \n (und ein leerer
+   Absatz eins für sich) — mitgezählt stand bei einem leeren Dokument
+   „1 Zeichen“, bei drei Absätzen vier zu viel. */
 function countStats(txt){
   const words=txt.trim()?txt.trim().split(/\s+/).length:0;
-  const chars=txt.length;
+  const chars=txt.replace(/[\r\n]/g,"").length;
   const charsNoSp=txt.replace(/\s/g,"").length;
   const paras=txt.split(/\n+/).filter(p=>p.trim()).length;
   return {words,chars,charsNoSp,paras};
