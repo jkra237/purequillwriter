@@ -1318,7 +1318,8 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      lesen alle var(--…). Auf Papier gelten feste, drucksichere Werte — sonst
      käme das PDF je nach Schema mit blassgelben Links oder (auf den dunklen
      Schemata) dunklen Kästen heraus. Die Tönung selbst bleibt gewollt (siehe
-     exportPdfDesktop: Hintergrundgrafiken sind im Druck immer an). */
+     exportPdfDesktop: Hintergrundgrafiken sind im Druck immer an).
+     Dieselben Werte stehen für die Druckvorschau an .pvinner .paper. */
   #editor{--paper:#fff;--chrome:#f0f0f0;--chrome-2:#f3f3f3;
     --ink:#000;--ink-soft:#333;--ink-faint:#767676;
     --rule:#999;--stamp:#1A4E8A;--on-stamp:#fff;--err:#B00}
@@ -1410,6 +1411,15 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .pvinner .glossterm{border-bottom:none!important}
 .pvinner .pgbreak::before{content:""!important}
 .pvinner .mg{display:none}
+/* Das Blatt in der Vorschau trägt die Druckfarben, nicht die des Schemas:
+   gedruckt wird immer schwarz auf Weiß (siehe @media print, #editor) — auf
+   Enzian zeigte die Vorschau sonst ein dunkelblaues Blatt mit heller Schrift.
+   Dieselben Werte wie dort; wer sie ändert, ändert beide. Umgebung und
+   Leiste behalten das Schema, --pageedge auch: die Blattkante soll sich auf
+   dunkler Umgebung abheben. */
+.pvinner .paper{--paper:#fff;--chrome:#f0f0f0;--chrome-2:#f3f3f3;
+  --ink:#000;--ink-soft:#333;--ink-faint:#767676;
+  --rule:#999;--stamp:#1A4E8A;--on-stamp:#fff;--err:#B00;color:#000}
 .cmdlist{max-height:340px;overflow:auto}
 .cmd{display:flex;align-items:center;gap:11px;padding:8px 13px;cursor:pointer;border-bottom:1px solid var(--rule)}
 .cmd:last-child{border-bottom:none}

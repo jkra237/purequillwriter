@@ -115,6 +115,13 @@ immer genau einen Commit, der sie anfasst.
   dovè auf 2. Gewöhnliche Tippfehler (maisn, beacoup, grazei, casaa,
   Hauser, obrigdo, ksiazka) unverändert. Im Prüfdialog in en/fr/it und
   mit beiden Einstellungen der Anführungszeichen geprüft.
+- **Druckvorschau zeigte das Blatt in den Farben des Schemas** — auf Enzian
+  dunkelblau mit heller Schrift, auf Tinte, Zyan, Bernstein und Phosphor
+  ebenso dunkel, auf Morgensonne, Salbei & Co. getönt. Gedruckt wird aber
+  immer schwarz auf Weiß. Das Blatt der Vorschau trägt jetzt dieselben
+  Druckfarben wie `@media print` (`.pvinner .paper`); Leiste und Umgebung
+  behalten das Schema. Gemessen über alle 17 Schemata: Blatt weiß, Text
+  schwarz, Zitatrahmen und Seitenzahl in Druckfarbe. Bestand seit 1.0.0.
 
 ### Nebenbei gefunden, noch nicht behoben
 
