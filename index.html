@@ -1821,9 +1821,6 @@ en:{
   "Schließen":"Close",
   "Schriftart":"Font",
   "Schriftgröße":"Font size",
-  "Fett (Strg+B)":"Bold (Ctrl+B)",
-  "Kursiv (Strg+I)":"Italic (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Underline (Ctrl+U)",
   "Absatzformat":"Paragraph style",
   "Text":"Text",
   "Ausrichten und einrücken":"Align and indent",
@@ -2599,9 +2596,6 @@ fr:{
   "Schließen":"Fermer",
   "Schriftart":"Police",
   "Schriftgröße":"Taille de police",
-  "Fett (Strg+B)":"Gras (Ctrl+B)",
-  "Kursiv (Strg+I)":"Italique (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Souligné (Ctrl+U)",
   "Absatzformat":"Style de paragraphe",
   "Text":"Texte",
   "Ausrichten und einrücken":"Aligner et mettre en retrait",
@@ -3377,9 +3371,6 @@ es:{
   "Schließen":"Cerrar",
   "Schriftart":"Fuente",
   "Schriftgröße":"Tamaño de fuente",
-  "Fett (Strg+B)":"Negrita (Ctrl+B)",
-  "Kursiv (Strg+I)":"Cursiva (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Subrayado (Ctrl+U)",
   "Absatzformat":"Estilo de párrafo",
   "Text":"Texto",
   "Ausrichten und einrücken":"Alinear y sangrar",
@@ -4155,9 +4146,6 @@ pt:{
   "Schließen":"Fechar",
   "Schriftart":"Fonte",
   "Schriftgröße":"Tamanho da fonte",
-  "Fett (Strg+B)":"Negrito (Ctrl+B)",
-  "Kursiv (Strg+I)":"Itálico (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Sublinhado (Ctrl+U)",
   "Absatzformat":"Estilo de parágrafo",
   "Text":"Texto",
   "Ausrichten und einrücken":"Alinhar e recuar",
@@ -4933,9 +4921,6 @@ pl:{
   "Schließen":"Zamknij",
   "Schriftart":"Czcionka",
   "Schriftgröße":"Rozmiar czcionki",
-  "Fett (Strg+B)":"Pogrubienie (Ctrl+B)",
-  "Kursiv (Strg+I)":"Kursywa (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Podkreślenie (Ctrl+U)",
   "Absatzformat":"Styl akapitu",
   "Text":"Tekst",
   "Ausrichten und einrücken":"Wyrównanie i wcięcia",
@@ -5711,9 +5696,6 @@ it:{
   "Schließen":"Chiudi",
   "Schriftart":"Carattere",
   "Schriftgröße":"Dimensione carattere",
-  "Fett (Strg+B)":"Grassetto (Ctrl+B)",
-  "Kursiv (Strg+I)":"Corsivo (Ctrl+I)",
-  "Unterstrichen (Strg+U)":"Sottolineato (Ctrl+U)",
   "Absatzformat":"Stile paragrafo",
   "Text":"Testo",
   "Ausrichten und einrücken":"Allinea e rientra",
@@ -7039,9 +7021,9 @@ function drawTools(){
         <button class="cbdrop" id="fSizeList" aria-label="${tr("Größe wählen")}"></button>
       </span>
       <div class="sep"></div>
-      <button class="tb" data-cmd="bold" title="${tr("Fett (Strg+B)")}"><b>${PL("F","B","G","N","N","B","G")}</b></button>
-      <button class="tb" data-cmd="italic" title="${tr("Kursiv (Strg+I)")}"><i>${PL("K","I","I","K","I","I","C")}</i></button>
-      <button class="tb" data-cmd="underline" title="${tr("Unterstrichen (Strg+U)")}"><u>${PL("U","U","S","S","S","U","S")}</u></button>
+      <button class="tb" data-cmd="bold" title="${tr("Fett")} (${kzPlus("fett")})"><b>${PL("F","B","G","N","N","B","G")}</b></button>
+      <button class="tb" data-cmd="italic" title="${tr("Kursiv")} (${kzPlus("kursiv")})"><i>${PL("K","I","I","K","I","I","C")}</i></button>
+      <button class="tb" data-cmd="underline" title="${tr("Unterstrichen")} (${kzPlus("unter")})"><u>${PL("U","U","S","S","S","U","S")}</u></button>
       <button class="tb tbc" id="foreBtn" title="${tr("Schriftfarbe")}" aria-label="${tr("Schriftfarbe")}">
         <span class="gl">A</span><i style="background:${S.settings.foreColor||TEXTCOLORS[0].c}"></i></button>
       <button class="tb tbc" id="markBtn" title="${tr("Texthervorhebung")}" aria-label="${tr("Texthervorhebung")}">
@@ -8859,7 +8841,7 @@ function commandList(){
   const c=[];
   /* Die Hinweise kommen aus kz() und sind damit schon uebersetzt und je
      Fassung richtig. Die Ersetzung bleibt fuer die Handvoll geerbter
-     Browserkuerzel (Strg B/I/U, Strg Z/Y), die nicht in KUERZEL stehen, weil
+     Browserkuerzel (Strg Z/Y), die nicht in KUERZEL stehen, weil
      das Programm sie nicht setzt. */
   const add=(grp,label,hint,run)=>c.push({grp:tr(grp),label:tr(label),hint:hint?hint.replace(/Strg/,tr("Strg")):hint,run});
   add("Ansicht","Schreiben",kz("ansSchr"),()=>setMode("write"));
@@ -8883,9 +8865,9 @@ function commandList(){
   const fmtCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
     if(S.mode!=="write")setMode("write");
     const ed=$("#editor");if(ed)ed.focus();fn();dirty=true;queuePaginate();drawStatus()});
-  fmtCmd("Fett","Strg B",()=>document.execCommand("bold"));
-  fmtCmd("Kursiv","Strg I",()=>document.execCommand("italic"));
-  fmtCmd("Unterstrichen","Strg U",()=>document.execCommand("underline"));
+  fmtCmd("Fett",kz("fett"),()=>document.execCommand("bold"));
+  fmtCmd("Kursiv",kz("kursiv"),()=>document.execCommand("italic"));
+  fmtCmd("Unterstrichen",kz("unter"),()=>document.execCommand("underline"));
   fmtCmd("Durchgestrichen","",()=>document.execCommand("strikeThrough"));
   fmtCmd("Fließtext","",()=>document.execCommand("formatBlock",false,"p"));
   [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
@@ -12211,9 +12193,9 @@ function formatMenu(){
     const b=e.target.closest("[data-f]");if(!b)return;
     const a=b.dataset.f;
     if(a==="text")return openSubMenu(b,[
-      {a:"bold",label:tr("Fett"),k:"Strg B",cur:qState("bold")},
-      {a:"italic",label:tr("Kursiv"),k:"Strg I",cur:qState("italic")},
-      {a:"underline",label:tr("Unterstrichen"),k:"Strg U",cur:qState("underline")},
+      {a:"bold",label:tr("Fett"),k:kz("fett"),cur:qState("bold")},
+      {a:"italic",label:tr("Kursiv"),k:kz("kursiv"),cur:qState("italic")},
+      {a:"underline",label:tr("Unterstrichen"),k:kz("unter"),cur:qState("underline")},
       {a:"strikeThrough",label:tr("Durchgestrichen"),cur:qState("strikeThrough")},
       {a:"superscript",label:tr("Hochgestellt"),cur:qState("superscript")},
       {a:"subscript",label:tr("Tiefgestellt"),cur:qState("subscript")}
@@ -17563,9 +17545,9 @@ anything further. Make a backup at once and free some space.</p>
 <p>The toolbar above the page carries the character formatting. Everything there applies
 to the selected text, or to what you type next if nothing is selected.</p>
 <table class="hkeys">
-<tr><td>Bold</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Italic</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Underline</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Bold</td><td>{kz*:fett}</td></tr>
+<tr><td>Italic</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Underline</td><td>{kz*:unter}</td></tr>
 <tr><td>Strikethrough</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
 </table>
 <p><b>Font size</b> is an editable box: pick a listed size from the arrow beside it, or
@@ -17583,10 +17565,10 @@ formulas and for figures you want to set by hand.</p>
 three heading levels. Headings are what the outline and the table of contents are built
 from, so use them rather than merely making a line bigger and bold.</p>
 <table class="hkeys">
-<tr><td>Align left</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Centre</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Align right</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Justify</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Align left</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centre</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Align right</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justify</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>To indent a paragraph</b>, press <kbd>Tab</kbd> at the start of it;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> takes it back. Inside a table these keys move between cells.</p>
@@ -17822,8 +17804,8 @@ from the third onwards are they reduced — and then to two, not to one.</p>`},
 
  {t:"Find and replace",k:"find;search;replace;match case;whole word",b:`
 <table class="hkeys">
-<tr><td>Find</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Replace</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Find</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Replace</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>A bar appears at the top of the page. It counts the matches and steps through them with
 <kbd>Enter</kbd> or the arrows. Two options narrow the search: <b>match case</b> and
@@ -17876,7 +17858,7 @@ of the last one, since a document here has one page format rather than one per s
 binary .doc format from before 2007 cannot be read.</p>`},
 
  {t:"Saving as",k:"save;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
-<p><b>File &rsaquo; Save</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx you opened is written back directly. The dot next to the file name in the status bar shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
+<p><b>File &rsaquo; Save</b> ({kz:speichern}) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx you opened is written back directly. The dot next to the file name in the status bar shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
 <p><b>File &rsaquo; Save as</b> writes the document out as a file. The Word format comes
 first because it is the ordinary case — it can be read anywhere, with or without this
 program.</p>
@@ -17993,29 +17975,30 @@ leaves alone</nur-b> keep their usual keys.</p>
 </table>
 <p class="hsec">Writing</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Bold / italic / underline</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Bold / italic / underline</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Undo / redo</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Left / centre<nur-a> / right</nur-a> / justified</td></tr>
+<tr><td>{kz:alles}</td><td>Select all</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Left / centre<nur-a> / right</nur-a> / justified</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Left / centre / right</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Indent / outdent (in tables: next cell)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Page break</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Insert or edit a link</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Insert or edit a link</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Table of contents</td></tr>
 </table>
 <p class="hsec">Documents and notes</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>New document</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Open file</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>New document</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Open file</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Close document</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>New note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Pin a note to the selection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Look up in the glossary</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Save (to the Word file)</td></tr>
+<tr><td>{kz:speichern}</td><td>Save (to the Word file)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Take a snapshot</td></tr>
 </table>
 <p class="hsec">Finding and viewing</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / replace</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Find / replace</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Spell check</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Command palette</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Zoom in / out / fit width</td></tr>
@@ -18121,9 +18104,9 @@ mehr an. Dann sofort eine Sicherung anlegen und Platz schaffen.</p>
 <p>Die Werkzeugleiste über der Seite trägt die Zeichenauszeichnung. Alles dort gilt für den
 markierten Text — oder für das, was du als Nächstes tippst, wenn nichts markiert ist.</p>
 <table class="hkeys">
-<tr><td>Fett</td><td><kbd>Strg</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Kursiv</td><td><kbd>Strg</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Unterstrichen</td><td><kbd>Strg</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Fett</td><td>{kz*:fett}</td></tr>
+<tr><td>Kursiv</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Unterstrichen</td><td>{kz*:unter}</td></tr>
 <tr><td>Durchgestrichen</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
 </table>
 <p><b>Die Schriftgröße</b> ist ein beschreibbares Feld: Über den Pfeil daneben wählst du einen
@@ -18143,10 +18126,10 @@ die Wörter stehen.</p>`},
 Überschriftsebenen. Aus Überschriften bauen sich Gliederung und Inhaltsverzeichnis — nimm
 also sie, statt eine Zeile nur größer und fett zu machen.</p>
 <table class="hkeys">
-<tr><td>Linksbündig</td><td><kbd>Strg</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Zentriert</td><td><kbd>Strg</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Rechtsbündig</td><td><nur-a><kbd>Strg</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Blocksatz</td><td><kbd>Strg</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Linksbündig</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Zentriert</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Rechtsbündig</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Blocksatz</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Zum Einrücken</b> drückst du <kbd>Tab</kbd> am Absatzanfang;
 <kbd>⇧</kbd>+<kbd>Tab</kbd> nimmt es zurück. In einer Tabelle wechseln diese Tasten
@@ -18396,8 +18379,8 @@ unangetastet; erst ab dem dritten wird gekürzt — und dann auf zwei, nicht auf
 
  {t:"Suchen und Ersetzen",k:"suchen;finden;ersetzen;groß- und kleinschreibung;ganzes wort",b:`
 <table class="hkeys">
-<tr><td>Suchen</td><td><kbd>Strg</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Ersetzen</td><td><kbd>Strg</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Suchen</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Ersetzen</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>Eine Leiste erscheint über der Seite. Sie zählt die Treffer und geht mit <kbd>Eingabe</kbd>
 oder den Pfeilen durch sie hindurch. Zwei Schalter engen die Suche ein: <b>Groß-/Kleinschreibung
@@ -18454,7 +18437,7 @@ behalten den Aufbau des letzten, denn hier hat ein Dokument ein Seitenformat und
 Abschnitt. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
 
  {t:"Speichern als",k:"speichern;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
-<p><b>Datei &rsaquo; Speichern</b> (<kbd>Strg</kbd>+<kbd>S</kbd>) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx wird direkt zurückgeschrieben. Der Punkt neben dem Dateinamen in der Statuszeile zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
+<p><b>Datei &rsaquo; Speichern</b> ({kz:speichern}) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx wird direkt zurückgeschrieben. Der Punkt neben dem Dateinamen in der Statuszeile zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
 <p><b>Datei &rsaquo; Speichern als</b> schreibt das Dokument als Datei heraus. Das
 Word-Format steht oben, weil es der Regelfall ist — es liest sich überall, auch ohne dieses
 Programm.</p>
@@ -18574,29 +18557,30 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 </table>
 <p class="hsec">Schreiben</p>
 <table class="hkeys">
-<tr><td><kbd>Strg</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Fett / kursiv / unterstrichen</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Fett / kursiv / unterstrichen</td></tr>
 <tr><td><kbd>Strg</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Rückgängig / Wiederholen</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Links / zentriert<nur-a> / rechts</nur-a> / Blocksatz</td></tr>
+<tr><td>{kz:alles}</td><td>Alles markieren</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Links / zentriert<nur-a> / rechts</nur-a> / Blocksatz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Links / zentriert / rechts</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>⇧</kbd>+<kbd>Tab</kbd></td><td>Ein- / ausrücken (in Tabellen: nächste Zelle)</td></tr>
 <tr><td><kbd>Strg</kbd>+<kbd>Eingabe</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Eingabe</kbd></td><td>Seitenumbruch</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>K</kbd></td><td>Link einfügen oder ändern</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>K</kbd></td><td>Link einfügen oder ändern</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>I</kbd></td><td>Inhaltsverzeichnis</td></tr>
 </table>
 <p class="hsec">Dokumente und Notizen</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Strg</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd></td><td>Neues Dokument</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>O</kbd></td><td>Datei öffnen</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd></td><td>Neues Dokument</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Datei öffnen</td></tr>
 <nur-a><tr><td><kbd>Strg</kbd>+<kbd>W</kbd></td><td>Dokument schließen</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd></td><td>Neue Notiz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd></td><td>Notiz an die Markierung heften</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd></td><td>Im Glossar nachschlagen</td></tr>
-<tr><td><kbd>Strg</kbd>+<kbd>S</kbd></td><td>Speichern (in die Word-Datei)</td></tr>
+<tr><td>{kz:speichern}</td><td>Speichern (in die Word-Datei)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd></td><td>Zwischenstand anlegen</td></tr>
 </table>
 <p class="hsec">Finden und Ansehen</p>
 <table class="hkeys">
-<tr><td><kbd>Strg</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Suchen / Ersetzen</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Suchen / Ersetzen</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Rechtschreibprüfung</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>P</kbd></td><td>Kommandopalette</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Vergrößern / verkleinern / einpassen</td></tr>
@@ -18703,9 +18687,9 @@ almacenar nada más. Haz una copia de seguridad de inmediato y libera espacio.</
 <p>La barra de herramientas sobre la página lleva el formato de carácter. Todo lo que hay ahí se
 aplica al texto seleccionado, o a lo que escribas a continuación si no hay nada seleccionado.</p>
 <table class="hkeys">
-<tr><td>Negrita</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Cursiva</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Subrayado</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Negrita</td><td>{kz*:fett}</td></tr>
+<tr><td>Cursiva</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Subrayado</td><td>{kz*:unter}</td></tr>
 <tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
 </table>
 <p>El <b>tamaño de fuente</b> es un cuadro editable: elige un tamaño de la lista con la flecha
@@ -18725,10 +18709,10 @@ fórmulas y figuras que quieras componer a mano.</p>
 tres niveles de título. Los títulos son la base del esquema y del índice, así que úsalos en
 lugar de limitarte a hacer una línea más grande y en negrita.</p>
 <table class="hkeys">
-<tr><td>Alinear a la izquierda</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Centrar</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Alinear a la derecha</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Justificar</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Alinear a la izquierda</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centrar</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Alinear a la derecha</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justificar</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Para sangrar un párrafo</b>, pulsa <kbd>Tab</kbd> al principio;
 <kbd>Mayús</kbd>+<kbd>Tab</kbd> lo devuelve. Dentro de una tabla, estas teclas se mueven entre
@@ -18981,8 +18965,8 @@ están; solo a partir del tercero se reducen, y entonces a dos, no a uno.</p>`},
 
  {t:"Buscar y reemplazar",k:"buscar;búsqueda;reemplazar;distinguir mayúsculas;palabra completa",b:`
 <table class="hkeys">
-<tr><td>Buscar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Reemplazar</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Buscar</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Reemplazar</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>Aparece una barra en la parte superior de la página. Cuenta las coincidencias y las recorre
 con <kbd>Intro</kbd> o las flechas. Dos opciones acotan la búsqueda: <b>distinguir
@@ -19036,7 +19020,7 @@ secciones conservan la configuración de la última, ya que aquí un documento t
 página y no uno por sección. El antiguo formato binario .doc anterior a 2007 no se puede leer.</p>`},
 
  {t:"Guardar como",k:"guardar;exportar;word;docx;epub;libro electrónico;kindle;pdf;html;markdown;texto;csv",b:`
-<p><b>Archivo &rsaquo; Guardar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx que hayas abierto se vuelve a escribir directamente. El punto junto al nombre del archivo en la barra de estado indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
+<p><b>Archivo &rsaquo; Guardar</b> ({kz:speichern}) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx que hayas abierto se vuelve a escribir directamente. El punto junto al nombre del archivo en la barra de estado indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
 <p><b>Archivo &rsaquo; Guardar como</b> escribe el documento como archivo. El formato Word va
 primero porque es el caso habitual: se puede leer en cualquier parte, con o sin este
 programa.</p>
@@ -19145,6 +19129,11 @@ muestra la versión en inglés con un aviso.</p>`}]},
 <p>Los comandos del programa usan <kbd>Alt</kbd>+<kbd>Mayús</kbd>, porque las combinaciones de
 <kbd>Ctrl</kbd> solo están, en su mayoría, ocupadas<nur-b> por el propio navegador</nur-b>. Los atajos de
 edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de siempre.</p>
+<p>En la aplicación de escritorio, los atajos son los de Word en español: <kbd>Ctrl</kbd>+<kbd>N</kbd> negrita,
+<kbd>Ctrl</kbd>+<kbd>K</kbd> cursiva, <kbd>Ctrl</kbd>+<kbd>S</kbd> subrayado, <kbd>Ctrl</kbd>+<kbd>G</kbd> guardar, <kbd>Ctrl</kbd>+<kbd>U</kbd> nuevo documento,
+<kbd>Ctrl</kbd>+<kbd>B</kbd> buscar. En el navegador no es posible, porque se reserva <kbd>Ctrl</kbd>+<kbd>N</kbd> y <kbd>Ctrl</kbd>+<kbd>T</kbd>;
+allí valen <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> y <kbd>U</kbd>, como en Google Docs. Las tablas muestran las teclas de la
+versión que estás usando.</p>
 <p class="hsec">Vistas</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Escribir / Notas / Glosario</td></tr>
@@ -19156,29 +19145,30 @@ edición<nur-b> que el navegador deja libres</nur-b> conservan sus teclas de sie
 </table>
 <p class="hsec">Escribir</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Negrita / cursiva / subrayado</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Negrita / cursiva / subrayado</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Deshacer / rehacer</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Izquierda / centro<nur-a> / derecha</nur-a> / justificado</td></tr>
+<tr><td>{kz:alles}</td><td>Seleccionar todo</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Izquierda / centro<nur-a> / derecha</nur-a> / justificado</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Izquierda / centro / derecha</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Mayús</kbd>+<kbd>Tab</kbd></td><td>Sangrar / reducir sangría (en tablas: siguiente celda)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Intro</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>Intro</kbd></td><td>Salto de página</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>K</kbd></td><td>Insertar o editar un enlace</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>K</kbd></td><td>Insertar o editar un enlace</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd></td><td>Índice</td></tr>
 </table>
 <p class="hsec">Documentos y notas</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd></td><td>Nuevo documento</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Abrir archivo</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd></td><td>Nuevo documento</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Abrir archivo</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Cerrar documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>N</kbd></td><td>Nueva nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>M</kbd></td><td>Fijar una nota a la selección</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>G</kbd></td><td>Consultar en el glosario</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Guardar (en el archivo de Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Guardar (en el archivo de Word)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>S</kbd></td><td>Crear un punto de restauración</td></tr>
 </table>
 <p class="hsec">Buscar y ver</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Buscar / reemplazar</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Buscar / reemplazar</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Revisión ortográfica</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>P</kbd></td><td>Paleta de comandos</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Acercar / alejar / ajustar al ancho</td></tr>
@@ -19284,9 +19274,9 @@ armazenar qualquer coisa a mais. Faça um backup na hora e libere espaço.</p>
 <p>A barra de ferramentas acima da página carrega a formatação de caractere. Tudo ali se aplica
 ao texto selecionado, ou ao que você digitar em seguida se nada estiver selecionado.</p>
 <table class="hkeys">
-<tr><td>Negrito</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Itálico</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Sublinhado</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Negrito</td><td>{kz*:fett}</td></tr>
+<tr><td>Itálico</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Sublinhado</td><td>{kz*:unter}</td></tr>
 <tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
 </table>
 <p>O <b>tamanho da fonte</b> é uma caixa editável: escolha um tamanho da lista na seta ao lado,
@@ -19306,10 +19296,10 @@ palavras.</p>`},
 de três níveis de título. Os títulos são a base da estrutura de tópicos e do sumário, então
 use-os em vez de apenas deixar uma linha maior e em negrito.</p>
 <table class="hkeys">
-<tr><td>Alinhar à esquerda</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Centralizar</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Alinhar à direita</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Justificar</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Alinhar à esquerda</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centralizar</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Alinhar à direita</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justificar</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Para recuar um parágrafo</b>, pressione <kbd>Tab</kbd> no começo dele;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> volta. Dentro de uma tabela, essas teclas movem entre
@@ -19558,8 +19548,8 @@ paz; só a partir do terceiro é que são reduzidos, e então para dois, não pa
 
  {t:"Localizar e substituir",k:"localizar;busca;substituir;diferenciar maiúsculas;palavra inteira",b:`
 <table class="hkeys">
-<tr><td>Localizar</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Substituir</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Localizar</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Substituir</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>Aparece uma barra no alto da página. Ela conta as ocorrências e passa por elas com
 <kbd>Enter</kbd> ou as setas. Duas opções restringem a busca: <b>diferenciar
@@ -19613,7 +19603,7 @@ mantêm a configuração da última, já que aqui um documento tem um formato de
 seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>`},
 
  {t:"Salvar como",k:"salvar;exportar;word;docx;epub;livro eletrônico;e-book;kindle;pdf;html;markdown;texto;csv",b:`
-<p><b>Arquivo &rsaquo; Salvar</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx que você abriu é regravado diretamente. O ponto ao lado do nome do arquivo na barra de status mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
+<p><b>Arquivo &rsaquo; Salvar</b> ({kz:speichern}) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx que você abriu é regravado diretamente. O ponto ao lado do nome do arquivo na barra de status mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
 <p><b>Arquivo &rsaquo; Salvar como</b> grava o documento como arquivo. O formato Word vem
 primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem este programa.</p>
 <table class="hkeys">
@@ -19722,6 +19712,11 @@ mostrada a versão em inglês com um aviso.</p>`}]},
 <p>Os comandos do programa usam <kbd>Alt</kbd>+<kbd>Shift</kbd>, porque as combinações só com
 <kbd>Ctrl</kbd> estão, em boa parte, tomadas<nur-b> pelo próprio navegador</nur-b>. Os atalhos de edição<nur-b> que o
 navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
+<p>No aplicativo para computador, os atalhos são os do Word em português: <kbd>Ctrl</kbd>+<kbd>N</kbd> negrito,
+<kbd>Ctrl</kbd>+<kbd>I</kbd> itálico, <kbd>Ctrl</kbd>+<kbd>S</kbd> sublinhado, <kbd>Ctrl</kbd>+<kbd>B</kbd> salvar, <kbd>Ctrl</kbd>+<kbd>O</kbd> novo documento,
+<kbd>Ctrl</kbd>+<kbd>T</kbd> selecionar tudo. No navegador isso não é possível, porque ele reserva <kbd>Ctrl</kbd>+<kbd>N</kbd> e
+<kbd>Ctrl</kbd>+<kbd>T</kbd> para si; lá valem <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> e <kbd>U</kbd>, como no Google Docs. As tabelas
+mostram as teclas da versão que você está usando.</p>
 <p class="hsec">Visões</p>
 <table class="hkeys">
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd></td><td>Escrever / Notas / Glossário</td></tr>
@@ -19733,29 +19728,30 @@ navegador deixa em paz</nur-b> mantêm as teclas de sempre.</p>
 </table>
 <p class="hsec">Escrever</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Negrito / itálico / sublinhado</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Negrito / itálico / sublinhado</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Desfazer / refazer</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Esquerda / centro<nur-a> / direita</nur-a> / justificado</td></tr>
+<tr><td>{kz:alles}</td><td>Selecionar tudo</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Esquerda / centro<nur-a> / direita</nur-a> / justificado</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Esquerda / centro / direita</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Recuar / reduzir recuo (em tabelas: próxima célula)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Quebra de página</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Inserir ou editar um link</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Inserir ou editar um link</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Sumário</td></tr>
 </table>
 <p class="hsec">Documentos e notas</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Novo documento</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Abrir arquivo</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Novo documento</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Abrir arquivo</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Fechar documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Fixar uma nota à seleção</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Consultar no glossário</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Salvar (no arquivo do Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Salvar (no arquivo do Word)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Criar um ponto de restauração</td></tr>
 </table>
 <p class="hsec">Localizar e ver</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Localizar / substituir</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Localizar / substituir</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Verificação ortográfica</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Paleta de comandos</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Aproximar / afastar / ajustar à largura</td></tr>
@@ -19870,9 +19866,9 @@ l'espace.</p>
 trouve s'applique au texte sélectionné, ou à ce que vous tapez ensuite si rien n'est
 sélectionné.</p>
 <table class="hkeys">
-<tr><td>Gras</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Italique</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Souligné</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Gras</td><td>{kz*:fett}</td></tr>
+<tr><td>Italique</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Souligné</td><td>{kz*:unter}</td></tr>
 <tr><td>Barré</td><td><b>Format</b> &rarr; <b>Texte</b></td></tr>
 </table>
 <p>La <b>taille de police</b> est un champ modifiable : choisissez une taille de la liste avec
@@ -19894,10 +19890,10 @@ l'un des trois niveaux de titre. Les titres sont ce à partir de quoi le plan et
 matières sont construits, alors utilisez-les au lieu de simplement agrandir une ligne et la
 mettre en gras.</p>
 <table class="hkeys">
-<tr><td>Aligner à gauche</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Centrer</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Aligner à droite</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Justifier</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Aligner à gauche</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centrer</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Aligner à droite</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Justifier</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Pour mettre un paragraphe en retrait</b>, appuyez sur <kbd>Tab</kbd> au début ;
 <kbd>Maj</kbd>+<kbd>Tab</kbd> le ramène. Dans un tableau, ces touches passent d'une cellule à
@@ -20156,8 +20152,8 @@ un.</p>`},
 
  {t:"Rechercher et remplacer",k:"rechercher;recherche;remplacer;respecter la casse;mot entier",b:`
 <table class="hkeys">
-<tr><td>Rechercher</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Remplacer</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Rechercher</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Remplacer</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>Une barre apparaît en haut de la page. Elle compte les correspondances et les parcourt avec
 <kbd>Entrée</kbd> ou les flèches. Deux options restreignent la recherche : <b>respecter la
@@ -20215,7 +20211,7 @@ un format de page et non un par section. L'ancien format binaire .doc d'avant 20
 être lu.</p>`},
 
  {t:"Enregistrer sous",k:"enregistrer;exporter;word;docx;epub;livre numérique;liseuse;kindle;pdf;html;markdown;texte;csv",b:`
-<p><b>Fichier &rsaquo; Enregistrer</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx que vous avez ouvert est réécrit directement. Le point à côté du nom du fichier dans la barre d’état indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
+<p><b>Fichier &rsaquo; Enregistrer</b> ({kz:speichern}) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx que vous avez ouvert est réécrit directement. Le point à côté du nom du fichier dans la barre d’état indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
 <p><b>Fichier &rsaquo; Enregistrer sous</b> écrit le document sous forme de fichier. Le format
 Word vient en premier parce que c'est le cas courant : il se lit partout, avec ou sans ce
 programme.</p>
@@ -20340,29 +20336,30 @@ habituelles.</p>
 </table>
 <p class="hsec">Écrire</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Gras / italique / souligné</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Gras / italique / souligné</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annuler / rétablir</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Gauche / centre<nur-a> / droite</nur-a> / justifié</td></tr>
+<tr><td>{kz:alles}</td><td>Tout sélectionner</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Gauche / centre<nur-a> / droite</nur-a> / justifié</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Gauche / centre / droite</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maj</kbd>+<kbd>Tab</kbd></td><td>Retrait / retrait négatif (dans les tableaux : cellule suivante)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Entrée</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>Entrée</kbd></td><td>Saut de page</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>K</kbd></td><td>Insérer ou modifier un lien</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>K</kbd></td><td>Insérer ou modifier un lien</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd></td><td>Table des matières</td></tr>
 </table>
 <p class="hsec">Documents et notes</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd></td><td>Nouveau document</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Ouvrir un fichier</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd></td><td>Nouveau document</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Ouvrir un fichier</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Fermer le document</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>N</kbd></td><td>Nouvelle note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>M</kbd></td><td>Épingler une note à la sélection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>G</kbd></td><td>Consulter le glossaire</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Enregistrer (dans le fichier Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Enregistrer (dans le fichier Word)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd></td><td>Créer un point de restauration</td></tr>
 </table>
 <p class="hsec">Rechercher et afficher</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Rechercher / remplacer</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Rechercher / remplacer</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Vérification orthographique</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>P</kbd></td><td>Palette de commandes</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Zoom avant / arrière / ajuster à la largeur</td></tr>
@@ -20469,9 +20466,9 @@ zapisania czegokolwiek więcej. Zrób od razu kopię zapasową i zwolnij trochę
 <p>Pasek narzędzi nad stroną zawiera formatowanie znaku. Wszystko z niego stosuje się do
 zaznaczonego tekstu albo do tego, co napiszesz dalej, jeśli nic nie jest zaznaczone.</p>
 <table class="hkeys">
-<tr><td>Pogrubienie</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Kursywa</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Podkreślenie</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Pogrubienie</td><td>{kz*:fett}</td></tr>
+<tr><td>Kursywa</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Podkreślenie</td><td>{kz*:unter}</td></tr>
 <tr><td>Przekreślenie</td><td><b>Format</b> &rarr; <b>Tekst</b></td></tr>
 </table>
 <p><b>Rozmiar czcionki</b> to pole edytowalne: wybierz rozmiar z listy przy strzałce obok albo
@@ -20490,10 +20487,10 @@ i rysunków, które chcesz złożyć ręcznie.</p>
 poziomów tytułu. Tytuły są tym, z czego budowany jest konspekt i spis treści, więc używaj ich
 zamiast po prostu powiększać wiersz i pogrubiać.</p>
 <table class="hkeys">
-<tr><td>Wyrównaj do lewej</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Wyśrodkuj</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Wyrównaj do prawej</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Wyjustuj</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Wyrównaj do lewej</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Wyśrodkuj</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Wyrównaj do prawej</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Wyjustuj</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Aby zrobić wcięcie akapitu</b>, naciśnij <kbd>Tab</kbd> na jego początku;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> je cofa. W tabeli te klawisze przechodzą między komórkami.</p>
@@ -20736,8 +20733,8 @@ spokoju; dopiero od trzeciego są redukowane — i to do dwóch, nie do jednego.
 
  {t:"Szukanie i zamiana",k:"szukaj;wyszukiwanie;zamień;uwzględnij wielkość liter;całe słowo",b:`
 <table class="hkeys">
-<tr><td>Szukaj</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Zamień</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Szukaj</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Zamień</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>U góry strony pojawia się pasek. Liczy dopasowania i przechodzi przez nie za pomocą
 <kbd>Enter</kbd> lub strzałek. Dwie opcje zawężają wyszukiwanie: <b>uwzględnij wielkość
@@ -20789,7 +20786,7 @@ ustawienia ostatniej, ponieważ tutaj dokument ma jeden format strony, a nie jed
 Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>`},
 
  {t:"Zapisz jako",k:"zapisz;eksportuj;word;docx;epub;e-book;czytnik;kindle;pdf;html;markdown;tekst;csv",b:`
-<p><b>Plik &rsaquo; Zapisz</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx jest zapisywany z powrotem bezpośrednio. Kropka obok nazwy pliku na pasku stanu pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
+<p><b>Plik &rsaquo; Zapisz</b> ({kz:speichern}) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx jest zapisywany z powrotem bezpośrednio. Kropka obok nazwy pliku na pasku stanu pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
 <p><b>Plik &rsaquo; Zapisz jako</b> zapisuje dokument jako plik. Format Word jest pierwszy,
 ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym programem lub bez niego.</p>
 <table class="hkeys">
@@ -20908,29 +20905,30 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 </table>
 <p class="hsec">Pisanie</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Pogrubienie / kursywa / podkreślenie</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Pogrubienie / kursywa / podkreślenie</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Cofnij / ponów</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Lewo / środek<nur-a> / prawo</nur-a> / wyjustowany</td></tr>
+<tr><td>{kz:alles}</td><td>Zaznacz wszystko</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Lewo / środek<nur-a> / prawo</nur-a> / wyjustowany</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Lewo / środek / prawo</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Wcięcie / cofnięcie wcięcia (w tabelach: następna komórka)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Podział strony</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Wstaw lub edytuj link</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd></td><td>Wstaw lub edytuj link</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd></td><td>Spis treści</td></tr>
 </table>
 <p class="hsec">Dokumenty i notatki</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Nowy dokument</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Otwórz plik</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd></td><td>Nowy dokument</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Otwórz plik</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Zamknij dokument</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nowa notatka</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Przypnij notatkę do zaznaczenia</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Wyszukaj w słowniczku</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Zapisz (do pliku Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Zapisz (do pliku Word)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Utwórz punkt przywracania</td></tr>
 </table>
 <p class="hsec">Wyszukiwanie i podgląd</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Szukaj / zamień</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Szukaj / zamień</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Sprawdzanie pisowni</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd></td><td>Paleta poleceń</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Powiększ / pomniejsz / dopasuj do szerokości</td></tr>
@@ -21039,9 +21037,9 @@ archiviare qualcosa in più. Fai subito un backup e libera dello spazio.</p>
 che vi si trova si applica al testo selezionato, o a ciò che digiti dopo se non c'è nulla di
 selezionato.</p>
 <table class="hkeys">
-<tr><td>Grassetto</td><td><kbd>Ctrl</kbd>+<kbd>B</kbd></td></tr>
-<tr><td>Corsivo</td><td><kbd>Ctrl</kbd>+<kbd>I</kbd></td></tr>
-<tr><td>Sottolineato</td><td><kbd>Ctrl</kbd>+<kbd>U</kbd></td></tr>
+<tr><td>Grassetto</td><td>{kz*:fett}</td></tr>
+<tr><td>Corsivo</td><td>{kz*:kursiv}</td></tr>
+<tr><td>Sottolineato</td><td>{kz*:unter}</td></tr>
 <tr><td>Barrato</td><td><b>Formato</b> &rarr; <b>Testo</b></td></tr>
 </table>
 <p>La <b>dimensione del carattere</b> è un campo modificabile: scegli una dimensione dall'elenco
@@ -21063,10 +21061,10 @@ le parole.</p>`},
 di tre livelli di titolo. I titoli sono ciò con cui vengono costruiti la struttura e il
 sommario, quindi usali invece di limitarti a ingrandire una riga e metterla in grassetto.</p>
 <table class="hkeys">
-<tr><td>Allinea a sinistra</td><td><kbd>Ctrl</kbd>+<kbd>L</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd></td></tr>
-<tr><td>Centra</td><td><kbd>Ctrl</kbd>+<kbd>E</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>E</kbd></td></tr>
-<tr><td>Allinea a destra</td><td><nur-a><kbd>Ctrl</kbd>+<kbd>R</kbd> · </nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>R</kbd></td></tr>
-<tr><td>Giustifica</td><td><kbd>Ctrl</kbd>+<kbd>J</kbd></td></tr>
+<tr><td>Allinea a sinistra</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd></td></tr>
+<tr><td>Centra</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>E</kbd></td></tr>
+<tr><td>Allinea a destra</td><td><nur-a>{kz:rechts} · </nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>R</kbd></td></tr>
+<tr><td>Giustifica</td><td>{kz:blocksatz}</td></tr>
 </table>
 <p><b>Per rientrare un paragrafo</b>, premi <kbd>Tab</kbd> all'inizio;
 <kbd>Maiusc</kbd>+<kbd>Tab</kbd> lo riporta indietro. Dentro una tabella questi tasti si spostano
@@ -21320,8 +21318,8 @@ solo dal terzo in poi vengono ridotti — e allora a due, non a uno.</p>`},
 
  {t:"Trova e sostituisci",k:"trova;ricerca;sostituisci;maiuscole/minuscole;parola intera",b:`
 <table class="hkeys">
-<tr><td>Trova</td><td><kbd>Ctrl</kbd>+<kbd>F</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>F</kbd></td></tr>
-<tr><td>Sostituisci</td><td><kbd>Ctrl</kbd>+<kbd>H</kbd> · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>H</kbd></td></tr>
+<tr><td>Trova</td><td>{kz:suchen} · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>F</kbd></td></tr>
+<tr><td>Sostituisci</td><td>{kz:ersetzen} · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>H</kbd></td></tr>
 </table>
 <p>In cima alla pagina compare una barra. Conta le corrispondenze e le percorre con
 <kbd>Invio</kbd> o le frecce. Due opzioni restringono la ricerca: <b>maiuscole/minuscole</b> e
@@ -21377,7 +21375,7 @@ l'impostazione dell'ultima, dato che qui un documento ha un solo formato pagina 
 sezione. Il vecchio formato binario .doc precedente al 2007 non può essere letto.</p>`},
 
  {t:"Salvare come",k:"salvare;esportare;word;docx;epub;e-book;lettore;kindle;pdf;html;markdown;testo;csv",b:`
-<p><b>File &rsaquo; Salva</b> (<kbd>Ctrl</kbd>+<kbd>S</kbd>) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx che hai aperto viene riscritto direttamente. Il punto accanto al nome del file nella barra di stato indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
+<p><b>File &rsaquo; Salva</b> ({kz:speichern}) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx che hai aperto viene riscritto direttamente. Il punto accanto al nome del file nella barra di stato indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
 <p><b>File &rsaquo; Salva come</b> scrive il documento come file. Il formato Word viene per primo
 perché è il caso normale: si legge ovunque, con o senza questo programma.</p>
 <table class="hkeys">
@@ -21498,29 +21496,30 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 </table>
 <p class="hsec">Scrivere</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>B</kbd> / <kbd>I</kbd> / <kbd>U</kbd></td><td>Grassetto / corsivo / sottolineato</td></tr>
+<tr><td>{kz:fett} / {kz:kursiv} / {kz:unter}</td><td>Grassetto / corsivo / sottolineato</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annulla / ripeti</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>L</kbd> / <kbd>E</kbd> /<nur-a> <kbd>R</kbd> /</nur-a> <kbd>J</kbd></td><td>Sinistra / centro<nur-a> / destra</nur-a> / giustificato</td></tr>
+<tr><td>{kz:alles}</td><td>Seleziona tutto</td></tr>
+<tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Sinistra / centro<nur-a> / destra</nur-a> / giustificato</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Sinistra / centro / destra</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maiusc</kbd>+<kbd>Tab</kbd></td><td>Aumenta / riduci rientro (nelle tabelle: cella successiva)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Invio</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>Invio</kbd></td><td>Interruzione di pagina</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>K</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>K</kbd></td><td>Inserisci o modifica un link</td></tr>
+<tr><td>{kz:link}<br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>K</kbd></td><td>Inserisci o modifica un link</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd></td><td>Sommario</td></tr>
 </table>
 <p class="hsec">Documenti e note</p>
 <table class="hkeys">
-<tr><td><nur-a><kbd>Ctrl</kbd>+<kbd>N</kbd><br></nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd></td><td>Nuovo documento</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>O</kbd></td><td>Apri file</td></tr>
+<tr><td><nur-a>{kz:neuDok}<br></nur-a><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd></td><td>Nuovo documento</td></tr>
+<tr><td>{kz:dateiAuf}</td><td>Apri file</td></tr>
 <nur-a><tr><td><kbd>Ctrl</kbd>+<kbd>W</kbd></td><td>Chiudi documento</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>N</kbd></td><td>Nuova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>M</kbd></td><td>Fissa una nota alla selezione</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>G</kbd></td><td>Consulta il glossario</td></tr>
-<tr><td><kbd>Ctrl</kbd>+<kbd>S</kbd></td><td>Salva (nel file Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Salva (nel file Word)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>S</kbd></td><td>Crea un punto di ripristino</td></tr>
 </table>
 <p class="hsec">Cercare e visualizzare</p>
 <table class="hkeys">
-<tr><td><kbd>Ctrl</kbd>+<kbd>F</kbd> / <kbd>H</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Trova / sostituisci</td></tr>
+<tr><td>{kz:suchen} / {kz:ersetzen}<br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>F</kbd> / <kbd>H</kbd></td><td>Trova / sostituisci</td></tr>
 <tr><td><kbd>F7</kbd></td><td>Controllo ortografico</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>P</kbd></td><td>Palette dei comandi</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>+</kbd> / <kbd>−</kbd> / <kbd>0</kbd></td><td>Aumenta / riduci zoom / adatta alla larghezza</td></tr>
@@ -21631,7 +21630,7 @@ function helpAufloesen(html){
 function helpAlleThemen(){
   const a=[];helpBooks().forEach((bk,bi)=>
     bk.t.forEach(tp=>a.push({bi,bk:bk.b,...tp,
-      b:helpAufloesen(tp.b), k:helpAufloesen(tp.k)})));
+      b:helpKuerzel(helpAufloesen(tp.b),helpSprache(),istApp()), k:helpAufloesen(tp.k)})));
   return a;
 }
 function helpFinde(titel){return helpAlleThemen().find(x=>x.t===titel)||null}
@@ -21819,6 +21818,14 @@ function helpDialog(titel){
    aufgeloest wird. Die Tabelle steht vor manchen dieser Funktionen; ein
    direkter Verweis waere beim Auswerten der Tabelle noch undefined. */
 const KUERZEL=[
+  /* Fett/Kursiv/Unterstrichen und Alles markieren erbte das Programm früher
+     vom Browser. Sie stehen jetzt hier, weil Word sie je Sprache anders legt
+     (KZ_SPRACHE) — in Spanisch ist Strg+B „Suchen“, in Portugiesisch
+     „Speichern“; das geht nur, wenn das Programm die Taste selbst vergibt. */
+  {id:"fett",     m:"c",  k:"b", tun:()=>zeichenFormat("bold")},
+  {id:"kursiv",   m:"c",  k:"i", tun:()=>zeichenFormat("italic")},
+  {id:"unter",    m:"c",  k:"u", tun:()=>zeichenFormat("underline")},
+  {id:"alles",    m:"c",  k:"a", tun:()=>document.execCommand("selectAll")},
   {id:"palette",  m:"as", k:"p", tun:()=>{if($("#ovl").innerHTML)closeOvl();else palette()}},
   {id:"notizHeft",m:"as", k:"m", tun:()=>linkSelection()},
   {id:"link",     m:"c",  k:"k", auch:[["as","k"]], tun:()=>linkDialog()},
@@ -21873,24 +21880,114 @@ const KUERZEL=[
   {id:"lesen",    m:"as", k:"b", tun:()=>readView()},
   {id:"vorschau", m:"as", k:"v", tun:()=>printPreview()},
 ];
+/* Tasten, die Word in der jeweiligen Oberflächensprache anders legt. Die
+   Liste ersetzt die Erstbelegung; ihr erster Eintrag steht im Menü, alle
+   stehen in der Hilfe. Die bisherigen Wege eines Kürzels (Erstbelegung,
+   auch, Browser-Belegung in der App) bleiben als Zweitweg, solange die
+   Sprache die Taste nicht für etwas anderes braucht.
+
+   Recherchiert 2026-10-10 (Microsofts Kürzelseiten je Sprache, die selbst
+   aus einer englischen Vorlage übersetzt und darum teils widersprüchlich
+   sind, dazu Kursunterlagen und Foren je Sprache):
+   de  Strg+⇧+F/K/U. Strg+B/I/U bleiben daneben, die kennt jeder aus dem
+       Browser; ob Word selbst sie noch annimmt, ist umstritten.
+   fr  Gras auf Strg+G, neuere Fassungen Strg+⇧+G.
+   it  Grassetto Strg+G. Sottolineato läge in Word auf Strg+S — bleibt
+       Speichern, weil die Quellen sich widersprechen und ein Speichern, das
+       unterstreicht, der schlimmere Irrtum wäre.
+   es, pt  Word belegt fast alles neu. Nur in der App: der Browser gibt
+       Strg+N und Strg+T nie an die Seite, Fett und Zentrieren (es) bzw.
+       Alles markieren (pt) gingen dort ins Leere. Die Browser-Fassung
+       bleibt darum bei der Belegung, die auch Google Docs nimmt.
+   en, pl  wie bisher. */
+const KZ_SPRACHE={
+  de:{tasten:{fett:[["cs","f"],["c","b"]],kursiv:[["cs","k"],["c","i"]],unter:[["cs","u"],["c","u"]]}},
+  fr:{tasten:{fett:[["c","g"],["cs","g"],["c","b"]]}},
+  it:{tasten:{fett:[["c","g"],["c","b"]]}},
+  es:{nurApp:true,tasten:{
+    fett:[["c","n"]],kursiv:[["c","k"]],unter:[["c","s"]],
+    speichern:[["c","g"]],neuDok:[["c","u"]],dateiAuf:[["c","a"]],alles:[["c","e"]],
+    suchen:[["c","b"]],ersetzen:[["c","l"]],link:[["ca","k"]],
+    links:[["c","q"]],mitte:[["c","t"]],rechts:[["c","d"]],blocksatz:[["c","j"]]}},
+  pt:{nurApp:true,tasten:{
+    fett:[["c","n"]],kursiv:[["c","i"]],unter:[["c","s"]],
+    speichern:[["c","b"]],neuDok:[["c","o"]],dateiAuf:[["c","a"]],alles:[["c","t"]],
+    suchen:[["c","l"]],ersetzen:[["c","u"]],link:[["c","k"]],
+    links:[["c","q"]],mitte:[["c","e"]],rechts:[["c","g"]],blocksatz:[["c","j"]]}},
+};
+/* Welche Tasten gelten, für eine Sprache und Fassung: je Kürzel `zeige`
+   (für Menü und Hilfe) und `alle` (was auslöst). Rein — kein S, kein
+   istApp() —, damit tools/check-kuerzel.mjs dieselbe Rechnung benutzt. */
+function kzBelegung(sprache,alsApp){
+  const L=KZ_SPRACHE[sprache];
+  const eigen=(L&&(!L.nurApp||alsApp))?L.tasten:{};
+  const schl=p=>p.m+"|"+p.k.toLowerCase();
+  const belegt=new Set();
+  for(const id in eigen)for(const p of eigen[id])belegt.add(schl({m:p[0],k:p[1]}));
+  const out={};
+  for(const x of KUERZEL){
+    if(x.nurApp&&!alsApp)continue;
+    let std=[(alsApp&&x.app)?x.app:{m:x.m,k:x.k},...(x.auch||[]).map(p=>({m:p[0],k:p[1]}))];
+    if(alsApp&&x.app)std.push({m:x.m,k:x.k});
+    std=std.filter(p=>!belegt.has(schl(p)));
+    const eig=(eigen[x.id]||[]).map(p=>({m:p[0],k:p[1]}));
+    out[x.id]={zeige:eig.length?eig:std.slice(0,1),alle:[...eig,...std]};
+  }
+  return out;
+}
+/* Platzhalter in der Hilfe: {kz:id} die Taste aus dem Menü, {kz*:id} alle
+   Tasten der Sprache („Strg+⇧+F · Strg+B“). So kann die Hilfe einer Sprache
+   keine Taste nennen, die dort etwas anderes tut. Schreibweise der
+   Zusatztasten wie im übrigen Hilfetext. */
+const KZ_HILFE={de:["Strg","⇧"],en:["Ctrl","Shift"],fr:["Ctrl","Maj"],es:["Ctrl","Mayús"],
+  pt:["Ctrl","Shift"],pl:["Ctrl","Shift"],it:["Ctrl","Maiusc"]};
+function helpKuerzel(html,sprache,alsApp){
+  if(html.indexOf("{kz")<0)return html;
+  const bel=kzBelegung(sprache,alsApp),[strg,um]=KZ_HILFE[sprache]||KZ_HILFE.en;
+  const kbd=p=>[...(p.m==="as"?["Alt",um]:p.m==="cs"?[strg,um]:p.m==="ca"?[strg,"Alt"]:p.m==="c"?[strg]:p.m==="alt"?["Alt"]:[]),
+    p.k.length===1?p.k.toUpperCase():p.k].map(t=>"<kbd>"+t+"</kbd>").join("+");
+  return html.replace(/\{kz(\*?):([a-zA-Z]+)\}/g,(_,alle,id)=>{
+    const b=bel[id];if(!b||!b.zeige.length)return "";
+    return (alle?b.zeige:b.zeige.slice(0,1)).map(kbd).join(" · ");
+  });
+}
+/* Fett/Kursiv/Unterstrichen nur, wo geschrieben wird — in einem Eingabefeld
+   täte der Browser bei Strg+B ebenfalls nichts. */
+function zeichenFormat(c){
+  const a=document.activeElement;
+  if(a&&a.isContentEditable)document.execCommand(c);
+}
 /* Namen, die anders heissen als der Tastenwert des Ereignisses. */
 const KZ_ZEIGE={Enter:"Eingabe","-":"−"};
 const kzTaste=k=>k.length===1?(KZ_ZEIGE[k]||k.toUpperCase()):(KZ_ZEIGE[k]||k);
 /* Die Menuespalte schreibt das Umschaltzeichen unuebersetzt, wie bisher —
    die Hilfe schreibt es je Sprache aus, das ist ein Unterschied von jeher. */
-/* Die Erstbelegung dieser Fassung. In der App gewinnt x.app, sofern da ist. */
-function kzErst(x){return (istApp()&&x.app)?x.app:{m:x.m,k:x.k}}
-function kzGilt(x){return !x.nurApp||istApp()}
+/* Die Belegung der aktuellen Oberflächensprache und Fassung, gemerkt bis
+   sich eines von beiden ändert. */
+let kzMerk=null;
+function kzJetzt(){
+  const s=(S.settings&&S.settings.uiLang)||"de",a=istApp();
+  if(!kzMerk||kzMerk.s!==s||kzMerk.a!==a)kzMerk={s,a,bel:kzBelegung(s,a)};
+  return kzMerk.bel;
+}
 function kz(id){
-  const x=KUERZEL.find(y=>y.id===id);
-  if(!x||!kzGilt(x))return "";
-  const e=kzErst(x);
-  const zus=e.m==="as"?["Alt","⇧"]:e.m==="c"?[tr("Strg")]:e.m==="alt"?["Alt"]:[];
+  const b=kzJetzt()[id];
+  if(!b||!b.zeige.length)return "";
+  const e=b.zeige[0];
+  const zus=e.m==="as"?["Alt","⇧"]:e.m==="cs"?[tr("Strg"),"⇧"]:e.m==="ca"?[tr("Strg"),"Alt"]
+    :e.m==="c"?[tr("Strg")]:e.m==="alt"?["Alt"]:[];
   return [...zus,kzTaste(e.k)].join(" ");
 }
+/* Für Tooltips: „Strg+⇧+F“ statt der Menüschreibweise mit Leerzeichen. */
+const kzPlus=id=>kz(id).split(" ").join("+");
+/* Strg+Alt ist unter Windows zugleich AltGr. Belegt ist es nur mit einer
+   Taste (Strg+Alt+K, Link im Spanischen), die auf keiner der Tastaturen
+   dieser Sprachen ein Zeichen trägt. */
 function kzModus(e){
   const c=e.ctrlKey||e.metaKey;
   if(e.altKey&&e.shiftKey&&!c)return "as";
+  if(c&&e.shiftKey&&!e.altKey)return "cs";
+  if(c&&e.altKey&&!e.shiftKey)return "ca";
   if(c&&!e.altKey&&!e.shiftKey)return "c";
   if(e.altKey&&!e.shiftKey&&!c)return "alt";
   if(!c&&!e.altKey&&!e.shiftKey)return "";
@@ -21899,13 +21996,8 @@ function kzModus(e){
 function kzFinde(e){
   const m=kzModus(e);if(m===null)return null;
   const gl=(a,b)=>(a.length===1?a.toLowerCase():a)===(b.length===1?b.toLowerCase():b);
-  return KUERZEL.find(x=>{
-    if(!kzGilt(x))return false;
-    const paare=[kzErst(x),...(x.auch||[]).map(p=>({m:p[0],k:p[1]}))];
-    /* In der App bleibt die Browser-Belegung als Zweitweg bestehen. */
-    if(istApp()&&x.app)paare.push({m:x.m,k:x.k});
-    return paare.some(p=>p.m===m&&gl(p.k,e.key));
-  }) || null;
+  const bel=kzJetzt();
+  return KUERZEL.find(x=>bel[x.id]&&bel[x.id].alle.some(p=>p.m===m&&gl(p.k,e.key))) || null;
 }
 
 document.addEventListener("keydown",e=>{

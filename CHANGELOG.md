@@ -65,6 +65,41 @@ immer genau einen Commit, der sie anfasst.
   Schriften vorher auf die Grundschrift bzw. Carlito. Greift nur, wo das
   Original fehlt; Windows und der Word-Export behalten den Originalnamen. Das
   .deb empfiehlt die Pakete dazu.
+- **Tastenkürzel wie Word in der jeweiligen Sprache.** Bisher galten überall
+  Strg+B/I/U (vom Browser geerbt), obwohl die Knöpfe seit 1.1.0 Words
+  Buchstaben zeigen. Jetzt nach der Oberflächensprache (`KZ_SPRACHE`):
+  - **Deutsch:** zusätzlich Strg+⇧+F / K / U.
+  - **Französisch:** Fett zusätzlich auf Strg+G und Strg+⇧+G.
+  - **Italienisch:** Fett zusätzlich auf Strg+G. Unterstrichen läge in Word
+    auf Strg+S; das bleibt Speichern, weil die Quellen sich widersprechen und
+    ein Speichern, das unterstreicht, der schlimmere Irrtum wäre.
+  - **Spanisch (nur Desktop-Fassung):** wie Word — Fett Strg+N, Kursiv
+    Strg+K, Unterstrichen Strg+S, Speichern Strg+G, Neu Strg+U, Öffnen
+    Strg+A, Alles markieren Strg+E, Suchen Strg+B, Ersetzen Strg+L, Link
+    Strg+Alt+K, links/zentriert/rechts/Blocksatz Strg+Q/T/D/J.
+  - **Portugiesisch (nur Desktop-Fassung):** wie Word — Fett Strg+N, Kursiv
+    Strg+I, Unterstrichen Strg+S, Speichern Strg+B, Neu Strg+O, Öffnen
+    Strg+A, Alles markieren Strg+T, Suchen Strg+L, Ersetzen Strg+U, Link
+    Strg+K, links/zentriert/rechts/Blocksatz Strg+Q/E/G/J.
+  - Englisch, Polnisch: unverändert, Word nimmt dort Strg+B/I/U.
+  - In der Browser-Fassung behalten es/pt die bisherige Belegung: der Browser
+    gibt Strg+N und Strg+T nie an die Seite, Fett und Zentrieren bzw. Alles
+    markieren gingen dort ins Leere. Die Hilfe sagt das.
+  - Alte Wege bleiben Zweitweg, solange die Sprache die Taste nicht anders
+    braucht (Strg+F sucht auch im Spanischen weiter).
+  - Menüs, Befehlspalette, Tooltips und Hilfe zeigen die Tasten der Sprache.
+    Die Hilfe nennt sprachabhängige Tasten über Platzhalter (`{kz:id}`), die
+    aus derselben Tabelle kommen — sie kann keine Taste mehr nennen, die in
+    der Sprache etwas anderes tut. `check-kuerzel.mjs` prüft jede Sprache
+    gegen ihre eigene Belegung.
+  - Recherche 2026-10-10: Microsofts Kürzelseiten je Sprache (selbst aus
+    einer englischen Vorlage übersetzt und darum teils widersprüchlich), dazu
+    Kursunterlagen und Foren je Sprache. Am unsichersten: Italienisch
+    (Speichern) und Französisch (Strg+G gegen Strg+⇧+G, darum beide).
+  - Geprüft: 106 Tastendrücke über sechs Sprachen und beide Fassungen, je mit
+    der erwarteten Wirkung; echtes Formatieren in de/fr/es/pt/en; Strg+B in
+    einem Eingabefeld formatiert den Editor nicht; check-kuerzel und
+    check-hilfe-marken grün.
 
 ### Behoben
 
@@ -153,18 +188,6 @@ immer genau einen Commit, der sie anfasst.
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
 
 ### Offen, noch nicht entschieden
-
-- **Tastenkürzel für Fett/Kursiv/Unterstrichen je Sprache** — Kandidat für
-  1.2, nicht für 1.1.x. Die Knöpfe zeigen seit 1.1.0 Words Buchstaben,
-  die Kürzel sind aber überall Strg+B/I/U (vom Browser geerbt). Word belegt
-  in Spanisch und Portugiesisch **Strg+N/K/S**, in Italienisch und
-  Französisch ebenfalls eigene. Wer aus Gewohnheit Strg+N drückt, bekommt in
-  der Desktop-Fassung ein neues Dokument statt Fett. Zu klären: Kürzel je
-  Sprache in `KUERZEL` aufnehmen (stehen dort bisher bewusst nicht), und was
-  dann mit Strg+N (neues Dokument) und Strg+S passiert — seit 1.1.0 ist
-  Strg+S „Speichern“, Unterstrichen auf Strg+S würde also das Speichern
-  verdrängen.
-  Vorher für it/fr nachschlagen statt annehmen.
 
 - **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
   Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:

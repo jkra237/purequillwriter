@@ -12,8 +12,13 @@
  *   2. Alt+Umschalt-Kombinationen, die die Hilfe nennt, die es aber nicht gibt
  *      — der gefaehrliche Fall: die Hilfe verspricht eine tote Taste
  *
- * Strg-Kombinationen des Browsers (Strg+B/I/U, Strg+Z/Y, Strg+X/C/V/A) sind
- * ausgenommen: die setzt das Programm nicht, es erbt sie.
+ * Strg-Kombinationen des Browsers (Strg+Z/Y, Strg+X/C/V) sind ausgenommen:
+ * die setzt das Programm nicht, es erbt sie.
+ *
+ * Seit 2026-10-10 haengt die Belegung auch von der Oberflaechensprache ab
+ * (KZ_SPRACHE: Word legt Fett & Co. je Sprache anders). Jede Sprachfassung
+ * der Hilfe wird darum gegen IHRE Belegung geprueft, und Platzhalter wie
+ * {kz:fett} werden mit demselben helpKuerzel() aufgeloest wie zur Laufzeit.
  *
  * Geprueft wird zweimal, einmal je Fassung. Vier Belegungen unterscheiden sich:
  * Strg+R, Strg+N und Strg+W gibt es nur in der App, und die Hilfe sagt das ueber
@@ -30,8 +35,10 @@ const code = src.match(/<script>([\s\S]*)<\/script>/)[1];
 
 /* --- Die Tabelle aus der Datei holen, statt sie hier nachzubauen --- */
 const ctx = createContext({});
-runInContext(code.match(/const KUERZEL=\[[\s\S]*?\n\];/)[0] + "\nglobalThis.__k=KUERZEL;", ctx);
-const KUERZEL = ctx.__k;
+const kernA = code.indexOf("const KUERZEL=["), kernB = code.indexOf("function zeichenFormat");
+runInContext(code.slice(kernA, kernB) +
+  "\nglobalThis.__k=KUERZEL;globalThis.__b=kzBelegung;globalThis.__hk=helpKuerzel;", ctx);
+const KUERZEL = ctx.__k, kzBelegung = ctx.__b, helpKuerzel = ctx.__hk;
 
 const hctx = createContext({});
 const i = code.indexOf("const HELPTEXTE"), j = code.indexOf("const HELPSPRACHEN");
@@ -49,7 +56,7 @@ const aufl = actx.__f;
 function hilfeText(s, alsApp) {
   if (alsApp) actx.window.pqwDesktop = {}; else delete actx.window.pqwDesktop;
   const teile = [];
-  for (const b of H[s]) for (const t of b.t) teile.push(aufl(t.b));
+  for (const b of H[s]) for (const t of b.t) teile.push(helpKuerzel(aufl(t.b), s, alsApp));
   delete actx.window.pqwDesktop;
   return teile;
 }
@@ -75,30 +82,21 @@ function norm(teile) {
   if (!rest.length) return null;
   return [...[...zus].sort(), rest.join("")].join("+");
 }
-const ausTabelle = (x, m, k) => norm([
-  ...(m === "as" ? ["alt", "shift"] : m === "c" ? ["ctrl"] : m === "alt" ? ["alt"] : []), k]);
+const ausTabelle = (m, k) => norm([
+  ...(m === "as" ? ["alt", "shift"] : m === "cs" ? ["ctrl", "shift"] : m === "ca" ? ["ctrl", "alt"]
+     : m === "c" ? ["ctrl"] : m === "alt" ? ["alt"] : []), k]);
 
 /* `tabelle` kennt alles, was ausloest — daran misst sich Meldung 2.
-   `anzuzeigen` sind nur die Erstbelegungen: die Zweitwege (Tastaturvarianten
-   wie + gegen =) sollen in der Hilfe gar nicht stehen, sie als fehlend zu
-   melden hiesse, den Pruefer zum Rufen ohne Anlass zu erziehen.
-   Beides haengt von der Fassung ab, siehe app und nurApp in der Tabelle. */
-function bauen(alsApp) {
+   `anzuzeigen` sind die Tasten fuer Menue und Hilfe: die Zweitwege (Tasten-
+   varianten wie + gegen =) sollen in der Hilfe gar nicht stehen, sie als
+   fehlend zu melden hiesse, den Pruefer zum Rufen ohne Anlass zu erziehen.
+   Beides haengt von Fassung und Sprache ab und kommt aus kzBelegung(). */
+function bauen(alsApp, sprache) {
   const tabelle = new Map(), anzuzeigen = new Map();
-  for (const x of KUERZEL) {
-    if (x.nurApp && !alsApp) continue;
-    const e = (alsApp && x.app) ? x.app : { m: x.m, k: x.k };
-    const erste = ausTabelle(x, e.m, e.k);
-    if (erste) { tabelle.set(erste, x.id); anzuzeigen.set(erste, x.id); }
-    for (const p of x.auch || []) {
-      const a = ausTabelle(x, p[0], p[1]);
-      if (a) tabelle.set(a, x.id);
-    }
-    /* In der App bleibt die Browser-Belegung als Zweitweg bestehen. */
-    if (alsApp && x.app) {
-      const z = ausTabelle(x, x.m, x.k);
-      if (z) tabelle.set(z, x.id);
-    }
+  const bel = kzBelegung(sprache, alsApp);
+  for (const id in bel) {
+    for (const p of bel[id].alle) { const n = ausTabelle(p.m, p.k); if (n) tabelle.set(n, id); }
+    for (const p of bel[id].zeige) { const n = ausTabelle(p.m, p.k); if (n) anzuzeigen.set(n, id); }
   }
   return { tabelle, anzuzeigen };
 }
@@ -127,27 +125,32 @@ const SPRACHEN = Object.keys(H);
 let offen = 0, falsch = 0;
 
 for (const [name, alsApp] of [["Browser-Fassung", false], ["App-Fassung", true]]) {
-  const { tabelle, anzuzeigen } = bauen(alsApp);
-  const proSprache = {};
+  const proSprache = {}, belegung = {};
   for (const s of SPRACHEN) {
     const alle = new Set();
     for (const roh of hilfeText(s, alsApp)) for (const k of ausHilfe(roh)) alle.add(k);
     proSprache[s] = alle;
+    belegung[s] = bauen(alsApp, s);
   }
 
   console.log(`=== ${name}: in der Tabelle, aber in der Hilfe nicht genannt ===`);
-  let n = 0;
-  for (const [komb, id] of anzuzeigen) {
-    const ohne = SPRACHEN.filter(s => !proSprache[s].has(komb));
-    if (!ohne.length) continue;
-    n++; offen++;
-    console.log(`  ${komb.padEnd(18)} (${id})  fehlt in: ${ohne.length === SPRACHEN.length ? "allen" : ohne.join(" ")}`);
+  const fehlt = new Map();
+  for (const s of SPRACHEN) for (const [komb, id] of belegung[s].anzuzeigen) {
+    if (proSprache[s].has(komb)) continue;
+    const z = `${komb.padEnd(18)} (${id})`;
+    if (!fehlt.has(z)) fehlt.set(z, []);
+    fehlt.get(z).push(s);
   }
-  if (!n) console.log("  (nichts)");
+  for (const [z, ohne] of fehlt) {
+    offen++;
+    console.log(`  ${z}  fehlt in: ${ohne.length === SPRACHEN.length ? "allen" : ohne.join(" ")}`);
+  }
+  if (!fehlt.size) console.log("  (nichts)");
 
   console.log(`=== ${name}: in der Hilfe genannt, aber nicht belegt (Alt-Bereich) ===`);
   let m = 0;
   for (const s of SPRACHEN) {
+    const { tabelle } = belegung[s];
     for (const komb of proSprache[s]) {
       if (!komb.startsWith("alt")) continue;     /* Strg gehoert teils dem Browser */
       if (tabelle.has(komb)) continue;
@@ -163,8 +166,8 @@ for (const [name, alsApp] of [["Browser-Fassung", false], ["App-Fassung", true]]
    Sie war die vierte Quelle und fiel bei der Umstellung durch: ihre Hinweise
    standen als fester Text und versprachen sieben Tasten, die inzwischen etwas
    anderes tun. Jeder Hinweis kommt jetzt aus kz(); ein handgeschriebener im
-   Alt-Bereich waere ein Rueckfall. Strg B/I/U und Strg Z/Y duerfen bleiben,
-   die erbt das Programm vom Browser und setzt sie nicht. */
+   Alt-Bereich waere ein Rueckfall. Strg Z/Y duerfen bleiben, die erbt das
+   Programm vom Browser und setzt sie nicht. */
 let palette = 0;
 console.log("=== Kommandopalette: Kuerzel von Hand eingetragen ===");
 const liste = code.match(/function commandList\(\)\{[\s\S]*?\n\}/);
