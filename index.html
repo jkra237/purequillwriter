@@ -15272,6 +15272,31 @@ function spMake(A,words,idx){
     take(word.toLowerCase(),0);
     for(let i=0;i<word.length-1;i++)                         /* zwei Zeichen vertauscht */
       take(word.slice(0,i)+word[i+1]+word[i]+word.slice(i+2),1);
+    /* Fehlender Apostroph: „doesnt“ meint „doesn't“, „lheure“ „l'heure“.
+       Unten bei „Zeichen fehlt“ kommen nur Buchstaben in Frage, darum kam
+       „doesn't“ nie, wohl aber „doesant“. Gewogen wie ein Dreher — den
+       Apostroph lässt man aus Bequemlichkeit weg, er ist kein Vertipper.
+       Geprüft mit checkOne() statt check(): check() lässt ein Wort mit
+       Apostroph auch gelten, wenn nur seine Teile Wörter sind, und machte
+       so aus „cant“ ein „c'ant“.
+       Die zweite Form sind Elisionen: das französische und das italienische
+       Wörterbuch führen „j'“, „qu'“, „dell'“ als eigene Einträge, „j'ai“
+       steht nirgends am Stück. Gilt also auch, wenn der Kopf samt Apostroph
+       ein Eintrag ist und der Rest ein Wort — Englisch, Deutsch, Spanisch
+       und Portugiesisch haben keine solchen Einträge, dort greift sie nie.
+       Ohne den Abschlag von rank(): eine Elision steht nie am Stück im
+       Wörterbuch, ist aber keine gebastelte Zusammensetzung — mit ihm fiel
+       „j'ai“ ganz aus der Liste. Elidiert wird nur vor Vokal oder h —
+       sonst baute das italienische „po'“ aus „pomo“ ein „po'mo“. */
+    const vorElision=/^[aeiouyhàâäéèêëîïôöùûüœæ]/i;
+    for(let i=1;i<word.length;i++){
+      const kopf=word.slice(0,i)+"'",rest=word.slice(i);
+      const cand=kopf+rest;
+      if(seen.has(cand))continue;
+      seen.add(cand);
+      if(checkOne(cand))scored.push([cand,rank(cand,1)]);
+      else if(vorElision.test(rest)&&directOk(kopf)&&directOk(rest))scored.push([cand,1]);
+    }
     /* Eine Ersetzung, die einen Buchstaben AUSSERHALB von ASCII einführt, ist
        keine phonetische Rateei (f/ph, t/d), sondern die Rückübersetzung einer
        Behelfsschreibung: ue->ü, ss->ß, e->é, a->ą. Nur die darf vor die
@@ -15392,8 +15417,10 @@ function spMake(A,words,idx){
   /* Vorschläge im Apostroph des Textes: wer „d’agua“ schreibt, soll nicht
      „d'água“ angeboten bekommen. Gesucht wird mit dem geraden, den die
      Wörterbücher führen. */
-  function suggestTypo(raw,limit){
-    const typo=/’/.test(String(raw));
+  /* Fehlt der Apostroph ganz, entscheidet `typoWunsch` — die Einstellung,
+     mit der ein getippter Apostroph ersetzt würde. */
+  function suggestTypo(raw,limit,typoWunsch){
+    const typo=/’/.test(String(raw))||(!!typoWunsch&&!/'/.test(String(raw)));
     const res=suggest(typo?String(raw).replace(/’/g,"'"):raw,limit);
     return typo?res.map(x=>x.replace(/'/g,"’")):res;
   }
@@ -15596,7 +15623,7 @@ function spellDialog(startAt){
       return sel+`<div class="spellbig">${tr("Prüft den Text des Dokuments Wort für Wort.")}</div>
         <div class="fmttip">${tr("Gefundene Stellen werden im Text rot unterringelt. Du gehst sie dann einzeln durch.")}</div>`;
     const c=spellContext(spellHits[spellIdx]);
-    const sug=SPELL.eng.suggest(c.word,7);
+    const sug=SPELL.eng.suggest(c.word,7,S.settings.autoc&&S.settings.autoc.quotes);
     spellSug=Math.min(spellSug,Math.max(0,sug.length-1));
     /* Das Eingabefeld ist die einzige Quelle, aus der „Ändern“ liest — ein
        Vorschlag füllt es nur. Vorher hing „Ändern“ an der Auswahl in der

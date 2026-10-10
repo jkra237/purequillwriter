@@ -92,6 +92,29 @@ immer genau einen Commit, der sie anfasst.
   countStats(), ohne Zeilen- und Absatzwechsel wie Word; gemessen an sechs
   Fällen (leer, ein und drei Absätze, Leerzeile, Überschrift, Liste) und an
   einer Auswahl über zwei Absätze, alle gleich Word. Bestand schon in 1.0.0.
+- **Vorschläge übersahen einen fehlenden Apostroph:** für „doesnt“ kamen
+  „doesant“, „doesent“ …, nie „doesn’t“ — beim fehlenden Zeichen probierte
+  `suggest()` nur Buchstaben. Jetzt wird der Apostroph an jeder Stelle
+  versucht, gewogen wie ein Dreher, also vorn in der Liste. Angenommen wird
+  nur, was als ganzes Wort im Wörterbuch steht (`checkOne()`), sonst machte
+  die Teile-Regel von `check()` aus „cant“ ein „c'ant“. Der Vorschlag kommt
+  im Apostroph, den die Autokorrektur setzen würde: typografisch, wenn
+  *Anführungszeichen* an ist, sonst gerade. Gemessen: doesnt, dont, isnt,
+  wouldnt, Im, thats → jeweils die Kurzform an erster Stelle, its → „Its,
+  it's“, cant → „Cant, can't“; teh, recieve unverändert.
+  **Elisionen in Französisch und Italienisch:** Diese Wörterbücher führen
+  „j'“, „qu'“, „dell'“ … als eigene Einträge, „j'ai“ steht nirgends am
+  Stück. Ein Vorschlag gilt darum auch, wenn der Kopf samt Apostroph ein
+  solcher Eintrag ist und der Rest ein Wort, das mit Vokal oder h beginnt
+  (sonst machte italienisch „po'“ aus „pomo“ ein „po'mo“). Englisch,
+  Deutsch, Spanisch, Portugiesisch und Polnisch haben keine solchen
+  Einträge, dort greift es nie. Gemessen: jai, quil, daccord, mappelle,
+  lorsquil, quelquun, aujourdhui → Elision auf Platz 1; cest, nest, sest,
+  lheure, lhomme, lami, jaime auf Platz 2 (hinter einem echten Wort);
+  italienisch lanno, cè, lamico, unaltra, cosè, lultimo auf Platz 1,
+  dovè auf 2. Gewöhnliche Tippfehler (maisn, beacoup, grazei, casaa,
+  Hauser, obrigdo, ksiazka) unverändert. Im Prüfdialog in en/fr/it und
+  mit beiden Einstellungen der Anführungszeichen geprüft.
 
 ### Nebenbei gefunden, noch nicht behoben
 
@@ -106,8 +129,6 @@ immer genau einen Commit, der sie anfasst.
   trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
   Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
   unter „Behoben“.
-- **Englische Vorschläge übersehen fehlende Apostrophe:** für „doesnt“
-  kommen „doesant“, „doesent“ …, nicht „doesn’t“. Bestand schon vorher.
 - **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
