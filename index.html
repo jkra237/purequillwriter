@@ -453,7 +453,7 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 @media print{body.hfmode #editor{opacity:1!important}}
 .printhf{display:none}
 .sheetpage .pn{position:absolute;font-family:var(--mono);color:var(--ink-soft)}
-#editor{
+:is(#editor,.pvedit){
   position:relative;z-index:1;outline:none;
   font-family:Georgia,serif;line-height:var(--lh,1.62);color:var(--ink);
   font-size:calc(var(--fs,12pt) * var(--zoom));
@@ -501,11 +501,11 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 .fmtmore:hover{border-color:var(--ink-soft);color:var(--ink)}
 .fmtmore .sum{margin-left:auto;min-width:0;font-family:var(--mono);font-size:11px;
   color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#editor h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
-#editor h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
-#editor h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
-#editor p{margin:0 0 var(--ps,.82em)}
-#editor ul,#editor ol{margin:0 0 .82em;padding-left:1.5em}
+:is(#editor,.pvedit) h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
+:is(#editor,.pvedit) h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
+:is(#editor,.pvedit) h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
+:is(#editor,.pvedit) p{margin:0 0 var(--ps,.82em)}
+:is(#editor,.pvedit) ul,:is(#editor,.pvedit) ol{margin:0 0 .82em;padding-left:1.5em}
 /* Drei Zitatstile, gewählt je Zitat — über Format → Zitat oder das
    Absatzformat-Feld der Werkzeugleiste („Zitat 1/2/3"). Der Stil steht als
    data-qs am <blockquote> selbst, nicht am Dokument: dadurch lassen sich in
@@ -532,8 +532,8 @@ blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;
 blockquote[data-qs="typo"]::before{content:'"';position:absolute;
   left:.3em;top:-.06em;font-size:2.1em;line-height:1;
   color:var(--rule);font-style:normal}
-#editor blockquote p{margin:0 0 .5em}
-#editor blockquote p:last-child{margin-bottom:0}
+:is(#editor,.pvedit) blockquote p{margin:0 0 .5em}
+:is(#editor,.pvedit) blockquote p:last-child{margin-bottom:0}
 /* Aufzählungszeichen und Nummerierung, gewählt je Liste (Format → Aufzählung
    bzw. Nummerierung). Wie beim Zitat steht der Stil als data-ls an der Liste
    selbst und ohne Attribut gilt der Grundstil — bestehende Listen bleiben
@@ -555,24 +555,24 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
    Wert zurück, statt sie vom Elternelement zu erben — betraf bisher jeden
    Tabellentext, der dadurch nie mit Zoom, Dokumentschrift oder -größe
    mitwuchs. font:inherit stellt die normale Vererbung wieder her. */
-#editor table{border-collapse:collapse;width:100%;table-layout:fixed;margin:0 0 .82em;font:inherit}
+:is(#editor,.pvedit) table{border-collapse:collapse;width:100%;table-layout:fixed;margin:0 0 .82em;font:inherit}
 /* Sicherheitsnetz gegen Eingefügtes. Die Bildregeln weiter unten greifen nur
    für Bilder in einer figure.fig, also für die, die durch addImage() gegangen
    sind — ein aus einer Webseite kopiertes <img> hat keine und stand vorher in
    Originalgröße weit über dem Satzspiegel. Der Filter beim Einfügen nimmt die
    Breitenangaben zwar heraus, aber hier darf nichts durchrutschen. */
-#editor img{max-width:100%;height:auto}
-#editor pre{white-space:pre-wrap;overflow-wrap:anywhere}
-#editor blockquote,#editor p,#editor li,#editor h1,#editor h2,#editor h3{overflow-wrap:break-word}
-#editor td,#editor th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
+:is(#editor,.pvedit) img{max-width:100%;height:auto}
+:is(#editor,.pvedit) pre{white-space:pre-wrap;overflow-wrap:anywhere}
+:is(#editor,.pvedit) blockquote,:is(#editor,.pvedit) p,:is(#editor,.pvedit) li,:is(#editor,.pvedit) h1,:is(#editor,.pvedit) h2,:is(#editor,.pvedit) h3{overflow-wrap:break-word}
+:is(#editor,.pvedit) td,:is(#editor,.pvedit) th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
-#editor th{background:var(--chrome-2);font-weight:600;text-align:left}
+:is(#editor,.pvedit) th{background:var(--chrome-2);font-weight:600;text-align:left}
 .tgrid{display:grid;grid-template-columns:repeat(8,18px);gap:2px;padding:7px 7px 3px}
 .tgrid i{width:18px;height:15px;border:1px solid var(--rule);background:var(--paper);display:block;cursor:pointer}
 .tgrid i.on{background:var(--stamp);border-color:var(--stamp)}
 .tlabel{text-align:center;font-family:var(--mono);font-size:11px;color:var(--ink-soft);padding:3px 0 7px}
-#editor a{color:var(--stamp);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
-#editor .pgbreak{position:relative;display:block;border-top:1px dashed var(--ink-faint);
+:is(#editor,.pvedit) a{color:var(--stamp);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+:is(#editor,.pvedit) .pgbreak{position:relative;display:block;border-top:1px dashed var(--ink-faint);
   margin:0;padding:0;overflow:hidden}
 #editor .pgbreak::before{content:attr(data-label);position:absolute;left:0;top:2px;
   font-family:var(--ui);font-size:11px;color:var(--ink-soft)}
@@ -587,15 +587,15 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 .toc-refresh,.toc-settings{width:24px;height:24px;border-radius:var(--radius);display:flex;align-items:center;
   justify-content:center;color:var(--ink-soft);flex:none}
 .toc-refresh:hover,.toc-settings:hover{background:var(--chrome);color:var(--ink)}
-#editor .toc-list a,.toc-list a{display:flex;align-items:baseline;gap:6px;padding:3px 0;color:var(--ink);
+:is(#editor,.pvedit) .toc-list a,.toc-list a{display:flex;align-items:baseline;gap:6px;padding:3px 0;color:var(--ink);
   text-decoration:none;cursor:pointer}
 #editor .toc-list a:hover,.toc-list a:hover{color:var(--stamp)}
 /* Ebene bestimmt Einrückung UND Schriftgröße - wie die eingebauten
    Verzeichnisformate in Word, wo tiefere Ebenen kleiner und weiter
    eingerückt erscheinen, nicht nur eingerückt. */
-#editor .toc-list a.toc-l1,.toc-list a.toc-l1{font-size:1em}
-#editor .toc-list a.toc-l2,.toc-list a.toc-l2{padding-left:1.3em;font-size:.93em}
-#editor .toc-list a.toc-l3,.toc-list a.toc-l3{padding-left:2.6em;font-size:.86em}
+:is(#editor,.pvedit) .toc-list a.toc-l1,.toc-list a.toc-l1{font-size:1em}
+:is(#editor,.pvedit) .toc-list a.toc-l2,.toc-list a.toc-l2{padding-left:1.3em;font-size:.93em}
+:is(#editor,.pvedit) .toc-list a.toc-l3,.toc-list a.toc-l3{padding-left:2.6em;font-size:.86em}
 .toc-leader{flex:1;margin-bottom:3px}
 .toc[data-leader="dots"] .toc-leader{border-bottom:1px dotted var(--ink-faint)}
 .toc[data-leader="dash"] .toc-leader{border-bottom:1px dashed var(--ink-faint)}
@@ -617,12 +617,12 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
   border:1px solid var(--rule);border-radius:3px;padding:0 3px}
 .toc-entrytext{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* -- Stile: Klassisch ist die Grundausstattung oben, der Rest weicht gezielt ab -- */
-#editor .toc[data-style="simple"] .toc-list a,.toc[data-style="simple"] .toc-list a{padding:5px 0}
+:is(#editor,.pvedit) .toc[data-style="simple"] .toc-list a,.toc[data-style="simple"] .toc-list a{padding:5px 0}
 .toc[data-style="modern"]{background:var(--paper);border:none;border-left:3px solid var(--stamp);
   border-radius:0 var(--radius) var(--radius) 0}
 .toc[data-style="modern"] .toc-head{border-bottom:1px solid var(--rule);padding-bottom:8px;margin-bottom:8px}
-#editor .toc[data-style="modern"] .toc-list a,.toc[data-style="modern"] .toc-list a{padding:5px 0}
-#editor .toc[data-style="modern"] .toc-list a.toc-l1{font-weight:700}
+:is(#editor,.pvedit) .toc[data-style="modern"] .toc-list a,.toc[data-style="modern"] .toc-list a{padding:5px 0}
+:is(#editor,.pvedit) .toc[data-style="modern"] .toc-list a.toc-l1{font-weight:700}
 .toc[data-style="modern"] .toc-pg{background:var(--stamp);color:var(--on-stamp,#fff);
   border-radius:9px;padding:1px 8px}
 .toc[data-style="numbered"] .toc-num{color:var(--ink);font-weight:600;min-width:2.6em}
@@ -673,21 +673,21 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 #editor p.cleanp.cur{background:color-mix(in srgb, var(--stamp) 16%, transparent)}
 .cleanctx b{white-space:pre;background:color-mix(in srgb, var(--stamp) 24%, transparent);
   border-radius:2px;color:var(--ink)}
-#editor figure.fig{margin:0 0 .82em;display:block;text-align:center}
+:is(#editor,.pvedit) figure.fig{margin:0 0 .82em;display:block;text-align:center}
 /* Bilder sind per Default nativ ziehbar - in einem contenteditable-Bereich
    legt der Browser dabei gern eine zweite Kopie am Ablageort ab. Das
    Verschieben macht hier eigener Code, also die native Variante abschalten. */
-#editor figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top;
+:is(#editor,.pvedit) figure.fig img{display:inline-block;max-width:100%;height:auto;vertical-align:top;
   -webkit-user-drag:none;user-drag:none}
-#editor figure.fig figcaption{font-family:var(--ui);font-size:.72em;
+:is(#editor,.pvedit) figure.fig figcaption{font-family:var(--ui);font-size:.72em;
   color:var(--ink-soft);margin-top:.35em;line-height:1.4;text-align:inherit}
 #editor figure.fig.sel img{outline:2px solid var(--stamp);outline-offset:2px}
 /* Frei platziert: liegt wie in Word „vor dem Text", statt im Fluss zu hängen.
    Die Maße kommen aus --fx/--fy/--fw/--fh, die placeFreeFigs() aus den
    Millimeterwerten der data-Attribute rechnet. */
-#editor figure.fig.free{position:absolute;margin:0;z-index:3;cursor:move;
+:is(#editor,.pvedit) figure.fig.free{position:absolute;margin:0;z-index:3;cursor:move;
   left:var(--fx,0px);top:var(--fy,0px);width:var(--fw,40mm);height:var(--fh,16mm)}
-#editor figure.fig.free img{display:block;width:100%;height:100%;max-width:none}
+:is(#editor,.pvedit) figure.fig.free img{display:block;width:100%;height:100%;max-width:none}
 #editor figure.fig.free.sel img{outline:none}
 #editor figure.fig.free.sel{outline:1px dashed var(--stamp);outline-offset:3px}
 .fhwrap{position:absolute;inset:0;pointer-events:none}
@@ -1410,6 +1410,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .pvinner .anch{background:none!important;border-bottom:none!important}
 .pvinner .glossterm{border-bottom:none!important}
 .pvinner .pgbreak::before{content:""!important}
+.pvinner .pgbreak{border-top-color:transparent!important}
 .pvinner .mg{display:none}
 /* Das Blatt in der Vorschau trägt die Druckfarben, nicht die des Schemas:
    gedruckt wird immer schwarz auf Weiß (siehe @media print, #editor) — auf
@@ -17430,6 +17431,14 @@ function printPreview(){
   const s=Math.min(1.1,Math.max(.25,(Math.min(innerWidth-90,880))/pw));
   const klon=paper.cloneNode(true);
   klon.removeAttribute("id");   /* sonst gäbe es #paper zweimal im Dokument */
+  /* Ohne seine ID verlor der Text jede #editor-Regel — Schriftgröße,
+     Zeilenabstand, Überschriften, Absatzabstände und position/z-index. Die
+     Seitenflächen lagen darum ÜBER dem Text, die Vorschau zeigte leere
+     Blätter (seit 1.0.0). Die Regeln, die Satz und Aussehen bestimmen,
+     gelten darum für :is(#editor,.pvedit); die nur fürs Bearbeiten
+     (Suchtreffer, Rechtschreibung, Auswahl) bleiben am Editor. */
+  const edKlon=klon.querySelector("#editor");
+  if(edKlon)edKlon.classList.add("pvedit");
   klon.querySelectorAll("[id]").forEach(el=>el.removeAttribute("id"));
   klon.querySelectorAll(".hfhint,.hfedit,.hfgrip,.figrsz,.pageflag,.ruler").forEach(el=>el.remove());
   klon.querySelectorAll("[contenteditable]").forEach(el=>el.setAttribute("contenteditable","false"));

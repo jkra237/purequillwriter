@@ -122,6 +122,18 @@ immer genau einen Commit, der sie anfasst.
   Druckfarben wie `@media print` (`.pvinner .paper`); Leiste und Umgebung
   behalten das Schema. Gemessen über alle 17 Schemata: Blatt weiß, Text
   schwarz, Zitatrahmen und Seitenzahl in Druckfarbe. Bestand seit 1.0.0.
+- **Druckvorschau zeigte leere Blätter** — der Text fehlte ganz, nur Kopf-
+  und Fußzeile und Seitenzahl waren zu sehen. Die Vorschau klont #paper und
+  nimmt dem Klon die IDs; damit verlor der Text jede `#editor`-Regel,
+  darunter `position:relative;z-index:1`, und die Seitenflächen lagen über
+  ihm. Auch Schriftgröße, Zeilen- und Absatzabstand, Überschriften und
+  Tabellen fehlten. Der Klon trägt jetzt `.pvedit`, die Regeln für Satz und
+  Aussehen gelten für `:is(#editor,.pvedit)`; die fürs Bearbeiten
+  (Suchtreffer, Rechtschreibung, Auswahl) bleiben am Editor. Der
+  Seitenumbruch zeigt in der Vorschau keine Strichlinie mehr. Gemessen an
+  einem Dokument über vier Seiten (Überschriften, Liste, Zitat, Tabelle,
+  40 Absätze, Seitenumbruch): alle 49 Blöcke stehen in der Vorschau auf
+  0 px genau wie im Editor; `check-export.mjs` 252/252. Bestand seit 1.0.0.
 
 ### Nebenbei gefunden, noch nicht behoben
 
