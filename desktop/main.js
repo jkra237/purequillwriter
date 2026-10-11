@@ -91,12 +91,22 @@ ipcMain.handle("pqw:savePdf", async (e, opts = {}) => {
     filters: [{ name: "PDF", extensions: ["pdf"] }]
   });
   if (canceled || !filePath) return { canceled: true };
-  const data = await e.sender.printToPDF({
+  const pdfOpts = {
     printBackground: true,
     preferCSSPageSize: true,
     generateDocumentOutline: opts.outline !== false,
     generateTaggedPDF: true
-  });
+  };
+  let data = await e.sender.printToPDF(pdfOpts);
+  /* „Seite x von y“: y kommt aus der Ansicht. Bricht ein überlanger Block
+     (lange Tabelle) im Druck anders, stimmt sie nicht — dann die echte
+     Seitenzahl nachreichen und noch einmal drucken (hfDruckGesamt in
+     index.html; antwortet false, wenn nichts zu ändern war). */
+  const seiten = (data.toString("latin1").match(/\/Type\s*\/Page[^s]/g) || []).length;
+  const neu = seiten && await e.sender
+    .executeJavaScript(`typeof hfDruckGesamt==="function"&&hfDruckGesamt(${seiten})`)
+    .catch(() => false);
+  if (neu) data = await e.sender.printToPDF(pdfOpts);
   await fs.writeFile(filePath, data);
   return { ok: true, path: filePath };
 });

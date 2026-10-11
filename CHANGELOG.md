@@ -109,6 +109,43 @@ immer genau einen Commit, der sie anfasst.
   eigenen PureQuill-Dokument (dessen Bilder sind schon eingepasst, beim
   Umstellen von Absätzen wäre die Frage im Weg) und bei reinen Bildern
   (Bildschirmfotos). Die Leiste „Nur Text übernehmen“ danach bleibt.
+- **Bilder in Kopf- und Fußzeile** (Logo, Siegel): Bildsymbol in der Leiste
+  über der Zeile oder „Bild einfügen …“ im Dialog *Kopf- und Fußzeile*. Dort
+  je Bild Seite (links/Mitte/rechts), Höhe (Seitenverhältnis bleibt, die
+  Kante, an der es steht, auch) und Entfernen. Ein eigenes Bild steht zuerst
+  rechts, 15 mm hoch, und schiebt den Text weg wie ein Bild im Word-Text.
+  Gedruckt, als PDF und nach Word gespeichert an derselben Stelle.
+- **Erste Seite anders** wie in Word (`w:titlePg`): Häkchen im Dialog
+  *Kopf- und Fußzeile*, darunter eigene Zeilen für Seite 1 (`d.hdr1`/`d.ftr1`,
+  `d.ersteAnders`; intern „hdr1“/„ftr1“, `hfFuerSeite()` wählt je Seite).
+  Anfangs leer wie in Word; Abstände zum Rand gelten für beide. Gedacht für
+  den Briefbogen mit Logo und Bankzeile nur auf Blatt 1 und das Deckblatt
+  ohne Kopfzeile — beides kam aus Word-Dateien bisher falsch an: die Zeile
+  der ersten Seite fehlte, oder (ohne Standardzeile) stand sie auf jeder Seite.
+  - Seite 1 bekommt das **größere** der beiden Bänder: der Druck kann
+    Seite 1 nur mehr Platz geben als den übrigen (thead/tfoot wiederholen
+    sich gleich hoch). Bei einem Deckblatt ohne Kopf beginnt der Text auf
+    Seite 1 darum am Band der Folgeseiten statt am Rand (gemessen 1,1 mm
+    tiefer als in Word).
+  - **Druck:** jede Seite bekommt ihre eigenen Zeilen (siehe „Seitenzahl im
+    Druck“ unter Behoben), Seite 1 eben die der ersten Seite. Ein erster
+    Weg — die fixierten Zeilen auf Seite 1 weiß zuzudecken — ist dadurch
+    überholt. Was davon blieb: `@page` links und rechts auf 0, die
+    Seitenränder tragen Rahmen und Druckzeilen selbst (ragte etwas im Fluss
+    über die Druckfläche, verkleinerte Chromium die ganze Seite auf 86 %), und
+    die 0,8-px-Linie an `.body` ist im Druck weg (sie schob den Rahmen
+    0,3 mm unter die Kante der Druckfläche).
+  - Export: `header2.xml`/`footer2.xml` mit `type="first"` plus
+    `w:titlePg`; ist die Zeile der ersten Seite aus, keine Datei (Word lässt
+    sie dann leer). Import liest `first` nur bei gesetztem `titlePg` und
+    weicht für die Standardzeile dann nicht mehr auf `first` aus.
+  - Der Fingerabdruck für „ungespeichert“ (`dokStand()`) nimmt die neuen
+    Felder nur auf, wenn sie gesetzt sind — sonst gälte nach dem Update jede
+    gespeicherte Datei als geändert.
+  - Geprüft mit zwei weiteren Word-Dateien (Brief mit eigener erster Seite,
+    Deckblatt ohne Kopf): Bilder auf Seite 1 im PDF ≤ 0,1 mm neben Words
+    PDF, Seite 2 ohne sie; Folgezeile auf Seite 1 verdeckt (als Bild aus dem
+    PDF geprüft, `pdf-foto.cjs`); Umlauf über Word identisch.
 
 ### Behoben
 
@@ -300,8 +337,93 @@ immer genau einen Commit, der sie anfasst.
   Reiter ist mindestens 88 px breit; bei „test“ blieb rechts Platz, und das
   Kreuz stand direkt hinter dem Titel. Jetzt `margin-left:auto`: gemessen
   an fünf Reitern (1 bis 37 Zeichen) steht es überall 13 px vom rechten Rand.
+- **Logos und Bilder in Kopf- und Fußzeile fielen beim Öffnen einer
+  Word-Datei weg** — seit 1.0.0. `docxHf()` las nur den Text der Absätze
+  direkt unter `w:hdr`; Bilder, aber auch Text in Tabellen (der übliche
+  Briefkopf: Logo links, Anschrift rechts) gingen verloren. Jetzt:
+  - Bilder im Text (`wp:inline`), frei verankerte (`wp:anchor`, Bezug Blatt,
+    Rand, Satzspiegel oder Absatz, Versatz oder Ausrichtung) und VML aus
+    älteren Dateien, je über die eigene Beziehungsdatei der Teildatei
+    (`word/_rels/header2.xml.rels`).
+  - Lage **wie in Word, in Millimetern** (Toms Entscheidung gegen das
+    einfachere „Seite links/Mitte/rechts“): gespeichert ab linkem Seitenrand
+    und ab der Linie der Zeile nach innen, damit sie mitwandern, wenn man den
+    Abstand zum Blatt verstellt. Bilder im Text schieben den Textkörper weg,
+    verankerte nicht — wie in Word.
+  - Text aus Tabellenzellen; steht er in einer Zelle, bekommt er deren
+    Spalte (`tx`/`tw`), steht er unter einem Bild, dessen Versatz (`ty`).
+  - Ohne `w:jc` steht ein Absatz links, wie in Word. Der Leser nahm bisher
+    „Mitte“ an — linksbündige Kopfzeilen kamen zentriert an.
+  - **Druck:** ragt ein Bild über die Zeile zur Blattkante hinaus (Logo bei
+    8 mm, Kopfzeile bei 12,5 mm), druckte Chromium es ein zweites Mal auf
+    die Gegenseite — unten auf Seite 1, oben auf Seite 2. Die fixierte
+    Druckzeile beginnt jetzt am äußersten Bild (`hfUeberstand()`, `@page`-Rand
+    entsprechend kleiner), nichts steht mehr über ihre Kante.
+  - **Export:** Bilder gehen als verankerte Grafik mit Blattbezug hinaus
+    (eigene `header1.xml.rels`, `word/media/`), andere Formate als PNG/JPEG
+    werden PNG. Weil Word ein verankertes Bild den Text nicht wegschieben
+    lässt, bekommt die Zeile so viel Abstand nach dem letzten (Kopf) bzw.
+    vor dem ersten Absatz (Fuß), dass sie so hoch wird wie ein Bild „im
+    Text“ — nicht der Seitenrand, der gälte für alle Seiten, auch wenn das
+    Bild nur auf Seite 1 steht. Solche Bilder heißen in der Datei
+    `PureQuill im Text …` (`HF_FLUSS_NAME`), daran erkennt der Import sie
+    wieder; der Umlauf ist damit verlustfrei.
+    Ohne Bilder ist die Kopfzeilendatei Zeichen für Zeichen wie vorher.
+    `bildGrafikXml()`/`bildAnkerXml()` sind aus `figurXml()` herausgelöst
+    und werden von beiden benutzt.
+  - Geprüft mit fünf Dateien, die das echte Word gebaut hat
+    (`werkzeuge/pruefen/hf-bilder-testdateien.ps1`: schwebend rechts,
+    Tabelle mit Logo links, im Text zentriert, Fußzeile mit Siegel, nur
+    Logo): Lage im PDF von PureQuill gegen Words eigenes PDF höchstens 0,3 mm
+    daneben (`pdf-bilder.cjs`). Die von PureQuill gespeicherten Dateien
+    öffnet Word ohne Rückfrage, die Bilder stehen dort auf 0,1 mm wie im
+    Original (`word-pdf.ps1`). Bedienung (Seite, Höhe, Einfügen, Entfernen)
+    über `hf-bilder-bedienung.cjs`; `check-export.mjs` 252/252.
+  - Bekannte Grenze: EMF/WMF-Logos (alte Vorlagen) kann Chromium nicht
+    zeigen, sie fallen weiter weg — wie im Fließtext.
+
+- **Seitenzahl im Druck stand auf jeder Seite auf „0“** — im PDF und auf
+  Papier „Seite 0 von 6“, seit 1.0 (am Bildschirm richtig; mit dem alten
+  Stand nachgemessen). `.pageno::after{content:counter(page)}` zählt in
+  Chromium nur in den Randfeldern von `@page`, die erst Chromium 131 kann
+  (die App: Electron 33 = 130), und die Druckzeilen waren fixierte Elemente,
+  die auf jeder Seite gleich sind. Jetzt (`hfDruckSeiten()`):
+  - Kopf- und Fußzeile **je Seite**, alle an einem Anker am Anfang des
+    Druckrahmens, per `transform` auf ihre Seite geschoben. Gemessen:
+    Chromium legt die Seiten des Flusses lückenlos übereinander, Seite p
+    beginnt bei p × Höhe der Druckfläche, **aufgerundet auf ganze CSS-Pixel**
+    (ohne Rundung wanderte die Zeile 0,14 mm je Seite). Ein transform ändert
+    nur das Malen, nicht den Umbruch — gilt auch mitten in einer langen
+    Tabelle. 25 Seiten nachgemessen: Logo überall auf derselben Höhe.
+  - **Der Druck bricht dort um, wo die Ansicht umbricht** (`druckWieSchirm()`,
+    break-before am ersten Block jeder Seite, `seitenAnfaenge` aus
+    `paginate()`). Vorher teilte der Druck Absätze zeilenweise, wo die
+    Ansicht sie ganz weiterschiebt: im Druck drei Absätze mehr auf Seite 2,
+    danach jede Seite verschoben, Gesamtzahl falsch. Die Blockhöhen sind in
+    beiden Medien gleich (nachgemessen), also passt der Druck immer.
+  - **Gesamtzahl:** „von y“ kommt aus der Ansicht. Wo ein Block länger als
+    eine Seite ist, bricht der Druck anders; die Desktop-Fassung zählt nach
+    dem ersten `printToPDF` die Seiten, baut mit der echten Zahl neu
+    (`hfDruckGesamt()`) und druckt noch einmal (`desktop/main.js`). Der
+    Browserdruck kann das nicht — dort kann in diesem Fall die letzte Seite
+    ohne Zeile bleiben und y um eins daneben liegen.
+  - Keine Reserve-Zeilen hinter dem Text: eine Zeile für eine Seite, die es
+    nicht gibt, legte Chromium als leere Seite an („Seite 7 von 6“).
+  - Die fixierten `#printhdr`/`#printftr` bleiben nur als Rückfall für einen
+    Druck am Rahmen vorbei (Browsermenü), mit dem alten Zähler.
+  - `check-export.mjs` prüft jetzt Seitenzahl je Seite und **gleich viele**
+    Seiten wie am Bildschirm (vorher nur „mindestens“) — 264/264. Dabei
+    behoben: das Skript nahm ohne `--chrome` das erste Argument als Pfad zu
+    Chrome, `--keep` und `--nur` liefen deshalb nie.
 
 ### Nebenbei gefunden, noch nicht behoben
+
+- **Lange Tabellen werden in der Ansicht nicht auf Seiten verteilt.** Eine
+  Tabelle, die länger als eine Seite ist, läuft am Bildschirm durch Fuß- und
+  Kopfband der Folgeseiten hindurch; `paginate()` verschiebt nur ganze
+  Blöcke. Der Druck teilt sie richtig nach Zeilen und braucht dadurch mehr
+  Seiten als die Ansicht (gemessen: 120 Zeilen, Ansicht 24 Seiten, Druck 25).
+  Abhilfe wäre, Tabellen zeilenweise zu paginieren wie Absätze ganz.
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
   `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht

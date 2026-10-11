@@ -412,6 +412,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .sheetpage .mg{position:absolute;top:0;bottom:0;border-left:1px dashed var(--rule)}
 .hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
   pointer-events:none;white-space:pre-wrap;line-height:1.3}
+.hfbild{position:absolute;pointer-events:none;user-select:none}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
    der ganz normalen Fußzeilen-Reserve (bottom:mb) - dieselbe Höhe, die auch
@@ -1349,6 +1350,11 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      bleiben leer; die sichtbaren Zeilen sind die fixierten .printhf, damit sie
      auch auf der letzten Seite unten am Blatt stehen (eine tfoot rutscht dort
      sonst direkt hinter den Text). */
+  /* Die Trennlinie unter der Leiste (0,8 px an .body) schob im Druck den
+     ganzen Rahmen 0,3 mm unter die Kante der Druckfläche — genug, dass die
+     Fußabdeckung der ersten Seite darüber hinausragte und Chromium sie
+     verschob (gemessen 3,5 mm) und ein Stück davon auf Seite 2 druckte. */
+  .body{border:0!important}
   .printframe{width:100%!important;border-collapse:collapse!important;
     table-layout:fixed!important;margin:0!important}
   .printframe>thead>tr>td,.printframe>tfoot>tr>td,.printframe>tbody>tr>td{
@@ -1739,7 +1745,7 @@ function ensureHfMeasurer(){
 }
 function hfTextHoehe(d,which,z){
   const v=hfOf(d,which),f=fmtOf(d);
-  const breite=MM(f.w-f.m[1]-f.m[3])*z, fs=(9*96/72)*z;
+  const breite=MM(v.tw||f.w-f.m[1]-f.m[3])*z, fs=(9*96/72)*z;
   const html=hfText(v.text,1,Math.max(1,pageCount))||"&nbsp;";
   /* paginate() fragt mehrfach je Durchlauf — ohne den Merker wäre das jedes
      Mal ein erzwungenes Neuberechnen des Layouts. */
@@ -1757,7 +1763,29 @@ function hfBand(d,which,z){
   const v=hfOf(d,which);
   if(!v.on)return 0;
   const f=fmtOf(d);
-  return MM(which==="hdr"?f.hd:f.fd)*z + hfTextHoehe(d,which,z) + MM(2)*z;
+  return MM(istKopf(which)?f.hd:f.fd)*z
+    + Math.max(MM(v.ty||0)*z+hfTextHoehe(d,which,z), MM(hfFlussMm(v))*z) + MM(2)*z;
+}
+/* Bilder der Kopf-/Fußzeile, siehe docxHf() für das Maßsystem. */
+const hfBilder=v=>Array.isArray(v&&v.bilder)?v.bilder.filter(b=>b&&b.uri&&b.b>0&&b.h>0):[];
+/* Wie weit die im Text stehenden Bilder ab der Linie nach innen reichen.
+   Frei verankerte zählen nicht — in Word schieben sie den Text auch nicht. */
+const hfFlussMm=v=>hfBilder(v).filter(b=>b.fluss).reduce((m,b)=>Math.max(m,(+b.y||0)+b.h),0);
+/* Auf dem Bildschirm steht dasselbe Logo auf jeder Seite. Als data:-URI
+   hinge es 50-mal am HTML-Text der Seitenebene; als Blob-Adresse einmal. */
+const hfBildUrls=new Map();
+function hfBildSrc(uri){
+  let u=hfBildUrls.get(uri);if(u)return u;
+  u=uri;
+  try{
+    const m=/^data:([^;,]+);base64,(.*)$/s.exec(uri);
+    if(m){const bin=atob(m[2]),a=new Uint8Array(bin.length);
+      for(let i=0;i<bin.length;i++)a[i]=bin.charCodeAt(i);
+      u=URL.createObjectURL(new Blob([a],{type:m[1]}))}
+  }catch(e){u=uri}
+  if(hfBildUrls.size>12){hfBildUrls.forEach(x=>{if(x.startsWith("blob:"))URL.revokeObjectURL(x)});hfBildUrls.clear()}
+  hfBildUrls.set(uri,u);
+  return u;
 }
 const THEMES=[
   {k:"azur",     n:"Azur",       d:"Neutrales Weißgrau aktueller Windows-Textverarbeitung — erinnert an Word", c:["#FFFFFF","#7F858C","#0F6CBD"]},
@@ -2295,6 +2323,7 @@ en:{
   "Doppelklick: Kopfzeile":"Double-click: header",
   "Doppelklick: Fußzeile":"Double-click: footer",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
+  "Erste Seite anders":"Different first page","Erste Seite":"First page",
   "Kopfzeile entfernt":"Header removed",
   "Fußzeile entfernt":"Footer removed",
   "Entfernen":"Remove",
@@ -3074,6 +3103,7 @@ fr:{
   "Doppelklick: Kopfzeile":"Double-clic : en-tête",
   "Doppelklick: Fußzeile":"Double-clic : pied de page",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Astuce : un double-clic sur la marge supérieure ou inférieure modifie l'en-tête et le pied de page directement dans le document.",
+  "Erste Seite anders":"Première page différente","Erste Seite":"Première page",
   "Kopfzeile entfernt":"En-tête supprimé",
   "Fußzeile entfernt":"Pied de page supprimé",
   "Entfernen":"Supprimer",
@@ -3853,6 +3883,7 @@ es:{
   "Doppelklick: Kopfzeile":"Doble clic: encabezado",
   "Doppelklick: Fußzeile":"Doble clic: pie de página",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Consejo: un doble clic en el margen superior o inferior edita el encabezado y el pie de página directamente en el documento.",
+  "Erste Seite anders":"Primera página diferente","Erste Seite":"Primera página",
   "Kopfzeile entfernt":"Encabezado eliminado",
   "Fußzeile entfernt":"Pie de página eliminado",
   "Entfernen":"Eliminar",
@@ -4632,6 +4663,7 @@ pt:{
   "Doppelklick: Kopfzeile":"Clique duplo: cabeçalho",
   "Doppelklick: Fußzeile":"Clique duplo: rodapé",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Dica: um clique duplo na margem superior ou inferior edita o cabeçalho e o rodapé diretamente no documento.",
+  "Erste Seite anders":"Primeira página diferente","Erste Seite":"Primeira página",
   "Kopfzeile entfernt":"Cabeçalho removido",
   "Fußzeile entfernt":"Rodapé removido",
   "Entfernen":"Remover",
@@ -5411,6 +5443,7 @@ pl:{
   "Doppelklick: Kopfzeile":"Dwuklik: nagłówek",
   "Doppelklick: Fußzeile":"Dwuklik: stopka",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Wskazówka: dwuklik na górnym lub dolnym marginesie strony pozwala edytować nagłówek i stopkę bezpośrednio w dokumencie.",
+  "Erste Seite anders":"Inna pierwsza strona","Erste Seite":"Pierwsza strona",
   "Kopfzeile entfernt":"Nagłówek usunięty",
   "Fußzeile entfernt":"Stopka usunięta",
   "Entfernen":"Usuń",
@@ -6197,6 +6230,7 @@ it:{
   "Doppelklick: Kopfzeile":"Doppio clic: intestazione",
   "Doppelklick: Fußzeile":"Doppio clic: piè di pagina",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Suggerimento: un doppio clic sul margine superiore o inferiore della pagina modifica intestazione e piè di pagina direttamente nel documento.",
+  "Erste Seite anders":"Prima pagina diversa","Erste Seite":"Prima pagina",
   "Kopfzeile entfernt":"Intestazione rimossa",
   "Fußzeile entfernt":"Piè di pagina rimosso",
   "Entfernen":"Rimuovi",
@@ -7343,7 +7377,7 @@ function drawWrite(){
       setTimeout(()=>{placeHfGrip();drawHfBar()},0);hfLive();return}
     if(e.key==="Escape"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
     if(e.key==="Tab"){e.preventDefault();
-      const other=hfEditing&&hfEditing.which==="hdr"?"ftr":"hdr",pg=hfEditing?hfEditing.page:0;
+      const pg=hfEditing?hfEditing.page:0,other=hfFuerSeite(doc(),hfEditing&&istKopf(hfEditing.which)?"ftr":"hdr",pg);
       hfEditCommit();hfEditClose();hfEditOpen(other,pg)}
   });
   hb.addEventListener("input",hfLive);
@@ -9123,15 +9157,60 @@ function hfLaufXml(text){
     return `<w:r><w:t xml:space="preserve">${xesc(teil)}</w:t></w:r>`;
   }).join("");
 }
-function hfPartXml(d,which,groesse){
-  const hf=hfOf(d,which);
-  const tag=which==="hdr"?"hdr":"ftr";
+/* Bilder gehen als frei verankerte Grafiken mit Blattbezug hinaus — sie
+   stehen in Word dann genau dort, wo sie hier stehen, gleich wie Word den
+   Text der Zeile setzt. Sie hängen am ersten Absatz. Der Textversatz (ty)
+   wird zum Abstand vor dem ersten bzw. nach dem letzten Absatz, die
+   Textspalte (tx/tw) zum Einzug. Ohne Bilder und Versatz bleibt die Datei
+   Zeichen für Zeichen wie vorher. */
+async function hfTeil(d,which,groesse){
+  const hf=hfOf(d,which),f=fmtOf(d),fuss=!istKopf(which);
+  const tag=fuss?"ftr":"hdr";
   const jc=hf.align==="left"?"left":hf.align==="right"?"right":"center";
-  const abs=String(hf.text||"").split("\n").map(zeile=>
-    `<w:p><w:pPr><w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${hfLaufXml(zeile)}</w:p>`).join("");
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:${tag} xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${abs||"<w:p/>"}</w:${tag}>`;
+  const rels=[],media=[];
+  /* Nummern je Zeile getrennt: docPr-id und Dateiname müssen im ganzen
+     Paket eindeutig sein, auch mit eigener erster Seite. */
+  let anker="",nr={hdr:1000,ftr:2000,hdr1:3000,ftr1:4000}[which];
+  for(const b of hfBilder(hf)){
+    let uri=b.uri;
+    /* Word nimmt hier verlässlich nur PNG und JPEG; der Rest wird PNG. */
+    if(!/^data:image\/(png|jpeg);/.test(uri)){try{uri=await scaleToDataUrl(uri,true)}catch(e){continue}}
+    const info=await bildInfo({src:uri});if(!info)continue;
+    nr++;
+    const id="rIdHfBild"+nr,datei=which+"-bild"+nr+"."+info.ext;
+    rels.push(`<Relationship Id="${id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${datei}"/>`);
+    media.push({name:"word/media/"+datei,bytes:info.bytes});
+    const yBlatt=fuss?f.h-f.fd-(+b.y||0)-b.h:f.hd+(+b.y||0);
+    /* Der Name trägt das „im Text“ durch Word hindurch (HF_FLUSS_NAME). */
+    anker+=bildAnkerXml(id,nr,(b.fluss?HF_FLUSS_NAME:"Bild ")+nr,mmToEmu(b.b),mmToEmu(b.h),
+      "page",mmToEmu(f.m[3]+(+b.x||0)),"page",mmToEmu(yBlatt));
+  }
+  const cw=f.w-f.m[1]-f.m[3];
+  const ind=hf.tw?`<w:ind w:left="${mmToTwip(hf.tx||0)}" w:right="${mmToTwip(Math.max(0,cw-(hf.tx||0)-hf.tw))}"/>`:"";
+  const zeilen=String(hf.text||"").split("\n");
+  /* Ein verankertes Bild schiebt in Word den Textkörper nicht weg, eines im
+     Text hier schon. Damit Word dasselbe tut, wird die Zeile selbst so hoch
+     wie das Bild: Abstand nach dem letzten Absatz (Kopf) bzw. vor dem ersten
+     (Fuß). Die Zeilenhöhe ist knapp geschätzt (1,0 × Schriftgröße) — lieber
+     ein wenig zu viel Abstand als Text unter dem Logo. Beim Lesen ändert
+     der Zusatz weder Text noch ty. Früher wurde stattdessen der Seitenrand
+     vergrößert; der gilt aber für alle Seiten, auch wenn das Bild nur in der
+     Zeile der ersten Seite steht. */
+  const zeileMm=groesse*0.85*25.4/72;
+  const zusatz=Math.max(0,hfFlussMm(hf)-(hf.ty||0)-zeilen.length*zeileMm);
+  const abs=zeilen.map((zeile,i)=>{
+    const vor=(hf.ty&&!fuss&&i===0?hf.ty:0)+(fuss&&i===0?zusatz:0);
+    const nach=(hf.ty&&fuss&&i===zeilen.length-1?hf.ty:0)+(!fuss&&i===zeilen.length-1?zusatz:0);
+    const abst=vor||nach?`<w:spacing${vor?` w:before="${mmToTwip(vor)}"`:""}${nach?` w:after="${mmToTwip(nach)}"`:""}/>`:"";
+    return `<w:p><w:pPr>${abst}${ind}<w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${hfLaufXml(zeile)}</w:p>`;
+  }).join("");
+  const ns=anker?` xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"`:"";
+  const xml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:${tag} xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"${ns}>${abs||"<w:p/>"}</w:${tag}>`;
+  return {xml,media,rels:rels.length?`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join("")}</Relationships>`:null};
 }
+const HF_FLUSS_NAME="PureQuill im Text ";
 const coreXml=titel=>`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
  xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xesc(titel||"")}</dc:title></cp:coreProperties>`;
@@ -9511,6 +9590,18 @@ async function figurXml(fig,ctx){
      Word selbst schreibt. id ist eine positive, im Dokument eindeutige Zahl
      (nicht 0). */
   const nr=ctx.imgId, name="Bild "+nr;
+  const graphic=bildGrafikXml(id,nr,name,wEmu,hEmu);
+  if(frei){
+    const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
+    return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y)}</w:p>`;
+  }
+  return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>`
+    +`<wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0">`
+    +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>`
+    +`<wp:docPr id="${nr}" name="${name}"/>${graphic}</wp:inline></w:drawing></w:r></w:p>`;
+}
+/* Bild samt Rahmensperre, wie Word es schreibt (siehe figurXml). */
+function bildGrafikXml(id,nr,name,wEmu,hEmu){
   const bildXml=`<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">`
     +`<pic:nvPicPr><pic:cNvPr id="${nr}" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr>`
     +`<pic:blipFill><a:blip r:embed="${id}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>`
@@ -9519,20 +9610,17 @@ async function figurXml(fig,ctx){
   const graphic=`<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main">`
     +`<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">${bildXml}</a:graphicData></a:graphic>`;
   const frameLock=`<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>`;
-  if(frei){
-    const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
-    return `<w:p><w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"`
-      +` distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${nr}" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">`
-      +`<wp:simplePos x="0" y="0"/>`
-      +`<wp:positionH relativeFrom="margin"><wp:posOffset>${x}</wp:posOffset></wp:positionH>`
-      +`<wp:positionV relativeFrom="margin"><wp:posOffset>${y}</wp:posOffset></wp:positionV>`
-      +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/>`
-      +`<wp:docPr id="${nr}" name="${name}"/>${frameLock}${graphic}</wp:anchor></w:drawing></w:r></w:p>`;
-  }
-  return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>`
-    +`<wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0">`
-    +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>`
-    +`<wp:docPr id="${nr}" name="${name}"/>${frameLock}${graphic}</wp:inline></w:drawing></w:r></w:p>`;
+  return frameLock+graphic;
+}
+/* Frei verankertes Bild als Textlauf: Lage über relativeFrom + Versatz. */
+function bildAnkerXml(id,nr,name,wEmu,hEmu,relH,x,relV,y){
+  return `<w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"`
+    +` distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${nr}" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">`
+    +`<wp:simplePos x="0" y="0"/>`
+    +`<wp:positionH relativeFrom="${relH}"><wp:posOffset>${x}</wp:posOffset></wp:positionH>`
+    +`<wp:positionV relativeFrom="${relV}"><wp:posOffset>${y}</wp:posOffset></wp:positionV>`
+    +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/>`
+    +`<wp:docPr id="${nr}" name="${name}"/>${bildGrafikXml(id,nr,name,wEmu,hEmu)}</wp:anchor></w:drawing></w:r>`;
 }
 /* „Speichern als › Word“. Wie in Word wird die gewählte Datei danach zur
    Datei des Dokuments: „Speichern“ schreibt ab dann dorthin. Gibt zurück,
@@ -9568,13 +9656,26 @@ async function docxBlob(d){
   const bodyXml=await walkBlocks(container,ctx);
   /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
      Kopf und Fuß, dann die Maße. */
-  const hatHdr=hfOf(d,"hdr").on,hatFtr=hfOf(d,"ftr").on;
+  /* Bis zu vier Teildateien: Kopf und Fuß, mit „Erste Seite anders“ dazu je
+     eine für Seite 1 (type="first" + w:titlePg). Ist die Zeile der ersten
+     Seite aus, braucht es keine Datei — Word lässt sie dann leer. */
+  const erst=!!d.ersteAnders;
+  const HF_TEILE=[
+    {which:"hdr",art:"header",typ:"default",datei:"header1.xml",rid:"rIdHdr"},
+    {which:"ftr",art:"footer",typ:"default",datei:"footer1.xml",rid:"rIdFtr"},
+    {which:"hdr1",art:"header",typ:"first",datei:"header2.xml",rid:"rIdHdr1"},
+    {which:"ftr1",art:"footer",typ:"first",datei:"footer2.xml",rid:"rIdFtr1"}];
+  const teile=[];
+  for(const t of HF_TEILE){
+    if(/1$/.test(t.which)&&!erst)continue;
+    if(!hfOf(d,t.which).on)continue;
+    teile.push({...t,...await hfTeil(d,t.which,ctx.docSize)});
+  }
   const sectPr=`<w:sectPr>`+
-    (hatHdr?'<w:headerReference w:type="default" r:id="rIdHdr"/>':"")+
-    (hatFtr?'<w:footerReference w:type="default" r:id="rIdFtr"/>':"")+
+    teile.map(t=>`<w:${t.art}Reference w:type="${t.typ}" r:id="${t.rid}"/>`).join("")+
     `<w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"${f.w>f.h?' w:orient="landscape"':""}/>`+
     `<w:pgMar w:top="${mmToTwip(f.m[0])}" w:right="${mmToTwip(f.m[1])}" w:bottom="${mmToTwip(f.m[2])}" w:left="${mmToTwip(f.m[3])}" `+
-    `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/></w:sectPr>`;
+    `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/>${erst?"<w:titlePg/>":""}</w:sectPr>`;
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
   xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -9586,8 +9687,7 @@ async function docxBlob(d){
   const relEintraege=[
     `<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`,
     `<Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>`,
-    hatHdr&&`<Relationship Id="rIdHdr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/>`,
-    hatFtr&&`<Relationship Id="rIdFtr" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>`,
+    ...teile.map(t=>`<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${t.art}" Target="${t.datei}"/>`),
     hatFussnoten&&`<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>`,
     ...ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`),
     ...ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`)
@@ -9598,8 +9698,7 @@ ${relEintraege.join(String.fromCharCode(10))}
 </Relationships>`;
   const zusatz=
     (hatFussnoten?'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>':"")+
-    (hatHdr?'<Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>':"")+
-    (hatFtr?'<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>':"");
+    teile.map(t=>`<Override PartName="/word/${t.datei}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${t.art}+xml"/>`).join("");
   const contentTypes=zusatz?DOCX_CONTENT_TYPES.replace("</Types>",zusatz+"</Types>"):DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
   const eintraege=[
@@ -9610,8 +9709,8 @@ ${relEintraege.join(String.fromCharCode(10))}
     {name:"word/numbering.xml",bytes:enc.encode(numberingXml(ctx.numInstanzen))},
     {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
     {name:"docProps/core.xml",bytes:enc.encode(coreXml(d.title))},
-    ...(hatHdr?[{name:"word/header1.xml",bytes:enc.encode(hfPartXml(d,"hdr",ctx.docSize))}]:[]),
-    ...(hatFtr?[{name:"word/footer1.xml",bytes:enc.encode(hfPartXml(d,"ftr",ctx.docSize))}]:[]),
+    ...teile.map(t=>({name:"word/"+t.datei,bytes:enc.encode(t.xml)})),
+    ...teile.flatMap(t=>t.rels?[{name:`word/_rels/${t.datei}.rels`,bytes:enc.encode(t.rels)},...t.media]:[]),
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
     ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[])
   ];
@@ -9639,8 +9738,12 @@ const SPEICHERN=()=>PL("Speichern","Save","Enregistrer","Guardar","Salvar","Zapi
    dazu: er steht nur in den Metadaten, und ein Umbenennen des Reiters soll
    die Datei nicht als „geändert“ melden. */
 function dokStand(d){
-  const s=JSON.stringify([d.html||"",d.fmt||null,d.hdr||null,d.ftr||null,
-    d.footnotes||null,d.size||null,d.font||null,d.lh||null,d.ps!=null?d.ps:null]);
+  const teile=[d.html||"",d.fmt||null,d.hdr||null,d.ftr||null,
+    d.footnotes||null,d.size||null,d.font||null,d.lh||null,d.ps!=null?d.ps:null];
+  /* Nur anhängen, wenn gesetzt — sonst gälte jede schon gespeicherte Datei
+     nach dem Update als geändert. */
+  if(d.ersteAnders)teile.push(true,d.hdr1||null,d.ftr1||null);
+  const s=JSON.stringify(teile);
   let h=0x811c9dc5;
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}
   return (h>>>0).toString(36)+":"+s.length;
@@ -10886,6 +10989,7 @@ function neuesDokumentAus(name,erg){
   if(b.fmt)d.fmt=b.fmt;
   if(b.hdr)d.hdr=b.hdr;
   if(b.ftr)d.ftr=b.ftr;
+  if(b.ersteAnders){d.ersteAnders=true;if(b.hdr1)d.hdr1=b.hdr1;if(b.ftr1)d.ftr1=b.ftr1}
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
   /* Schrift und Größe der Datei statt der eigenen Voreinstellung — sonst
      erschien eine Calibri-11-Datei in Georgia 12 und ging beim Speichern
@@ -11337,19 +11441,187 @@ function docxHfAbsatz(p){
   });
   return out;
 }
-function docxHf(xml){
+/* Bilder in Kopf- und Fußzeile (Logos, Siegel) stehen an Words Position, in
+   Millimetern: x ab dem linken Seitenrand, y von der Linie der Zeile (hd
+   bzw. fd) nach innen — in der Kopfzeile bis zur Bildoberkante, in der
+   Fußzeile bis zur Bildunterkante. So wandern sie mit, wenn man den Abstand
+   der Zeile zum Blatt verstellt. fluss: das Bild stand in Word im Text
+   (wp:inline) und schiebt den Textkörper weg wie eine Textzeile; ein frei
+   verankertes (wp:anchor) tut das in Word nicht und hier auch nicht.
+   ty/tx/tw: wo der Text steht, wenn ein Bild ihn verdrängt — ty nach innen
+   versetzt, tx/tw als Spalte (Briefkopf als Tabelle: Logo links, Adresse in
+   der rechten Zelle). Fehlen die Felder, steht der Text wie immer. */
+const HF_ZEILE=4.1;   /* mm: eine Zeile in .hf, 9 pt × 1,3 */
+const HF_RAHMEN={w:210,h:297,m:[25,20,25,25],hd:12,fd:12};
+const mmVonTwip=v=>(parseInt(v,10)||0)*25.4/1440;
+const auf1=v=>Math.round(v*10)/10;
+function docxHfAusrichtung(p){
+  const aus=String(xattrN(KIND(KIND(p,"pPr"),"jc"),"val")||"").toLowerCase();
+  /* Ohne jc steht ein Absatz in Word links. Der Leser nahm bis 1.1 „Mitte“
+     an — eine linksbündige Kopfzeile kam zentriert an. */
+  return aus==="center"?"center":aus==="right"||aus==="end"?"right":"left";
+}
+/* Ein frei verankertes Bild: Lage über positionH/V, bezogen auf Blatt,
+   Satzspiegel, Rand oder Absatz. Liefert die Oberkante in Blattkoordinaten,
+   außer beim Absatzbezug — der ist in der Fußzeile erst bekannt, wenn ihre
+   Gesamthöhe feststeht, darum dort {absatz:versatz}. */
+function docxHfAnker(an,f,spalteX){
+  const ext=KIND(an,"extent");
+  const b=(parseInt(ext&&ext.getAttribute("cx"),10)||0)*EMU_MM,h=(parseInt(ext&&ext.getAttribute("cy"),10)||0)*EMU_MM;
+  const lage=(pos,rahmen)=>{
+    const off=KIND(pos,"posOffset"),al=KIND(pos,"align");
+    const [a,e]=rahmen,groesse=pos===KIND(an,"positionH")?b:h;
+    if(off)return a+(parseInt(off.textContent,10)||0)*EMU_MM;
+    const w=String(al?al.textContent:"").trim();
+    return w==="center"?a+(e-a-groesse)/2:(w==="right"||w==="bottom"||w==="outside")?e-groesse:a;
+  };
+  const ph=KIND(an,"positionH"),pv=KIND(an,"positionV");
+  const rh=String(ph&&ph.getAttribute("relativeFrom")||"column");
+  const xr=rh==="page"?[0,f.w]:rh==="leftMargin"||rh==="insideMargin"?[0,f.m[3]]
+    :rh==="rightMargin"||rh==="outsideMargin"?[f.w-f.m[1],f.w]
+    :rh==="character"||rh==="column"?[f.m[3]+spalteX,f.w-f.m[1]]:[f.m[3],f.w-f.m[1]];
+  const x=ph?lage(ph,xr):f.m[3]+spalteX;
+  const rv=String(pv&&pv.getAttribute("relativeFrom")||"paragraph");
+  if(!pv||rv==="paragraph"||rv==="line"){
+    const off=pv&&KIND(pv,"posOffset");
+    return {b,h,x,absatz:off?(parseInt(off.textContent,10)||0)*EMU_MM:0};
+  }
+  const yr=rv==="page"?[0,f.h]:rv==="topMargin"?[0,f.m[0]]
+    :rv==="bottomMargin"?[f.h-f.m[2],f.h]:[f.m[0],f.h-f.m[2]];
+  return {b,h,x,yBlatt:lage(pv,yr)};
+}
+/* VML (ältere Dateien): Maße und Lage stehen als CSS im style-Attribut. */
+function docxHfVml(shape,f,spalteX){
+  const st=String(shape.getAttribute("style")||"");
+  const wert=n=>{const m=new RegExp("(?:^|;)\\s*"+n+"\\s*:\\s*([\\d.\\-]+)(pt|in|mm|cm|px)?","i").exec(st);
+    if(!m)return null;const v=parseFloat(m[1]),e=(m[2]||"pt").toLowerCase();
+    return v*(e==="in"?25.4:e==="mm"?1:e==="cm"?10:e==="px"?25.4/96:25.4/72)};
+  const b=wert("width")||0,h=wert("height")||0;
+  if(!/position\s*:\s*absolute/i.test(st))return {b,h,inline:true};
+  const rel=n=>(new RegExp(n+"\\s*:\\s*([a-z-]+)","i").exec(st)||[,""])[1].toLowerCase();
+  const rh=rel("mso-position-horizontal-relative"),rv=rel("mso-position-vertical-relative");
+  const x=(rh==="page"?0:f.m[3]+(rh==="margin"?0:spalteX))+(wert("margin-left")||0);
+  const yOff=wert("margin-top")||0;
+  if(rv==="page")return {b,h,x,yBlatt:yOff};
+  if(rv==="margin")return {b,h,x,yBlatt:f.m[0]+yOff};
+  return {b,h,x,absatz:yOff};
+}
+function docxHf(xml,zub){
   if(!xml)return null;
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return null;
-  const abs=[...dom.documentElement.children].filter(e=>e.localName==="p");
-  if(!abs.length)return null;
-  const zeilen=abs.map(docxHfAbsatz);
-  const text=zeilen.join("\n").replace(/\n+$/,"");
-  if(!text.trim())return null;
-  const jc=xattrN(KIND(KIND(abs[0],"pPr"),"jc"),"val");
-  const aus=String(jc||"").toLowerCase();
-  return {on:true,text,
-    align:aus==="left"||aus==="start"?"left":aus==="right"||aus==="end"?"right":"center"};
+  zub=zub||{};
+  const f=zub.fmt||HF_RAHMEN,karte=zub.bilder||{},fuss=dom.documentElement.localName==="ftr";
+  const cw=f.w-f.m[1]-f.m[3];
+  const zeilen=[],bilder=[],offen=[];
+  /* Text kann aus mehreren Zellen kommen; dann zählt die ganze Breite. */
+  let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false;
+  const absatz=(p,x0,w0,zelle)=>{
+    const pPr=KIND(p,"pPr"),sp=KIND(pPr,"spacing"),ind=KIND(pPr,"ind");
+    y+=mmVonTwip(xattrN(sp,"before"));
+    const il=mmVonTwip(xattrN(ind,"left")??xattrN(ind,"start")),ir=mmVonTwip(xattrN(ind,"right")??xattrN(ind,"end"));
+    const t=docxHfAbsatz(p),al=docxHfAusrichtung(p);
+    const imText=[];
+    for(const el of p.getElementsByTagName("*")){
+      const n=el.localName;
+      /* mc:AlternateContent trägt dasselbe Bild zweimal: modern und als
+         VML-Rückfall. Nur die erste Fassung zählt. */
+      let rueck=false;for(let a=el.parentNode;a&&a!==p;a=a.parentNode)if(a.localName==="Fallback"){rueck=true;break}
+      if(rueck)continue;
+      if(n!=="inline"&&n!=="anchor"&&!(n==="shape"&&el.namespaceURI==="urn:schemas-microsoft-com:vml"))continue;
+      const rid=docxBildRid(el),bild=rid&&karte[rid];
+      if(!bild)continue;
+      if(n==="inline"){
+        const ext=KIND(el,"extent");
+        imText.push({uri:bild.uri,b:(parseInt(ext&&ext.getAttribute("cx"),10)||0)*EMU_MM,h:(parseInt(ext&&ext.getAttribute("cy"),10)||0)*EMU_MM});
+        continue;
+      }
+      const a=n==="anchor"?docxHfAnker(el,f,x0):docxHfVml(el,f,x0);
+      if(a.inline){imText.push({uri:bild.uri,b:a.b,h:a.h});continue}
+      if(!(a.b>0&&a.h>0))continue;
+      /* Von PureQuill geschrieben und hier im Text gestanden (hfTeil) */
+      const dp=n==="anchor"?KIND(el,"docPr"):null;
+      const markeImText=!!dp&&String(dp.getAttribute("name")||"").startsWith(HF_FLUSS_NAME);
+      offen.push({uri:bild.uri,...a,absatzY:y,fluss:markeImText});
+    }
+    let hoehe=0;
+    if(imText.length){
+      const breit=imText.reduce((s,i)=>s+i.b,0),innen=w0-il-ir;
+      let x=x0+il+(al==="center"?(innen-breit)/2:al==="right"?innen-breit:0);
+      const hoch=Math.max(...imText.map(i=>i.h));
+      /* Words Grundlinie: alle Bilder einer Zeile stehen unten bündig. */
+      imText.forEach(i=>{if(i.b>0&&i.h>0)bilder.push({uri:i.uri,b:i.b,h:i.h,x,yBand:y+hoch-i.h,fluss:true});x+=i.b});
+      hoehe=hoch;
+      if(ty!==null&&!t.trim())bildImText=true;
+    }
+    if(t.trim()||!imText.length){
+      /* Steht schon Text und kommt jetzt ein Bild, hält eine Leerzeile je
+         Zeilenhöhe den Platz frei — der Text ist ein Block, er kann einem
+         Bild in seiner Mitte nicht anders ausweichen. */
+      if(ty===null)ty=y+(imText.length?hoehe-HF_ZEILE:0);
+      else if(bildImText){const soll=Math.round((y+(imText.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
+        while(zeilen.length<soll)zeilen.push("")}
+      bildImText=false;
+      zeilen.push(t);
+      if(t.trim()){if(align===null)align=al;if(zelle)textZellen.add(zelle);
+        if(spalte===null)spalte={x:x0+il,w:w0-il-ir}}
+      hoehe=Math.max(hoehe,HF_ZEILE);
+    }
+    y+=hoehe+mmVonTwip(xattrN(sp,"after"));
+  };
+  const bloecke=(c,x0,w0,zelle)=>docxBloecke(c).forEach(el=>el.localName==="p"?absatz(el,x0,w0,zelle):tabelle(el,x0));
+  const tabelle=(tbl,x0)=>{
+    const spalten=[...(KIND(tbl,"tblGrid")||{children:[]}).children].filter(e=>e.localName==="gridCol").map(e=>mmVonTwip(xattrN(e,"w")));
+    const mar=KIND(KIND(KIND(tbl,"tblPr"),"tblCellMar"),"left")||KIND(KIND(KIND(tbl,"tblPr"),"tblCellMar"),"start");
+    const ml=mar?mmVonTwip(xattrN(mar,"w")):1.9;
+    const tblInd=mmVonTwip(xattrN(KIND(KIND(tbl,"tblPr"),"tblInd"),"w"));
+    [...tbl.children].filter(e=>e.localName==="tr").forEach(tr=>{
+      const oben=y;let unten=y,sp=0;
+      [...tr.children].filter(e=>e.localName==="tc").forEach(tc=>{
+        const span=parseInt(xattrN(KIND(KIND(tc,"tcPr"),"gridSpan"),"val"),10)||1;
+        const zx=x0+tblInd+spalten.slice(0,sp).reduce((s,v)=>s+v,0);
+        const zw=spalten.slice(sp,sp+span).reduce((s,v)=>s+v,0)||cw/2;
+        sp+=span;y=oben;
+        bloecke(tc,zx+ml,zw-2*ml,tc);
+        unten=Math.max(unten,y);
+      });
+      y=unten;
+    });
+  };
+  bloecke(dom.documentElement,0,cw,null);
+  const gesamt=y;
+  for(const a of offen){
+    /* Blattkoordinaten → Band. Absatzbezug: Kopfzeile ab hd, Fußzeile ab
+       ihrer Oberkante, die bei h−fd−Gesamthöhe liegt. */
+    const yBlatt=a.yBlatt!=null?a.yBlatt
+      :(fuss?f.h-f.fd-gesamt:f.hd)+a.absatzY+a.absatz;
+    bilder.push({uri:a.uri,b:a.b,h:a.h,x:a.x-f.m[3],yBlatt,fluss:!!a.fluss});
+  }
+  /* Zeilenende-Leerzeilen weg wie bisher. */
+  while(zeilen.length&&!zeilen[zeilen.length-1].trim())zeilen.pop();
+  const text=zeilen.join("\n");
+  if(!text.trim()&&!bilder.length)return null;
+  const erg={on:true,text,align:align||"center"};
+  if(bilder.length){
+    erg.bilder=bilder.map(i=>{
+      const y=i.yBlatt!=null
+        ?(fuss?(f.h-f.fd)-(i.yBlatt+i.h):i.yBlatt-f.hd)
+        :(fuss?gesamt-(i.yBand+i.h):i.yBand);
+      const o={uri:i.uri,b:auf1(i.b),h:auf1(i.h),x:auf1(i.x),y:auf1(y)};
+      if(i.fluss)o.fluss=true;
+      return o;
+    });
+    /* Text: in der Fußzeile vom unteren Rand des Textblocks gemessen. */
+    const tyBand=ty||0,textH=zeilen.length*HF_ZEILE;
+    const tyWert=fuss?Math.max(0,gesamt-(tyBand+textH)):tyBand;
+    if(text.trim()&&tyWert>0.2)erg.ty=auf1(tyWert);
+  }
+  /* Eigene Spalte nur, wenn der Text aus genau einer Zelle bzw. mit Einzug
+     kam — sonst stünde er schmaler als in Word. */
+  if(text.trim()&&spalte&&textZellen.size<=1&&(spalte.x>0.2||spalte.x+spalte.w<cw-0.2)){
+    erg.tx=auf1(spalte.x);erg.tw=auf1(spalte.w);
+  }
+  return erg;
 }
 /* Verweis über die Beziehungsdatei auflösen: sectPr nennt nur eine rId. */
 function docxRelZiel(relXml,id){
@@ -11361,10 +11633,16 @@ function docxRelZiel(relXml,id){
   if(!ziel||/^https?:/i.test(ziel))return null;
   return "word/"+String(ziel).replace(/^\.?\//,"");
 }
-const hfRefId=(sect,art)=>{
+/* typ "first": nur genau diese, ohne Rückfall — fehlt sie bei gesetztem
+   titlePg, ist die erste Seite in Word leer. */
+/* w:titlePg = „Erste Seite anders“. Ein Schalter: ohne val an, val="0"/"false" aus. */
+const docxTitelSeite=sect=>{const t=KIND(sect,"titlePg");
+  return !!t&&!/^(0|false|off)$/i.test(String(xattrN(t,"val")??""))};
+const hfRefId=(sect,art,typ)=>{
   if(!sect)return null;
   const refs=[...sect.children].filter(e=>e.localName===art+"Reference");
-  const std=refs.find(e=>String(xattrN(e,"type")||"default")==="default")||refs[0];
+  const std=typ?refs.find(e=>String(xattrN(e,"type")||"default")===typ)
+    :refs.find(e=>String(xattrN(e,"type")||"default")==="default")||refs[0];
   return std?(std.getAttribute("r:id")||xattrN(std,"id")):null;
 };
 
@@ -11725,7 +12003,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const sect=docxSect(body);
   return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
     bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
-    hdrId:hfRefId(sect,"header"),ftrId:hfRefId(sect,"footer"),
+    /* Mit titlePg nie auf die erste ausweichen: die gilt dann nur für Seite 1. */
+    hdrId:hfRefId(sect,"header",docxTitelSeite(sect)?"default":undefined),
+    ftrId:hfRefId(sect,"footer",docxTitelSeite(sect)?"default":undefined),
+    hdr1Id:hfRefId(sect,"header","first"),ftr1Id:hfRefId(sect,"footer","first"),
+    ersteAnders:docxTitelSeite(sect),
     size:gs.size,font:gs.font,lh:gs.lh,ps:gs.ps};
 }
 
@@ -11977,9 +12259,16 @@ async function zipDokument(name,buf){
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
-      for(const [art,feld] of [["hdrId","hdr"],["ftrId","ftr"]]){
+      /* Erste Seite nur, wenn Word sie auch zeigt (titlePg). */
+      const teile=[["hdrId","hdr"],["ftrId","ftr"],...(erg.ersteAnders?[["hdr1Id","hdr1"],["ftr1Id","ftr1"]]:[])];
+      for(const [art,feld] of teile){
         const ziel=docxRelZiel(rel,erg[art]);
-        if(ziel)erg[feld]=docxHf(await hol(ziel));
+        if(!ziel)continue;
+        /* Bilder der Teildatei hängen an ihrer eigenen Beziehungsdatei
+           (word/_rels/header2.xml.rels), nicht an der des Dokuments. */
+        const teilRel=await hol(ziel.replace(/([^/]+)$/,"_rels/$1.rels"));
+        const bilderHf=await docxBildKarte(buf,teilRel);
+        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt});
       }
       return erg;
     }
@@ -13076,6 +13365,18 @@ function wacheUeberUmbruch(){
     if(Math.abs(inhaltUnterkante()-letzteUnterkante)>1)paginate();
   },1200);
 }
+let seitenAnfaenge=[];
+/* Wo der Textkörper auf Seite page (ab 0) beginnt bzw. endet, in px bei
+   Zoom z: am Seitenrand oder unterhalb des Bandes. Auf Seite 1 gilt bei
+   „Erste Seite anders“ das größere der beiden Bänder — der Druck kann
+   Seite 1 nur mehr Platz geben als den übrigen, nicht weniger (thead und
+   tfoot des Druckrahmens wiederholen sich auf jeder Seite gleich hoch). */
+function hfRandPx(d,seite,page,z){
+  const f=fmtOf(d),rand=MM(seite==="hdr"?f.m[0]:f.m[2])*z;
+  let b=hfBand(d,seite,z);
+  if(page===0&&d.ersteAnders)b=Math.max(b,hfBand(d,seite+"1",z));
+  return Math.max(rand,b);
+}
 function queuePaginate(){
   queueRep();clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate();drawAnchors()},220)}
 function paginate(){
@@ -13087,12 +13388,14 @@ function paginate(){
   const mr=MM(f.m[1])*z, ml=MM(f.m[3])*z;
   /* Der Textkörper beginnt am Rand — oder unterhalb der Kopfzeile, falls die
      tiefer reicht. Vorher konnten sich beide überlagern. */
-  const mt=Math.max(MM(f.m[0])*z, hfBand(doc(),"hdr",z));
-  const mb=Math.max(MM(f.m[2])*z, hfBand(doc(),"ftr",z));
+  const mt=hfRandPx(doc(),"hdr",1,z), mb=hfRandPx(doc(),"ftr",1,z);
+  /* Seite 1 kann bei „Erste Seite anders“ ein eigenes Band haben. */
+  const mt0=hfRandPx(doc(),"hdr",0,z), mb0=hfRandPx(doc(),"ftr",0,z);
+  const oben=p=>p===0?mt0:mt, unten=p=>p===0?mb0:mb;
   const stride=ph+GAP;
   lastStride=stride;
   paper.style.width=pw+"px";
-  ed.style.padding=`${mt}px ${mr}px ${mb}px ${ml}px`;
+  ed.style.padding=`${mt0}px ${mr}px ${mb}px ${ml}px`;
   ed.style.setProperty("--pl",ml+"px");
   ed.style.setProperty("--pt",mt+"px");
 
@@ -13123,7 +13426,7 @@ function paginate(){
         b.style.height=Math.max(14,nextStart-top)+"px";
         return;
       }
-      const limit=p*stride+mt+contentH;
+      const limit=p*stride+oben(p)+contentH;
       if(top+h>limit+1&&h<=contentH){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
@@ -13150,8 +13453,8 @@ function paginate(){
     });
     return fnByPage;
   }
-  const contentH=Math.max(60,ph-mt-mb);
-  let fnByPage=reflow(()=>contentH),fnHeights=[];
+  const contentHVon=p=>Math.max(60,ph-oben(p)-unten(p));
+  let fnByPage=reflow(contentHVon),fnHeights=[];
   if(hasFn){
     /* Wie viel Höhe die Fußnoten je Seite tatsächlich brauchen, an einem
        unsichtbaren Messelement mit derselben Breite und Schrift ablesen -
@@ -13166,12 +13469,20 @@ function paginate(){
       meas.innerHTML=fnBandHtml(uniq);
       return meas.offsetHeight+MM(2)*z;
     });
-    fnByPage=reflow(p=>Math.max(60,contentH-(fnHeights[p]||0)));
+    fnByPage=reflow(p=>Math.max(60,contentHVon(p)-(fnHeights[p]||0)));
   }
   ed.querySelectorAll(".toc").forEach(t=>tocUpdatePageNumbers(ed,t));
   if(S.outlineOpen)drawOutline();
   const edTop=ed.getBoundingClientRect().top;
   const last=blocks.length?blocks[blocks.length-1].getBoundingClientRect():null;
+  /* Für den Druck: welche Blöcke eine Seite sauber beginnen (oben am
+     Textkörper). Der Druck bricht genau dort um (druckWieSchirm). Seiten,
+     die mitten in einem überlangen Block beginnen, fehlen in der Liste. */
+  seitenAnfaenge=[];
+  for(const b of blocks){
+    const t=b.getBoundingClientRect().top-edTop,k=Math.round(t/stride);
+    if(k>=1&&Math.abs(t-(k*stride+oben(k)))<=2)seitenAnfaenge.push(b);
+  }
   const bottom=last?last.bottom-edTop:0;
   pageCount=Math.max(1,Math.ceil((bottom+mb)/stride));
   wacheUeberUmbruch();
@@ -13187,7 +13498,7 @@ function paginate(){
     html+=`<div class="sheetpage" style="top:${i*stride}px;height:${ph}px">
       ${S.guides?`<div class="mg" style="left:${ml}px"></div><div class="mg" style="right:${mr}px;left:auto"></div>`:""}
       ${hfHtml(i,pageCount,ml,mr,z)}
-      ${fnIds.length?`<div class="fnband" style="bottom:${mb}px;left:${ml}px;right:${mr}px;font-size:${(8.5*96/72)*z}px">${fnBandHtml(fnIds)}</div>`:""}
+      ${fnIds.length?`<div class="fnband" style="bottom:${unten(i)}px;left:${ml}px;right:${mr}px;font-size:${(8.5*96/72)*z}px">${fnBandHtml(fnIds)}</div>`:""}
       ${(S.pagenum!==false&&!ftrOn)?pnHtml(i,ml,mr,z,f):""}
     </div>`;
   }
@@ -13591,7 +13902,46 @@ function hfBandMm(d,which){
   const f=fmtOf(d);
   /* Dieselbe Messung wie am Bildschirm, nur bei Zoom 1 und in Millimetern —
      sonst rechnete der Druck mit einem anderen Band als die Ansicht. */
-  return (which==="hdr"?f.hd:f.fd) + hfTextHoehe(d,which,1)/MM(1) + 2;
+  return (istKopf(which)?f.hd:f.fd)
+    + Math.max((v.ty||0)+hfTextHoehe(d,which,1)/MM(1), hfFlussMm(v)) + 2;
+}
+/* Ragt ein Bild über die Linie der Zeile zur Blattkante hin (ein Logo bei
+   8 mm, die Kopfzeile bei 12,5 mm), muss die fixierte Druckzeile dort schon
+   beginnen. Gemessen: was über ihre Kante zum Blattrand hinaussteht, druckt
+   Chromium ein zweites Mal auf der Gegenseite — das Logo stand dann auch
+   unten auf Seite 1. Die Zeile rückt also um den Überstand nach außen, ihr
+   Inhalt um denselben Betrag nach innen. */
+function hfUeberstand(d,which){
+  const v=hfOf(d,which),f=fmtOf(d);
+  if(!v.on)return 0;
+  const min=hfBilder(v).reduce((m,b)=>Math.min(m,+b.y||0),0);
+  return Math.min(istKopf(which)?f.hd:f.fd,-min);
+}
+/* Alle Druckmaße an einer Stelle (mm): @page-Rand oben/unten (mt/mb), der
+   Überstand der Bilder darüber hinaus (ueH/ueF) und die Höhe der Platzhalter
+   im Druckrahmen — kopf/fuss für alle Seiten, kopf1/fuss1 für Seite 1 bei
+   „Erste Seite anders“ (nie kleiner, siehe hfRandPx). */
+function hfDruck(d){
+  const f=fmtOf(d),erst=!!d.ersteAnders;
+  const an=s=>hfOf(d,s).on||(erst&&hfOf(d,s+"1").on);
+  const ue=s=>an(s)?Math.max(hfUeberstand(d,s),erst?hfUeberstand(d,s+"1"):0):0;
+  const ueH=ue("hdr"),ueF=ue("ftr");
+  const mt=an("hdr")?f.hd-ueH:f.m[0], mb=an("ftr")?f.fd-ueF:f.m[2];
+  const rand=(s,page)=>hfRandPx(d,s,page,1)/MM(1);
+  return {f,erst,mt,mb,ueH,ueF,kopfAn:an("hdr"),fussAn:an("ftr"),
+    kopf:Math.max(0,rand("hdr",1)-mt),fuss:Math.max(0,rand("ftr",1)-mb),
+    kopf1:Math.max(0,rand("hdr",0)-mt),fuss1:Math.max(0,rand("ftr",0)-mb)};
+}
+/* Kopf-/Fußzeile als Druck-HTML. Die Bilder stehen absolut; Ursprung ist
+   die Ecke aus linkem Seitenrand und hd (bzw. fd von unten) — dasselbe
+   Maßsystem, in dem sie gespeichert sind — verschoben um den Überstand ue. */
+/* seite: im Druckrahmen die echte Zahl; ohne steht der Zähler, den nur die
+   fixierten Rückfall-Zeilen brauchen (Druck am Rahmen vorbei). */
+function hfDruckTeil(v,kante,ue,seite,gesamt){
+  if(!v.on)return "";
+  const ab=(v.ty||0)+ue;
+  return `<div style="text-align:${v.align}${ab?`;padding-${kante}:${ab}mm`:""}${v.tw?`;margin-left:${v.tx||0}mm;width:${v.tw}mm`:""}">${seite?hfText(v.text,seite,gesamt||pageCount):hfText(v.text,1,pageCount,true)}</div>`+
+    hfBilder(v).map(b=>`<img alt="" src="${b.uri}" style="position:absolute;${kante}:${(+b.y||0)+ue}mm;left:${+b.x||0}mm;width:${b.b}mm;height:${b.h}mm">`).join("");
 }
 function setPrintPage(){
   let st=document.getElementById("printpage");
@@ -13602,8 +13952,13 @@ function setPrintPage(){
      Satzspiegels sitzen (top:0/bottom:0, siehe Druck-CSS). Den Rest bis zum
      Textanfang, also max(Seitenrand, Band) - hd, reserviert der Druckrahmen
      mit thead/tfoot auf jeder Seite (printFrame). */
-  const mt=hfOf(d,"hdr").on?f.hd:f.m[0], mb=hfOf(d,"ftr").on?f.fd:f.m[2];
-  st.textContent=`@page{size:${f.w}mm ${f.h}mm;margin:${mt}mm ${f.m[1]}mm ${mb}mm ${f.m[3]}mm}`;
+  const {mt,mb}=hfDruck(d);
+  /* Links und rechts 0: die Druckfläche reicht über das ganze Blatt, die
+     Seitenränder tragen Druckrahmen und Druckzeilen selbst (setPrintHF).
+     Ragte etwas im Fluss über die Druckfläche hinaus — die Abdeckung der
+     ersten Seite reicht bis an die Blattkante —, verkleinerte Chromium die
+     ganze Seite, damit es passt (gemessen: auf 86 %). */
+  st.textContent=`@page{size:${f.w}mm ${f.h}mm;margin:${mt}mm 0 ${mb}mm 0}`;
   setPrintHF();
 }
 
@@ -13957,8 +14312,17 @@ function queueRep(){
    damit schon gespeicherter Kopf-/Fußzeilentext nicht plötzlich wörtlich
    "{seite}" anzeigt. */
 const HF_DEF={hdr:{on:false,text:"{title}",align:"center"},
-              ftr:{on:false,text:"Seite {page} von {pages}",align:"center"}};
+              ftr:{on:false,text:"Seite {page} von {pages}",align:"center"},
+              /* „Erste Seite anders“ wie in Word (w:titlePg): Seite 1 hat
+                 eigene Zeilen, anfangs leer — ein Deckblatt oder der erste
+                 Briefbogen mit Logo. */
+              hdr1:{on:false,text:"",align:"left"},
+              ftr1:{on:false,text:"",align:"left"}};
 function hfOf(d,which){return {...HF_DEF[which],...(d[which]||{})}}
+function istKopf(w){return w==="hdr"||w==="hdr1"}
+const hfName=w=>tr(istKopf(w)?"Kopfzeile":"Fußzeile")+(/1$/.test(w)?" · "+tr("Erste Seite"):"");
+/* Welche Zeile auf Seite page (ab 0) gilt: seite ist "hdr" oder "ftr". */
+function hfFuerSeite(d,seite,page){return page===0&&d.ersteAnders?seite+"1":seite}
 function hfText(tpl,page,total,forPrint){
   const t=esc(tpl||"")
     .replace(/\{(titel|title)\}/gi,esc(doc().title||""))
@@ -13980,18 +14344,20 @@ function hfZoneAt(clientY){
   if(page<0||page>=pageCount)return null;
   const yp=y-page*stride;
   if(yp<0||yp>ph)return null;
-  if(yp<mt)return{which:"hdr",page};
-  if(yp>ph-mb)return{which:"ftr",page};
+  /* Die Zeile, die auf dieser Seite gilt — auf Seite 1 ggf. die eigene. */
+  if(yp<mt)return{which:hfFuerSeite(doc(),"hdr",page),page};
+  if(yp>ph-mb)return{which:hfFuerSeite(doc(),"ftr",page),page};
   return null;
 }
 function hfRect(which,page){
-  const f=fmtOf(doc()),z=S.zoom;
+  const f=fmtOf(doc()),z=S.zoom,v=hfOf(doc(),which);
   const ph=MM(f.h)*z,stride=ph+GAP;
   const fs=(9*96/72)*z;
   const h=Math.max(hfTextHoehe(doc(),which,z),16);
-  const d=MM(which==="hdr"?f.hd:f.fd)*z;
-  return {top:which==="hdr"?page*stride+d:page*stride+ph-d-h,
-    left:MM(f.m[3])*z,right:MM(f.m[1])*z,h,fs};
+  const d=MM((istKopf(which)?f.hd:f.fd)+(v.ty||0))*z;
+  return {top:istKopf(which)?page*stride+d:page*stride+ph-d-h,
+    left:MM(f.m[3]+(v.tw?v.tx||0:0))*z,
+    right:MM(v.tw?f.w-f.m[3]-(v.tx||0)-v.tw:f.m[1])*z,h,fs};
 }
 function hfHintAt(clientY){
   const hint=$("#hfhint");if(!hint)return;
@@ -14000,7 +14366,7 @@ function hfHintAt(clientY){
   if(!zone){hint.classList.remove("on");return}
   const r=hfRect(zone.which,zone.page),on=hfOf(doc(),zone.which).on;
   hint.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;height:${r.h}px`;
-  hint.textContent=on?"":tr(zone.which==="hdr"?"Doppelklick: Kopfzeile":"Doppelklick: Fußzeile");
+  hint.textContent=on?"":tr(istKopf(zone.which)?"Doppelklick: Kopfzeile":"Doppelklick: Fußzeile");
   hint.classList.add("on");
 }
 function hfEditOpen(which,page){
@@ -14027,9 +14393,8 @@ function placeHfGrip(){
   const grip=$("#hfgrip"),grip2=$("#hfgrip2");
   if(!hfEditing||!grip){if(grip)grip.classList.remove("on");if(grip2)grip2.classList.remove("on");return}
   const d=doc(),f=fmtOf(d),z=S.zoom;
-  const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page,hdr=hfEditing.which==="hdr";
-  const mt=Math.max(MM(f.m[0])*z,hfBand(d,"hdr",z));
-  const mb=Math.max(MM(f.m[2])*z,hfBand(d,"ftr",z));
+  const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page,hdr=istKopf(hfEditing.which);
+  const mt=hfRandPx(d,"hdr",pg,z), mb=hfRandPx(d,"ftr",pg,z);
   const links=MM(f.m[3])*z, breit=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z;
   /* Kante 1: wo der Textkörper beginnt (= Seitenrand). */
   const y=hdr?pg*stride+mt:pg*stride+ph-mb;
@@ -14092,12 +14457,13 @@ function drawHfBar(){
     right:'<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>'};
   bar.innerHTML=
     `<span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-      text-transform:uppercase;color:var(--ink-soft)">${tr(hfEditing.which==="hdr"?"Kopfzeile":"Fußzeile")}</span>
+      text-transform:uppercase;color:var(--ink-soft)">${hfName(hfEditing.which)}</span>
     <div class="sep"></div>
     ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
       title="${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}">${ICO(ic[a])}</button>`).join("")}
     <div class="sep"></div>
     <button class="pill" id="hfIns">${tr("Platzhalter")} &rsaquo;</button>
+    <button class="tb" id="hfImg" title="${esc(tr("Bild einfügen"))}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.4" cy="9.4" r="1.7"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
     <button class="tb" id="hfMore" title="${esc(tr("Kopf- und Fußzeile"))}"
       style="font-size:16px;line-height:1">&#8943;</button>`;
   bar.classList.add("on");
@@ -14121,7 +14487,7 @@ function drawHfBar(){
   const unten=kanten.length?Math.max(...kanten.map(k=>k.bottom)):r.bottom;
   const oben =kanten.length?Math.min(...kanten.map(k=>k.top)):r.top;
   const passt=y=>y>=8&&y+bh<=innerHeight-8&&kanten.every(k=>y+bh<k.top-6||y>k.bottom+6);
-  const wahl=(hfEditing.which==="hdr"
+  const wahl=(istKopf(hfEditing.which)
     ? [unten+10, oben-bh-10, r.bottom+8, r.top-bh-8]
     : [oben-bh-10, unten+10, r.top-bh-8, r.bottom+8]).find(passt);
   bar.style.top=(wahl!==undefined?wahl
@@ -14140,22 +14506,22 @@ function hfGripDrag(e,rolle){
   const grip=$(rolle==="abstand"?"#hfgrip2":"#hfgrip");grip.classList.add("drag");
   const bar=$("#hfbar");if(bar)bar.classList.add("leise");
   const k=hfEditing.which,pg=hfEditing.page,d=doc();
-  const fm=ownFmt(d),idx=k==="hdr"?0:2;
+  const fm=ownFmt(d),idx=istKopf(k)?0:2;
   const z=S.zoom,ph=MM(fm.h)*z,stride=ph+GAP;
   const paper=$("#paper");
   const move=ev=>{
     const y=ev.clientY-paper.getBoundingClientRect().top-pg*stride;
-    let mm=Math.round((k==="hdr"?y:ph-y)/(MM(1)*z));
+    let mm=Math.round((istKopf(k)?y:ph-y)/(MM(1)*z));
     if(rolle==="abstand"){
       /* Nicht über die Blattkante hinaus und nicht so tief, dass für den Text
          nichts bleibt; der Seitenrand weicht ohnehin über max(Rand, Band). */
       mm=Math.min(Math.round(fm.h/3),Math.max(0,mm));
-      if(mm===(k==="hdr"?fm.hd:fm.fd))return;
-      if(k==="hdr")fm.hd=mm;else fm.fd=mm;
+      if(mm===(istKopf(k)?fm.hd:fm.fd))return;
+      if(istKopf(k))fm.hd=mm;else fm.fd=mm;
     }else{
       /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
       const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
-      const maxMm=Math.max(minMm,fm.h-fm.m[k==="hdr"?2:0]-30);
+      const maxMm=Math.max(minMm,fm.h-fm.m[istKopf(k)?2:0]-30);
       mm=Math.min(maxMm,Math.max(minMm,mm));
       if(mm===fm.m[idx])return;
       fm.m[idx]=mm;
@@ -14207,15 +14573,22 @@ $("#hfbar").addEventListener("click",e=>{
      ohnehin alles kann. Die Leiste trägt nur noch, was man beim Schreiben
      der Zeile braucht. */
   if(e.target.closest("#hfMore")){hfEditCommit();hfEditClose();hfDialog();return}
+  /* Danach in den Dialog: dort stehen Seite, Höhe und Entfernen. */
+  if(e.target.closest("#hfImg")){hfEditCommit();const k=hfEditing.which;hfEditClose();
+    hfBildEinfuegen(k,hfDialog);return}
 });
 function hfHtml(i,total,ml,mr,z){
-  const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr"),fm=fmtOf(d);
+  const d=doc(),fm=fmtOf(d);
   let out="";
   const fs=(9*96/72)*z;
-  if(h.on)out+=`<div class="hf" style="top:${MM(fm.hd)*z}px;left:${ml}px;right:${mr}px;
-    text-align:${h.align};font-size:${fs}px">${hfText(h.text,i+1,total)}</div>`;
-  if(f.on)out+=`<div class="hf" style="bottom:${MM(fm.fd)*z}px;left:${ml}px;right:${mr}px;
-    text-align:${f.align};font-size:${fs}px">${hfText(f.text,i+1,total)}</div>`;
+  for(const seite of ["hdr","ftr"]){
+    const v=hfOf(d,hfFuerSeite(d,seite,i));if(!v.on)continue;
+    const kante=seite==="hdr"?"top":"bottom",ab=MM(seite==="hdr"?fm.hd:fm.fd)*z;
+    const spalte=v.tw?`left:${ml+MM(v.tx||0)*z}px;width:${MM(v.tw)*z}px`:`left:${ml}px;right:${mr}px`;
+    out+=`<div class="hf" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
+    text-align:${v.align};font-size:${fs}px">${hfText(v.text,i+1,total)}</div>`;
+    out+=hfBilder(v).map(b=>`<img class="hfbild" alt="" src="${hfBildSrc(b.uri)}" style="${kante}:${ab+MM(+b.y||0)*z}px;left:${ml+MM(+b.x||0)*z}px;width:${MM(b.b)*z}px;height:${MM(b.h)*z}px">`).join("");
+  }
   return out;
 }
 /* Automatische Seitenzahl (nur ohne eigene Fußzeile - die kann die Zahl über
@@ -14278,23 +14651,24 @@ function pageNumDialog(){
   $("#pnDone").onclick=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
 }
 function setPrintHF(){
-  const d=doc(),h=hfOf(d,"hdr"),f=hfOf(d,"ftr");
-  const hd=$("#printhdr"),ft=$("#printftr");
-  hd.innerHTML=h.on?`<div style="text-align:${h.align}">${hfText(h.text,1,pageCount,true)}</div>`:"";
-  ft.innerHTML=f.on?`<div style="text-align:${f.align}">${hfText(f.text,1,pageCount,true)}</div>`:"";
+  const d=doc(),m=hfDruck(d);
+  $("#printhdr").innerHTML=hfDruckTeil(hfOf(d,"hdr"),"top",m.ueH);
+  $("#printftr").innerHTML=hfDruckTeil(hfOf(d,"ftr"),"bottom",m.ueF);
   let st=document.getElementById("printhfstyle");
   if(!st){st=document.createElement("style");st.id="printhfstyle";document.head.appendChild(st)}
   /* Die fixierten Zeilen bleiben auf top:0/bottom:0 (alles andere ist im
      Druck unzuverlässig, siehe Druck-CSS). Hier steht nur, wie hoch die
      Platzhalter im Druckrahmen sein müssen, damit der Text unterhalb des
      Bandes beginnt: max(Seitenrand, Band) - hd bzw. - fd. */
-  const fmt=fmtOf(d);
-  const kopf=h.on?Math.max(0,Math.max(fmt.m[0],hfBandMm(d,"hdr"))-fmt.hd):0;
-  const fuss=f.on?Math.max(0,Math.max(fmt.m[2],hfBandMm(d,"ftr"))-fmt.fd):0;
+  const kopf=m.kopf,fuss=m.fuss;
   st.textContent=`@media print{`+
     `#editor{padding-top:0!important;padding-bottom:0!important}`+
     `.printframe>thead>tr>td{height:${kopf.toFixed(2)}mm!important}`+
     `.printframe>tfoot>tr>td{height:${fuss.toFixed(2)}mm!important}`+
+    `.printframe{width:${m.f.w-m.f.m[1]-m.f.m[3]}mm!important;margin-left:${m.f.m[3]}mm!important}`+
+    `.printhf{left:${m.f.m[3]}mm!important;right:${m.f.m[1]}mm!important}`+
+    `.hfdruck,.hfdruck *{visibility:visible!important}`+
+    `body.hfseiten .printhf{display:none!important}`+
     `}`;
 }
 /* Baut den Druckrahmen um #editor: eine Tabelle, deren thead/tfoot Chromium
@@ -14313,14 +14687,153 @@ function printFrame(ed){
   ed.parentNode.insertBefore(marke,ed);
   ed.parentNode.insertBefore(tbl,ed);
   tbl.querySelector("tbody td").appendChild(ed);
+  const ersteWeg=hfDruckSeiten(tbl,ed);
   return ()=>{
+    ersteWeg();
     marke.parentNode.insertBefore(ed,marke);
     marke.remove();tbl.remove();
     if(merk){try{sel.removeAllRanges();sel.addRange(merk)}catch(e){}}
   };
 }
+/* Kopf- und Fußzeile im Druck, je Seite mit ihrer eigenen Seitenzahl.
+   Bis 1.2 standen sie in fixierten Elementen (#printhdr/#printftr), die
+   Chromium auf jeder Seite gleich wiederholt — counter(page) zählt dort
+   nicht (nur in den Randfeldern von @page, die Electron 33 nicht kann), es
+   stand überall „Seite 0“, und eine eigene erste Seite ließ sich nur
+   zudecken.
+   Jetzt hängen alle Seiten an einem Anker am Anfang des Druckrahmens und
+   werden per transform auf ihre Seite geschoben. Gemessen: Chromium legt
+   die Seiten des Flusses lückenlos übereinander, Seite p beginnt bei
+   p × Höhe der Druckfläche — aufgerundet auf ganze CSS-Pixel (bei 274,5 mm
+   = 1037,48 px liegt die nächste Seite 1038 px tiefer; mit der ungerundeten
+   Höhe wanderte die Zeile 0,14 mm je Seite). Ein transform ändert nur das
+   Malen, nicht den Umbruch — wo der Text bricht, spielt keine Rolle, auch
+   mitten in einer langen Tabelle nicht.
+   Ist das Band auf Seite 1 höher, schiebt oben ein Abstandshalter den Text
+   nach unten, und unten beginnt Seite 2 dort, wo sie auch am Bildschirm
+   beginnt (break-before am ersten Block von Seite 2). */
+function hfDruckSeiten(tbl,ed){
+  const d=doc(),m=hfDruck(d),f=m.f,cw=f.w-f.m[1]-f.m[3],weg=[];
+  /* Umbrüche wie am Bildschirm — siehe druckWieSchirm(). Gilt auch ohne
+     Kopf- und Fußzeile: was man sieht, wird gedruckt. */
+  weg.push(druckWieSchirm(ed));
+  if(m.erst&&m.kopf1>m.kopf+0.05){
+    const halter=document.createElement("div");
+    halter.style.height=(m.kopf1-m.kopf)+"mm";
+    ed.parentNode.insertBefore(halter,ed);weg.push(()=>halter.remove());
+  }
+  if(!(m.kopfAn||m.fussAn))return ()=>weg.forEach(w=>w());
+  const A=f.h-m.mt-m.mb, P=Math.ceil(A*96/25.4-1e-6)*25.4/96;
+  /* Genau so viele Seiten wie gezählt, keine Reserve: eine Zeile hinter dem
+     Text legte Chromium eine leere Seite an (gemessen, „Seite 7 von 6“).
+     Läuft der Druck länger, baut hfDruckGesamt() mit der echten Zahl neu. */
+  const bau=gesamt=>{
+    let html="";
+    for(let p=0;p<gesamt;p++){
+      const nr=p+1;
+      const kopf=hfDruckTeil(hfOf(d,hfFuerSeite(d,"hdr",p)),"top",m.ueH,nr,gesamt);
+      const fuss=hfDruckTeil(hfOf(d,hfFuerSeite(d,"ftr",p)),"bottom",m.ueF,nr,gesamt);
+      if(kopf)html+=`<div style="position:absolute;top:0;left:0;width:${cw}mm;transform:translateY(${(p*P).toFixed(4)}mm)">${kopf}</div>`;
+      if(fuss)html+=`<div style="position:absolute;top:0;left:0;width:${cw}mm;height:0;transform:translateY(${(p*P+A).toFixed(4)}mm)">`+
+        `<div style="position:absolute;bottom:0;left:0;width:${cw}mm">${fuss}</div></div>`;
+    }
+    return html;
+  };
+  tbl.style.position="relative";
+  const anker=document.createElement("div");
+  anker.className="hfdruck";
+  anker.style.cssText="position:absolute;top:0;left:0;width:0;height:0;font-family:Georgia,serif;font-size:9pt;color:#000;white-space:pre-wrap";
+  let gesamt=pageCount;
+  anker.innerHTML=bau(gesamt);
+  hfDruckNeubau=n=>{if(n===gesamt)return false;gesamt=n;anker.innerHTML=bau(n);return true};
+  tbl.appendChild(anker);weg.push(()=>{anker.remove();hfDruckNeubau=null});
+  document.body.classList.add("hfseiten");weg.push(()=>document.body.classList.remove("hfseiten"));
+  return ()=>weg.forEach(w=>w());
+}
+/* Die Desktop-Fassung zählt nach dem ersten printToPDF die Seiten und ruft
+   das hier auf (desktop/main.js). Weicht die Zahl von der Ansicht ab — ein
+   Block länger als eine Seite, etwa eine lange Tabelle, bricht im Druck
+   anders als am Bildschirm —, wird mit der echten Gesamtzahl neu gebaut
+   und noch einmal gedruckt. Der Browserdruck kann das nicht; dort gilt die
+   Zahl der Ansicht. */
+let hfDruckNeubau=null;
+function hfDruckGesamt(n){return !!(hfDruckNeubau&&hfDruckNeubau(n))}
+/* Der Druck bricht dort um, wo die Ansicht umbricht. Ohne das teilte der
+   Druck Absätze zeilenweise, wo die Ansicht sie ganz auf die nächste Seite
+   schiebt — gemessen: im Druck drei Absätze mehr auf Seite 2, danach jede
+   Seite verschoben, und am Ende eine Seite weniger; mit Tabellen auch eine
+   mehr („Seite 25 von 24“). Die Ansicht legt nie mehr auf eine Seite, als
+   der Druck fassen kann (gleiche Blockhöhen, gemessen in beiden Medien),
+   darum passt es immer. Die Obermarge des ersten Blocks fällt weg wie am
+   Bildschirm, dort steht er bündig am Textkörper. */
+function druckWieSchirm(ed){
+  const weg=[];
+  for(const b of seitenAnfaenge){
+    if(!ed.contains(b))continue;
+    const bb=b.style.breakBefore,mt=b.style.marginTop;
+    b.style.breakBefore="page";b.style.marginTop="0";
+    weg.push(()=>{b.style.breakBefore=bb;b.style.marginTop=mt});
+  }
+  return ()=>weg.forEach(w=>w());
+}
+/* ---- Bilder in Kopf-/Fußzeile ----
+   Ein eigenes Logo steht zuerst rechts (wie im Briefkopf nach DIN 5008),
+   15 mm hoch, und schiebt den Text weg wie ein Bild, das in Word im Text
+   steht. Importierte Bilder behalten ihre Lage, bis man eine Seite wählt. */
+const HF_BILD_HOEHE=15;
+const hfSpalteMm=d=>{const f=fmtOf(d);return f.w-f.m[1]-f.m[3]};
+function hfBildSeite(d,b){
+  const cw=hfSpalteMm(d),x=+b.x||0;
+  if(Math.abs(x)<0.5)return "left";
+  if(Math.abs(x+b.b-cw)<0.5)return "right";
+  if(Math.abs(x+b.b/2-cw/2)<0.5)return "center";
+  return null;
+}
+const hfBildX=(d,b,seite)=>{const cw=hfSpalteMm(d);
+  return auf1(seite==="left"?0:seite==="center"?(cw-b.b)/2:cw-b.b)};
+function hfBildAendern(d,k,i,fn){
+  const v=hfOf(d,k),liste=hfBilder(v).map(b=>({...b}));
+  if(!liste[i])return;
+  fn(liste[i],liste);
+  d[k]={...v,bilder:liste.filter(Boolean)};
+  if(!d[k].bilder.length)delete d[k].bilder;
+}
+function hfBildEinfuegen(k,fertig){
+  const i=document.createElement("input");i.type="file";i.accept="image/*";
+  i.onchange=()=>{
+    const file=i.files[0];if(!file)return;
+    if(!file.type.startsWith("image/")){toast(tr("Keine Bilddatei"));return}
+    blobToDataUrl(file).then(roh=>scaleToDataUrl(roh,magPng(file.type))).then(uri=>
+      new Promise((ok,nein)=>{const im=new Image();
+        im.onload=()=>ok({uri,ratio:im.naturalWidth/Math.max(1,im.naturalHeight)});
+        im.onerror=nein;im.src=uri}))
+    .then(({uri,ratio})=>{
+      const d=doc(),v=hfOf(d,k),cw=hfSpalteMm(d);
+      const h=Math.min(HF_BILD_HOEHE,cw/Math.max(ratio,0.01)),b=auf1(Math.min(cw,h*ratio));
+      const neu={uri,b,h:auf1(b/ratio),x:0,y:0,fluss:true};
+      neu.x=hfBildX(d,neu,"right");
+      d[k]={...v,on:true,bilder:[...hfBilder(v),neu]};
+      commit();if(S.mode==="write"){paginate();setPrintHF()}
+      if(fertig)fertig();
+    })
+    .catch(()=>toast(tr("Bild konnte nicht gelesen werden")));
+  };
+  i.click();
+}
 function hfDialog(){
   const d=doc();
+  const bildZeilen=(k,v)=>hfBilder(v).map((b,i)=>{
+    const seite=hfBildSeite(d,b);
+    return `<div class="mmrow" style="margin-top:6px">
+      <img src="${hfBildSrc(b.uri)}" alt="" style="height:26px;max-width:70px;object-fit:contain;flex:0 0 auto;border:1px solid var(--rule);background:#fff">
+      ${["left","center","right"].map(a=>
+        `<button class="pill ${seite===a?"on":""}" data-bs="${k}:${i}:${a}" style="flex:1">
+          ${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
+      <label style="flex:0 0 auto;text-align:right">${tr("Höhe")}</label>
+      <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-bh="${k}:${i}" value="${toUnit(b.h)}" style="flex:0 0 62px">
+      <span style="color:var(--ink-soft)">${unitAbbr()}</span>
+      <button class="pill" data-bw="${k}:${i}" title="${tr("Entfernen")}">✕</button>
+    </div>`}).join("");
   const row=(k,label)=>{
     const v=hfOf(d,k);
     return `<div style="border:1px solid var(--rule);border-radius:var(--radius);padding:10px;margin-bottom:10px">
@@ -14336,23 +14849,29 @@ function hfDialog(){
           `<button class="pill ${v.align===a?"on":""}" data-al="${k}:${a}" style="flex:1" ${v.on?"":"disabled"}>
             ${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}</button>`).join("")}
         <label style="flex:0 0 84px;text-align:right">${tr("Von Rand")}</label>
-        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-di="${k}" value="${toUnit(fmtOf(d)[k==="hdr"?"hd":"fd"])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
+        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-di="${k}" value="${toUnit(fmtOf(d)[istKopf(k)?"hd":"fd"])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
         <span style="color:var(--ink-soft)">${unitAbbr()}</span>
       </div>
       <div class="mmrow" style="margin-top:6px">
         <label style="flex:0 0 84px;text-align:right">${tr("Höhe")}</label>
-        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-hh="${k}" value="${toUnit(fmtOf(d).m[k==="hdr"?0:2])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
+        <input type="number" step="${unitOf()==="in"?"0.01":"1"}" data-hh="${k}" value="${toUnit(fmtOf(d).m[istKopf(k)?0:2])}" style="flex:0 0 62px" ${v.on?"":"disabled"}>
         <span style="color:var(--ink-soft)">${unitAbbr()}</span>
         <span style="color:var(--ink-soft);font-size:12px;flex:1">${tr("Bis hierher bleibt die Seite frei von Text")}</span>
       </div>
       <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap">
         ${[["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],["{title}","Titel einfügen"],["{date}","Datum einfügen"]].map(([p,n])=>
           `<button class="pill" data-ph="${k}:${p}" ${v.on?"":"disabled"} title="${tr(n)}">${p}</button>`).join("")}
-      </div></div>`;
+        <button class="pill" data-bn="${k}" style="margin-left:auto">${tr("Bild einfügen")} …</button>
+      </div>${bildZeilen(k,v)}</div>`;
   };
   /* Eine Warnung wegen knapper Ränder braucht es nicht mehr: reicht die Zeile
      tiefer als der Rand, rückt der Textkörper von selbst nach. */
+  /* Wie Words Häkchen: Seite 1 bekommt eigene Zeilen, anfangs leer. */
   const body=()=>row("hdr",tr("Kopfzeile"))+row("ftr",tr("Fußzeile"))+
+    `<label style="display:flex;align-items:center;gap:7px;margin:4px 0 10px">
+      <input type="checkbox" id="hfErste" ${d.ersteAnders?"checked":""} style="width:auto">
+      <b>${tr("Erste Seite anders")}</b></label>`+
+    (d.ersteAnders?row("hdr1",hfName("hdr1"))+row("ftr1",hfName("ftr1")):"")+
     `<div style="color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:6px">
       ${tr("Platzhalter werden pro Seite ersetzt. Die Angaben gelten für dieses Dokument.")}<br>
       ${tr("Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.")}<br>
@@ -14364,15 +14883,16 @@ function hfDialog(){
   const apply=()=>{if(S.mode==="write"){paginate();setPrintHF()}commit()};
   const bind=()=>{
     const b=$("#hfbody");
+    $("#hfErste").onchange=e=>{d.ersteAnders=e.target.checked;if(!d.ersteAnders)delete d.ersteAnders;repaint()};
     b.querySelectorAll("[data-on]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.on;d[k]={...hfOf(d,k),on:el.checked};repaint()});
     b.querySelectorAll("[data-tx]").forEach(el=>el.oninput=()=>{
       const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value};apply()});
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.di,fm=ownFmt(d);
-      fm[k==="hdr"?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
+      fm[istKopf(k)?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
     b.querySelectorAll("[data-hh]").forEach(el=>el.onchange=()=>{
-      const k=el.dataset.hh,fm=ownFmt(d),idx=k==="hdr"?0:2;
+      const k=el.dataset.hh,fm=ownFmt(d),idx=istKopf(k)?0:2;
       const minMm=Math.ceil(hfBandMm(d,k));
       fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,fromUnit(el.value)));
       repaint()});
@@ -14385,6 +14905,23 @@ function hfDialog(){
       inp.value=inp.value.slice(0,pos)+p+inp.value.slice(inp.selectionEnd??pos);
       d[k]={...hfOf(d,k),text:inp.value};inp.focus();
       inp.selectionStart=inp.selectionEnd=pos+p.length;apply()});
+    const kI=el=>{const [k,i,a]=el.split(":");return [k,+i,a]};
+    b.querySelectorAll("[data-bn]").forEach(el=>el.onclick=()=>hfBildEinfuegen(el.dataset.bn,repaint));
+    b.querySelectorAll("[data-bw]").forEach(el=>el.onclick=()=>{
+      const [k,i]=kI(el.dataset.bw);hfBildAendern(d,k,i,(x,liste)=>{liste[i]=null});repaint()});
+    b.querySelectorAll("[data-bs]").forEach(el=>el.onclick=()=>{
+      const [k,i,a]=kI(el.dataset.bs);hfBildAendern(d,k,i,x=>{x.x=hfBildX(d,x,a)});repaint()});
+    /* Neue Höhe, Seitenverhältnis bleibt; die Kante, an der das Bild steht,
+       bleibt stehen — ein rechtes Logo wächst nach links. */
+    b.querySelectorAll("[data-bh]").forEach(el=>el.onchange=()=>{
+      const [k,i]=kI(el.dataset.bh);
+      hfBildAendern(d,k,i,x=>{
+        const seite=hfBildSeite(d,x),mitte=(+x.x||0)+x.b/2;
+        const h=Math.max(3,Math.min(80,fromUnit(el.value)));
+        x.b=auf1(x.b*h/x.h);x.h=auf1(h);
+        x.x=seite?hfBildX(d,x,seite):auf1(mitte-x.b/2);
+      });
+      repaint()});
   };
   bind();
   $("#hfClose").onclick=()=>{closeOvl();if(S.mode==="write"){paginate();setPrintHF()}};
@@ -18093,6 +18630,13 @@ the handle along that boundary, or type a value in the bar. Making the header ta
 the text down; it never runs underneath it.</p>
 <p><b>The distance from the paper edge</b> — where the line itself sits — belongs to the
 page format and is set under <b>File &rsaquo; Page format</b>, beside the margins.</p>
+<p><b>Pictures</b> such as a logo go in with the picture button in the bar, or with
+<b>Insert image</b> in the <b>Header and footer</b> dialog. There you choose the side (left,
+center, right) and the height, or remove the picture. Pictures in the header and footer of a
+Word document come along and stay where they were in Word.</p>
+<p><b>Different first page</b> in the <b>Header and footer</b> dialog gives page 1 its own
+header and footer, as in Word — for a letterhead with the logo only on the first sheet, or a
+cover page without a header. They start out empty; the distances from the edge are shared.</p>
 <p><kbd>Enter</kbd> adds a line. <kbd>Tab</kbd> jumps between header
 and footer. <kbd>Esc</kbd> finishes and keeps the text.</p>`},
 
@@ -18662,6 +19206,13 @@ den Griff auf dieser Grenze, oder trag einen Wert in der Leiste ein. Eine höher
 schiebt den Text nach unten; sie läuft nie darunter hindurch.</p>
 <p><b>Der Abstand zur Papierkante</b> — wo die Zeile selbst sitzt — gehört zum Seitenformat und
 wird unter <b>Datei &rsaquo; Seitenformat</b> neben den Rändern eingestellt.</p>
+<p><b>Bilder</b> wie ein Logo kommen über das Bildsymbol in der Leiste hinein oder über
+<b>Bild einfügen</b> im Dialog <b>Kopf- und Fußzeile</b>. Dort wählst du die Seite (links,
+Mitte, rechts) und die Höhe oder entfernst das Bild. Bilder in Kopf- und Fußzeile einer
+Word-Datei kommen mit und stehen dort, wo sie in Word standen.</p>
+<p><b>Erste Seite anders</b> im Dialog <b>Kopf- und Fußzeile</b> gibt Seite 1 eigene Kopf- und
+Fußzeilen, wie in Word — für einen Briefbogen mit Logo nur auf dem ersten Blatt oder ein
+Deckblatt ohne Kopfzeile. Sie beginnen leer; die Abstände zum Rand gelten für beide.</p>
 <p><kbd>Eingabe</kbd> fügt eine Zeile hinzu. <kbd>Tab</kbd> springt
 zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet und übernimmt.</p>`},
 
@@ -19247,6 +19798,14 @@ Arrastra el tirador a lo largo de ese límite, o escribe un valor en la barra. H
 encabezado más alto empuja el texto hacia abajo; nunca queda por debajo.</p>
 <p><b>La distancia al borde del papel</b> —donde se sitúa la propia línea— pertenece al formato
 de página y se ajusta en <b>Archivo &rsaquo; Formato de página</b>, junto a los márgenes.</p>
+<p><b>Las imágenes</b>, como un logotipo, se añaden con el botón de imagen de la barra o
+con <b>Insertar imagen</b> en el cuadro <b>Encabezado y pie de página</b>. Allí eliges el lado
+(izquierda, centro, derecha) y la altura, o quitas la imagen. Las imágenes del encabezado y del
+pie de un documento de Word se conservan y quedan donde estaban en Word.</p>
+<p><b>Primera página diferente</b>, en el cuadro <b>Encabezado y pie de página</b>, da a la
+página 1 su propio encabezado y pie, como en Word: para un papel con membrete y logotipo solo en
+la primera hoja o una portada sin encabezado. Empiezan vacíos; las distancias al borde son
+comunes.</p>
 <p><kbd>Intro</kbd> añade una línea. <kbd>Tab</kbd> salta entre
 encabezado y pie. <kbd>Esc</kbd> termina.</p>`},
 
@@ -19832,6 +20391,13 @@ ao longo desse limite, ou digite um valor na barra. Deixar o cabeçalho mais alt
 texto para baixo; ele nunca fica por baixo.</p>
 <p><b>A distância da borda do papel</b> —onde a própria linha fica— pertence ao formato de
 página e é definida em <b>Arquivo &rsaquo; Formato de página</b>, ao lado das margens.</p>
+<p><b>Imagens</b> como um logotipo entram pelo botão de imagem da barra ou por
+<b>Inserir imagem</b> na caixa <b>Cabeçalho e rodapé</b>. Ali você escolhe o lado (esquerda,
+centro, direita) e a altura, ou remove a imagem. As imagens no cabeçalho e no rodapé de um
+documento do Word vêm junto e ficam onde estavam no Word.</p>
+<p><b>Primeira página diferente</b>, na caixa <b>Cabeçalho e rodapé</b>, dá à página 1 seu
+próprio cabeçalho e rodapé, como no Word — para um papel timbrado com o logotipo só na primeira
+folha ou uma capa sem cabeçalho. Eles começam vazios; as distâncias da borda são as mesmas.</p>
 <p><kbd>Enter</kbd> adiciona uma linha. <kbd>Tab</kbd> pula entre
 cabeçalho e rodapé. <kbd>Esc</kbd> conclui.</p>`},
 
@@ -20430,6 +20996,14 @@ Faites glisser la poignée le long de cette limite, ou tapez une valeur dans la 
 l'en-tête pousse le texte vers le bas ; il ne passe jamais en dessous.</p>
 <p><b>La distance au bord du papier</b> — là où la ligne elle-même se place — appartient au
 format de page et se règle dans <b>Fichier &rsaquo; Format de page</b>, à côté des marges.</p>
+<p><b>Les images</b>, comme un logo, s'ajoutent avec le bouton image de la barre ou avec
+<b>Insérer une image</b> dans la boîte <b>En-tête et pied de page</b>. Vous y choisissez le côté
+(gauche, centre, droite) et la hauteur, ou supprimez l'image. Les images de l'en-tête et du pied
+de page d'un document Word sont reprises et restent là où elles étaient dans Word.</p>
+<p><b>Première page différente</b>, dans la boîte <b>En-tête et pied de page</b>, donne à la
+page 1 son propre en-tête et pied de page, comme dans Word — pour un papier à en-tête avec le
+logo sur la première feuille seulement, ou une page de garde sans en-tête. Ils sont vides au
+départ ; les distances au bord sont communes.</p>
 <p><kbd>Entrée</kbd> ajoute une ligne. <kbd>Tab</kbd> passe de l'en-tête
 au pied de page. <kbd>Échap</kbd> termine.</p>`},
 
@@ -21019,6 +21593,13 @@ wzdłuż tej granicy albo wpisz wartość w pasku. Zwiększenie nagłówka przes
 nie wchodzi pod niego.</p>
 <p><b>Odległość od krawędzi papieru</b> — gdzie leży sama linia — należy do formatu strony i
 ustawia się w <b>Plik &rsaquo; Format strony</b>, obok marginesów.</p>
+<p><b>Obrazy</b>, np. logo, wstawia przycisk obrazu na pasku albo <b>Wstaw obraz</b> w oknie
+<b>Nagłówek i stopka</b>. Tam wybierasz stronę (lewo, środek, prawo) i wysokość albo usuwasz
+obraz. Obrazy z nagłówka i stopki dokumentu Worda są przenoszone i stoją tam, gdzie stały
+w Wordzie.</p>
+<p><b>Inna pierwsza strona</b> w oknie <b>Nagłówek i stopka</b> daje stronie 1 własny nagłówek
+i stopkę, jak w Wordzie — dla papieru firmowego z logo tylko na pierwszym arkuszu albo strony
+tytułowej bez nagłówka. Na początku są puste; odległości od krawędzi są wspólne.</p>
 <p><kbd>Enter</kbd> dodaje wiersz. <kbd>Tab</kbd> przeskakuje między
 nagłówkiem a stopką. <kbd>Esc</kbd> kończy.</p>`},
 
@@ -21600,6 +22181,15 @@ Trascina la maniglia lungo quel confine, o digita un valore nella barra. Alzare 
 spinge il testo verso il basso; non passa mai al di sotto.</p>
 <p><b>La distanza dal bordo della carta</b> — dove si trova la riga stessa — appartiene al
 formato pagina e si imposta in <b>File &rsaquo; Formato pagina</b>, accanto ai margini.</p>
+<p><b>Le immagini</b>, come un logo, si inseriscono con il pulsante immagine della barra o
+con <b>Inserisci immagine</b> nella finestra <b>Intestazione e piè di pagina</b>. Lì scegli il
+lato (sinistra, centro, destra) e l'altezza, oppure rimuovi l'immagine. Le immagini
+nell'intestazione e nel piè di pagina di un documento Word vengono riprese e restano dove
+erano in Word.</p>
+<p><b>Prima pagina diversa</b>, nella finestra <b>Intestazione e piè di pagina</b>, dà alla
+pagina 1 intestazione e piè di pagina propri, come in Word — per una carta intestata con il logo
+solo sul primo foglio o una copertina senza intestazione. All'inizio sono vuoti; le distanze dal
+bordo sono comuni.</p>
 <p><kbd>Invio</kbd> aggiunge una riga. <kbd>Tab</kbd> passa tra
 intestazione e piè di pagina. <kbd>Esc</kbd> conclude.</p>`},
 

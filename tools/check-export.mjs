@@ -36,7 +36,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
 const args = process.argv.slice(2);
 const keep = args.includes("--keep");
-const chromeArg = args[args.indexOf("--chrome") + 1];
+const chromeArg = args.includes("--chrome") ? args[args.indexOf("--chrome") + 1] : null;
 const nur = args.includes("--nur") ? args[args.indexOf("--nur") + 1] : null;
 
 /* Höhe einer Kopf-/Fußzeilenzeile in mm — .printhf steht auf 9pt, hfBandMm()
@@ -376,7 +376,13 @@ const DRUCKVORBEREITUNG = String.raw`(async()=>{
     textspalteMm:f.w-f.m[1]-f.m[3], seitenAmBildschirm:pageCount,
     bandObenMm:Math.max(f.m[0],hfBandMm(d,"hdr")),
     bandUntenMm:Math.max(f.m[2],hfBandMm(d,"ftr")),
-    kopfZeilen:zeilenVon("hdr"), fussZeilen:zeilenVon("ftr")});
+    kopfZeilen:zeilenVon("hdr"), fussZeilen:zeilenVon("ftr"),
+    /* Was der Druck je Seite als Kopf-/Fußzeile setzt (hfDruckSeiten). Im
+       PDF selbst steht kein lesbarer Text (Skia schreibt Glyphennummern),
+       darum hier: bis 1.2 stand im Druck auf jeder Seite „Seite 0“, und
+       diese Prüfung zählte nur Zeilen, nicht ihren Inhalt. */
+    druckTexte:[...document.querySelectorAll(".hfdruck")].map(a=>a.textContent).join("|"),
+    zaehlerImDruck:document.querySelectorAll(".hfdruck .pageno").length});
 })()`;
 
 /* ---------- Dateiserver ---------- */
@@ -525,7 +531,7 @@ try {
 
     if (cfg.voll) befunde.push(...JSON.parse(await auswerten(cdp.send, DATEIPRUEFUNG)));
 
-    const { textspalteMm, seitenAmBildschirm, bandObenMm, bandUntenMm, kopfZeilen, fussZeilen } =
+    const { textspalteMm, seitenAmBildschirm, bandObenMm, bandUntenMm, kopfZeilen, fussZeilen, druckTexte, zaehlerImDruck } =
       JSON.parse(await auswerten(cdp.send, DRUCKVORBEREITUNG));
     const antwort = await cdp.send("Page.printToPDF", {
       printBackground: true, preferCSSPageSize: true,
@@ -543,6 +549,16 @@ try {
        `${g.breiteMm.toFixed(1)} x ${g.hoeheMm.toFixed(1)} mm, erwartet ${f.w} x ${f.h}`);
     ok(P + "mehrseitig", g.seiten.length >= 2, g.seiten.length + " Seiten");
     /* Weniger Seiten als am Bildschirm heisst: Inhalt wurde abgeschnitten. */
+    /* Seit 1.2 bricht der Druck dort um, wo die Ansicht umbricht (druckWieSchirm) */
+    ok(P + "genauso viele Seiten wie am Bildschirm", g.seiten.length === seitenAmBildschirm,
+       g.seiten.length + " im PDF, " + seitenAmBildschirm + " am Bildschirm");
+    if (cfg.fuss) {
+      const fehlt = [];
+      for (let k = 1; k <= seitenAmBildschirm; k++)
+        if (!druckTexte.includes("Seite " + k + " von " + seitenAmBildschirm)) fehlt.push(k);
+      ok(P + "jede Seite traegt ihre Seitenzahl", !fehlt.length && !zaehlerImDruck,
+         fehlt.length ? "fehlt fuer Seite " + fehlt.slice(0, 5).join(", ") : zaehlerImDruck ? "CSS-Zaehler im Druck" : "Seite 1 bis " + seitenAmBildschirm);
+    }
     ok(P + "Seitenzahl passt zum Bildschirm", g.seiten.length >= seitenAmBildschirm,
        `${g.seiten.length} im PDF, ${seitenAmBildschirm} am Bildschirm`);
 
