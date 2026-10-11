@@ -439,6 +439,8 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 /* Abschnittswechsel aus Word: dezent markiert, wie Words Formatierungszeichen */
 #editor [data-wsect]{border-bottom:1px dashed var(--rule)}
 @media print{#editor [data-wsect]{border-bottom:none!important}}
+/* Abstandszeile einer umbrochenen Tabelle (paginate) */
+#editor tr.pgzeile>td{padding:0!important;border:none!important;background:none!important}
 .wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
@@ -7313,7 +7315,7 @@ function drawWrite(){
     if(!cell){e.preventDefault();indentBlocks(e.shiftKey?-1:1);return}
     e.preventDefault();
     const table=cell.closest("table");
-    const cells=[...table.querySelectorAll("td,th")];
+    const cells=[...table.querySelectorAll("td,th")].filter(c=>!c.closest(".pgzeile"));
     let i=cells.indexOf(cell)+(e.shiftKey?-1:1);
     if(i>=cells.length){
       const last=table.rows[table.rows.length-1];
@@ -7321,7 +7323,7 @@ function drawWrite(){
       [...last.children].forEach(()=>{const td=document.createElement("td");td.innerHTML="<br>";nr.appendChild(td)});
       last.parentNode.appendChild(nr);
       i=cells.length;
-      const fresh=[...table.querySelectorAll("td,th")];
+      const fresh=[...table.querySelectorAll("td,th")].filter(c=>!c.closest(".pgzeile"));
       putCaret(fresh[i]);dirty=true;queuePaginate();return;
     }
     if(i<0)return;
@@ -7523,6 +7525,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll(".toc").forEach(t=>t.classList.remove("sel"));
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
   c.querySelectorAll(":scope > .enliste").forEach(w=>w.remove());
+  c.querySelectorAll("tr.pgzeile").forEach(w=>w.remove());
   c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
@@ -14118,6 +14121,7 @@ function paginate(){
      landen, damit sie danach an genau dieser Stelle gerendert werden. */
   function reflow(contentHOf){
     blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
+    ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
     const edTop=ed.getBoundingClientRect().top;
     const fnByPage=[];
     let nachAbschnitt=false;
@@ -14142,7 +14146,41 @@ function paginate(){
         return;
       }
       const limit=p*stride+oben(p)+contentH;
-      if(zwang||(top+h>limit+1&&h<=contentH)){
+      /* Eine Tabelle, die länger als eine Seite ist, wird zeilenweise
+         umbrochen: vor die erste Zeile, die über die Seite ragt, kommt eine
+         Abstandszeile (tr.pgzeile) bis zum Anfang der nächsten Seite. Bis
+         1.2 blieb sie stehen und lief durch Fuß- und Kopfzeile der
+         Folgeseiten; der Druck teilte sie richtig und lag danach eine Seite
+         gegen die Ansicht versetzt (gemessen: 24 gegen 25 Seiten). Die
+         Abstandszeilen sind reine Anzeige wie margin-top: flush() und der
+         Druck nehmen sie heraus, Tabellenbefehle räumen sie vorher ab. */
+      if(b.tagName==="TABLE"&&!zwang&&h>contentH&&top+h>limit+1){
+        const zeilen=[...b.rows];
+        const spalten=Math.max(1,...zeilen.map(r=>[...r.cells].reduce((n,c)=>n+(c.colSpan||1),0)));
+        zeilen.forEach((r,i)=>{
+          const rr=r.getBoundingClientRect(),rt=rr.top-edTop,rh=rr.height;
+          const pp=Math.max(0,Math.floor(rt/stride));
+          /* 6 px Spielraum: bricht Chromium eine Tabelle im Druck, zeichnet es
+             an jedem Bruch die Rahmen dazu — gemessen passte eine randvolle
+             Seite im Druck eine Zeile weniger, und es blieb eine Seite mit
+             einer einzigen Zeile. Die Zeilen selbst sind in beiden Medien
+             gleich hoch (nachgemessen). */
+          if(rt+rh<=pp*stride+oben(pp)+contentHOf(pp)-6*S.zoom||rh>contentHOf(pp+1))return;
+          const ziel=(pp+1)*stride+mt;
+          if(i===0){
+            const base=parseFloat(getComputedStyle(b).marginTop)||0;
+            b.style.marginTop=(base+(ziel-rt))+"px";return;
+          }
+          const sp=document.createElement("tr");
+          sp.className="pgzeile";sp.contentEditable="false";
+          sp.innerHTML=`<td colspan="${spalten}"></td>`;
+          r.parentNode.insertBefore(sp,r);
+          sp.firstChild.style.height=(ziel-rt)+"px";
+          const rest=ziel-(r.getBoundingClientRect().top-edTop);
+          if(Math.abs(rest)>0.5)sp.firstChild.style.height=(ziel-rt+rest)+"px";
+        });
+      }
+      else if(zwang||(top+h>limit+1&&h<=contentH)){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
         b.style.marginTop=(base+(ziel-top))+"px";
@@ -14163,7 +14201,8 @@ function paginate(){
         p++;
       }
       if(hasFn)b.querySelectorAll&&b.querySelectorAll(".fn[data-fn]").forEach(m=>{
-        (fnByPage[p]=fnByPage[p]||[]).push(m.dataset.fn);
+        const pm=b.tagName==="TABLE"?Math.max(0,Math.floor((m.getBoundingClientRect().top-edTop)/stride)):p;
+        (fnByPage[pm]=fnByPage[pm]||[]).push(m.dataset.fn);
       });
     });
     return fnByPage;
@@ -14196,7 +14235,7 @@ function paginate(){
      Textkörper). Der Druck bricht genau dort um (druckWieSchirm). Seiten,
      die mitten in einem überlangen Block beginnen, fehlen in der Liste. */
   seitenAnfaenge=[];
-  for(const b of blocks){
+  for(const b of [...blocks,...ed.querySelectorAll("tr:not(.pgzeile)")]){
     const t=b.getBoundingClientRect().top-edTop,k=Math.round(t/stride);
     if(k>=1&&Math.abs(t-(k*stride+oben(k)))<=2)seitenAnfaenge.push(b);
   }
@@ -15821,6 +15860,7 @@ function curCell(){
 function tableCmd(a,cell){
   if(!cell)return;
   const row=cell.parentElement,table=cell.closest("table");
+  table.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
   const idx=[...row.children].indexOf(cell);
   const mk=tag=>{const e=document.createElement(tag);e.innerHTML="<br>";return e};
   if(a==="rowAbove"||a==="rowBelow"){
@@ -15926,6 +15966,7 @@ function drawTblBar(){
    Betrifft Leiste und Kontextmenue gleichermassen, deshalb hier gemeinsam. */
 function tableCmdMitMarke(a,zelle){
   const tab=zelle.closest("table");if(!tab)return;
+  tab.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
   const zi=[...tab.rows].indexOf(zelle.parentElement);
   const si=[...zelle.parentElement.children].indexOf(zelle);
   tableCmd(a,zelle);
@@ -16277,6 +16318,7 @@ function stripScreenPagination(ed){
     b.style.marginTop="";
     if(b.classList.contains("pgbreak"))b.style.height="";
   });
+  ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
   ed.style.minHeight="";
   return ()=>{ed.style.minHeight=mh;if(S.mode==="write")paginate()};
 }

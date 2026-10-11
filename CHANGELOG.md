@@ -562,14 +562,23 @@ immer genau einen Commit, der sie anfasst.
   - `check-export.mjs` prüft, dass jede Fußnote im Band steht und keine
     Sammelliste mehr angehängt ist (271/271).
 
-### Nebenbei gefunden, noch nicht behoben
+- **Lange Tabellen werden in der Ansicht auf Seiten verteilt.** Eine
+  Tabelle, die länger als eine Seite ist, lief am Bildschirm durch Fuß- und
+  Kopfband der Folgeseiten; `paginate()` verschob nur ganze Blöcke. Der Druck
+  teilte sie richtig und lag danach eine Seite gegen die Ansicht versetzt
+  (gemessen: 120 Zeilen, Ansicht 24 Seiten, Druck 25). Jetzt kommt vor die
+  erste Zeile, die über die Seite ragt, eine Abstandszeile (`tr.pgzeile`,
+  reine Anzeige wie `margin-top`: `flush()` und der Druck nehmen sie heraus,
+  Tabellenbefehle räumen sie vorher ab, die Tab-Taste überspringt sie); die
+  Zeile zählt als Seitenanfang, an dem der Druck umbricht. Ragt schon die
+  erste Zeile über die Seite, wandert die Tabelle wie bisher ganz weiter.
+  6 px Spielraum: bricht Chromium eine Tabelle im Druck, zeichnet es an jedem
+  Bruch die Rahmen dazu, und eine randvolle Seite fasste dort eine Zeile
+  weniger. Ergebnis: Ansicht und Druck 25 Seiten, gleiche Seitenanfänge,
+  kein zweiter Druckdurchgang mehr nötig. Fußnoten in umbrochenen Tabellen
+  zählen zu der Seite, auf der ihre Marke steht.
 
-- **Lange Tabellen werden in der Ansicht nicht auf Seiten verteilt.** Eine
-  Tabelle, die länger als eine Seite ist, läuft am Bildschirm durch Fuß- und
-  Kopfband der Folgeseiten hindurch; `paginate()` verschiebt nur ganze
-  Blöcke. Der Druck teilt sie richtig nach Zeilen und braucht dadurch mehr
-  Seiten als die Ansicht (gemessen: 120 Zeilen, Ansicht 24 Seiten, Druck 25).
-  Abhilfe wäre, Tabellen zeilenweise zu paginieren wie Absätze ganz.
+### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
   `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
