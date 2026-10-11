@@ -360,7 +360,9 @@ const DATEIPRUEFUNG = String.raw`(async()=>{
    Bildschirm-Umbrüche entfernen, Druckrahmen bauen, @page setzen. */
 const DRUCKVORBEREITUNG = String.raw`(async()=>{
   const d=doc(),ed=document.getElementById("editor");
-  const liste=footnoteListHtml(d,"fnprint");
+  if(S.mode==="write")paginate();   /* wie exportPdfDesktop: frisch aufteilen */
+  /* wie exportPdfDesktop: Sammelliste nur, wenn die Fußnoten nicht je Seite stehen */
+  const liste=fnSeitenweise()?"":footnoteListHtml(d,"fnprint");
   if(liste){const w=document.createElement("div");w.innerHTML=liste;ed.appendChild(w.firstElementChild)}
   stripScreenPagination(ed);
   printFrame(ed);
@@ -382,7 +384,11 @@ const DRUCKVORBEREITUNG = String.raw`(async()=>{
        darum hier: bis 1.2 stand im Druck auf jeder Seite „Seite 0“, und
        diese Prüfung zählte nur Zeilen, nicht ihren Inhalt. */
     druckTexte:[...document.querySelectorAll(".hfdruck")].map(a=>a.textContent).join("|"),
-    zaehlerImDruck:document.querySelectorAll(".hfdruck .pageno").length});
+    zaehlerImDruck:document.querySelectorAll(".hfdruck .pageno").length,
+    /* Fußnoten am Fuß ihrer Seite statt als Sammelliste (seit 1.2) */
+    fnSoll:(d.footnotes||[]).map(f=>f.text),
+    fnImDruck:[...document.querySelectorAll(".hfdruck .fnband")].map(b=>b.textContent).join(" | "),
+    fnListe:document.querySelectorAll(".fnprint").length});
 })()`;
 
 /* ---------- Dateiserver ---------- */
@@ -531,7 +537,7 @@ try {
 
     if (cfg.voll) befunde.push(...JSON.parse(await auswerten(cdp.send, DATEIPRUEFUNG)));
 
-    const { textspalteMm, seitenAmBildschirm, bandObenMm, bandUntenMm, kopfZeilen, fussZeilen, druckTexte, zaehlerImDruck } =
+    const { textspalteMm, seitenAmBildschirm, bandObenMm, bandUntenMm, kopfZeilen, fussZeilen, druckTexte, zaehlerImDruck, fnSoll, fnImDruck, fnListe } =
       JSON.parse(await auswerten(cdp.send, DRUCKVORBEREITUNG));
     const antwort = await cdp.send("Page.printToPDF", {
       printBackground: true, preferCSSPageSize: true,
@@ -558,6 +564,11 @@ try {
         if (!druckTexte.includes("Seite " + k + " von " + seitenAmBildschirm)) fehlt.push(k);
       ok(P + "jede Seite traegt ihre Seitenzahl", !fehlt.length && !zaehlerImDruck,
          fehlt.length ? "fehlt fuer Seite " + fehlt.slice(0, 5).join(", ") : zaehlerImDruck ? "CSS-Zaehler im Druck" : "Seite 1 bis " + seitenAmBildschirm);
+    }
+    if (fnSoll.length) {
+      const fehlt = fnSoll.filter(t => !fnImDruck.includes(t));
+      ok(P + "Fussnoten am Seitenfuss, keine Sammelliste", !fehlt.length && !fnListe,
+         fehlt.length ? "fehlt: " + fehlt.join(" / ") : fnListe ? "Sammelliste angehaengt" : fnSoll.length + " Fussnote(n) im Band");
     }
     ok(P + "Seitenzahl passt zum Bildschirm", g.seiten.length >= seitenAmBildschirm,
        `${g.seiten.length} im PDF, ${seitenAmBildschirm} am Bildschirm`);

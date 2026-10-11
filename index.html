@@ -10581,7 +10581,11 @@ function pdfAuthorMeta(author){
 async function exportPdfDesktop(D,opts={}){
   flush();
   const d=doc(),ed=$("#editor");
-  const liste=footnoteListHtml(d,"fnprint");
+  /* Frisch aufteilen: Seitenanfänge und Fußnoten je Seite müssen zum
+     jetzigen Text passen — paginate() läuft sonst erst 220 ms nach dem
+     letzten Tastendruck, und der Druck nahm die alte Aufteilung. */
+  if(S.mode==="write"&&ed)paginate();
+  const liste=fnSeitenweise()?"":footnoteListHtml(d,"fnprint");
   let node=null;
   if(liste&&ed){const w=document.createElement("div");w.innerHTML=liste;node=w.firstElementChild;ed.appendChild(node)}
   /* printToPDF liest Titel und Autor des PDF aus der Seite (<title> bzw.
@@ -14059,7 +14063,10 @@ function wacheUeberUmbruch(){
     if(Math.abs(inhaltUnterkante()-letzteUnterkante)>1)paginate();
   },1200);
 }
-let seitenAnfaenge=[];
+let seitenAnfaenge=[],fnSeiten=[];
+/* Fußnoten stehen im Druck je Seite, wenn die Ansicht sie verteilt hat;
+   sonst (etwa außerhalb der Schreibansicht) als Sammelliste am Ende. */
+const fnSeitenweise=()=>S.mode==="write"&&fnSeiten.some(x=>x.length);
 /* Wo der Textkörper auf Seite page (ab 0) beginnt bzw. endet, in px bei
    Zoom z: am Seitenrand oder unterhalb des Bandes. Auf Seite 1 gilt bei
    „Erste Seite anders“ das größere der beiden Bänder — der Druck kann
@@ -14074,9 +14081,15 @@ function hfRandPx(d,seite,page,z){
 }
 function queuePaginate(){
   queueRep();clearTimeout(pgTimer);pgTimer=setTimeout(()=>{paginate();drawAnchors()},220)}
+/* Solange der Druckrahmen steht, keine Bildschirm-Aufteilung: sie setzte
+   ihre Abstände wieder in den Text, den der Druck gerade ohne sie braucht.
+   Der Wächter (wacheUeberUmbruch) tat genau das, sobald der Speichern-Dialog
+   des PDF-Exports länger als 1,2 s offen war — gemessen: jede Seite im Druck
+   zu zwei Seiten zerfallen. */
+let druckLaeuft=false;
 function paginate(){
   const ed=$("#editor"),paper=$("#paper"),layer=$("#pagelayer");
-  if(!ed||!paper)return;
+  if(!ed||!paper||druckLaeuft)return;
   renumberFootnotes(ed);
   const f=fmtOf(doc()),z=S.zoom;
   const pw=MM(f.w)*z, ph=MM(f.h)*z;
@@ -14173,6 +14186,8 @@ function paginate(){
     });
     fnByPage=reflow(p=>Math.max(60,contentHVon(p)-(fnHeights[p]||0)));
   }
+  /* Für den Druck: Fußnoten je Seite (hfDruckSeiten) */
+  fnSeiten=fnByPage.map(ids=>ids?[...new Set(ids)]:[]);
   ed.querySelectorAll(".toc").forEach(t=>tocUpdatePageNumbers(ed,t));
   if(S.outlineOpen)drawOutline();
   const edTop=ed.getBoundingClientRect().top;
@@ -15472,6 +15487,7 @@ function setPrintHF(){
    von #editor die Auswahl verwirft. */
 function printFrame(ed){
   if(!ed||!ed.parentNode)return ()=>{};
+  druckLaeuft=true;
   const sel=getSelection();
   const merk=sel&&sel.rangeCount?sel.getRangeAt(0).cloneRange():null;
   const tbl=document.createElement("table");
@@ -15484,6 +15500,7 @@ function printFrame(ed){
   tbl.querySelector("tbody td").appendChild(ed);
   const ersteWeg=hfDruckSeiten(tbl,ed);
   return ()=>{
+    druckLaeuft=false;
     ersteWeg();
     marke.parentNode.insertBefore(ed,marke);
     marke.remove();tbl.remove();
@@ -15517,8 +15534,20 @@ function hfDruckSeiten(tbl,ed){
     halter.style.height=(m.kopf1-m.kopf)+"mm";
     ed.parentNode.insertBefore(halter,ed);weg.push(()=>halter.remove());
   }
-  if(!(m.kopfAn||m.fussAn))return ()=>weg.forEach(w=>w());
+  const fnJe=fnSeitenweise();
+  if(!(m.kopfAn||m.fussAn)&&!fnJe)return ()=>weg.forEach(w=>w());
   const A=f.h-m.mt-m.mb, P=Math.ceil(A*96/25.4-1e-6)*25.4/96;
+  /* Fußnoten am Fuß ihrer Seite, wie am Bildschirm und in Word — bis 1.2
+     standen sie im Druck gesammelt am Ende. Unterkante wie am Bildschirm:
+     dort, wo der Textkörper der Seite endet (über der Fußzeile). Den Platz
+     dafür hat schon die Ansicht freigehalten, und der Druck bricht dort um,
+     wo sie umbricht (druckWieSchirm). */
+  const fnBaender=()=>fnJe?fnSeiten.map((ids,p)=>{
+    if(!ids.length)return "";
+    const unten=f.h-hfRandPx(d,"ftr",p,1)/MM(1);
+    return `<div style="position:absolute;top:0;left:0;width:${cw}mm;height:0;transform:translateY(${(p*P+unten-m.mt).toFixed(4)}mm)">`+
+      `<div class="fnband" style="position:absolute;bottom:0;left:0;width:${cw}mm;font-size:8.5pt;color:#000">${fnBandHtml(ids)}</div></div>`;
+  }).join(""):"";
   /* Genau so viele Seiten wie gezählt, keine Reserve: eine Zeile hinter dem
      Text legte Chromium eine leere Seite an (gemessen, „Seite 7 von 6“).
      Läuft der Druck länger, baut hfDruckGesamt() mit der echten Zahl neu. */
@@ -15532,7 +15561,7 @@ function hfDruckSeiten(tbl,ed){
       if(fuss)html+=`<div style="position:absolute;top:0;left:0;width:${cw}mm;height:0;transform:translateY(${(p*P+A).toFixed(4)}mm)">`+
         `<div style="position:absolute;bottom:0;left:0;width:${cw}mm">${fuss}</div></div>`;
     }
-    return html;
+    return html+fnBaender();
   };
   tbl.style.position="relative";
   const anker=document.createElement("div");
@@ -16082,13 +16111,12 @@ function renumberFootnotes(ed){
     s.textContent=seen.get(s.dataset.fn);
   });
 }
-/* ---- Fußnoten am Seitenfuß (nur die Bildschirmansicht, siehe paginate()) ----
+/* ---- Fußnoten am Seitenfuß (siehe paginate()) ----
    Word/WordPerfect/Lotus Word Pro zeigen Fußnoten seit jeher direkt am Fuß
    der Seite, auf der sie stehen, nicht gesammelt am Dokumentende - die
-   Fläche wächst dafür je Seite unterschiedlich. Drucken/PDF können das mit
-   reinem CSS nicht (siehe withPrintFootnotes weiter unten): dort bleibt es
-   bei der Sammelliste am Ende. Die Druckvorschau dagegen klont #pagelayer
-   unverändert und zeigt die echte Seitenfläche mit. */
+   Fläche wächst dafür je Seite unterschiedlich. Seit 1.2 auch im Druck/PDF:
+   hfDruckSeiten() setzt dasselbe Band je Seite (fnSeiten). Die Druckvorschau
+   klont #pagelayer unverändert und zeigt die echte Seitenfläche mit. */
 function fnBandHtml(ids){
   const ed=$("#editor"),d=doc();if(!ed)return"";
   return `<div class="fnline"></div>`+ids.map(id=>{
@@ -16224,10 +16252,9 @@ function editFootnote(id,frisch){
     if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#fnOk").click()}
   });
 }
-/* Drucken/PDF und die textbasierten Exporte kennen keine Seiten, auf denen
-   eine Fußnote "unten" sitzen könnte (siehe paginate(): das ist ein reiner
-   Editor-Begriff, dem window.print() nicht folgt) - dort erscheinen die
-   Fußnoten darum gesammelt am Dokumentende, wie Endnoten. */
+/* Sammelliste am Dokumentende: nur noch der Rückfall, wenn der Druck die
+   Fußnoten nicht je Seite setzen kann (fnSeitenweise() falsch, etwa außerhalb
+   der Schreibansicht). Die textbasierten Exporte haben ihre eigenen Listen. */
 function footnoteListHtml(d,cls){
   const order=footnoteOrderFromHtml(d.html);
   if(!order.length)return"";
@@ -16255,7 +16282,8 @@ function stripScreenPagination(ed){
 }
 function withPrintFootnotes(fn){
   const d=doc(),ed=$("#editor");
-  const html=footnoteListHtml(d,"fnprint");
+  if(S.mode==="write"&&ed)paginate();   /* frisch, siehe exportPdfDesktop */
+  const html=fnSeitenweise()?"":footnoteListHtml(d,"fnprint");
   let node=null;
   if(html&&ed){const wrap=document.createElement("div");wrap.innerHTML=html;node=wrap.firstElementChild;ed.appendChild(node)}
   const zurueck=stripScreenPagination(ed);

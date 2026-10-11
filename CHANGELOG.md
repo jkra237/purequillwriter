@@ -544,12 +544,25 @@ immer genau einen Commit, der sie anfasst.
   (`werkzeuge/pruefen/untermenue-pruefen.cjs`), Gegenprobe am alten Stand
   zeigt den Fehler.
 
-### Nebenbei gefunden, noch nicht behoben
+- **Fußnoten stehen im Druck/PDF am Fuß ihrer Seite** wie am Bildschirm
+  und in Word — bis 1.2 gesammelt am Ende. `hfDruckSeiten()` setzt je Seite
+  dasselbe Band wie die Ansicht (`fnSeiten` aus `paginate()`, Unterkante
+  dort, wo der Textkörper der Seite endet); den Platz hält schon die Ansicht
+  frei, und der Druck bricht wie sie um. Die Sammelliste bleibt Rückfall.
+  Dabei zwei Druckfehler behoben:
+  - Der Druck nahm die **alte Aufteilung**: `paginate()` läuft erst 220 ms
+    nach dem letzten Tastendruck. Beide Druckwege teilen jetzt vorher frisch
+    auf (sonst gemessen: Fußnoten eines anderen Dokuments, leeres Band).
+  - Der **Umbruch-Wächter** (`wacheUeberUmbruch`) teilte mitten in der
+    Druckvorbereitung neu auf und setzte die Bildschirm-Abstände wieder in
+    den Text — gemessen: jede Seite im Druck zu zwei zerfallen (10 statt 6).
+    Beim PDF-Export reichte dafür ein Speichern-Dialog, der länger als 1,2 s
+    offen war. `paginate()` ruht jetzt, solange der Druckrahmen steht
+    (`druckLaeuft`).
+  - `check-export.mjs` prüft, dass jede Fußnote im Band steht und keine
+    Sammelliste mehr angehängt ist (271/271).
 
-- **Fußnoten stehen im Druck/PDF gesammelt am Ende**, nicht am Fuß ihrer
-  Seite wie am Bildschirm und in Word (`withPrintFootnotes`). Mit dem
-  seitenweisen Druck (`hfDruckSeiten`) wäre ein Fußband je Seite jetzt
-  machbar.
+### Nebenbei gefunden, noch nicht behoben
 
 - **Lange Tabellen werden in der Ansicht nicht auf Seiten verteilt.** Eine
   Tabelle, die länger als eine Seite ist, läuft am Bildschirm durch Fuß- und
