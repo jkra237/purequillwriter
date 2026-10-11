@@ -488,6 +488,13 @@ immer genau einen Commit, der sie anfasst.
   Bewahren standen sie nur als Platzhalter. Dabei: `endnotePr` aus
   settings.xml wird nicht mehr übernommen — ohne `endnotes.xml` hielt Word die
   Datei für beschädigt.
+- **Spalten**: aus Word gelesen (gleich breite, `w:cols` mit `num`), in der
+  Statusleiste angezeigt („2 Spalten“, Klick öffnet den Dialog), über
+  *Format › Spalten …* für Word setzbar (1–3, Abstand), beim Speichern an der
+  vom Schema verlangten Stelle im `sectPr` (`wMitteMitSpalten`). **Am
+  Bildschirm und im Druck einspaltig** — Toms Entscheidung: mehrspaltig hätte
+  bedeutet, jeden Absatz der zweiten Spalte zu verschieben, ein Risiko für
+  Schreibmarke und Markieren. Ungleich breite Spalten bleiben roh bewahrt.
 - **Gerade Seiten anders** wie in Word (`evenAndOddHeaders` in
   settings.xml, `type="even"`): Häkchen im Dialog *Kopf- und Fußzeile*,
   eigene Zeilen für Seite 2, 4, 6 … (`d.hdr2`/`d.ftr2`, `d.geradeAnders`;
