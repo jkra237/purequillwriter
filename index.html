@@ -569,7 +569,12 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 :is(#editor,.pvedit) blockquote,:is(#editor,.pvedit) p,:is(#editor,.pvedit) li,:is(#editor,.pvedit) h1,:is(#editor,.pvedit) h2,:is(#editor,.pvedit) h3{overflow-wrap:break-word}
 :is(#editor,.pvedit) td,:is(#editor,.pvedit) th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
+:is(#editor,.pvedit) td>p:last-child,:is(#editor,.pvedit) th>p:last-child{margin-bottom:0}
 :is(#editor,.pvedit) th{background:var(--chrome-2);font-weight:600;text-align:left}
+/* Rahmenlose Tabelle (aus Word, data-rahmen="ohne"): im Editor feine Hilfslinien wie
+   Words „Rasterlinien anzeigen“, damit man die Zellen sieht; überall sonst ohne. */
+#editor table[data-rahmen="ohne"]>*>tr>td,#editor table[data-rahmen="ohne"]>*>tr>th{border:1px dashed color-mix(in srgb,var(--ink-faint) 55%,transparent)}
+.pvedit table[data-rahmen="ohne"]>*>tr>td,.pvedit table[data-rahmen="ohne"]>*>tr>th{border-color:transparent}
 .tgrid{display:grid;grid-template-columns:repeat(8,18px);gap:2px;padding:7px 7px 3px}
 .tgrid i{width:18px;height:15px;border:1px solid var(--rule);background:var(--paper);display:block;cursor:pointer}
 .tgrid i.on{background:var(--stamp);border-color:var(--stamp)}
@@ -1365,6 +1370,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor .pgbreak{break-after:page;page-break-after:always;border:none!important;
     height:0!important;visibility:hidden!important}
   #editor td,#editor th{border:1px solid #000!important}
+  #editor table[data-rahmen="ohne"]>*>tr>td,#editor table[data-rahmen="ohne"]>*>tr>th{border:none!important}
   #editor th{background:none!important}
   .glossterm{border-bottom:none!important}
   .toc-refresh,.toc-settings{display:none!important}
@@ -1392,6 +1398,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .readview .rinner img{max-width:100%;height:auto}
 .readview .rinner table{border-collapse:collapse;width:100%;margin:0 0 .9em}
 .readview .rinner td,.readview .rinner th{border:1px solid var(--rule);padding:.35em .5em}
+.readview .rinner table[data-rahmen="ohne"]>*>tr>td,.readview .rinner table[data-rahmen="ohne"]>*>tr>th{border:none}
 /* Arbeitsspuren gehören nicht in die Leseansicht */
 .readview .anch{background:none!important;border-bottom:none!important}
 .readview .glossterm{border-bottom:none!important}
@@ -8662,6 +8669,7 @@ blockquote[data-qs="typo"]::before{content:'“';position:absolute;left:.1em;top
   font-size:2.4em;line-height:1;color:${rule};font-style:normal}
 table{border-collapse:collapse;width:100%;margin:0 0 ${ps}em}
 td,th{border:1px solid ${faint};padding:.35em .5em;vertical-align:top;text-align:left}
+table[data-rahmen="ohne"]>*>tr>td,table[data-rahmen="ohne"]>*>tr>th{border:none}
 th{background:${chrome2};font-weight:600}
 .pgbreak{border:none;border-top:1px solid ${rule};margin:2.4em 0;height:0}
 .pgbreak::before{content:""}
@@ -9161,7 +9169,21 @@ function docxNumId(el){
   if(i<0)i=DOCXLISTS.findIndex(d=>d.tag===tag&&d.ls==="");
   return i+1;
 }
-function numberingXml(){
+/* Jede nummerierte Liste bekommt eine eigene w:num mit ihrer Startnummer.
+   Vorher teilten sich alle Listen eines Stils eine numId — Word zählt eine
+   numId über das ganze Dokument weiter, aus zwei getrennten Listen 1–3 und
+   1–3 wurden 1–3 und 4–6. Umgekehrt zählt eine Liste mit start="4" (aus
+   Word eingelesen, durch Aufzählungspunkte unterbrochen) bei 4 weiter.
+   Aufzählungen ohne Nummern brauchen das nicht und bleiben bei ihrer numId. */
+function docxNumInstanz(el,ctx){
+  const basis=docxNumId(el);
+  if(el.tagName.toLowerCase()!=="ol"||!ctx||!ctx.numInstanzen)return basis;
+  const start=Math.max(1,parseInt(el.getAttribute("start"),10)||1);
+  const numId=DOCXLISTS.length+1+ctx.numInstanzen.length;
+  ctx.numInstanzen.push({numId,abstract:basis-1,start});
+  return numId;
+}
+function numberingXml(instanzen){
   const stufe=(fmt,text)=>[0,1,2,3].map(i=>
     `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${fmt}"/><w:lvlText w:val="${text(i)}"/>`+
     `<w:pPr><w:ind w:left="${(i+1)*360}" w:hanging="360"/></w:pPr></w:lvl>`).join("");
@@ -9169,6 +9191,8 @@ function numberingXml(){
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
 ${DOCXLISTS.map((d,i)=>`<w:abstractNum w:abstractNumId="${i}">${stufe(d.fmt,d.text)}</w:abstractNum>`).join("\n")}
 ${DOCXLISTS.map((d,i)=>`<w:num w:numId="${i+1}"><w:abstractNumId w:val="${i}"/></w:num>`).join("\n")}
+${(instanzen||[]).map(n=>`<w:num w:numId="${n.numId}"><w:abstractNumId w:val="${n.abstract}"/>`+
+  `<w:lvlOverride w:ilvl="0"><w:startOverride w:val="${n.start}"/></w:lvlOverride></w:num>`).join("\n")}
 </w:numbering>`;
 }
 function stylesXml(d){
@@ -9221,16 +9245,21 @@ function docxEinebnen(root){
     if(!p.textContent.trim()&&!p.querySelector("img"))p.remove();
   });
 }
+/* Reihenfolge nach dem Schema (CT_RPr): rStyle, b, i, caps, strike, color,
+   sz, u, shd, vertAlign. Vorher stand rStyle am Ende und u vor strike —
+   Word nahm es hin, ein strenger Leser nicht. */
 function rPrXml(st){
   let x="";
+  if(st.link)x+='<w:rStyle w:val="Hyperlink"/>';
   if(st.b)x+="<w:b/>";
   if(st.i)x+="<w:i/>";
-  if(st.u)x+='<w:u w:val="single"/>';
+  if(st.caps)x+="<w:caps/>";
   if(st.strike)x+="<w:strike/>";
   if(st.color)x+=`<w:color w:val="${st.color}"/>`;
+  if(st.sz)x+=`<w:sz w:val="${st.sz}"/><w:szCs w:val="${st.sz}"/>`;
+  if(st.u)x+='<w:u w:val="single"/>';
   if(st.hi)x+=`<w:shd w:val="clear" w:color="auto" w:fill="${st.hi}"/>`;
   if(st.vert)x+=`<w:vertAlign w:val="${st.vert}"/>`;
-  if(st.link)x+='<w:rStyle w:val="Hyperlink"/>';
   return x?`<w:rPr>${x}</w:rPr>`:"";
 }
 function runeXml(text,st){
@@ -9312,6 +9341,17 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
     if(tag==="font"&&n.getAttribute("color"))neu.color=n.getAttribute("color").replace("#","").toUpperCase();
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
+    if(n.style&&n.style.textTransform==="uppercase")neu.caps=true;
+    /* Größe: em verschachtelt sich (relativ zur umgebenden Größe), darum
+       wird die aktuelle Größe in pt mitgeführt. w:sz in Halbpunkten, nur
+       wenn sie von der Dokumentgröße abweicht. */
+    if(n.style&&n.style.fontSize&&ctx&&ctx.docSize){
+      const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
+      const basis=st.pt||ctx.docSize;
+      const pt=u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
+      if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);
+        if(hp!==Math.round(ctx.docSize*2))neu.sz=hp;else delete neu.sz}
+    }
     if(tag==="a"){neu.link=true;links.push({href:n.getAttribute("href")||"",start:runs.length})}
     inlineAblaufen(n,neu,runs,links,ctx,ws);
     if(tag==="a")links[links.length-1].end=runs.length;
@@ -9363,13 +9403,19 @@ async function walkBlocks(root,ctx){
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
-      const a=absatzXml(el,jc?`<w:jc w:val="${jc}"/>`:"",null,ctx);
+      /* Einzug: im Editor margin-left in em (indentBlocks). Ging bis
+         2026-10 beim Speichern als Word verloren. */
+      const twip=v=>{const z=parseFloat(v);return z&&/em$/.test(v)?Math.round(z*ctx.docSize*20):0};
+      const ml=el.style?twip(el.style.marginLeft):0,ti=el.style?twip(el.style.textIndent):0;
+      const indA=[ml>0&&`w:left="${ml}"`,ti>0&&`w:firstLine="${ti}"`,ti<0&&`w:hanging="${-ti}"`].filter(Boolean);
+      const ind=indA.length?`<w:ind ${indA.join(" ")}/>`:"";
+      const a=absatzXml(el,ind+(jc?`<w:jc w:val="${jc}"/>`:""),null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(/^h[1-3]$/.test(tag)){
       const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`,null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="ul"||tag==="ol"){
-      xml+=listeXml(el,docxNumId(el),0,ctx);
+      xml+=listeXml(el,docxNumInstanz(el,ctx),0,ctx);
     }else if(tag==="table"){
       xml+=await tabelleXml(el,ctx);
     }else if(tag==="figure"){
@@ -9436,10 +9482,13 @@ async function tabelleXml(table,ctx){
     zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
   }
   if(!zeilen)return "";
+  /* Eine rahmenlose Tabelle (aus Word eingelesen, data-rahmen="ohne") geht
+     auch ohne Rahmen hinaus — ausdrücklich nil, sonst setzte ein Leser mit
+     anderer Vorgabe wieder welche. */
+  const ohne=table.getAttribute("data-rahmen")==="ohne";
+  const seite=n=>ohne?`<w:${n} w:val="nil"/>`:`<w:${n} w:val="single" w:sz="4" w:color="999999"/>`;
   return `<w:tbl><w:tblPr><w:tblW w:w="${ctx.tableWidthTwip}" w:type="dxa"/>`+
-    `<w:tblBorders><w:top w:val="single" w:sz="4" w:color="999999"/><w:left w:val="single" w:sz="4" w:color="999999"/>`+
-    `<w:bottom w:val="single" w:sz="4" w:color="999999"/><w:right w:val="single" w:sz="4" w:color="999999"/>`+
-    `<w:insideH w:val="single" w:sz="4" w:color="999999"/><w:insideV w:val="single" w:sz="4" w:color="999999"/></w:tblBorders>`+
+    `<w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(seite).join("")}</w:tblBorders>`+
     `</w:tblPr><w:tblGrid>${grid}</w:tblGrid>${zeilen}</w:tbl><w:p/>`;
 }
 async function figurXml(fig,ctx){
@@ -9514,7 +9563,7 @@ async function docxBlob(d){
     docSize:d.size||S.settings.size,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
-    footnoteId:1,footnotes:[],footnoteIds:new Map(),
+    footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],
     footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text]))};
   const bodyXml=await walkBlocks(container,ctx);
   /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
@@ -9558,7 +9607,7 @@ ${relEintraege.join(String.fromCharCode(10))}
     {name:"_rels/.rels",bytes:enc.encode(DOCX_RELS)},
     {name:"word/document.xml",bytes:enc.encode(documentXml)},
     {name:"word/styles.xml",bytes:enc.encode(stylesXml(d))},
-    {name:"word/numbering.xml",bytes:enc.encode(numberingXml())},
+    {name:"word/numbering.xml",bytes:enc.encode(numberingXml(ctx.numInstanzen))},
     {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
     {name:"docProps/core.xml",bytes:enc.encode(coreXml(d.title))},
     ...(hatHdr?[{name:"word/header1.xml",bytes:enc.encode(hfPartXml(d,"hdr",ctx.docSize))}]:[]),
@@ -9691,6 +9740,7 @@ figure{margin:1.2em 0;text-align:center;page-break-inside:avoid;break-inside:avo
 figcaption{font-size:.85em;font-style:italic;margin-top:.3em}
 table{border-collapse:collapse;margin:1em 0}
 td,th{border:1px solid #888;padding:.3em .5em;text-align:left}
+table[data-rahmen="ohne"]>*>tr>td,table[data-rahmen="ohne"]>*>tr>th{border:none}
 .pgbreak{border:0;border-top:1px solid #999;margin:2em 0;height:0}
 .titlepage{text-align:center;margin-top:22%}
 .titlepage .booktitle{font-size:2em;margin:0 0 .6em}
@@ -10985,8 +11035,12 @@ function docxSchalter(pr,n){
   return s!=="0"&&s!=="false"&&s!=="off"&&s!=="none";
 }
 function docxRPr(pr){
-  const o={};["b","i","u","strike"].forEach(n=>{
+  const o={};["b","i","u","strike","caps"].forEach(n=>{
     const v=docxSchalter(pr,n);if(v!==undefined)o[n]=v});
+  /* Schriftfarbe; „auto“ ist Words Standardschwarz und keine Auszeichnung. */
+  const farbe=KIND(pr,"color");
+  if(farbe){const v=String(xattr(farbe,"val")||"");
+    o.color=/^[0-9a-f]{6}$/i.test(v)?v.toUpperCase():null}
   /* Größe und Schrift laufen mit durch dieselbe Vererbungskette, werden aber
      nicht am Lauf ausgezeichnet — sie bestimmen nur die Grundschrift des
      Dokuments (docxGrundschrift). w:sz steht in Halbpunkten. Eine Designschrift
@@ -11156,7 +11210,8 @@ function docxNummern(xml){
     [...e.children].filter(c=>c.localName==="lvl").forEach(l=>{
       ebenen[String(xattrN(l,"ilvl")||"0")]={
         fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
-        text:String(xattrN(KIND(l,"lvlText"),"val")||"")};
+        text:String(xattrN(KIND(l,"lvlText"),"val")||""),
+        start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1};
     });
     abstrakt[String(id)]=ebenen;
   });
@@ -11167,10 +11222,15 @@ function docxNummern(xml){
     const ebenen=Object.assign({},abstrakt[ziel]||{});
     /* lvlOverride ersetzt einzelne Ebenen für genau diese Liste */
     [...e.children].filter(c=>c.localName==="lvlOverride").forEach(o=>{
-      const l=KIND(o,"lvl");if(!l)return;
-      ebenen[String(xattr(o,"ilvl")||xattrN(l,"ilvl")||"0")]={
+      const l=KIND(o,"lvl"),so=KIND(o,"startOverride");
+      const ilvl=String(xattr(o,"ilvl")||(l&&xattrN(l,"ilvl"))||"0");
+      if(l)ebenen[ilvl]={
         fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
-        text:String(xattrN(KIND(l,"lvlText"),"val")||"")};
+        text:String(xattrN(KIND(l,"lvlText"),"val")||""),
+        start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1};
+      /* startOverride: diese Liste beginnt bei einer eigenen Nummer */
+      if(so&&ebenen[ilvl])ebenen[ilvl]=Object.assign({},ebenen[ilvl],
+        {start:parseInt(xattrN(so,"val"),10)||1});
     });
     karte[String(id)]=ebenen;
   });
@@ -11390,11 +11450,74 @@ function docxBildRid(el){
   return null;
 }
 
+/* Hüllen um Textläufe, deren Inhalt zum Text gehört. Gelesen wurden bis
+   2026-10 nur w:r und w:hyperlink; alles andere fiel samt Inhalt weg —
+   gemessen an einem Goethe-Formular: jede Antwort in einem Formularfeld
+   (w:sdt) und jeder nachverfolgt eingefügte Text (w:ins) verschwand beim
+   Öffnen ohne Meldung. w:del und w:moveFrom bleiben draußen, das ist
+   gelöschter bzw. weggeschobener Text. */
+const DOCX_HUELLE_LAUF=new Set(["hyperlink","ins","moveTo","smartTag","customXml","fldSimple","dir","bdo"]);
+const DOCX_HUELLE_BLOCK=new Set(["customXml","ins","moveTo"]);
+/* Ein leeres Formularfeld zeigt seinen Hinweis („Klicken oder tippen Sie
+   hier …“) als Text an — der gehört zur Bedienung von Word, nicht zum
+   Dokument. Ausgefüllt fehlt die Kennung, dann ist es Inhalt. */
+const docxPlatzhalter=sdt=>!!KIND(KIND(sdt,"sdtPr"),"showingPlcHdr");
+function docxSdtInhalt(sdt){return docxPlatzhalter(sdt)?null:KIND(sdt,"sdtContent")}
+/* Die Blöcke eines Containers (body, Zelle, Feldinhalt) als flache Liste
+   von w:p und w:tbl — durch Formularfelder und Hüllen hindurch. */
+function docxBloecke(c){
+  const out=[];
+  for(const el of c.children){
+    const n=el.localName;
+    if(n==="p"||n==="tbl")out.push(el);
+    else if(n==="sdt"){const k=docxSdtInhalt(el);if(k)out.push(...docxBloecke(k))}
+    else if(DOCX_HUELLE_BLOCK.has(n))out.push(...docxBloecke(el));
+  }
+  return out;
+}
+/* Hat eine Word-Tabelle sichtbare Rahmen? Bisher bekam jede eingelesene
+   Tabelle welche — auch die rahmenlosen Kästen, mit denen Formulare ihre
+   Felder anordnen. Reihenfolge wie in Word: direkte tblBorders, sonst
+   Zellrahmen, sonst die Tabellenvorlage samt basedOn-Kette. Ohne jede
+   Angabe gilt Words „Normale Tabelle“ — ohne Rahmen. */
+function docxRahmenSichtbar(el){
+  if(!el)return undefined;
+  const seiten=[...el.children];
+  if(!seiten.length)return undefined;
+  return seiten.some(s=>{const v=String(xattrN(s,"val")||"").toLowerCase();return v&&v!=="none"&&v!=="nil"});
+}
+function docxTabellenRahmen(stilXml){
+  const karte={};
+  if(!stilXml)return karte;
+  const dom=new DOMParser().parseFromString(stilXml,"application/xml");
+  if(dom.querySelector("parsererror"))return karte;
+  for(const s of dom.documentElement.children){
+    if(s.localName!=="style"||xattrN(s,"type")!=="table")continue;
+    karte[String(xattrN(s,"styleId")||"")]={
+      sicht:docxRahmenSichtbar(KIND(KIND(s,"tblPr"),"tblBorders")),
+      basedOn:xattrN(KIND(s,"basedOn"),"val")};
+  }
+  return karte;
+}
+function docxTabelleMitRahmen(t,karte){
+  const tp=KIND(t,"tblPr");
+  const direkt=docxRahmenSichtbar(KIND(tp,"tblBorders"));
+  if(direkt!==undefined)return direkt;
+  for(const n of t.getElementsByTagName("*"))
+    if(n.localName==="tcBorders"&&docxRahmenSichtbar(n))return true;
+  let id=xattrN(KIND(tp,"tblStyle"),"val"),runde=0;
+  while(id&&karte[id]&&runde++<10){
+    if(karte[id].sicht!==undefined)return karte[id].sicht;
+    id=karte[id].basedOn;
+  }
+  return false;
+}
 function docxLauf(p,ktx){
   let out="";
   const grund=ktx?ktx.grund:{};
   [...p.children].forEach(el=>{
-    if(el.localName==="hyperlink"){out+=docxLauf(el,ktx);return}
+    if(DOCX_HUELLE_LAUF.has(el.localName)){out+=docxLauf(el,ktx);return}
+    if(el.localName==="sdt"){const k=docxSdtInhalt(el);if(k)out+=docxLauf(k,ktx);return}
     if(el.localName!=="r")return;
     let t="",marke="";
     [...el.children].forEach(c=>{
@@ -11428,6 +11551,20 @@ function docxLauf(p,ktx){
     const wirk=Object.assign({},grund,
       ktx?docxVorlageWirkung(ktx.stile,xattrN(KIND(pr,"rStyle"),"val")||""):{},
       docxRPr(pr));
+    /* Farbe, GROSSBUCHSTABEN und eine Größe abweichend vom Dokument kamen
+       bis 2026-10 nicht mit (gemessen am Goethe-Formular: dunkelblaue
+       Versal-Überschriften, Feldnamen in 10 pt, Text in 9 pt — alles kam
+       schwarz, klein geschrieben und in 9 pt an). Die Größe steht relativ
+       in em zur Dokumentgröße: absolute pt gingen am Zoom vorbei, und
+       ändert man die Dokumentgröße, bleiben die Verhältnisse. In
+       Überschriften entscheidet weiter die Überschrift über die Größe. */
+    const stil=[];
+    if(wirk.color)stil.push("color:#"+wirk.color);
+    if(wirk.caps)stil.push("text-transform:uppercase");
+    const gg=ktx&&ktx.groesse;
+    if(gg&&wirk.sz&&!ktx.ueberschrift&&Math.abs(wirk.sz-gg)>=0.25)
+      stil.push("font-size:"+(Math.round(wirk.sz/gg*1000)/1000)+"em");
+    if(stil.length)t='<span style="'+stil.join(";")+'">'+t+"</span>";
     if(wirk.b&&!(ktx&&ktx.ohneFett))t="<b>"+t+"</b>";
     if(wirk.i)t="<i>"+t+"</i>";
     if(wirk.u)t="<u>"+t+"</u>";
@@ -11449,13 +11586,22 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const grundGroesse=gs.size||z.groesse||S.settings.size||11;
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
+  const rahmenStile=docxTabellenRahmen(stilXml);
+  const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
+    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,bild}};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
      bewusst nicht geschlossen. */
   const stapel=[];
-  const auf=s=>{out+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+">";
+  const auf=(s,start)=>{out+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(start>1?' start="'+start+'"':"")+">";
     stapel.push({tag:s.tag,ls:s.ls,offen:false})};
+  /* Nummern zählen je Liste (numId) und Ebene weiter, auch wenn andere
+     Absätze dazwischenstehen — so macht es Word. Im Goethe-Formular stehen
+     zwischen den fünf nummerierten Abschnitten Aufzählungspunkte; ohne
+     diese Zählung hieß jeder Abschnitt „1.“. Wird eine Ebene tiefer
+     gezählt, beginnt die nächste Unterebene wieder vorn. */
+  const zaehler={};
   const zuBis=n=>{while(stapel.length>n){const t=stapel.pop();
     if(t.offen)out+="</li>";out+="</"+t.tag+">"}};
   const alleZu=()=>zuBis(0);
@@ -11466,7 +11612,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,fn,bild})||"";
+    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,bild})||"";
     const numPr=KIND(pr,"numPr");
     if(numPr){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
@@ -11475,11 +11621,22 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
       /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
       if(stil){
-        if(!stapel.length)auf(stil);
+        const ebene=ebenen?ebenen[String(ilvl)]:null;
+        const k=numId+":"+ilvl;
+        const nummer=zaehler[k]?zaehler[k]+1:((ebene&&ebene.start)||1);
+        zaehler[k]=nummer;
+        for(let t=ilvl+1;t<9;t++)delete zaehler[numId+":"+t];
+        const startHier=stil.tag==="ol"?nummer:0;
+        const oeffne=()=>auf(stil,stapel.length===ilvl?startHier:0);
+        if(!stapel.length)oeffne();
         zuBis(ilvl+1);
-        while(stapel.length<ilvl+1)auf(stil);
+        while(stapel.length<ilvl+1)oeffne();
         const oben=stapel[stapel.length-1];
-        if(oben.tag!==stil.tag||oben.ls!==stil.ls){zuBis(stapel.length-1);auf(stil)}
+        /* Eine andere Liste (numId) beginnt eine neue, auch bei gleichem
+           Aussehen — sonst verschmolzen zwei direkt aufeinanderfolgende
+           Listen, und eine Startnummer ging verloren. */
+        if(oben.tag!==stil.tag||oben.ls!==stil.ls||(oben.numId&&oben.numId!==numId)){zuBis(stapel.length-1);oeffne()}
+        stapel[stapel.length-1].numId=numId;
         const jetzt=stapel[stapel.length-1];
         if(jetzt.offen)out+="</li>";
         out+="<li>"+(inhalt||"<br>");jetzt.offen=true;
@@ -11498,10 +11655,22 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       return;
     }
     if(h)out+="<h"+h+">"+(inhalt||"<br>")+"</h"+h+">";
-    else out+="<p>"+(inhalt||"<br>")+"</p>";
+    else{
+      /* Linker Einzug, in em wie beim Einrücken im Editor (indentBlocks).
+         Nur der direkte am Absatz: der einer Vorlage gehört meist zu einer
+         Liste, und die rückt ihre Punkte selbst ein. */
+      const ind=KIND(pr,"ind");
+      const zuEm=a=>{const tw=ind?parseInt(xattrN(ind,a)||"0",10)||0:0;
+        return tw&&grundGroesse?Math.round(tw/20/grundGroesse*100)/100:0};
+      const links=zuEm("left")||zuEm("start");
+      /* Erstzeileneinzug (firstLine) bzw. hängender Einzug (hanging) */
+      const erste=zuEm("firstLine")||-zuEm("hanging");
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em"].filter(Boolean).join(";");
+      out+=(st?'<p style="'+st+'">':"<p>")+(inhalt||"<br>")+"</p>";
+    }
   };
-  const tabelle=t=>{
-    alleZu();
+  const tabelle=t=>{alleZu();out+=tabelleHtml(t)};
+  const tabelleHtml=t=>{
     /* tblGrid steht in Twips, die colgroup dieses Programms in Prozent —
        ein Verhältnis überlebt Zoom und einen Wechsel des Seitenformats,
        ein absolutes Maß nicht. */
@@ -11509,7 +11678,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const spalten=grid?[...grid.children].filter(c=>c.localName==="gridCol")
       .map(c=>parseInt(xattrN(c,"w"),10)||0):[];
     const summe=spalten.reduce((a,b)=>a+b,0);
-    let r="<table>";
+    let r=docxTabelleMitRahmen(t,rahmenStile)?"<table>":'<table data-rahmen="ohne">';
     if(spalten.length&&summe>0)
       r+="<colgroup>"+spalten.map(w=>
         `<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
@@ -11519,19 +11688,33 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       /* Zeilenhöhen stehen hier in em, damit sie mit der Schriftgröße mitgehen */
       const em=twip&&grundGroesse?Math.round(twip/20/grundGroesse*100)/100:0;
       r+=em>0?`<tr style="height:${em}em">`:"<tr>";
-      [...tr.children].filter(x=>x.localName==="tc").forEach(tc=>{
-        const inner=[...tc.children].filter(x=>x.localName==="p").map(p=>{
-          const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-          return docxLauf(p,{stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),fn,bild});
-        }).join("<br>");
+      /* Zeilen können selbst in Formularfeldern stecken (wiederholbare
+         Abschnitte); Zellen ebenso. */
+      const zellen=[];
+      const sammle=c=>[...c.children].forEach(x=>{
+        if(x.localName==="tc")zellen.push(x);
+        else if(x.localName==="sdt"){const k=docxSdtInhalt(x);if(k)sammle(k)}
+        else if(DOCX_HUELLE_BLOCK.has(x.localName))sammle(x)});
+      sammle(tr);
+      zellen.forEach(tc=>{
+        /* Absätze einer Zelle bleiben Absätze — vorher wurden sie mit
+           Zeilenumbrüchen zu einem zusammengezogen und verloren ihren
+           Abstand. Eine Zelle mit nur einem Absatz bleibt schlicht Text,
+           wie bisher. Verschachtelte Tabellen kommen mit. */
+        const teile=docxBloecke(tc).map(b=>b.localName==="tbl"
+          ?{tabelle:tabelleHtml(b)}
+          :{text:docxLauf(b,lautKtx(b))});
+        let inner;
+        if(teile.length===1&&teile[0].text!==undefined)inner=teile[0].text;
+        else inner=teile.map(x=>x.tabelle!==undefined?x.tabelle:"<p>"+(x.text||"<br>")+"</p>").join("");
         r+="<td>"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
-    out+=r+"</table>";
+    return r+"</table>";
   };
   let nachTabelle=false;
-  [...body.children].forEach(el=>{
+  docxBloecke(body).forEach(el=>{
     if(el.localName==="p"){
       if(nachTabelle&&!docxLauf(el,null).trim()&&!KIND(KIND(el,"pPr"),"numPr")){nachTabelle=false;return}
       nachTabelle=false;absatz(el);

@@ -179,6 +179,56 @@ immer genau einen Commit, der sie anfasst.
   **Nicht geprüft:** Einfügen aus Word. In der Browser-Fassung lassen viele
   Seiten das Einbetten ihrer Bilder nicht zu (Tagesschau 76 von 76); die
   bleiben Verweise ins Netz — wie schon vorher.
+- **Ausgefüllte Word-Formulare verloren beim Öffnen alle Antworten** — ohne
+  Meldung, seit 1.0.0. Gemeldet an einem Formular des Goethe-Instituts (PEP-
+  Dokumentation). Der Word-Leser kannte nur Absätze, Tabellen, Textläufe und
+  Links; alles in einem Formularfeld (`w:sdt`, Inhaltssteuerelement) fiel
+  samt Inhalt weg, ebenso nachverfolgt eingefügter Text (`w:ins`), Smart
+  Tags und einfache Felder. Gelesen wird jetzt durch diese Hüllen hindurch,
+  auf Absatz-, Block-, Zeilen- und Zellebene (`docxBloecke()`,
+  `DOCX_HUELLE_LAUF`). Draußen bleiben gelöschter Text (`w:del`) und der
+  graue Hinweis leerer Felder („Klicken oder tippen Sie hier …“,
+  `showingPlcHdr`). Geprüft am echten Formular, mit Antworten ausgefüllt:
+  alle vier Antworten und der nachverfolgte Text kommen an und gehen beim
+  Speichern als Word wieder hinaus; gelöschter Text nicht.
+- **Formatierung aus Word-Dateien** (am selben Formular):
+  - **Schriftfarbe und GROSSBUCHSTABEN** (`w:color`, `w:caps`) wurden nicht
+    gelesen — die dunkelblauen Versal-Überschriften kamen schwarz und klein
+    an. Jetzt als Inline-Stil, und der Export schreibt beides zurück.
+  - **Schriftgröße je Textstelle**: nur die Grundgröße wurde übernommen,
+    Überschriften (11 pt) und Feldnamen (10 pt) standen in 9 pt wie der
+    Text. Jetzt relativ in em zur Dokumentgröße (geht mit Zoom und mit einer
+    späteren Änderung der Dokumentgröße mit); der Export schreibt `w:sz`.
+  - **Tabellen ohne Rahmen** bekamen welche — Formulare ordnen ihre Felder
+    in rahmenlosen Tabellen. Erkannt über `tblBorders`, Zellrahmen und die
+    Tabellenvorlage samt `basedOn`; ohne Angabe gilt Words „Normale Tabelle“
+    (ohne Rahmen). Im Editor zeigen feine gestrichelte Hilfslinien die
+    Zellen (wie Words „Rasterlinien anzeigen“), in Vorschau, Druck,
+    Leseansicht, HTML/EPUB ohne; der Export schreibt `nil`.
+  - **Absätze in Tabellenzellen** wurden mit Zeilenumbrüchen zu einem
+    zusammengezogen und verloren ihren Abstand; jetzt bleiben sie Absätze.
+    Verschachtelte Tabellen in Zellen kamen gar nicht an; jetzt schon.
+  - **Einzüge** (links, Erstzeile, hängend) wurden nicht gelesen — und der
+    Word-Export schrieb Einzüge, die man im Editor gesetzt hatte, ebenfalls
+    nicht. Beides behoben (margin-left/text-indent in em ↔ `w:ind`).
+  - **Nummerierung zählte nach einer Unterbrechung neu** — die fünf
+    Abschnitte des Formulars hießen alle „1.“, weil Aufzählungspunkte
+    dazwischenstehen. Word zählt je Liste (`numId`) weiter; der Leser jetzt
+    auch, als `<ol start="…">`, und liest `w:start`/`startOverride`.
+    Umgekehrt im Export: alle nummerierten Listen eines Stils teilten sich
+    eine Word-Liste, Word zählte über das ganze Dokument weiter (zwei
+    getrennte Listen 1–3 wurden 1–3 und 4–6). Jetzt bekommt jede ihre
+    eigene `w:num` mit ihrer Startnummer.
+  - Nebenbei: `w:rPr` in Schemareihenfolge (rStyle stand am Ende).
+  - Geprüft über den echten Weg (Datei öffnen → Editor → Speichern als Word
+    → wieder öffnen → wieder speichern): zweiter und dritter Export
+    zeichengleich; 11 Stellen farbig und versal, Größen 1,222/1,111 em,
+    erste Tabelle ohne Rahmen mit 4 Absätzen, Einzüge als Erstzeileneinzug,
+    Abschnitte 1–5. Getrennte Listen und `start="7"` überleben den Umlauf.
+    `check-export.mjs` 252/252.
+  **Nicht behoben:** die beiden Logos der Kopfzeile. Kopf- und Fußzeilen
+  sind in PureQuill reiner Text; die Kopfzeile fällt beim Einlesen ganz weg.
+  Eigener, größerer Schritt.
 
 - **Schriftwechsel über die Werkzeugleiste** setzte `Schrift,serif` statt
   `schriftStapel()`: Eine fehlende serifenlose Schrift (unter Linux Verdana,
