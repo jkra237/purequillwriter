@@ -413,6 +413,14 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
   pointer-events:none;white-space:pre-wrap;line-height:1.3}
 .hfbild{position:absolute;pointer-events:none;user-select:none}
+/* Endnoten: Liste am Dokumentende (endnotenListe) */
+.enliste{margin-top:2em;padding-top:.5em;border-top:1px solid var(--rule);font-size:.85em;user-select:text}
+.enliste .enkopf{font-weight:600;margin-bottom:.3em}
+.enliste p{margin:0 0 .35em}
+sup.en{cursor:pointer;color:var(--stamp)}
+/* Kopf-/Fußzeile mit Tabulatoren: links | Mitte | rechts (hfTabZeilen) */
+.hfzeile{display:grid;grid-template-columns:1fr auto 1fr;column-gap:.5em}
+.hfzeile>span:nth-child(1){text-align:left}.hfzeile>span:nth-child(2){text-align:center}.hfzeile>span:nth-child(3){text-align:right}
 /* Aus Word bewahrte Inhalte (wRohHtml): erkennbar als Fremdkörper, nicht
    bearbeitbar, als Ganzes löschbar. Marken (Lesezeichen, Kommentarbereiche)
    bleiben unsichtbar. */
@@ -1762,7 +1770,7 @@ function ensureHfMeasurer(){
 function hfTextHoehe(d,which,z){
   const v=hfOf(d,which),f=fmtOf(d);
   const breite=MM(v.tw||f.w-f.m[1]-f.m[3])*z, fs=(9*96/72)*z;
-  const html=hfText(v.text,1,Math.max(1,pageCount))||"&nbsp;";
+  const html=hfInhalt(v,1,Math.max(1,pageCount))||"&nbsp;";
   /* paginate() fragt mehrfach je Durchlauf — ohne den Merker wäre das jedes
      Mal ein erzwungenes Neuberechnen des Layouts. */
   const key=which+"|"+z+"|"+breite+"|"+html;
@@ -2340,6 +2348,8 @@ en:{
   "Doppelklick: Fußzeile":"Double-click: footer",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
   "Erste Seite anders":"Different first page","Erste Seite":"First page",
+  "Endnote einfügen":"Insert endnote","Endnoten":"Endnotes","Endnotentext":"Endnote text","Endnote löschen":"Delete endnote","Endnote ohne Text":"Endnote without text",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Formatted. Edit the formatting directly on the page (double-click) — changed here, the line becomes plain text.",
   "Kommentar":"Comment","Endnote":"Endnote","Formel":"Equation","Diagramm":"Chart","Textfeld":"Text box","Form":"Shape","Objekt":"Object","Aus Word — bleibt beim Speichern unverändert erhalten":"From Word — kept unchanged when saving","Gelöscht (nachverfolgte Änderung)":"Deleted (tracked change)",
   "Kopfzeile entfernt":"Header removed",
   "Fußzeile entfernt":"Footer removed",
@@ -3121,6 +3131,8 @@ fr:{
   "Doppelklick: Fußzeile":"Double-clic : pied de page",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Astuce : un double-clic sur la marge supérieure ou inférieure modifie l'en-tête et le pied de page directement dans le document.",
   "Erste Seite anders":"Première page différente","Erste Seite":"Première page",
+  "Endnote einfügen":"Insérer une note de fin","Endnoten":"Notes de fin","Endnotentext":"Texte de la note de fin","Endnote löschen":"Supprimer la note de fin","Endnote ohne Text":"Note de fin sans texte",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Mis en forme. Modifiez la mise en forme directement sur la page (double-clic) — modifiée ici, la ligne devient du texte brut.",
   "Kommentar":"Commentaire","Endnote":"Note de fin","Formel":"Équation","Diagramm":"Graphique","Textfeld":"Zone de texte","Form":"Forme","Objekt":"Objet","Aus Word — bleibt beim Speichern unverändert erhalten":"Depuis Word — conservé tel quel à l’enregistrement","Gelöscht (nachverfolgte Änderung)":"Supprimé (modification suivie)",
   "Kopfzeile entfernt":"En-tête supprimé",
   "Fußzeile entfernt":"Pied de page supprimé",
@@ -3902,6 +3914,8 @@ es:{
   "Doppelklick: Fußzeile":"Doble clic: pie de página",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Consejo: un doble clic en el margen superior o inferior edita el encabezado y el pie de página directamente en el documento.",
   "Erste Seite anders":"Primera página diferente","Erste Seite":"Primera página",
+  "Endnote einfügen":"Insertar nota al final","Endnoten":"Notas al final","Endnotentext":"Texto de la nota al final","Endnote löschen":"Eliminar nota al final","Endnote ohne Text":"Nota al final sin texto",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Con formato. Edite el formato directamente en la página (doble clic): si lo cambia aquí, la línea pasa a ser texto sin formato.",
   "Kommentar":"Comentario","Endnote":"Nota al final","Formel":"Ecuación","Diagramm":"Gráfico","Textfeld":"Cuadro de texto","Form":"Forma","Objekt":"Objeto","Aus Word — bleibt beim Speichern unverändert erhalten":"De Word — se conserva sin cambios al guardar","Gelöscht (nachverfolgte Änderung)":"Eliminado (cambio controlado)",
   "Kopfzeile entfernt":"Encabezado eliminado",
   "Fußzeile entfernt":"Pie de página eliminado",
@@ -4683,6 +4697,8 @@ pt:{
   "Doppelklick: Fußzeile":"Clique duplo: rodapé",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Dica: um clique duplo na margem superior ou inferior edita o cabeçalho e o rodapé diretamente no documento.",
   "Erste Seite anders":"Primeira página diferente","Erste Seite":"Primeira página",
+  "Endnote einfügen":"Inserir nota de fim","Endnoten":"Notas de fim","Endnotentext":"Texto da nota de fim","Endnote löschen":"Excluir nota de fim","Endnote ohne Text":"Nota de fim sem texto",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Formatado. Edite a formatação diretamente na página (clique duplo) — alterada aqui, a linha vira texto simples.",
   "Kommentar":"Comentário","Endnote":"Nota de fim","Formel":"Equação","Diagramm":"Gráfico","Textfeld":"Caixa de texto","Form":"Forma","Objekt":"Objeto","Aus Word — bleibt beim Speichern unverändert erhalten":"Do Word — mantido sem alterações ao salvar","Gelöscht (nachverfolgte Änderung)":"Excluído (alteração controlada)",
   "Kopfzeile entfernt":"Cabeçalho removido",
   "Fußzeile entfernt":"Rodapé removido",
@@ -5464,6 +5480,8 @@ pl:{
   "Doppelklick: Fußzeile":"Dwuklik: stopka",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Wskazówka: dwuklik na górnym lub dolnym marginesie strony pozwala edytować nagłówek i stopkę bezpośrednio w dokumencie.",
   "Erste Seite anders":"Inna pierwsza strona","Erste Seite":"Pierwsza strona",
+  "Endnote einfügen":"Wstaw przypis końcowy","Endnoten":"Przypisy końcowe","Endnotentext":"Tekst przypisu końcowego","Endnote löschen":"Usuń przypis końcowy","Endnote ohne Text":"Przypis końcowy bez tekstu",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Sformatowane. Formatowanie edytuj bezpośrednio na stronie (dwuklik) — zmienione tutaj, wiersz staje się zwykłym tekstem.",
   "Kommentar":"Komentarz","Endnote":"Przypis końcowy","Formel":"Równanie","Diagramm":"Wykres","Textfeld":"Pole tekstowe","Form":"Kształt","Objekt":"Obiekt","Aus Word — bleibt beim Speichern unverändert erhalten":"Z Worda — zachowane bez zmian przy zapisie","Gelöscht (nachverfolgte Änderung)":"Usunięte (śledzona zmiana)",
   "Kopfzeile entfernt":"Nagłówek usunięty",
   "Fußzeile entfernt":"Stopka usunięta",
@@ -6252,6 +6270,8 @@ it:{
   "Doppelklick: Fußzeile":"Doppio clic: piè di pagina",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Suggerimento: un doppio clic sul margine superiore o inferiore della pagina modifica intestazione e piè di pagina direttamente nel documento.",
   "Erste Seite anders":"Prima pagina diversa","Erste Seite":"Prima pagina",
+  "Endnote einfügen":"Inserisci nota di chiusura","Endnoten":"Note di chiusura","Endnotentext":"Testo della nota di chiusura","Endnote löschen":"Elimina nota di chiusura","Endnote ohne Text":"Nota di chiusura senza testo",
+  "Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.":"Formattato. Modifica la formattazione direttamente sulla pagina (doppio clic): se la cambi qui, la riga diventa testo semplice.",
   "Kommentar":"Commento","Endnote":"Nota di chiusura","Formel":"Equazione","Diagramm":"Grafico","Textfeld":"Casella di testo","Form":"Forma","Objekt":"Oggetto","Aus Word — bleibt beim Speichern unverändert erhalten":"Da Word — conservato invariato al salvataggio","Gelöscht (nachverfolgte Änderung)":"Eliminato (revisione)",
   "Kopfzeile entfernt":"Intestazione rimossa",
   "Fußzeile entfernt":"Piè di pagina rimosso",
@@ -7444,6 +7464,8 @@ function drawWrite(){
       const list=spansOf(id);curOcc[id]=Math.max(0,list.indexOf(a));drawAnchors();return}
     const fn=e.target.closest(".fn");
     if(fn){e.preventDefault();editFootnote(fn.dataset.fn);return}
+    const en=e.target.closest(".en[data-en]");
+    if(en){e.preventDefault();editEndnote(en.dataset.en);return}
     const tocRefresh=e.target.closest(".toc-refresh");
     if(tocRefresh){e.preventDefault();refreshToc(tocRefresh.closest(".toc"));return}
     const tocSettings=e.target.closest(".toc-settings");
@@ -7475,6 +7497,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll("figure.fig").forEach(f=>f.classList.remove("sel"));
   c.querySelectorAll(".toc").forEach(t=>t.classList.remove("sel"));
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
+  c.querySelectorAll(":scope > .enliste").forEach(w=>w.remove());
   c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
@@ -8593,6 +8616,8 @@ function exportMd(){
   let out=mdBlocks(root,fnNum,0).filter(Boolean).join("\n\n");
   const fn=fnListLines(d,(n,t)=>`[^${n}]: ${t}`);
   if(fn.length)out+=(out?"\n\n":"")+fn.join("\n");
+  const en=endnotenZeilen(d);
+  if(en.length)out+=(out?"\n\n":"")+"**"+tr("Endnoten")+"**\n\n"+en.map(e=>e.n+". "+e.text).join("\n");
   download(d.title+".md",out.trim()+"\n","text/markdown");
 }
 
@@ -8672,6 +8697,8 @@ function exportTxt(){
   const bloecke=txtBlocks(root,fnNum,0).filter(Boolean);
   const fn=fnListLines(d,(n,t)=>n+". "+t);
   if(fn.length){bloecke.push(tr("Fußnoten")+":");bloecke.push(fn.join("\n"))}
+  const en=endnotenZeilen(d);
+  if(en.length){bloecke.push(tr("Endnoten")+":");bloecke.push(en.map(e=>e.n+". "+e.text).join("\n"))}
   const text=(bloecke.length?bloecke.join("\n\n"):stripHtml(d.html).trim())+"\n";
   download(d.title+".txt",text.replace(/\r?\n/g,"\r\n"));
 }
@@ -8767,6 +8794,16 @@ function exportHtmlBody(d){
   });
   return box.innerHTML;
 }
+/* Endnoten für die Textformate: in Reihenfolge des Auftretens, römisch */
+function endnotenZeilen(d){
+  const t=document.createElement("div");t.innerHTML=d.html||"";
+  const ids=[];t.querySelectorAll(".en[data-en]").forEach(s=>{if(!ids.includes(s.dataset.en))ids.push(s.dataset.en)});
+  return ids.map((id,i)=>{const e=(d.endnotes||[]).find(x=>x.id===id);return {n:roemisch(i+1),text:(e&&e.text)||""}});
+}
+function exportEndnotesHtml(d){
+  const z=endnotenZeilen(d);if(!z.length)return"";
+  return `<section class="endnotes"><h2>${tr("Endnoten")}</h2><ol type="i">${z.map(e=>`<li>${esc(e.text)}</li>`).join("")}</ol></section>`;
+}
 function exportFootnotesHtml(d){
   const order=footnoteOrderFromHtml(d.html);
   if(!order.length)return"";
@@ -8788,7 +8825,7 @@ function exportHtml(){
 <style>${exportCss(d)}</style>
 </head>
 <body>
-<main>${exportHtmlBody(d)}${exportFootnotesHtml(d)}</main>
+<main>${exportHtmlBody(d)}${exportFootnotesHtml(d)}${exportEndnotesHtml(d)}</main>
 </body>
 </html>
 `;
@@ -8980,6 +9017,7 @@ function commandList(){
   fmtCmd("Link einfügen oder bearbeiten…",kz("link"),linkDialog);
   fmtCmd("Seitenumbruch einfügen",kz("umbruch"),insertPageBreak);
   fmtCmd("Fußnote einfügen","",insertFootnote);
+  fmtCmd("Endnote einfügen","",insertEndnote);
   fmtCmd("Inhaltsverzeichnis einfügen",kz("toc"),insertToc);
   if(S.settings.tofEnabled)fmtCmd("Abbildungsverzeichnis einfügen","",insertTof);
   fmtCmd("Formatierung entfernen","",()=>document.execCommand("removeFormat"));
@@ -9171,13 +9209,32 @@ const DOCX_CONTENT_TYPES=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?
    leer. */
 const HF_FELD=[[/^\{(?:seiten|pages)\}$/i," NUMPAGES "],[/^\{(?:seite|page)\}$/i," PAGE "],
                [/^\{(?:titel|title)\}$/i," TITLE "],[/^\{(?:datum|date)\}$/i,' DATE \\@ "dd.MM.yyyy" ']];
-function hfLaufXml(text){
-  /* An den Platzhaltern zerteilen, damit der Text drumherum Text bleibt */
-  return String(text||"").split(/(\{[a-zA-Z]+\})/g).filter(x=>x!=="").map(teil=>{
+function hfLaufXml(text,rpr){
+  rpr=rpr||"";
+  /* An den Platzhaltern zerteilen, damit der Text drumherum Text bleibt;
+     Tabulatoren als eigener Lauf (ein Tab in w:t wäre bloßer Leerraum) */
+  return String(text||"").split(/(\{[a-zA-Z]+\}|\t)/g).filter(x=>x!=="").map(teil=>{
+    if(teil==="\t")return `<w:r>${rpr}<w:tab/></w:r>`;
     for(const [rx,instr] of HF_FELD)
-      if(rx.test(teil))return `<w:fldSimple w:instr="${xesc(instr)}"><w:r><w:t>1</w:t></w:r></w:fldSimple>`;
-    return `<w:r><w:t xml:space="preserve">${xesc(teil)}</w:t></w:r>`;
+      if(rx.test(teil))return `<w:fldSimple w:instr="${xesc(instr)}"><w:r>${rpr}<w:t>1</w:t></w:r></w:fldSimple>`;
+    return `<w:r>${rpr}<w:t xml:space="preserve">${xesc(teil)}</w:t></w:r>`;
   }).join("");
+}
+/* Eine formatierte Zeile (v.html, siehe hfSaeubern) als Läufe */
+function hfHtmlLaeufe(html,basisPt){
+  const box=document.createElement("div");box.innerHTML=html;
+  let out="";
+  const lauf=(n,st)=>{
+    if(n.nodeType===3){out+=hfLaufXml(n.data,rPrXml(st));return}
+    if(n.nodeType!==1)return;
+    const t=n.tagName.toLowerCase(),neu={...st};
+    if(t==="b")neu.b=true;if(t==="i")neu.i=true;if(t==="u")neu.u=true;if(t==="s")neu.strike=true;
+    if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+    if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2);
+    n.childNodes.forEach(k=>lauf(k,neu));
+  };
+  box.childNodes.forEach(k=>lauf(k,{}));
+  return out;
 }
 /* Bilder gehen als frei verankerte Grafiken mit Blattbezug hinaus — sie
    stehen in Word dann genau dort, wo sie hier stehen, gleich wie Word den
@@ -9223,11 +9280,17 @@ async function hfTeil(d,which,groesse){
      Zeile der ersten Seite steht. */
   const zeileMm=groesse*0.85*25.4/72;
   const zusatz=Math.max(0,hfFlussMm(hf)-(hf.ty||0)-zeilen.length*zeileMm);
+  /* Formatiert: dieselben Zeilen aus v.html. Tabstopps wie in Words
+     Vorlage „Kopfzeile“ — Mitte und rechter Rand —, damit Word die Zeile so
+     setzt wie diese Anzeige (hfTabZeilen). */
+  const zeilenH=hf.html!=null?String(hf.html).split("<br>"):null;
+  const tabs=`<w:tabs><w:tab w:val="center" w:pos="${mmToTwip(cw/2)}"/><w:tab w:val="right" w:pos="${mmToTwip(cw)}"/></w:tabs>`;
   const abs=zeilen.map((zeile,i)=>{
     const vor=(hf.ty&&!fuss&&i===0?hf.ty:0)+(fuss&&i===0?zusatz:0);
     const nach=(hf.ty&&fuss&&i===zeilen.length-1?hf.ty:0)+(!fuss&&i===zeilen.length-1?zusatz:0);
     const abst=vor||nach?`<w:spacing${vor?` w:before="${mmToTwip(vor)}"`:""}${nach?` w:after="${mmToTwip(nach)}"`:""}/>`:"";
-    return `<w:p><w:pPr>${abst}${ind}<w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${hfLaufXml(zeile)}</w:p>`;
+    const laeufe=zeilenH?hfHtmlLaeufe(zeilenH[i]||"",groesse*0.85):hfLaufXml(zeile);
+    return `<w:p><w:pPr>${zeile.includes("\t")?tabs:""}${abst}${ind}<w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${laeufe}</w:p>`;
   }).join("");
   const ns=anker?` xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"`:"";
   const xml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -9321,11 +9384,26 @@ ${ueberschrift(1,36)}${ueberschrift(2,30)}${ueberschrift(3,26)}
   <w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="FootnoteText"><w:name w:val="footnote text"/><w:basedOn w:val="Normal"/>
   <w:rPr><w:sz w:val="20"/></w:rPr></w:style>
+<w:style w:type="character" w:styleId="EndnoteReference"><w:name w:val="endnote reference"/>
+  <w:rPr><w:vertAlign w:val="superscript"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="EndnoteText"><w:name w:val="endnote text"/><w:basedOn w:val="Normal"/>
+  <w:rPr><w:sz w:val="20"/></w:rPr></w:style>
 </w:styles>`;
 }
 /* Zwei Pflicht-Einträge (Trennlinie/Fortsetzungstrennlinie mit den festen
    IDs -1/0) gehen jedem echten Eintrag voraus - ohne sie öffnet Word die
    Datei zwar noch, meldet aber eine Reparatur beim Öffnen. */
+function endnotesXml(list){
+  const body=list.map(f=>`<w:endnote w:id="${f.id}"><w:p><w:pPr><w:pStyle w:val="EndnoteText"/></w:pPr>
+    <w:r><w:rPr><w:rStyle w:val="EndnoteReference"/></w:rPr><w:endnoteRef/></w:r>
+    <w:r><w:t xml:space="preserve"> ${xesc(f.text||"")}</w:t></w:r></w:p></w:endnote>`).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:endnotes xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+<w:endnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:endnote>
+<w:endnote w:type="continuationSeparator" w:id="0"><w:p><w:r><w:continuationSeparator/></w:r></w:p></w:endnote>
+${body}
+</w:endnotes>`;
+}
 function footnotesXml(list){
   const body=list.map(f=>`<w:footnote w:id="${f.id}"><w:p><w:pPr><w:pStyle w:val="FootnoteText"/></w:pPr>
     <w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteRef/></w:r>
@@ -9451,6 +9529,16 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
         return;
       }
     }
+    /* Endnote: wie die Fußnote, Word zählt selbst (römisch) */
+    if(tag==="sup"&&n.classList.contains("en")&&ctx&&ctx.endnotes){
+      let eid=ctx.endnoteIds.get(n.dataset.en);
+      if(!eid){
+        eid=ctx.endnoteId++;ctx.endnoteIds.set(n.dataset.en,eid);
+        ctx.endnotes.push({id:eid,text:(ctx.endnoteLookup.get(n.dataset.en))||""});
+      }
+      runs.push(`<w:r><w:rPr><w:rStyle w:val="EndnoteReference"/></w:rPr><w:endnoteReference w:id="${eid}"/></w:r>`);
+      ws.vorn=false;return;
+    }
     if(tag==="br"){runs.push("<w:r><w:br/></w:r>");ws.vorn=true;return}
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
@@ -9532,6 +9620,8 @@ async function walkBlocks(root,ctx){
   let xml="";
   for(const el of [...root.children]){
     const tag=el.tagName.toLowerCase();
+    /* Die Endnotenliste ist Anzeige; Word baut sie aus endnotes.xml selbst */
+    if(el.classList&&el.classList.contains("enliste"))continue;
     if(el.classList&&el.classList.contains("toc")){
       /* Kein exportierter Text - stattdessen ist an den Überschriften bereits
          outlineLvl gesetzt (siehe stylesXml), Word kann darüber sein eigenes,
@@ -9730,7 +9820,7 @@ function wPaketSchreiben(d,documentXml,belegt,rohRels){
   let kopf=documentXml.slice(0,ende);
   for(const [n,v] of w.ns||[])if(!new RegExp("\\s"+n.replace(/[.:]/g,"\\$&")+"=").test(kopf))kopf+=` ${n}="${xesc(v)}"`;
   documentXml=kopf+documentXml.slice(ende);
-  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people|endnotes)$/;
+  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people)$/;
   const genutzt=new Set([...documentXml.matchAll(/"(W_[^"]+)"/g)].map(m=>m[1]));
   for(const [id,r] of Object.entries(w.rels||{}))if(BEWAHRT.test(r.type))genutzt.add(id);
   const neuName=p=>belegt.has(p)?p.replace(/([^/]+)$/,"w-$1"):p;
@@ -9786,6 +9876,7 @@ async function docxBlob(d){
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
     footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],
     footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text])),
+    endnoteId:1,endnotes:[],endnoteIds:new Map(),endnoteLookup:new Map((d.endnotes||[]).map(e=>[e.id,e.text])),
     word:d.word||null};
   const bodyXml=await walkBlocks(container,ctx);
   /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
@@ -9819,15 +9910,16 @@ async function docxBlob(d){
   xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
   xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
 <w:body>${bodyXml||"<w:p/>"}${sectPr}</w:body></w:document>`;
-  const belegt=new Set(["word/document.xml","word/styles.xml","word/numbering.xml","word/footnotes.xml","word/settings.xml",
+  const belegt=new Set(["word/document.xml","word/styles.xml","word/numbering.xml","word/footnotes.xml","word/endnotes.xml","word/settings.xml",
     ...HF_TEILE.map(t=>"word/"+t.datei)]);
   const wp=wPaketSchreiben(d,rohDoc,belegt,teile.filter(t=>t.roh&&t.rels).map(t=>t.rels));
   const documentXml=wp.documentXml;
-  const hatFussnoten=ctx.footnotes.length>0;
+  const hatFussnoten=ctx.footnotes.length>0,hatEndnoten=ctx.endnotes.length>0;
   const relEintraege=[
     `<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`,
     `<Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>`,
     ...teile.map(t=>`<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${t.art}" Target="${t.datei}"/>`),
+    hatEndnoten&&`<Relationship Id="rIdEndnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/endnotes" Target="endnotes.xml"/>`,
     hatFussnoten&&`<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>`,
     ...ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`),
     ...ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`),
@@ -9839,6 +9931,7 @@ ${relEintraege.join(String.fromCharCode(10))}
 </Relationships>`;
   const zusatz=
     (hatFussnoten?'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>':"")+
+    (hatEndnoten?'<Override PartName="/word/endnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml"/>':"")+
     teile.map(t=>`<Override PartName="/word/${t.datei}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${t.art}+xml"/>`).join("")+wp.ct;
   const contentTypes=zusatz?DOCX_CONTENT_TYPES.replace("</Types>",zusatz+"</Types>"):DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
@@ -9854,6 +9947,7 @@ ${relEintraege.join(String.fromCharCode(10))}
     ...teile.flatMap(t=>t.rels?[{name:`word/_rels/${t.datei}.rels`,bytes:enc.encode(t.rels)},...t.media]:[]),
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
     ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[]),
+    ...(hatEndnoten?[{name:"word/endnotes.xml",bytes:enc.encode(endnotesXml(ctx.endnotes))}]:[]),
     ...wp.eintraege
   ];
   return await zipSchreiben(eintraege);
@@ -11135,6 +11229,7 @@ function neuesDokumentAus(name,erg){
   /* Was aus der Word-Datei bewahrt wird (siehe wPaketBewahren) */
   if(b.word)d.word=b.word;
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
+  if(b.endnotes&&b.endnotes.length)d.endnotes=b.endnotes;
   /* Schrift und Größe der Datei statt der eigenen Voreinstellung — sonst
      erschien eine Calibri-11-Datei in Georgia 12 und ging beim Speichern
      auch so zurück. */
@@ -11561,19 +11656,25 @@ const feldPlatzhalter=instr=>{
   for(const [rx,ph] of DOCX_FELD)if(rx.test(instr))return ph;
   return "";
 };
-function docxHfAbsatz(p){
+/* Liefert den Text der Zeile; mit html={basisPt} zusätzlich in html.out
+   dieselbe Zeile mit Auszeichnung (nur direkte am Lauf: Fett, Kursiv,
+   Unterstrichen, Durchgestrichen, Farbe, Größe in em zur Zeilenschrift).
+   Tabulatoren als „\t“ — bis 1.2 fielen sie ganz weg („FirmaMitteRechts“). */
+function docxHfAbsatz(p,html){
   let out="",imFeld=0,instr="",ergebnis=false;
+  const h=t=>{if(html)html.out+=t};
+  const feld=ph=>{out+=ph;h(xesc(ph))};
   [...p.children].forEach(el=>{
     if(el.localName==="fldSimple"){
-      out+=feldPlatzhalter(String(xattrN(el,"instr")||""));return;
+      feld(feldPlatzhalter(String(xattrN(el,"instr")||"")));return;
     }
     if(el.localName!=="r")return;
     const fc=KIND(el,"fldChar");
     if(fc){
       const typ=String(xattrN(fc,"fldCharType")||"");
       if(typ==="begin"){imFeld++;instr="";ergebnis=false}
-      else if(typ==="separate"){ergebnis=true;out+=feldPlatzhalter(instr)}
-      else if(typ==="end"){if(!ergebnis)out+=feldPlatzhalter(instr);imFeld=Math.max(0,imFeld-1);ergebnis=false}
+      else if(typ==="separate"){ergebnis=true;feld(feldPlatzhalter(instr))}
+      else if(typ==="end"){if(!ergebnis)feld(feldPlatzhalter(instr));imFeld=Math.max(0,imFeld-1);ergebnis=false}
       return;
     }
     const it=KIND(el,"instrText");
@@ -11581,7 +11682,21 @@ function docxHfAbsatz(p){
     /* Zwischen „separate“ und „end“ steht das gespeicherte Ergebnis — das ist
        schon durch den Platzhalter ersetzt und darf nicht doppelt erscheinen. */
     if(imFeld&&ergebnis)return;
-    [...el.children].forEach(c=>{if(c.localName==="t")out+=c.textContent});
+    let t="";
+    [...el.children].forEach(c=>{if(c.localName==="t")t+=c.textContent;else if(c.localName==="tab")t+="\t"});
+    out+=t;
+    if(html&&t){
+      const w=docxRPr(KIND(el,"rPr")),st=[];
+      let x=xesc(t);
+      if(w.color)st.push("color:#"+w.color);
+      if(w.sz&&html.basisPt&&Math.abs(w.sz-html.basisPt)>=0.25)st.push("font-size:"+(Math.round(w.sz/html.basisPt*1000)/1000)+"em");
+      if(st.length){x=`<span style="${st.join(";")}">${x}</span>`;html.formatiert=true}
+      if(w.strike){x="<s>"+x+"</s>";html.formatiert=true}
+      if(w.u){x="<u>"+x+"</u>";html.formatiert=true}
+      if(w.i){x="<i>"+x+"</i>";html.formatiert=true}
+      if(w.b){x="<b>"+x+"</b>";html.formatiert=true}
+      html.out+=x;
+    }
   });
   return out;
 }
@@ -11657,14 +11772,16 @@ function docxHf(xml,zub){
   zub=zub||{};
   const f=zub.fmt||HF_RAHMEN,karte=zub.bilder||{},fuss=dom.documentElement.localName==="ftr";
   const cw=f.w-f.m[1]-f.m[3];
-  const zeilen=[],bilder=[],offen=[];
+  const zeilen=[],zeilenH=[],bilder=[],offen=[];
   /* Text kann aus mehreren Zellen kommen; dann zählt die ganze Breite. */
-  let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false;
+  let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false,formatiert=false;
   const absatz=(p,x0,w0,zelle)=>{
     const pPr=KIND(p,"pPr"),sp=KIND(pPr,"spacing"),ind=KIND(pPr,"ind");
     y+=mmVonTwip(xattrN(sp,"before"));
     const il=mmVonTwip(xattrN(ind,"left")??xattrN(ind,"start")),ir=mmVonTwip(xattrN(ind,"right")??xattrN(ind,"end"));
-    const t=docxHfAbsatz(p),al=docxHfAusrichtung(p);
+    const hz={out:"",basisPt:zub.basisPt,formatiert:false};
+    const t=docxHfAbsatz(p,hz),al=docxHfAusrichtung(p);
+    if(hz.formatiert)formatiert=true;
     const imText=[];
     for(const el of p.getElementsByTagName("*")){
       const n=el.localName;
@@ -11704,9 +11821,9 @@ function docxHf(xml,zub){
          Bild in seiner Mitte nicht anders ausweichen. */
       if(ty===null)ty=y+(imText.length?hoehe-HF_ZEILE:0);
       else if(bildImText){const soll=Math.round((y+(imText.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
-        while(zeilen.length<soll)zeilen.push("")}
+        while(zeilen.length<soll){zeilen.push("");zeilenH.push("")}}
       bildImText=false;
-      zeilen.push(t);
+      zeilen.push(t);zeilenH.push(hz.out);
       if(t.trim()){if(align===null)align=al;if(zelle)textZellen.add(zelle);
         if(spalte===null)spalte={x:x0+il,w:w0-il-ir}}
       hoehe=Math.max(hoehe,HF_ZEILE);
@@ -11742,10 +11859,11 @@ function docxHf(xml,zub){
     bilder.push({uri:a.uri,b:a.b,h:a.h,x:a.x-f.m[3],yBlatt,fluss:!!a.fluss});
   }
   /* Zeilenende-Leerzeilen weg wie bisher. */
-  while(zeilen.length&&!zeilen[zeilen.length-1].trim())zeilen.pop();
+  while(zeilen.length&&!zeilen[zeilen.length-1].trim()){zeilen.pop();zeilenH.pop()}
   const text=zeilen.join("\n");
   if(!text.trim()&&!bilder.length)return null;
   const erg={on:true,text,align:align||"center"};
+  if(formatiert)erg.html=zeilenH.join("<br>");
   if(bilder.length){
     erg.bilder=bilder.map(i=>{
       const y=i.yBlatt!=null
@@ -11817,12 +11935,13 @@ async function docxBildKarte(buf,relXml){
 }
 
 /* footnotes.xml: Kennung → Text. 0 und -1 sind die Trennlinien, kein Inhalt. */
-function docxFussnoten(xml){
+/* art: "footnote" (Standard) oder "endnote" — endnotes.xml ist gleich gebaut */
+function docxFussnoten(xml,art){
   const karte=new Map();
   if(!xml)return karte;
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return karte;
-  [...dom.documentElement.children].filter(e=>e.localName==="footnote").forEach(e=>{
+  [...dom.documentElement.children].filter(e=>e.localName===(art||"footnote")).forEach(e=>{
     const id=String(xattrN(e,"id")||"");
     const typ=String(xattrN(e,"type")||"");
     if(typ==="separator"||typ==="continuationSeparator"||id==="0"||id==="-1")return;
@@ -11947,7 +12066,7 @@ function docxTabelleMitRahmen(t,karte){
    Bilder, comments.xml, endnotes.xml …; d.word.teile). Verweise (r:id)
    bekommen beim Lesen das Präfix W_, damit sie nicht mit den eigenen
    Kennungen des Exports zusammenstoßen. */
-const WROH_LAUF=new Set(["object","AlternateContent","commentReference","endnoteReference","sym","ptab","ruby","contentPart"]);
+const WROH_LAUF=new Set(["object","AlternateContent","commentReference","sym","ptab","ruby","contentPart"]);
 const WROH_ABSATZ=new Set(["oMath","oMathPara","commentRangeStart","commentRangeEnd","bookmarkStart","bookmarkEnd",
   "del","moveFrom","moveFromRangeStart","moveFromRangeEnd","moveToRangeStart","moveToRangeEnd"]);
 /* Bewahrte Verweise heißen W_…; eine von hier gespeicherte Datei trägt
@@ -12084,6 +12203,14 @@ function docxLauf(p,ktx){
             `<img src="${quelle.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
         } else if(rid!==null&&ktx.bild) ktx.bild.fehlend++;
       }
+      else if(c.localName==="endnoteReference"&&ktx&&ktx.en){
+        const wid=String(xattrN(c,"id")||"");
+        if(ktx.en.karte.has(wid)){
+          let id=ktx.en.zu.get(wid);
+          if(!id){id=uid();ktx.en.zu.set(wid,id);ktx.en.liste.push({id,text:ktx.en.karte.get(wid)||""})}
+          marke+=`<sup class="en" data-en="${id}">i</sup>`;
+        }
+      }
       else if(c.localName==="footnoteReference"&&ktx&&ktx.fn){
         const wid=String(xattrN(c,"id")||"");
         if(ktx.fn.karte.has(wid)){
@@ -12135,10 +12262,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const gs=docxGrundschrift(body,def,stile,z.thema||{});
   const grundGroesse=gs.size||z.groesse||S.settings.size||11;
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
+  const en={karte:z.endnoten||new Map(),zu:new Map(),liste:[]};
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   const rahmenStile=docxTabellenRahmen(stilXml);
   const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,bild,roh:z.roh}};
+    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh}};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -12162,7 +12290,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,bild,roh:z.roh};
+    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,en,bild,roh:z.roh};
     const inhalt=docxLauf(p,lktx)||"";
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
@@ -12277,7 +12405,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   });
   alleZu();
   const sect=docxSect(body);
-  return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,
+  return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,endnotes:en.liste,
     bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
     /* Mit titlePg nie auf die erste ausweichen: die gilt dann nur für Seite 1. */
     hdrId:hfRefId(sect,"header",docxTitelSeite(sect)?"default":undefined),
@@ -12543,7 +12671,10 @@ function wKommentare(xml){
    Originals (das Schema legt sie fest). */
 const WSETTINGS=new Set(["mirrorMargins","gutterAtTop","bookFoldPrinting","bookFoldRevPrinting","bookFoldPrintingSheets",
   "evenAndOddHeaders","defaultTabStop","autoHyphenation","consecutiveHyphenLimit","hyphenationZone","doNotHyphenateCaps",
-  "trackRevisions","endnotePr"]);
+  "trackRevisions"]);
+/* endnotePr nicht: es verweist auf die Trennlinien in endnotes.xml, die es
+   nur gibt, wenn das Dokument Endnoten hat — sonst meldete Word die Datei
+   als beschädigt (gemessen). Word legt die Angabe selbst wieder an. */
 function wSettingsBewahren(xml){
   if(!xml)return [];
   const dom=new DOMParser().parseFromString(xml,"application/xml");
@@ -12572,7 +12703,7 @@ async function wPaketBewahren(buf,docXml,roh,erg,hfRoh){
     for(const r of wRelsListe(new TextDecoder().decode(rb)))
       if(r.mode!=="External")await sammle(wPfad(ordner,r.target));
   };
-  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people|endnotes)$/;
+  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people)$/;
   const rels={};
   for(const [id,r] of Object.entries(roh.rels)){
     if(!roh.genutzt.has(id)&&!BEWAHRT.test(r.type))continue;
@@ -12609,6 +12740,7 @@ async function zipDokument(name,buf){
       const stil=await hol("word/styles.xml");
       const num=await hol("word/numbering.xml");
       const fuss=await hol("word/footnotes.xml");
+      const endn=await hol("word/endnotes.xml");
       /* Die Beziehungsdatei wird zweimal gebraucht: für die Bilder vor dem
          Lesen, für Kopf und Fuß danach. */
       const rel=await hol("word/_rels/document.xml.rels");
@@ -12625,7 +12757,7 @@ async function zipDokument(name,buf){
         rels:Object.fromEntries(wRelsListe(rel).map(r=>[r.id,r])),
         kommentare:wKommentare(await hol("word/comments.xml"))};
       const erg=docxToHtml(xml,stil,num,
-        {fussnoten:docxFussnoten(fuss),bilder,breiteMm,thema,roh});
+        {fussnoten:docxFussnoten(fuss),endnoten:docxFussnoten(endn,"endnote"),bilder,breiteMm,thema,roh});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
@@ -12639,7 +12771,7 @@ async function zipDokument(name,buf){
            (word/_rels/header2.xml.rels), nicht an der des Dokuments. */
         const teilRel=await hol(ziel.replace(/([^/]+)$/,"_rels/$1.rels"));
         const bilderHf=await docxBildKarte(buf,teilRel);
-        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt});
+        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt,basisPt:(erg.size||S.settings.size||11)*0.85});
         if(erg[feld])hfRoh.push({feld,ziel,stand:wStand(erg[feld])});
       }
       erg.word=await wPaketBewahren(buf,xml,roh,erg,hfRoh);
@@ -13365,6 +13497,7 @@ function toolsMenu(){
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
     <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
+    <button class="mi" data-t="en"><span class="chk"></span>${tr("Endnote einfügen")}</button>
     <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">${kz("toc")}</span></button>
     ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
@@ -13386,6 +13519,7 @@ function toolsMenu(){
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
     if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
     if(a==="fn"){if(S.mode!=="write")setMode("write");setTimeout(insertFootnote,40)}
+    if(a==="en"){if(S.mode!=="write")setMode("write");setTimeout(insertEndnote,40)}
   };
 }
 
@@ -13446,7 +13580,8 @@ function contextMenu(e){
         {a:"img",label:tr("Bild einfügen")},
         ...(cell?[]:[{a:"tblNew",label:tr("Tabelle einfügen")}]),
         {a:"pgbr",label:tr("Seitenumbruch einfügen"),k:"Alt ⇧ ⏎"},
-        {a:"fn",label:tr("Fußnote einfügen")}
+        {a:"fn",label:tr("Fußnote einfügen")},
+        {a:"en",label:tr("Endnote einfügen")}
       ];
       openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
       return;
@@ -13533,6 +13668,7 @@ function insertAct(a){
   if(a==="tblNew")setTimeout(tablePicker,10);
   if(a==="pgbr")insertPageBreak();
   if(a==="fn")insertFootnote();
+  if(a==="en")insertEndnote();
 }
 function glossAct(a,selText){
   if(a==="look")glossSearch();
@@ -13772,6 +13908,7 @@ function paginate(){
   ed.style.setProperty("--pl",ml+"px");
   ed.style.setProperty("--pt",mt+"px");
 
+  endnotenListe(ed);
   /* Frei platzierte Bilder liegen außerhalb des Flusses — sie dürfen weder
      umbrochen noch in die Seitenzahl eingerechnet werden. */
   const blocks=[...ed.children].filter(b=>!b.classList.contains("free"));
@@ -14313,7 +14450,7 @@ function hfDruck(d){
 function hfDruckTeil(v,kante,ue,seite,gesamt){
   if(!v.on)return "";
   const ab=(v.ty||0)+ue;
-  return `<div style="text-align:${v.align}${ab?`;padding-${kante}:${ab}mm`:""}${v.tw?`;margin-left:${v.tx||0}mm;width:${v.tw}mm`:""}">${seite?hfText(v.text,seite,gesamt||pageCount):hfText(v.text,1,pageCount,true)}</div>`+
+  return `<div style="text-align:${v.align}${ab?`;padding-${kante}:${ab}mm`:""}${v.tw?`;margin-left:${v.tx||0}mm;width:${v.tw}mm`:""}">${seite?hfInhalt(v,seite,gesamt||pageCount):hfInhalt(v,1,pageCount,true)}</div>`+
     hfBilder(v).map(b=>`<img alt="" src="${b.uri}" style="position:absolute;${kante}:${(+b.y||0)+ue}mm;left:${+b.x||0}mm;width:${b.b}mm;height:${b.h}mm">`).join("");
 }
 function setPrintPage(){
@@ -14696,8 +14833,38 @@ function istKopf(w){return w==="hdr"||w==="hdr1"}
 const hfName=w=>tr(istKopf(w)?"Kopfzeile":"Fußzeile")+(/1$/.test(w)?" · "+tr("Erste Seite"):"");
 /* Welche Zeile auf Seite page (ab 0) gilt: seite ist "hdr" oder "ftr". */
 function hfFuerSeite(d,seite,page){return page===0&&d.ersteAnders?seite+"1":seite}
-function hfText(tpl,page,total,forPrint){
-  const t=esc(tpl||"")
+/* Was in der Zeile steht, als HTML: formatiert (v.html — Fett, Kursiv,
+   Unterstrichen, Farbe, Größe in em zur Zeilenschrift; Zeilen durch <br>)
+   oder als reiner Text (v.text, wie bis 1.1). Tabulatoren wie in Words
+   Vorlage „Kopfzeile“: der erste springt zur Mitte, der zweite an den
+   rechten Rand — „Firma⇥Titel⇥Seite 3“. */
+function hfInhalt(v,page,total,forPrint){
+  const html=v.html!=null?hfText(v.html,page,total,forPrint,true)
+    :hfText(v.text,page,total,forPrint).replace(/\n/g,"<br>");
+  return html.includes("\t")?hfTabZeilen(html):html;
+}
+function hfTabZeilen(html){
+  const box=document.createElement("div");box.innerHTML=html;
+  /* in Zeilen an den <br> der obersten Ebene */
+  const zeilen=[[]];
+  for(const n of [...box.childNodes]){if(n.nodeName==="BR")zeilen.push([]);else zeilen[zeilen.length-1].push(n)}
+  const außen=d=>{const t=document.createElement("div");t.appendChild(d);return t.innerHTML};
+  return zeilen.map(knoten=>{
+    const z=document.createElement("div");knoten.forEach(k=>z.appendChild(k));
+    if(!z.textContent.includes("\t"))return z.innerHTML;
+    /* An jedem Tab teilen; Range.cloneContents schließt angeschnittene
+       Auszeichnung an beiden Seiten richtig. */
+    const stellen=[],w=document.createTreeWalker(z,NodeFilter.SHOW_TEXT);let t;
+    while((t=w.nextNode())){let i=-1;while((i=t.data.indexOf("\t",i+1))>=0)stellen.push([t,i])}
+    const teile=[];let ab=[z,0];
+    for(const [k,i] of stellen){const r=document.createRange();r.setStart(...ab);r.setEnd(k,i);teile.push(außen(r.cloneContents()));ab=[k,i+1]}
+    const r=document.createRange();r.setStart(...ab);r.setEnd(z,z.childNodes.length);teile.push(außen(r.cloneContents()));
+    return `<span class="hfzeile"><span>${teile[0]}</span><span>${teile[1]||""}</span><span>${teile.slice(2).join(" ")}</span></span>`;
+  }).join("<br>");
+}
+/* roh: tpl ist schon HTML (v.html) und wird nicht maskiert */
+function hfText(tpl,page,total,forPrint,roh){
+  const t=(roh?String(tpl||""):esc(tpl||""))
     .replace(/\{(titel|title)\}/gi,esc(doc().title||""))
     .replace(/\{(datum|date)\}/gi,new Date().toLocaleDateString(LOC()))
     .replace(/\{(seiten|pages)\}/gi,String(total));
@@ -14750,7 +14917,8 @@ function hfEditOpen(which,page){
   const v=hfOf(d,which),r=hfRect(which,page);
   box.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;`+
     `min-height:${r.h}px;font-size:${r.fs}px;text-align:${v.align}`;
-  box.textContent=v.text||"";
+  /* Formatiert als HTML, sonst wie bisher als Text */
+  if(v.html!=null)box.innerHTML=v.html;else box.textContent=v.text||"";
   box.classList.add("on");
   document.body.classList.add("hfmode");
   $("#hfhint").classList.remove("on");
@@ -14795,7 +14963,7 @@ function hfLive(){
     const box=$("#hfedit");
     if(!hfEditing||!box)return;
     const d=doc();
-    d[hfEditing.which]={...hfOf(d,hfEditing.which),text:(box.innerText||"").replace(/\n+$/,"")};
+    d[hfEditing.which]={...hfOf(d,hfEditing.which),...hfAusFeld(box)};
     paginate();
     /* Die Fußzeile wächst nach oben — ihr Eingabefeld muss mitwandern. */
     const r=hfRect(hfEditing.which,hfEditing.page);
@@ -14803,11 +14971,42 @@ function hfLive(){
     placeHfGrip();drawHfBar();
   },160);
 }
+/* Inhalt des Eingabefelds: reiner Text wie bis 1.1 (dann bleibt die Zeile
+   Zeichen für Zeichen, wie sie war) oder, sobald etwas ausgezeichnet ist,
+   zusätzlich als bereinigtes HTML — nur b/i/u/s, span mit Farbe und Größe,
+   <br> als Zeilenwechsel. html:undefined fällt in JSON weg. */
+function hfAusFeld(box){
+  const text=(box.innerText||"").replace(/\n+$/,"");
+  const html=hfSaeubern(box);
+  return /<(b|i|u|s|span)\b/i.test(html)?{text,html}:{text,html:undefined};
+}
+function hfSaeubern(wurzel){
+  let out="";
+  const lauf=n=>{
+    if(n.nodeType===3){out+=xesc(n.data);return}
+    if(n.nodeType!==1)return;
+    const tag=n.tagName.toLowerCase();
+    if(tag==="br"){out+="<br>";return}
+    const block=/^(div|p|li|h\d)$/.test(tag);
+    if(block&&out&&!out.endsWith("<br>"))out+="<br>";
+    const st=[];
+    if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)st.push("color:#"+h)}
+    if(tag==="font"&&n.getAttribute("color"))st.push("color:"+n.getAttribute("color"));
+    if(n.style&&/em$/.test(n.style.fontSize))st.push("font-size:"+n.style.fontSize);
+    const fett=tag==="b"||tag==="strong"||(n.style&&+n.style.fontWeight>=600);
+    const kur=tag==="i"||tag==="em",unt=tag==="u",dur=tag==="s"||tag==="strike";
+    out+=(fett?"<b>":"")+(kur?"<i>":"")+(unt?"<u>":"")+(dur?"<s>":"")+(st.length?`<span style="${st.join(";")}">`:"");
+    n.childNodes.forEach(lauf);
+    out+=(st.length?"</span>":"")+(dur?"</s>":"")+(unt?"</u>":"")+(kur?"</i>":"")+(fett?"</b>":"");
+  };
+  wurzel.childNodes.forEach(lauf);
+  return out.replace(/(<br>)+$/,"");
+}
 function hfEditCommit(){
   if(!hfEditing)return;
   const d=doc(),box=$("#hfedit");
   /* innerText statt textContent: erhält die Zeilenumbrüche der Eingabe */
-  d[hfEditing.which]={...hfOf(d,hfEditing.which),text:(box.innerText||"").replace(/\n+$/,"")};
+  d[hfEditing.which]={...hfOf(d,hfEditing.which),...hfAusFeld(box)};
   commit();paginate();setPrintHF();
 }
 function hfEditClose(){
@@ -14959,7 +15158,7 @@ function hfHtml(i,total,ml,mr,z){
     const kante=seite==="hdr"?"top":"bottom",ab=MM(seite==="hdr"?fm.hd:fm.fd)*z;
     const spalte=v.tw?`left:${ml+MM(v.tx||0)*z}px;width:${MM(v.tw)*z}px`:`left:${ml}px;right:${mr}px`;
     out+=`<div class="hf" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
-    text-align:${v.align};font-size:${fs}px">${hfText(v.text,i+1,total)}</div>`;
+    text-align:${v.align};font-size:${fs}px">${hfInhalt(v,i+1,total)}</div>`;
     out+=hfBilder(v).map(b=>`<img class="hfbild" alt="" src="${hfBildSrc(b.uri)}" style="${kante}:${ab+MM(+b.y||0)*z}px;left:${ml+MM(+b.x||0)*z}px;width:${MM(b.b)*z}px;height:${MM(b.h)*z}px">`).join("");
   }
   return out;
@@ -15216,6 +15415,7 @@ function hfDialog(){
       <textarea data-tx="${k}" rows="2" placeholder="${tr("Text oder Platzhalter")}"
         style="width:100%;margin-bottom:7px;resize:vertical;font-family:Georgia,serif"
         ${v.on?"":"disabled"}>${esc(v.text)}</textarea>
+      ${v.html!=null?`<div style="color:var(--ink-soft);font-size:12px;margin:-3px 0 7px">${tr("Formatiert. Die Formatierung bearbeiten Sie direkt auf der Seite (Doppelklick) — hier geändert, wird die Zeile zu reinem Text.")}</div>`:""}
       <div class="mmrow" style="margin-bottom:0">
         <label>${tr("Ausrichtung")}</label>
         ${["left","center","right"].map(a=>
@@ -15260,7 +15460,7 @@ function hfDialog(){
     b.querySelectorAll("[data-on]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.on;d[k]={...hfOf(d,k),on:el.checked};repaint()});
     b.querySelectorAll("[data-tx]").forEach(el=>el.oninput=()=>{
-      const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value};apply()});
+      const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value,html:undefined};apply()});
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.di,fm=ownFmt(d);
       fm[istKopf(k)?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
@@ -15276,7 +15476,7 @@ function hfDialog(){
       const inp=b.querySelector(`[data-tx="${k}"]`);
       const pos=inp.selectionStart??inp.value.length;
       inp.value=inp.value.slice(0,pos)+p+inp.value.slice(inp.selectionEnd??pos);
-      d[k]={...hfOf(d,k),text:inp.value};inp.focus();
+      d[k]={...hfOf(d,k),text:inp.value,html:undefined};inp.focus();
       inp.selectionStart=inp.selectionEnd=pos+p.length;apply()});
     const kI=el=>{const [k,i,a]=el.split(":");return [k,+i,a]};
     b.querySelectorAll("[data-bn]").forEach(el=>el.onclick=()=>hfBildEinfuegen(el.dataset.bn,repaint));
@@ -15698,8 +15898,17 @@ function insertFootnote(){
      Der sichtbare Ziffertext ist ohnehin nur Anzeige - renumberFootnotes()
      schreibt ihn bei jedem paginate() neu, ein versehentlicher Tastendruck
      darin heilt sich also von selbst aus. */
-  document.execCommand("insertHTML",false,
-    `<sup class="fn" data-fn="${id}" title="${esc(tr("Fußnote ohne Text"))}">*</sup>`);
+  /* Direkt in den Text statt über insertHTML: Chrome machte daraus je nach
+     Umgebung einen <span> mit nachgeahmten Stilen — ohne Klasse und
+     Kennung, die Fußnote war verloren (gemessen 2026-10-11, auch gleich die
+     erste am Absatzende). */
+  const sel=getSelection();
+  const sup=document.createElement("sup");
+  sup.className="fn";sup.dataset.fn=id;sup.title=tr("Fußnote ohne Text");sup.textContent="*";
+  if(sel.rangeCount&&ed.contains(sel.getRangeAt(0).startContainer)){
+    const rg=sel.getRangeAt(0);rg.deleteContents();rg.insertNode(sup);
+    rg.setStartAfter(sup);rg.collapse(true);sel.removeAllRanges();sel.addRange(rg);
+  }else (ed.querySelector("p,li,h1,h2,h3")||ed).appendChild(sup);
   flush();dirty=true;commit();queuePaginate();
   setTimeout(()=>editFootnote(id,true),30);
 }
@@ -15832,6 +16041,83 @@ function withPrintFootnotes(fn){
   try{fn()}
   catch(e){aufraeumen();throw e}
   setTimeout(aufraeumen,1200);
+}
+/* ================= Endnoten =================
+   Wie die Fußnoten: der Text hängt am Dokument (d.endnotes), im Text steht
+   nur eine Marke (sup.en, data-en). Gezählt in kleinen römischen Ziffern wie
+   in Word. Die Liste steht am Dokumentende als fester Block (.enliste), den
+   paginate() vor jedem Umbruch neu setzt und flush() wieder entfernt — so
+   bricht sie mit um und kommt mit in Druck und PDF. Bis 1.2 gingen Endnoten
+   aus Word ganz verloren, seit dem Bewahren standen sie als Platzhalter. */
+function roemisch(n){
+  const z=[[1000,"m"],[900,"cm"],[500,"d"],[400,"cd"],[100,"c"],[90,"xc"],[50,"l"],[40,"xl"],[10,"x"],[9,"ix"],[5,"v"],[4,"iv"],[1,"i"]];
+  let s="";for(const [w,b] of z)while(n>=w){s+=b;n-=w}return s;
+}
+function renumberEndnotes(ed){
+  const seen=new Map();
+  [...ed.querySelectorAll(".en[data-en]")].forEach(s=>{
+    if(!seen.has(s.dataset.en))seen.set(s.dataset.en,seen.size+1);
+    s.textContent=roemisch(seen.get(s.dataset.en));
+  });
+  return seen;
+}
+function endnotenListe(ed){
+  const d=doc();
+  ed.querySelectorAll(":scope > .enliste").forEach(x=>x.remove());
+  const nummern=renumberEndnotes(ed);
+  if(!nummern.size)return;
+  const el=document.createElement("div");
+  el.className="enliste";el.contentEditable="false";
+  el.innerHTML=`<div class="enkopf">${esc(tr("Endnoten"))}</div>`+[...nummern].map(([id,n])=>{
+    const e=(d.endnotes||[]).find(x=>x.id===id);
+    return `<p data-en-zeile="${esc(id)}"><sup>${roemisch(n)}</sup> ${esc((e&&e.text)||"")}</p>`;
+  }).join("");
+  ed.appendChild(el);
+}
+function insertEndnote(){
+  const ed=$("#editor");if(S.mode!=="write"||!ed)return;
+  ed.focus();
+  const id=uid();
+  (doc().endnotes=doc().endnotes||[]).push({id,text:""});
+  /* Nicht über insertHTML: steht die Schreibmarke direkt hinter einer
+     anderen Marke, macht Chrome aus dem neuen <sup> einen <span> mit
+     nachgeahmten Stilen — ohne Klasse und Kennung (gemessen). */
+  const sel=getSelection();
+  const sup=document.createElement("sup");
+  sup.className="en";sup.dataset.en=id;sup.title=tr("Endnote ohne Text");sup.textContent="i";
+  if(sel.rangeCount&&ed.contains(sel.getRangeAt(0).startContainer)){
+    const rg=sel.getRangeAt(0);rg.deleteContents();rg.insertNode(sup);
+    rg.setStartAfter(sup);rg.collapse(true);sel.removeAllRanges();sel.addRange(rg);
+  }else (ed.querySelector("p,li,h1,h2,h3")||ed).appendChild(sup);
+  flush();dirty=true;commit();queuePaginate();
+  setTimeout(()=>editEndnote(id,true),30);
+}
+function deleteEndnote(id){
+  const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll(`.en[data-en="${id}"]`).forEach(s=>s.remove());
+  const d=doc();d.endnotes=(d.endnotes||[]).filter(f=>f.id!==id);
+  flush();dirty=true;commit();queuePaginate();
+}
+function editEndnote(id,frisch){
+  const d=doc();const en=(d.endnotes||[]).find(f=>f.id===id);
+  if(!en)return;
+  overlay(`<div class="modal"><h3>${tr("Endnote")}</h3>
+    <div class="pad"><textarea id="enText" rows="4" placeholder="${tr("Endnotentext")}"
+      style="width:100%;resize:vertical;font:inherit;background:var(--paper);color:var(--ink);
+      border:1px solid var(--rule);border-radius:var(--radius);padding:7px 9px">${esc(en.text||"")}</textarea></div>
+    <div class="rowend">
+      <button class="btn" id="enDel" style="margin-right:auto">${tr("Endnote löschen")}</button>
+      <button class="btn" id="enClose">${tr("Schließen")}</button>
+      <button class="btn pri" id="enOk">${tr("Übernehmen")}</button>
+    </div></div>`);
+  const ta=$("#enText");ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  const finish=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
+  $("#enOk").onclick=()=>{en.text=ta.value.trim();flush();dirty=true;commit();if(S.mode==="write")paginate();finish()};
+  $("#enDel").onclick=()=>{deleteEndnote(id);finish()};
+  /* Eine gerade angelegte Endnote ohne Text, die man wieder schließt, war
+     nicht gewollt — wie bei den Fußnoten. */
+  $("#enClose").onclick=()=>{finish();if(frisch&&!(en.text||"").trim()&&!ta.value.trim())deleteEndnote(id)};
+  ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#enOk").click()}});
 }
 /* ================= Inhaltsverzeichnis =================
    Ein echter, aber größtenteils nicht bearbeitbarer Block im Text (wie eine
@@ -19010,6 +19296,7 @@ Word document come along and stay where they were in Word.</p>
 <p><b>Different first page</b> in the <b>Header and footer</b> dialog gives page 1 its own
 header and footer, as in Word — for a letterhead with the logo only on the first sheet, or a
 cover page without a header. They start out empty; the distances from the edge are shared.</p>
+<p>Inside the line, <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> and <kbd>U</kbd> work as in the text. Formatting and tabs from Word come along: the first tab jumps to the centre, the second to the right edge, as in Word's header style.</p>
 <p><kbd>Enter</kbd> adds a line. <kbd>Tab</kbd> jumps between header
 and footer. <kbd>Esc</kbd> finishes and keeps the text.</p>`},
 
@@ -19095,7 +19382,8 @@ skipped rather than duplicated.</p>`},
 <p><b>Tools &rsaquo; Insert footnote</b> places a numbered reference at the cursor and puts
 the note at the foot of the page it falls on.</p>
 <p>Footnotes renumber themselves as you write and move with the text they belong to.
-Deleting the reference removes the note as well.</p>`},
+Deleting the reference removes the note as well.</p>
+<p><b>Tools &rsaquo; Insert endnote</b> works the same way, but collects the notes at the end of the document, numbered i, ii, iii as in Word. Click a mark to edit its note.</p>`},
 
  {t:"Table of contents and figures",k:"table of contents;toc;contents;figures",b:`
 <p><b>Tools &rsaquo; Insert table of contents</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
@@ -19586,6 +19874,7 @@ Word-Datei kommen mit und stehen dort, wo sie in Word standen.</p>
 <p><b>Erste Seite anders</b> im Dialog <b>Kopf- und Fußzeile</b> gibt Seite 1 eigene Kopf- und
 Fußzeilen, wie in Word — für einen Briefbogen mit Logo nur auf dem ersten Blatt oder ein
 Deckblatt ohne Kopfzeile. Sie beginnen leer; die Abstände zum Rand gelten für beide.</p>
+<p>In der Zeile wirken Fett, Kursiv und Unterstrichen mit denselben Tasten wie im Text. Formatierung und Tabulatoren aus Word kommen mit: der erste Tab springt zur Mitte, der zweite an den rechten Rand, wie in Words Kopfzeilen-Vorlage.</p>
 <p><kbd>Eingabe</kbd> fügt eine Zeile hinzu. <kbd>Tab</kbd> springt
 zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet und übernimmt.</p>`},
 
@@ -19675,7 +19964,8 @@ das angesehene Glossar oder als neues, benannt nach der Datei. Schon vorhandene 
 <p><b>Werkzeuge &rsaquo; Fußnote einfügen</b> setzt eine nummerierte Marke an die Schreibmarke
 und stellt die Anmerkung an den Fuß der Seite, auf die sie fällt.</p>
 <p>Fußnoten nummerieren sich beim Schreiben selbst neu und wandern mit dem Text, zu dem sie
-gehören. Wird die Marke im Text gelöscht, verschwindet auch die Anmerkung.</p>`},
+gehören. Wird die Marke im Text gelöscht, verschwindet auch die Anmerkung.</p>
+<p><b>Werkzeuge &rsaquo; Endnote einfügen</b> arbeitet genauso, sammelt die Anmerkungen aber am Ende des Dokuments, gezählt i, ii, iii wie in Word. Ein Klick auf die Marke bearbeitet ihren Text.</p>`},
 
  {t:"Inhalts- und Abbildungsverzeichnis",k:"inhaltsverzeichnis;verzeichnis;abbildungen",b:`
 <p><b>Werkzeuge &rsaquo; Inhaltsverzeichnis einfügen</b>
@@ -20179,6 +20469,7 @@ pie de un documento de Word se conservan y quedan donde estaban en Word.</p>
 página 1 su propio encabezado y pie, como en Word: para un papel con membrete y logotipo solo en
 la primera hoja o una portada sin encabezado. Empiezan vacíos; las distancias al borde son
 comunes.</p>
+<p>Dentro de la línea, negrita, cursiva y subrayado funcionan con las mismas teclas que en el texto. El formato y las tabulaciones de Word se conservan: la primera tabulación salta al centro y la segunda al margen derecho, como en el estilo de encabezado de Word.</p>
 <p><kbd>Intro</kbd> añade una línea. <kbd>Tab</kbd> salta entre
 encabezado y pie. <kbd>Esc</kbd> termina.</p>`},
 
@@ -20270,7 +20561,8 @@ que ya existen se omiten en lugar de duplicarse.</p>`},
 <p><b>Herramientas &rsaquo; Insertar nota al pie</b> coloca una referencia numerada en el cursor
 y pone la nota al pie de la página en la que cae.</p>
 <p>Las notas al pie se renumeran solas mientras escribes y se mueven con el texto al que
-pertenecen. Borrar la referencia elimina también la nota.</p>`},
+pertenecen. Borrar la referencia elimina también la nota.</p>
+<p><b>Herramientas &rsaquo; Insertar nota al final</b> funciona igual, pero reúne las notas al final del documento, numeradas i, ii, iii como en Word. Un clic en la marca edita su texto.</p>`},
 
  {t:"Índice y lista de figuras",k:"índice;contenido;tabla de contenido;figuras",b:`
 <p><b>Herramientas &rsaquo; Insertar índice</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd>)
@@ -20771,6 +21063,7 @@ documento do Word vêm junto e ficam onde estavam no Word.</p>
 <p><b>Primeira página diferente</b>, na caixa <b>Cabeçalho e rodapé</b>, dá à página 1 seu
 próprio cabeçalho e rodapé, como no Word — para um papel timbrado com o logotipo só na primeira
 folha ou uma capa sem cabeçalho. Eles começam vazios; as distâncias da borda são as mesmas.</p>
+<p>Na linha, negrito, itálico e sublinhado funcionam com as mesmas teclas que no texto. A formatação e as tabulações do Word são mantidas: a primeira tabulação vai para o centro e a segunda para a margem direita, como no estilo de cabeçalho do Word.</p>
 <p><kbd>Enter</kbd> adiciona uma linha. <kbd>Tab</kbd> pula entre
 cabeçalho e rodapé. <kbd>Esc</kbd> conclui.</p>`},
 
@@ -20859,7 +21152,8 @@ são pulados em vez de duplicados.</p>`},
 <p><b>Ferramentas &rsaquo; Inserir nota de rodapé</b> coloca uma referência numerada no cursor e
 põe a nota no pé da página em que ela cai.</p>
 <p>As notas de rodapé se renumeram sozinhas enquanto você escreve e se movem com o texto ao qual
-pertencem. Excluir a referência remove a nota também.</p>`},
+pertencem. Excluir a referência remove a nota também.</p>
+<p><b>Ferramentas &rsaquo; Inserir nota de fim</b> funciona do mesmo jeito, mas reúne as notas no fim do documento, numeradas i, ii, iii como no Word. Um clique na marca edita o texto.</p>`},
 
  {t:"Sumário e índice de figuras",k:"sumário;índice;conteúdo;figuras",b:`
 <p><b>Ferramentas &rsaquo; Inserir sumário</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
@@ -21377,6 +21671,7 @@ de page d'un document Word sont reprises et restent là où elles étaient dans 
 page 1 son propre en-tête et pied de page, comme dans Word — pour un papier à en-tête avec le
 logo sur la première feuille seulement, ou une page de garde sans en-tête. Ils sont vides au
 départ ; les distances au bord sont communes.</p>
+<p>Dans la ligne, gras, italique et souligné s'appliquent avec les mêmes touches que dans le texte. La mise en forme et les tabulations de Word sont conservées : la première tabulation va au centre, la seconde à la marge droite, comme dans le style d'en-tête de Word.</p>
 <p><kbd>Entrée</kbd> ajoute une ligne. <kbd>Tab</kbd> passe de l'en-tête
 au pied de page. <kbd>Échap</kbd> termine.</p>`},
 
@@ -21469,7 +21764,8 @@ déjà présents sont ignorés au lieu d'être dupliqués.</p>`},
 <p><b>Outils &rsaquo; Insérer une note de bas de page</b> place un appel de note numéroté au
 curseur et met la note au bas de la page où elle tombe.</p>
 <p>Les notes de bas de page se renumérotent d'elles-mêmes pendant que vous écrivez et suivent le
-texte auquel elles appartiennent. Supprimer l'appel de note retire aussi la note.</p>`},
+texte auquel elles appartiennent. Supprimer l'appel de note retire aussi la note.</p>
+<p><b>Outils &rsaquo; Insérer une note de fin</b> fonctionne de la même façon, mais regroupe les notes à la fin du document, numérotées i, ii, iii comme dans Word. Un clic sur l'appel modifie son texte.</p>`},
 
  {t:"Table des matières et des illustrations",k:"table des matières;sommaire;contenu;illustrations",b:`
 <p><b>Outils &rsaquo; Insérer une table des matières</b>
@@ -21973,6 +22269,7 @@ w Wordzie.</p>
 <p><b>Inna pierwsza strona</b> w oknie <b>Nagłówek i stopka</b> daje stronie 1 własny nagłówek
 i stopkę, jak w Wordzie — dla papieru firmowego z logo tylko na pierwszym arkuszu albo strony
 tytułowej bez nagłówka. Na początku są puste; odległości od krawędzi są wspólne.</p>
+<p>W wierszu pogrubienie, kursywa i podkreślenie działają tymi samymi klawiszami co w tekście. Formatowanie i tabulatory z Worda zostają: pierwszy tabulator przeskakuje na środek, drugi do prawej krawędzi, jak w stylu nagłówka Worda.</p>
 <p><kbd>Enter</kbd> dodaje wiersz. <kbd>Tab</kbd> przeskakuje między
 nagłówkiem a stopką. <kbd>Esc</kbd> kończy.</p>`},
 
@@ -22061,7 +22358,8 @@ a nie powielane.</p>`},
 <p><b>Narzędzia &rsaquo; Wstaw przypis</b> umieszcza numerowane odwołanie w miejscu kursora i
 umieszcza notkę u dołu strony, na którą przypada.</p>
 <p>Przypisy same się przenumerowują podczas pisania i przemieszczają się z tekstem, do którego
-należą. Usunięcie odwołania usuwa też notkę.</p>`},
+należą. Usunięcie odwołania usuwa też notkę.</p>
+<p><b>Narzędzia &rsaquo; Wstaw przypis końcowy</b> działa tak samo, ale zbiera przypisy na końcu dokumentu, numerowane i, ii, iii jak w Wordzie. Kliknięcie znacznika otwiera jego tekst.</p>`},
 
  {t:"Spis treści i spis ilustracji",k:"spis treści;spis;zawartość;ilustracje",b:`
 <p><b>Narzędzia &rsaquo; Wstaw spis treści</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
@@ -22563,6 +22861,7 @@ erano in Word.</p>
 pagina 1 intestazione e piè di pagina propri, come in Word — per una carta intestata con il logo
 solo sul primo foglio o una copertina senza intestazione. All'inizio sono vuoti; le distanze dal
 bordo sono comuni.</p>
+<p>Nella riga, grassetto, corsivo e sottolineato funzionano con gli stessi tasti del testo. Formattazione e tabulazioni di Word vengono mantenute: la prima tabulazione va al centro, la seconda al margine destro, come nello stile intestazione di Word.</p>
 <p><kbd>Invio</kbd> aggiunge una riga. <kbd>Tab</kbd> passa tra
 intestazione e piè di pagina. <kbd>Esc</kbd> conclude.</p>`},
 
@@ -22653,7 +22952,8 @@ vengono ignorati invece che duplicati.</p>`},
 <p><b>Strumenti &rsaquo; Inserisci nota a piè di pagina</b> mette un richiamo numerato al
 cursore e mette la nota in fondo alla pagina su cui cade.</p>
 <p>Le note a piè di pagina si rinumerano da sole mentre scrivi e si spostano con il testo a cui
-appartengono. Eliminare il richiamo rimuove anche la nota.</p>`},
+appartengono. Eliminare il richiamo rimuove anche la nota.</p>
+<p><b>Strumenti &rsaquo; Inserisci nota di chiusura</b> funziona allo stesso modo, ma raccoglie le note alla fine del documento, numerate i, ii, iii come in Word. Un clic sul richiamo ne modifica il testo.</p>`},
 
  {t:"Sommario e indice delle figure",k:"sommario;indice;contenuto;figure",b:`
 <p><b>Strumenti &rsaquo; Inserisci sommario</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd>)

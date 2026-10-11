@@ -455,7 +455,51 @@ immer genau einen Commit, der sie anfasst.
   - Fixpunkt: zweites und drittes Speichern Teil für Teil gleich, in allen
     zwölf Fällen (`word-bewahren-pruefen.cjs`).
 
+- **Formatierung und Tabulatoren in Kopf- und Fußzeile** — bis 1.2 nur
+  reiner Text in einer Schrift; aus Word kamen Fett, Farbe, Größe nicht mit,
+  Tabs fielen ganz weg („FirmaMitteRechts“). Jetzt trägt die Zeile neben
+  `text` ein optionales `html` (nur b/i/u/s, span mit Farbe und Größe in em
+  zur Zeilenschrift, `<br>` als Zeilenwechsel; `hfSaeubern()`). Reine
+  Textzeilen bleiben Zeichen für Zeichen wie bisher.
+  - Anzeige über `hfInhalt()` an allen Stellen (Seite, Messung, Druck).
+    Tabulatoren wie Words Vorlage „Kopfzeile“: erster zur Mitte, zweiter an
+    den rechten Rand (`hfTabZeilen()`, Raster links | Mitte | rechts;
+    geteilt mit Range.cloneContents, damit angeschnittene Auszeichnung
+    stimmt).
+  - Bearbeiten auf der Seite mit Formatierung; Strg+B/I/U usw. wirken im
+    Eingabefeld (geprüft mit echtem Tastendruck). Im Dialog bleibt das
+    Textfeld reiner Text — ein Hinweis sagt, dass eine Änderung dort die
+    Formatierung aufhebt.
+  - Import: direkte Auszeichnung der Läufe (`docxHfAbsatz(p,html)`), Größe
+    relativ zur Grundgröße, die der Export schreibt (Dokumentgröße × 0,85).
+    Export: Läufe aus dem HTML (`hfHtmlLaeufe()`), Tabs als `w:tab`, dazu
+    Tabstopps Mitte/rechts im Absatz, damit Word die Zeile genauso setzt.
+  - Geprüft: Kopfzeile „Firma (fett, rot, 14 pt) ⇥ Mitte ⇥ Rechts“ aus
+    Word, in PureQuill geändert und gespeichert — Word findet Fett, Farbe
+    und Tabs wieder; unverändert geht weiter das Original zurück.
+
+- **Endnoten** wie in Word: *Werkzeuge › Endnote einfügen*, Marke im Text
+  (`sup.en`, gezählt i, ii, iii), Klick bearbeitet den Text, Liste am
+  Dokumentende (`.enliste`, setzt `paginate()` vor jedem Umbruch neu,
+  `flush()` nimmt sie wieder heraus — sie bricht mit um und wird gedruckt).
+  Aus Word gelesen wie die Fußnoten (`docxFussnoten(xml,"endnote")`), nach
+  Word als `endnotes.xml` mit `EndnoteReference`/`EndnoteText`; in Markdown,
+  Text und HTML als eigene Liste. Bis 1.2 gingen sie verloren, seit dem
+  Bewahren standen sie nur als Platzhalter. Dabei: `endnotePr` aus
+  settings.xml wird nicht mehr übernommen — ohne `endnotes.xml` hielt Word die
+  Datei für beschädigt.
+- **Eingefügte Fußnoten gingen verloren** — `insertHTML` machte aus der
+  Marke einen `<span>` mit nachgeahmten Stilen, ohne Klasse und Kennung
+  (gemessen: schon die erste am Absatzende, erst recht eine zweite direkt
+  hinter einer ersten). Die Marke wird jetzt direkt in den Text gesetzt; zwei
+  Fußnoten hintereinander kommen beide in Word an.
+
 ### Nebenbei gefunden, noch nicht behoben
+
+- **Fußnoten stehen im Druck/PDF gesammelt am Ende**, nicht am Fuß ihrer
+  Seite wie am Bildschirm und in Word (`withPrintFootnotes`). Mit dem
+  seitenweisen Druck (`hfDruckSeiten`) wäre ein Fußband je Seite jetzt
+  machbar.
 
 - **Lange Tabellen werden in der Ansicht nicht auf Seiten verteilt.** Eine
   Tabelle, die länger als eine Seite ist, läuft am Bildschirm durch Fuß- und
