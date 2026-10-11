@@ -436,6 +436,9 @@ sup.en{cursor:pointer;color:var(--stamp)}
 .wroh.wkommentar{border:none;background:none;padding:0 .1em}
 ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decoration-thickness:2px}
 /* Tabulator wie in Word: Standard-Tabstopps alle 1,25 cm ab Zeilenanfang */
+/* Abschnittswechsel aus Word: dezent markiert, wie Words Formatierungszeichen */
+#editor [data-wsect]{border-bottom:1px dashed var(--rule)}
+@media print{#editor [data-wsect]{border-bottom:none!important}}
 .wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
@@ -2352,6 +2355,7 @@ en:{
   "Doppelklick: Fußzeile":"Double-click: footer",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
   "Erste Seite anders":"Different first page","Erste Seite":"First page",
+  "Abschnitte":"sections","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Sections from Word: PureQuill shows every page in the format of the last section; each section keeps its own format when saving as Word.",
   "Spalten":"Columns","Spaltenabstand":"Column spacing","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"Multiple columns in Word. PureQuill shows and prints the text in one column; the columns are kept when saving as Word.",
   "Gerade Seiten anders":"Different odd and even pages","Gerade Seiten":"Even pages",
   "Endnote einfügen":"Insert endnote","Endnoten":"Endnotes","Endnotentext":"Endnote text","Endnote löschen":"Delete endnote","Endnote ohne Text":"Endnote without text",
@@ -3137,6 +3141,7 @@ fr:{
   "Doppelklick: Fußzeile":"Double-clic : pied de page",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Astuce : un double-clic sur la marge supérieure ou inférieure modifie l'en-tête et le pied de page directement dans le document.",
   "Erste Seite anders":"Première page différente","Erste Seite":"Première page",
+  "Abschnitte":"sections","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Sections de Word : PureQuill affiche toutes les pages au format de la dernière section ; chaque section garde son propre format à l’enregistrement au format Word.",
   "Spalten":"Colonnes","Spaltenabstand":"Espacement des colonnes","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"Plusieurs colonnes dans Word. PureQuill affiche et imprime le texte sur une colonne ; les colonnes sont conservées à l’enregistrement au format Word.",
   "Gerade Seiten anders":"Pages paires et impaires différentes","Gerade Seiten":"Pages paires",
   "Endnote einfügen":"Insérer une note de fin","Endnoten":"Notes de fin","Endnotentext":"Texte de la note de fin","Endnote löschen":"Supprimer la note de fin","Endnote ohne Text":"Note de fin sans texte",
@@ -3922,6 +3927,7 @@ es:{
   "Doppelklick: Fußzeile":"Doble clic: pie de página",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Consejo: un doble clic en el margen superior o inferior edita el encabezado y el pie de página directamente en el documento.",
   "Erste Seite anders":"Primera página diferente","Erste Seite":"Primera página",
+  "Abschnitte":"secciones","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Secciones de Word: PureQuill muestra todas las páginas con el formato de la última sección; cada sección conserva su propio formato al guardar como Word.",
   "Spalten":"Columnas","Spaltenabstand":"Espacio entre columnas","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"Varias columnas en Word. PureQuill muestra e imprime el texto en una columna; las columnas se conservan al guardar como Word.",
   "Gerade Seiten anders":"Páginas pares e impares diferentes","Gerade Seiten":"Páginas pares",
   "Endnote einfügen":"Insertar nota al final","Endnoten":"Notas al final","Endnotentext":"Texto de la nota al final","Endnote löschen":"Eliminar nota al final","Endnote ohne Text":"Nota al final sin texto",
@@ -4707,6 +4713,7 @@ pt:{
   "Doppelklick: Fußzeile":"Clique duplo: rodapé",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Dica: um clique duplo na margem superior ou inferior edita o cabeçalho e o rodapé diretamente no documento.",
   "Erste Seite anders":"Primeira página diferente","Erste Seite":"Primeira página",
+  "Abschnitte":"seções","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Seções do Word: o PureQuill mostra todas as páginas no formato da última seção; cada seção mantém seu próprio formato ao salvar como Word.",
   "Spalten":"Colunas","Spaltenabstand":"Espaçamento entre colunas","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"Várias colunas no Word. O PureQuill mostra e imprime o texto em uma coluna; as colunas são mantidas ao salvar como Word.",
   "Gerade Seiten anders":"Páginas pares e ímpares diferentes","Gerade Seiten":"Páginas pares",
   "Endnote einfügen":"Inserir nota de fim","Endnoten":"Notas de fim","Endnotentext":"Texto da nota de fim","Endnote löschen":"Excluir nota de fim","Endnote ohne Text":"Nota de fim sem texto",
@@ -5492,6 +5499,7 @@ pl:{
   "Doppelklick: Fußzeile":"Dwuklik: stopka",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Wskazówka: dwuklik na górnym lub dolnym marginesie strony pozwala edytować nagłówek i stopkę bezpośrednio w dokumencie.",
   "Erste Seite anders":"Inna pierwsza strona","Erste Seite":"Pierwsza strona",
+  "Abschnitte":"sekcje","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Sekcje z Worda: PureQuill pokazuje wszystkie strony w formacie ostatniej sekcji; każda sekcja zachowuje własny format przy zapisie jako Word.",
   "Spalten":"Kolumny","Spaltenabstand":"Odstęp między kolumnami","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"W Wordzie kilka kolumn. PureQuill pokazuje i drukuje tekst w jednej kolumnie; kolumny zostają przy zapisie jako Word.",
   "Gerade Seiten anders":"Inne strony parzyste i nieparzyste","Gerade Seiten":"Strony parzyste",
   "Endnote einfügen":"Wstaw przypis końcowy","Endnoten":"Przypisy końcowe","Endnotentext":"Tekst przypisu końcowego","Endnote löschen":"Usuń przypis końcowy","Endnote ohne Text":"Przypis końcowy bez tekstu",
@@ -6284,6 +6292,7 @@ it:{
   "Doppelklick: Fußzeile":"Doppio clic: piè di pagina",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Suggerimento: un doppio clic sul margine superiore o inferiore della pagina modifica intestazione e piè di pagina direttamente nel documento.",
   "Erste Seite anders":"Prima pagina diversa","Erste Seite":"Prima pagina",
+  "Abschnitte":"sezioni","Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format.":"Sezioni da Word: PureQuill mostra tutte le pagine nel formato dell’ultima sezione; ogni sezione mantiene il proprio formato salvando come Word.",
   "Spalten":"Colonne","Spaltenabstand":"Spaziatura colonne","In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten.":"Più colonne in Word. PureQuill mostra e stampa il testo in una colonna; le colonne vengono mantenute salvando come Word.",
   "Gerade Seiten anders":"Pagine pari e dispari diverse","Gerade Seiten":"Pagine pari",
   "Endnote einfügen":"Inserisci nota di chiusura","Endnoten":"Note di chiusura","Endnotentext":"Testo della nota di chiusura","Endnote löschen":"Elimina nota di chiusura","Endnote ohne Text":"Nota di chiusura senza testo",
@@ -8297,6 +8306,8 @@ function drawStatus(){
       pageCount>1?"páginas":"página",pageCount>1?"strony":"strona",
       pageCount>1?"pagine":"pagina")):pages+" "+tr("Normseiten")}</span>
     <span id="fmtHint" style="cursor:pointer" title="${tr("Seitenformat ändern")}">${tr(fmtOf(doc()).n)}</span>
+    ${(()=>{const n=((d.html||"").match(/data-wsect="/g)||[]).length+1;
+      return n>1?`<span title="${esc(tr("Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format."))}">${n} ${tr("Abschnitte")}</span>`:""})()}
     ${d.spalten&&d.spalten.n>1?`<span id="spHint" style="cursor:pointer" title="${esc(tr("In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten."))}">${d.spalten.n} ${tr("Spalten")}</span>`:""}
     <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki",
       "note")}</span>
@@ -12256,7 +12267,10 @@ function wRohHtml(ktx,el){
 function wAbsatzAttr(pr,ktx){
   if(!pr||!ktx||!ktx.roh)return "";
   const s=KIND(pr,"sectPr"),tabs=KIND(pr,"tabs");
-  return (s?` data-wsect="${wRohMerken(ktx,s)}"`:"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"");
+  /* Ein Abschnitt beginnt in Word auf einer neuen Seite, außer er ist
+     „fortlaufend“ (w:type fehlt = nextPage) */
+  const neu=s&&String(xattrN(KIND(s,"type"),"val")||"nextPage")!=="continuous";
+  return (s?` data-wsect="${wRohMerken(ktx,s)}"`+(neu?` data-wsect-neu="1"`:""):"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"");
 }
 function docxLauf(p,ktx,innen){
   let out="";
@@ -14069,11 +14083,17 @@ function paginate(){
     blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
     const edTop=ed.getBoundingClientRect().top;
     const fnByPage=[];
+    let nachAbschnitt=false;
     blocks.forEach(b=>{
       const r=b.getBoundingClientRect();
       const top=r.top-edTop, h=r.height;
       let p=Math.max(0,Math.floor(top/stride));
       const contentH=contentHOf(p);
+      /* Nach einem Abschnittswechsel aus Word beginnt eine neue Seite, wie
+         in Word — vorher lief der Text einfach weiter, und Umbrüche und
+         Seitenzahl wichen ab. Der Druck folgt über seitenAnfaenge. */
+      const zwang=nachAbschnitt&&top>p*stride+oben(p)+1;
+      nachAbschnitt=!!(b.dataset&&b.dataset.wsectNeu);
       if(b.classList.contains("pgbreak")){
         const nextStart=(p+1)*stride+mt;
         /* Ohne den frueheren Abzug von 1px: der Platzhalter traegt eine
@@ -14085,7 +14105,7 @@ function paginate(){
         return;
       }
       const limit=p*stride+oben(p)+contentH;
-      if(top+h>limit+1&&h<=contentH){
+      if(zwang||(top+h>limit+1&&h<=contentH)){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
         b.style.marginTop=(base+(ziel-top))+"px";

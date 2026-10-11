@@ -488,6 +488,15 @@ immer genau einen Commit, der sie anfasst.
   Bewahren standen sie nur als Platzhalter. Dabei: `endnotePr` aus
   settings.xml wird nicht mehr übernommen — ohne `endnotes.xml` hielt Word die
   Datei für beschädigt.
+- **Abschnitte aus Word**: bleiben wie bisher vollständig erhalten (jeder
+  mit seinem Format, seinen Kopfzeilen). Neu: ein Abschnittswechsel beginnt
+  eine neue Seite wie in Word (außer „fortlaufend“; `data-wsect-neu`,
+  `paginate()` verschiebt den nächsten Block, der Druck folgt über
+  `seitenAnfaenge`) — vorher lief der Text weiter, Umbrüche und Seitenzahl
+  wichen ab (gemessen: 1 statt 2 Seiten). Am Abschnittswechsel eine dezente
+  gestrichelte Linie, in der Statusleiste „2 Abschnitte“ mit Hinweis, dass
+  alle Seiten im Format des letzten Abschnitts erscheinen (Toms Entscheidung:
+  echte Formate je Abschnitt hätten Umbruch und Druck im Kern umgebaut).
 - **Spalten**: aus Word gelesen (gleich breite, `w:cols` mit `num`), in der
   Statusleiste angezeigt („2 Spalten“, Klick öffnet den Dialog), über
   *Format › Spalten …* für Word setzbar (1–3, Abstand), beim Speichern an der
