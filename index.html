@@ -2356,6 +2356,10 @@ en:{
   "Portugiesisch":"Portuguese",
   "Italienisch":"Italian",
   "Ohne Formatierung eingefügt":"Pasted without formatting",
+  "Bilder mitkopieren?":"Copy the images too?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Images from web pages or emails can shift paragraphs and change page breaks. Without images, you get the text with its headings, lists and emphasis.",
+  "Mit Bildern einfügen":"Paste with images",
+  "Ohne Bilder einfügen":"Paste without images",
   "Nur Text übernehmen":"Keep text only",
   "Rechtschreibprüfung":"Spell check",
   "Rechtschreibprüfung&hellip;":"Spell check&hellip;",
@@ -3131,6 +3135,10 @@ fr:{
   "Portugiesisch":"Portugais",
   "Italienisch":"Italien",
   "Ohne Formatierung eingefügt":"Collé sans mise en forme",
+  "Bilder mitkopieren?":"Copier aussi les images ?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Les images de pages web ou d’e-mails peuvent déplacer des paragraphes et modifier les sauts de page. Sans les images, vous obtenez le texte avec ses titres, listes et mises en valeur.",
+  "Mit Bildern einfügen":"Coller avec les images",
+  "Ohne Bilder einfügen":"Coller sans les images",
   "Nur Text übernehmen":"Conserver le texte seul",
   "Rechtschreibprüfung":"Vérification orthographique",
   "Rechtschreibprüfung&hellip;":"Vérification orthographique&hellip;",
@@ -3906,6 +3914,10 @@ es:{
   "Portugiesisch":"Portugués",
   "Italienisch":"Italiano",
   "Ohne Formatierung eingefügt":"Pegado sin formato",
+  "Bilder mitkopieren?":"¿Copiar también las imágenes?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Las imágenes de páginas web o correos pueden desplazar párrafos y cambiar los saltos de página. Sin imágenes llega el texto con sus títulos, listas y resaltados.",
+  "Mit Bildern einfügen":"Pegar con imágenes",
+  "Ohne Bilder einfügen":"Pegar sin imágenes",
   "Nur Text übernehmen":"Mantener solo el texto",
   "Rechtschreibprüfung":"Revisión ortográfica",
   "Rechtschreibprüfung&hellip;":"Revisión ortográfica&hellip;",
@@ -4681,6 +4693,10 @@ pt:{
   "Portugiesisch":"Português",
   "Italienisch":"Italiano",
   "Ohne Formatierung eingefügt":"Colado sem formatação",
+  "Bilder mitkopieren?":"Copiar também as imagens?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Imagens de páginas da web ou e-mails podem deslocar parágrafos e mudar as quebras de página. Sem as imagens, vem o texto com títulos, listas e destaques.",
+  "Mit Bildern einfügen":"Colar com imagens",
+  "Ohne Bilder einfügen":"Colar sem imagens",
   "Nur Text übernehmen":"Manter somente o texto",
   "Rechtschreibprüfung":"Verificação ortográfica",
   "Rechtschreibprüfung&hellip;":"Verificação ortográfica&hellip;",
@@ -5456,6 +5472,10 @@ pl:{
   "Portugiesisch":"Portugalski",
   "Italienisch":"Włoski",
   "Ohne Formatierung eingefügt":"Wklejono bez formatowania",
+  "Bilder mitkopieren?":"Skopiować też obrazy?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Obrazy ze stron internetowych lub e-maili mogą przesuwać akapity i zmieniać podziały stron. Bez obrazów wklejony zostanie tekst z nagłówkami, listami i wyróżnieniami.",
+  "Mit Bildern einfügen":"Wklej z obrazami",
+  "Ohne Bilder einfügen":"Wklej bez obrazów",
   "Nur Text übernehmen":"Zachowaj tylko tekst",
   "Rechtschreibprüfung":"Sprawdzanie pisowni",
   "Rechtschreibprüfung&hellip;":"Sprawdzanie pisowni&hellip;",
@@ -6238,6 +6258,10 @@ it:{
   "Portugiesisch":"Portoghese",
   "Italienisch":"Italiano",
   "Ohne Formatierung eingefügt":"Incollato senza formattazione",
+  "Bilder mitkopieren?":"Copiare anche le immagini?",
+  "Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.":"Le immagini da pagine web o e-mail possono spostare i paragrafi e cambiare le interruzioni di pagina. Senza immagini arriva il testo con titoli, elenchi ed evidenziazioni.",
+  "Mit Bildern einfügen":"Incolla con immagini",
+  "Ohne Bilder einfügen":"Incolla senza immagini",
   "Nur Text übernehmen":"Mantieni solo il testo",
   "Rechtschreibprüfung":"Controllo ortografico",
   "Rechtschreibprüfung&hellip;":"Controllo ortografico&hellip;",
@@ -7252,22 +7276,24 @@ function drawWrite(){
     const eigen=html.indexOf(PQW_MARK)>=0;
     const sauber=eigen?cleanPasteOwn(html):cleanPasteForeign(html);
     const rohtext=cd.getData("text/plain");
-    /* Der Knopf lohnt nur bei fremdem Inhalt: was aus dem eigenen Dokument
-       kommt, ist bewusst so formatiert kopiert worden. Beim Verschieben von
-       Absätzen ginge er sonst dauernd auf. */
-    const zeigen=!eigen&&rohtext&&pasteHasFormat(sauber);
-    const snapshot=zeigen?ed.innerHTML:null;
-    const caretVor=zeigen?caretPath(ed):null;
-    /* Vorher merken, welche Fernbilder schon dastanden: nachgeladen werden
-       sollen nur die neuen, sonst klopfte jedes Einfügen erneut bei allen
-       Quellservern früherer Einfügungen an. */
-    const vorher=new Set([...ed.querySelectorAll('img[src^="http"]')]);
-    if(sauber)document.execCommand("insertHTML",false,sauber);
-    pasteTidy();
-    flush();dirty=true;commit();queuePaginate();
-    if(zeigen)pasteBarShow(snapshot,caretVor,rohtext);
-    if(!eigen)embedRemoteImages([...ed.querySelectorAll('img[src^="http"]')]
-      .filter(i=>!vorher.has(i)));
+    /* Fremder Text mit Bildern: erst fragen. Bilder aus Webseiten und
+       E-Mails verschieben Absätze und Seitenumbrüche, und wer nur den Text
+       wollte, hatte bisher keine Wahl. Eigene Inhalte fragen nicht — deren
+       Bilder sind schon ins Dokument eingepasst, und beim Umstellen von
+       Absätzen wäre die Frage jedes Mal im Weg. Reine Bilder (Bildschirm-
+       fotos) kommen oben ohne HTML an und fragen ebenfalls nicht. */
+    const bilder=eigen?0:pasteBildZahl(sauber);
+    if(bilder&&pasteHatText(sauber)){
+      const s=getSelection();
+      const bereich=s.rangeCount&&ed.contains(s.getRangeAt(0).startContainer)?s.getRangeAt(0).cloneRange():null;
+      pasteBilderFrage(bilder,mit=>{
+        ed.focus();
+        if(bereich){const s2=getSelection();s2.removeAllRanges();s2.addRange(bereich)}
+        pasteEinsetzen(mit?sauber:pasteOhneBilder(sauber),eigen,rohtext);
+      });
+      return;
+    }
+    pasteEinsetzen(sauber,eigen,rohtext);
   });
   ed.addEventListener("dragover",e=>{
     if(e.dataTransfer&&[...e.dataTransfer.types].includes("Files"))e.preventDefault()});
@@ -9383,7 +9409,7 @@ function listeXml(list,numId,ilvl,ctx){
   return xml;
 }
 async function tabelleXml(table,ctx){
-  const spalten=table.rows[0]?table.rows[0].children.length:0;
+  const spalten=Math.max(0,...[...table.rows].map(r=>r.children.length));
   const cg=table.querySelector(":scope > colgroup");
   const breiten=cg
     ?[...cg.children].map(c=>ctx.tableWidthTwip*parseFloat(c.style.width)/100)
@@ -9391,6 +9417,11 @@ async function tabelleXml(table,ctx){
   const grid=breiten.map(w=>`<w:gridCol w:w="${Math.round(w)}"/>`).join("");
   let zeilen="";
   for(const tr of table.rows){
+    /* Eine Zeile ohne Zelle ist in Word ungültig (w:tr verlangt mindestens
+       ein w:tc), und Word meldet die ganze Datei als beschädigt. Entstand
+       aus einer eingefügten Newsletter-Mail, deren Bildzellen herausgefiltert
+       waren. Solche Zeilen fallen weg; bleibt keine, entfällt die Tabelle. */
+    if(!tr.children.length)continue;
     const hEm=parseFloat(tr.style.height);
     const trHeight=hEm?`<w:trHeight w:val="${Math.round(hEm*(ctx.docSize)*20)}" w:hRule="atLeast"/>`:"";
     let zellen="";
@@ -9404,6 +9435,7 @@ async function tabelleXml(table,ctx){
     }
     zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
   }
+  if(!zeilen)return "";
   return `<w:tbl><w:tblPr><w:tblW w:w="${ctx.tableWidthTwip}" w:type="dxa"/>`+
     `<w:tblBorders><w:top w:val="single" w:sz="4" w:color="999999"/><w:left w:val="single" w:sz="4" w:color="999999"/>`+
     `<w:bottom w:val="single" w:sz="4" w:color="999999"/><w:right w:val="single" w:sz="4" w:color="999999"/>`+
@@ -10194,7 +10226,46 @@ function cleanPasteOwn(src){
   const box=b.querySelector("["+PQW_MARK+"]")||b;
   box.querySelectorAll("[id]").forEach(e=>e.removeAttribute("id"));
   box.querySelectorAll("[data-toc],[data-tof]").forEach(e=>e.remove());
+  pasteBildMarke(box);
   return box.innerHTML;
+}
+/* Newsletter und viele HTML-Mails bauen ihr ganzes Layout aus Tabellen —
+   gemessen an einer Mailchimp-Mail: drei Ebenen tief verschachtelt, jede
+   einspaltig. Als echte Tabelle übernommen, stand fast die ganze Mail in
+   EINER Tabellenzeile; die lässt sich nicht über zwei Seiten teilen, sprang
+   als Ganzes auf Seite 2 und ließ Seite 1 leer. Und wo ein Bild aus einer
+   Zelle gefiltert war, blieb eine Zeile ohne Zelle, die Word als
+   beschädigte Datei meldet.
+   Als Layout gilt: role="presentation" (so markieren Mailprogramme ihre
+   Gerüsttabellen), einspaltig (eine Tabelle mit einer Spalte ist keine
+   Tabelle), oder eine Tabelle, die selbst Tabellen enthält. Solche Tabellen
+   werden aufgelöst, jede Zelle wird eine Hülle, die der Rest von
+   cleanPasteForeign() wie jedes <div> zu Absätzen macht. Echte
+   Datentabellen mit mehreren Spalten bleiben. Innen zuerst, damit eine
+   äußere Tabelle nach dem Auflösen der inneren richtig beurteilt wird —
+   die Entscheidung fällt aber vorher, solange die Verschachtelung noch
+   sichtbar ist. */
+function pasteLayoutTabellen(dom,b){
+  const alle=[...b.querySelectorAll("table")];
+  const zellenJeZeile=t=>[...t.rows].map(r=>r.cells.length);
+  const layout=new Set(alle.filter(t=>
+    (t.getAttribute("role")||"").toLowerCase()==="presentation"
+    ||Math.max(0,...zellenJeZeile(t))<=1
+    ||!!t.querySelector("table")));
+  alle.reverse().forEach(t=>{
+    if(!t.isConnected)return;
+    if(!t.rows.length||!t.querySelector("td,th")){t.remove();return}
+    if(!layout.has(t))return;
+    const frag=dom.createDocumentFragment();
+    [...t.rows].forEach(r=>[...r.cells].forEach(c=>{
+      const h=dom.createElement("div");
+      while(c.firstChild)h.appendChild(c.firstChild);
+      frag.appendChild(h);
+    }));
+    t.replaceWith(frag);
+  });
+  /* Zeilen ohne Zellen in echten Tabellen (Bildzelle herausgefiltert) */
+  b.querySelectorAll("tr").forEach(r=>{if(!r.cells.length)r.remove()});
 }
 /* Von außen: die Gliederung wird übernommen, die Gestaltung der Quelle nicht.
    Überschrift bleibt Überschrift, Liste bleibt Liste — aber Breiten, Floats,
@@ -10204,6 +10275,7 @@ function cleanPasteForeign(src){
   const dom=new DOMParser().parseFromString(String(src),"text/html");
   const b=dom.body;
   b.querySelectorAll(PASTE_WEG).forEach(n=>n.remove());
+  pasteLayoutTabellen(dom,b);
   const w=dom.createTreeWalker(b,NodeFilter.SHOW_COMMENT);
   const komm=[];let k;while(k=w.nextNode())komm.push(k);
   komm.forEach(n=>n.remove());
@@ -10217,10 +10289,13 @@ function cleanPasteForeign(src){
      Verhaeltnis von Breite zu Hoehe ueberlebt deshalb als aspect-ratio —
      damit stimmt die Hoehe vom ersten Augenblick an, ohne dass ein einziges
      Byte des Bildes vorliegt. */
-  const seitenverhaeltnis=new Map();
+  const seitenverhaeltnis=new Map(),winzig=new Set();
   b.querySelectorAll("img").forEach(im=>{
     const bw=parseFloat(im.getAttribute("width")),bh=parseFloat(im.getAttribute("height"));
     if(bw>0&&bh>0)seitenverhaeltnis.set(im,bw/bh);
+    /* Symbole und Emoji als Bild (E-Mails, soziale Netze) gehören in die
+       Zeile — als eigener Bildblock risse jedes Smiley den Absatz auf. */
+    if((bw>0&&bw<=48)||(bh>0&&bh<=48))winzig.add(im);
   });
   b.querySelectorAll("*").forEach(el=>{
     [...el.attributes].forEach(a=>{
@@ -10269,6 +10344,55 @@ function cleanPasteForeign(src){
     }
   });
   b.querySelectorAll("img:not([src])").forEach(n=>n.remove());
+  /* Ein Bild mitten im Text stand bisher in der Zeile: der Absatz wurde so
+     hoch wie das Bild, Umbrüche und Seiten verschoben sich — und bei
+     Fernbildern ein zweites Mal, sobald die Datei eintraf. Es wird jetzt zu
+     einem eigenen Bildblock hinter seinem Absatz, auf die Textbreite
+     begrenzt und wie jedes Dokumentbild verschieb- und skalierbar. In
+     Listen und Tabellen bleibt es, wo es ist: dort gehört es zum Eintrag
+     bzw. zur Zelle. */
+  [...b.querySelectorAll("img")].reverse().forEach(img=>{
+    if(winzig.has(img)||img.closest("figure,li,td,th"))return;
+    const block=img.closest("p,h1,h2,h3,h4,h5,h6,blockquote,pre");
+    if(!block||!(block.textContent||"").trim())return;
+    const fig=dom.createElement("figure");fig.className="fig";
+    block.after(fig);fig.appendChild(img);
+  });
+  /* Kachel-Layouts (Nachrichten, Rezepte, Blogs): das Bild steckt in einem
+     Link, der ohne umgebenden Absatz direkt im Inhalt steht — oft samt
+     Überschrift. Die Regel oben findet dort keinen Absatz; gemessen an
+     echten Seiten blieben so bei Chefkoch 137 Bilder mit 605 px in der
+     Zeile. Hier wird es ein Bildblock vor der äußersten Inline-Hülle, also
+     dort, wo es in der Kachel auch stand. Der Link bleibt am Text. */
+  const BLOCK=/^(P|H[1-6]|BLOCKQUOTE|PRE|LI|TD|TH|FIGURE|UL|OL|TABLE)$/;
+  [...b.querySelectorAll("img")].forEach(img=>{
+    if(winzig.has(img)||img.closest("figure,li,td,th"))return;
+    let top=img;
+    while(top.parentNode&&top.parentNode!==b&&!BLOCK.test(top.parentNode.tagName))top=top.parentNode;
+    if(top===img&&top.parentNode!==b)return;        /* steht schon allein im Absatz: siehe unten */
+    if(top.parentNode&&/^(P|H[1-6]|PRE)$/.test(top.parentNode.tagName))return;
+    const fig=dom.createElement("figure");fig.className="fig";
+    top.before(fig);fig.appendChild(img);
+  });
+  /* Leere Hüllen und Absätze, die dabei oder schon in der Quelle übrig
+     blieben (Wikipedia: 14 je Artikel). Ein leeres <p> ist unsichtbar,
+     hält aber seinen Absatzabstand — eine Lücke ohne erkennbaren Grund.
+     Absätze mit <br> sind bewusste Leerzeilen und bleiben. */
+  b.querySelectorAll("a,span,b,strong,i,em,u").forEach(el=>{
+    if(!el.textContent.trim()&&!el.querySelector("img,br"))el.remove()});
+  b.querySelectorAll("p,h1,h2,h3,h4,h5,h6").forEach(el=>{
+    if(!el.textContent.trim()&&!el.querySelector("img,br,table,figure"))el.remove()});
+  /* Eine Figur, deren Inhalt herausgefiltert wurde (Video, Grafik als
+     <svg>), stünde als leerer Bildblock mit verwaister Unterschrift da —
+     gesehen bei Wikipedia. Die Unterschrift wird ein Absatz, damit kein
+     Text verloren geht. */
+  b.querySelectorAll("figure").forEach(f=>{
+    if(f.querySelector("img,table,pre"))return;
+    const cap=f.querySelector("figcaption");
+    if(cap&&cap.textContent.trim()){const p=dom.createElement("p");
+      while(cap.firstChild)p.appendChild(cap.firstChild);f.replaceWith(p)}
+    else f.remove();
+  });
   /* Ein Bild, das allein in seinem Block steht, wird zu einem Dokumentbild —
      dann greifen Werkzeugleiste und Ziehgriff darauf wie auf jedes andere. */
   b.querySelectorAll("img").forEach(img=>{
@@ -10280,7 +10404,33 @@ function cleanPasteForeign(src){
     (p===b?img:p).replaceWith(fig);fig.appendChild(img);
   });
   b.querySelectorAll("figure").forEach(f=>f.className="fig");
+  pasteBildMarke(b);
   return b.innerHTML.trim();
+}
+/* Steht der Cursor in einem Absatz, verschmilzt Chrome den ersten
+   eingefügten Block damit. Ist das ein Bildblock, verliert er seine Hülle
+   und das Bild steht mitten in der Zeile. Die Marke sagt hinterher, welche
+   Bilder ein Bildblock sein sollten; pasteBildReparatur() stellt ihn wieder
+   her und nimmt die Marke ab. */
+const PASTE_FIG="data-pqwfig";
+function pasteBildMarke(b){b.querySelectorAll("figure img").forEach(i=>i.setAttribute(PASTE_FIG,""))}
+function pasteBildReparatur(ed){
+  const geleert=new Set();
+  [...ed.querySelectorAll("img["+PASTE_FIG+"]")].reverse().forEach(img=>{
+    img.removeAttribute(PASTE_FIG);
+    if(img.closest("figure"))return;
+    /* Was Chrome beim Verschmelzen an Stil mitgibt, gehört zum Absatz, nicht
+       zum Bild; aspect-ratio (siehe cleanPasteForeign) bleibt. */
+    img.style.removeProperty("text-align");img.style.removeProperty("font-size");
+    if(!img.getAttribute("style"))img.removeAttribute("style");
+    const block=img.closest("p,h1,h2,h3,h4,h5,h6,li,blockquote");
+    const fig=document.createElement("figure");fig.className="fig";
+    if(block&&block!==ed){block.after(fig);geleert.add(block)}else img.before(fig);
+    fig.appendChild(img);
+  });
+  /* Nur die Absätze, aus denen hier ein Bild herausgenommen wurde — eine
+     bewusste Leerzeile anderswo im Dokument bleibt stehen. */
+  geleert.forEach(p=>{if(!p.textContent.trim()&&!p.querySelector("img,br,table"))p.remove()});
 }
 /* ---- Einfügeoptionen ----
    Nach dem Einfügen erscheint neben der Stelle ein kleiner Knopf, der die
@@ -10322,6 +10472,106 @@ function pasteBarClose(){
   const bar=$("#pastebar");if(bar)bar.classList.remove("on");
   if(pasteOptOff){pasteOptOff();pasteOptOff=null}
   pasteOpt=null;
+}
+/* Das eigentliche Einsetzen, aus dem paste-Handler herausgelöst: es läuft
+   entweder sofort oder erst nach der Bilder-Rückfrage. */
+function pasteEinsetzen(sauber,eigen,rohtext){
+  const ed=$("#editor");if(!ed)return;
+  /* Der Knopf lohnt nur bei fremdem Inhalt: was aus dem eigenen Dokument
+     kommt, ist bewusst so formatiert kopiert worden. Beim Verschieben von
+     Absätzen ginge er sonst dauernd auf. */
+  const zeigen=!eigen&&rohtext&&pasteHasFormat(sauber);
+  const snapshot=zeigen?ed.innerHTML:null;
+  const caretVor=zeigen?caretPath(ed):null;
+  /* Vorher merken, welche Fernbilder schon dastanden: nachgeladen werden
+     sollen nur die neuen, sonst klopfte jedes Einfügen erneut bei allen
+     Quellservern früherer Einfügungen an. */
+  const vorher=new Set([...ed.querySelectorAll('img[src^="http"]')]);
+  const stilVorher=new Set(ed.querySelectorAll("[style]"));
+  const absVorher=new Set(ed.querySelectorAll("p"));
+  if(sauber)document.execCommand("insertHTML",false,sauber);
+  /* Chrome legt beim Einsetzen um Bildblöcke herum eigene leere <p> an
+     (gemessen: vier bei der GitHub-Seite). Unsichtbar, aber mit
+     Absatzabstand. Nur neu entstandene, ohne <br> — eine Leerzeile, die
+     schon im Dokument stand oder bewusst mitkam, bleibt. */
+  ed.querySelectorAll("p").forEach(p=>{
+    if(!absVorher.has(p)&&!p.textContent.trim()&&!p.querySelector("img,br,table,figure"))p.remove()});
+  /* Chrome schreibt eingefügtem Text die gerade gültige Schriftgröße fest
+     dazu (font-size:14.6667px bei Calibri 11). Sieht gleich aus, bis man
+     die Dokumentgröße ändert: dann bleibt der eingefügte Text in der alten
+     Größe stehen. Nur an neu hinzugekommenen Elementen und nur, wenn die
+     Größe der des Dokuments entspricht — eine gewollte Größe bleibt. */
+  const grund=parseFloat(getComputedStyle(ed).fontSize);
+  /* Bei fremdem Inhalt gilt dieselbe Liste wie in cleanPasteForeign() auch
+     für das, was Chrome beim Einsetzen selbst dazuschreibt: verschmilzt der
+     erste Block mit dem Absatz der Schreibmarke, bekommt sein Text die
+     Größe, Farbe und Abstände des Originals als Inline-Stil — gemessen an
+     echten Seiten (Chefkoch, Mozilla-Blog, Spiegel: font-size, color,
+     margin-top). Aus dem eigenen Dokument bleibt alles; dort kann eine
+     Größe gewollt sein. */
+  const erlaubt=eigen?null:new Set([...PASTE_STIL,"aspect-ratio"]);
+  ed.querySelectorAll("[style]").forEach(el=>{
+    if(stilVorher.has(el))return;
+    if(erlaubt){
+      pasteKeepStyle(el,erlaubt);
+      if(!el.getAttribute("style")&&el.tagName==="SPAN")unwrap(el);
+      return;
+    }
+    if(!el.style.fontSize)return;
+    if(Math.abs(parseFloat(getComputedStyle(el.parentElement).fontSize)-grund)>.05)return;
+    if(Math.abs(parseFloat(el.style.fontSize)-grund)>.05||!/px$/.test(el.style.fontSize))return;
+    el.style.removeProperty("font-size");
+    if(!el.getAttribute("style")){el.removeAttribute("style");if(el.tagName==="SPAN")unwrap(el)}
+  });
+  pasteBildReparatur(ed);
+  pasteTidy();
+  flush();dirty=true;commit();queuePaginate();
+  if(zeigen)pasteBarShow(snapshot,caretVor,rohtext);
+  if(!eigen)embedRemoteImages([...ed.querySelectorAll('img[src^="http"]')]
+    .filter(i=>!vorher.has(i)));
+}
+const pasteBaum=html=>new DOMParser().parseFromString(String(html),"text/html").body;
+function pasteBildZahl(html){return pasteBaum(html).querySelectorAll("img").length}
+function pasteHatText(html){
+  const b=pasteBaum(html);
+  b.querySelectorAll("img,figcaption").forEach(n=>n.remove());
+  return !!b.textContent.trim();
+}
+/* Ohne Bilder: Bildblöcke samt Bildunterschrift fallen weg, ebenso Bilder im
+   Text, und was danach leer dasteht, auch — sonst blieben Leerzeilen, wo
+   die Bilder waren. */
+function pasteOhneBilder(html){
+  const b=pasteBaum(html);
+  b.querySelectorAll("figure").forEach(f=>{if(f.querySelector("img"))f.remove()});
+  b.querySelectorAll("img").forEach(n=>n.remove());
+  b.querySelectorAll("p,div,a,span,b,strong,i,em,u").forEach(el=>{
+    if(!el.textContent.trim()&&!el.querySelector("img,br,table,hr"))el.remove();
+  });
+  return b.innerHTML.trim();
+}
+function pasteBilderFrage(n,weiter){
+  overlay(`<div class="modal" style="max-width:540px"><h3>${tr("Bilder mitkopieren?")}</h3><div class="pad">
+    <p style="margin:0 0 9px;font-size:14px;line-height:1.5">${PL(
+      n===1?"Der kopierte Inhalt enthält ein Bild und Text.":`Der kopierte Inhalt enthält ${n} Bilder und Text.`,
+      n===1?"The copied content contains an image and text.":`The copied content contains ${n} images and text.`,
+      n===1?"Le contenu copié contient une image et du texte.":`Le contenu copié contient ${n} images et du texte.`,
+      n===1?"El contenido copiado tiene una imagen y texto.":`El contenido copiado tiene ${n} imágenes y texto.`,
+      n===1?"O conteúdo copiado tem uma imagem e texto.":`O conteúdo copiado tem ${n} imagens e texto.`,
+      n===1?"Skopiowana treść zawiera obraz i tekst.":`Skopiowana treść zawiera ${n} ${n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"obrazy":"obrazów"} i tekst.`,
+      n===1?"Il contenuto copiato contiene un'immagine e del testo.":`Il contenuto copiato contiene ${n} immagini e del testo.`)}</p>
+    <p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">${tr("Bilder aus Webseiten oder E-Mails können Absätze verschieben und Seitenumbrüche verändern. Ohne Bilder kommt der Text samt Überschriften, Listen und Hervorhebungen.")}</p>
+    </div>
+    <div class="rowend">
+      <button class="btn" id="pbfNein">${tr("Abbrechen")}</button>
+      <button class="btn" id="pbfMit">${tr("Mit Bildern einfügen")}</button>
+      <button class="btn pri" id="pbfOhne">${tr("Ohne Bilder einfügen")}</button></div></div>`);
+  /* Vorausgewählt ist „Ohne Bilder“: wer nur Enter drückt, behält sein
+     Layout. Escape und Abbrechen fügen nichts ein. */
+  const wahl=mit=>{closeOvl();weiter(mit)};
+  $("#pbfOhne").onclick=()=>wahl(false);
+  $("#pbfMit").onclick=()=>wahl(true);
+  $("#pbfNein").onclick=()=>{closeOvl();const ed=$("#editor");ed&&ed.focus()};
+  $("#pbfOhne").focus();
 }
 /* Lohnt sich der Knopf überhaupt? Bei reinem Text gäbe es nichts wegzunehmen. */
 function pasteHasFormat(html){

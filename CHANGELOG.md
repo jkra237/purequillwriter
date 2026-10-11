@@ -100,8 +100,85 @@ immer genau einen Commit, der sie anfasst.
     der erwarteten Wirkung; echtes Formatieren in de/fr/es/pt/en; Strg+B in
     einem Eingabefeld formatiert den Editor nicht; check-kuerzel und
     check-hilfe-marken grün.
+- **Einfügen fragt bei Bildern nach.** Fremder Inhalt (Webseite, E-Mail,
+  Word) mit Text und Bildern öffnet vor dem Einsetzen die Frage „Bilder
+  mitkopieren?“ mit der Zahl der Bilder: *Ohne Bilder einfügen*
+  (vorausgewählt, Enter), *Mit Bildern einfügen*, *Abbrechen*. Ohne Bilder
+  kommt der Text samt Überschriften, Listen und Hervorhebungen; leer
+  gewordene Absätze fallen weg. Nicht gefragt wird bei Inhalt aus einem
+  eigenen PureQuill-Dokument (dessen Bilder sind schon eingepasst, beim
+  Umstellen von Absätzen wäre die Frage im Weg) und bei reinen Bildern
+  (Bildschirmfotos). Die Leiste „Nur Text übernehmen“ danach bleibt.
 
 ### Behoben
+
+- **Eingefügte Bilder mitten im Text sprengten den Absatz.** Ein Bild aus
+  einer Webseite, das im Fließtext stand, kam als Inline-Bild in voller
+  Breite: die Zeile wurde so hoch wie das Bild, Umbrüche und Seiten
+  verschoben sich — bei Fernbildern ein zweites Mal, sobald die Datei
+  eintraf. Es wird jetzt ein eigener Bildblock hinter seinem Absatz, wie
+  jedes Dokumentbild verschieb- und skalierbar. Ausnahmen: Symbole und
+  Emoji bis 48 px bleiben in der Zeile, Bilder in Listen und Tabellen
+  bleiben in ihrem Eintrag.
+- **Ein Bild am Anfang des Eingefügten landete im Absatz der Schreibmarke.**
+  Chrome verschmilzt den ersten eingefügten Block mit dem Absatz, in dem
+  der Cursor steht; war das ein Bildblock, verlor er seine Hülle. Eingefügte
+  Bildblöcke tragen jetzt eine Marke, `pasteBildReparatur()` stellt sie nach
+  dem Einsetzen wieder her. Gilt auch für Inhalt aus dem eigenen Dokument.
+- **Eingefügter Text behielt Größe, Farbe und Abstände der Quelle.** Chrome
+  schreibt beim Einsetzen die gerade gültige Größe fest dazu
+  (`font-size:14.6667px` bei Calibri 11) und gibt dem ersten Block, den es
+  mit dem Absatz der Schreibmarke verschmilzt, Größe, Farbe und Abstände
+  des Originals als Inline-Stil mit. Nach einer Änderung der Dokumentgröße
+  blieb solcher Text in der alten Größe. Bei fremdem Inhalt gilt jetzt auch
+  für das, was Chrome dazuschreibt, dieselbe Liste wie für die Quelle
+  (Fett, Kursiv, Unterstrichen, Ausrichtung); bei eigenem Inhalt fällt nur
+  eine Größe weg, die der Dokumentgröße entspricht.
+- **Bilder in Kachel-Layouts blieben in voller Breite in der Zeile.**
+  Nachrichten-, Rezept- und Blogseiten setzen Bild und Überschrift in einen
+  Link ohne umgebenden Absatz; gemessen an Chefkoch standen 137 Bilder mit
+  605 px im Text. Sie werden jetzt ein Bildblock vor ihrem Link.
+- **Leere Absätze aus der Quelle und vom Einsetzen** (Wikipedia: 14 je
+  Artikel, GitHub: 4 um Bildblöcke) hielten unsichtbar ihren Abstand. Neu
+  eingefügte leere Absätze ohne `<br>` fallen weg; bewusste Leerzeilen und
+  alles, was schon im Dokument stand, bleiben.
+- **Bildblock ohne Bild** (Wikipedia-Video: das Video wird gefiltert, die
+  Unterschrift blieb in einem leeren Bildblock): die Unterschrift wird ein
+  Absatz.
+- **Newsletter-Mails sprangen auf Seite 2 und ergaben eine beschädigte
+  Word-Datei.** Gemeldet an einer Mailchimp-Mail: HTML-Mails bauen ihr
+  Layout aus Tabellen, drei Ebenen tief, jede einspaltig. Fast die ganze
+  Mail stand dadurch in einer Tabellenzeile, die sich nicht teilen lässt —
+  sie sprang als Ganzes auf Seite 2, Seite 1 blieb leer. Und wo ein Bild
+  aus einer Zelle gefiltert war, blieb eine Zeile ohne Zelle; Word verlangt
+  mindestens eine und meldet die Datei als beschädigt.
+  `pasteLayoutTabellen()` löst beim Einfügen Layout-Tabellen auf
+  (`role="presentation"`, einspaltig oder selbst Tabellen enthaltend), ihr
+  Inhalt wird zu Absätzen. Echte Datentabellen mit mehreren Spalten
+  bleiben. Zusätzlich lässt der Word-Export Zeilen ohne Zelle und leere
+  Tabellen weg, auch für Dokumente, die schon so gespeichert sind.
+  Nachgeprüft vom Nutzer mit der echten Mail in der Desktop-Fassung aus dem
+  Projektordner (2026-10-11): „jetzt ist es viel besser“.
+- **Geprüft mit echtem Kopieren und Einfügen** über die Windows-
+  Zwischenablage (Electron, `webContents.copy()`/`paste()`) an zehn Seiten:
+  Wikipedia de und en, MDN, GitHub, Tagesschau, BBC, NASA, Chefkoch,
+  Mozilla-Blog, Spiegel — je mit und ohne Bilder. Neun ohne Befund: nichts
+  über den Rand, kein großes Bild in der Zeile, keine festen
+  Schriftgrößen, keine leeren Absätze, Text davor und danach unversehrt,
+  keine Programmfehler. Spiegel greift selbst ins Kopieren ein und lieferte
+  wechselnde Inhalte; den tatsächlich kopierten Inhalt direkt eingefügt:
+  voller Text, Rückfrage erscheint. Layout-Tabellen an einem
+  Mailchimp-Nachbau (7 Tabellen → 0, zwei Seiten statt leerer erster) und
+  an den neun Seiten (Wikipedia behält seine 6 Tabellen, echte Datentabelle
+  bleibt), jedes Ergebnis nach Word exportiert: wohlgeformt, keine Zeile
+  ohne Zelle. Dazu im headless Chrome: Enter = ohne Bilder, Abbrechen,
+  keine Frage bei eigenem Inhalt und reinem Bild, Smiley bleibt in der
+  Zeile, Leerzeile anderswo bleibt, nach Wechsel auf 16 pt folgt der Text,
+  Knöpfe in allen sieben Sprachen in einer Zeile. `check-export.mjs`
+  252/252.
+  **Nicht geprüft:** Einfügen aus Word. In der Browser-Fassung lassen viele
+  Seiten das Einbetten ihrer Bilder nicht zu (Tagesschau 76 von 76); die
+  bleiben Verweise ins Netz — wie schon vorher.
 
 - **Schriftwechsel über die Werkzeugleiste** setzte `Schrift,serif` statt
   `schriftStapel()`: Eine fehlende serifenlose Schrift (unter Linux Verdana,
