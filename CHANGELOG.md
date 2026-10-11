@@ -416,6 +416,45 @@ immer genau einen Commit, der sie anfasst.
     behoben: das Skript nahm ohne `--chrome` das erste Argument als Pfad zu
     Chrome, `--keep` und `--nur` liefen deshalb nie.
 
+- **Word-Dateien verloren beim Öffnen und Speichern alles, was PureQuill
+  nicht kennt** — seit 1.0. Gemessen an zwölf Dateien, die das echte Word
+  gebaut hat (`werkzeuge/pruefen/word-merkmale.ps1 bauen`), gezählt von Word
+  selbst vor und nach dem Umlauf (`… zaehlen`, `merkmale-vergleich.cjs`):
+  formatierte Kopfzeile, Textfeld, Kommentare, Endnoten, Formel, Diagramm,
+  zwei Spalten, Kopfzeile für gerade Seiten, Querformat-Abschnitt,
+  Tabulatoren, EMF-Bild, nachverfolgte Änderungen — jede Datei verlor ihr
+  Merkmal. Jetzt in allen zwölf **gleich**, Word öffnet jede ohne Reparatur:
+  - **Bewahren** (`wRohHtml`, `wPaketBewahren`, `wPaketSchreiben`): was
+    nicht darstellbar ist, bleibt als fester Platzhalter im Text (`span.wroh`,
+    nicht bearbeitbar, als Ganzes löschbar) mit dem Original-XML in
+    `d.word.roh`, samt allen Teilen des Pakets, an denen es hängt (rekursiv
+    über die Beziehungsdateien: Diagrammdaten, eingebettete Tabellen, Bilder,
+    `comments.xml`, `people.xml`, `endnotes.xml`; `d.word.teile`). Verweise
+    heißen `W_…` (bleibt bei weiteren Umläufen stabil), Namensräume und
+    `mc:Ignorable` des Originals kommen an die Wurzel, Inhaltstypen aus dem
+    Original. Bewahrte Teile, die wie eigene heißen, bekommen `w-` davor.
+  - Platzhalter: Diagramm/Formel/Textfeld/Form/Objekt/Bild als gestricheltes
+    Kästchen mit Art und Text, im Text stehende in Originalgröße (sonst
+    brächen die Seiten anders um); Kommentar als 💬 mit Text im Tooltip;
+    Endnote als Kästchen; Lesezeichen und Kommentarbereiche unsichtbar.
+  - **Nachverfolgte Änderungen** werden nicht mehr stillschweigend
+    angenommen: Eingefügtes bleibt bearbeitbar und unterstrichen
+    (`ins.wins`, geht als `w:ins` zurück), Gelöschtes rot durchgestrichen.
+  - Abschnittswechsel und Tabstopps hängen am Absatz (`data-wsect`,
+    `data-wtabs`), Spalten, gerade Kopfzeilen, Seitennummerierung, Raster aus
+    dem letzten `sectPr` (`d.word.sect`), dazu Einstellungen aus
+    `settings.xml` (gerade/ungerade, Silbentrennung, Standard-Tabstopp …).
+  - **Kopf-/Fußzeile im Original**, solange man sie nicht ändert (`wHfRoh`,
+    Vergleich über einen Fingerabdruck des Modells) — mit Fett, Farbe, Größe
+    und Tabstopps, die das Modell nicht kennt.
+  - **Tabulatoren** sind echte Tabs (`span.wtab`, Abstand wie Words
+    Standard-Tabstopps alle 1,25 cm), keine Leerzeichen mehr.
+  - Nebenbei: ein leerer Absatz ging als Absatz mit Zeilenumbruch nach Word
+    (`<p><br></p>` → `w:br`) und war dort doppelt so hoch — das abschließende
+    `<br>` eines Blocks fällt jetzt weg, wie es auch in HTML keine Zeile ist.
+  - Fixpunkt: zweites und drittes Speichern Teil für Teil gleich, in allen
+    zwölf Fällen (`word-bewahren-pruefen.cjs`).
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Lange Tabellen werden in der Ansicht nicht auf Seiten verteilt.** Eine

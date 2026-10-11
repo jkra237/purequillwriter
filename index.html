@@ -413,6 +413,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
   pointer-events:none;white-space:pre-wrap;line-height:1.3}
 .hfbild{position:absolute;pointer-events:none;user-select:none}
+/* Aus Word bewahrte Inhalte (wRohHtml): erkennbar als Fremdkörper, nicht
+   bearbeitbar, als Ganzes löschbar. Marken (Lesezeichen, Kommentarbereiche)
+   bleiben unsichtbar. */
+.wroh{display:inline-block;vertical-align:baseline;border:1px dashed var(--rule);border-radius:3px;
+  padding:0 .35em;margin:0 .1em;font-size:.82em;line-height:1.45;color:var(--ink-soft);
+  background:var(--chrome-2);cursor:default;max-width:100%;text-indent:0}
+.wroh b{font-weight:600;margin-right:.3em}
+.wroh[style*="height"]{vertical-align:bottom;overflow:hidden;box-sizing:border-box}
+.wroh img{display:block;max-width:100%;max-height:12em;margin:.2em 0}
+.wroh.wmarke{display:none}
+.wroh.wdel{border:none;background:none;padding:0;margin:0;font-size:inherit;line-height:inherit;
+  color:var(--err);text-decoration:line-through}
+.wroh.wkommentar{border:none;background:none;padding:0 .1em}
+ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decoration-thickness:2px}
+/* Tabulator wie in Word: Standard-Tabstopps alle 1,25 cm ab Zeilenanfang */
+.wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
    der ganz normalen Fußzeilen-Reserve (bottom:mb) - dieselbe Höhe, die auch
@@ -2324,6 +2340,7 @@ en:{
   "Doppelklick: Fußzeile":"Double-click: footer",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Tip: double-click the top or bottom page margin to edit the header and footer right in the document.",
   "Erste Seite anders":"Different first page","Erste Seite":"First page",
+  "Kommentar":"Comment","Endnote":"Endnote","Formel":"Equation","Diagramm":"Chart","Textfeld":"Text box","Form":"Shape","Objekt":"Object","Aus Word — bleibt beim Speichern unverändert erhalten":"From Word — kept unchanged when saving","Gelöscht (nachverfolgte Änderung)":"Deleted (tracked change)",
   "Kopfzeile entfernt":"Header removed",
   "Fußzeile entfernt":"Footer removed",
   "Entfernen":"Remove",
@@ -3104,6 +3121,7 @@ fr:{
   "Doppelklick: Fußzeile":"Double-clic : pied de page",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Astuce : un double-clic sur la marge supérieure ou inférieure modifie l'en-tête et le pied de page directement dans le document.",
   "Erste Seite anders":"Première page différente","Erste Seite":"Première page",
+  "Kommentar":"Commentaire","Endnote":"Note de fin","Formel":"Équation","Diagramm":"Graphique","Textfeld":"Zone de texte","Form":"Forme","Objekt":"Objet","Aus Word — bleibt beim Speichern unverändert erhalten":"Depuis Word — conservé tel quel à l’enregistrement","Gelöscht (nachverfolgte Änderung)":"Supprimé (modification suivie)",
   "Kopfzeile entfernt":"En-tête supprimé",
   "Fußzeile entfernt":"Pied de page supprimé",
   "Entfernen":"Supprimer",
@@ -3884,6 +3902,7 @@ es:{
   "Doppelklick: Fußzeile":"Doble clic: pie de página",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Consejo: un doble clic en el margen superior o inferior edita el encabezado y el pie de página directamente en el documento.",
   "Erste Seite anders":"Primera página diferente","Erste Seite":"Primera página",
+  "Kommentar":"Comentario","Endnote":"Nota al final","Formel":"Ecuación","Diagramm":"Gráfico","Textfeld":"Cuadro de texto","Form":"Forma","Objekt":"Objeto","Aus Word — bleibt beim Speichern unverändert erhalten":"De Word — se conserva sin cambios al guardar","Gelöscht (nachverfolgte Änderung)":"Eliminado (cambio controlado)",
   "Kopfzeile entfernt":"Encabezado eliminado",
   "Fußzeile entfernt":"Pie de página eliminado",
   "Entfernen":"Eliminar",
@@ -4664,6 +4683,7 @@ pt:{
   "Doppelklick: Fußzeile":"Clique duplo: rodapé",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Dica: um clique duplo na margem superior ou inferior edita o cabeçalho e o rodapé diretamente no documento.",
   "Erste Seite anders":"Primeira página diferente","Erste Seite":"Primeira página",
+  "Kommentar":"Comentário","Endnote":"Nota de fim","Formel":"Equação","Diagramm":"Gráfico","Textfeld":"Caixa de texto","Form":"Forma","Objekt":"Objeto","Aus Word — bleibt beim Speichern unverändert erhalten":"Do Word — mantido sem alterações ao salvar","Gelöscht (nachverfolgte Änderung)":"Excluído (alteração controlada)",
   "Kopfzeile entfernt":"Cabeçalho removido",
   "Fußzeile entfernt":"Rodapé removido",
   "Entfernen":"Remover",
@@ -5444,6 +5464,7 @@ pl:{
   "Doppelklick: Fußzeile":"Dwuklik: stopka",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Wskazówka: dwuklik na górnym lub dolnym marginesie strony pozwala edytować nagłówek i stopkę bezpośrednio w dokumencie.",
   "Erste Seite anders":"Inna pierwsza strona","Erste Seite":"Pierwsza strona",
+  "Kommentar":"Komentarz","Endnote":"Przypis końcowy","Formel":"Równanie","Diagramm":"Wykres","Textfeld":"Pole tekstowe","Form":"Kształt","Objekt":"Obiekt","Aus Word — bleibt beim Speichern unverändert erhalten":"Z Worda — zachowane bez zmian przy zapisie","Gelöscht (nachverfolgte Änderung)":"Usunięte (śledzona zmiana)",
   "Kopfzeile entfernt":"Nagłówek usunięty",
   "Fußzeile entfernt":"Stopka usunięta",
   "Entfernen":"Usuń",
@@ -6231,6 +6252,7 @@ it:{
   "Doppelklick: Fußzeile":"Doppio clic: piè di pagina",
   "Tipp: Ein Doppelklick auf den oberen oder unteren Seitenrand bearbeitet Kopf- und Fußzeile direkt im Dokument.":"Suggerimento: un doppio clic sul margine superiore o inferiore della pagina modifica intestazione e piè di pagina direttamente nel documento.",
   "Erste Seite anders":"Prima pagina diversa","Erste Seite":"Prima pagina",
+  "Kommentar":"Commento","Endnote":"Nota di chiusura","Formel":"Equazione","Diagramm":"Grafico","Textfeld":"Casella di testo","Form":"Forma","Objekt":"Oggetto","Aus Word — bleibt beim Speichern unverändert erhalten":"Da Word — conservato invariato al salvataggio","Gelöscht (nachverfolgte Änderung)":"Eliminato (revisione)",
   "Kopfzeile entfernt":"Intestazione rimossa",
   "Fußzeile entfernt":"Piè di pagina rimosso",
   "Entfernen":"Rimuovi",
@@ -9164,6 +9186,9 @@ function hfLaufXml(text){
    Textspalte (tx/tw) zum Einzug. Ohne Bilder und Versatz bleibt die Datei
    Zeichen für Zeichen wie vorher. */
 async function hfTeil(d,which,groesse){
+  /* Unverändert aus Word: das Original zurück */
+  const roh=wHfRoh(d,which);
+  if(roh)return roh;
   const hf=hfOf(d,which),f=fmtOf(d),fuss=!istKopf(which);
   const tag=fuss?"ftr":"hdr";
   const jc=hf.align==="left"?"left":hf.align==="right"?"right":"center";
@@ -9408,6 +9433,24 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
       ws.vorn=false;
       return;
     }
+    /* Aus Word bewahrt: Original-XML unverändert zurück (siehe wRohHtml) */
+    if(n.classList&&n.classList.contains("wroh")){
+      const x=ctx&&ctx.word&&ctx.word.roh&&ctx.word.roh[n.dataset.roh];
+      if(x)runs.push(x);
+      ws.vorn=false;return;
+    }
+    if(n.classList&&n.classList.contains("wtab")){runs.push(`<w:r>${rPrXml(st)}<w:tab/></w:r>`);ws.vorn=false;return}
+    /* Nachverfolgt eingefügt: der Inhalt wie sonst, in seinem w:ins */
+    if(tag==="ins"&&n.classList.contains("wins")){
+      const auf=ctx&&ctx.word&&ctx.word.roh&&ctx.word.roh[n.dataset.roh];
+      if(auf){
+        const start=runs.length;
+        inlineAblaufen(n,st,runs,links,ctx,ws);
+        const innen=runs.splice(start);
+        runs.push(auf+innen.join("")+"</w:ins>");
+        return;
+      }
+    }
     if(tag==="br"){runs.push("<w:r><w:br/></w:r>");ws.vorn=true;return}
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
@@ -9436,10 +9479,31 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
     if(tag==="a")links[links.length-1].end=runs.length;
   });
 }
+/* Tabstopps (w:tabs) stehen im Schema nach pStyle und numPr, vor ind und jc */
+function wTabsEinfuegen(pPr,tabs){
+  const m=/^(<w:pStyle[^>]*\/>)?(<w:numPr>[\s\S]*?<\/w:numPr>)?/.exec(pPr);
+  const k=m?m[0].length:0;
+  return pPr.slice(0,k)+tabs+pPr.slice(k);
+}
 function absatzXml(el,pPrExtra,basisStil,ctx){
   const runs=[],links=[];
+  /* Aus Word bewahrt: Tabstopps und ein Abschnittswechsel (sectPr steht
+     als letztes im pPr) */
+  const w=ctx&&ctx.word&&ctx.word.roh,ds=el&&el.dataset;
+  if(w&&ds){
+    if(ds.wtabs&&w[ds.wtabs])pPrExtra=wTabsEinfuegen(pPrExtra||"",w[ds.wtabs]);
+    if(ds.wsect&&w[ds.wsect])pPrExtra=(pPrExtra||"")+w[ds.wsect];
+  }
   const roh=!!(el.closest&&el.closest("pre"))||!!(el.querySelector&&el.querySelector("pre"));
   inlineAblaufen(el,basisStil||{},runs,links,ctx,{vorn:true,roh});
+  /* Ein <br> am Blockende zeigt in HTML keine eigene Zeile — es hält nur
+     leere Absätze offen (<p><br></p>). Als w:br wurde daraus in Word eine
+     zweite Zeile: jeder leere Absatz war dort doppelt so hoch (gemessen:
+     ein Zeichen mehr je leerem Absatz). */
+  if(!roh&&runs.length&&runs[runs.length-1]==="<w:r><w:br/></w:r>"){
+    runs.pop();
+    links.forEach(l=>{if(l.end!==undefined&&l.end>runs.length)l.end=runs.length});
+  }
   /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
      merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
      und der Gesamtliste der Beziehungen hinzufügen kann. */
@@ -9641,6 +9705,75 @@ async function exportDoc(){
   commit();
   return true;
 }
+/* ---- Bewahrtes aus Word zurückschreiben (Gegenstück zu wPaketBewahren) ---- */
+const wBytes=b64=>{const s=atob(b64),u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+const wText=b64=>new TextDecoder().decode(wBytes(b64));
+const wRelsPfad=p=>p.replace(/([^/]+)$/,"_rels/$1.rels");
+/* Kopf-/Fußzeile im Original, solange man sie hier nicht verändert hat —
+   dann bleibt ihre Formatierung (Fett, Farbe, Größe, Tabstopps), die das
+   Modell dieses Programms nicht kennt. */
+function wHfRoh(d,which){
+  const w=d.word,h=w&&w.hf&&w.hf[which];
+  if(!h||!w.teile[h.teil]||wStand(d[which])!==h.stand)return null;
+  const rp=wRelsPfad(h.teil);
+  return {xml:wText(w.teile[h.teil]),rels:w.teile[rp]?wText(w.teile[rp]):null,media:[]};
+}
+/* belegt: Teile, die der Export selbst schreibt — bewahrte Teile gleichen
+   Namens bekommen „w-“ davor. rohRels: Beziehungsdateien von Kopf-/Fuß-
+   zeilen, die im Original zurückgehen (ihre Bilder müssen mit). */
+function wPaketSchreiben(d,documentXml,belegt,rohRels){
+  const w=d.word,leer={documentXml,rels:[],ct:"",eintraege:[]};
+  if(!w)return leer;
+  /* Namensräume des Originals an die Wurzel, sonst verstünde Word die
+     bewahrten Teile nicht (mc:Choice Requires="wps" u. ä.) */
+  const ende=documentXml.indexOf(">",documentXml.indexOf("<w:document"));
+  let kopf=documentXml.slice(0,ende);
+  for(const [n,v] of w.ns||[])if(!new RegExp("\\s"+n.replace(/[.:]/g,"\\$&")+"=").test(kopf))kopf+=` ${n}="${xesc(v)}"`;
+  documentXml=kopf+documentXml.slice(ende);
+  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people|endnotes)$/;
+  const genutzt=new Set([...documentXml.matchAll(/"(W_[^"]+)"/g)].map(m=>m[1]));
+  for(const [id,r] of Object.entries(w.rels||{}))if(BEWAHRT.test(r.type))genutzt.add(id);
+  const neuName=p=>belegt.has(p)?p.replace(/([^/]+)$/,"w-$1"):p;
+  const schreib=new Map();
+  const besuche=p=>{
+    if(schreib.has(p)||!(p in w.teile))return;
+    schreib.set(p,neuName(p));
+    const rp=wRelsPfad(p);
+    if(rp in w.teile)for(const r of wRelsListe(wText(w.teile[rp])))
+      if(r.mode!=="External")besuche(wPfad(p.replace(/[^/]*$/,""),r.target));
+  };
+  const rels=[];
+  for(const id of genutzt){
+    const r=w.rels&&w.rels[id];if(!r)continue;
+    let ziel=r.target;
+    if(r.mode!=="External"){
+      const p=wPfad("word/",r.target);besuche(p);
+      const n=schreib.get(p)||p;
+      ziel=n.startsWith("word/")?n.slice(5):"/"+n;
+    }
+    rels.push(`<Relationship Id="${xesc(id)}" Type="${xesc(r.type)}" Target="${xesc(ziel)}"${r.mode==="External"?' TargetMode="External"':""}/>`);
+  }
+  for(const x of rohRels||[])for(const r of wRelsListe(x))if(r.mode!=="External")besuche(wPfad("word/",r.target));
+  const eintraege=[],ueber=[],standard=new Set(["rels","xml","png","jpeg"]);let ct="";
+  for(const [alt,neu] of schreib){
+    eintraege.push({name:neu,bytes:wBytes(w.teile[alt])});
+    const rp=wRelsPfad(alt);
+    if(rp in w.teile)eintraege.push({name:wRelsPfad(neu),bytes:wBytes(w.teile[rp])});
+    if(w.ct.over[alt])ueber.push(`<Override PartName="/${xesc(neu)}" ContentType="${xesc(w.ct.over[alt])}"/>`);
+    else{
+      const ext=(neu.match(/\.([^./]+)$/)||[,""])[1].toLowerCase();
+      if(ext&&!standard.has(ext)&&w.ct.def[ext]){standard.add(ext);ct+=`<Default Extension="${xesc(ext)}" ContentType="${xesc(w.ct.def[ext])}"/>`}
+    }
+  }
+  ct+=ueber.join("");
+  if(w.settings&&w.settings.length){
+    eintraege.push({name:"word/settings.xml",bytes:new TextEncoder().encode(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${w.settings.join("")}</w:settings>`)});
+    rels.push(`<Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>`);
+    ct+=`<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>`;
+  }
+  return {documentXml,rels,ct,eintraege};
+}
 /* Das Word-Dokument als Blob, ohne Dialog — gemeinsam für „Speichern“ und
    „Speichern als“. */
 async function docxBlob(d){
@@ -9652,7 +9785,8 @@ async function docxBlob(d){
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
     footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],
-    footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text]))};
+    footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text])),
+    word:d.word||null};
   const bodyXml=await walkBlocks(container,ctx);
   /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
      Kopf und Fuß, dann die Maße. */
@@ -9669,20 +9803,26 @@ async function docxBlob(d){
   for(const t of HF_TEILE){
     if(/1$/.test(t.which)&&!erst)continue;
     if(!hfOf(d,t.which).on)continue;
-    teile.push({...t,...await hfTeil(d,t.which,ctx.docSize)});
+    teile.push({...t,...await hfTeil(d,t.which,ctx.docSize),roh:!!wHfRoh(d,t.which)});
   }
+  /* Aus Word bewahrte Teile des letzten sectPr (Spalten, gerade Seiten …) */
+  const ws=(d.word&&d.word.sect)||{};
   const sectPr=`<w:sectPr>`+
-    teile.map(t=>`<w:${t.art}Reference w:type="${t.typ}" r:id="${t.rid}"/>`).join("")+
+    teile.map(t=>`<w:${t.art}Reference w:type="${t.typ}" r:id="${t.rid}"/>`).join("")+(ws.refs||"")+(ws.vor||"")+
     `<w:pgSz w:w="${mmToTwip(f.w)}" w:h="${mmToTwip(f.h)}"${f.w>f.h?' w:orient="landscape"':""}/>`+
     `<w:pgMar w:top="${mmToTwip(f.m[0])}" w:right="${mmToTwip(f.m[1])}" w:bottom="${mmToTwip(f.m[2])}" w:left="${mmToTwip(f.m[3])}" `+
-    `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/>${erst?"<w:titlePg/>":""}</w:sectPr>`;
-  const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    `w:header="${mmToTwip(f.hd)}" w:footer="${mmToTwip(f.fd)}" w:gutter="0"/>${ws.mitte||""}${erst?"<w:titlePg/>":""}${ws.nach||""}</w:sectPr>`;
+  const rohDoc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
   xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
   xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
   xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
   xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
 <w:body>${bodyXml||"<w:p/>"}${sectPr}</w:body></w:document>`;
+  const belegt=new Set(["word/document.xml","word/styles.xml","word/numbering.xml","word/footnotes.xml","word/settings.xml",
+    ...HF_TEILE.map(t=>"word/"+t.datei)]);
+  const wp=wPaketSchreiben(d,rohDoc,belegt,teile.filter(t=>t.roh&&t.rels).map(t=>t.rels));
+  const documentXml=wp.documentXml;
   const hatFussnoten=ctx.footnotes.length>0;
   const relEintraege=[
     `<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`,
@@ -9690,7 +9830,8 @@ async function docxBlob(d){
     ...teile.map(t=>`<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${t.art}" Target="${t.datei}"/>`),
     hatFussnoten&&`<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>`,
     ...ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`),
-    ...ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`)
+    ...ctx.links.map(l=>`<Relationship Id="${l.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="${xesc(l.href)}" TargetMode="External"/>`),
+    ...wp.rels
   ].filter(Boolean);
   const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
@@ -9698,7 +9839,7 @@ ${relEintraege.join(String.fromCharCode(10))}
 </Relationships>`;
   const zusatz=
     (hatFussnoten?'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>':"")+
-    teile.map(t=>`<Override PartName="/word/${t.datei}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${t.art}+xml"/>`).join("");
+    teile.map(t=>`<Override PartName="/word/${t.datei}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${t.art}+xml"/>`).join("")+wp.ct;
   const contentTypes=zusatz?DOCX_CONTENT_TYPES.replace("</Types>",zusatz+"</Types>"):DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
   const eintraege=[
@@ -9712,7 +9853,8 @@ ${relEintraege.join(String.fromCharCode(10))}
     ...teile.map(t=>({name:"word/"+t.datei,bytes:enc.encode(t.xml)})),
     ...teile.flatMap(t=>t.rels?[{name:`word/_rels/${t.datei}.rels`,bytes:enc.encode(t.rels)},...t.media]:[]),
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
-    ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[])
+    ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[]),
+    ...wp.eintraege
   ];
   return await zipSchreiben(eintraege);
 }
@@ -10990,6 +11132,8 @@ function neuesDokumentAus(name,erg){
   if(b.hdr)d.hdr=b.hdr;
   if(b.ftr)d.ftr=b.ftr;
   if(b.ersteAnders){d.ersteAnders=true;if(b.hdr1)d.hdr1=b.hdr1;if(b.ftr1)d.ftr1=b.ftr1}
+  /* Was aus der Word-Datei bewahrt wird (siehe wPaketBewahren) */
+  if(b.word)d.word=b.word;
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
   /* Schrift und Größe der Datei statt der eigenen Voreinstellung — sonst
      erschien eine Calibri-11-Datei in Georgia 12 und ging beim Speichern
@@ -11790,18 +11934,146 @@ function docxTabelleMitRahmen(t,karte){
   }
   return false;
 }
+/* ================= Word: bewahren, was dieses Programm nicht kann =================
+   Was PureQuill nicht darstellen oder bearbeiten kann — Diagramme, Formeln,
+   Textfelder und Formen, EMF/WMF-Bilder, eingebettete Objekte, Kommentare,
+   Endnoten, gelöschter Text in nachverfolgten Änderungen, Lesezeichen —,
+   fiel bis 1.2 beim Öffnen weg und fehlte damit auch in der gespeicherten
+   Datei (gemessen an zwölf Dateien aus Word, jede verlor ihr Merkmal).
+   Jetzt bleibt es als fester Platzhalter im Text stehen (span.wroh, nicht
+   bearbeitbar, aber löschbar), der das Original-XML trägt (d.word.roh).
+   Beim Speichern geht genau dieses XML zurück, samt allen Teilen des
+   Word-Pakets, an denen es hängt (Diagrammdaten, eingebettete Tabellen,
+   Bilder, comments.xml, endnotes.xml …; d.word.teile). Verweise (r:id)
+   bekommen beim Lesen das Präfix W_, damit sie nicht mit den eigenen
+   Kennungen des Exports zusammenstoßen. */
+const WROH_LAUF=new Set(["object","AlternateContent","commentReference","endnoteReference","sym","ptab","ruby","contentPart"]);
+const WROH_ABSATZ=new Set(["oMath","oMathPara","commentRangeStart","commentRangeEnd","bookmarkStart","bookmarkEnd",
+  "del","moveFrom","moveFromRangeStart","moveFromRangeEnd","moveToRangeStart","moveToRangeEnd"]);
+/* Bewahrte Verweise heißen W_…; eine von hier gespeicherte Datei trägt
+   das Präfix schon und behält es — sonst wüchse es bei jedem Umlauf. */
+const wId=v=>v.startsWith("W_")?v:"W_"+v;
+function wRohText(ktx,el){
+  const r=ktx.roh;
+  return new XMLSerializer().serializeToString(el).replace(/(\sr:[A-Za-z]+=")([^"]+)"/g,(m,a,v)=>{
+    if(!r.rels[v])return m;
+    r.genutzt.add(v);return a+wId(v)+'"';
+  });
+}
+function wRohMerken(ktx,el){
+  const id="w"+(ktx.roh.n++);
+  ktx.roh.map[id]=wRohText(ktx,el);
+  return id;
+}
+/* Was im letzten sectPr steht und der Export nicht selbst schreibt:
+   Spalten, Seitennummerierung, Zeilennummern, Raster, Kopf-/Fußzeilen für
+   gerade Seiten. In Gruppen nach der Reihenfolge des Schemas (CT_SectPr):
+   Verweise | footnotePr endnotePr type | pgSz pgMar | paperSrc … noEndnote |
+   titlePg | textDirection … printerSettings. */
+function wSectReste(sect,ktx){
+  const g={refs:"",vor:"",mitte:"",nach:""};
+  const VOR=new Set(["footnotePr","endnotePr","type"]);
+  const MITTE=new Set(["paperSrc","pgBorders","lnNumType","pgNumType","cols","formProt","vAlign","noEndnote"]);
+  const NACH=new Set(["textDirection","bidi","rtlGutter","docGrid","printerSettings"]);
+  for(const c of sect.children){
+    const n=c.localName;
+    if(n==="headerReference"||n==="footerReference"){
+      const t=String(xattrN(c,"type")||"default");
+      if(t!=="default"&&t!=="first")g.refs+=wRohText(ktx,c);
+    }
+    else if(VOR.has(n))g.vor+=wRohText(ktx,c);
+    else if(MITTE.has(n))g.mitte+=wRohText(ktx,c);
+    else if(NACH.has(n))g.nach+=wRohText(ktx,c);
+  }
+  return g.refs||g.vor||g.mitte||g.nach?g:null;
+}
+/* Ein normales Bild (pic:pic mit lesbarer Bilddatei, keine Form, kein
+   Diagramm) wird weiter zur Figur des Editors; alles andere bewahrt. */
+function wNurBild(c,ktx){
+  const alle=[...c.getElementsByTagName("*")];
+  if(alle.some(x=>/^(chart|wsp|wgp|wpc|relIds|txbxContent|textbox|OLEObject|shape)$/.test(x.localName)&&
+    !(x.localName==="shape"&&alle.some(y=>y.localName==="imagedata")&&!alle.some(y=>y.localName==="textbox")))) return false;
+  const rid=docxBildRid(c);
+  return !!(rid&&ktx&&ktx.bild&&ktx.bild.karte[rid]);
+}
+function wRohArt(el){
+  const alle=[el,...el.getElementsByTagName("*")];
+  const hat=n=>alle.some(x=>x.localName===n);
+  const texte=(von,n)=>{const out=[];for(const x of von.getElementsByTagName("*"))if(x.localName===n)out.push(x.textContent);return out.join("")};
+  const ln=el.localName;
+  if(ln==="del"||ln==="moveFrom")return {art:"del",text:texte(el,"delText")||texte(el,"t")};
+  if(/^(commentRange|bookmark|moveFromRange|moveToRange)/.test(ln))return {art:"marke"};
+  if(hat("commentReference"))return {art:"kommentar",id:String(xattrN(alle.find(x=>x.localName==="commentReference"),"id")||"")};
+  if(hat("endnoteReference"))return {art:"endnote"};
+  if(ln==="oMath"||ln==="oMathPara"||hat("oMath"))return {art:"formel",text:texte(el,"t")};
+  if(hat("chart"))return {art:"diagramm"};
+  if(hat("txbxContent")){const tb=alle.find(x=>x.localName==="txbxContent");return {art:"textfeld",text:texte(tb,"t")}}
+  if(hat("wsp")||hat("wgp")||hat("wpc")||(hat("shape")&&!hat("imagedata")))return {art:"form"};
+  if(hat("OLEObject"))return {art:"objekt"};
+  if(hat("blip")||hat("imagedata"))return {art:"bild"};
+  return {art:"objekt"};
+}
+const WROH_NAME={kommentar:"Kommentar",endnote:"Endnote",formel:"Formel",diagramm:"Diagramm",
+  textfeld:"Textfeld",form:"Form",objekt:"Objekt",bild:"Bild"};
+function wRohHtml(ktx,el){
+  const id=wRohMerken(ktx,el),a=wRohArt(el);
+  const kopf=`class="wroh w${a.art}" contenteditable="false" data-roh="${id}"`;
+  if(a.art==="marke")return `<span ${kopf}></span>`;
+  const titel=tr("Aus Word — bleibt beim Speichern unverändert erhalten");
+  if(a.art==="del")return `<span ${kopf} title="${esc(tr("Gelöscht (nachverfolgte Änderung)"))}">${xesc(a.text)}</span>`;
+  if(a.art==="kommentar"){
+    const k=ktx.roh.kommentare&&ktx.roh.kommentare.get(a.id);
+    return `<span ${kopf} title="${esc(k?k:tr("Kommentar"))}">💬</span>`;
+  }
+  /* Ein lesbares Vorschaubild (z. B. das PNG hinter einer Form) zeigen;
+     sonst Art und, wo vorhanden, Text. */
+  const rid=docxBildRid(el),quelle=rid&&ktx.bild&&ktx.bild.karte[rid];
+  const vorschau=quelle?`<img src="${quelle.uri}" alt="" draggable="false">`:"";
+  const text=a.text?" "+xesc(a.text.slice(0,120)):"";
+  /* Steht das Objekt in Word im Text (wp:inline), nimmt der Platzhalter
+     dieselbe Fläche ein — sonst brächen die Seiten anders um als in Word.
+     Frei schwebende Objekte nehmen im Textfluss keinen Platz. */
+  const inl=[...el.getElementsByTagName("*")].find(x=>x.localName==="inline");
+  const ext=inl&&KIND(inl,"extent");
+  const groesse=ext?` style="width:calc(${(parseInt(ext.getAttribute("cx"),10)*EMU_MM).toFixed(1)}mm * var(--zoom,1));`+
+    `height:calc(${(parseInt(ext.getAttribute("cy"),10)*EMU_MM).toFixed(1)}mm * var(--zoom,1))"`:"";
+  return `<span ${kopf}${groesse} title="${esc(titel)}">${vorschau}<b>${esc(tr(WROH_NAME[a.art]||"Objekt"))}</b>${text}</span>`;
+}
+function wAbsatzAttr(pr,ktx){
+  if(!pr||!ktx||!ktx.roh)return "";
+  const s=KIND(pr,"sectPr"),tabs=KIND(pr,"tabs");
+  return (s?` data-wsect="${wRohMerken(ktx,s)}"`:"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"");
+}
 function docxLauf(p,ktx){
   let out="";
   const grund=ktx?ktx.grund:{};
   [...p.children].forEach(el=>{
+    /* Nachverfolgt eingefügt: bleibt als Änderung markiert und bearbeitbar */
+    if(el.localName==="ins"&&ktx&&ktx.roh){
+      const id="w"+(ktx.roh.n++);
+      ktx.roh.map[id]=`<w:ins w:id="${xesc(String(xattrN(el,"id")||id.slice(1)))}" w:author="${xesc(String(xattrN(el,"author")||""))}"`+
+        (xattrN(el,"date")?` w:date="${xesc(String(xattrN(el,"date")))}"`:"")+">";
+      out+=`<ins class="wins" data-roh="${id}">`+docxLauf(el,ktx)+"</ins>";
+      return;
+    }
     if(DOCX_HUELLE_LAUF.has(el.localName)){out+=docxLauf(el,ktx);return}
     if(el.localName==="sdt"){const k=docxSdtInhalt(el);if(k)out+=docxLauf(k,ktx);return}
+    if(WROH_ABSATZ.has(el.localName)){
+      if(ktx&&ktx.roh&&!(el.localName==="bookmarkStart"&&xattrN(el,"name")==="_GoBack"))out+=wRohHtml(ktx,el);
+      return;
+    }
     if(el.localName!=="r")return;
+    /* Ein Lauf mit etwas, das hier nicht darstellbar ist, bleibt als Ganzes */
+    if(ktx&&ktx.roh&&[...el.children].some(c=>WROH_LAUF.has(c.localName)||
+        ((c.localName==="drawing"||c.localName==="pict")&&!wNurBild(c,ktx)))){
+      out+=wRohHtml(ktx,el);return;
+    }
     let t="",marke="";
     [...el.children].forEach(c=>{
       if(c.localName==="t")t+=xesc(c.textContent);
       else if(c.localName==="br")t+="<br>";
-      else if(c.localName==="tab")t+=" ";
+      /* Ein echter Tabulator statt eines Leerzeichens (bis 1.2) */
+      else if(c.localName==="tab")t+='<span class="wtab" contenteditable="false">\t</span>';
       else if((c.localName==="drawing"||c.localName==="pict")&&ktx&&ktx.bild){
         const rid=docxBildRid(c);
         const quelle=rid&&ktx.bild.karte[rid];
@@ -11866,7 +12138,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   const rahmenStile=docxTabellenRahmen(stilXml);
   const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,bild}};
+    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,bild,roh:z.roh}};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -11890,7 +12162,10 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const inhalt=docxLauf(p,{stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,bild})||"";
+    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,bild,roh:z.roh};
+    const inhalt=docxLauf(p,lktx)||"";
+    /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
+    const wa=wAbsatzAttr(pr,lktx);
     const numPr=KIND(pr,"numPr");
     if(numPr){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
@@ -11917,7 +12192,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         stapel[stapel.length-1].numId=numId;
         const jetzt=stapel[stapel.length-1];
         if(jetzt.offen)out+="</li>";
-        out+="<li>"+(inhalt||"<br>");jetzt.offen=true;
+        out+="<li"+wa+">"+(inhalt||"<br>");jetzt.offen=true;
         return;
       }
     }
@@ -11928,11 +12203,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const figuren=inhalt.match(/<figure[\s\S]*?<\/figure>/g);
     if(figuren){
       const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
-      if(rest)out+="<p>"+rest+"</p>";
+      if(rest||wa)out+="<p"+wa+">"+(rest||"<br>")+"</p>";
       out+=figuren.join("");
       return;
     }
-    if(h)out+="<h"+h+">"+(inhalt||"<br>")+"</h"+h+">";
+    if(h)out+="<h"+h+wa+">"+(inhalt||"<br>")+"</h"+h+">";
     else{
       /* Linker Einzug, in em wie beim Einrücken im Editor (indentBlocks).
          Nur der direkte am Absatz: der einer Vorlage gehört meist zu einer
@@ -11944,7 +12219,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       /* Erstzeileneinzug (firstLine) bzw. hängender Einzug (hanging) */
       const erste=zuEm("firstLine")||-zuEm("hanging");
       const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em"].filter(Boolean).join(";");
-      out+=(st?'<p style="'+st+'">':"<p>")+(inhalt||"<br>")+"</p>";
+      out+=(st?'<p style="'+st+'"'+wa+">":"<p"+wa+">")+(inhalt||"<br>")+"</p>";
     }
   };
   const tabelle=t=>{alleZu();out+=tabelleHtml(t)};
@@ -11994,7 +12269,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   let nachTabelle=false;
   docxBloecke(body).forEach(el=>{
     if(el.localName==="p"){
-      if(nachTabelle&&!docxLauf(el,null).trim()&&!KIND(KIND(el,"pPr"),"numPr")){nachTabelle=false;return}
+      /* Ein Abschnittswechsel steckt oft genau in diesem Pflichtabsatz */
+      if(nachTabelle&&!docxLauf(el,null).trim()&&!KIND(KIND(el,"pPr"),"numPr")&&!KIND(KIND(el,"pPr"),"sectPr")){nachTabelle=false;return}
       nachTabelle=false;absatz(el);
     }
     else if(el.localName==="tbl"){tabelle(el);nachTabelle=true}
@@ -12008,6 +12284,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     ftrId:hfRefId(sect,"footer",docxTitelSeite(sect)?"default":undefined),
     hdr1Id:hfRefId(sect,"header","first"),ftr1Id:hfRefId(sect,"footer","first"),
     ersteAnders:docxTitelSeite(sect),
+    wSect:z.roh&&sect?wSectReste(sect,{roh:z.roh}):null,
     size:gs.size,font:gs.font,lh:gs.lh,ps:gs.ps};
 }
 
@@ -12230,6 +12507,96 @@ function odtToHtml(xml){
   [...inhalt.children].forEach(block);
   return out||null;
 }
+/* ---- Word-Paket bewahren: Hilfen ---- */
+function wRelsListe(xml){
+  if(!xml)return [];
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return [];
+  return [...dom.documentElement.children].map(r=>({id:r.getAttribute("Id"),type:r.getAttribute("Type")||"",
+    target:r.getAttribute("Target")||"",mode:r.getAttribute("TargetMode")||""}));
+}
+/* Ziel einer Beziehung relativ zum Ordner der Teildatei auflösen */
+function wPfad(ordner,ziel){
+  const teile=(ziel.startsWith("/")?ziel.slice(1):ordner+ziel).split("/"),out=[];
+  for(const t of teile){if(t===".."){out.pop()}else if(t!=="."&&t!=="")out.push(t)}
+  return out.join("/");
+}
+const wFnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}
+  return (h>>>0).toString(36)+":"+s.length};
+const wStand=v=>wFnv(JSON.stringify(v||null));
+/* Kommentartexte für den Tooltip am Platzhalter */
+function wKommentare(xml){
+  const m=new Map();
+  if(!xml)return m;
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return m;
+  for(const c of dom.documentElement.children){
+    if(c.localName!=="comment")continue;
+    let t="";for(const x of c.getElementsByTagName("*"))if(x.localName==="t")t+=x.textContent;
+    const wer=String(xattrN(c,"author")||"");
+    m.set(String(xattrN(c,"id")||""),(wer?wer+": ":"")+t);
+  }
+  return m;
+}
+/* Einstellungen aus settings.xml, die das Aussehen der Datei bestimmen und
+   die dieses Programm selbst nicht schreibt. Reihenfolge bleibt die des
+   Originals (das Schema legt sie fest). */
+const WSETTINGS=new Set(["mirrorMargins","gutterAtTop","bookFoldPrinting","bookFoldRevPrinting","bookFoldPrintingSheets",
+  "evenAndOddHeaders","defaultTabStop","autoHyphenation","consecutiveHyphenLimit","hyphenationZone","doNotHyphenateCaps",
+  "trackRevisions","endnotePr"]);
+function wSettingsBewahren(xml){
+  if(!xml)return [];
+  const dom=new DOMParser().parseFromString(xml,"application/xml");
+  if(dom.querySelector("parsererror"))return [];
+  return [...dom.documentElement.children].filter(c=>WSETTINGS.has(c.localName))
+    .map(c=>new XMLSerializer().serializeToString(c));
+}
+/* Alles einsammeln, woran bewahrte Inhalte hängen: die Teildateien hinter
+   den benutzten Beziehungen, rekursiv über deren eigene Beziehungsdateien;
+   dazu Kommentare, Personen und Endnoten des Dokuments, die Kopf-/Fuß-
+   zeilen im Original (zurückgeschrieben, solange man sie nicht ändert),
+   Inhaltstypen, Namensräume und die Einstellungen. */
+async function wPaketBewahren(buf,docXml,roh,erg,hfRoh){
+  const hol=n=>zipBytes(buf,n).catch(()=>null);
+  const teile={};
+  const sammle=async pfad=>{
+    if(pfad in teile)return;
+    const b=await hol(pfad);
+    teile[pfad]=b?base64Von(b):null;
+    if(!b)return;
+    const rp=pfad.replace(/([^/]+)$/,"_rels/$1.rels");
+    const rb=await hol(rp);
+    if(!rb)return;
+    teile[rp]=base64Von(rb);
+    const ordner=pfad.replace(/[^/]*$/,"");
+    for(const r of wRelsListe(new TextDecoder().decode(rb)))
+      if(r.mode!=="External")await sammle(wPfad(ordner,r.target));
+  };
+  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people|endnotes)$/;
+  const rels={};
+  for(const [id,r] of Object.entries(roh.rels)){
+    if(!roh.genutzt.has(id)&&!BEWAHRT.test(r.type))continue;
+    rels[wId(id)]=r;
+    if(r.mode!=="External")await sammle(wPfad("word/",r.target));
+  }
+  const hf={};
+  for(const h of hfRoh){await sammle(h.ziel);hf[h.feld]={teil:h.ziel,stand:h.stand}}
+  for(const k of Object.keys(teile))if(teile[k]===null)delete teile[k];
+  const settings=wSettingsBewahren(await zipEintrag(buf,"word/settings.xml").catch(()=>null));
+  if(!Object.keys(roh.map).length&&!Object.keys(rels).length&&!Object.keys(hf).length&&!erg.wSect&&!settings.length)return null;
+  const ct={def:{},over:{}};
+  const ctXml=await zipEintrag(buf,"[Content_Types].xml").catch(()=>null);
+  if(ctXml){
+    const dom=new DOMParser().parseFromString(ctXml,"application/xml");
+    for(const e of dom.documentElement.children){
+      if(e.localName==="Default")ct.def[String(e.getAttribute("Extension")).toLowerCase()]=e.getAttribute("ContentType");
+      if(e.localName==="Override")ct.over[String(e.getAttribute("PartName")).replace(/^\//,"")]=e.getAttribute("ContentType");
+    }
+  }
+  const wurzel=new DOMParser().parseFromString(docXml,"application/xml").documentElement;
+  const ns=[...wurzel.attributes].filter(a=>a.name.startsWith("xmlns:")||a.name==="mc:Ignorable").map(a=>[a.name,a.value]);
+  return {ns,roh:roh.map,rels,teile,ct,settings,sect:erg.wSect||null,hf};
+}
 async function zipDokument(name,buf){
   const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
   try{
@@ -12254,13 +12621,17 @@ async function zipDokument(name,buf){
       const vorabFmt=docxFormat(vorabSect);
       const breiteMm=vorabFmt?vorabFmt.w-vorabFmt.m[1]-vorabFmt.m[3]:170;
       const thema=docxThema(await hol("word/theme/theme1.xml"));
+      const roh={map:{},n:0,genutzt:new Set(),
+        rels:Object.fromEntries(wRelsListe(rel).map(r=>[r.id,r])),
+        kommentare:wKommentare(await hol("word/comments.xml"))};
       const erg=docxToHtml(xml,stil,num,
-        {fussnoten:docxFussnoten(fuss),bilder,breiteMm,thema});
+        {fussnoten:docxFussnoten(fuss),bilder,breiteMm,thema,roh});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
       /* Erste Seite nur, wenn Word sie auch zeigt (titlePg). */
       const teile=[["hdrId","hdr"],["ftrId","ftr"],...(erg.ersteAnders?[["hdr1Id","hdr1"],["ftr1Id","ftr1"]]:[])];
+      const hfRoh=[];
       for(const [art,feld] of teile){
         const ziel=docxRelZiel(rel,erg[art]);
         if(!ziel)continue;
@@ -12269,7 +12640,9 @@ async function zipDokument(name,buf){
         const teilRel=await hol(ziel.replace(/([^/]+)$/,"_rels/$1.rels"));
         const bilderHf=await docxBildKarte(buf,teilRel);
         erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt});
+        if(erg[feld])hfRoh.push({feld,ziel,stand:wStand(erg[feld])});
       }
+      erg.word=await wPaketBewahren(buf,xml,roh,erg,hfRoh);
       return erg;
     }
     const xml=await zipEintrag(buf,"content.xml");
