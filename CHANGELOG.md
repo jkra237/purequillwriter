@@ -488,6 +488,19 @@ immer genau einen Commit, der sie anfasst.
   Bewahren standen sie nur als Platzhalter. Dabei: `endnotePr` aus
   settings.xml wird nicht mehr übernommen — ohne `endnotes.xml` hielt Word die
   Datei für beschädigt.
+- **Word-Kommentare werden Notizen** (`wKommentarNotiz`): je Kommentar eine
+  Notiz (Titel = Autor, Text = Kommentar, Farbe Zitrone, `n.wort` mit Autor,
+  Datum, Initialen), die kommentierte Stelle eine verknüpfte Markierung
+  (`span.anch`) wie bei einer selbst verknüpften Notiz. Bereiche über
+  mehrere Absätze werden je Absatz geschlossen und wieder geöffnet,
+  überlappende so verschachtelt, dass die Tags nie über Kreuz gehen.
+  Zurück nach Word gehen **nur Notizen aus Word-Kommentaren**
+  (`wKommentarePlanen`, `comments.xml`) — eigene Notizen sind privat und
+  gehören nicht ungefragt in eine weitergegebene Datei. Geprüft mit zwei
+  Dateien aus Word (zwei Kommentare; einer über zwei Absätze plus zwei
+  überlappende): Autor, Text und kommentierte Stelle laut Word gleich.
+  Dabei: aneinanderstoßende oder verschachtelte Markierungen haben keinen
+  Innenabstand mehr — er riss Wörter sichtbar auseinander („Drit ter“).
 - **Eingefügte Fußnoten gingen verloren** — `insertHTML` machte aus der
   Marke einen `<span>` mit nachgeahmten Stilen, ohne Klasse und Kennung
   (gemessen: schon die erste am Absatzende, erst recht eine zweite direkt

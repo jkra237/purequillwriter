@@ -1276,6 +1276,10 @@ body.focus .outline{display:none}
 .anch{background:var(--ab,rgba(140,59,46,.22));border-bottom:2px solid var(--ac,#8C3B2E);cursor:pointer;
   border-radius:2px;padding:0 1px}
 .anch.hot{outline:2px solid var(--ac,#8C3B2E);outline-offset:1px}
+/* Überlappende Word-Kommentare teilen eine Markierung in aneinanderstoßende
+   oder verschachtelte Stücke; ohne das riss der Innenabstand Wörter
+   sichtbar auseinander („Drit ter“). */
+.anch .anch,.anch+.anch{padding-left:0}.anch .anch,.anch:has(+.anch){padding-right:0}
 .anchcol{position:relative;flex:0 0 252px;width:252px;min-height:10px}
 .acard{position:absolute;left:0;width:252px;background:#EBDFC4;color:#22242A;border:1px solid rgba(0,0,0,.2);
   border-left:4px solid var(--ac,#8C3B2E);border-radius:var(--radius);padding:9px 10px 8px;
@@ -9539,6 +9543,14 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
       runs.push(`<w:r><w:rPr><w:rStyle w:val="EndnoteReference"/></w:rPr><w:endnoteReference w:id="${eid}"/></w:r>`);
       ws.vorn=false;return;
     }
+    /* Markierung einer Notiz, die aus einem Word-Kommentar stammt
+       (wKommentarePlanen): Bereich und Kommentarmarke wie in Word */
+    if(n.classList&&n.classList.contains("anch")&&(n.dataset.wkStart||n.dataset.wkEnde)){
+      if(n.dataset.wkStart)runs.push(`<w:commentRangeStart w:id="${n.dataset.wkStart}"/>`);
+      inlineAblaufen(n,st,runs,links,ctx,ws);
+      if(n.dataset.wkEnde)runs.push(`<w:commentRangeEnd w:id="${n.dataset.wkEnde}"/><w:r><w:commentReference w:id="${n.dataset.wkEnde}"/></w:r>`);
+      return;
+    }
     if(tag==="br"){runs.push("<w:r><w:br/></w:r>");ws.vorn=true;return}
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
@@ -9820,9 +9832,7 @@ function wPaketSchreiben(d,documentXml,belegt,rohRels){
   let kopf=documentXml.slice(0,ende);
   for(const [n,v] of w.ns||[])if(!new RegExp("\\s"+n.replace(/[.:]/g,"\\$&")+"=").test(kopf))kopf+=` ${n}="${xesc(v)}"`;
   documentXml=kopf+documentXml.slice(ende);
-  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people)$/;
   const genutzt=new Set([...documentXml.matchAll(/"(W_[^"]+)"/g)].map(m=>m[1]));
-  for(const [id,r] of Object.entries(w.rels||{}))if(BEWAHRT.test(r.type))genutzt.add(id);
   const neuName=p=>belegt.has(p)?p.replace(/([^/]+)$/,"w-$1"):p;
   const schreib=new Map();
   const besuche=p=>{
@@ -9864,12 +9874,47 @@ function wPaketSchreiben(d,documentXml,belegt,rohRels){
   }
   return {documentXml,rels,ct,eintraege};
 }
+/* Welche Markierungen als Word-Kommentar hinausgehen: nur Notizen, die aus
+   einem Word-Kommentar stammen (n.wort). Je Notiz ein Kommentar vom ersten
+   bis zum letzten ihrer Stücke — ein Kommentar über zwei Absätze kommt hier
+   als zwei Markierungen an. Die Kennung steht als data-Attribut am Element,
+   damit sie das Klonen der Listenpunkte im Export übersteht. */
+function wKommentarePlanen(container){
+  const stuecke=new Map();
+  container.querySelectorAll(".anch[data-n]").forEach(sp=>{
+    const n=findNote(sp.dataset.n);
+    if(!n||!n.wort)return;
+    if(!stuecke.has(n.id))stuecke.set(n.id,[]);
+    stuecke.get(n.id).push(sp);
+  });
+  const liste=[];
+  for(const [id,sps] of stuecke){
+    const cid=String(liste.length);
+    sps[0].dataset.wkStart=cid;sps[sps.length-1].dataset.wkEnde=cid;
+    liste.push({cid,n:findNote(id)});
+  }
+  return liste;
+}
+function kommentareXml(liste){
+  const absaetze=n=>{const t=document.createElement("div");t.innerHTML=n.html||"";
+    const z=[...t.querySelectorAll("p,li,h1,h2,h3,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.innerText!==undefined?e.textContent:"");
+    return z.length?z:[t.textContent||""]};
+  const body=liste.map(({cid,n})=>{
+    const w=n.wort||{};
+    return `<w:comment w:id="${cid}" w:author="${xesc(w.autor||"PureQuill")}"`+
+      (w.datum?` w:date="${xesc(w.datum)}"`:"")+(w.initialen?` w:initials="${xesc(w.initialen)}"`:"")+">"+
+      absaetze(n).map(t=>`<w:p><w:r><w:t xml:space="preserve">${xesc(t)}</w:t></w:r></w:p>`).join("")+"</w:comment>";
+  }).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:comments xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${body}</w:comments>`;
+}
 /* Das Word-Dokument als Blob, ohne Dialog — gemeinsam für „Speichern“ und
    „Speichern als“. */
 async function docxBlob(d){
   const f=fmtOf(d);
   const container=document.createElement("div");container.innerHTML=d.html||"";
   docxEinebnen(container);
+  const kommentare=wKommentarePlanen(container);
   const ctx={imgId:0,linkId:0,images:[],links:[],
     docSize:d.size||S.settings.size,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
@@ -9910,15 +9955,16 @@ async function docxBlob(d){
   xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
   xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
 <w:body>${bodyXml||"<w:p/>"}${sectPr}</w:body></w:document>`;
-  const belegt=new Set(["word/document.xml","word/styles.xml","word/numbering.xml","word/footnotes.xml","word/endnotes.xml","word/settings.xml",
+  const belegt=new Set(["word/document.xml","word/styles.xml","word/numbering.xml","word/footnotes.xml","word/endnotes.xml","word/comments.xml","word/settings.xml",
     ...HF_TEILE.map(t=>"word/"+t.datei)]);
   const wp=wPaketSchreiben(d,rohDoc,belegt,teile.filter(t=>t.roh&&t.rels).map(t=>t.rels));
   const documentXml=wp.documentXml;
-  const hatFussnoten=ctx.footnotes.length>0,hatEndnoten=ctx.endnotes.length>0;
+  const hatFussnoten=ctx.footnotes.length>0,hatEndnoten=ctx.endnotes.length>0,hatKommentare=kommentare.length>0;
   const relEintraege=[
     `<Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>`,
     `<Relationship Id="rIdNumbering" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>`,
     ...teile.map(t=>`<Relationship Id="${t.rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/${t.art}" Target="${t.datei}"/>`),
+    hatKommentare&&`<Relationship Id="rIdComments" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="comments.xml"/>`,
     hatEndnoten&&`<Relationship Id="rIdEndnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/endnotes" Target="endnotes.xml"/>`,
     hatFussnoten&&`<Relationship Id="rIdFootnotes" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>`,
     ...ctx.images.map(im=>`<Relationship Id="${im.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${im.id}.${im.ext}"/>`),
@@ -9932,6 +9978,7 @@ ${relEintraege.join(String.fromCharCode(10))}
   const zusatz=
     (hatFussnoten?'<Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>':"")+
     (hatEndnoten?'<Override PartName="/word/endnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.endnotes+xml"/>':"")+
+    (hatKommentare?'<Override PartName="/word/comments.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml"/>':"")+
     teile.map(t=>`<Override PartName="/word/${t.datei}" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.${t.art}+xml"/>`).join("")+wp.ct;
   const contentTypes=zusatz?DOCX_CONTENT_TYPES.replace("</Types>",zusatz+"</Types>"):DOCX_CONTENT_TYPES;
   const enc=new TextEncoder();
@@ -9948,6 +9995,7 @@ ${relEintraege.join(String.fromCharCode(10))}
     ...ctx.images.map(im=>({name:`word/media/${im.id}.${im.ext}`,bytes:im.bytes})),
     ...(hatFussnoten?[{name:"word/footnotes.xml",bytes:enc.encode(footnotesXml(ctx.footnotes))}]:[]),
     ...(hatEndnoten?[{name:"word/endnotes.xml",bytes:enc.encode(endnotesXml(ctx.endnotes))}]:[]),
+    ...(hatKommentare?[{name:"word/comments.xml",bytes:enc.encode(kommentareXml(kommentare))}]:[]),
     ...wp.eintraege
   ];
   return await zipSchreiben(eintraege);
@@ -11230,6 +11278,8 @@ function neuesDokumentAus(name,erg){
   if(b.word)d.word=b.word;
   if(b.footnotes&&b.footnotes.length)d.footnotes=b.footnotes;
   if(b.endnotes&&b.endnotes.length)d.endnotes=b.endnotes;
+  /* Word-Kommentare als Notizen, je mit eigenem Platz auf der Notizfläche */
+  (b.kommentare||[]).forEach(n=>{const pos=freierNotizPlatz();S.notes.push({...n,x:pos.x,y:pos.y})});
   /* Schrift und Größe der Datei statt der eigenen Voreinstellung — sonst
      erschien eine Calibri-11-Datei in Georgia 12 und ging beim Speichern
      auch so zurück. */
@@ -12066,8 +12116,8 @@ function docxTabelleMitRahmen(t,karte){
    Bilder, comments.xml, endnotes.xml …; d.word.teile). Verweise (r:id)
    bekommen beim Lesen das Präfix W_, damit sie nicht mit den eigenen
    Kennungen des Exports zusammenstoßen. */
-const WROH_LAUF=new Set(["object","AlternateContent","commentReference","sym","ptab","ruby","contentPart"]);
-const WROH_ABSATZ=new Set(["oMath","oMathPara","commentRangeStart","commentRangeEnd","bookmarkStart","bookmarkEnd",
+const WROH_LAUF=new Set(["object","AlternateContent","sym","ptab","ruby","contentPart"]);
+const WROH_ABSATZ=new Set(["oMath","oMathPara","bookmarkStart","bookmarkEnd",
   "del","moveFrom","moveFromRangeStart","moveFromRangeEnd","moveToRangeStart","moveToRangeEnd"]);
 /* Bewahrte Verweise heißen W_…; eine von hier gespeicherte Datei trägt
    das Präfix schon und behält es — sonst wüchse es bei jedem Umlauf. */
@@ -12142,7 +12192,7 @@ function wRohHtml(ktx,el){
   if(a.art==="del")return `<span ${kopf} title="${esc(tr("Gelöscht (nachverfolgte Änderung)"))}">${xesc(a.text)}</span>`;
   if(a.art==="kommentar"){
     const k=ktx.roh.kommentare&&ktx.roh.kommentare.get(a.id);
-    return `<span ${kopf} title="${esc(k?k:tr("Kommentar"))}">💬</span>`;
+    return `<span ${kopf} title="${esc(k?(k.autor?k.autor+": ":"")+k.absaetze.join(" "):tr("Kommentar"))}">💬</span>`;
   }
   /* Ein lesbares Vorschaubild (z. B. das PNG hinter einer Form) zeigen;
      sonst Art und, wo vorhanden, Text. */
@@ -12163,25 +12213,44 @@ function wAbsatzAttr(pr,ktx){
   const s=KIND(pr,"sectPr"),tabs=KIND(pr,"tabs");
   return (s?` data-wsect="${wRohMerken(ktx,s)}"`:"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"");
 }
-function docxLauf(p,ktx){
+function docxLauf(p,ktx,innen){
   let out="";
   const grund=ktx?ktx.grund:{};
+  /* Kommentarbereiche können über Absätze laufen: am Absatzanfang wieder
+     öffnen, am Ende schließen. Nur auf der obersten Ebene des Absatzes —
+     in einer Hülle (Link, Formularfeld) gingen sonst die Tags über Kreuz. */
+  const kom=!innen&&ktx&&ktx.kom;
+  if(kom)out+=kom.offen.map(wAnchAuf).join("");
   [...p.children].forEach(el=>{
+    if((el.localName==="commentRangeStart"||el.localName==="commentRangeEnd")&&ktx&&ktx.kom){
+      if(!kom)return;
+      const id=wKommentarNotiz(ktx,String(xattrN(el,"id")||""));
+      /* Überlappende Bereiche: alle schließen, Liste ändern, wieder öffnen */
+      out+="</span>".repeat(kom.offen.length);
+      if(el.localName==="commentRangeStart"){if(!kom.offen.includes(id))kom.offen.push(id)}
+      else kom.offen=kom.offen.filter(x=>x!==id);
+      out+=kom.offen.map(wAnchAuf).join("");
+      return;
+    }
     /* Nachverfolgt eingefügt: bleibt als Änderung markiert und bearbeitbar */
     if(el.localName==="ins"&&ktx&&ktx.roh){
       const id="w"+(ktx.roh.n++);
       ktx.roh.map[id]=`<w:ins w:id="${xesc(String(xattrN(el,"id")||id.slice(1)))}" w:author="${xesc(String(xattrN(el,"author")||""))}"`+
         (xattrN(el,"date")?` w:date="${xesc(String(xattrN(el,"date")))}"`:"")+">";
-      out+=`<ins class="wins" data-roh="${id}">`+docxLauf(el,ktx)+"</ins>";
+      out+=`<ins class="wins" data-roh="${id}">`+docxLauf(el,ktx,true)+"</ins>";
       return;
     }
-    if(DOCX_HUELLE_LAUF.has(el.localName)){out+=docxLauf(el,ktx);return}
-    if(el.localName==="sdt"){const k=docxSdtInhalt(el);if(k)out+=docxLauf(k,ktx);return}
+    if(DOCX_HUELLE_LAUF.has(el.localName)){out+=docxLauf(el,ktx,true);return}
+    if(el.localName==="sdt"){const k=docxSdtInhalt(el);if(k)out+=docxLauf(k,ktx,true);return}
     if(WROH_ABSATZ.has(el.localName)){
       if(ktx&&ktx.roh&&!(el.localName==="bookmarkStart"&&xattrN(el,"name")==="_GoBack"))out+=wRohHtml(ktx,el);
       return;
     }
     if(el.localName!=="r")return;
+    /* Die Kommentarmarke selbst: die Notiz gibt es schon (oder jetzt, bei
+       einem Kommentar ohne Bereich); im Text steht nichts */
+    const kr=[...el.children].find(c=>c.localName==="commentReference");
+    if(kr&&ktx&&ktx.kom){wKommentarNotiz(ktx,String(xattrN(kr,"id")||""));return}
     /* Ein Lauf mit etwas, das hier nicht darstellbar ist, bleibt als Ganzes */
     if(ktx&&ktx.roh&&[...el.children].some(c=>WROH_LAUF.has(c.localName)||
         ((c.localName==="drawing"||c.localName==="pict")&&!wNurBild(c,ktx)))){
@@ -12248,6 +12317,7 @@ function docxLauf(p,ktx){
     if(wirk.strike)t="<s>"+t+"</s>";
     out+=t+marke;
   });
+  if(kom)out+="</span>".repeat(kom.offen.length);
   return out;
 }
 
@@ -12263,10 +12333,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const grundGroesse=gs.size||z.groesse||S.settings.size||11;
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
   const en={karte:z.endnoten||new Map(),zu:new Map(),liste:[]};
+  const kom=z.roh?{zu:new Map(),notizen:[],offen:[]}:null;
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   const rahmenStile=docxTabellenRahmen(stilXml);
   const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh}};
+    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh,kom}};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -12290,7 +12361,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,en,bild,roh:z.roh};
+    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,en,bild,roh:z.roh,kom};
     const inhalt=docxLauf(p,lktx)||"";
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
@@ -12405,7 +12476,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   });
   alleZu();
   const sect=docxSect(body);
-  return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,endnotes:en.liste,
+  return {html:out||null,fmt:docxFormat(sect),footnotes:fn.liste,endnotes:en.liste,kommentare:kom?kom.notizen:[],
     bilder:{zahl:bild.zahl,bytes:bild.bytes,fehlend:bild.fehlend},
     /* Mit titlePg nie auf die erste ausweichen: die gilt dann nur für Seite 1. */
     hdrId:hfRefId(sect,"header",docxTitelSeite(sect)?"default":undefined),
@@ -12652,7 +12723,7 @@ function wPfad(ordner,ziel){
 const wFnv=s=>{let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}
   return (h>>>0).toString(36)+":"+s.length};
 const wStand=v=>wFnv(JSON.stringify(v||null));
-/* Kommentartexte für den Tooltip am Platzhalter */
+/* comments.xml: Kennung → {autor, datum, initialen, absaetze[]} */
 function wKommentare(xml){
   const m=new Map();
   if(!xml)return m;
@@ -12660,12 +12731,36 @@ function wKommentare(xml){
   if(dom.querySelector("parsererror"))return m;
   for(const c of dom.documentElement.children){
     if(c.localName!=="comment")continue;
-    let t="";for(const x of c.getElementsByTagName("*"))if(x.localName==="t")t+=x.textContent;
-    const wer=String(xattrN(c,"author")||"");
-    m.set(String(xattrN(c,"id")||""),(wer?wer+": ":"")+t);
+    const absaetze=[];
+    for(const p of c.getElementsByTagName("*")){
+      if(p.localName!=="p")continue;
+      let t="";for(const x of p.getElementsByTagName("*"))if(x.localName==="t")t+=x.textContent;
+      absaetze.push(t);
+    }
+    m.set(String(xattrN(c,"id")||""),{autor:String(xattrN(c,"author")||""),datum:String(xattrN(c,"date")||""),
+      initialen:String(xattrN(c,"initials")||""),absaetze});
   }
   return m;
 }
+/* Word-Kommentare werden Notizen (S.notes), die kommentierte Stelle eine
+   verknüpfte Markierung (span.anch) — wie eine selbst verknüpfte Notiz.
+   Die Notiz merkt sich ihre Herkunft (n.wort), und nur solche Notizen gehen
+   beim Speichern als Kommentar zurück: eigene Notizen sind privat und
+   gehören nicht ungefragt in eine weitergegebene Datei. */
+function wKommentarNotiz(ktx,wid){
+  const k=ktx.kom;
+  let id=k.zu.get(wid);
+  if(id)return id;
+  id=uid();k.zu.set(wid,id);
+  const c=ktx.roh&&ktx.roh.kommentare&&ktx.roh.kommentare.get(wid)||{autor:"",datum:"",initialen:"",absaetze:[]};
+  const zeit=Date.parse(c.datum);
+  k.notizen.push({id,title:(c.autor||tr("Kommentar")).slice(0,60),
+    html:c.absaetze.map(t=>"<p>"+(esc(t)||"<br>")+"</p>").join("")||"<p><br></p>",
+    color:NOTECOLORS[1].c,fs:14,created:isFinite(zeit)?zeit:Date.now(),
+    wort:{autor:c.autor,datum:c.datum,initialen:c.initialen}});
+  return id;
+}
+const wAnchAuf=id=>`<span class="anch" data-n="${id}">`;
 /* Einstellungen aus settings.xml, die das Aussehen der Datei bestimmen und
    die dieses Programm selbst nicht schreibt. Reihenfolge bleibt die des
    Originals (das Schema legt sie fest). */
@@ -12703,10 +12798,9 @@ async function wPaketBewahren(buf,docXml,roh,erg,hfRoh){
     for(const r of wRelsListe(new TextDecoder().decode(rb)))
       if(r.mode!=="External")await sammle(wPfad(ordner,r.target));
   };
-  const BEWAHRT=/\/(comments|commentsExtended|commentsIds|commentsExtensible|people)$/;
   const rels={};
   for(const [id,r] of Object.entries(roh.rels)){
-    if(!roh.genutzt.has(id)&&!BEWAHRT.test(r.type))continue;
+    if(!roh.genutzt.has(id))continue;
     rels[wId(id)]=r;
     if(r.mode!=="External")await sammle(wPfad("word/",r.target));
   }
@@ -19496,7 +19590,8 @@ links to, rather than containing, cannot come along: they live on someone else's
 <p>What does not come across: comments, tracked changes, text boxes, shapes and equations.
 Merged table cells become separate cells. Documents split into several sections keep the setup
 of the last one, since a document here has one page format rather than one per section. The old
-binary .doc format from before 2007 cannot be read.</p>`},
+binary .doc format from before 2007 cannot be read.</p>
+<p><b>Nothing from a Word file is lost when you save it again.</b> Comments become notes beside the text they belong to and go back to Word as comments; endnotes and tracked changes come along. What PureQuill Writer cannot show or edit itself — charts, equations, text boxes, shapes, old EMF pictures — stays in the text as a dashed box and goes back to Word unchanged. You can delete such a box, but not edit it. Columns, sections and headers for even pages are kept as well.</p>`},
 
  {t:"Saving as",k:"save;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
 <p><b>File &rsaquo; Save</b> ({kz:speichern}) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx you opened is written back directly. The dot next to the file name in the status bar shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
@@ -20084,7 +20179,8 @@ einem fremden Rechner.</p>
 <p>Nicht mit herüber kommen: Kommentare, Änderungsverfolgung, Textfelder, Formen und Formeln.
 Verbundene Tabellenzellen werden zu einzelnen Zellen. Dokumente mit mehreren Abschnitten
 behalten den Aufbau des letzten, denn hier hat ein Dokument ein Seitenformat und nicht eines je
-Abschnitt. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>`},
+Abschnitt. Das alte binäre .doc-Format von vor 2007 lässt sich nicht lesen.</p>
+<p><b>Aus einer Word-Datei geht beim erneuten Speichern nichts verloren.</b> Kommentare werden Notizen neben dem Text, zu dem sie gehören, und gehen als Kommentare nach Word zurück; Endnoten und nachverfolgte Änderungen kommen mit. Was PureQuill Writer selbst nicht zeigen oder bearbeiten kann — Diagramme, Formeln, Textfelder, Formen, alte EMF-Bilder —, bleibt als gestricheltes Kästchen im Text und geht unverändert nach Word zurück. So ein Kästchen lässt sich löschen, aber nicht bearbeiten. Spalten, Abschnitte und Kopfzeilen für gerade Seiten bleiben ebenfalls erhalten.</p>`},
 
  {t:"Speichern als",k:"speichern;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
 <p><b>Datei &rsaquo; Speichern</b> ({kz:speichern}) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx wird direkt zurückgeschrieben. Der Punkt neben dem Dateinamen in der Statuszeile zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
@@ -20677,7 +20773,8 @@ pueden venir: viven en el equipo de otra persona.</p>
 <p>Lo que no viene: comentarios, control de cambios, cuadros de texto, formas y ecuaciones. Las
 celdas de tabla combinadas se vuelven celdas separadas. Los documentos divididos en varias
 secciones conservan la configuración de la última, ya que aquí un documento tiene un formato de
-página y no uno por sección. El antiguo formato binario .doc anterior a 2007 no se puede leer.</p>`},
+página y no uno por sección. El antiguo formato binario .doc anterior a 2007 no se puede leer.</p>
+<p><b>Al volver a guardar un archivo de Word no se pierde nada.</b> Los comentarios se convierten en notas junto al texto al que pertenecen y vuelven a Word como comentarios; las notas al final y los cambios controlados se conservan. Lo que PureQuill Writer no puede mostrar ni editar —gráficos, ecuaciones, cuadros de texto, formas, imágenes EMF antiguas— queda en el texto como un recuadro discontinuo y vuelve a Word sin cambios. Ese recuadro se puede borrar, pero no editar. También se conservan las columnas, las secciones y los encabezados de páginas pares.</p>`},
 
  {t:"Guardar como",k:"guardar;exportar;word;docx;epub;libro electrónico;kindle;pdf;html;markdown;texto;csv",b:`
 <p><b>Archivo &rsaquo; Guardar</b> ({kz:speichern}) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx que hayas abierto se vuelve a escribir directamente. El punto junto al nombre del archivo en la barra de estado indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
@@ -21269,7 +21366,8 @@ vivem no computador de outra pessoa.</p>
 <p>O que não vem: comentários, controle de alterações, caixas de texto, formas e equações. As
 células de tabela mescladas viram células separadas. Os documentos divididos em várias seções
 mantêm a configuração da última, já que aqui um documento tem um formato de página e não um por
-seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>`},
+seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>
+<p><b>Ao salvar de novo um arquivo do Word, nada se perde.</b> Os comentários viram notas ao lado do texto a que pertencem e voltam ao Word como comentários; notas de fim e alterações controladas são mantidas. O que o PureQuill Writer não consegue mostrar nem editar — gráficos, equações, caixas de texto, formas, imagens EMF antigas — fica no texto como uma caixa tracejada e volta ao Word sem alterações. Essa caixa pode ser apagada, mas não editada. Colunas, seções e cabeçalhos de páginas pares também são mantidos.</p>`},
 
  {t:"Salvar como",k:"salvar;exportar;word;docx;epub;livro eletrônico;e-book;kindle;pdf;html;markdown;texto;csv",b:`
 <p><b>Arquivo &rsaquo; Salvar</b> ({kz:speichern}) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx que você abriu é regravado diretamente. O ponto ao lado do nome do arquivo na barra de status mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
@@ -21887,7 +21985,8 @@ d'autre.</p>
 équations. Les cellules de tableau fusionnées deviennent des cellules séparées. Les documents
 découpés en plusieurs sections gardent la mise en page de la dernière, puisqu'ici un document a
 un format de page et non un par section. L'ancien format binaire .doc d'avant 2007 ne peut pas
-être lu.</p>`},
+être lu.</p>
+<p><b>Rien ne se perd quand vous réenregistrez un fichier Word.</b> Les commentaires deviennent des notes à côté du texte auquel ils se rapportent et retournent dans Word sous forme de commentaires ; les notes de fin et les modifications suivies sont conservées. Ce que PureQuill Writer ne peut pas afficher ni modifier — graphiques, équations, zones de texte, formes, anciennes images EMF — reste dans le texte sous forme de cadre en pointillés et retourne dans Word tel quel. Ce cadre peut être supprimé, mais pas modifié. Les colonnes, les sections et les en-têtes des pages paires sont également conservés.</p>`},
 
  {t:"Enregistrer sous",k:"enregistrer;exporter;word;docx;epub;livre numérique;liseuse;kindle;pdf;html;markdown;texte;csv",b:`
 <p><b>Fichier &rsaquo; Enregistrer</b> ({kz:speichern}) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx que vous avez ouvert est réécrit directement. Le point à côté du nom du fichier dans la barre d’état indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
@@ -22471,7 +22570,8 @@ odsyła linkiem, zamiast je zawierać, nie mogą przyjść: żyją na komputerze
 <p>Czego nie ma: komentarzy, śledzenia zmian, pól tekstowych, kształtów i równań. Scalone
 komórki tabeli stają się osobnymi komórkami. Dokumenty podzielone na kilka sekcji zachowują
 ustawienia ostatniej, ponieważ tutaj dokument ma jeden format strony, a nie jeden na sekcję.
-Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>`},
+Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>
+<p><b>Przy ponownym zapisie pliku Worda nic nie ginie.</b> Komentarze stają się notatkami obok tekstu, do którego należą, i wracają do Worda jako komentarze; przypisy końcowe i śledzone zmiany zostają. To, czego PureQuill Writer nie potrafi pokazać ani edytować — wykresy, równania, pola tekstowe, kształty, stare obrazy EMF — zostaje w tekście jako przerywana ramka i wraca do Worda bez zmian. Taką ramkę można usunąć, ale nie edytować. Kolumny, sekcje i nagłówki stron parzystych także zostają.</p>`},
 
  {t:"Zapisz jako",k:"zapisz;eksportuj;word;docx;epub;e-book;czytnik;kindle;pdf;html;markdown;tekst;csv",b:`
 <p><b>Plik &rsaquo; Zapisz</b> ({kz:speichern}) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx jest zapisywany z powrotem bezpośrednio. Kropka obok nazwy pliku na pasku stanu pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
@@ -23071,7 +23171,8 @@ venire: vivono sul computer di qualcun altro.</p>
 <p>Ciò che non viene: commenti, revisioni, caselle di testo, forme ed equazioni. Le celle di
 tabella unite diventano celle separate. I documenti divisi in più sezioni mantengono
 l'impostazione dell'ultima, dato che qui un documento ha un solo formato pagina e non uno per
-sezione. Il vecchio formato binario .doc precedente al 2007 non può essere letto.</p>`},
+sezione. Il vecchio formato binario .doc precedente al 2007 non può essere letto.</p>
+<p><b>Salvando di nuovo un file Word non si perde nulla.</b> I commenti diventano note accanto al testo a cui si riferiscono e tornano in Word come commenti; note di chiusura e revisioni vengono mantenute. Ciò che PureQuill Writer non può mostrare né modificare — grafici, equazioni, caselle di testo, forme, vecchie immagini EMF — resta nel testo come un riquadro tratteggiato e torna in Word invariato. Il riquadro si può eliminare, ma non modificare. Anche colonne, sezioni e intestazioni delle pagine pari vengono mantenute.</p>`},
 
  {t:"Salvare come",k:"salvare;esportare;word;docx;epub;e-book;lettore;kindle;pdf;html;markdown;testo;csv",b:`
 <p><b>File &rsaquo; Salva</b> ({kz:speichern}) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx che hai aperto viene riscritto direttamente. Il punto accanto al nome del file nella barra di stato indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
