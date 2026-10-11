@@ -488,6 +488,17 @@ immer genau einen Commit, der sie anfasst.
   Bewahren standen sie nur als Platzhalter. Dabei: `endnotePr` aus
   settings.xml wird nicht mehr übernommen — ohne `endnotes.xml` hielt Word die
   Datei für beschädigt.
+- **Gerade Seiten anders** wie in Word (`evenAndOddHeaders` in
+  settings.xml, `type="even"`): Häkchen im Dialog *Kopf- und Fußzeile*,
+  eigene Zeilen für Seite 2, 4, 6 … (`d.hdr2`/`d.ftr2`, `d.geradeAnders`;
+  `hfFuerSeite()` wählt, die erste Seite geht vor). Am Bildschirm, im Druck
+  (je Seite über `hfDruckSeiten`) und als Word-Datei (`header3.xml`/
+  `footer3.xml`, `wSettings()` setzt die Einstellung an die vom Schema
+  verlangte Stelle). Alle Seiten ab 2 bekommen das größere Band aus normal
+  und gerade — der Druckrahmen reserviert überall gleich viel. Vorher nur
+  bewahrt, jetzt sichtbar und bearbeitbar; geprüft mit einer Word-Datei
+  (gerade/ungerade im Druck abwechselnd richtig, Word zählt gleich) und
+  umgekehrt in PureQuill angelegt (Word findet Einstellung und beide Zeilen).
 - **Word-Kommentare werden Notizen** (`wKommentarNotiz`): je Kommentar eine
   Notiz (Titel = Autor, Text = Kommentar, Farbe Zitrone, `n.wort` mit Autor,
   Datum, Initialen), die kommentierte Stelle eine verknüpfte Markierung
