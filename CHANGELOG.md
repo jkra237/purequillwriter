@@ -534,6 +534,16 @@ immer genau einen Commit, der sie anfasst.
   hinter einer ersten). Die Marke wird jetzt direkt in den Text gesetzt; zwei
   Fußnoten hintereinander kommen beide in Word an.
 
+- **Untermenüs blieben offen** (gemeldet am Rechtsklick-Menü, betraf auch
+  Datei und Format): sie öffneten beim Überfahren ihres Pfeil-Eintrags, aber
+  nichts schloss sie, wenn der Zeiger weiterzog. Jetzt schließen sie, sobald
+  der Zeiger weder auf dem Eintrag noch im Untermenü ist — mit 300 ms
+  Verzögerung wie in Windows, damit man schräg hinüberfahren kann
+  (`subMenuSchliessenPlanen`); erneutes Überfahren desselben Eintrags öffnet
+  nicht neu. Geprüft mit echten Mausereignissen
+  (`werkzeuge/pruefen/untermenue-pruefen.cjs`), Gegenprobe am alten Stand
+  zeigt den Fehler.
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Fußnoten stehen im Druck/PDF gesammelt am Ende**, nicht am Fuß ihrer

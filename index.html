@@ -13383,10 +13383,31 @@ function menuPlatzieren(m,x,y,anker){
    die Pfeil-Einträge (rsaquo) innerhalb eines offenen Menüs reagieren auf
    mouseenter. Erkennung über das rsaquo-Zeichen statt eigenem Attribut,
    damit kein Aufrufort vergessen werden kann. */
+/* Untermenüs öffnen beim Überfahren ihres Pfeil-Eintrags — und schließen
+   wieder, sobald der Zeiger weder auf diesem Eintrag noch im Untermenü ist.
+   Bis 1.2 blieben sie stehen, bis man irgendwo klickte (gemeldet am
+   Rechtsklick-Menü). Mit kurzer Verzögerung wie in Windows, damit man schräg
+   ins Untermenü hinüberfahren kann, ohne dass es unterwegs verschwindet. */
+let subZuTimer=null;
+function subMenuSchliessenPlanen(){
+  clearTimeout(subZuTimer);
+  subZuTimer=setTimeout(()=>{
+    const sm=document.getElementById("submenu");
+    if(!sm||sm.matches(":hover")||(sm._opener&&sm._opener.matches(":hover")))return;
+    sm.remove();
+  },300);
+}
 function armHoverSubs(m){
   m.querySelectorAll(".mi").forEach(b=>{
     const k=b.querySelector(".k");
-    if(k&&k.textContent.trim()==="›")b.addEventListener("mouseenter",()=>b.click());
+    if(k&&k.textContent.trim()==="›"){
+      b.addEventListener("mouseenter",()=>{
+        clearTimeout(subZuTimer);
+        const sm=document.getElementById("submenu");
+        if(!(sm&&sm._opener===b))b.click();
+      });
+      b.addEventListener("mouseleave",subMenuSchliessenPlanen);
+    }else b.addEventListener("mouseenter",subMenuSchliessenPlanen);
   });
 }
 function fileMenu(){
@@ -13456,6 +13477,9 @@ function openSubMenu(anchor,items,cb=runFileAct){
   m.innerHTML=items.map(it=>
     `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk">${it.cur?"&#10003;":""}</span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
+  m._opener=anchor;
+  m.addEventListener("mouseenter",()=>clearTimeout(subZuTimer));
+  m.addEventListener("mouseleave",subMenuSchliessenPlanen);
   const r=anchor.getBoundingClientRect();
   /* Knapp anschließend statt tief überlappend, wie bei Google Docs -
      nur 1px Überdeckung, damit sich die Ränder ohne sichtbare Lücke oder
