@@ -312,7 +312,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   position:relative;z-index:5}
 .tab.on{background:var(--paper);border-color:color-mix(in srgb, var(--rule) 80%, var(--ink));color:var(--ink)}
 .tab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.tab .x{color:var(--ink-soft);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto}
+/* margin-left:auto: das Kreuz steht immer am rechten Rand. Bei einem kurzen
+   Titel („test“) ist der Reiter durch min-width breiter als sein Inhalt, und
+   das Kreuz rückte sonst direkt hinter den Titel, Richtung Mitte. */
+.tab .x{color:var(--ink-soft);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto;margin-left:auto}
 .tab .x:hover{color:var(--stamp)}
 .tabadd{padding:6px 9px;color:var(--ink-soft);font-size:16px;flex:0 0 auto}
 

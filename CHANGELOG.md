@@ -169,6 +169,10 @@ immer genau einen Commit, der sie anfasst.
   einem Dokument über vier Seiten (Überschriften, Liste, Zitat, Tabelle,
   40 Absätze, Seitenumbruch): alle 49 Blöcke stehen in der Vorschau auf
   0 px genau wie im Editor; `check-export.mjs` 252/252. Bestand seit 1.0.0.
+- **Schließen-Kreuz im Reiter rückte bei kurzen Titeln zur Mitte.** Ein
+  Reiter ist mindestens 88 px breit; bei „test“ blieb rechts Platz, und das
+  Kreuz stand direkt hinter dem Titel. Jetzt `margin-left:auto`: gemessen
+  an fünf Reitern (1 bis 37 Zeichen) steht es überall 13 px vom rechten Rand.
 
 ### Nebenbei gefunden, noch nicht behoben
 
