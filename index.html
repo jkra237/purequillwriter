@@ -18699,6 +18699,56 @@ function sigInit(){
   };
 }
 let selFig=null;
+/* Markierte Elemente mit der Tastatur löschen, wie in Word: ein Bild (auch
+   frei platziert) oder ein Inhaltsverzeichnis mit Rücktaste oder Entf, eine
+   ganz markierte Tabelle mit der Rücktaste — Entf leert dort nur die Zellen,
+   auch das wie in Word. Bis 1.2 geschah bei Bildern gar nichts, bei Tabellen
+   blieb das leere Gerüst stehen. Über execCommand, damit Strg+Z es
+   zurücknimmt; geht das nicht, wird das Element direkt entfernt. */
+function blockLoeschen(el){
+  const ed=$("#editor");if(!ed||!ed.contains(el))return;
+  const nach=el.nextElementSibling,vor=el.previousElementSibling;
+  ed.focus();
+  const r=document.createRange();r.selectNode(el);
+  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+  try{document.execCommand("delete")}catch(e){}
+  if(ed.contains(el))el.remove();
+  const ziel=[nach,vor].find(x=>x&&ed.contains(x)&&!x.classList.contains("free"));
+  if(ziel)putCaret(ziel);
+  flush();dirty=true;commit();queuePaginate();drawStatus();
+}
+function ganzMarkierteTabelle(){
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount||sel.isCollapsed)return null;
+  const r=sel.getRangeAt(0);
+  const t=(r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement).closest("table");
+  if(!t||!ed.contains(t))return null;
+  const zellen=[...t.querySelectorAll("td,th")].filter(c=>!c.closest(".pgzeile")&&c.closest("table")===t);
+  if(!zellen.length)return null;
+  const a=document.createRange();a.selectNodeContents(zellen[0]);
+  const z=document.createRange();z.selectNodeContents(zellen[zellen.length-1]);
+  return r.compareBoundaryPoints(Range.START_TO_START,a)<=0&&r.compareBoundaryPoints(Range.END_TO_END,z)>=0?t:null;
+}
+document.addEventListener("keydown",e=>{
+  if(e.key!=="Backspace"&&e.key!=="Delete"){
+    /* Schreibmarke bewegt oder getippt: das Bild ist nicht mehr gemeint —
+       sonst löschte die nächste Rücktaste ein Bild, das man längst verlassen hat */
+    if(selFig&&(/^(Arrow|Home|End|Page|Enter|Tab)/.test(e.key)||e.key.length===1)&&!(e.ctrlKey||e.metaKey)&&
+       !(e.target&&e.target.closest&&e.target.closest("input,textarea,select,figcaption,#imgbar")))selectFig(null);
+    return;
+  }
+  if(e.ctrlKey||e.altKey||e.metaKey||S.mode!=="write")return;
+  if($("#ovl")&&$("#ovl").firstElementChild)return;
+  const t=e.target;
+  if(t&&t.closest&&t.closest("input,textarea,select,#hfedit,figcaption"))return;
+  const ed=$("#editor");if(!ed)return;
+  const toc=ed.querySelector(".toc.sel");
+  if(selFig&&ed.contains(selFig)){e.preventDefault();const f=selFig;selectFig(null);blockLoeschen(f);return}
+  /* Nicht, wenn man gerade einen Eintrag des Verzeichnisses bearbeitet */
+  const an=getSelection().anchorNode,anEl=an&&(an.nodeType===1?an:an.parentElement);
+  if(toc&&!(anEl&&anEl.closest(".toc-t"))){e.preventDefault();blockLoeschen(toc);return}
+  if(e.key==="Backspace"){const tab=ganzMarkierteTabelle();if(tab){e.preventDefault();blockLoeschen(tab)}}
+},true);
 function selectFig(f){
   const ed=$("#editor");
   if(ed){

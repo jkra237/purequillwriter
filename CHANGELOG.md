@@ -578,6 +578,18 @@ immer genau einen Commit, der sie anfasst.
   kein zweiter Druckdurchgang mehr nötig. Fußnoten in umbrochenen Tabellen
   zählen zu der Seite, auf der ihre Marke steht.
 
+- **Markiertes Bild oder ganze Tabelle mit der Tastatur löschen**: ein
+  angeklicktes Bild (auch frei platziert) oder ein markiertes
+  Inhaltsverzeichnis entfernen jetzt Rücktaste und Entf, wie in Word und
+  anderen Programmen — bis 1.2 ging das nur über das Löschkreuz, die Tasten
+  bewirkten nichts. Eine ganz markierte Tabelle löscht die Rücktaste ebenso
+  (Entf tat das schon, der Browser selbst). Über `execCommand("delete")`,
+  damit Strg+Z es zurücknimmt (`blockLoeschen`). Pfeiltasten oder Tippen
+  heben die Bildmarkierung auf, damit die nächste Rücktaste kein Bild löscht,
+  das man längst verlassen hat; wer einen Eintrag im Inhaltsverzeichnis
+  bearbeitet, löscht nicht das ganze Verzeichnis. Geprüft mit echten Klicks
+  und Tastendrücken (`werkzeuge/pruefen/loeschen-pruefen.cjs`).
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
