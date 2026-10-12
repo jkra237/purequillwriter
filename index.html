@@ -521,17 +521,32 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 .fmtprev{flex:0 0 104px;display:flex;justify-content:center;padding-top:20px}
 .fmtprev .pg{position:relative;background:var(--paper);border:1px solid var(--ink-soft);
   box-shadow:0 2px 7px rgba(0,0,0,.2)}
-.fmtprev .pg i{position:absolute;border:1px dashed var(--stamp);opacity:.55}
+.fmtprev .pg i{position:absolute;border:1px dashed var(--stamp);opacity:.55;
+  background:repeating-linear-gradient(to bottom,transparent 0 calc(var(--zeile,3px) - 1px),var(--ink-faint) calc(var(--zeile,3px) - 1px) var(--zeile,3px))}
+.fmtprev .pg .anschrift{position:absolute;background:var(--paper);border:1px solid var(--ink-soft);opacity:.8}
 .fmtinfo{font-size:12px;color:var(--ink-soft);margin-top:11px}
 .fmttip{color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:4px}
 /* Aufklappbare Feineinstellungen: Zeilenabstand und die Millimeterfelder
    füllen über die halbe Dialoghöhe, werden aber selten angefasst. Eingeklappt
    rückt „Anlegen" dicht unter die Formatauswahl. Die Zeile trägt die aktuellen
    Werte mit, damit hinter dem Zuklappen nichts Wichtiges verschwindet. */
-.fmtmore{display:flex;align-items:center;gap:8px;width:100%;margin-bottom:11px;
-  padding:7px 10px;border:1px solid var(--rule);border-radius:var(--radius);
-  background:var(--chrome-2);color:var(--ink-soft);text-align:left}
-.fmtmore:hover{border-color:var(--ink-soft);color:var(--ink)}
+.fmtmore{display:flex;align-items:center;gap:8px;width:100%;margin:6px 0 9px;
+  padding:10px 2px 4px;border:none;border-top:1px solid var(--rule);border-radius:0;
+  background:none;color:var(--ink-soft);text-align:left}
+.fmtmore:hover{color:var(--ink)}
+/* Hoch-/Querformat als zwei Seitensymbole neben der Formatliste */
+.orient{display:flex;flex:none;border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden}
+.orient button{width:34px;align-self:stretch;min-height:30px;display:flex;align-items:center;justify-content:center;
+  color:var(--ink-soft);background:var(--paper);border:none;border-radius:0}
+.orient button+button{border-left:1px solid var(--rule)}
+.orient button:hover{color:var(--ink)}
+.orient button.on{background:color-mix(in srgb,var(--stamp) 12%,var(--paper));color:var(--stamp)}
+.fmtdel{flex:none;width:32px;min-height:30px;align-self:stretch;display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink-soft)}
+.fmtdel:hover{color:var(--ink);border-color:var(--ink-soft)}
+.fmtsave{display:inline-flex;align-items:center;gap:7px;margin-top:11px;padding:4px 0;border:none;
+  background:none;color:var(--stamp)}
+.fmtsave:hover{text-decoration:underline}
 .fmtmore .sum{margin-left:auto;min-width:0;font-family:var(--mono);font-size:11px;
   color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 :is(#editor,.pvedit) h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
@@ -2173,6 +2188,10 @@ en:{
   "Notizen und Glossar":"Notes and glossary",
   "Vollsicherung":"Full backup",
   "Alle Daten löschen":"Delete all data",
+  "Werkszustand":"Factory settings",
+  "Auf Werkszustand zurücksetzen":"Reset to factory settings",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"All settings return to how PureQuill Writer was shipped: colour scheme, language, font and page format for new documents, autocorrect and view.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Your documents, notes, glossaries, custom formats and dictionary are kept.",
   "Das lässt sich nicht rückgängig machen.":"This cannot be undone.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Files you saved yourself stay where they are — only the link to them goes.",
   "Erst sichern, dann löschen":"Back up first, then delete",
@@ -2339,6 +2358,8 @@ en:{
   "Standard":"default",
   "Zeilenabstand und Maße":"Line spacing and dimensions",
   "Ränder und Maße":"Margins and dimensions",
+  "Weitere Einstellungen":"More settings",
+  "Eigene Formate":"Custom formats",
   "Neue Dokumente":"New documents",
   "Neue Dokumente beginnen sonst mit {x}.":"New documents otherwise start with {x}.",
   "Künftig immer so beginnen":"Always start like this",
@@ -2959,6 +2980,10 @@ fr:{
   "Notizen und Glossar":"Notes et glossaire",
   "Vollsicherung":"Sauvegarde complète",
   "Alle Daten löschen":"Supprimer toutes les données",
+  "Werkszustand":"Réglages d’usine",
+  "Auf Werkszustand zurücksetzen":"Rétablir les réglages d’usine",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tous les réglages reviennent à leur état d’origine : jeu de couleurs, langue, police et format de page des nouveaux documents, correction automatique et affichage.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Vos documents, notes, glossaires, formats personnalisés et votre dictionnaire sont conservés.",
   "Das lässt sich nicht rückgängig machen.":"Cette action est irréversible.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Les fichiers que vous avez enregistrés vous-même restent en place — seul le lien vers eux disparaît.",
   "Erst sichern, dann löschen":"Sauvegarder d’abord, puis supprimer",
@@ -3125,6 +3150,8 @@ fr:{
   "Standard":"par défaut",
   "Zeilenabstand und Maße":"Interligne et dimensions",
   "Ränder und Maße":"Marges et dimensions",
+  "Weitere Einstellungen":"Plus de réglages",
+  "Eigene Formate":"Formats personnalisés",
   "Neue Dokumente":"Nouveaux documents",
   "Neue Dokumente beginnen sonst mit {x}.":"Les nouveaux documents commencent sinon avec {x}.",
   "Künftig immer so beginnen":"Toujours commencer ainsi",
@@ -3745,6 +3772,10 @@ es:{
   "Notizen und Glossar":"Notas y glosario",
   "Vollsicherung":"Copia de seguridad completa",
   "Alle Daten löschen":"Borrar todos los datos",
+  "Werkszustand":"Configuración de fábrica",
+  "Auf Werkszustand zurücksetzen":"Restablecer la configuración de fábrica",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todos los ajustes vuelven a su estado original: combinación de colores, idioma, fuente y formato de página para documentos nuevos, autocorrección y vista.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Tus documentos, notas, glosarios, formatos propios y tu diccionario se conservan.",
   "Das lässt sich nicht rückgängig machen.":"Esto no se puede deshacer.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Los archivos que guardaste tú mismo permanecen donde están — solo desaparece el enlace hacia ellos.",
   "Erst sichern, dann löschen":"Guardar primero, luego borrar",
@@ -3911,6 +3942,8 @@ es:{
   "Standard":"predeterminado",
   "Zeilenabstand und Maße":"Interlineado y medidas",
   "Ränder und Maße":"Márgenes y medidas",
+  "Weitere Einstellungen":"Más opciones",
+  "Eigene Formate":"Formatos propios",
   "Neue Dokumente":"Documentos nuevos",
   "Neue Dokumente beginnen sonst mit {x}.":"Si no, los documentos nuevos empiezan con {x}.",
   "Künftig immer so beginnen":"Empezar siempre así",
@@ -4531,6 +4564,10 @@ pt:{
   "Notizen und Glossar":"Notas e glossário",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Apagar todos os dados",
+  "Werkszustand":"Configuração de fábrica",
+  "Auf Werkszustand zurücksetzen":"Repor a configuração de fábrica",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todas as definições voltam ao estado original: esquema de cores, idioma, tipo de letra e formato de página para novos documentos, correção automática e vista.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Os teus documentos, notas, glossários, formatos próprios e o teu dicionário são mantidos.",
   "Das lässt sich nicht rückgängig machen.":"Isto não pode ser desfeito.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Os arquivos que você mesmo salvou permanecem onde estão — apenas o vínculo para eles desaparece.",
   "Erst sichern, dann löschen":"Fazer backup primeiro, depois apagar",
@@ -4697,6 +4734,8 @@ pt:{
   "Standard":"padrão",
   "Zeilenabstand und Maße":"Espaçamento entre linhas e medidas",
   "Ränder und Maße":"Margens e medidas",
+  "Weitere Einstellungen":"Mais opções",
+  "Eigene Formate":"Formatos próprios",
   "Neue Dokumente":"Novos documentos",
   "Neue Dokumente beginnen sonst mit {x}.":"Caso contrário, novos documentos começam com {x}.",
   "Künftig immer so beginnen":"Sempre começar assim",
@@ -5317,6 +5356,10 @@ pl:{
   "Notizen und Glossar":"Notatki i słowniczek",
   "Vollsicherung":"Pełna kopia zapasowa",
   "Alle Daten löschen":"Usuń wszystkie dane",
+  "Werkszustand":"Ustawienia fabryczne",
+  "Auf Werkszustand zurücksetzen":"Przywróć ustawienia fabryczne",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Wszystkie ustawienia wracają do stanu początkowego: schemat kolorów, język, czcionka i format strony nowych dokumentów, autokorekta i widok.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Twoje dokumenty, notatki, glosariusze, własne formaty i słownik pozostają bez zmian.",
   "Das lässt sich nicht rückgängig machen.":"Tego nie można cofnąć.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Pliki zapisane przez Ciebie pozostają na swoim miejscu — znika tylko odnośnik do nich.",
   "Erst sichern, dann löschen":"Najpierw kopia, potem usuwanie",
@@ -5483,6 +5526,8 @@ pl:{
   "Standard":"domyślny",
   "Zeilenabstand und Maße":"Interlinia i wymiary",
   "Ränder und Maße":"Marginesy i wymiary",
+  "Weitere Einstellungen":"Więcej ustawień",
+  "Eigene Formate":"Własne formaty",
   "Neue Dokumente":"Nowe dokumenty",
   "Neue Dokumente beginnen sonst mit {x}.":"W przeciwnym razie nowe dokumenty zaczynają się od {x}.",
   "Künftig immer so beginnen":"Zawsze zaczynaj tak",
@@ -6110,6 +6155,10 @@ it:{
   "Notizen und Glossar":"Note e glossario",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Elimina tutti i dati",
+  "Werkszustand":"Impostazioni di fabbrica",
+  "Auf Werkszustand zurücksetzen":"Ripristina le impostazioni di fabbrica",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tutte le impostazioni tornano allo stato originale: combinazione di colori, lingua, carattere e formato pagina dei nuovi documenti, correzione automatica e visualizzazione.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"I tuoi documenti, note, glossari, formati personalizzati e il tuo dizionario restano invariati.",
   "Das lässt sich nicht rückgängig machen.":"L’operazione non può essere annullata.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"I file che hai salvato tu restano dove sono — sparisce solo il collegamento.",
   "Erst sichern, dann löschen":"Prima il backup, poi elimina",
@@ -6276,6 +6325,8 @@ it:{
   "Standard":"predefinito",
   "Zeilenabstand und Maße":"Interlinea e dimensioni",
   "Ränder und Maße":"Margini e dimensioni",
+  "Weitere Einstellungen":"Altre impostazioni",
+  "Eigene Formate":"Formati personalizzati",
   "Neue Dokumente":"Nuovi documenti",
   "Neue Dokumente beginnen sonst mit {x}.":"Altrimenti i nuovi documenti iniziano con {x}.",
   "Künftig immer so beginnen":"Inizia sempre così",
@@ -6772,10 +6823,13 @@ const SYS_LANG=systemUiLang();
 /* Prüfsprachen als schlichtes Literal — SPELL_LANGS steht weiter unten und ist
    hier noch in der temporalen Totzone (siehe langAngeglichen weiter unten). */
 const SYS_SPELL_LANGS=["de","en","fr","es","it","pt","pl"];
+/* Einstellungen beim allerersten Start — und nach „Auf Werkszustand
+   zurücksetzen“. Was hier fehlt, ergänzen die Migrationen unten. */
+function standardEinstellungen(){return{font:"Calibri",size:11,lh:1.15,autosave:true,interval:30,
+  lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA}}
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
-  settings:{font:"Calibri",size:11,lh:1.15,autosave:true,interval:30,
-    lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA},
+  settings:standardEinstellungen(),
   /* Zoom 100 % wie in Word: die Seite in echter Größe. Bis 1.0 waren es 120 %,
      dazu Georgia 12 statt Calibri 11 — Text aus Word-Dateien und Eingefügtes
      wirkte rund 1,3-mal so groß wie in der Quelle. Wer schon eine Stufe hat,
@@ -13056,6 +13110,39 @@ async function alleDatenWeg(){
     });
   }catch(e){}
 }
+/* Auf Werkszustand zurücksetzen: nur die Einstellungen und die Ansicht,
+   nicht die Arbeit. Dokumente, Notizen, Glossare, eigene Formate, das
+   eigene Wörterbuch, verknüpfte Dateien und die automatische Sicherung
+   bleiben — wer alles loswerden will, hat „Alle Daten löschen“. Bewusst
+   eine Liste dessen, was zurückgeht, statt alles Übrige zu leeren: in S
+   stehen auch Merker bereits gelaufener Umstellungen (dimUiAus, wordWerte),
+   die sonst ein zweites Mal über die Dokumente liefen. Danach neu laden,
+   damit die Migrationen die fehlenden Einstellungen wie beim ersten Start
+   ergänzen. */
+const WERK_ANSICHT={zoom:1,fitPage:false,guides:true,showCol:true,marks:false,gsort:"alpha",mode:"write"};
+const WERK_WEG=["noteFilter","noteView","showAnchMarks","sideWidth","sideMax","outlineWidth","outlineOpen","memoOpen","zoomVorFit"];
+function werkszustand(){
+  flush();
+  S.settings=standardEinstellungen();
+  Object.assign(S,WERK_ANSICHT);
+  WERK_WEG.forEach(k=>delete S[k]);
+  if(S.goal)S.goal.on=false;
+  return save();
+}
+function werkszustandDialog(){
+  overlay(`<div class="modal"><h3>${tr("Auf Werkszustand zurücksetzen")}</h3><div class="pad">
+    <p style="margin:0 0 10px;font-size:13px;line-height:1.5">${tr("Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.")}</p>
+    <p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">${tr("Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.")}</p>
+    </div>
+    <div class="rowend">
+      <button class="btn" id="wzCancel">${tr("Abbrechen")}</button>
+      <button class="btn pri" id="wzOk">${tr("Zurücksetzen")}</button></div></div>`);
+  $("#wzCancel").onclick=()=>settings();
+  $("#wzOk").onclick=()=>{
+    if(!werkszustand()){toast(tr("Nicht gesichert"));return}
+    closeOvl();setTimeout(()=>location.reload(),150);
+  };
+}
 function wipeDialog(){
   const zahlen=`${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")} · ${tr("Einstellungen")}`;
   overlay(`<div class="modal"><h3>${tr("Alle Daten löschen")}</h3><div class="pad">
@@ -14322,80 +14409,76 @@ function formatDialog(mode,onDone){
   /* Eigene Maße lassen sich ohne die Felder nicht eingeben - dort von
      vornherein aufgeklappt, sonst zeigt der Dialog erst die Kurzfassung. */
   let offen=sel==="custom";
-  let savingName=false;
+  let savingName=false,titel="";
   const quer=()=>cfg.w>cfg.h;
   const unit=unitOf,toDisp=toUnit,fromDisp=fromUnit;
   const kurzfassung=()=>{
     const z=S.settings.uiLang==="en"?String(lh):String(lh).replace(".",",");
-    return `${toDisp(cfg.w)}&times;${toDisp(cfg.h)} ${unitAbbr()} · ${cfg.m.map(toDisp).join("/")}${isNew?"":" · "+z}`;
+    return `${tr("Ränder")} ${cfg.m.map(toDisp).join("/")} ${unitAbbr()} · ${z}`;
   };
+  /* Maßstäblich zueinander: A5 und Taschenbuch erscheinen kleiner als A4
+     (bis 1.2 wurde jede Seite auf dieselbe Höhe gezogen, ein Formatwechsel
+     zeigte kaum einen Unterschied). Im Satzspiegel stehen Textzeilen im
+     Abstand von Schrift und Zeilenabstand, beim Geschäftsbrief zusätzlich
+     das Anschriftfeld nach DIN 5008 (Form B: 20 mm von links, 45 mm von
+     oben, 85 × 45 mm). */
   const pagePreview=()=>{
-    const sc=100/Math.max(cfg.w||1,cfg.h||1);
+    const sc=Math.min(100/297,100/Math.max(cfg.w||1,cfg.h||1));
     const px=v=>Math.max(0,Math.round((v||0)*sc));
     const w=Math.max(14,px(cfg.w)),h=Math.max(14,px(cfg.h));
+    const zeile=Math.max(2.4,(groesse||11)*0.3528*lh*1.2*sc);
+    const brief=cfg.key==="brief"&&!quer()?`<b class="anschrift" style="left:${px(20)}px;top:${px(45)}px;width:${px(85)}px;height:${px(45)}px"></b>`:"";
     return `<div class="fmtprev"><div class="pg" style="width:${w}px;height:${h}px">
-      <i style="top:${px(cfg.m[0])}px;right:${px(cfg.m[1])}px;bottom:${px(cfg.m[2])}px;left:${px(cfg.m[3])}px"></i>
+      <i style="top:${px(cfg.m[0])}px;right:${px(cfg.m[1])}px;bottom:${px(cfg.m[2])}px;left:${px(cfg.m[3])}px;--zeile:${zeile.toFixed(2)}px"></i>${brief}
     </div></div>`;
   };
+  /* Seit 1.2 kompakt: Titel, Format als Klappliste mit Ausrichtung daneben
+     und (beim Anlegen) die Schrift - mehr braucht ein neues Dokument selten.
+     Abstände, Ränder und das Speichern eigener Formate liegen unter
+     „Weitere Einstellungen“. Bis 1.2 standen sieben Formatkarten und alle
+     Felder offen untereinander, der Dialog ragte aus kleinen Fenstern. */
+  const lhSelect=()=>`<select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
+        `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
+          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===LH_STD?" · "+tr("Standard"):""}</option>`).join("")}</select>`;
+  const masz=(w,h)=>`${toDisp(w)} × ${toDisp(h)} ${unitAbbr()}`;
+  const fmtOptionen=()=>Object.entries(FORMATS).map(([k,f])=>
+      `<option value="${k}" ${sel===k?"selected":""}>${esc(tr(f.n))} · ${masz(f.w,f.h)}</option>`).join("")+
+    (S.customFormats.length?`<optgroup label="${esc(tr("Eigene Formate"))}">${S.customFormats.map(f=>
+      `<option value="cf:${f.id}" ${sel==="cf:"+f.id?"selected":""}>${esc(f.n)} · ${masz(f.w,f.h)}</option>`).join("")}</optgroup>`:"")+
+    `<option value="custom" ${sel==="custom"?"selected":""}>${esc(tr("Eigene Maße"))} …</option>`;
+  const seitenSymbol=(w,h)=>`<svg viewBox="0 0 18 18" style="width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4"><rect x="${(18-w)/2}" y="${(18-h)/2}" width="${w}" height="${h}" rx="1"/></svg>`;
   const body=()=>`
-    <div class="fmtgrid">${Object.entries(FORMATS).map(([k,f])=>
-      `<button class="fmtopt ${sel===k?"on":""}" data-f="${k}">
-        <b>${tr(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()} &middot; ${tr(f.d)}</span></button>`).join("")}
-      ${S.customFormats.map(f=>
-      `<div style="position:relative">
-        <button class="fmtopt ${sel==="cf:"+f.id?"on":""}" data-f="cf:${f.id}" style="width:100%">
-          <b>${esc(f.n)}</b><span>${toDisp(f.w)} &times; ${toDisp(f.h)} ${unitAbbr()}</span></button>
-        <button data-delcf="${f.id}" title="${tr("Löschen")}" aria-label="${tr("Löschen")}"
-          style="position:absolute;top:3px;right:3px;width:20px;height:20px;line-height:1;border:none;
-          border-radius:50%;background:transparent;color:var(--ink-soft);font-size:15px;cursor:pointer">&times;</button>
-      </div>`).join("")}
-      <button class="fmtopt ${sel==="custom"?"on":""}" data-f="custom" style="grid-column:1/3">
-        <b>${tr("Eigene Maße")}</b><span>${tr("Breite und Höhe frei wählen")}</span></button>
-    </div>
-    ${sel==="custom"?(savingName?`
-    <div class="mmrow" style="margin-bottom:7px">
-      <input type="text" id="cfName" maxlength="40" placeholder="${tr("Name des Formats")}" style="flex:1">
-      <button class="btn pri" id="cfSaveOk">${tr("Anlegen")}</button>
-      <button class="btn" id="cfSaveCancel">${tr("Abbrechen")}</button>
-    </div>`:`
-    <button class="btn" id="cfSaveStart" style="margin-bottom:7px;width:100%">${tr("Eigenes Format speichern")}</button>`):""}
-    <div class="mmrow" style="margin-bottom:7px">
-      <label>${tr("Ausrichtung")}</label>
-      <button class="pill ${!quer()?"on":""}" data-o="hoch" style="flex:1">${tr("Hochformat")}</button>
-      <button class="pill ${quer()?"on":""}" data-o="quer" style="flex:1">${tr("Querformat")}</button>
-    </div>
     ${isNew?`
-    <div class="mmrow" style="margin-bottom:7px">
-      <label>${tr("Schriftart")}</label>
+    <div class="mmrow"><label for="cName">${tr("Titel")}</label>
+      <input type="text" id="cName" maxlength="120" placeholder="${esc(tr("Ohne Titel"))}" value="${esc(titel)}"></div>`:""}
+    <div class="mmrow"><label for="cFmt">${tr("Format")}</label>
+      <select id="cFmt" style="flex:1;min-width:0">${fmtOptionen()}</select>
+      ${sel.startsWith("cf:")?`<button class="fmtdel" id="cfDel" title="${esc(tr("Löschen"))}" aria-label="${esc(tr("Löschen"))}">${ICO('<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>')}</button>`:""}
+      <div class="orient" role="group">
+        <button class="${!quer()?"on":""}" data-o="hoch" title="${esc(tr("Hochformat"))}" aria-label="${esc(tr("Hochformat"))}" aria-pressed="${!quer()}">${seitenSymbol(11,15)}</button>
+        <button class="${quer()?"on":""}" data-o="quer" title="${esc(tr("Querformat"))}" aria-label="${esc(tr("Querformat"))}" aria-pressed="${quer()}">${seitenSymbol(15,11)}</button>
+      </div></div>
+    ${isNew?`
+    <div class="mmrow">
+      <label for="cFont">${tr("Schriftart")}</label>
       <select id="cFont" style="flex:1">${FONTS.map(f=>
         `<option ${schrift===f?"selected":""} style="font-family:'${f}'">${f}</option>`).join("")}</select>
       <select id="cSize" style="flex:0 0 64px" title="${tr("Schriftgröße")}">${
         [...new Set([...SIZES,groesse])].sort((a,b)=>a-b).map(x=>
         `<option value="${x}" ${groesse==x?"selected":""}>${S.settings.uiLang==="en"?x:String(x).replace(".",",")}</option>`).join("")}</select>
-    </div>
-    <div class="mmrow" style="margin-bottom:7px">
-      <label>${tr("Zeilenabstand")}</label>
-      <select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
-        `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
-          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===LH_STD?" · "+tr("Standard"):""}</option>`).join("")}</select>
-    </div>
-    <div class="mmrow" style="margin-bottom:7px">
-      <label>${tr("Absatzabstand")}</label>
-      <select id="cPs" style="flex:1">${PARSPACES.map(([lab,v])=>
-        `<option value="${v}" ${Math.abs(abs-v)<0.001?"selected":""}>${tr(lab)}</option>`).join("")}</select>
     </div>`:""}
     <button class="fmtmore" id="fMore" aria-expanded="${offen}">
       ${ICO(offen?'<path d="m6 9 6 6 6-6"/>':'<path d="m9 6 6 6-6 6"/>')}
-      <span>${isNew?tr("Ränder und Maße"):tr("Zeilenabstand und Maße")}</span>
+      <span>${tr("Weitere Einstellungen")}</span>
       <span class="sum">${offen?"":kurzfassung()}</span>
     </button>
     ${offen?`
-    ${isNew?"":`<div class="mmrow" style="margin-bottom:11px">
-      <label>${tr("Zeilenabstand")}</label>
-      <select id="cLh" style="flex:1">${LINEHEIGHTS.map(([lab,v])=>
-        `<option value="${v}" ${Math.abs(lh-v)<0.001?"selected":""}>${
-          S.settings.uiLang==="en"?lab.replace(",","."):lab}${v===LH_STD?" · "+tr("Standard"):""}</option>`).join("")}</select>
-    </div>`}
+    <div class="mmrow"><label for="cLh">${tr("Zeilenabstand")}</label>${lhSelect()}</div>
+    ${isNew?`<div class="mmrow">
+      <label for="cPs">${tr("Absatzabstand")}</label>
+      <select id="cPs" style="flex:1">${PARSPACES.map(([lab,v])=>
+        `<option value="${v}" ${Math.abs(abs-v)<0.001?"selected":""}>${tr(lab)}</option>`).join("")}</select>
+    </div>`:""}
     <div class="mmrow" style="margin-bottom:11px">
       <label>${tr("Maßsystem")}</label>
       <button class="pill ${unit()!=="in"?"on":""}" data-u="mm" style="flex:1">mm</button>
@@ -14403,12 +14486,11 @@ function formatDialog(mode,onDone){
     </div>
     <div class="fmtwrap">
       <div class="fmtfields">
+        ${sel==="custom"?`
         <div class="mlabel" style="padding-left:0">${unit()==="in"?tr("Seitengröße in Zoll"):tr("Seitengröße in mm")}</div>
         <div class="mmrow"><label>${tr("Breite / Höhe")}</label>
-          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="cw" value="${toDisp(cfg.w)}" ${sel==="custom"?"":"disabled"}
-            title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}">
-          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="ch" value="${toDisp(cfg.h)}" ${sel==="custom"?"":"disabled"}
-            title="${sel==="custom"?"":tr("Nur bei „Eigene Maße“ änderbar")}"></div>
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="cw" value="${toDisp(cfg.w)}">
+          <input type="number" step="${unit()==="in"?"0.01":"1"}" id="ch" value="${toDisp(cfg.h)}"></div>`:""}
         <div class="mlabel" style="padding-left:0">${unit()==="in"?tr("Ränder in Zoll"):tr("Ränder in mm")}</div>
         <div class="mmrow"><label>${tr("Oben / Unten")}</label>
           <input type="number" step="${unit()==="in"?"0.01":"1"}" id="c0" value="${toDisp(cfg.m[0])}">
@@ -14424,7 +14506,14 @@ function formatDialog(mode,onDone){
       ${pagePreview()}
     </div>
     <div class="fmtinfo">${tr("Satzspiegel")} ${toDisp(Math.max(0,cfg.w-cfg.m[1]-cfg.m[3]))} &times; ${toDisp(Math.max(0,cfg.h-cfg.m[0]-cfg.m[2]))} ${unitAbbr()}</div>
-    <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>`:""}`;
+    <div class="fmttip">${tr("Linken und rechten Rand kannst du auch im Lineal über der Seite ziehen.")}</div>
+    ${savingName?`
+    <div class="mmrow" style="margin:11px 0 0">
+      <input type="text" id="cfName" maxlength="40" placeholder="${tr("Name des Formats")}" style="flex:1">
+      <button class="btn pri" id="cfSaveOk">${tr("Anlegen")}</button>
+      <button class="btn" id="cfSaveCancel">${tr("Abbrechen")}</button>
+    </div>`:`
+    <button class="fmtsave" id="cfSaveStart">${ICO('<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/>')}<span>${tr("Eigenes Format speichern")}</span></button>`}`:""}`;
   overlay(`<div class="modal wide"><h3>${isNew?tr("Neues Dokument"):tr("Seitenformat")}</h3>
     <div class="pad" id="fbody">${body()}</div>
     <div id="fStd" style="padding:0 16px"></div>
@@ -14448,8 +14537,8 @@ function formatDialog(mode,onDone){
     if(sel==="custom"){cfg.w=fromDisp($("#cw").value)||210;cfg.h=fromDisp($("#ch").value)||297}};
   const repaint=()=>{$("#fbody").innerHTML=body();bind()};
   let bind=()=>{
-    $("#fbody").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
-      readM();const k=b.dataset.f;savingName=false;
+    const fmtSel=$("#cFmt");if(fmtSel)fmtSel.onchange=()=>{
+      readM();const k=fmtSel.value;savingName=false;
       /* „Eigene Maße" ohne sichtbare Felder wäre eine Sackgasse */
       if(k==="custom"){sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true}
       else if(k.startsWith("cf:")){
@@ -14459,13 +14548,15 @@ function formatDialog(mode,onDone){
       }
       else{const f=FORMATS[k];const war=quer();
         sel=k;cfg={n:f.n,w:war?f.h:f.w,h:war?f.w:f.h,m:[...f.m],key:k,hd:f.hd,fd:f.fd}}
-      repaint()});
-    $("#fbody").querySelectorAll("[data-delcf]").forEach(b=>b.onclick=e=>{
-      e.stopPropagation();const id=b.dataset.delcf;
+      repaint();const neu=$("#cFmt");if(neu)neu.focus()};
+    const cfDel=$("#cfDel");if(cfDel)cfDel.onclick=()=>{
+      const id=sel.slice(3);
       S.customFormats=S.customFormats.filter(x=>x.id!==id);
-      if(sel==="cf:"+id){sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true}
+      sel="custom";cfg.n="Eigene Maße";cfg.key="custom";offen=true;
       save();repaint();
-    });
+    };
+    const nameFeld=$("#cName");if(nameFeld){nameFeld.oninput=()=>{titel=nameFeld.value};
+      nameFeld.onkeydown=ev=>{if(ev.key==="Enter"){ev.preventDefault();$("#fOk").click()}}}
     $("#fbody").querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{
       readM();const willQuer=b.dataset.o==="quer";
       if(willQuer!==quer()){const w=cfg.w;cfg.w=cfg.h;cfg.h=w}
@@ -14538,20 +14629,23 @@ function formatDialog(mode,onDone){
   $("#fHf").onclick=()=>{
     readM();const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
     closeOvl();
-    if(isNew)leeresDokument(val,lh,{font:schrift,size:groesse,ps:abs});
+    if(isNew)leeresDokument(val,lh,{font:schrift,size:groesse,ps:abs,titel:titel.trim()});
     else{doc().fmt=val;doc().lh=lh;commit();render()}
     hfDialog();};
   $("#fOk").onclick=()=>{
     readM();
     const val={n:cfg.n,w:cfg.w,h:cfg.h,m:[...cfg.m],key:cfg.key,hd:cfg.hd,fd:cfg.fd};
-    closeOvl();onDone(val,lh,isNew?{font:schrift,size:groesse,ps:abs}:null);
+    closeOvl();onDone(val,lh,isNew?{font:schrift,size:groesse,ps:abs,titel:titel.trim()}:null);
   };
+  if(isNew&&$("#cName"))$("#cName").focus();
 }
 /* Schrift, Größe und Abstände werden am Dokument festgeschrieben, nicht aus
    den Einstellungen geerbt — sonst änderte ein späteres „Als Standard“ alle
    älteren Dokumente mit. */
 function leeresDokument(val,lh,x){
-  flush();const d=blankDoc();d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();
+  /* Ein im Dialog eingetippter Titel gilt als selbst gewählt — sonst
+     ersetzt flush() ihn beim ersten Tippen durch die erste Textzeile. */
+  flush();const d=blankDoc(x&&x.titel||undefined);if(x&&x.titel)d.customTitle=true;d.fmt=val;d.lh=lh;d.glossaryId=defaultGlossId();
   if(x){d.font=x.font;d.size=x.size;d.ps=x.ps}
   platzhalterAbloesen();S.docs.push(d);S.active=d.id;save();render();
   return d;
@@ -18987,7 +19081,9 @@ function settings(){
     <div class="setsec">${tr("Dokument")}</div>
     ${zeile(tr("Maßsystem"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
       <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
-    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("als Einfügeoption anbieten")))}`;
+    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("als Einfügeoption anbieten")))}
+    <div class="setsec">${tr("Werkszustand")}</div>
+    ${zeile("",`<button class="btn" id="sWerk">${tr("Auf Werkszustand zurücksetzen")}&hellip;</button>`)}`;
   const autoc=`
     <div class="setsec">${tr("Beim Tippen")}</div>
     ${zeile(tr("Anführungszeichen"),haken("acQuotes",a.quotes,tr("Gerade Anführungszeichen werden beim Tippen ersetzt")))}
@@ -19066,6 +19162,7 @@ function settings(){
     setTab=b.dataset.tab;settings()});
   const anTh=$("#sThemeBtn");if(anTh)anTh.onclick=themeDialog;
   /* Zurück auf Word: der Weg zurück, falls man sich verklickt hat */
+  const werk=$("#sWerk");if(werk)werk.onclick=werkszustandDialog;
   const stdR=$("#sStdReset");if(stdR)stdR.onclick=()=>{
     Object.assign(s,{font:WORD_VORGABE.font,size:WORD_VORGABE.size,lh:WORD_VORGABE.lh,
       ps:WORD_VORGABE.ps,fmt:WORD_VORGABE.fmt});

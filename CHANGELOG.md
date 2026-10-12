@@ -146,6 +146,40 @@ immer genau einen Commit, der sie anfasst.
     Deckblatt ohne Kopf): Bilder auf Seite 1 im PDF ≤ 0,1 mm neben Words
     PDF, Seite 2 ohne sie; Folgezeile auf Seite 1 verdeckt (als Bild aus dem
     PDF geprüft, `pdf-foto.cjs`); Umlauf über Word identisch.
+- **Dialog „Neues Dokument“ neu und kompakt** (Entwurf A, Tom 2026-10-12):
+  oben nur Titel, Format und Schrift. Der **Titel** lässt sich gleich beim
+  Anlegen eintippen (Schreibmarke steht im Feld, Enter legt an; leer bleibt
+  es bei „Ohne Titel“ und der Benennung nach der ersten Zeile). Ein
+  eingetippter Titel setzt `customTitle`, sonst ersetzte `flush()` ihn
+  beim ersten Tippen durch die erste Textzeile — im Test aufgefallen. Das
+  **Format** ist eine Klappliste (Name und Maße, die Beschreibungen wie
+  „Standard für alles“ fielen auf Toms Wunsch weg), darunter „Eigene
+  Formate“, ganz unten „Eigene Maße …“; Hoch- und Querformat als zwei
+  Seitensymbole daneben. Ein eigenes Format löscht ein Papierkorb-Knopf
+  neben der Liste. Zeilen- und Absatzabstand, Maßsystem, Ränder, Kopf-/
+  Fußzeilenabstand und „Eigenes Format speichern“ (jetzt aus jedem Format,
+  nicht nur aus eigenen Maßen) liegen unter **„Weitere Einstellungen“**,
+  zugeklappt mit Kurzfassung „Ränder 25/25/20/25 mm · 1,15“. Bis 1.2
+  standen sieben Formatkarten und alle Felder offen untereinander. „Seiten-
+  format“ für ein bestehendes Dokument hat denselben Aufbau ohne Titel und
+  Schrift. Die **Seitenvorschau** zeigt die Formate maßstäblich zueinander
+  (bis 1.2 wurde jede Seite auf dieselbe Höhe gezogen, A4 und A5 sahen
+  gleich aus), Textzeilen im Satzspiegel und beim Geschäftsbrief das
+  Anschriftfeld nach DIN 5008. Geprüft: `werkzeuge/pruefen/neues-dokument.cjs`,
+  `format-vorschau.cjs`.
+- **Auf Werkszustand zurücksetzen** (Einstellungen › Allgemein, mit
+  Rückfrage): Einstellungen und Ansicht zurück auf den Auslieferungsstand —
+  Farbschema, Sprache, Schrift und Format neuer Dokumente, Autokorrektur,
+  Zoom, Seitenleisten, Schreibziel. Dokumente, Notizen, Glossare, eigene
+  Formate, das eigene Wörterbuch, verknüpfte Dateien und die automatische
+  Sicherung bleiben; wer alles loswerden will, hat weiter „Alle Daten
+  löschen“. Zurückgesetzt wird eine feste Liste (`WERK_ANSICHT`,
+  `WERK_WEG`), nicht „alles außer den Daten“: in `S` stehen auch Merker
+  gelaufener Umstellungen, die sonst ein zweites Mal über die Dokumente
+  liefen. Der Auslieferungsstand steht dafür an einer Stelle
+  (`standardEinstellungen()`), danach lädt das Programm neu und die
+  Migrationen ergänzen den Rest wie beim ersten Start. Geprüft:
+  `werkzeuge/pruefen/werkszustand.cjs` (eigene, flüchtige Sitzung).
 
 ### Behoben
 
