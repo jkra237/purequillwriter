@@ -217,6 +217,23 @@ immer genau einen Commit, der sie anfasst.
     für „aus“: Nummer 2 und 3 sind freiwillig. In der App heißt Karte 1
     „Arbeitsstand im Programmspeicher“.
 
+- **Versionsverlauf reicht bis zu einem Monat zurück** (Einstellungen ›
+  Zwischenstände › „Wie weit zurück“: eine Stunde, einen Tag, eine Woche —
+  Standard —, einen Monat). Bis 1.2 behielt jedes Dokument fest die
+  **letzten 12** Zwischenstände, bei 30 s Abstand also gut sechs Minuten
+  Arbeit — was gestern war, ließ sich nicht zurückholen. Jetzt wird
+  ausgedünnt wie bei Time Machine (`histAusduennen()`): die fünf neuesten
+  bleiben, ältere nur einer je Altersstufe (10/30 min, 1/2/4/8 h, 1/2/3/5 d,
+  1/2/3 Wochen, 1 Monat), höchstens 19 statt 12 — der Speicher wächst also
+  kaum. Im Zeitraffer gemessen (35 Tage, alle 10 Minuten ein Stand):
+  Spanne Woche 13–14 Stände bis 6 Tage zurück, Monat 15–17 bis 19 Tage
+  (der älteste fällt beim Überschreiten der Spanne weg, dann rückt der
+  nächste nach). Läuft der Speicher voll, opfert `commit()` die ältesten
+  Zwischenstände über alle Dokumente, nie den neuesten und nie den Text.
+  Dazu Abstände „alle 10 Minuten“ und „alle 15 Minuten“. Die Hilfe sagte
+  „die letzten zwölf“ — in allen sieben Sprachen berichtigt. Geprüft:
+  `werkzeuge/pruefen/zwischenstaende.cjs`.
+
 ### Behoben
 
 - **Eingefügte Bilder mitten im Text sprengten den Absatz.** Ein Bild aus

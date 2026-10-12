@@ -1769,7 +1769,11 @@ function vorgabeText(){
 /* Abstände für die Zwischenstände des Versionsverlaufs. Vorher ein nacktes
    Zahlenfeld von 5 bis 600 Sekunden — 5 Sekunden ist sinnlos, 600 wäre eine
    Falle. Eine kurze Liste sinnvoller Werte nimmt die Entscheidung ab. */
-const SNAPSHOTS=[["alle 30 Sekunden",30],["jede Minute",60],["alle 2 Minuten",120],["alle 5 Minuten",300]];
+const SNAPSHOTS=[["alle 30 Sekunden",30],["jede Minute",60],["alle 2 Minuten",120],["alle 5 Minuten",300],
+  ["alle 10 Minuten",600],["alle 15 Minuten",900]];
+/* Wie weit der Versionsverlauf zurückreicht (Sekunden). Bis 1.2 galt fest
+   „die letzten 12“ — bei 30 s Abstand gut sechs Minuten. */
+const HIST_SPANNEN=[["eine Stunde",3600],["einen Tag",86400],["eine Woche",604800],["einen Monat",2592000]];
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
 /* 0 ist ein gültiger Absatzabstand (häufig in Word-Dateien) — darum nicht
    „||“, das 0 als „nicht gesetzt“ durchfallen ließe. */
@@ -2216,6 +2220,13 @@ en:{
   "Notizen und Glossar":"Notes and glossary",
   "Vollsicherung":"Full backup",
   "Alle Daten löschen":"Delete all data",
+  "alle 10 Minuten":"every 10 minutes",
+  "Wie weit zurück":"How far back",
+  "eine Stunde":"one hour",
+  "einen Tag":"one day",
+  "eine Woche":"one week",
+  "einen Monat":"one month",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Recent snapshots stay close together, older ones are thinned out: first every few minutes, then hourly, then daily.",
   "aktiv":"active",
   "Zugriff nötig":"needs access",
   "nicht verfügbar":"not available",
@@ -3030,6 +3041,13 @@ fr:{
   "Notizen und Glossar":"Notes et glossaire",
   "Vollsicherung":"Sauvegarde complète",
   "Alle Daten löschen":"Supprimer toutes les données",
+  "alle 10 Minuten":"toutes les 10 minutes",
+  "Wie weit zurück":"Jusqu’où remonter",
+  "eine Stunde":"une heure",
+  "einen Tag":"un jour",
+  "eine Woche":"une semaine",
+  "einen Monat":"un mois",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Les points récents restent rapprochés, les plus anciens sont espacés : d’abord toutes les quelques minutes, puis toutes les heures, puis chaque jour.",
   "aktiv":"actif",
   "Zugriff nötig":"accès requis",
   "nicht verfügbar":"non disponible",
@@ -3844,6 +3862,13 @@ es:{
   "Notizen und Glossar":"Notas y glosario",
   "Vollsicherung":"Copia de seguridad completa",
   "Alle Daten löschen":"Borrar todos los datos",
+  "alle 10 Minuten":"cada 10 minutos",
+  "Wie weit zurück":"Hasta cuándo",
+  "eine Stunde":"una hora",
+  "einen Tag":"un día",
+  "eine Woche":"una semana",
+  "einen Monat":"un mes",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Las instantáneas recientes quedan juntas, las antiguas se espacian: primero cada pocos minutos, luego cada hora, luego cada día.",
   "aktiv":"activo",
   "Zugriff nötig":"requiere acceso",
   "nicht verfügbar":"no disponible",
@@ -4658,6 +4683,13 @@ pt:{
   "Notizen und Glossar":"Notas e glossário",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Apagar todos os dados",
+  "alle 10 Minuten":"a cada 10 minutos",
+  "Wie weit zurück":"Até quando",
+  "eine Stunde":"uma hora",
+  "einen Tag":"um dia",
+  "eine Woche":"uma semana",
+  "einen Monat":"um mês",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Os pontos recentes ficam próximos, os antigos são espaçados: primeiro a cada poucos minutos, depois de hora a hora, depois diariamente.",
   "aktiv":"ativo",
   "Zugriff nötig":"requer acesso",
   "nicht verfügbar":"indisponível",
@@ -5472,6 +5504,13 @@ pl:{
   "Notizen und Glossar":"Notatki i słowniczek",
   "Vollsicherung":"Pełna kopia zapasowa",
   "Alle Daten löschen":"Usuń wszystkie dane",
+  "alle 10 Minuten":"co 10 minut",
+  "Wie weit zurück":"Jak daleko wstecz",
+  "eine Stunde":"godzina",
+  "einen Tag":"dzień",
+  "eine Woche":"tydzień",
+  "einen Monat":"miesiąc",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Nowsze migawki leżą blisko siebie, starsze są przerzedzane: najpierw co kilka minut, potem co godzinę, potem codziennie.",
   "aktiv":"aktywne",
   "Zugriff nötig":"wymaga dostępu",
   "nicht verfügbar":"niedostępne",
@@ -6293,6 +6332,13 @@ it:{
   "Notizen und Glossar":"Note e glossario",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Elimina tutti i dati",
+  "alle 10 Minuten":"ogni 10 minuti",
+  "Wie weit zurück":"Quanto indietro",
+  "eine Stunde":"un’ora",
+  "einen Tag":"un giorno",
+  "eine Woche":"una settimana",
+  "einen Monat":"un mese",
+  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"I punti recenti restano vicini, i più vecchi vengono diradati: prima ogni pochi minuti, poi ogni ora, poi ogni giorno.",
   "aktiv":"attivo",
   "Zugriff nötig":"accesso necessario",
   "nicht verfügbar":"non disponibile",
@@ -7075,6 +7121,7 @@ if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
 if(S.autoBackup&&typeof S.autoBackup!=="object")delete S.autoBackup;
 if(S.autoBackup){S.autoBackup.lose=true;if(!S.autoBackup.jede&&S.autoBackup.jede!==0)S.autoBackup.jede=900}
 if(S.settings&&!S.settings.autoc)S.settings.autoc={quotes:true,dash:true,cap:true,lists:true};
+if(S.settings&&!S.settings.histSpan)S.settings.histSpan=604800;
 if(S.settings&&S.settings.autoc)["quotes","dash","cap","lists"].forEach(k=>{
   if(S.settings.autoc[k]===undefined)S.settings.autoc[k]=true});
 if(S.settings&&!S.settings.unit)S.settings.unit="mm";
@@ -7083,7 +7130,7 @@ if(S.settings&&!S.settings.unit)S.settings.unit="mm";
    Eintrag getroffen und beim Öffnen still auf den ersten gesprungen. Deshalb
    einmalig auf den nächstgelegenen der angebotenen Werte runden. */
 if(S.settings&&!S.intervallAngeglichen){
-  const erlaubt=[30,60,120,300];
+  const erlaubt=[30,60,120,300,600,900];
   const i=+S.settings.interval||30;
   S.settings.interval=erlaubt.reduce((a,b)=>Math.abs(b-i)<Math.abs(a-i)?b:a);
   S.intervallAngeglichen=true;
@@ -8691,12 +8738,39 @@ function queueSave(){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{flush();save();merkeGesichert()},1200);
 }
+/* Ausdünnen wie Time Machine: die fünf neuesten Stände bleiben immer, ältere
+   nur einer je Altersstufe (10 und 30 Minuten, 1/2/4/8 Stunden, 1/2/3/5
+   Tage, 1/2/3 Wochen, 1 Monat) — behalten wird je Stufe der ältere, damit
+   ein Stand mit dem Älterwerden von Stufe zu Stufe wandert. So reicht der
+   Verlauf bis zu einem Monat zurück mit höchstens 19 Ständen statt der
+   festen 12 von bisher. Was älter ist als die eingestellte Spanne, fällt
+   weg. */
+const HIST_STUFEN=[600,1800,3600,7200,14400,28800,86400,172800,259200,432000,604800,1209600,1814400,2592000];
+const HIST_DICHT=5;
+function histAusduennen(d,jetzt=Date.now()){
+  const spanne=(S.settings.histSpan||604800)*1000;
+  const h=d.history.filter(e=>jetzt-e.ts<=spanne||e===d.history[d.history.length-1]);
+  const neu=h.slice(-HIST_DICHT),alt=h.slice(0,-HIST_DICHT),belegt=new Set(),bleibt=[];
+  for(const e of alt){
+    const sek=(jetzt-e.ts)/1000;let st=HIST_STUFEN.findIndex(x=>sek<=x);if(st<0)st=HIST_STUFEN.length;
+    if(!belegt.has(st)){belegt.add(st);bleibt.push(e)}
+  }
+  d.history=[...bleibt,...neu];
+}
 function commit(){
   clearTimeout(saveTimer);
   flush();const d=doc();
   const last=d.history[d.history.length-1];
-  if(!last||last.html!==d.html){d.history.push({ts:Date.now(),html:d.html});if(d.history.length>12)d.history.shift()}
-  save();merkeGesichert();
+  if(!last||last.html!==d.html){d.history.push({ts:Date.now(),html:d.html});histAusduennen(d)}
+  /* Läuft der Speicher voll, gehen zuerst die ältesten Zwischenstände —
+     über alle Dokumente, nie der neueste eines Dokuments und nie der Text. */
+  let ok=save();
+  for(let i=0;!ok&&!datenGeloescht&&i<60;i++){
+    const voll=S.docs.filter(x=>x.history&&x.history.length>1).sort((a,b)=>a.history[0].ts-b.history[0].ts)[0];
+    if(!voll)break;
+    voll.history.shift();ok=save();
+  }
+  merkeGesichert();
 }
 let timer=null;
 /* Nur noch die Zwischenstände; gesichert wird unabhängig davon. */
@@ -19271,6 +19345,11 @@ function settings(){
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
         ${tr("Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.")}</label></div>
+    ${zeile(tr("Wie weit zurück"),`<select id="sSpan">${HIST_SPANNEN.map(([lab,v])=>
+        `<option value="${v}" ${(s.histSpan||604800)==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
+    <div class="setrow" style="border-bottom:none;padding-top:2px">
+      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
+        ${tr("Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.")}</label></div>
     ${zeile("",`<button class="btn" id="sHist">${tr("Versionsverlauf öffnen")}&hellip;</button>`)}`;
   const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
@@ -19312,7 +19391,7 @@ function settings(){
     s.lh=+v("sLh",s.lh)||s.lh;s.ps=$("#sPs")?+$("#sPs").value:s.ps;
     const fmtWahl=v("sFmt",null);if(fmtWahl&&fmtWahl!=="eigen")s.fmt=fmtWahl;
     s.autosave=v("sAuto",s.autosave);
-    s.interval=+v("sInt",s.interval)||60;s.lang=v("sLang",s.lang);
+    s.interval=+v("sInt",s.interval)||60;s.histSpan=+v("sSpan",s.histSpan)||s.histSpan||604800;s.lang=v("sLang",s.lang);
     /* Ohne Zwischenstände ist der Abstand gegenstandslos — das Feld wird grau,
        statt einen Wert anzubieten, der nichts bewirkt. */
     if($("#sInt"))$("#sInt").disabled=!s.autosave;
@@ -19330,7 +19409,7 @@ function settings(){
     a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sAuto","sInt","sLang","sUiLang","sTw","sDim","sTof",
+  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sAuto","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof",
    "acQuotes","acDash","acCap","acLists"]
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
@@ -20206,7 +20285,7 @@ rewrite a passage you might want back.</p>
 <p><b>File &rsaquo; Snapshots &rsaquo; Version history</b> lists them, newest first, each with
 its time and word count so you can recognise the one you want. <i>Restore</i> puts that version
 back in place of the current text.</p>
-<p>The <b>last twelve</b> are kept per document; older ones fall away. They sit <nur-b>in the browser</nur-b><nur-a>in storage</nur-a>
+<p>How far back they reach is set under <b>Settings &rsaquo; Snapshots</b>, from one hour to a month; recent ones stay close together, older ones are thinned out. They sit <nur-b>in the browser</nur-b><nur-a>in storage</nur-a>
 beside the document, so they travel along inside a backup — but they are no substitute for one.
 A snapshot helps you take a step back while writing; a backup is for the day <nur-b>the browser</nur-b><nur-a>this machine</nur-a> is
 gone.</p>
@@ -20796,7 +20875,7 @@ das lohnt sich, bevor du eine Passage umschreibst, die du vielleicht zurückhabe
 <p><b>Datei &rsaquo; Zwischenstände &rsaquo; Versionsverlauf</b> zeigt sie, den neuesten zuerst,
 je mit Uhrzeit und Wortzahl — daran erkennst du den, den du suchst. <i>Wiederherstellen</i>
 setzt diesen Stand an die Stelle des aktuellen Textes.</p>
-<p>Aufgehoben werden die <b>letzten zwölf</b> je Dokument, ältere fallen weg. Sie liegen <nur-b>im
+<p>Wie weit sie zurückreichen, stellst du unter <b>Einstellungen &rsaquo; Zwischenstände</b> ein, von einer Stunde bis zu einem Monat; neuere liegen dicht beieinander, ältere werden ausgedünnt. Sie liegen <nur-b>im
 Browser</nur-b><nur-a>im Speicher</nur-a> neben dem Dokument und wandern deshalb in einer Sicherung mit — ersetzen sie aber
 nicht. Ein Zwischenstand hilft beim Schreiben einen Schritt zurück; eine Sicherung ist für den
 Tag, an dem <nur-b>der Browser</nur-b><nur-a>dieser Rechner</nur-a> weg ist.</p>
@@ -21391,7 +21470,7 @@ hacerlo antes de reescribir un pasaje que quizá quieras recuperar.</p>
 <p><b>Archivo &rsaquo; Puntos de restauración &rsaquo; Historial de versiones</b> los lista, del
 más reciente al más antiguo, cada uno con su hora y su recuento de palabras para que reconozcas
 el que buscas. <i>Restaurar</i> pone esa versión en lugar del texto actual.</p>
-<p>Se conservan los <b>doce últimos</b> por documento; los más antiguos se descartan. Están <nur-b>en
+<p>Hasta dónde llegan se ajusta en <b>Configuración &rsaquo; Puntos de restauración</b>, de una hora a un mes; las recientes quedan juntas, las antiguas se espacian. Están <nur-b>en
 el navegador</nur-b><nur-a>en el almacenamiento</nur-a> junto al documento, así que viajan dentro de una copia de seguridad, pero no la
 sustituyen. Una instantánea te ayuda a dar un paso atrás mientras escribes; una copia de
 seguridad es para el día en que <nur-b>el navegador</nur-b><nur-a>este equipo</nur-a> ya no esté.</p>
@@ -21984,7 +22063,7 @@ trecho que você talvez queira de volta.</p>
 <p><b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Histórico de versões</b> lista todos, do
 mais recente ao mais antigo, cada um com a hora e a contagem de palavras para você reconhecer o
 que procura. <i>Restaurar</i> põe aquela versão no lugar do texto atual.</p>
-<p>Os <b>doze últimos</b> são mantidos por documento; os mais antigos caem fora. Eles ficam <nur-b>no
+<p>Até onde recuam define-se em <b>Configurações &rsaquo; Pontos de restauração</b>, de uma hora a um mês; os recentes ficam próximos, os antigos são espaçados. Eles ficam <nur-b>no
 navegador</nur-b><nur-a>no armazenamento</nur-a> junto do documento, então viajam dentro de um backup, mas não o substituem. Um ponto
 de restauração ajuda a dar um passo atrás enquanto você escreve; um backup é para o dia em que <nur-b>o
 navegador</nur-b><nur-a>este computador</nur-a> não estiver mais lá.</p>
@@ -22606,7 +22685,7 @@ utile avant de réécrire un passage que vous pourriez vouloir récupérer.</p>
 plus récent au plus ancien, chacun avec son heure et son nombre de mots pour que vous
 reconnaissiez celui que vous voulez. <i>Restaurer</i> remet cette version à la place du texte
 actuel.</p>
-<p>Les <b>douze derniers</b> sont conservés par document ; les plus anciens disparaissent. Ils
+<p>Jusqu’où ils remontent se règle dans <b>Paramètres &rsaquo; Points de restauration</b>, d’une heure à un mois ; les récents restent rapprochés, les anciens sont espacés. Ils
 se trouvent <nur-b>dans le navigateur</nur-b><nur-a>dans le stockage</nur-a> à côté du document, ils voyagent donc à l'intérieur d'une
 sauvegarde — mais ils ne la remplacent pas. Un point de restauration vous aide à prendre du
 recul en écrivant ; une sauvegarde est pour le jour où <nur-b>le navigateur</nur-b><nur-a>cette machine</nur-a> ne sera plus là.</p>
@@ -23190,7 +23269,7 @@ fragmentu, który być może zechcesz odzyskać.</p>
 <p><b>Plik &rsaquo; Punkty przywracania &rsaquo; Historia wersji</b> wymienia je, od najnowszego
 do najstarszego, każdy z godziną i liczbą słów, żebyś rozpoznał ten, którego chcesz.
 <i>Przywróć</i> stawia tę wersję na miejsce bieżącego tekstu.</p>
-<p><b>Dwanaście ostatnich</b> jest przechowywanych na dokument; starsze odpadają. Leżą <nur-b>w
+<p>Jak daleko wstecz sięgają, ustawisz w <b>Ustawienia &rsaquo; Punkty przywracania</b>, od godziny do miesiąca; nowsze leżą blisko siebie, starsze są przerzedzane. Leżą <nur-b>w
 przeglądarce</nur-b><nur-a>w pamięci</nur-a> obok dokumentu, więc podróżują wewnątrz kopii zapasowej — ale jej nie zastępują.
 Punkt przywracania pomaga zrobić krok wstecz podczas pisania; kopia zapasowa jest na dzień, w
 którym <nur-b>przeglądarki</nur-b><nur-a>tego komputera</nur-a> już nie będzie.</p>
@@ -23793,7 +23872,7 @@ prima di riscrivere un passaggio che potresti voler recuperare.</p>
 <p><b>File &rsaquo; Punti di ripristino &rsaquo; Cronologia versioni</b> li elenca, dal più
 recente al più vecchio, ciascuno con l'ora e il conteggio delle parole per farti riconoscere
 quello che vuoi. <i>Ripristina</i> rimette quella versione al posto del testo corrente.</p>
-<p>Gli <b>ultimi dodici</b> sono conservati per documento; i più vecchi cadono. Si trovano <nur-b>nel
+<p>Quanto indietro arrivano si imposta in <b>Impostazioni &rsaquo; Punti di ripristino</b>, da un’ora a un mese; i recenti restano vicini, i più vecchi vengono diradati. Si trovano <nur-b>nel
 browser</nur-b><nur-a>nella memoria</nur-a> accanto al documento, quindi viaggiano dentro un backup — ma non lo sostituiscono. Un
 punto di ripristino aiuta a fare un passo indietro mentre si scrive; un backup è per il giorno
 in cui <nur-b>il browser</nur-b><nur-a>questo computer</nur-a> non ci sarà più.</p>
