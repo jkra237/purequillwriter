@@ -81,6 +81,32 @@ immer genau einen Commit, der sie anfasst.
   zusätzlich Überschriften und Zitate zu Fließtext, und Ausrichtung und
   Einrückung gehen zurück (`formatierungEntfernen()`). Listen bleiben
   Listen. Hilfe in allen sieben Sprachen ergänzt.
+
+- **Der Autor kam nie im PDF an.** `pdfAuthorMeta()` setzte ein
+  `<meta name="author">` in der Annahme, Chromium übernehme es; nachgemessen
+  mit Chrome 154: das Info-Verzeichnis trägt nur Title, Creator (die
+  Browserkennung), Producer und die Daten. Die Desktop-Fassung trägt Titel,
+  Autor, Betreff, Stichwörter und „PureQuill Writer“ als Ersteller jetzt nach
+  dem Drucken selbst ein (`desktop/pdf-info.js`, inkrementelle
+  Aktualisierung: neues Info-Objekt, Querverweis, Trailer mit `/Prev`; der
+  Inhalt davor bleibt Byte für Byte). `check-export.mjs` prüft das an jedem
+  Testdokument (285/285). Nicht in der echten Electron-App nachgemessen,
+  nur mit Chrome headless und denselben `printToPDF`-Optionen.
+
+### Geändert
+
+- **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),
+  Autor, unter „Weitere Angaben“ Betreff und Stichwörter. Lesezeichen aus
+  Überschriften sind voreingestellt **aus**; bei schon exportierten
+  Dokumenten einmalig zurückgesetzt, weil dort fast immer nur die alte
+  Voreinstellung stand. Die Browserfassung zeigt nur den Titel: dort
+  speichert der Druckdialog des Browsers, und der übernimmt nur `<title>`.
+- **Autor kommt aus „Dein Name“** (Einstellungen → Allgemein, anfangs
+  leer), wie Words Benutzername. Bisher füllten PDF und EPUB mit dem Namen
+  vor, der zuletzt in irgendeinem Exportdialog stand, auch dem eines
+  fremden Dokuments. Der alte Wert (`S.settings.author`) wird verworfen,
+  nicht übernommen. Was im Dialog eingetragen wird, gilt nur für dieses
+  Dokument.
   Die Liste steht unter Einstellungen → Autokorrektur → Ausnahmen, jedes
   Wort lässt sich einzeln entfernen. Sie liegt außerhalb von `S.settings`,
   „Werkszustand“ lässt sie also stehen wie das eigene Wörterbuch. Ein

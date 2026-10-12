@@ -8,6 +8,7 @@ const path = require("node:path");
 const fs = require("node:fs/promises");
 const { statSync } = require("node:fs");
 const { pathToFileURL, fileURLToPath } = require("node:url");
+const { setPdfInfo } = require("./pdf-info");
 
 const APP_DIR = path.join(__dirname, "app");
 
@@ -107,6 +108,11 @@ ipcMain.handle("pqw:savePdf", async (e, opts = {}) => {
     .executeJavaScript(`typeof hfDruckGesamt==="function"&&hfDruckGesamt(${seiten})`)
     .catch(() => false);
   if (neu) data = await e.sender.printToPDF(pdfOpts);
+  /* Autor, Betreff, Stichwörter: printToPDF übernimmt nur den Titel (siehe
+     pdf-info.js). Als Ersteller steht dann das Programm, nicht die
+     Browserkennung von Chromium. */
+  data = setPdfInfo(data, { title: opts.title, author: opts.author, subject: opts.subject,
+    keywords: opts.keywords, creator: "PureQuill Writer" });
   await fs.writeFile(filePath, data);
   return { ok: true, path: filePath };
 });

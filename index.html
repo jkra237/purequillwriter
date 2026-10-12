@@ -2200,6 +2200,12 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "Weitere Angaben":"More details",
+  "Betreff":"Subject",
+  "Stichwörter":"Keywords",
+  "durch Komma getrennt":"separated by commas",
+  "Dein Name":"Your name",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"Suggested as the author when exporting to PDF or EPUB.",
   "Kapitel beginnen bei":"Start chapters at",
   "Überschrift 1 und 2":"Heading 1 and 2",
   "nicht trennen":"do not split",
@@ -3044,6 +3050,12 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "Weitere Angaben":"Plus d’informations",
+  "Betreff":"Objet",
+  "Stichwörter":"Mots-clés",
+  "durch Komma getrennt":"séparés par des virgules",
+  "Dein Name":"Votre nom",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"Proposé comme auteur lors de l’export en PDF ou EPUB.",
   "Kapitel beginnen bei":"Commencer les chapitres à",
   "Überschrift 1 und 2":"Titre 1 et 2",
   "nicht trennen":"ne pas diviser",
@@ -3888,6 +3900,12 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "Weitere Angaben":"Más datos",
+  "Betreff":"Asunto",
+  "Stichwörter":"Palabras clave",
+  "durch Komma getrennt":"separadas por comas",
+  "Dein Name":"Tu nombre",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"Se propone como autor al exportar a PDF o EPUB.",
   "Kapitel beginnen bei":"Empezar capítulos en",
   "Überschrift 1 und 2":"Título 1 y 2",
   "nicht trennen":"no dividir",
@@ -4732,6 +4750,12 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "Weitere Angaben":"Mais informações",
+  "Betreff":"Assunto",
+  "Stichwörter":"Palavras-chave",
+  "durch Komma getrennt":"separadas por vírgula",
+  "Dein Name":"Seu nome",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"É sugerido como autor ao exportar para PDF ou EPUB.",
   "Kapitel beginnen bei":"Iniciar capítulos em",
   "Überschrift 1 und 2":"Título 1 e 2",
   "nicht trennen":"não dividir",
@@ -5576,6 +5600,12 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "Weitere Angaben":"Więcej informacji",
+  "Betreff":"Temat",
+  "Stichwörter":"Słowa kluczowe",
+  "durch Komma getrennt":"oddzielone przecinkami",
+  "Dein Name":"Twoje imię i nazwisko",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"Proponowane jako autor przy eksporcie do PDF lub EPUB.",
   "Kapitel beginnen bei":"Rozpocznij rozdziały od",
   "Überschrift 1 und 2":"Nagłówek 1 i 2",
   "nicht trennen":"nie dziel",
@@ -6427,6 +6457,12 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "Weitere Angaben":"Altre informazioni",
+  "Betreff":"Oggetto",
+  "Stichwörter":"Parole chiave",
+  "durch Komma getrennt":"separate da virgole",
+  "Dein Name":"Il tuo nome",
+  "Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.":"Viene proposto come autore nell’esportazione in PDF o EPUB.",
   "Kapitel beginnen bei":"Inizia i capitoli a",
   "Überschrift 1 und 2":"Titolo 1 e 2",
   "nicht trennen":"non dividere",
@@ -7261,6 +7297,19 @@ if(S.goal&&!S.goal.unit)S.goal.unit="words";
 /* Eigene Wörter der Rechtschreibprüfung — gelten über alle Dokumente hinweg */
 if(!Array.isArray(S.userDict))S.userDict=[];
 if(!Array.isArray(S.capAusnahmen))S.capAusnahmen=[];
+/* Bis 1.2 füllten PDF und EPUB den Autor mit S.settings.author vor — dem
+   Namen, der zuletzt in irgendeinem Exportdialog stand, auch dem eines
+   fremden Dokuments. Ersetzt durch S.settings.meinName (Einstellungen →
+   Allgemein), anfangs leer, wie Words Benutzername. Der alte Wert wird
+   bewusst nicht übernommen: er war genau der falsche Vorschlag.
+   Einmalig dazu: Lesezeichen im PDF sind ab jetzt aus, solange man sie
+   nicht anhakt. Bisher stand bei jedem schon exportierten Dokument
+   outline:true — fast immer nur die alte Voreinstellung, nicht gewählt.
+   Und der gemerkte PDF-Autor geht mit, denn er kam meist aus demselben
+   falschen Vorschlag und landete ohnehin nie im PDF (siehe setPdfInfo in
+   desktop/pdf-info.js). */
+if(S.settings&&"author" in S.settings)delete S.settings.author;
+if(!S.pdfVorgabe13){(S.docs||[]).forEach(d=>{if(d&&d.pdf){d.pdf.outline=false;delete d.pdf.author}});S.pdfVorgabe13=1}
 ensureGlossaries();
 /* Der Abstand zur Papierkante saß früher an der Kopf-/Fußzeile, jetzt am
    Seitenformat — wie in Word unter „Layout“. Eigene Werte wandern mit. */
@@ -10940,7 +10989,7 @@ function exportEpub(){
   overlay(`<div class="modal"><h3>${tr("Als EPUB exportieren")}</h3>
     <div class="pad">
       <p class="iohint">${esc(tr(d.title))} · ${esc(tr(lname))}</p>
-      ${feld(tr("Autor"),`<input type="text" id="epAuthor" autocomplete="off" value="${esc(ep.author||S.settings.author||"")}" placeholder="${tr("Vorname Nachname")}">`)}
+      ${feld(tr("Autor"),`<input type="text" id="epAuthor" autocomplete="off" value="${esc(ep.author!=null?ep.author:S.settings.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
       ${feld(tr("Kapitel beginnen bei"),`<select id="epSplit">
         <option value="1">${tr("Überschrift 1")}</option>
         <option value="2">${tr("Überschrift 1 und 2")}</option>
@@ -10973,7 +11022,7 @@ function exportEpub(){
     };
     d.epub={author:opts.author,split:opts.split,titlepage:opts.titlepage,
       publisher:opts.publisher,year:opts.year,isbn:opts.isbn};
-    S.settings.author=opts.author;save();
+    save();
     const cf=($("#epCover").files||[])[0];
     if(cf){
       const t=EPUB_IMG[cf.type];
@@ -11003,10 +11052,17 @@ function exportEpub(){
    siehe exportPdfDesktop().
 
    "Als PDF exportieren" zeigt vorher einen kleinen Dialog - wie beim EPUB,
-   nur schlanker, weil ein PDF viel weniger zu entscheiden gibt: Autor
-   (Metadaten, geteilt mit dem EPUB), im Desktop die Lesezeichen, und ein
-   Blick auf das Seitenformat mit dem Sprung zum Formatdialog. "Drucken"
-   (Strg+P) bleibt ohne Dialog. */
+   nur schlanker, weil ein PDF viel weniger zu entscheiden gibt: Titel, im
+   Desktop Autor, Betreff, Stichwörter und die Lesezeichen, und ein Blick
+   auf das Seitenformat mit dem Sprung zum Formatdialog. "Drucken" (Strg+P)
+   bleibt ohne Dialog.
+   Seit 1.3 bietet die Browserfassung nur noch den Titel an: dort speichert
+   der Druckdialog des Browsers, und der übernimmt nur <title> — ein
+   Autorfeld wäre ein Versprechen ohne Wirkung. Die Desktop-Fassung schreibt
+   die übrigen Angaben nach dem Drucken selbst ins PDF (desktop/pdf-info.js).
+   Lesezeichen sind voreingestellt aus (Toms Wunsch, 2026-10-12). Gemerkt
+   wird je Dokument; der Titel nur, wenn er vom Dokumentnamen abweicht,
+   sonst folgte er einer späteren Umbenennung nicht. */
 function exportPdf(){ pdfDialog(); }
 function pdfDialog(){
   flush();
@@ -11019,10 +11075,15 @@ function pdfDialog(){
     +` · ${tr("Ränder")} ${f.m.map(toUnit).join("/")}`;
   overlay(`<div class="modal"><h3>${tr("Als PDF exportieren")}</h3>
     <div class="pad">
-      <p class="iohint">${esc(tr(d.title))}</p>
-      ${feld(tr("Autor"),`<input type="text" id="pdfAuthor" autocomplete="off" value="${esc(pdf.author||S.settings.author||"")}" placeholder="${tr("Vorname Nachname")}">`)}
-      ${desktop?`<label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink-soft);margin:11px 0 4px">
-        <input type="checkbox" id="pdfOutline" ${pdf.outline!==false?"checked":""} style="width:auto;margin-top:2px">
+      ${feld(tr("Titel"),`<input type="text" id="pdfTitle" autocomplete="off" value="${esc(pdf.title||tr(d.title))}">`)}
+      ${desktop?`${feld(tr("Autor"),`<input type="text" id="pdfAuthor" autocomplete="off" value="${esc(pdf.author!=null?pdf.author:S.settings.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
+      <details id="pdfMehr" ${pdf.subject||pdf.keywords?"open":""} style="margin:4px 0 2px">
+        <summary style="cursor:pointer;font-size:13px;color:var(--ink-soft);padding:4px 0">${tr("Weitere Angaben")}</summary>
+        ${feld(tr("Betreff"),`<input type="text" id="pdfSubject" autocomplete="off" value="${esc(pdf.subject||"")}">`)}
+        ${feld(tr("Stichwörter"),`<input type="text" id="pdfKeywords" autocomplete="off" value="${esc(pdf.keywords||"")}" placeholder="${tr("durch Komma getrennt")}">`)}
+      </details>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink-soft);margin:11px 0 4px">
+        <input type="checkbox" id="pdfOutline" ${pdf.outline===true?"checked":""} style="width:auto;margin-top:2px">
         ${tr("Lesezeichen aus Überschriften")}</label>`:""}
       <div class="iosep"></div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -11039,18 +11100,20 @@ function pdfDialog(){
   $("#pdfCancel").onclick=closeOvl;
   $("#pdfFmt").onclick=()=>{closeOvl();changeFormat()};
   $("#pdfGo").onclick=()=>{
-    const author=$("#pdfAuthor").value.trim();
-    const outline=$("#pdfOutline")?$("#pdfOutline").checked:true;
-    d.pdf={author,outline};
-    if(author)S.settings.author=author;
+    const wert=id=>$("#"+id)?$("#"+id).value.trim():"";
+    const title=wert("pdfTitle")||tr(d.title);
+    const meta={title,author:wert("pdfAuthor"),subject:wert("pdfSubject"),keywords:wert("pdfKeywords"),
+      outline:$("#pdfOutline")?$("#pdfOutline").checked:false};
+    d.pdf={...pdf,title:title===tr(d.title)?"":title,outline:meta.outline};
+    if(desktop)Object.assign(d.pdf,{author:meta.author,subject:meta.subject,keywords:meta.keywords});
     save();closeOvl();
-    if(desktop)return exportPdfDesktop(PQWD(),{author,outline});
+    if(desktop)return exportPdfDesktop(PQWD(),meta);
     /* window.print() setzt Dateiname und PDF-Titel aus document.title - dort
        hängt sonst " — PureQuill Writer" dran. Fürs Drucken kurz den reinen
        Titel setzen und danach zurückstellen. */
-    const prev=document.title, meta=pdfAuthorMeta(author);
-    document.title=tr(d.title)||"Ohne Titel";
-    const zurueck=()=>{document.title=prev;meta&&meta();window.removeEventListener("afterprint",zurueck)};
+    const prev=document.title;
+    document.title=title||"Ohne Titel";
+    const zurueck=()=>{document.title=prev;window.removeEventListener("afterprint",zurueck)};
     window.addEventListener("afterprint",zurueck);
     setTimeout(zurueck,120000);   /* Notnagel, falls afterprint ausbleibt */
     withPrintFootnotes(()=>{
@@ -11060,18 +11123,7 @@ function pdfDialog(){
     });
   };
 }
-/* Best effort: Chromium übernimmt <meta name="author"> als /Author ins PDF.
-   Gibt eine Aufräumfunktion zurück (Attribut leeren bzw. das selbst angelegte
-   Tag entfernen). */
-function pdfAuthorMeta(author){
-  if(!author)return null;
-  let m=document.querySelector('meta[name="author"]');
-  const eigen=!m;
-  if(!m){m=document.createElement("meta");m.setAttribute("name","author");document.head.appendChild(m)}
-  const vorher=m.getAttribute("content");
-  m.setAttribute("content",author);
-  return ()=>{if(eigen)m.remove();else if(vorher==null)m.removeAttribute("content");else m.setAttribute("content",vorher)};
-}
+
 /* Electron schreibt das PDF ohne Druckdialog direkt in die gewählte Datei.
    Drei Dinge, die der Browserweg nicht sicherstellen kann:
    - Hintergrundgrafiken sind immer an. Im Browserdialog ist das ein Haken,
@@ -11094,19 +11146,20 @@ async function exportPdfDesktop(D,opts={}){
   const liste=fnSeitenweise()?"":footnoteListHtml(d,"fnprint");
   let node=null;
   if(liste&&ed){const w=document.createElement("div");w.innerHTML=liste;node=w.firstElementChild;ed.appendChild(node)}
-  /* printToPDF liest Titel und Autor des PDF aus der Seite (<title> bzw.
-     <meta name="author">), nicht aus Optionen - hier kurz beides setzen. */
-  const prevTitle=document.title, metaWeg=pdfAuthorMeta(opts.author||"");
+  /* printToPDF liest den Titel des PDF aus <title> — hier kurz setzen. Autor,
+     Betreff und Stichwörter trägt der Hauptprozess danach selbst ein. */
+  const prevTitle=document.title;
   const zurueck=stripScreenPagination(ed);
   const rahmenWeg=printFrame(ed);
-  document.title=tr(d.title)||"Ohne Titel";
+  document.title=opts.title||tr(d.title)||"Ohne Titel";
   setPrintPage();
   try{
     const r=await D.savePdf({suggestedName:safeName(tr(d.title))+".pdf",
-      outline:opts.outline!==false});
+      outline:opts.outline===true,title:opts.title||tr(d.title),author:opts.author||"",
+      subject:opts.subject||"",keywords:opts.keywords||""});
     if(r&&r.ok)toast(tr("Gespeichert"));
   }catch(e){toast(tr("Datei ließ sich nicht schreiben"))}
-  finally{if(node)node.remove();document.title=prevTitle;metaWeg&&metaWeg();rahmenWeg();zurueck()}
+  finally{if(node)node.remove();document.title=prevTitle;rahmenWeg();zurueck()}
 }
 /* ---- Fremde Dokumente laden ----
    Liest Text, Markdown und HTML. Unsere eigenen .doc-Exporte sind HTML und
@@ -19760,7 +19813,10 @@ function settings(){
     <div class="setsec">${tr("Bearbeiten")}</div>
     ${zeile(tr("Maßeinheit"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>${tr("Millimeter")}</option>
       <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
-    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("im Menü Einfügen anbieten")))}`;
+    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("im Menü Einfügen anbieten")))}
+    <div class="setsec">${tr("Autor")}</div>
+    ${zeile(tr("Dein Name"),`<input type="text" id="sName" autocomplete="off" value="${esc(s.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
+    <p class="setnote">${tr("Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.")}</p>`;
   const neu=`
     <div class="setsec">${tr("Neue Dokumente")}</div>
     <p class="setnote">${tr("Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.")}</p>
@@ -19884,13 +19940,14 @@ function settings(){
        (noch) nicht, dort bliebe sonst die Prüfsprache auf einem Code stehen,
        den dict/ gar nicht bedient. */
     if(langChanged&&hasSpellDict(uiNeu))s.lang=uiNeu;
+    if($("#sName"))s.meinName=$("#sName").value.trim();
     s.typewriter=v("sTw",s.typewriter);s.dimUi=v("sDim",s.dimUi);s.tofEnabled=v("sTof",s.tofEnabled);
     if(!s.dimUi)document.body.classList.remove("typing");
     a.quotes=v("acQuotes",a.quotes);a.dash=v("acDash",a.dash);
     a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof",
+  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof","sName",
    "acQuotes","acDash","acCap","acLists"]
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
@@ -21109,8 +21166,10 @@ Seiten gebaut, die du ohnehin siehst, deshalb können Vorschau und Papier nicht 
 <p><b>Zum Drucken</b> drückst du <kbd>Strg</kbd>+<kbd>P</kbd> oder nimmst
 <b>Datei &rsaquo; Drucken</b>.</p>
 <p><b>Für ein PDF</b> wählst du <b>Datei &rsaquo; Speichern als &rsaquo; PDF-Dokument</b>.
-Ein kleines Fenster fragt nach dem Autor und zeigt das Seitenformat, dann geht es
-weiter<nur-b>: in den Druckdialog des Browsers — dort als Ziel <i>Als PDF speichern</i> wählen</nur-b><nur-a> gleich in den Speichern-Dialog</nur-a>.</p>`}]},
+Ein kleines Fenster fragt nach dem Titel und zeigt das Seitenformat; in der Desktop-Fassung
+auch nach Autor, Betreff und Stichwörtern (den Autor schlägt es aus <b>Einstellungen &rsaquo;
+Allgemein &rsaquo; Dein Name</b> vor) und ob Lesezeichen aus den Überschriften entstehen sollen.
+Dann geht es weiter<nur-b>: in den Druckdialog des Browsers — dort als Ziel <i>Als PDF speichern</i> wählen</nur-b><nur-a> gleich in den Speichern-Dialog</nur-a>.</p>`}]},
 
 {b:"Arbeit an längeren Texten",t:[
  {t:"Notizen auf der Pinnwand",k:"notizen;pinnwand;zettel;farben",b:`

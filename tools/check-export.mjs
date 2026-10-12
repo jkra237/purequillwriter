@@ -31,6 +31,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { createRequire } from "node:module";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
@@ -550,6 +551,32 @@ try {
     if (keep) await fsp.writeFile(path.join(root, `pruef-export-${cfg.id}.pdf`), pdf);
     const g = pdfMessen(pdf);
     const f = cfg.fmt;
+
+    /* Metadaten: printToPDF schreibt nur den Titel, die Desktop-Fassung
+       trägt Autor, Betreff, Stichwörter und Ersteller mit setPdfInfo()
+       nach (desktop/pdf-info.js, dieselbe Funktion wie in main.js). Geprüft
+       wird, was ein strenger Leser verlangt: der neue Trailer zeigt auf ein
+       Info-Objekt, das genau an der im Querverweis genannten Stelle steht,
+       /Prev auf den alten Querverweis, und die Seiten bleiben dieselben. */
+    {
+      const { setPdfInfo, pdfText } = createRequire(import.meta.url)("../desktop/pdf-info.js");
+      const soll = { title: "Prüftitel", author: "Jan Kraj ąß", subject: "Betreff (eins)", keywords: "a, b", creator: "PureQuill Writer" };
+      const neu = setPdfInfo(pdf, soll), t = neu.toString("latin1");
+      const sx = +/startxref\s+(\d+)\s+%%EOF\s*$/.exec(t)[1];
+      const xr = /^xref\n(\d+) 1\n(\d{10}) 00000 n \ntrailer\n<<([\s\S]*?)>>/.exec(t.slice(sx));
+      const objOk = xr && t.startsWith(xr[1] + " 0 obj", +xr[2]);
+      const infoOk = xr && new RegExp("/Info " + xr[1] + " 0 R").test(xr[3]);
+      const prev = xr && /\/Prev (\d+)/.exec(xr[3]);
+      const prevOk = prev && t.startsWith("xref", +prev[1]) && neu.subarray(0, pdf.length).equals(pdf);
+      const objText = objOk ? t.slice(+xr[2], t.indexOf("endobj", +xr[2])) : "";
+      const felderOk = Object.entries({ Title: soll.title, Author: soll.author, Subject: soll.subject, Keywords: soll.keywords, Creator: soll.creator })
+        .every(([k, v]) => objText.includes("/" + k + " " + pdfText(v)));
+      ok(P + "Metadaten nachgetragen (Querverweis, Info, Prev)", !!(objOk && infoOk && prevOk && felderOk),
+         !xr ? "kein Querverweis am Ende" : !objOk ? "Objekt nicht an der Querverweis-Stelle" : !infoOk ? "Trailer ohne /Info"
+           : !prevOk ? "/Prev oder alter Inhalt verändert" : !felderOk ? "Felder fehlen" : "Titel, Autor, Betreff, Stichwörter, Ersteller");
+      ok(P + "Metadaten ändern die Seiten nicht", pdfMessen(neu).seiten.length === g.seiten.length,
+         pdfMessen(neu).seiten.length + " / " + g.seiten.length);
+    }
 
     ok(P + "Blattmass", Math.abs(g.breiteMm - f.w) < 1 && Math.abs(g.hoeheMm - f.h) < 1,
        `${g.breiteMm.toFixed(1)} x ${g.hoeheMm.toFixed(1)} mm, erwartet ${f.w} x ${f.h}`);
