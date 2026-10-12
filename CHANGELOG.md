@@ -45,6 +45,25 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Behoben
+
+- **Großschreibung nach Abkürzungen, und sie ließ sich nicht zurücknehmen.**
+  Die Autokorrektur machte nach jedem „. “ groß, auch mitten im Satz nach
+  „z.B.“, „ca.“ oder „bzw.“. Rücktaste und wieder klein getippt ergab sofort
+  wieder den Großbuchstaben, nur Abschalten half. Jetzt wie in Word:
+  eine eingebaute Liste je Prüfsprache (`AC_ABK`), dazu jedes Wort mit
+  Punkt darin (z.B, e.g) und einzelne Buchstaben (Initialen, „z. B.“).
+  Im Deutschen und Polnischen bleibt es auch nach einer Ordnungszahl mitten
+  im Satz klein („der 3. große Tag“). Wer die Großschreibung mit der
+  Rücktaste und demselben Buchstaben oder mit Strg+Z zurücknimmt, behält den
+  Kleinbuchstaben, und das Wort vor dem Punkt kommt in `S.capAusnahmen`.
+  Die Liste steht unter Einstellungen → Autokorrektur → Ausnahmen, jedes
+  Wort lässt sich einzeln entfernen. Sie liegt außerhalb von `S.settings`,
+  „Werkszustand“ lässt sie also stehen wie das eigene Wörterbuch. Ein
+  anderer Buchstabe nach der Rücktaste wird weiter groß, denn das ist ein
+  Tippfehler, keine Rücknahme. Bewusst nicht in der Liste sind Kürzel, die
+  oft als Wort am Satzende stehen („Jan.“, „Max.“, „No.“, „Inc.“).
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch

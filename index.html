@@ -2608,6 +2608,8 @@ en:{
   "Gedankenstrich":"Dash",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Two hyphens become a dash",
   "Großschreibung":"Capitalisation",
+  "Ausnahmen":"Exceptions",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"After abbreviations such as “e.g.” it stays lowercase. If you turn a capital letter back to lowercase with Backspace or Ctrl+Z, the program remembers the word before it.",
   "Erster Buchstabe nach einem Satzende wird groß":"First letter after a sentence end is capitalised",
   "Listen":"Lists",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"A hyphen or number at the start of a line begins a list",
@@ -3450,6 +3452,8 @@ fr:{
   "Gedankenstrich":"Tiret",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Deux traits d’union deviennent un tiret",
   "Großschreibung":"Majuscules",
+  "Ausnahmen":"Exceptions",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"Après une abréviation comme « p. ex. », la lettre reste en minuscule. Si vous remettez une majuscule en minuscule avec Retour arrière ou Ctrl+Z, le programme retient le mot qui la précède.",
   "Erster Buchstabe nach einem Satzende wird groß":"La première lettre après la fin d’une phrase est mise en majuscule",
   "Listen":"Listes",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"Un trait d’union ou un numéro en début de ligne commence une liste",
@@ -4292,6 +4296,8 @@ es:{
   "Gedankenstrich":"Raya",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Dos guiones se convierten en una raya",
   "Großschreibung":"Mayúsculas",
+  "Ausnahmen":"Excepciones",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"Tras abreviaturas como «p. ej.» se mantiene en minúscula. Si vuelves a poner una mayúscula en minúscula con Retroceso o Ctrl+Z, el programa recuerda la palabra anterior.",
   "Erster Buchstabe nach einem Satzende wird groß":"La primera letra después del final de una frase se pone en mayúscula",
   "Listen":"Listas",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"Un guion o un número al principio de la línea inicia una lista",
@@ -5134,6 +5140,8 @@ pt:{
   "Gedankenstrich":"Travessão",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Dois hífens tornam-se um travessão",
   "Großschreibung":"Maiúsculas",
+  "Ausnahmen":"Exceções",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"Depois de abreviações como “p. ex.” continua em minúscula. Se você voltar uma maiúscula para minúscula com Backspace ou Ctrl+Z, o programa memoriza a palavra anterior.",
   "Erster Buchstabe nach einem Satzende wird groß":"A primeira letra após o fim de uma frase fica maiúscula",
   "Listen":"Listas",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"Um hífen ou número no início da linha inicia uma lista",
@@ -5976,6 +5984,8 @@ pl:{
   "Gedankenstrich":"Myślnik",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Dwa łączniki zamieniają się w myślnik",
   "Großschreibung":"Wielka litera",
+  "Ausnahmen":"Wyjątki",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"Po skrótach takich jak „np.” zostaje mała litera. Jeśli zamienisz wielką literę z powrotem na małą klawiszem Backspace lub Ctrl+Z, program zapamięta słowo przed nią.",
   "Erster Buchstabe nach einem Satzende wird groß":"Pierwsza litera po końcu zdania jest wielka",
   "Listen":"Listy",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"Łącznik lub liczba na początku wiersza rozpoczyna listę",
@@ -6825,6 +6835,8 @@ it:{
   "Gedankenstrich":"Lineetta",
   "Zwei Bindestriche werden zu einem Gedankenstrich":"Due trattini diventano una lineetta",
   "Großschreibung":"Maiuscole",
+  "Ausnahmen":"Eccezioni",
+  "Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.":"Dopo abbreviazioni come «ad es.» resta minuscola. Se riporti una maiuscola in minuscolo con Backspace o Ctrl+Z, il programma memorizza la parola precedente.",
   "Erster Buchstabe nach einem Satzende wird groß":"La prima lettera dopo la fine di una frase diventa maiuscola",
   "Listen":"Elenchi",
   "Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste":"Un trattino o un numero a inizio riga avvia un elenco",
@@ -7248,6 +7260,7 @@ if(!S.goal)S.goal={on:false,target:1000,base:0,unit:"words"};
 if(S.goal&&!S.goal.unit)S.goal.unit="words";
 /* Eigene Wörter der Rechtschreibprüfung — gelten über alle Dokumente hinweg */
 if(!Array.isArray(S.userDict))S.userDict=[];
+if(!Array.isArray(S.capAusnahmen))S.capAusnahmen=[];
 ensureGlossaries();
 /* Der Abstand zur Papierkante saß früher an der Kopf-/Fußzeile, jetzt am
    Seitenformat — wie in Word unter „Layout“. Eigene Werte wandern mit. */
@@ -7714,6 +7727,8 @@ function drawWrite(){
       if(e.key==="Enter"||e.key==="Tab"){e.preventDefault();slashRun(slashIdx);return}
       if(e.key==="Escape"){e.preventDefault();slashClose();return}
     }
+    if(acGross&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
+      &&acGrossZuruecknehmen()){e.preventDefault();return}
     /* Zweimal Enter auf einer bereits leeren Zitatzeile verlässt das Zitat -
        genau wie der Browser es bei Aufzählungen/Nummerierungen schon von
        selbst tut. Ohne diesen Sonderfall setzt formatBlock("blockquote")
@@ -18581,9 +18596,116 @@ function acSafeInsert(blk,range,text){
   }
   return acReplace(range,0,text);
 }
+/* Großschreibung nach dem Punkt, aber nicht nach einer Abkürzung — wie Words
+   Ausnahmeliste unter AutoKorrektur → Ausnahmen → „Erster Buchstabe“. Bis
+   1.2 machte das Programm nach jedem „. “ groß, auch mitten im Satz nach
+   „z.B.“ oder „ca.“, und ließ sich nicht davon abbringen: Rücktaste und
+   wieder klein getippt ergab sofort wieder den Großbuchstaben.
+   Je Prüfsprache die geläufigen Abkürzungen (ohne Schlusspunkt, klein).
+   Bewusst nicht dabei: Kürzel, die zugleich ein Wort oder Name sind, das oft
+   am Satzende steht — „Jan.“, „Max.“, „No.“, „Akt.“, „Inc.“. Dort ist ein
+   fehlender Großbuchstabe ärgerlicher als ein überflüssiger, und wer
+   anders schreibt, bringt es dem Programm über die Rücknahme bei. Zwei
+   Formen brauchen keine Liste: ein Punkt im Wort (z.B, d.h, e.g) und ein
+   einzelner Buchstabe (Initialen, „S. 12“, „z. B.“ mit Leerzeichen). */
+const AC_ABK={
+  de:"abb abs abschn abt allg anm aufl ausg bd bes betr bsp bspw bzgl bzw ca chr dgl dipl dr dt ebd ehem einschl entspr etc evtl ff gegr geb gem ggf ggfs hg hr hrsg inkl insb jh jhd kap lt mind mio mrd nr prof sog std str tel tsd ugs urspr usw verf vgl zit zzgl zzt",
+  en:"approx appt cf dept dr eds etc fig figs jr mr mrs ms pp prof sr st viz vol vols vs",
+  fr:"apr av bd cf chap dr env etc ex fig mlle mme pr vol",
+  es:"aprox art avda cap dpto dr dra ej etc núm pág págs sr sra srta tel ud uds vol",
+  it:"art avv ca cap cfr dott ecc es fig ing pag pagg prof sig sigg tel vol",
+  pt:"aprox art av cap cf dr dra etc ex fig obs pág págs prof sr sra tel vol",
+  pl:"al cdn dr gen godz inż itd itp jw kpt ks mgr mln np nr ok pl płk por prof przyp red st str tel tj tys tzn ul wg wyd zob św"
+};
+const acAbkSets={};
+/* Das Wort direkt vor einem abschließenden „. “, klein — oder null, wenn der
+   Satz anders endet (! ? … oder ein Anführungszeichen nach dem Punkt, das
+   ist ein Satzende in wörtlicher Rede). Drei Punkte („...“) zählen als
+   Satzende, nicht als Wort mit Punkt darin. */
+function acWortVorPunkt(vor){
+  const m=/(\S+)\.\s+$/u.exec(vor);
+  if(!m||m[1].endsWith("."))return null;
+  const w=m[1].replace(/^[^\p{L}\p{N}]+/u,"").toLowerCase();
+  return w||null;
+}
+function acIstAbkuerzung(wort,lang,vor){
+  if(/\.\p{L}/u.test(wort)||/^\p{L}$/u.test(wort))return true;
+  /* Ordnungszahl mitten im Satz: „der 3. große Erfolg“. Nur im Deutschen
+     und Polnischen, die Ordnungszahlen mit Punkt schreiben, und nur, wenn
+     vor der Zahl schon Text steht — „1. “ am Zeilenanfang ist ein
+     Listenpunkt, danach geht es groß weiter. */
+  if(/^\d+$/.test(wort))return (lang==="de"||lang==="pl")&&vor.trim()!==wort+".";
+  const set=acAbkSets[lang]||(acAbkSets[lang]=new Set((AC_ABK[lang]||"").split(" ")));
+  return set.has(wort)||(S.capAusnahmen||[]).includes(wort);
+}
+function acSatzanfang(vor,lang){
+  if(!vor.trim())return true;
+  if(!/[.!?…]["'’”“»)\]]*\s+$/.test(vor))return false;
+  const w=acWortVorPunkt(vor);
+  return !(w&&acIstAbkuerzung(w,lang,vor));
+}
+/* Zurücknehmen wie in Word: Rücktaste und denselben Buchstaben klein
+   tippen, oder Strg+Z direkt danach, lässt ihn klein — und das Wort vor dem
+   Punkt landet in S.capAusnahmen, damit es beim nächsten Mal gar nicht erst
+   groß wird. Liegt außerhalb von S.settings, weil es wie das eigene
+   Wörterbuch Arbeit ist, keine Einstellung: „Werkszustand“ lässt es stehen.
+   acGross ist die letzte automatische Großschreibung, solange sie noch
+   zurückgenommen werden kann (jede weitere Eingabe beendet das), acZurueck
+   dieselbe nach der Rücktaste. Beide halten den Text vor der Stelle fest —
+   stimmt er nicht mehr, ist die Schreibmarke woanders und nichts passiert. */
+let acGross=null,acZurueck=null;
+/* Chrome legt ein Leerzeichen am Blockende beim Tippen und Löschen mal als
+   geschütztes (U+00A0) ab, mal als normales — für den Vergleich gleich. */
+const acOhneNbsp=s=>s.replace(/ /g," ");
+function acStelle(g){
+  const sel=getSelection();
+  if(!g||!sel.rangeCount||!sel.isCollapsed)return null;
+  const range=sel.getRangeAt(0);
+  if(!g.blk.isConnected||acBlockOf(range.startContainer)!==g.blk)return null;
+  return {range,vor:acOhneNbsp(acTextBefore(g.blk,range))};
+}
+function acLernen(wort){
+  if(!wort||!/\p{L}/u.test(wort))return;
+  if(!Array.isArray(S.capAusnahmen))S.capAusnahmen=[];
+  if(!S.capAusnahmen.includes(wort)){S.capAusnahmen.push(wort);save()}
+}
+/* Strg+Z direkt nach der Großschreibung: aus dem Tastenhandler des Editors.
+   Liefert true, wenn es etwas zurückzunehmen gab — dann bleibt der normale
+   Rückgängig-Schritt aus, genau wie bei Word, wo das erste Strg+Z nur die
+   Autokorrektur aufhebt und den getippten Buchstaben stehen lässt. */
+function acGrossZuruecknehmen(){
+  const g=acGross,st=acStelle(g);acGross=null;
+  if(!st||st.vor!==g.vor+g.gross)return false;
+  /* Nicht über acReplace: nach acSafeInsert stehen Leerzeichen und
+     Großbuchstabe oft in einem eigenen Textknoten, getrennt vom Text davor,
+     und acReplace gibt auf, sobald es über eine Knotengrenze zurück müsste.
+     Hier die Zeichen über die Knoten hinweg zurückzählen. */
+  const n=acAtBlockEnd(g.blk,st.range)&&g.vor.endsWith(" ")?2:1;
+  const r=st.range.cloneRange(),w=document.createTreeWalker(g.blk,NodeFilter.SHOW_TEXT);
+  const texte=[];let t;while(t=w.nextNode())texte.push(t);
+  let rest=n,k=st.range.startContainer,off=st.range.startOffset;
+  if(k.nodeType!==3){   /* Schreibmarke zwischen Elementen: ab dem letzten Textknoten davor zählen */
+    const vorher=texte.filter(x=>{const rx=document.createRange();rx.selectNodeContents(x);
+      return st.range.compareBoundaryPoints(Range.END_TO_END,rx)>=0});
+    k=vorher[vorher.length-1];off=k?k.length:0}
+  while(k&&rest>off){rest-=off;k=texte[texte.indexOf(k)-1];off=k?k.length:0}
+  if(!k)return false;
+  r.setStart(k,off-rest);
+  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+  document.execCommand("insertText",false,(n===2?" ":"")+g.klein);
+  acLernen(g.wort);
+  return true;
+}
 function autoCorrectInput(e){
   const a=S.settings.autoc;
-  if(!a||slashOn||e.inputType!=="insertText"||!e.data)return;
+  if(!a||slashOn)return;
+  const g=acGross,z=acZurueck;acGross=null;acZurueck=null;
+  if(g&&e.inputType==="deleteContentBackward"){
+    const st=acStelle(g);
+    if(st&&st.vor===g.vor+g.gross)acZurueck=g;
+    return;
+  }
+  if(e.inputType!=="insertText"||!e.data)return;
   const sel=getSelection();
   if(!sel.rangeCount||!sel.isCollapsed)return;
   const range=sel.getRangeAt(0);
@@ -18614,11 +18736,18 @@ function autoCorrectInput(e){
   }
   if(a.cap&&/^\p{Ll}$/u.test(data)){
     const vor=acTextBefore(blk,range);
+    /* Gerade den eigenen Großbuchstaben gelöscht und denselben klein
+       getippt: so bleibt es. Nur bei demselben Buchstaben — wer sich
+       vertippt hat und einen anderen nachschiebt, will weiter groß. */
+    if(z&&z.blk===blk&&z.vor===acOhneNbsp(vor)&&z.klein===data){acLernen(z.wort);return}
     /* Blockanfang, oder ein Satzende (mit optional folgenden Anführungs-
-       zeichen/Klammern) plus mindestens ein Leerzeichen davor. */
-    const satzanfang=!vor.trim()
-      ||/[.!?…]["'’”“»)\]]*\s+$/.test(vor);
-    if(satzanfang){e.preventDefault();acSafeInsert(blk,range,data.toUpperCase());return}
+       zeichen/Klammern) plus mindestens ein Leerzeichen davor — außer nach
+       einer Abkürzung. */
+    if(acSatzanfang(vor,lang)){
+      e.preventDefault();
+      const gross=data.toUpperCase();
+      if(acSafeInsert(blk,range,gross))acGross={blk,vor:acOhneNbsp(vor),gross,klein:data,wort:acWortVorPunkt(vor)};
+    }
     return;
   }
   if(a.lists&&data===" "&&blk.tagName==="P"){
@@ -19503,6 +19632,10 @@ function settings(){
     ${zeile(tr("Anführungszeichen"),haken("acQuotes",a.quotes,tr("Gerade \" und ' werden zu typografischen Anführungszeichen")))}
     ${zeile(tr("Gedankenstrich"),haken("acDash",a.dash,tr("Zwei Bindestriche (--) werden zum Gedankenstrich (–)")))}
     ${zeile(tr("Großschreibung"),haken("acCap",a.cap,tr("Nach . ! ? beginnt der nächste Satz groß")))}
+    ${zeile(tr("Ausnahmen"),`<div style="flex:1;text-align:left">
+      ${(S.capAusnahmen||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">${S.capAusnahmen.map((w,i)=>
+        `<button class="pill" data-acx="${i}" title="${tr("Entfernen")}">${esc(w)}. ✕</button>`).join("")}</div>`:""}
+      <span style="color:var(--ink-soft);font-size:12px;line-height:1.45">${tr("Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.")}</span></div>`)}
     ${zeile(tr("Listen"),haken("acLists",a.lists,tr("„- “ oder „1. “ am Zeilenanfang beginnt eine Liste")))}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
@@ -19611,6 +19744,8 @@ function settings(){
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
     setTab=b.dataset.tab;settings()});
+  $("#ovl").querySelectorAll("[data-acx]").forEach(b=>b.onclick=()=>{
+    S.capAusnahmen.splice(+b.dataset.acx,1);save();settings()});
   const anTh=$("#sThemeBtn");if(anTh)anTh.onclick=themeDialog;
   /* Zurück auf Word: der Weg zurück, falls man sich verklickt hat */
   const werk=$("#sWerk");if(werk)werk.onclick=werkszustandDialog;
@@ -20172,7 +20307,7 @@ individually under <b>Settings &rsaquo; AutoCorrect</b>.</p>
 <table class="hkeys">
 <tr><td><b>Quotation marks</b></td><td>Straight quotes become typographic ones.</td></tr>
 <tr><td><b>Dash</b></td><td>Two hyphens become a dash.</td></tr>
-<tr><td><b>Capitalisation</b></td><td>The first letter of a sentence is capitalised.</td></tr>
+<tr><td><b>Capitalisation</b></td><td>The first letter of a sentence is capitalised, but not after abbreviations such as “e.g.” or “etc.”. If you turn the capital back to lowercase with Backspace or Ctrl+Z, it stays that way, and the program remembers the word before the full stop. You can remove learned words under Settings → AutoCorrect.</td></tr>
 <tr><td><b>Lists</b></td><td><code>- </code> or <code>1. </code> starts a list.</td></tr>
 </table>
 <p>Which quotation marks are used follows the <b>spelling language</b>, not the language of
@@ -20747,7 +20882,7 @@ sich einzeln unter <b>Einstellungen &rsaquo; Autokorrektur</b> abschalten.</p>
 <table class="hkeys">
 <tr><td><b>Anführungszeichen</b></td><td>Gerade werden zu typografischen.</td></tr>
 <tr><td><b>Gedankenstrich</b></td><td>Zwei Bindestriche werden zu einem Gedankenstrich.</td></tr>
-<tr><td><b>Großschreibung</b></td><td>Der erste Buchstabe eines Satzes wird groß.</td></tr>
+<tr><td><b>Großschreibung</b></td><td>Der erste Buchstabe eines Satzes wird groß, nicht aber nach Abkürzungen wie „z. B.“ oder „bzw.“. Machst du den Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, bleibt er klein, und das Programm merkt sich das Wort vor dem Punkt. Gelernte Wörter lassen sich unter Einstellungen → Autokorrektur wieder entfernen.</td></tr>
 <tr><td><b>Listen</b></td><td><code>- </code> oder <code>1. </code> beginnt eine Liste.</td></tr>
 </table>
 <p>Welche Anführungszeichen gesetzt werden, richtet sich nach der <b>Rechtschreibsprache</b>,
@@ -21341,7 +21476,7 @@ desactivar por separado en <b>Configuración &rsaquo; Autocorrección</b>.</p>
 <table class="hkeys">
 <tr><td><b>Comillas</b></td><td>Las comillas rectas se vuelven tipográficas.</td></tr>
 <tr><td><b>Raya</b></td><td>Dos guiones se vuelven una raya.</td></tr>
-<tr><td><b>Mayúsculas</b></td><td>La primera letra de una frase se pone en mayúscula.</td></tr>
+<tr><td><b>Mayúsculas</b></td><td>La primera letra de una frase se pone en mayúscula, pero no después de abreviaturas como «p. ej.» o «etc.». Si vuelves a ponerla en minúscula con Retroceso o Ctrl+Z, se queda así, y el programa recuerda la palabra anterior al punto. Las palabras aprendidas se pueden quitar en Configuración → Autocorrección.</td></tr>
 <tr><td><b>Listas</b></td><td><code>- </code> o <code>1. </code> empieza una lista.</td></tr>
 </table>
 <p>Qué comillas se usan depende del <b>idioma de ortografía</b>, no del idioma de los menús: el
@@ -21940,7 +22075,7 @@ desligadas individualmente em <b>Configurações &rsaquo; Correção automática
 <table class="hkeys">
 <tr><td><b>Aspas</b></td><td>Aspas retas viram tipográficas.</td></tr>
 <tr><td><b>Travessão</b></td><td>Dois hifens viram um travessão.</td></tr>
-<tr><td><b>Maiúsculas</b></td><td>A primeira letra de uma frase fica maiúscula.</td></tr>
+<tr><td><b>Maiúsculas</b></td><td>A primeira letra de uma frase fica maiúscula, mas não depois de abreviações como “p. ex.” ou “etc.”. Se você voltar a maiúscula para minúscula com Backspace ou Ctrl+Z, ela fica assim, e o programa memoriza a palavra antes do ponto. As palavras aprendidas podem ser removidas em Configurações → Correção automática.</td></tr>
 <tr><td><b>Listas</b></td><td><code>- </code> ou <code>1. </code> começa uma lista.</td></tr>
 </table>
 <p>Quais aspas são usadas segue o <b>idioma de ortografia</b>, não o idioma dos menus: alemão e
@@ -22544,7 +22679,7 @@ automatique</b>.</p>
 <table class="hkeys">
 <tr><td><b>Guillemets</b></td><td>Les guillemets droits deviennent typographiques.</td></tr>
 <tr><td><b>Tiret</b></td><td>Deux traits d'union deviennent un tiret.</td></tr>
-<tr><td><b>Majuscules</b></td><td>La première lettre d'une phrase est mise en majuscule.</td></tr>
+<tr><td><b>Majuscules</b></td><td>La première lettre d'une phrase est mise en majuscule, mais pas après une abréviation comme « p. ex. » ou « etc. ». Si vous remettez la majuscule en minuscule avec Retour arrière ou Ctrl+Z, elle reste ainsi, et le programme retient le mot avant le point. Les mots appris peuvent être retirés dans Paramètres → Correction automatique.</td></tr>
 <tr><td><b>Listes</b></td><td><code>- </code> ou <code>1. </code> commence une liste.</td></tr>
 </table>
 <p>Les guillemets utilisés suivent la <b>langue d'orthographe</b>, pas la langue des menus :
@@ -23147,7 +23282,7 @@ można je wyłączyć osobno w <b>Ustawienia &rsaquo; Autokorekta</b>.</p>
 <table class="hkeys">
 <tr><td><b>Cudzysłowy</b></td><td>Proste cudzysłowy stają się typograficzne.</td></tr>
 <tr><td><b>Myślnik</b></td><td>Dwa dywizy stają się myślnikiem.</td></tr>
-<tr><td><b>Wielkie litery</b></td><td>Pierwsza litera zdania jest zamieniana na wielką.</td></tr>
+<tr><td><b>Wielkie litery</b></td><td>Pierwsza litera zdania jest zamieniana na wielką, ale nie po skrótach takich jak „np.” czy „itd.”. Jeśli zamienisz wielką literę z powrotem na małą klawiszem Backspace lub Ctrl+Z, zostanie mała, a program zapamięta słowo przed kropką. Zapamiętane słowa można usunąć w Ustawienia → Autokorekta.</td></tr>
 <tr><td><b>Listy</b></td><td><code>- </code> lub <code>1. </code> rozpoczyna listę.</td></tr>
 </table>
 <p>To, których cudzysłowów się używa, zależy od <b>języka pisowni</b>, nie od języka menu —
@@ -23736,7 +23871,7 @@ possono disattivare singolarmente in <b>Impostazioni &rsaquo; Correzione automat
 <table class="hkeys">
 <tr><td><b>Virgolette</b></td><td>Le virgolette dritte diventano tipografiche.</td></tr>
 <tr><td><b>Lineetta</b></td><td>Due trattini diventano una lineetta.</td></tr>
-<tr><td><b>Maiuscole</b></td><td>La prima lettera di una frase viene messa in maiuscolo.</td></tr>
+<tr><td><b>Maiuscole</b></td><td>La prima lettera di una frase viene messa in maiuscolo, ma non dopo abbreviazioni come «ad es.» o «ecc.». Se la riporti in minuscolo con Backspace o Ctrl+Z, resta così, e il programma memorizza la parola prima del punto. Le parole memorizzate si possono rimuovere in Impostazioni → Correzione automatica.</td></tr>
 <tr><td><b>Elenchi</b></td><td><code>- </code> o <code>1. </code> avvia un elenco.</td></tr>
 </table>
 <p>Quali virgolette vengono usate dipende dalla <b>lingua di ortografia</b>, non dalla lingua
