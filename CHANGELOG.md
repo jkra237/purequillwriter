@@ -590,6 +590,23 @@ immer genau einen Commit, der sie anfasst.
   bearbeitet, löscht nicht das ganze Verzeichnis. Geprüft mit echten Klicks
   und Tastendrücken (`werkzeuge/pruefen/loeschen-pruefen.cjs`).
 
+- **Dialoge öffnen mittig über dem Programmfenster**, wie in OpenOffice und
+  Word, maximiert wie im kleinen Fenster. Bis 1.2 standen sie in fester Höhe
+  ab der Oberkante (maximiert 127 px) — kleine Dialoge wie „Wörter zählen“
+  oder die Rechtschreibprüfung saßen damit bis zu 248 px über der Mitte.
+  `dialogLage()` setzt die Lage einmal beim Öffnen; was gleich danach
+  nachgefüllt wird (Rechtschreibprüfung: erst „lädt …“), zählt noch dazu.
+  Danach bleibt die Oberkante stehen: wächst der Inhalt, wächst der Dialog
+  nach unten, statt zu springen. Baut sich derselbe Dialog neu auf (die
+  Reiter der Einstellungen gehen durch `overlay()`), behält er seine Lage.
+  Eine neue Fenstergröße (Maximieren) richtet ihn neu aus. Dialoge, die
+  höher als das Fenster sind (Einstellungen ragten selbst maximiert unten
+  heraus), passen ihren Rahmen ans Fenster an, nur der Inhalt rollt, Titel
+  und Schließkreuz bleiben stehen (`.modal.zuhoch` — nur dann, weil
+  overflow sonst Aufklappendes im Dialog abschneiden könnte). Gemessen an
+  elf Dialogen in drei Fenstergrößen: Abweichung zur Mitte höchstens 1 px
+  (`werkzeuge/pruefen/dialog-lage.cjs`, `dialog-reiter.cjs`).
+
 ### Nebenbei gefunden, noch nicht behoben
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.

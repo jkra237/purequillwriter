@@ -1084,10 +1084,17 @@ body.focus .outline{display:none}
 
 /* ---- Overlays ---- */
 /* Scrollbar, damit hohe Dialoge auf kleinen Fenstern nicht abgeschnitten werden */
+/* Dialoge öffnen mittig über dem Programmfenster wie in OpenOffice und
+   Word, maximiert wie im kleinen Fenster. Bis 1.2 standen sie in fester
+   Höhe ab der Oberkante (maximiert 127 px, gut 200 px über der Mitte).
+   Die Lage rechnet dialogLage() beim Öffnen aus; .veil gibt nur den Rand. */
 .veil{position:fixed;inset:0;background:rgba(0,0,0,.28);display:flex;align-items:flex-start;
-  justify-content:center;padding:13vh 10px 28px;z-index:50;overflow-y:auto}
-@media (max-height:820px){.veil{padding-top:5vh}}
-@media (max-height:620px){.veil{padding-top:12px}}
+  justify-content:center;padding:12px 10px;z-index:50;overflow-y:auto}
+/* Höher als das Fenster: der Rahmen passt sich an, nur der Inhalt rollt,
+   Titel und Schließkreuz bleiben stehen. Nur dann, weil overflow sonst
+   Aufklappendes im Dialog abschneiden könnte. */
+.modal.zuhoch{max-height:calc(100vh - 24px);overflow-y:auto}
+.modal.zuhoch>h3{position:sticky;top:0;z-index:2;background:var(--paper);border-radius:var(--radius-lg) var(--radius-lg) 0 0}
 .modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius-lg);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
 .modal.wide{width:min(600px,94vw)}
@@ -8525,7 +8532,41 @@ function closeOvl(){if(lockedOvl)return;
    Gesperrte Overlays bekommen keines. closeOvl() kommt dort nicht durch, das
    Kreuz waere also tot. Der Startbildschirm — das einzige gesperrte — bringt
    sein eigenes mit, das startSkip() ruft. */
-function overlay(html,lock){lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
+/* Einmal beim Öffnen mittig setzen, danach bleibt die Oberkante stehen:
+   wächst der Inhalt (Reiter, Prüfergebnisse), wächst der Dialog nach
+   unten, statt zu springen — erst wenn er unten anstößt, rückt er so weit
+   hoch wie nötig. Eine neue Fenstergröße richtet ihn neu aus. */
+let dlgBeobachter=null,dlgSeit=0;
+function dialogLage(neu){
+  const m=$("#ovl .veil>.modal");if(!m)return;
+  const H=innerHeight,RAND=12;
+  m.classList.toggle("zuhoch",m.scrollHeight>H-2*RAND+1);
+  const h=m.offsetHeight,alt=parseFloat(m.style.marginTop)||0;
+  /* Was gleich nach dem Öffnen nachgefüllt wird (Rechtschreibprüfung:
+     erst „lädt …“, dann das Ergebnis), zählt noch zum Öffnen. */
+  if(performance.now()-dlgSeit<600)neu=true;
+  let oben=neu?Math.max(0,(H-h)/2-RAND):alt;
+  if(oben+h>H-2*RAND)oben=Math.max(0,H-2*RAND-h);
+  m.style.marginTop=Math.round(oben)+"px";
+}
+addEventListener("resize",()=>dialogLage(true));
+function overlay(html,lock){
+  /* Baut sich derselbe Dialog neu auf (Reiter der Einstellungen gehen durch
+     overlay()), behält er seine Lage, statt neu zur Mitte zu springen. */
+  const vorher=$("#ovl .veil>.modal"),vorTitel=vorher&&vorher.querySelector("h3")?vorher.querySelector("h3").firstChild&&vorher.querySelector("h3").firstChild.textContent:null,
+    vorOben=vorher?vorher.style.marginTop:"";
+  lockedOvl=!!lock;$("#ovl").innerHTML=`<div class="veil">${html}</div>`;
+  if(dlgBeobachter)dlgBeobachter.disconnect();
+  const dlg=$("#ovl .veil>.modal");
+  const gleich=dlg&&vorTitel!=null&&dlg.querySelector("h3")&&dlg.querySelector("h3").firstChild&&dlg.querySelector("h3").firstChild.textContent===vorTitel;
+  if(dlg&&gleich){dlg.style.marginTop=vorOben;dialogLage(false);
+    if(window.ResizeObserver){dlgBeobachter=new ResizeObserver(()=>dialogLage(false));dlgBeobachter.observe(dlg);[...dlg.children].forEach(k=>dlgBeobachter.observe(k))}}
+  else if(dlg){dlgSeit=performance.now();dialogLage(true);
+    if(window.ResizeObserver){dlgBeobachter=new ResizeObserver(()=>dialogLage(false));dlgBeobachter.observe(dlg);
+      /* Inhalt, der nach dem Öffnen nachgefüllt wird, ändert die Größe des
+         Dialogs erst, wenn er nicht mehr begrenzt ist — deshalb auch die
+         Kinder beobachten. */
+      [...dlg.children].forEach(k=>dlgBeobachter.observe(k))}}
   if(lock)return;
   $("#ovl").querySelector(".veil").onclick=e=>{if(e.target.classList.contains("veil"))closeOvl()};
   const kopf=$("#ovl").querySelector(".modal>h3");
