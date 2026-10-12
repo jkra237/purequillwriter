@@ -18649,10 +18649,15 @@ function acSatzanfang(vor,lang){
    Punkt landet in S.capAusnahmen, damit es beim nächsten Mal gar nicht erst
    groß wird. Liegt außerhalb von S.settings, weil es wie das eigene
    Wörterbuch Arbeit ist, keine Einstellung: „Werkszustand“ lässt es stehen.
-   acGross ist die letzte automatische Großschreibung, solange sie noch
-   zurückgenommen werden kann (jede weitere Eingabe beendet das), acZurueck
-   dieselbe nach der Rücktaste. Beide halten den Text vor der Stelle fest —
-   stimmt er nicht mehr, ist die Schreibmarke woanders und nichts passiert. */
+   acGross ist die letzte automatische Großschreibung. Sie bleibt gültig,
+   solange der Text vor ihr unverändert steht — auch wenn danach das ganze
+   Wort getippt und wieder gelöscht wurde: Wer „Text“ fertig schreibt, es
+   wegradiert und „text“ neu tippt, nimmt die Korrektur genauso zurück wie
+   mit der Rücktaste direkt danach (so verhält sich Word; bis zum ersten
+   Test galt nur die Rücktaste unmittelbar nach dem Großbuchstaben).
+   acZurueck ist dieselbe, sobald der Großbuchstabe gelöscht wurde. Beide
+   halten den Text vor der Stelle fest — verlässt die Schreibmarke diesen
+   Satzanfang, verfallen sie. */
 let acGross=null,acZurueck=null;
 /* Chrome legt ein Leerzeichen am Blockende beim Tippen und Löschen mal als
    geschütztes (U+00A0) ab, mal als normales — für den Vergleich gleich. */
@@ -18664,6 +18669,15 @@ function acStelle(g){
   if(!g.blk.isConnected||acBlockOf(range.startContainer)!==g.blk)return null;
   return {range,vor:acOhneNbsp(acTextBefore(g.blk,range))};
 }
+/* Steht die Schreibmarke noch im Wort, das mit der automatischen
+   Großschreibung begann? Nur dort zählt Löschen und klein Neuschreiben als
+   Rücknahme. Wer schon ein Leerzeichen dahinter getippt hat, schreibt den
+   Satz weiter; löscht er ihn später ganz und fängt klein neu an, verlässt
+   er sich auf die Korrektur, statt sie abzulehnen — sonst lernte das
+   Programm aus „Ende. Das war es“ beim Umschreiben „ende“ als Abkürzung. */
+function acImWort(g,st){
+  return !!st&&st.vor.startsWith(g.vor)&&!/\s/.test(st.vor.slice(g.vor.length));
+}
 function acLernen(wort){
   if(!wort||!/\p{L}/u.test(wort))return;
   if(!Array.isArray(S.capAusnahmen))S.capAusnahmen=[];
@@ -18674,8 +18688,9 @@ function acLernen(wort){
    Rückgängig-Schritt aus, genau wie bei Word, wo das erste Strg+Z nur die
    Autokorrektur aufhebt und den getippten Buchstaben stehen lässt. */
 function acGrossZuruecknehmen(){
-  const g=acGross,st=acStelle(g);acGross=null;
+  const g=acGross,st=acStelle(g);
   if(!st||st.vor!==g.vor+g.gross)return false;
+  acGross=null;
   /* Nicht über acReplace: nach acSafeInsert stehen Leerzeichen und
      Großbuchstabe oft in einem eigenen Textknoten, getrennt vom Text davor,
      und acReplace gibt auf, sobald es über eine Knotengrenze zurück müsste.
@@ -18699,12 +18714,28 @@ function acGrossZuruecknehmen(){
 function autoCorrectInput(e){
   const a=S.settings.autoc;
   if(!a||slashOn)return;
-  const g=acGross,z=acZurueck;acGross=null;acZurueck=null;
-  if(g&&e.inputType==="deleteContentBackward"){
-    const st=acStelle(g);
-    if(st&&st.vor===g.vor+g.gross)acZurueck=g;
+  const z=acZurueck;acZurueck=null;
+  const g=acGross;
+  if(g&&/^delete/.test(e.inputType)){
+    /* Wird der Großbuchstabe gerade gelöscht? Der Browser nennt den Bereich
+       (getTargetRanges) — das deckt Rücktaste, Strg+Rücktaste und eine
+       markierte Stelle gleichermaßen ab. Ohne Angabe: Rücktaste direkt
+       hinter dem Buchstaben. */
+    const tr=e.getTargetRanges?e.getTargetRanges()[0]:null;
+    let weg=false;
+    if(tr&&!tr.collapsed){
+      const r=document.createRange();r.setStart(tr.startContainer,tr.startOffset);r.setEnd(tr.endContainer,tr.endOffset);
+      weg=acBlockOf(r.startContainer)===g.blk&&acOhneNbsp(acTextBefore(g.blk,r))===g.vor
+        &&r.toString().startsWith(g.gross);
+    }else{
+      const st=acStelle(g);
+      weg=!!st&&st.vor===g.vor+g.gross;
+    }
+    if(weg){acZurueck=g;acGross=null}
+    else{const st=acStelle(g);if(!acImWort(g,st))acGross=null}
     return;
   }
+  if(g){const st=acStelle(g);if(!acImWort(g,st))acGross=null}
   if(e.inputType!=="insertText"||!e.data)return;
   const sel=getSelection();
   if(!sel.rangeCount||!sel.isCollapsed)return;
@@ -18740,6 +18771,13 @@ function autoCorrectInput(e){
        getippt: so bleibt es. Nur bei demselben Buchstaben — wer sich
        vertippt hat und einen anderen nachschiebt, will weiter groß. */
     if(z&&z.blk===blk&&z.vor===acOhneNbsp(vor)&&z.klein===data){acLernen(z.wort);return}
+    /* Mitten in einem bestehenden Wort nie: wer in „Text weiter“ das „T“
+       löscht und „t“ tippt, korrigiert von Hand. Word korrigiert erst beim
+       Fertigschreiben eines Worts, ein ausgetauschter Buchstabe darin
+       bleibt, wie er getippt wurde (Toms Test nach dem ersten Wurf). */
+    const nach=document.createRange();
+    nach.selectNodeContents(blk);nach.setStart(range.startContainer,range.startOffset);
+    if(/^[\p{L}\p{N}]/u.test(nach.toString()))return;
     /* Blockanfang, oder ein Satzende (mit optional folgenden Anführungs-
        zeichen/Klammern) plus mindestens ein Leerzeichen davor — außer nach
        einer Abkürzung. */

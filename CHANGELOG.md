@@ -57,6 +57,14 @@ immer genau einen Commit, der sie anfasst.
   im Satz klein („der 3. große Tag“). Wer die Großschreibung mit der
   Rücktaste und demselben Buchstaben oder mit Strg+Z zurücknimmt, behält den
   Kleinbuchstaben, und das Wort vor dem Punkt kommt in `S.capAusnahmen`.
+  Das gilt auch, wenn das Wort erst fertig getippt, dann ganz gelöscht
+  (Rücktaste, Strg+Rücktaste oder markiert) und klein neu geschrieben wird,
+  wie in Word. Aber nur innerhalb dieses ersten Worts: Wer schon ein
+  Leerzeichen dahinter getippt hat und später den ganzen Satz neu
+  anfängt, verlässt sich auf die Korrektur und bekommt sie (`acImWort`).
+  Und mitten in einem bestehenden Wort greift die Großschreibung nie: Wer
+  später in „Text weiter“ das „T“ löscht und „t“ tippt, korrigiert von
+  Hand. Auch Word korrigiert erst beim Fertigschreiben eines Worts.
   Die Liste steht unter Einstellungen → Autokorrektur → Ausnahmen, jedes
   Wort lässt sich einzeln entfernen. Sie liegt außerhalb von `S.settings`,
   „Werkszustand“ lässt sie also stehen wie das eigene Wörterbuch. Ein
