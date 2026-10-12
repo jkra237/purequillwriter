@@ -45,6 +45,51 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Nebenbei gefunden, noch nicht behoben
+
+- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
+  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
+  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
+  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
+  Einmal geschlossen durchsehen.
+
+- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
+  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
+  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
+  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
+  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
+  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
+  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
+  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
+  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
+  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
+  unter „Behoben“.
+- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
+  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
+  Haken samt Hinweis — ehrlich, aber kein Werbebild.
+
+### Offen, noch nicht entschieden
+
+- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
+  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
+  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
+  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
+  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
+  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
+
+---
+
+## 1.2.0 — 2026-10-12
+
+Zweite Folgeversion im Store, am 2026-10-12 eingereicht und freigegeben.
+Tag `v1.2.0` auf `bc406b5`, Pakete x64 und arm64 in einer Einreichung,
+ohne schrittweisen Rollout, nur Windows 10/11 Desktop. „Neuigkeiten“ in
+sieben Sprachen (`suvantra-site/store-einreichung/Neuigkeiten-1.2.0.txt`).
+Am selben Tag live: Browser-Fassung unter /app/, Linux-Pakete 1.2.0 unter
+/download/linux/, Produktseiten und „What’s new“ (suvantra-site c95c31c).
+1.2.0, weil neue Funktionen dabei sind (Word-Kompatibilität, neue Dialoge,
+Versionsverlauf bis einen Monat).
+
 ### Neu
 
 - **Linux-Fassung**: AppImage und .deb, je x64 und arm64, gebaut in WSL mit
@@ -750,38 +795,6 @@ immer genau einen Commit, der sie anfasst.
   overflow sonst Aufklappendes im Dialog abschneiden könnte). Gemessen an
   elf Dialogen in drei Fenstergrößen: Abweichung zur Mitte höchstens 1 px
   (`werkzeuge/pruefen/dialog-lage.cjs`, `dialog-reiter.cjs`).
-
-### Nebenbei gefunden, noch nicht behoben
-
-- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
-  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
-  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
-  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
-  Einmal geschlossen durchsehen.
-
-- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
-  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
-  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
-  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
-  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
-  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
-  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
-  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
-  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
-  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
-  unter „Behoben“.
-- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
-  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
-  Haken samt Hinweis — ehrlich, aber kein Werbebild.
-
-### Offen, noch nicht entschieden
-
-- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
-  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
-  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
-  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
-  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
-  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
 
 ---
 
