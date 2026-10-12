@@ -65,6 +65,22 @@ immer genau einen Commit, der sie anfasst.
   Und mitten in einem bestehenden Wort greift die Großschreibung nie: Wer
   später in „Text weiter“ das „T“ löscht und „t“ tippt, korrigiert von
   Hand. Auch Word korrigiert erst beim Fertigschreiben eines Worts.
+
+- **Kopierte Zitate ließen sich nicht mehr in Fließtext verwandeln.** Aus
+  Webseiten kommt ein Zitat als `<blockquote><p>…</p></blockquote>`;
+  Absatzformat → Fließtext (`formatBlock("p")`) wandelte nur die inneren
+  Absätze um, die schon Absätze waren, und der Zitatrahmen blieb. Man bekam
+  ihn nur durch Löschen los. Ebenso `<h2><div>`, aus dem `<h2><p>` wurde.
+  `alsFliesstext()` löst Überschriften und Zitate jetzt selbst auf; aus
+  einem Zitat treten nur die markierten Absätze heraus, davor und danach
+  bleibt es Zitat (wie in Word, wo jeder Absatz seine Formatvorlage hat).
+  Listen, Tabellen und Bilder im Zitat bleiben, was sie sind.
+
+- **„Formatierung entfernen“ wirkt jetzt wie in Word auch auf den Absatz.**
+  Bisher nahm es nur Fett, Kursiv, Farben und Ähnliches weg. Jetzt werden
+  zusätzlich Überschriften und Zitate zu Fließtext, und Ausrichtung und
+  Einrückung gehen zurück (`formatierungEntfernen()`). Listen bleiben
+  Listen. Hilfe in allen sieben Sprachen ergänzt.
   Die Liste steht unter Einstellungen → Autokorrektur → Ausnahmen, jedes
   Wort lässt sich einzeln entfernen. Sie liegt außerhalb von `S.settings`,
   „Werkszustand“ lässt sie also stehen wie das eigene Wörterbuch. Ein

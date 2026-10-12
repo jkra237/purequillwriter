@@ -8001,7 +8001,8 @@ function sizeMenu(e){
   m.onclick=ev=>{const b=ev.target.closest("[data-fs]");if(!b)return;
     closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
 }
-function cmd(c){document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
+function cmd(c){if(c==="removeFormat"){formatierungEntfernen();return}
+  document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
 /* Die Werkzeugleiste zeigte nie, was an der Schreibmarke gerade gilt - der
    Fett-Knopf blieb inaktiv, auch mitten in fettem Text, und "Absatzformat"
    stand immer auf Fließtext, selbst in einer Überschrift. Die CSS-Klasse
@@ -9533,7 +9534,7 @@ function commandList(){
   fmtCmd("Kursiv",kz("kursiv"),()=>document.execCommand("italic"));
   fmtCmd("Unterstrichen",kz("unter"),()=>document.execCommand("underline"));
   fmtCmd("Durchgestrichen","",()=>document.execCommand("strikeThrough"));
-  fmtCmd("Fließtext","",()=>document.execCommand("formatBlock",false,"p"));
+  fmtCmd("Fließtext","",fliesstext);
   [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
   fmtCmd("Aufzählung","",()=>document.execCommand("insertUnorderedList"));
   fmtCmd("Nummerierung","",()=>document.execCommand("insertOrderedList"));
@@ -9554,7 +9555,7 @@ function commandList(){
   fmtCmd("Endnote einfügen","",insertEndnote);
   fmtCmd("Inhaltsverzeichnis einfügen",kz("toc"),insertToc);
   if(S.settings.tofEnabled)fmtCmd("Abbildungsverzeichnis einfügen","",insertTof);
-  fmtCmd("Formatierung entfernen","",()=>document.execCommand("removeFormat"));
+  fmtCmd("Formatierung entfernen","",formatierungEntfernen);
   fmtCmd("Rückgängig","Strg Z",()=>document.execCommand("undo"));
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
@@ -14174,7 +14175,7 @@ function formatMenu(){
       {a:"h2",label:tr("Überschrift 2"),cur:cb==="h2"},
       {a:"h3",label:tr("Überschrift 3"),cur:cb==="h3"},
       {a:"blockquote",label:tr("Zitat"),cur:cb==="blockquote"}
-    ],sub=>formatAct(()=>document.execCommand("formatBlock",false,sub)));}
+    ],sub=>formatAct(()=>sub==="p"?fliesstext():document.execCommand("formatBlock",false,sub)));}
     if(a==="align")return openSubMenu(b,[
       {a:"justifyLeft",label:tr("Linksbündig"),k:"Alt ⇧ L",cur:qState("justifyLeft")},
       {a:"justifyCenter",label:tr("Zentriert"),k:"Alt ⇧ E",cur:qState("justifyCenter")},
@@ -14219,7 +14220,7 @@ function formatMenu(){
     if(a==="hf")hfDialog();
     if(a==="pnum")pageNumDialog();
     if(a==="spalten")spaltenDialog();
-    if(a==="clear")formatAct(()=>document.execCommand("removeFormat"));
+    if(a==="clear")formatAct(formatierungEntfernen);
   };
 }
 function toolsMenu(){
@@ -15125,6 +15126,118 @@ function applyQuote(k){
   dirty=true;commit();queuePaginate();syncToolbarState();
   const i=QUOTESTYLES.findIndex(([,x])=>x===k);
   toast(tr("Zitat")+" "+(i+1)+" · "+tr(QUOTESTYLES[i<0?0:i][0]));
+}
+/* Aus Überschriften und Zitaten wird Fließtext — für „Formatierung
+   entfernen“ und Absatzformat → Fließtext. formatBlock("p") allein reicht
+   nicht: Aus Webseiten Kopiertes kommt als <blockquote><p>…</p></blockquote>,
+   und formatBlock wandelt dann nur die inneren Absätze um, die schon
+   Absätze sind — der Zitatrahmen bleibt, und man bekam das Zitat nur durch
+   Löschen los (Toms Fund, nachgestellt 2026-10-12). Ebenso <h2><div>…</div></h2>,
+   aus dem <h2><p> wurde. Darum hier von Hand: Überschriften werden <p>, aus
+   einem Zitat treten nur die markierten Absätze heraus — davor und danach
+   bleibt es Zitat, wie in Word, wo jeder Absatz seine eigene Formatvorlage
+   hat. Listen, Tabellen und Bilder darin bleiben, was sie sind. */
+const FT_BLOCK=/^(P|DIV|H[1-6]|BLOCKQUOTE)$/,FT_LASSEN=/^(UL|OL|TABLE|FIGURE|PRE|HR)$/;
+function ftAufloesen(el){
+  /* Ein Absatz ohne innere Blöcke bleibt dasselbe Element — so überleben
+     die Textknoten und mit ihnen die Markierung. */
+  if(el.tagName==="P"&&![...el.children].some(k=>FT_BLOCK.test(k.tagName)||FT_LASSEN.test(k.tagName)))return [el];
+  const out=[];let p=null;
+  [...el.childNodes].forEach(k=>{
+    if(k.nodeType===1&&FT_BLOCK.test(k.tagName)){p=null;out.push(...ftAufloesen(k));return}
+    if(k.nodeType===1&&FT_LASSEN.test(k.tagName)){p=null;out.push(k);return}
+    if(!p){p=document.createElement("p");
+      if(/^H[1-6]$/.test(el.tagName)&&el.getAttribute("style"))p.setAttribute("style",el.getAttribute("style"));
+      out.push(p)}
+    p.appendChild(k);
+  });
+  /* Zeilenumbrüche im kopierten HTML zwischen den Blöcken sind Textknoten
+     aus Leerraum — daraus keine leeren Absätze machen. */
+  const res=out.filter(b=>b.tagName!=="P"||b.textContent.trim()||b.querySelector("img,br"));
+  if(!res.length){const p=document.createElement("p");p.innerHTML="<br>";res.push(p)}
+  return res;
+}
+/* Eine Grenze der Markierung auf einen Textknoten legen. Elemente werden
+   hier ersetzt, Textknoten nur umgehängt — eine Grenze in einem Text-
+   knoten übersteht das, eine in einem <h2> nicht. */
+function ftGrenze(c,o,ende){
+  if(c.nodeType===3)return [c,o];
+  const w=document.createTreeWalker(c,NodeFilter.SHOW_TEXT);
+  const texte=[];let t;while(t=w.nextNode())texte.push(t);
+  if(!texte.length)return [c,o];
+  const vor=c.childNodes[o];
+  if(vor){const erst=texte.find(x=>vor===x||vor.contains(x));if(erst&&!ende)return [erst,0];
+    const davor=texte.filter(x=>vor.compareDocumentPosition(x)&Node.DOCUMENT_POSITION_PRECEDING);
+    if(davor.length)return [davor[davor.length-1],davor[davor.length-1].length];
+    return [texte[0],0]}
+  const letzt=texte[texte.length-1];return [letzt,letzt.length];
+}
+const FT_ABSATZSTIL=["text-align","margin-left","margin-right","text-indent"];
+function alsFliesstext(absatzAuch){
+  const ed=$("#editor");if(!ed)return false;
+  const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return false;
+  const r=sel.getRangeAt(0);
+  const [sc,so]=ftGrenze(r.startContainer,r.startOffset,false);
+  const [ec,eo]=ftGrenze(r.endContainer,r.endOffset,true);
+  const trifft=n=>{try{return r.intersectsNode(n)}catch(e){return false}};
+  let tops=[...ed.children].filter(trifft);
+  if(!tops.length){const b=curBlock();if(b)tops=[b]}
+  let geaendert=false,erster=null;
+  tops.forEach(b=>{
+    if(/^H[1-6]$/.test(b.tagName)){
+      const neu=ftAufloesen(b);b.replaceWith(...neu);erster=erster||neu[0];geaendert=true;return}
+    if(b.tagName!=="BLOCKQUOTE")return;
+    const kinder=[...b.childNodes].filter(k=>!(k.nodeType===3&&!k.nodeValue.trim()));
+    const bloecke=kinder.some(k=>k.nodeType===1&&(FT_BLOCK.test(k.tagName)||FT_LASSEN.test(k.tagName)));
+    if(!bloecke){const neu=ftAufloesen(b);b.replaceWith(...neu);erster=erster||neu[0];geaendert=true;return}
+    const vor=[],mit=[],nach=[];
+    kinder.forEach(k=>(trifft(k)?mit:mit.length?nach:vor).push(k));
+    if(!mit.length)mit.push(...vor.splice(0),...nach.splice(0));
+    const teile=[];
+    const rest=liste=>{const q=b.cloneNode(false);liste.forEach(k=>q.appendChild(k));teile.push(q)};
+    if(vor.length)rest(vor);
+    const tmp=document.createElement("div");mit.forEach(k=>tmp.appendChild(k));
+    const neu=ftAufloesen(tmp);teile.push(...neu);erster=erster||neu[0];
+    if(nach.length)rest(nach);
+    b.replaceWith(...teile);geaendert=true;
+  });
+  /* Markierung zurück: auf dieselben Textknoten, sonst an den Anfang des
+     ersten umgewandelten Absatzes. */
+  const nr=document.createRange();
+  if(sc.isConnected&&ec.isConnected&&ed.contains(sc)&&ed.contains(ec)){nr.setStart(sc,so);nr.setEnd(ec,eo)}
+  else if(erster){nr.selectNodeContents(erster);nr.collapse(true)}
+  sel.removeAllRanges();sel.addRange(nr);
+  if(absatzAuch){
+    selectedBlocks().forEach(b=>{
+      if(!/^(P|H[1-6]|BLOCKQUOTE|DIV|UL|OL)$/.test(b.tagName))return;
+      [b,...b.querySelectorAll("li")].forEach(x=>{
+        if(x.hasAttribute("align")){x.removeAttribute("align");geaendert=true}
+        if(!x.hasAttribute("style"))return;
+        FT_ABSATZSTIL.forEach(p=>{if(x.style.getPropertyValue(p)){x.style.removeProperty(p);geaendert=true}});
+        /* auch das leere style="", das removeFormat gern stehen lässt */
+        if(!x.getAttribute("style").trim())x.removeAttribute("style");
+      });
+    });
+  }
+  if(geaendert){flush();dirty=true;commit();queuePaginate();drawAnchors();drawStatus();syncToolbarState()}
+  return geaendert;
+}
+/* Absatzformat → Fließtext: erst der Weg des Browsers (der auch <div> und
+   <pre> erfasst und im Rückgängig-Verlauf landet), dann aufräumen, was er
+   stehen lässt. */
+function fliesstext(){
+  document.execCommand("formatBlock",false,"p");
+  alsFliesstext(false);
+}
+/* Formatierung entfernen wie in Word: Zeichenformat (Fett, Farbe, Schrift …)
+   über removeFormat, dazu das Absatzformat — Überschrift und Zitat werden
+   Fließtext, Ausrichtung und Einrückung gehen zurück. Listen bleiben. */
+function formatierungEntfernen(){
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  document.execCommand("removeFormat");
+  alsFliesstext(true);
+  dirty=true;drawStatus();syncToolbarState();
 }
 /* Baut die Miniatur eines Listenstils: drei Zeilen aus echtem Zeichen und
    Textbalken. zeichen(n) liefert je Zeilennummer das Zeichen — bei einer
@@ -20281,7 +20394,7 @@ picker for anything else. The stripe under the button shows what will be used.</
 colour schemes. Apply the highlight first and the text colour afterwards if you want both.</p>
 <p><b>Superscript and subscript</b> sit in the Format menu under <b>Character</b> — for units,
 formulas and for figures you want to set by hand.</p>
-<p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words.</p>`},
+<p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words. Headings and quotes become normal text, and alignment and indentation are reset; lists stay lists.</p>`},
 
  {t:"Paragraphs and headings",k:"heading;paragraph;alignment;indent;line spacing;paragraph spacing",b:`
 <p>The <b>paragraph style</b> box turns the current paragraph into body text or one of
@@ -20852,7 +20965,7 @@ dunklen Farbschemata lesbar bleibt. Wer beides will, hebt zuerst hervor und fär
 <p><b>Hochgestellt und tiefgestellt</b> stehen im Format-Menü unter <b>Zeichen</b> — für
 Maßeinheiten, Formeln und für Ziffern, die du von Hand setzen willst.</p>
 <p><b>Format &rsaquo; Formatierung entfernen</b> nimmt die Zeichenauszeichnung weg und lässt
-die Wörter stehen.</p>`},
+die Wörter stehen. Überschriften und Zitate werden zu normalem Text, Ausrichtung und Einrückung gehen zurück; Listen bleiben Listen.</p>`},
 
  {t:"Absätze und Überschriften",k:"überschrift;absatz;ausrichtung;einrücken;zeilenabstand;absatzabstand",b:`
 <p>Das Feld <b>Absatzformat</b> macht aus dem Absatz Fließtext oder eine von drei
@@ -21445,7 +21558,7 @@ los esquemas de color oscuros. Aplica primero el resaltado y después el color d
 quieres ambos.</p>
 <p><b>Superíndice y subíndice</b> están en el menú Formato, en <b>Carácter</b>: para unidades,
 fórmulas y figuras que quieras componer a mano.</p>
-<p><b>Formato &rsaquo; Borrar formato</b> quita el formato de carácter y deja las palabras.</p>`},
+<p><b>Formato &rsaquo; Borrar formato</b> quita el formato de carácter y deja las palabras. Los títulos y las citas pasan a ser texto normal, y la alineación y la sangría vuelven a su estado inicial; las listas siguen siendo listas.</p>`},
 
  {t:"Párrafos y títulos",k:"título;párrafo;alineación;sangría;interlineado;espacio entre párrafos",b:`
 <p>El cuadro de <b>estilo de párrafo</b> convierte el párrafo actual en texto normal o en uno de
@@ -22043,7 +22156,7 @@ de cores escuros. Aplique o realce primeiro e a cor do texto depois, se quiser o
 <p><b>Sobrescrito e subscrito</b> ficam no menu Formato, em <b>Caractere</b>: para unidades,
 fórmulas e figuras que você queira compor à mão.</p>
 <p><b>Formato &rsaquo; Limpar formatação</b> tira a formatação de caractere e deixa as
-palavras.</p>`},
+palavras. Títulos e citações viram texto normal, e o alinhamento e o recuo voltam ao padrão; as listas continuam sendo listas.</p>`},
 
  {t:"Parágrafos e títulos",k:"título;parágrafo;alinhamento;recuo;espaçamento entre linhas;espaço entre parágrafos",b:`
 <p>A caixa de <b>estilo de parágrafo</b> transforma o parágrafo atual em texto normal ou em um
@@ -22646,7 +22759,7 @@ vous voulez les deux.</p>
 <p><b>Exposant et indice</b> se trouvent dans le menu Format, sous <b>Caractère</b> : pour les
 unités, les formules et les figures que vous voulez composer à la main.</p>
 <p><b>Format &rsaquo; Effacer la mise en forme</b> retire la mise en forme de caractère et
-laisse les mots.</p>`},
+laisse les mots. Les titres et les citations redeviennent du texte normal, l’alignement et le retrait sont réinitialisés ; les listes restent des listes.</p>`},
 
  {t:"Paragraphes et titres",k:"titre;paragraphe;alignement;retrait;interligne;espacement entre paragraphes",b:`
 <p>Le champ <b>style de paragraphe</b> transforme le paragraphe courant en corps de texte ou en
@@ -23255,7 +23368,7 @@ dla dowolnego innego. Pasek pod przyciskiem pokazuje, co zostanie użyte.</p>
 schematach kolorów. Zastosuj najpierw wyróżnienie, a potem kolor tekstu, jeśli chcesz obu.</p>
 <p><b>Indeks górny i dolny</b> znajdują się w menu Format, w <b>Znak</b> — do jednostek, wzorów
 i rysunków, które chcesz złożyć ręcznie.</p>
-<p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa.</p>`},
+<p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa. Nagłówki i cytaty stają się zwykłym tekstem, a wyrównanie i wcięcie wracają do domyślnych; listy pozostają listami.</p>`},
 
  {t:"Akapity i tytuły",k:"tytuł;akapit;wyrównanie;wcięcie;interlinia;odstęp między akapitami",b:`
 <p>Pole <b>styl akapitu</b> zamienia bieżący akapit w tekst podstawowy albo w jeden z trzech
@@ -23839,7 +23952,7 @@ entrambi.</p>
 <p><b>Apice e pedice</b> si trovano nel menu Formato, sotto <b>Carattere</b>: per unità, formule
 e figure che vuoi comporre a mano.</p>
 <p><b>Formato &rsaquo; Cancella formattazione</b> toglie la formattazione del carattere e lascia
-le parole.</p>`},
+le parole. Titoli e citazioni tornano testo normale, e allineamento e rientro vengono azzerati; gli elenchi restano elenchi.</p>`},
 
  {t:"Paragrafi e titoli",k:"titolo;paragrafo;allineamento;rientro;interlinea;spaziatura tra paragrafi",b:`
 <p>Il campo <b>stile paragrafo</b> trasforma il paragrafo corrente in corpo del testo o in uno
@@ -24894,7 +25007,9 @@ $("#tools").addEventListener("change",e=>{
        Doppelpunkt trennt beides, damit das eine Auswahlfeld beides kann. */
     const [tag,qs]=e.target.value.split(":");
     if(tag==="blockquote"){applyQuote(qs||"");return}
-    document.execCommand("formatBlock",false,tag);$("#editor").focus();dirty=true}
+    $("#editor").focus();
+    if(tag==="p")fliesstext();else document.execCommand("formatBlock",false,tag);
+    dirty=true}
 });
 $("#tools").addEventListener("input",e=>{
   if(e.target.id==="nSearch"){window._nq=e.target.value;drawNotes()}
