@@ -216,6 +216,43 @@ immer genau einen Commit, der sie anfasst.
     Neustart verloren), grau „aus“ oder „nicht verfügbar“. Bewusst kein Rot
     für „aus“: Nummer 2 und 3 sind freiwillig. In der App heißt Karte 1
     „Arbeitsstand im Programmspeicher“.
+  - **Speichern einfacher** (Toms Durchsicht, Zielgruppe: Schreibende, keine
+    Technikprofis): nur noch zwei Karten — „Programmspeicher“ (Browser:
+    „Browserspeicher“) und „Automatische Sicherung von allem“, je mit einer
+    Umfang-Zeile („Alles: 3 Dok. · …“, „Alles: Dokumente, Notizen, Glossare,
+    Einstellungen · .pqw“). Die Karte für die Verknüpfung einzelner Dokumente
+    mit einer .pqw ist raus: ein Sonderfall für Fortgeschrittene, der neben
+    der Sicherung von allem und „Speichern als → Word“ mehr erklärt als
+    hilft (ein Zwischenentwurf listete alle Reiter mit Zustand — zu
+    kompliziert). Die Verknüpfung bleibt im Menü Datei › Sicherung, dort jetzt
+    auch „Verbinden“ (bei abgelaufenem Zugriff) und „Verbindung lösen“.
+    **Am Reiter** trägt ein verknüpftes Dokument ein kleines Dateisymbol mit
+    Tooltip („Wird auch in Roman.pqw gespeichert“); ist der Zugriff
+    abgelaufen, ist es gelb und verbindet per Klick neu. Der stille
+    Zugriffscheck beim Öffnen der Einstellungen läuft für alle verknüpften
+    Dokumente. Text, Umfang und Knöpfe beginnen bündig unter dem Titel
+    (vorher drei verschiedene Linien), Text der Sicherung in Toms Wortlaut,
+    der Cloud-Hinweis kein eigener Kasten mehr. Fläche der Einstellungen
+    580 px. Hilfe: „an drei Orten, in den Einstellungen durchnummeriert“ und
+    die Überschrift „Datei auf der Festplatte ist ausgegraut“ (jetzt „‚Mit
+    Datei verknüpfen‘ fehlt im Menü“) in allen Sprachen angepasst.
+  - **Zwischenstände übersichtlicher**: erst die Erklärung, dann die Felder.
+    „Automatisch anlegen“ ist ein Feld mit „Aus“ als erstem Eintrag statt
+    eines unbeschrifteten Hakens neben der Liste; „Aufbewahren: eine Woche“
+    statt „Wie weit zurück: einen Monat“, der Hinweis zur Ausdünnung in
+    einfacheren Worten. Ein Kasten zum aktiven Dokument zeigt Zahl und Alter
+    seiner Zwischenstände („4 Zwischenstände · ältester: 09.10.2026, 14:04“)
+    mit den Knöpfen „Zwischenstand anlegen“ und „Versionsverlauf öffnen…“.
+  - **Was beim Schließen passiert** (Toms Frage): ein geschlossener Reiter
+    ist nicht mehr im Programmspeicher — und mit ihm seine Zwischenstände.
+    Das stand nirgends. Jetzt bei den Zwischenständen: sie gibt es nur in
+    PureQuill, eine Word-Datei enthält sie nicht, eine .pqw schon, beim
+    Schließen sind sie im Programm weg. Beim Programmspeicher: „Wenn du ein
+    Dokument schließt, ist es hier weg. Speichere es vorher …“; bei der
+    Sicherung: nur offene Dokumente, samt Zwischenständen.
+  - Portugiesisch: die heute neuen Texte im brasilianischen Portugiesisch der
+    übrigen Oberfläche („salvar“, „você“, „arquivo“); sie waren zuerst
+    europäisch geschrieben.
 
 - **Versionsverlauf reicht bis zu einem Monat zurück** (Einstellungen ›
   Zwischenstände › „Wie weit zurück“: eine Stunde, einen Tag, eine Woche —
@@ -235,6 +272,15 @@ immer genau einen Commit, der sie anfasst.
   `werkzeuge/pruefen/zwischenstaende.cjs`.
 
 ### Behoben
+
+- **Verknüpfte Datei blieb beim schnellen Reiterwechsel zurück.** Das
+  Mitschreiben in die .pqw lief über einen einzigen Zeitgeber für alle
+  Dokumente: wer in Reiter A tippte und binnen einer Sekunde in Reiter B
+  weiterschrieb, löschte den ausstehenden Schreibvorgang von A — die Datei
+  von A hatte bis zum nächsten Tippen in A einen Stand zu wenig (im
+  Programmspeicher war alles da). Jetzt ein Zeitgeber je Dokument
+  (`fileTimers`); geprüft mit gestubbtem Dateizugriff, beide Dateien werden
+  geschrieben (`werkzeuge/pruefen/mehrere-dateien.cjs`).
 
 - **Eingefügte Bilder mitten im Text sprengten den Absatz.** Ein Bild aus
   einer Webseite, das im Fließtext stand, kam als Inline-Bild in voller
@@ -695,6 +741,12 @@ immer genau einen Commit, der sie anfasst.
   (`werkzeuge/pruefen/dialog-lage.cjs`, `dialog-reiter.cjs`).
 
 ### Nebenbei gefunden, noch nicht behoben
+
+- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
+  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
+  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
+  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
+  Einmal geschlossen durchsehen.
 
 - **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
   `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht

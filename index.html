@@ -315,6 +315,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 /* margin-left:auto: das Kreuz steht immer am rechten Rand. Bei einem kurzen
    Titel („test“) ist der Reiter durch min-width breiter als sein Inhalt, und
    das Kreuz rückte sonst direkt hinter den Titel, Richtung Mitte. */
+.tabfile{display:inline-flex;flex:none;color:var(--ink-soft);font-style:normal}
+.tabfile.warn{color:color-mix(in srgb,#d4920f 70%,var(--ink));cursor:pointer}
 .tab .x{color:var(--ink-soft);font-size:16px;line-height:1;padding:0 1px;flex:0 0 auto;margin-left:auto}
 .tab .x:hover{color:var(--stamp)}
 .tabadd{padding:6px 9px;color:var(--ink-soft);font-size:16px;flex:0 0 auto}
@@ -1243,6 +1245,11 @@ body.focus .outline{display:none}
 .setnavi.on{background:var(--paper);color:var(--stamp);font-weight:600;box-shadow:inset 0 0 0 1px var(--rule)}
 .setbody{flex:1;min-width:0;overflow-y:auto}
 .setnote{margin:-3px 0 8px;font-size:12px;line-height:1.45;color:var(--ink-soft)}
+.zwbox{margin-top:14px;padding:11px 13px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--chrome-2);
+  display:flex;flex-direction:column;gap:9px}
+.zwinfo{display:flex;flex-direction:column;gap:2px}
+.zwinfo b{font-size:13px}
+.zwinfo span{font-size:12px;color:var(--ink-soft)}
 .setstd{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .setstd span{font-size:12px;color:var(--ink-soft)}
 .setstd .btn{white-space:nowrap}
@@ -1277,6 +1284,22 @@ body.focus .outline{display:none}
 /* Die drei Speicherorte durchnummeriert: die Staffelung soll ohne Erklärung
    lesbar sein — eins gilt immer, zwei und drei kommen freiwillig dazu. */
 .storeintro{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:0 0 10px}
+/* Alles unter dem Kopf beginnt bündig unter dem Titel (Nummer 18 + Symbol 26
+   + zwei Abstände 9 = 62 px), statt am Kartenrand — vorher standen Titel,
+   Text und Knöpfe auf drei verschiedenen Linien. */
+.storecard>:not(.storehead){margin-left:62px}
+.storehead{align-items:center}
+.storeamp{align-self:center}
+.storescope{display:inline-flex;align-items:center;gap:6px;margin-top:7px;padding:2px 8px;font-size:12px;
+  color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius)}
+.storescope svg{flex:none;color:var(--ink-soft)}
+@media (max-width:640px){.storecard>:not(.storehead){margin-left:0}}
+/* In den Einstellungen etwas dichter, damit alle drei Karten ohne Rollen passen */
+.setbody .storecard{padding:10px 13px}
+.setbody .storenote{margin-top:6px}
+.setbody .storeact{margin-top:8px}
+.setbody .storescope{margin-top:5px}
+.setbody .storecard+.storecard{margin-top:7px!important}
 .storenum{flex:0 0 18px;height:18px;border-radius:50%;display:flex;align-items:center;
   justify-content:center;background:var(--chrome);color:var(--ink-soft);
   font-family:var(--mono);font-size:11px;font-weight:600}
@@ -1899,6 +1922,7 @@ const THEMES=[
 const STANDARD_THEMA="azur";
 const ICOSZ=(p,px,sw)=>`<svg viewBox="0 0 24 24" style="width:${px}px;height:${px}px;fill:none;stroke:currentColor;stroke-width:${sw};stroke-linecap:round;stroke-linejoin:round">${p}</svg>`;
 const ICO=p=>ICOSZ(p,16,1.6);
+const ICO_BLATT='<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>';
 /* Symbolknoepfe (.tb) sind 26x24 gross, das Symbol darin mass 16px — das
    liess 5px seitlich und 4px oben und unten ungenutzt und wirkte verloren.
    20px fuellt den Knopf und laesst noch 3 bzw. 2px Luft; 22px beruehrt den
@@ -2220,13 +2244,31 @@ en:{
   "Notizen und Glossar":"Notes and glossary",
   "Vollsicherung":"Full backup",
   "Alle Daten löschen":"Delete all data",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Snapshots exist only in PureQuill. A Word file doesn’t contain them, a PureQuill file (.pqw) does. When you close a document, its snapshots are gone from the program.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"When you close a document, it’s gone from here. Save it first, for example as a Word file.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Only open documents are backed up, along with their snapshots.",
+  "Aus":"Off",
+  "Aufbewahren":"Keep for",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"Recent snapshots are kept in full, older ones are gradually thinned out so storage doesn’t fill up.",
+  "ältester":"oldest",
+  "Wird auch in {x} gespeichert":"Also saved to {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Access to {x} has expired – click to reconnect",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Your work is always kept in program storage. You can also set up an automatic backup of everything.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Your work is always kept in browser storage. You can also set up an automatic backup of everything.",
+  "Programmspeicher":"Program storage",
+  "Browserspeicher":"Browser storage",
+  "im Benutzerordner deines Rechners":"in your user folder on this computer",
+  "in diesem Browser, getrennt nach Adresse":"in this browser, separately per address",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"PureQuill saves here continuously. It stays even if you uninstall the program.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"PureQuill saves here continuously. Clearing the browser data loses everything kept here.",
+  "Automatische Sicherung von allem":"Automatic backup of everything",
+  "Dokumente, Notizen, Glossare, Einstellungen":"documents, notes, glossaries, settings",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"A backup file that updates itself regularly. If it sits in a Google Drive, Dropbox or OneDrive folder linked to your computer, it automatically ends up in the cloud.",
   "alle 10 Minuten":"every 10 minutes",
-  "Wie weit zurück":"How far back",
   "eine Stunde":"one hour",
   "einen Tag":"one day",
   "eine Woche":"one week",
   "einen Monat":"one month",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Recent snapshots stay close together, older ones are thinned out: first every few minutes, then hourly, then daily.",
   "aktiv":"active",
   "Zugriff nötig":"needs access",
   "nicht verfügbar":"not available",
@@ -3041,13 +3083,31 @@ fr:{
   "Notizen und Glossar":"Notes et glossaire",
   "Vollsicherung":"Sauvegarde complète",
   "Alle Daten löschen":"Supprimer toutes les données",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Les points de restauration n’existent que dans PureQuill. Un fichier Word ne les contient pas, un fichier PureQuill (.pqw) si. Quand vous fermez un document, ses points de restauration disparaissent du programme.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quand vous fermez un document, il disparaît d’ici. Enregistrez-le d’abord, par exemple en fichier Word.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Seuls les documents ouverts sont sauvegardés, avec leurs points de restauration.",
+  "Aus":"Désactivé",
+  "Aufbewahren":"Conserver",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"Les points récents sont gardés en entier, les plus anciens sont peu à peu espacés pour ne pas remplir la mémoire.",
+  "ältester":"le plus ancien",
+  "Wird auch in {x} gespeichert":"Aussi enregistré dans {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Accès à {x} expiré – cliquez pour reconnecter",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Votre travail est toujours conservé dans la mémoire du programme. Vous pouvez aussi configurer une sauvegarde automatique de tout.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Votre travail est toujours conservé dans la mémoire du navigateur. Vous pouvez aussi configurer une sauvegarde automatique de tout.",
+  "Programmspeicher":"Mémoire du programme",
+  "Browserspeicher":"Mémoire du navigateur",
+  "im Benutzerordner deines Rechners":"dans votre dossier utilisateur sur cet ordinateur",
+  "in diesem Browser, getrennt nach Adresse":"dans ce navigateur, séparément pour chaque adresse",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"PureQuill enregistre ici en continu. Cela reste même après une désinstallation.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"PureQuill enregistre ici en continu. Effacer les données du navigateur fait perdre tout ce qui s’y trouve.",
+  "Automatische Sicherung von allem":"Sauvegarde automatique de tout",
+  "Dokumente, Notizen, Glossare, Einstellungen":"documents, notes, glossaires, paramètres",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"Un fichier de sauvegarde qui se met à jour régulièrement. S’il se trouve dans un dossier Google Drive, Dropbox ou OneDrive lié à votre ordinateur, il est automatiquement envoyé dans le cloud.",
   "alle 10 Minuten":"toutes les 10 minutes",
-  "Wie weit zurück":"Jusqu’où remonter",
   "eine Stunde":"une heure",
   "einen Tag":"un jour",
   "eine Woche":"une semaine",
   "einen Monat":"un mois",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Les points récents restent rapprochés, les plus anciens sont espacés : d’abord toutes les quelques minutes, puis toutes les heures, puis chaque jour.",
   "aktiv":"actif",
   "Zugriff nötig":"accès requis",
   "nicht verfügbar":"non disponible",
@@ -3862,13 +3922,31 @@ es:{
   "Notizen und Glossar":"Notas y glosario",
   "Vollsicherung":"Copia de seguridad completa",
   "Alle Daten löschen":"Borrar todos los datos",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Los puntos de restauración solo existen en PureQuill. Un archivo de Word no los contiene; un archivo de PureQuill (.pqw), sí. Si cierras un documento, sus puntos de restauración desaparecen del programa.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Si cierras un documento, desaparece de aquí. Guárdalo antes, por ejemplo como archivo de Word.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Solo se guardan los documentos abiertos, con sus puntos de restauración.",
+  "Aus":"Desactivado",
+  "Aufbewahren":"Conservar",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"Las instantáneas recientes se conservan completas; las antiguas se van espaciando para no llenar la memoria.",
+  "ältester":"la más antigua",
+  "Wird auch in {x} gespeichert":"También se guarda en {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"El acceso a {x} ha caducado: haz clic para conectar",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Tu trabajo siempre se guarda en la memoria del programa. Además puedes configurar una copia de seguridad automática de todo.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Tu trabajo siempre se guarda en la memoria del navegador. Además puedes configurar una copia de seguridad automática de todo.",
+  "Programmspeicher":"Memoria del programa",
+  "Browserspeicher":"Memoria del navegador",
+  "im Benutzerordner deines Rechners":"en tu carpeta de usuario de este equipo",
+  "in diesem Browser, getrennt nach Adresse":"en este navegador, por separado para cada dirección",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"PureQuill guarda aquí de forma continua. Se conserva incluso si desinstalas el programa.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"PureQuill guarda aquí de forma continua. Si borras los datos del navegador, pierdes todo lo que hay aquí.",
+  "Automatische Sicherung von allem":"Copia de seguridad automática de todo",
+  "Dokumente, Notizen, Glossare, Einstellungen":"documentos, notas, glosarios, configuración",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"Un archivo de copia que se actualiza solo con regularidad. Si está en una carpeta de Google Drive, Dropbox u OneDrive vinculada a tu equipo, llega automáticamente a la nube.",
   "alle 10 Minuten":"cada 10 minutos",
-  "Wie weit zurück":"Hasta cuándo",
   "eine Stunde":"una hora",
   "einen Tag":"un día",
   "eine Woche":"una semana",
   "einen Monat":"un mes",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Las instantáneas recientes quedan juntas, las antiguas se espacian: primero cada pocos minutos, luego cada hora, luego cada día.",
   "aktiv":"activo",
   "Zugriff nötig":"requiere acceso",
   "nicht verfügbar":"no disponible",
@@ -4683,13 +4761,31 @@ pt:{
   "Notizen und Glossar":"Notas e glossário",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Apagar todos os dados",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Os pontos de restauração só existem no PureQuill. Um arquivo do Word não os contém; um arquivo do PureQuill (.pqw), sim. Quando você fecha um documento, os pontos de restauração dele somem do programa.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quando você fecha um documento, ele some daqui. Salve-o antes, por exemplo como arquivo do Word.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Só os documentos abertos entram no backup, junto com seus pontos de restauração.",
+  "Aus":"Desativado",
+  "Aufbewahren":"Manter por",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"Os pontos recentes ficam completos; os antigos são espaçados aos poucos para não encher a memória.",
+  "ältester":"o mais antigo",
+  "Wird auch in {x} gespeichert":"Também salvo em {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"O acesso a {x} expirou – clique para conectar",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Seu trabalho fica sempre na memória do programa. Você também pode configurar um backup automático de tudo.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Seu trabalho fica sempre na memória do navegador. Você também pode configurar um backup automático de tudo.",
+  "Programmspeicher":"Memória do programa",
+  "Browserspeicher":"Memória do navegador",
+  "im Benutzerordner deines Rechners":"na sua pasta de usuário neste computador",
+  "in diesem Browser, getrennt nach Adresse":"neste navegador, separadamente por endereço",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"O PureQuill salva aqui continuamente. Isso permanece mesmo se você desinstalar o programa.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"O PureQuill salva aqui continuamente. Quem apaga os dados do navegador perde tudo o que está aqui.",
+  "Automatische Sicherung von allem":"Backup automático de tudo",
+  "Dokumente, Notizen, Glossare, Einstellungen":"documentos, notas, glossários, configurações",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"Um arquivo de backup que se atualiza sozinho regularmente. Se ele estiver em uma pasta do Google Drive, Dropbox ou OneDrive vinculada ao seu computador, vai automaticamente para a nuvem.",
   "alle 10 Minuten":"a cada 10 minutos",
-  "Wie weit zurück":"Até quando",
   "eine Stunde":"uma hora",
   "einen Tag":"um dia",
   "eine Woche":"uma semana",
   "einen Monat":"um mês",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Os pontos recentes ficam próximos, os antigos são espaçados: primeiro a cada poucos minutos, depois de hora a hora, depois diariamente.",
   "aktiv":"ativo",
   "Zugriff nötig":"requer acesso",
   "nicht verfügbar":"indisponível",
@@ -4697,25 +4793,25 @@ pt:{
   "Zeile beim Schreiben":"Linha ao escrever",
   "in der Fenstermitte halten":"manter no meio da janela",
   "Leisten beim Schreiben":"Barras ao escrever",
-  "abblenden, solange du tippst":"escurecer enquanto escreves",
+  "abblenden, solange du tippst":"escurecer enquanto você digita",
   "Bearbeiten":"Edição",
   "Maßeinheit":"Unidade",
   "Millimeter":"Milímetros",
   "im Menü Einfügen anbieten":"oferecer no menu Inserir",
-  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Predefinições para novos documentos que criares a partir de agora. O formato dos documentos existentes mantém-se.",
-  "Standardwerte wiederherstellen":"Repor valores predefinidos",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Padrões para novos documentos que você criar a partir de agora. O formato dos documentos existentes permanece.",
+  "Standardwerte wiederherstellen":"Restaurar valores padrão",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"As \" e ' retas passam a aspas tipográficas",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dois hífenes (--) passam a travessão (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Depois de . ! ? a frase seguinte começa com maiúscula",
   "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"«- » ou «1. » no início da linha começa uma lista",
   "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"As aspas usadas dependem do idioma da verificação ortográfica (Geral).",
   "Automatisch anlegen":"Criar automaticamente",
-  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Instantâneos do teu texto aos quais podes voltar no histórico de versões. O teu texto em si é guardado continuamente, independentemente disto.",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Registros do seu texto aos quais você pode voltar no histórico de versões. O texto em si é salvo continuamente, independentemente disso.",
   "Versionsverlauf öffnen":"Abrir histórico de versões",
-  "Werkszustand":"Configuração de fábrica",
-  "Auf Werkszustand zurücksetzen":"Repor a configuração de fábrica",
-  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todas as definições voltam ao estado original: esquema de cores, idioma, tipo de letra e formato de página para novos documentos, correção automática e vista.",
-  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Os teus documentos, notas, glossários, formatos próprios e o teu dicionário são mantidos.",
+  "Werkszustand":"Configurações de fábrica",
+  "Auf Werkszustand zurücksetzen":"Restaurar configurações de fábrica",
+  "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todas as configurações voltam ao estado original: esquema de cores, idioma, fonte e formato de página para novos documentos, correção automática e exibição.",
+  "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Seus documentos, notas, glossários, formatos próprios e seu dicionário são mantidos.",
   "Das lässt sich nicht rückgängig machen.":"Isto não pode ser desfeito.",
   "Dateien, die du selbst abgelegt hast, bleiben erhalten — nur die Verknüpfung dorthin verschwindet.":"Os arquivos que você mesmo salvou permanecem onde estão — apenas o vínculo para eles desaparece.",
   "Erst sichern, dann löschen":"Fazer backup primeiro, depois apagar",
@@ -5504,13 +5600,31 @@ pl:{
   "Notizen und Glossar":"Notatki i słowniczek",
   "Vollsicherung":"Pełna kopia zapasowa",
   "Alle Daten löschen":"Usuń wszystkie dane",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Punkty przywracania istnieją tylko w PureQuill. Plik Worda ich nie zawiera, plik PureQuill (.pqw) tak. Gdy zamkniesz dokument, jego punkty przywracania znikają z programu.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Gdy zamkniesz dokument, znika stąd. Zapisz go wcześniej, na przykład jako plik Worda.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Kopia obejmuje tylko otwarte dokumenty, razem z ich punktami przywracania.",
+  "Aus":"Wyłączone",
+  "Aufbewahren":"Przechowuj",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"Nowsze migawki zostają w całości, starsze są stopniowo przerzedzane, żeby pamięć się nie zapełniła.",
+  "ältester":"najstarsza",
+  "Wird auch in {x} gespeichert":"Zapisywany także w {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Dostęp do {x} wygasł – kliknij, aby połączyć",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Twoja praca jest zawsze w pamięci programu. Możesz też ustawić automatyczną kopię wszystkiego.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Twoja praca jest zawsze w pamięci przeglądarki. Możesz też ustawić automatyczną kopię wszystkiego.",
+  "Programmspeicher":"Pamięć programu",
+  "Browserspeicher":"Pamięć przeglądarki",
+  "im Benutzerordner deines Rechners":"w folderze użytkownika na tym komputerze",
+  "in diesem Browser, getrennt nach Adresse":"w tej przeglądarce, osobno dla każdego adresu",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"PureQuill zapisuje tu na bieżąco. Zostaje nawet po odinstalowaniu programu.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"PureQuill zapisuje tu na bieżąco. Usunięcie danych przeglądarki usuwa wszystko, co tu jest.",
+  "Automatische Sicherung von allem":"Automatyczna kopia wszystkiego",
+  "Dokumente, Notizen, Glossare, Einstellungen":"dokumenty, notatki, glosariusze, ustawienia",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"Plik kopii, który regularnie sam się aktualizuje. Jeśli leży w folderze Google Drive, Dropbox lub OneDrive połączonym z komputerem, trafia automatycznie do chmury.",
   "alle 10 Minuten":"co 10 minut",
-  "Wie weit zurück":"Jak daleko wstecz",
   "eine Stunde":"godzina",
   "einen Tag":"dzień",
   "eine Woche":"tydzień",
   "einen Monat":"miesiąc",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"Nowsze migawki leżą blisko siebie, starsze są przerzedzane: najpierw co kilka minut, potem co godzinę, potem codziennie.",
   "aktiv":"aktywne",
   "Zugriff nötig":"wymaga dostępu",
   "nicht verfügbar":"niedostępne",
@@ -6332,13 +6446,31 @@ it:{
   "Notizen und Glossar":"Note e glossario",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Elimina tutti i dati",
+  "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"I punti di ripristino esistono solo in PureQuill. Un file Word non li contiene, un file PureQuill (.pqw) sì. Quando chiudi un documento, i suoi punti di ripristino spariscono dal programma.",
+  "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quando chiudi un documento, sparisce da qui. Salvalo prima, per esempio come file Word.",
+  "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Vengono salvati solo i documenti aperti, con i loro punti di ripristino.",
+  "Aus":"Disattivato",
+  "Aufbewahren":"Conserva",
+  "Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.":"I punti recenti restano completi, i più vecchi vengono diradati poco a poco perché la memoria non si riempia.",
+  "ältester":"il più vecchio",
+  "Wird auch in {x} gespeichert":"Salvato anche in {x}",
+  "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Accesso a {x} scaduto – clicca per collegare",
+  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Il tuo lavoro è sempre nella memoria del programma. Puoi anche impostare un backup automatico di tutto.",
+  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Il tuo lavoro è sempre nella memoria del browser. Puoi anche impostare un backup automatico di tutto.",
+  "Programmspeicher":"Memoria del programma",
+  "Browserspeicher":"Memoria del browser",
+  "im Benutzerordner deines Rechners":"nella tua cartella utente su questo computer",
+  "in diesem Browser, getrennt nach Adresse":"in questo browser, separatamente per ogni indirizzo",
+  "Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten.":"PureQuill salva qui di continuo. Resta anche se disinstalli il programma.",
+  "Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.":"PureQuill salva qui di continuo. Cancellando i dati del browser perdi tutto ciò che c’è qui.",
+  "Automatische Sicherung von allem":"Backup automatico di tutto",
+  "Dokumente, Notizen, Glossare, Einstellungen":"documenti, note, glossari, impostazioni",
+  "Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.":"Un file di backup che si aggiorna da solo regolarmente. Se si trova in una cartella di Google Drive, Dropbox o OneDrive collegata al computer, finisce automaticamente nel cloud.",
   "alle 10 Minuten":"ogni 10 minuti",
-  "Wie weit zurück":"Quanto indietro",
   "eine Stunde":"un’ora",
   "einen Tag":"un giorno",
   "eine Woche":"una settimana",
   "einen Monat":"un mese",
-  "Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.":"I punti recenti restano vicini, i più vecchi vengono diradati: prima ogni pochi minuti, poi ogni ora, poi ogni giorno.",
   "aktiv":"attivo",
   "Zugriff nötig":"accesso necessario",
   "nicht verfügbar":"non disponibile",
@@ -7156,8 +7288,10 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clea
 function drawTabs(){
   $("#tabbar").innerHTML=S.docs.map(d=>
     `<div class="tab ${d.id===S.active?"on":""}" data-id="${d.id}" ${d.tabColor?`style="background:${d.tabColor};color:#22242A;border-color:rgba(0,0,0,.18)"`:""}>
-      <span>${esc(tr(d.title))}</span><button class="x" data-close="${d.id}" title="${tr("Dokument schließen")}" ${d.tabColor?'style="color:#22242A"':""}>&times;</button></div>`
+      <span>${esc(tr(d.title))}</span>${d.file?`<i class="tabfile${d.file.lose?" warn":""}" title="${esc((d.file.lose?tr("Zugriff auf {x} abgelaufen – zum Verbinden klicken"):tr("Wird auch in {x} gespeichert")).replace("{x}",d.file.name))}">${ICOSZ(ICO_BLATT,12,1.8)}</i>`:""}<button class="x" data-close="${d.id}" title="${tr("Dokument schließen")}" ${d.tabColor?'style="color:#22242A"':""}>&times;</button></div>`
   ).join("")+`<button class="tabadd" id="newdoc" title="${tr("Neues Dokument")}">+</button>`;
+  $("#tabbar").querySelectorAll(".tabfile.warn").forEach(i=>i.onclick=e=>{e.stopPropagation();
+    fileReconnect(S.docs.find(x=>x.id===i.closest(".tab").dataset.id))});
 }
 function anchorsInDocCount(d){
   const t=document.createElement("div");t.innerHTML=d.html||"";
@@ -13479,27 +13613,34 @@ async function fileWrite(d,h){
 /* Beim Sichern mitschreiben. Absichtlich ohne Nachfrage: ist der Zugriff
    abgelaufen, wird die Datei still als getrennt vermerkt und die Oberfläche
    bietet „Verbinden" an, statt mitten im Schreiben einen Dialog aufzuwerfen. */
-let fileTimer=null;
-function queueFileWrite(){
-  const d=doc();if(!d||!d.file||!hatDateien())return;
-  clearTimeout(fileTimer);
-  fileTimer=setTimeout(async()=>{
+/* Ein Zeitgeber JE DOKUMENT. Bis 1.2 gab es einen gemeinsamen: wer in Reiter
+   A tippte und binnen einer Sekunde in Reiter B weiterschrieb, löschte A's
+   ausstehenden Schreibvorgang — A's Datei blieb bis zum nächsten Tippen in A
+   einen Stand zurück (im Browserspeicher war alles da). */
+const fileTimers=new Map();
+const dateiStand=()=>{drawStatus();if($("#tabbar"))drawTabs()};
+function queueFileWrite(d=doc()){
+  if(!d||!d.file||!hatDateien())return;
+  clearTimeout(fileTimers.get(d.id));
+  fileTimers.set(d.id,setTimeout(async()=>{
+    fileTimers.delete(d.id);
     const h=await handleGet(d.id);
-    if(!await fileOk(h,false)){d.file.lose=true;save();drawStatus();return}
-    try{await fileWrite(d,h);d.file.lose=false;d.file.at=Date.now();save();drawStatus()}
-    catch(e){d.file.lose=true;save();drawStatus()}
-  },900);
+    const war=!!d.file.lose;
+    if(!await fileOk(h,false)){d.file.lose=true;save();if(!war)dateiStand();else drawStatus();return}
+    try{await fileWrite(d,h);d.file.lose=false;d.file.at=Date.now();save();if(war)dateiStand();else drawStatus()}
+    catch(e){d.file.lose=true;save();dateiStand()}
+  },900));
 }
-async function fileSaveAs(){
+async function fileSaveAs(d=doc()){
   if(!hatDateien()){toast(tr("Dieser Browser kann keine Dateien öffnen."));return}
-  flush();const d=doc();
+  flush();if(!d)return;
   try{
     const h=await showSaveFilePicker({suggestedName:safeName(tr(d.title))+".pqw",
       types:[{description:"PureQuill",accept:{"application/json":PQWLESEN}}]});
     await fileWrite(d,h);
     await handleSet(d.id,h);
     d.file={name:h.name,lose:false,at:Date.now()};
-    save();drawStatus();toast(tr("In Datei gespeichert"));
+    save();dateiStand();toast(tr("In Datei gespeichert"));
   }catch(e){/* Abbruch im Dateidialog ist kein Fehler */}
 }
 async function fileOpen(){
@@ -13517,19 +13658,20 @@ async function fileOpen(){
     if(d&&!vorher.has(d.id)){
       await handleSet(d.id,h);
       d.file={name:h.name,lose:false,at:Date.now()};
-      save();drawStatus();
+      save();dateiStand();
     }
   }catch(e){}
 }
-async function fileReconnect(){
-  const d=doc();if(!d||!d.file)return;
+async function fileReconnect(d=doc()){
+  if(!d||!d.file)return;
   const h=await handleGet(d.id);
-  if(await fileOk(h,true)){d.file.lose=false;save();drawStatus();toast(tr("Verbunden"));settings()}
+  if(await fileOk(h,true)){d.file.lose=false;save();dateiStand();queueFileWrite(d);toast(tr("Verbunden"));if($("#sBackup"))settings()}
   else toast(tr("Der Zugriff wurde nicht erteilt."));
 }
-async function fileDetach(){
-  const d=doc();if(!d)return;
-  await handleDel(d.id);delete d.file;save();drawStatus();toast(tr("Verbindung gelöst"));settings();
+async function fileDetach(d=doc()){
+  if(!d)return;
+  clearTimeout(fileTimers.get(d.id));fileTimers.delete(d.id);
+  await handleDel(d.id);delete d.file;save();dateiStand();toast(tr("Verbindung gelöst"));if($("#sBackup"))settings();
 }
 
 /* ================= Automatische Vollsicherung =================
@@ -13835,6 +13977,8 @@ function fileMenu(){
         {a:"fileas",cur:!!doc().file,
          label:doc().file?tr("Mit anderer Datei verknüpfen…"):tr("Mit Datei verknüpfen…"),
          k:doc().file?esc(doc().file.name):PQWEXT},
+        ...(doc().file&&doc().file.lose?[{a:"filere",label:tr("Verbinden"),k:esc(doc().file.name)}]:[]),
+        ...(doc().file?[{a:"fileoff",label:tr("Verbindung lösen"),k:esc(doc().file.name)}]:[]),
         {a:"fileopen",label:tr("Verknüpfte Datei öffnen…"),k:PQWEXT}]:[])]);
     if(a==="auto"){s.autosave=!s.autosave;save();resetTimer();drawStatus();closeMenu();fileMenu();return}
     closeMenu();runFileAct(a);
@@ -13869,6 +14013,8 @@ function runFileAct(a){
   if(a==="fmt")changeFormat();
   if(a==="fileopen")fileOpen();
   if(a==="fileas")fileSaveAs();
+  if(a==="filere")fileReconnect();
+  if(a==="fileoff")fileDetach();
   if(a==="open")importJson();
   if(a==="save"){commit();toast(tr("Zwischenstand angelegt"))}
   if(a==="speichern")speichern();
@@ -19337,42 +19483,54 @@ function settings(){
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
         ${tr("Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).")}</label></div>`;
+  /* Seit 1.2 (Toms Durchsicht): erst erklären, dann einstellen. Ein Feld
+     „Automatisch anlegen“ mit „Aus“ als erstem Eintrag statt eines
+     unbeschrifteten Hakens neben der Liste; darunter der Kasten zum aktiven
+     Dokument — Zahl und Alter seiner Zwischenstände zeigen, dass die
+     Einstellung wirkt, und die beiden Knöpfe stehen dort, wo man sie sucht. */
+  const zd=$("#editor")?doc():null,zh=zd?zd.history||[]:[];
   const zwi=`
     <div class="setsec">${tr("Zwischenstände")}</div>
-    ${zeile(tr("Automatisch anlegen"),`<input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
-      <select id="sInt" ${s.autosave?"":"disabled"}>${SNAPSHOTS.map(([lab,v])=>
-        `<option value="${v}" ${s.interval==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
-    <div class="setrow" style="border-bottom:none;padding-top:2px">
-      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
-        ${tr("Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.")}</label></div>
-    ${zeile(tr("Wie weit zurück"),`<select id="sSpan">${HIST_SPANNEN.map(([lab,v])=>
+    <p class="setnote">${tr("Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.")}</p>
+    <p class="setnote">${tr("Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.")}</p>
+    ${zeile(tr("Automatisch anlegen"),`<select id="sInt"><option value="0" ${s.autosave?"":"selected"}>${tr("Aus")}</option>${SNAPSHOTS.map(([lab,v])=>
+        `<option value="${v}" ${s.autosave&&s.interval==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
+    ${zeile(tr("Aufbewahren"),`<select id="sSpan">${HIST_SPANNEN.map(([lab,v])=>
         `<option value="${v}" ${(s.histSpan||604800)==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
-    <div class="setrow" style="border-bottom:none;padding-top:2px">
-      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
-        ${tr("Neuere Stände bleiben dicht beieinander, ältere werden ausgedünnt: erst alle paar Minuten, dann stündlich, dann täglich.")}</label></div>
-    ${zeile("",`<button class="btn" id="sHist">${tr("Versionsverlauf öffnen")}&hellip;</button>`)}`;
+    <p class="setnote" style="margin-top:6px">${tr("Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.")}</p>
+    ${zd?`<div class="zwbox">
+      <div class="zwinfo"><b>${esc(tr(zd.title)||tr("Ohne Titel"))}</b>
+        <span>${zh.length
+          ?zh.length+" "+tr(zh.length===1?"Zwischenstand":"Zwischenstände")+" · "+tr("ältester")+": "+new Date(zh[0].ts).toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"short"})
+          :tr("Noch keine gesicherten Stände.")}</span></div>
+      <div class="storeact" style="margin-top:0">
+        <button class="btn" id="sSnap">${tr("Zwischenstand anlegen")}</button>
+        <button class="btn" id="sHist">${tr("Versionsverlauf öffnen")}&hellip;</button></div>
+    </div>`:""}`;
   const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
-      <p class="storeintro">${tr("Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.")}</p>
+      <p class="storeintro">${tr(istApp()?"Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten."
+        :"Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.")}</p>
       <div class="storecard">
         <div class="storehead">
           <span class="storenum">1</span>
           <span class="storeicon">${ICO('<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 10h16"/><circle cx="7.5" cy="7.6" r=".6"/>')}</span>
           <span style="min-width:0">
-            <b>${tr(istApp()?"Arbeitsstand im Programmspeicher":"Arbeitsstand in diesem Browser")}</b><br>
-            <span class="storecount">${tr("alles")} · ${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")}</span>
+            <b>${tr(istApp()?"Programmspeicher":"Browserspeicher")}</b><br>
+            <span class="storecount">${tr(istApp()?"im Benutzerordner deines Rechners":"in diesem Browser, getrennt nach Adresse")}</span>
           </span>${ampel("an")}
         </div>
+        ${umfang(ICO_STAPEL,grossAnfang(tr("alles"))+": "+S.docs.length+"&nbsp;"+tr("Dok.")+" · "+S.notes.length+"&nbsp;"+tr("Notizen")+" · "+S.glossary.length+"&nbsp;"+tr("Glossareinträge"))}
         <p class="storenote">${tr(istApp()
-          ?"Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht."
-          :"Hier liegt immer der Arbeitsstand — getrennt nach Adresse, nicht als Datei auf der Festplatte. Wer die Browserdaten löscht, verliert ihn.")}</p>
+          ?"Hier speichert PureQuill laufend. Das bleibt auch nach einer Deinstallation erhalten."
+          :"Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.")}
+          ${tr("Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.")}</p>
         <div class="storeact">
           <button class="btn" id="sBackup">${tr("Alles sichern")}&hellip;</button>
           <button class="btn" id="sRestore">${tr("Sicherung laden")}&hellip;</button>
           <button class="btn" id="sWipe">${tr("Alle Daten löschen")}&hellip;</button>
         </div>
       </div>
-      ${dateiKarte()}
       ${abKarte()}`;
   overlay(`<div class="modal setwin"><h3>${tr("Einstellungen")}</h3>
     <div class="setsplit">
@@ -19390,11 +19548,9 @@ function settings(){
     s.font=v("sFont",s.font);s.size=+v("sSize",s.size);s.unit=v("sUnit",s.unit);
     s.lh=+v("sLh",s.lh)||s.lh;s.ps=$("#sPs")?+$("#sPs").value:s.ps;
     const fmtWahl=v("sFmt",null);if(fmtWahl&&fmtWahl!=="eigen")s.fmt=fmtWahl;
-    s.autosave=v("sAuto",s.autosave);
-    s.interval=+v("sInt",s.interval)||60;s.histSpan=+v("sSpan",s.histSpan)||s.histSpan||604800;s.lang=v("sLang",s.lang);
+    if($("#sInt")){const iv=+$("#sInt").value;s.autosave=iv>0;if(iv>0)s.interval=iv}s.histSpan=+v("sSpan",s.histSpan)||s.histSpan||604800;s.lang=v("sLang",s.lang);
     /* Ohne Zwischenstände ist der Abstand gegenstandslos — das Feld wird grau,
        statt einen Wert anzubieten, der nichts bewirkt. */
-    if($("#sInt"))$("#sInt").disabled=!s.autosave;
     const uiNeu=v("sUiLang",s.uiLang),langChanged=s.uiLang!==uiNeu;s.uiLang=uiNeu;
     /* Die Oberflächensprache umzustellen zieht die Prüfsprache mit — sonst
        schlüge die Rechtschreibprüfung weiter die alte vor. Wer nur das
@@ -19409,7 +19565,7 @@ function settings(){
     a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
-  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sAuto","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof",
+  ["sFont","sSize","sLh","sPs","sFmt","sUnit","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof",
    "acQuotes","acDash","acCap","acLists"]
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
@@ -19427,14 +19583,11 @@ function settings(){
   const anBtn=(id,fn)=>{const b=$("#"+id);if(b)b.onclick=fn};
   anBtn("sBackup",()=>{closeOvl();saveBundle("all")});
   anBtn("sHist",()=>{closeOvl();history()});
+  anBtn("sSnap",()=>{commit();settings()});
   anBtn("sWipe",()=>{closeOvl();wipeDialog()});
   anBtn("sRestore",()=>{closeOvl();importJson()});
   /* Die Berechtigungsfrage des Browsers kommt so immer direkt nach einem
      Klick — nie beim Start, nie im Hintergrund. */
-  anBtn("sFileAs",()=>{closeOvl();fileSaveAs()});
-  anBtn("sFileOpen",()=>{closeOvl();fileOpen()});
-  anBtn("sFileRe",fileReconnect);
-  anBtn("sFileOff",fileDetach);
   /* Automatische Vollsicherung — der Dateidialog muss aus dem Klick heraus
      kommen, deshalb ohne closeOvl() davor: der Einstellungsdialog bleibt
      stehen und zeichnet sich danach mit der neuen Karte neu. */
@@ -19451,10 +19604,14 @@ function settings(){
   /* Ob der Zugriff noch gilt, weiß nur der Browser. Nachträglich nachsehen —
      ohne zu fragen — und die Karte berichtigen, falls sie das Falsche behauptet.
      Der zweite Durchlauf findet nichts mehr zu ändern und hört auf. */
-  if(hatDateien()&&doc()&&doc().file)(async()=>{
-    const d=doc();const ok=await fileOk(await handleGet(d.id),false);
-    if(!!d.file.lose===!ok)return;
-    d.file.lose=!ok;save();drawStatus();
+  if(hatDateien()&&S.docs.some(x=>x.file))(async()=>{
+    let geaendert=false;
+    for(const d of S.docs.filter(x=>x.file)){
+      const ok=await fileOk(await handleGet(d.id),false);
+      if(!!d.file.lose!==!ok){d.file.lose=!ok;geaendert=true}
+    }
+    if(!geaendert)return;
+    save();dateiStand();
     if($("#sBackup"))settings();
   })();
   $("#setClose").onclick=closeOvl;
@@ -19519,68 +19676,42 @@ async function download(name,text,mime){
    dem Neustart verloren), grau = aus oder hier nicht möglich. Bewusst kein
    Rot für „aus“: Nummer 2 und 3 sind freiwillig, Rot würde einen Fehler
    behaupten, wo keiner ist. */
+/* Umfang-Zeile: sagt je Karte, WAS dort gespeichert wird — der Unterschied
+   zwischen Nummer 2 (nur das aktive Dokument) und 3 (alles) war sonst nur
+   aus dem Fließtext zu erraten, beide schreiben eine .pqw. */
+const ICO_STAPEL='<path d="m12 4 8 4-8 4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 16 8 4 8-4"/>';
+const grossAnfang=t=>t.charAt(0).toUpperCase()+t.slice(1);
+const umfang=(ico,text)=>`<span class="storescope">${ICOSZ(ico,13,1.6)}<span>${text}</span></span>`;
 const ampel=z=>`<span class="storeamp ${z}">${tr(z==="an"?"aktiv":z==="warn"?"Zugriff nötig":z==="na"?"nicht verfügbar":"aus")}</span>`;
-function dateiKarte(){
-  const d=doc();
-  /* Vom Willkommensbildschirm aus gibt es noch kein Dokument — dann redet
-     "dieses Dokument" ueber etwas, das es nicht gibt. Gemessen am Editor, denn
-     ein leeres, aber geoeffnetes Dokument laesst sich sehr wohl verknuepfen. */
-  if(!$("#editor"))return `<div class="storecard" style="margin-top:8px;opacity:.75">
-    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
-      <span><b>${tr("Datei auf der Festplatte")}</b><br>
-      <span class="storecount">${tr("kein Dokument offen")}</span></span>${ampel("na")}</div>
-    <p class="storenote">${tr("Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.")}</p></div>`;
-  if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
-    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
-      <span><b>${tr("Datei auf der Festplatte")}</b><br>
-      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span>${ampel("na")}</div>
-    <p class="storenote">${tr("Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Alles sichern“.")}</p></div>`;
-  const f=d&&d.file;
-  return `<div class="storecard" style="margin-top:8px">
-    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
-      <span style="min-width:0">
-        <b>${f?esc(f.name):tr("Datei auf der Festplatte")}</b><br>
-        <span class="storecount">${f?(f.lose?tr("Zugriff abgelaufen"):tr("verbunden")):tr("nicht verbunden")}</span>
-      </span>${ampel(f?(f.lose?"warn":"an"):"aus")}</div>
-    <p class="storenote">${f
-      ?(f.lose
-        ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.")
-        : tr("Dieses Dokument wird bei jedem Sichern auch in die Datei geschrieben."))
-      :tr("Dieses Dokument zusätzlich als Datei ablegen. Ab dann wird bei jedem Sichern mitgeschrieben — auch in einen Ordner, den Dropbox oder OneDrive abgleicht.")}</p>
-    <div class="storeact">
-      ${f&&f.lose?`<button class="btn pri" id="sFileRe">${tr("Verbinden")}</button>`:""}
-      <button class="btn" id="sFileAs">${f?tr("Mit anderer Datei verknüpfen…"):tr("Mit Datei verknüpfen…")}</button>
-      <button class="btn" id="sFileOpen">${tr("Verknüpfte Datei öffnen…")}</button>
-      ${f?`<button class="btn" id="sFileOff">${tr("Verbindung lösen")}</button>`:""}
-    </div></div>`;
-}
-
-/* Die dritte Karte: die einzige, die den ganzen Programmstand abdeckt.
-   Nummeriert wie die beiden darüber, damit die Staffelung ohne Erklärung
-   lesbar ist — eins gilt immer, zwei und drei sind freiwillig. */
+/* Die Karte der automatischen Sicherung: die einzige, die den ganzen
+   Programmstand an einen zweiten Ort bringt. Bis 1.2 stand dazwischen eine
+   Karte für die Verknüpfung einzelner Dokumente mit einer .pqw; Tom fand
+   das für die Zielgruppe zu kompliziert. Die Verknüpfung gibt es weiter im
+   Menü Datei › Sicherung, ihr Zustand steht am Reiter. */
 function abKarte(){
   const ICON=ICO('<path d="M12 4v10"/><path d="m8.5 10.5 3.5 3.5 3.5-3.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>');
   if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
-    <div class="storehead"><span class="storenum">3</span><span class="storeicon">${ICON}</span>
-      <span><b>${tr("Automatische Sicherung")}</b><br>
+    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICON}</span>
+      <span><b>${tr("Automatische Sicherung von allem")}</b><br>
       <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span>${ampel("na")}</div>
     <p class="storenote">${tr("Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Alles sichern“.")}</p></div>`;
   const a=S.autoBackup;
   const wann=a&&a.at?new Date(a.at).toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"}):"";
   return `<div class="storecard" id="abCard" style="margin-top:8px">
-    <div class="storehead"><span class="storenum">3</span><span class="storeicon">${ICON}</span>
+    <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICON}</span>
       <span style="min-width:0">
-        <b>${a?esc(a.name):tr("Automatische Sicherung")}</b><br>
+        <b>${tr("Automatische Sicherung von allem")}</b><br>
         <span class="storecount">${a
-          ?(a.lose?tr("Zugriff abgelaufen"):(wann?tr("zuletzt")+" "+wann:tr("eingerichtet")))
+          ?esc(a.name)+" · "+(a.lose?tr("Zugriff abgelaufen"):(wann?tr("zuletzt")+" "+wann:tr("eingerichtet")))
           :tr("nicht eingerichtet")}</span>
       </span>${ampel(a?(a.lose?"warn":"an"):"aus")}</div>
+    ${umfang(ICO_STAPEL,grossAnfang(tr("alles"))+": "+tr("Dokumente, Notizen, Glossare, Einstellungen")+" · .pqw")}
     <p class="storenote">${a
       ?(a.lose
         ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.")
         : tr("Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben."))
-      :tr("Der ganze Programmstand in eine Datei, von selbst und wiederkehrend — anders als Nummer 2, die nur das offene Dokument abdeckt.")}</p>
-    <p class="storenote storehint">${tr("Liegt die Datei in einem Ordner von Google Drive, Dropbox oder OneDrive, wird sie von dort automatisch mit in die Cloud gesichert. Das Programm braucht dafür keinen Zugang zu diesen Diensten.")}</p>
+      :tr("Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.")}</p>
+    <p class="storenote">${tr("Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.")}</p>
     ${a&&!a.lose?`<div class="storeact" style="align-items:center">
       <label style="color:var(--ink-soft);font-size:12px">${tr("Wie oft")}</label>
       <select id="abJede" style="width:auto">${AB_INTERVALL.map(([lab,v])=>
@@ -19899,7 +20030,7 @@ affects only the document you are in.</p>`},
  {t:"Where your work is kept",k:"saving;storage;autosave;browser storage;lost work",b:`
 <p>Your text is saved continuously as you type. There is no Save command to remember,
 and the status bar at the bottom right always says where things stand.</p>
-<p>Work is kept in <b>three places</b>, numbered in <b>Settings &rsaquo; Saving</b>:</p>
+<p>Work can be kept in <b>three places</b>:</p>
 <ol>
 <li><b><nur-b>This browser</nur-b><nur-a>This program</nur-a></b> — always, and everything.<nur-b> Tied to the address you opened the
 program from, and lost if you clear your browser data.</nur-b><nur-a> Kept with the program's data on this machine. Uninstalling the
@@ -20420,7 +20551,7 @@ or a different browser, or a private window — shows an empty program, not a lo
 to the address you were using, or load a backup.</p></nur-b><nur-a><p>Storage belongs to the program and to your account on this machine. A second installation,
 or a different account, therefore shows an empty program, not a lost one. Load a backup there to
 bring your work along.</p></nur-a>
-<nur-b><p class="hsec">"File on disk" is greyed out</p>
+<nur-b><p class="hsec">"Link to a file" is missing from the menu</p>
 <p>Reading and writing real files needs Chrome or Edge. In other browsers, use <b>Create a
 backup</b> and <b>Load a backup</b> instead.</p></nur-b>`}]}
 ],
@@ -20466,8 +20597,7 @@ Zeilenabstand. Änderungen daran betreffen nur das Dokument, in dem du gerade bi
  {t:"Wo deine Arbeit liegt",k:"sichern;speicher;speicherort;browserspeicher;verlust",b:`
 <p>Dein Text wird fortlaufend beim Tippen gesichert. Es gibt keinen Speichern-Befehl, an den
 man denken müsste, und die Statuszeile unten rechts sagt jederzeit, woran man ist.</p>
-<p>Die Arbeit liegt an <b>drei Orten</b>, im Einstellungsdialog unter <b>Speichern</b>
-durchnummeriert:</p>
+<p>Die Arbeit kann an <b>drei Orten</b> liegen:</p>
 <ol>
 <li><b><nur-b>Dieser Browser</nur-b><nur-a>Dieses Programm</nur-a></b> — immer, und alles. Hier liegt der Arbeitsstand.<nur-b> Er hängt an der
 Adresse, von der du das Programm geöffnet hast, und geht verloren, wenn du die Browserdaten
@@ -21015,7 +21145,7 @@ geöffnet wurde. Rufe das Programm über eine Webadresse oder einen lokalen Serv
 Programm, kein verlorenes. Kehre zur bisherigen Adresse zurück oder lade eine Sicherung.</p></nur-b><nur-a><p>Der Speicher gehört zum Programm und zu deinem Benutzerkonto auf diesem Rechner. Eine
 zweite Installation oder ein anderes Konto zeigt deshalb ein leeres Programm, kein verlorenes.
 Lade dort eine Sicherung, um deine Arbeit mitzunehmen.</p></nur-a>
-<nur-b><p class="hsec">„Datei auf der Festplatte" ist ausgegraut</p>
+<nur-b><p class="hsec">„Mit Datei verknüpfen“ fehlt im Menü</p>
 <p>Echte Dateien zu lesen und zu schreiben braucht Chrome oder Edge. In anderen Browsern nimmst
 du stattdessen <b>Alles sichern</b> und <b>Sicherung laden</b>.</p></nur-b>`}]}
 ],
@@ -21062,8 +21192,7 @@ Cambiarlos solo afecta al documento en el que estás.</p>`},
  {t:"Dónde se guarda tu trabajo",k:"guardar;almacenamiento;autoguardado;navegador;trabajo perdido",b:`
 <p>Tu texto se guarda de forma continua mientras escribes. No hay ningún comando de guardar que
 recordar, y la barra de estado abajo a la derecha siempre indica cómo está la situación.</p>
-<p>El trabajo se conserva en <b>tres lugares</b>, numerados en <b>Configuración &rsaquo;
-Guardado</b>:</p>
+<p>El trabajo puede conservarse en <b>tres lugares</b>:</p>
 <ol>
 <li><b><nur-b>Este navegador</nur-b><nur-a>Este programa</nur-a></b>: siempre, y todo.<nur-b> Ligado a la dirección desde la que abriste el
 programa, y se pierde si borras los datos del navegador.</nur-b><nur-a> Se guarda con los datos del programa en este equipo. Desinstalar el
@@ -21614,7 +21743,7 @@ dirección —u otro navegador, o una ventana privada— muestra un programa vac
 Vuelve a la dirección que usabas, o carga una copia de seguridad.</p></nur-b><nur-a><p>El almacenamiento pertenece al programa y a tu cuenta en este equipo. Una segunda
 instalación, o una cuenta distinta, muestra por eso un programa vacío, no uno perdido. Carga
 allí una copia de seguridad para llevarte tu trabajo.</p></nur-a>
-<nur-b><p class="hsec">«Archivo en el disco» está en gris</p>
+<nur-b><p class="hsec">«Vincular a un archivo» no aparece en el menú</p>
 <p>Leer y escribir archivos reales necesita Chrome o Edge. En otros navegadores, usa <b>Crear
 copia de seguridad</b> y <b>Cargar copia de seguridad</b> en su lugar.</p></nur-b>`}]}
 ],
@@ -21661,8 +21790,7 @@ Mudar isso afeta apenas o documento em que você está.</p>`},
  {t:"Onde seu trabalho fica guardado",k:"salvar;armazenamento;salvamento automático;navegador;trabalho perdido",b:`
 <p>Seu texto é salvo continuamente enquanto você escreve. Não há nenhum comando de salvar para
 lembrar, e a barra de status embaixo à direita sempre mostra a situação.</p>
-<p>O trabalho fica em <b>três lugares</b>, numerados em <b>Configurações &rsaquo;
-Salvamento</b>:</p>
+<p>O trabalho pode ficar em <b>três lugares</b>:</p>
 <ol>
 <li><b><nur-b>Este navegador</nur-b><nur-a>Este programa</nur-a></b>: sempre, e tudo.<nur-b> Ligado ao endereço de onde você abriu o programa, e
 perdido se você limpar os dados do navegador.</nur-b><nur-a> Fica junto dos dados do programa neste computador. Desinstalar o
@@ -22063,7 +22191,7 @@ trecho que você talvez queira de volta.</p>
 <p><b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Histórico de versões</b> lista todos, do
 mais recente ao mais antigo, cada um com a hora e a contagem de palavras para você reconhecer o
 que procura. <i>Restaurar</i> põe aquela versão no lugar do texto atual.</p>
-<p>Até onde recuam define-se em <b>Configurações &rsaquo; Pontos de restauração</b>, de uma hora a um mês; os recentes ficam próximos, os antigos são espaçados. Eles ficam <nur-b>no
+<p>Até onde eles voltam você define em <b>Configurações &rsaquo; Pontos de restauração</b>, de uma hora a um mês; os recentes ficam próximos, os antigos são espaçados. Eles ficam <nur-b>no
 navegador</nur-b><nur-a>no armazenamento</nur-a> junto do documento, então viajam dentro de um backup, mas não o substituem. Um ponto
 de restauração ajuda a dar um passo atrás enquanto você escreve; um backup é para o dia em que <nur-b>o
 navegador</nur-b><nur-a>este computador</nur-a> não estiver mais lá.</p>
@@ -22210,7 +22338,7 @@ local.</p></nur-b>
 Volte para o endereço que você usava, ou carregue um backup.</p></nur-b><nur-a><p>O armazenamento pertence ao programa e à sua conta neste computador. Uma segunda
 instalação, ou outra conta, mostra por isso um programa vazio, não um perdido. Carregue um
 backup lá para levar seu trabalho junto.</p></nur-a>
-<nur-b><p class="hsec">«Arquivo no disco» está esmaecido</p>
+<nur-b><p class="hsec">“Vincular a um arquivo” não aparece no menu</p>
 <p>Ler e gravar arquivos de verdade precisa do Chrome ou do Edge. Em outros navegadores, use
 <b>Criar backup</b> e <b>Carregar backup</b> no lugar.</p></nur-b>`}]}
 ],
@@ -22260,8 +22388,7 @@ Les modifier n'affecte que le document dans lequel vous vous trouvez.</p>`},
 <p>Votre texte est enregistré en continu pendant que vous écrivez. Il n'y a aucune commande
 d'enregistrement à retenir, et la barre d'état en bas à droite indique toujours où en sont les
 choses.</p>
-<p>Le travail est conservé à <b>trois endroits</b>, numérotés dans <b>Paramètres &rsaquo;
-Enregistrement</b> :</p>
+<p>Le travail peut être conservé à <b>trois endroits</b> :</p>
 <ol>
 <li><b><nur-b>Ce navigateur</nur-b><nur-a>Ce programme</nur-a></b> : toujours, et tout.<nur-b> Lié à l'adresse depuis laquelle vous avez ouvert
 le programme, et perdu si vous effacez les données du navigateur.</nur-b><nur-a> Conservé avec les données du programme sur cette
@@ -22829,7 +22956,7 @@ adresse — ou un autre navigateur, ou une fenêtre privée — montre un progra
 programme perdu. Revenez à l'adresse que vous utilisiez, ou chargez une sauvegarde.</p></nur-b><nur-a><p>Le stockage appartient au programme et à votre compte sur cette machine. Une deuxième
 installation, ou un autre compte, montre donc un programme vide, pas un programme perdu.
 Chargez-y une sauvegarde pour emporter votre travail.</p></nur-a>
-<nur-b><p class="hsec">« Fichier sur le disque » est grisé</p>
+<nur-b><p class="hsec">« Lier à un fichier » manque dans le menu</p>
 <p>Lire et écrire de vrais fichiers demande Chrome ou Edge. Dans les autres navigateurs, servez-
 vous de <b>Créer une sauvegarde</b> et <b>Charger une sauvegarde</b> à la place.</p></nur-b>`}]}
 ],
@@ -22876,8 +23003,7 @@ dotyczy tylko dokumentu, w którym jesteś.</p>`},
  {t:"Gdzie przechowywana jest Twoja praca",k:"zapisywanie;przechowywanie;autozapis;pamięć przeglądarki;utracona praca",b:`
 <p>Tekst jest zapisywany na bieżąco podczas pisania. Nie ma żadnego polecenia zapisu do
 zapamiętania, a pasek stanu w prawym dolnym rogu zawsze pokazuje, jak stoją sprawy.</p>
-<p>Praca jest przechowywana w <b>trzech miejscach</b>, ponumerowanych w <b>Ustawienia &rsaquo;
-Zapisywanie</b>:</p>
+<p>Praca może być przechowywana w <b>trzech miejscach</b>:</p>
 <ol>
 <li><b><nur-b>Ta przeglądarka</nur-b><nur-a>Ten program</nur-a></b> — zawsze i wszystko.<nur-b> Powiązane z adresem, spod którego otworzono
 program, i utracone po wyczyszczeniu danych przeglądarki.</nur-b><nur-a> Leży przy danych programu na tym komputerze. Odinstalowanie programu
@@ -23407,7 +23533,7 @@ innej przeglądarki, albo z okna prywatnego — pokazuje pusty program, a nie ut
 adresu, którego używałeś, albo wczytaj kopię zapasową.</p></nur-b><nur-a><p>Pamięć należy do programu i do Twojego konta na tym komputerze. Druga instalacja albo inne
 konto pokazuje dlatego pusty program, a nie utracony. Wczytaj tam kopię zapasową, aby zabrać
 swoją pracę ze sobą.</p></nur-a>
-<nur-b><p class="hsec">„Plik na dysku” jest wyszarzony</p>
+<nur-b><p class="hsec">„Powiąż z plikiem” nie ma w menu</p>
 <p>Czytanie i zapisywanie prawdziwych plików wymaga Chrome albo Edge. W innych przeglądarkach
 użyj zamiast tego <b>Utwórz kopię zapasową</b> i <b>Wczytaj kopię zapasową</b>.</p></nur-b>`}]}
 ],
@@ -23456,8 +23582,7 @@ riguarda solo il documento in cui ti trovi.</p>`},
  {t:"Dove viene conservato il tuo lavoro",k:"salvare;archiviazione;salvataggio automatico;browser;lavoro perso",b:`
 <p>Il tuo testo viene salvato di continuo mentre scrivi. Non c'è alcun comando di salvataggio
 da ricordare, e la barra di stato in basso a destra indica sempre come stanno le cose.</p>
-<p>Il lavoro è conservato in <b>tre luoghi</b>, numerati in <b>Impostazioni &rsaquo;
-Salvataggio</b>:</p>
+<p>Il lavoro può essere conservato in <b>tre luoghi</b>:</p>
 <ol>
 <li><b><nur-b>Questo browser</nur-b><nur-a>Questo programma</nur-a></b>: sempre, e tutto.<nur-b> Legato all'indirizzo da cui hai aperto il programma,
 e perso se cancelli i dati del browser.</nur-b><nur-a> Si trova insieme ai dati del programma su questo computer.
@@ -24012,7 +24137,7 @@ o da un altro browser, o da una finestra privata — mostra un programma vuoto, 
 Torna all'indirizzo che usavi, o carica un backup.</p></nur-b><nur-a><p>La memoria appartiene al programma e al tuo account su questo computer. Una seconda
 installazione, o un altro account, mostra perciò un programma vuoto, non uno perso. Carica lì un
 backup per portarti dietro il tuo lavoro.</p></nur-a>
-<nur-b><p class="hsec">«File sul disco» è in grigio</p>
+<nur-b><p class="hsec">«Collega a un file» manca nel menu</p>
 <p>Leggere e scrivere file veri richiede Chrome o Edge. Negli altri browser, usa invece
 <b>Crea backup</b> e <b>Carica backup</b>.</p></nur-b>`}]}
 ]
