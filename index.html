@@ -1235,7 +1235,7 @@ body.focus .outline{display:none}
    man einmal durchsieht. Genau diese Trennung machen die Reiter sichtbar. */
 /* Seitenleiste der Einstellungen (seit 1.2, vorher Reiter oben) */
 .modal.setwin{width:min(780px,96vw)}
-.setsplit{display:flex;height:min(580px,calc(100vh - 150px))}
+.setsplit{display:flex;height:min(620px,calc(100vh - 150px))}
 .setnav{flex:0 0 190px;display:flex;flex-direction:column;gap:2px;padding:10px 8px;
   border-right:1px solid var(--rule);background:var(--chrome-2);overflow-y:auto}
 .setnavi{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;
@@ -1297,7 +1297,13 @@ body.focus .outline{display:none}
 /* In den Einstellungen etwas dichter, damit alle drei Karten ohne Rollen passen */
 .setbody .storecard{padding:10px 13px}
 .setbody .storenote{margin-top:6px}
-.setbody .storeact{margin-top:8px}
+.setbody .storeact{margin-top:10px;gap:6px;align-items:center}
+.setbody .storeact .btn{font-size:13px;padding:5px 12px;line-height:1.3}
+.setbody .storeact select{width:auto;font-size:13px}
+.setbody .storeact label{font-size:12px;color:var(--ink-soft)}
+.setbody .storehead{min-height:30px}
+.setbody .storehead b{line-height:1.3}
+.setbody .storenote+.storenote{margin-top:4px}
 .setbody .storescope{margin-top:5px}
 .setbody .storecard+.storecard{margin-top:7px!important}
 .storenum{flex:0 0 18px;height:18px;border-radius:50%;display:flex;align-items:center;
@@ -2244,6 +2250,9 @@ en:{
   "Notizen und Glossar":"Notes and glossary",
   "Vollsicherung":"Full backup",
   "Alle Daten löschen":"Delete all data",
+  "Manuelle Sicherung":"Manual backup",
+  "einmalig als Datei":"once, as a file",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Saves everything once to a file, for example before switching computers. With “Load backup” you bring a backup back, including an automatic one.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Snapshots exist only in PureQuill. A Word file doesn’t contain them, a PureQuill file (.pqw) does. When you close a document, its snapshots are gone from the program.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"When you close a document, it’s gone from here. Save it first, for example as a Word file.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Only open documents are backed up, along with their snapshots.",
@@ -2253,8 +2262,8 @@ en:{
   "ältester":"oldest",
   "Wird auch in {x} gespeichert":"Also saved to {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Access to {x} has expired – click to reconnect",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Your work is always kept in program storage. You can also set up an automatic backup of everything.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Your work is always kept in browser storage. You can also set up an automatic backup of everything.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Your work is always kept in program storage. You can also back it up automatically or by hand.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Your work is always kept in browser storage. You can also back it up automatically or by hand.",
   "Programmspeicher":"Program storage",
   "Browserspeicher":"Browser storage",
   "im Benutzerordner deines Rechners":"in your user folder on this computer",
@@ -3083,6 +3092,9 @@ fr:{
   "Notizen und Glossar":"Notes et glossaire",
   "Vollsicherung":"Sauvegarde complète",
   "Alle Daten löschen":"Supprimer toutes les données",
+  "Manuelle Sicherung":"Sauvegarde manuelle",
+  "einmalig als Datei":"une fois, dans un fichier",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Enregistre tout une fois dans un fichier, par exemple avant de changer d’ordinateur. Avec « Charger une sauvegarde », vous récupérez une sauvegarde, même automatique.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Les points de restauration n’existent que dans PureQuill. Un fichier Word ne les contient pas, un fichier PureQuill (.pqw) si. Quand vous fermez un document, ses points de restauration disparaissent du programme.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quand vous fermez un document, il disparaît d’ici. Enregistrez-le d’abord, par exemple en fichier Word.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Seuls les documents ouverts sont sauvegardés, avec leurs points de restauration.",
@@ -3092,8 +3104,8 @@ fr:{
   "ältester":"le plus ancien",
   "Wird auch in {x} gespeichert":"Aussi enregistré dans {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Accès à {x} expiré – cliquez pour reconnecter",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Votre travail est toujours conservé dans la mémoire du programme. Vous pouvez aussi configurer une sauvegarde automatique de tout.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Votre travail est toujours conservé dans la mémoire du navigateur. Vous pouvez aussi configurer une sauvegarde automatique de tout.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Votre travail est toujours conservé dans la mémoire du programme. Vous pouvez aussi le sauvegarder automatiquement ou à la main.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Votre travail est toujours conservé dans la mémoire du navigateur. Vous pouvez aussi le sauvegarder automatiquement ou à la main.",
   "Programmspeicher":"Mémoire du programme",
   "Browserspeicher":"Mémoire du navigateur",
   "im Benutzerordner deines Rechners":"dans votre dossier utilisateur sur cet ordinateur",
@@ -3922,6 +3934,9 @@ es:{
   "Notizen und Glossar":"Notas y glosario",
   "Vollsicherung":"Copia de seguridad completa",
   "Alle Daten löschen":"Borrar todos los datos",
+  "Manuelle Sicherung":"Copia a mano",
+  "einmalig als Datei":"una vez, como archivo",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Guarda todo una vez en un archivo, por ejemplo antes de cambiar de ordenador. Con «Cargar copia de seguridad» recuperas una copia, también una automática.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Los puntos de restauración solo existen en PureQuill. Un archivo de Word no los contiene; un archivo de PureQuill (.pqw), sí. Si cierras un documento, sus puntos de restauración desaparecen del programa.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Si cierras un documento, desaparece de aquí. Guárdalo antes, por ejemplo como archivo de Word.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Solo se guardan los documentos abiertos, con sus puntos de restauración.",
@@ -3931,8 +3946,8 @@ es:{
   "ältester":"la más antigua",
   "Wird auch in {x} gespeichert":"También se guarda en {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"El acceso a {x} ha caducado: haz clic para conectar",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Tu trabajo siempre se guarda en la memoria del programa. Además puedes configurar una copia de seguridad automática de todo.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Tu trabajo siempre se guarda en la memoria del navegador. Además puedes configurar una copia de seguridad automática de todo.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Tu trabajo siempre se guarda en la memoria del programa. Además puedes hacer copias automáticas o a mano.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Tu trabajo siempre se guarda en la memoria del navegador. Además puedes hacer copias automáticas o a mano.",
   "Programmspeicher":"Memoria del programa",
   "Browserspeicher":"Memoria del navegador",
   "im Benutzerordner deines Rechners":"en tu carpeta de usuario de este equipo",
@@ -4761,6 +4776,9 @@ pt:{
   "Notizen und Glossar":"Notas e glossário",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Apagar todos os dados",
+  "Manuelle Sicherung":"Backup manual",
+  "einmalig als Datei":"uma vez, como arquivo",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Salva tudo uma vez em um arquivo, por exemplo antes de trocar de computador. Com “Carregar backup” você recupera um backup, inclusive um automático.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Os pontos de restauração só existem no PureQuill. Um arquivo do Word não os contém; um arquivo do PureQuill (.pqw), sim. Quando você fecha um documento, os pontos de restauração dele somem do programa.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quando você fecha um documento, ele some daqui. Salve-o antes, por exemplo como arquivo do Word.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Só os documentos abertos entram no backup, junto com seus pontos de restauração.",
@@ -4770,8 +4788,8 @@ pt:{
   "ältester":"o mais antigo",
   "Wird auch in {x} gespeichert":"Também salvo em {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"O acesso a {x} expirou – clique para conectar",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Seu trabalho fica sempre na memória do programa. Você também pode configurar um backup automático de tudo.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Seu trabalho fica sempre na memória do navegador. Você também pode configurar um backup automático de tudo.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Seu trabalho fica sempre na memória do programa. Você também pode fazer backup automático ou manual.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Seu trabalho fica sempre na memória do navegador. Você também pode fazer backup automático ou manual.",
   "Programmspeicher":"Memória do programa",
   "Browserspeicher":"Memória do navegador",
   "im Benutzerordner deines Rechners":"na sua pasta de usuário neste computador",
@@ -5600,6 +5618,9 @@ pl:{
   "Notizen und Glossar":"Notatki i słowniczek",
   "Vollsicherung":"Pełna kopia zapasowa",
   "Alle Daten löschen":"Usuń wszystkie dane",
+  "Manuelle Sicherung":"Kopia ręczna",
+  "einmalig als Datei":"jednorazowo, jako plik",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Zapisuje wszystko jednorazowo do pliku, na przykład przed zmianą komputera. Przyciskiem „Wczytaj kopię zapasową” przywrócisz kopię, także automatyczną.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"Punkty przywracania istnieją tylko w PureQuill. Plik Worda ich nie zawiera, plik PureQuill (.pqw) tak. Gdy zamkniesz dokument, jego punkty przywracania znikają z programu.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Gdy zamkniesz dokument, znika stąd. Zapisz go wcześniej, na przykład jako plik Worda.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Kopia obejmuje tylko otwarte dokumenty, razem z ich punktami przywracania.",
@@ -5609,8 +5630,8 @@ pl:{
   "ältester":"najstarsza",
   "Wird auch in {x} gespeichert":"Zapisywany także w {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Dostęp do {x} wygasł – kliknij, aby połączyć",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Twoja praca jest zawsze w pamięci programu. Możesz też ustawić automatyczną kopię wszystkiego.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Twoja praca jest zawsze w pamięci przeglądarki. Możesz też ustawić automatyczną kopię wszystkiego.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Twoja praca jest zawsze w pamięci programu. Możesz też robić kopie automatycznie albo ręcznie.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Twoja praca jest zawsze w pamięci przeglądarki. Możesz też robić kopie automatycznie albo ręcznie.",
   "Programmspeicher":"Pamięć programu",
   "Browserspeicher":"Pamięć przeglądarki",
   "im Benutzerordner deines Rechners":"w folderze użytkownika na tym komputerze",
@@ -6446,6 +6467,9 @@ it:{
   "Notizen und Glossar":"Note e glossario",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Elimina tutti i dati",
+  "Manuelle Sicherung":"Backup manuale",
+  "einmalig als Datei":"una volta, come file",
+  "Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.":"Salva tutto una volta in un file, per esempio prima di cambiare computer. Con «Carica backup» recuperi un backup, anche automatico.",
   "Zwischenstände gibt es nur in PureQuill. Eine Word-Datei enthält sie nicht, eine PureQuill-Datei (.pqw) schon. Wenn du ein Dokument schließt, sind seine Zwischenstände im Programm weg.":"I punti di ripristino esistono solo in PureQuill. Un file Word non li contiene, un file PureQuill (.pqw) sì. Quando chiudi un documento, i suoi punti di ripristino spariscono dal programma.",
   "Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.":"Quando chiudi un documento, sparisce da qui. Salvalo prima, per esempio come file Word.",
   "Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.":"Vengono salvati solo i documenti aperti, con i loro punti di ripristino.",
@@ -6455,8 +6479,8 @@ it:{
   "ältester":"il più vecchio",
   "Wird auch in {x} gespeichert":"Salvato anche in {x}",
   "Zugriff auf {x} abgelaufen – zum Verbinden klicken":"Accesso a {x} scaduto – clicca per collegare",
-  "Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Il tuo lavoro è sempre nella memoria del programma. Puoi anche impostare un backup automatico di tutto.",
-  "Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.":"Il tuo lavoro è sempre nella memoria del browser. Puoi anche impostare un backup automatico di tutto.",
+  "Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Il tuo lavoro è sempre nella memoria del programma. Puoi anche farne un backup automatico o manuale.",
+  "Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.":"Il tuo lavoro è sempre nella memoria del browser. Puoi anche farne un backup automatico o manuale.",
   "Programmspeicher":"Memoria del programma",
   "Browserspeicher":"Memoria del browser",
   "im Benutzerordner deines Rechners":"nella tua cartella utente su questo computer",
@@ -19509,8 +19533,8 @@ function settings(){
     </div>`:""}`;
   const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
-      <p class="storeintro">${tr(istApp()?"Deine Arbeit liegt immer im Programmspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten."
-        :"Deine Arbeit liegt immer im Browserspeicher. Zusätzlich kannst du eine automatische Sicherung von allem einrichten.")}</p>
+      <p class="storeintro">${tr(istApp()?"Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand."
+        :"Deine Arbeit liegt immer im Browserspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand.")}</p>
       <div class="storecard">
         <div class="storehead">
           <span class="storenum">1</span>
@@ -19526,12 +19550,29 @@ function settings(){
           :"Hier speichert PureQuill laufend. Wer die Browserdaten löscht, verliert alles, was hier liegt.")}
           ${tr("Wenn du ein Dokument schließt, ist es hier weg. Speichere es vorher, zum Beispiel als Word-Datei.")}</p>
         <div class="storeact">
-          <button class="btn" id="sBackup">${tr("Alles sichern")}&hellip;</button>
-          <button class="btn" id="sRestore">${tr("Sicherung laden")}&hellip;</button>
           <button class="btn" id="sWipe">${tr("Alle Daten löschen")}&hellip;</button>
         </div>
       </div>
-      ${abKarte()}`;
+      ${abKarte()}
+      <!-- Manuelle Sicherung: bis 1.2 standen „Alles sichern“ und „Sicherung
+           laden“ unter dem Programmspeicher, als gehörten sie zu ihm. Sie
+           schreiben und lesen aber eine .pqw wie die automatische Sicherung.
+           Keine Ampel: eine Handlung, kein Zustand. -->
+      <div class="storecard" style="margin-top:8px">
+        <div class="storehead">
+          <span class="storenum">3</span>
+          <span class="storeicon">${ICO('<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/>')}</span>
+          <span style="min-width:0">
+            <b>${tr("Manuelle Sicherung")}</b><br>
+            <span class="storecount">${tr("einmalig als Datei")}</span>
+          </span>
+        </div>
+        <p class="storenote">${tr("Speichert alles einmalig in eine Datei, zum Beispiel vor einem Rechnerwechsel. Mit „Sicherung laden“ holst du eine Sicherung zurück, auch eine automatische.")}</p>
+        <div class="storeact">
+          <button class="btn" id="sBackup">${tr("Alles sichern")}&hellip;</button>
+          <button class="btn" id="sRestore">${tr("Sicherung laden")}&hellip;</button>
+        </div>
+      </div>`;
   overlay(`<div class="modal setwin"><h3>${tr("Einstellungen")}</h3>
     <div class="setsplit">
       <nav class="setnav" role="tablist" aria-orientation="vertical">${reiter.map(([k,n,ico])=>
@@ -19705,13 +19746,12 @@ function abKarte(){
           ?esc(a.name)+" · "+(a.lose?tr("Zugriff abgelaufen"):(wann?tr("zuletzt")+" "+wann:tr("eingerichtet")))
           :tr("nicht eingerichtet")}</span>
       </span>${ampel(a?(a.lose?"warn":"an"):"aus")}</div>
-    ${umfang(ICO_STAPEL,grossAnfang(tr("alles"))+": "+tr("Dokumente, Notizen, Glossare, Einstellungen")+" · .pqw")}
     <p class="storenote">${a
       ?(a.lose
         ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.")
         : tr("Alle Dokumente, Notizen, Glossare und Einstellungen werden von selbst in diese Datei geschrieben."))
-      :tr("Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.")}</p>
-    <p class="storenote">${tr("Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.")}</p>
+      :tr("Eine Sicherungsdatei, die sich regelmäßig selbst aktualisiert. Liegt sie in einem mit deinem Computer verknüpften Ordner von Google Drive, Dropbox oder OneDrive, landet sie automatisch in der Cloud.")}
+      ${tr("Gesichert werden nur offene Dokumente, samt ihren Zwischenständen.")}</p>
     ${a&&!a.lose?`<div class="storeact" style="align-items:center">
       <label style="color:var(--ink-soft);font-size:12px">${tr("Wie oft")}</label>
       <select id="abJede" style="width:auto">${AB_INTERVALL.map(([lab,v])=>

@@ -250,6 +250,17 @@ immer genau einen Commit, der sie anfasst.
     Schließen sind sie im Programm weg. Beim Programmspeicher: „Wenn du ein
     Dokument schließt, ist es hier weg. Speichere es vorher …“; bei der
     Sicherung: nur offene Dokumente, samt Zwischenständen.
+  - **Manuelle Sicherung als eigene Karte** (Toms Vorschlag): „Alles
+    sichern“ und „Sicherung laden“ standen unter dem Programmspeicher, als
+    gehörten sie zu ihm — sie schreiben und lesen aber eine .pqw wie die
+    automatische Sicherung. Jetzt Karte 3 „Manuelle Sicherung · einmalig als
+    Datei“, ohne Ampel (eine Handlung, kein Zustand); beim Programmspeicher
+    bleibt nur „Alle Daten löschen“. Einleitung: „Sichern kannst du sie
+    zusätzlich automatisch oder von Hand.“ Für eine ruhigere Fläche trägt nur
+    noch Karte 1 eine Umfang-Zeile (mit echten Zahlen), die Sätze der
+    automatischen Sicherung sind ein Absatz, Knöpfe einheitlich 13 px.
+    Fläche der Einstellungen 620 px: auch mit eingerichteter Sicherung passt
+    alles ohne Rollen.
   - Portugiesisch: die heute neuen Texte im brasilianischen Portugiesisch der
     übrigen Oberfläche („salvar“, „você“, „arquivo“); sie waren zuerst
     europäisch geschrieben.
