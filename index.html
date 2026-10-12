@@ -1231,6 +1231,26 @@ body.focus .outline{display:none}
    beiden Karten inzwischen fast so groß wie alles andere zusammen und wird
    gezielt aufgesucht („wo liegt mein Text?") — der Rest ist eine Liste, die
    man einmal durchsieht. Genau diese Trennung machen die Reiter sichtbar. */
+/* Seitenleiste der Einstellungen (seit 1.2, vorher Reiter oben) */
+.modal.setwin{width:min(780px,96vw)}
+.setsplit{display:flex;height:min(580px,calc(100vh - 150px))}
+.setnav{flex:0 0 190px;display:flex;flex-direction:column;gap:2px;padding:10px 8px;
+  border-right:1px solid var(--rule);background:var(--chrome-2);overflow-y:auto}
+.setnavi{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border:none;
+  border-radius:var(--radius);background:none;color:var(--ink-soft);text-align:left;font-size:13px}
+.setnavi svg{flex:none}
+.setnavi:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.setnavi.on{background:var(--paper);color:var(--stamp);font-weight:600;box-shadow:inset 0 0 0 1px var(--rule)}
+.setbody{flex:1;min-width:0;overflow-y:auto}
+.setnote{margin:-3px 0 8px;font-size:12px;line-height:1.45;color:var(--ink-soft)}
+.setstd{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.setstd span{font-size:12px;color:var(--ink-soft)}
+.setstd .btn{white-space:nowrap}
+@media (max-width:640px){
+  .setsplit{flex-direction:column;height:auto;max-height:calc(100vh - 150px)}
+  .setnav{flex:none;flex-direction:row;overflow-x:auto;border-right:none;border-bottom:1px solid var(--rule);padding:6px}
+  .setnavi{width:auto;white-space:nowrap}
+}
 .settabs{display:flex;gap:2px;padding:0 16px;border-bottom:1px solid var(--rule)}
 .settab{padding:8px 13px;font-size:13px;color:var(--ink-soft);
   border-bottom:2px solid transparent;margin-bottom:-1px}
@@ -1244,6 +1264,14 @@ body.focus .outline{display:none}
   align-items:center;justify-content:center;background:var(--paper);
   border:1px solid var(--rule);color:var(--ink-soft)}
 .storecount{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+.storeamp{margin-left:auto;align-self:flex-start;flex:none;display:inline-flex;align-items:center;gap:6px;
+  padding:2px 9px 2px 7px;border-radius:999px;font-size:11px;font-weight:600;white-space:nowrap;
+  color:var(--ink-soft);background:var(--paper);border:1px solid var(--rule)}
+.storeamp::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--ink-faint)}
+.storeamp.an{color:color-mix(in srgb,#1e8e4e 65%,var(--ink));border-color:color-mix(in srgb,#1e8e4e 45%,var(--rule))}
+.storeamp.an::before{background:#22a05a}
+.storeamp.warn{color:color-mix(in srgb,#b7791f 60%,var(--ink));border-color:color-mix(in srgb,#d4920f 50%,var(--rule))}
+.storeamp.warn::before{background:#e0a01a}
 .storenote{font-size:12px;line-height:1.5;color:var(--ink-soft);margin:8px 0 0}
 .storeact{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
 /* Die drei Speicherorte durchnummeriert: die Staffelung soll ohne Erklärung
@@ -2188,6 +2216,28 @@ en:{
   "Notizen und Glossar":"Notes and glossary",
   "Vollsicherung":"Full backup",
   "Alle Daten löschen":"Delete all data",
+  "aktiv":"active",
+  "Zugriff nötig":"needs access",
+  "nicht verfügbar":"not available",
+  "Programm":"Program",
+  "Zeile beim Schreiben":"Line while writing",
+  "in der Fenstermitte halten":"keep in the middle of the window",
+  "Leisten beim Schreiben":"Toolbars while writing",
+  "abblenden, solange du tippst":"dim while you type",
+  "Bearbeiten":"Editing",
+  "Maßeinheit":"Unit",
+  "Millimeter":"Millimetres",
+  "im Menü Einfügen anbieten":"offer in the Insert menu",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Defaults for new documents you create from now on. The format of existing documents stays as it is.",
+  "Standardwerte wiederherstellen":"Restore defaults",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"Straight \" and ' become typographic quotation marks",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Two hyphens (--) become a dash (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"After . ! ? the next sentence starts with a capital",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"“- ” or “1. ” at the start of a line begins a list",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"Which quotation marks are used depends on the spell-check language (General).",
+  "Automatisch anlegen":"Create automatically",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Snapshots of your text that you can return to in the version history. Your text itself is saved continuously regardless.",
+  "Versionsverlauf öffnen":"Open version history",
   "Werkszustand":"Factory settings",
   "Auf Werkszustand zurücksetzen":"Reset to factory settings",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"All settings return to how PureQuill Writer was shipped: colour scheme, language, font and page format for new documents, autocorrect and view.",
@@ -2197,7 +2247,7 @@ en:{
   "Erst sichern, dann löschen":"Back up first, then delete",
   "Ohne Sicherung löschen":"Delete without a backup",
   "Alles gelöscht":"Everything deleted",
-  "Arbeitsstand in diesem Programm":"Working state in this program",
+  "Arbeitsstand im Programmspeicher":"Working state in program storage",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"The working state always lives here — in your machine’s user folder. Uninstalling the program does not remove it.",
   "Vollsicherung laden":"Load full backup",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"A full backup replaces every document, note and glossary entry currently stored here.",
@@ -2980,6 +3030,28 @@ fr:{
   "Notizen und Glossar":"Notes et glossaire",
   "Vollsicherung":"Sauvegarde complète",
   "Alle Daten löschen":"Supprimer toutes les données",
+  "aktiv":"actif",
+  "Zugriff nötig":"accès requis",
+  "nicht verfügbar":"non disponible",
+  "Programm":"Programme",
+  "Zeile beim Schreiben":"Ligne pendant la saisie",
+  "in der Fenstermitte halten":"garder au milieu de la fenêtre",
+  "Leisten beim Schreiben":"Barres pendant la saisie",
+  "abblenden, solange du tippst":"atténuer pendant la frappe",
+  "Bearbeiten":"Édition",
+  "Maßeinheit":"Unité",
+  "Millimeter":"Millimètres",
+  "im Menü Einfügen anbieten":"proposer dans le menu Insertion",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Réglages par défaut des nouveaux documents que vous créez désormais. Le format des documents existants reste inchangé.",
+  "Standardwerte wiederherstellen":"Rétablir les valeurs par défaut",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"Les \" et ' droits deviennent des guillemets typographiques",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Deux traits d’union (--) deviennent un tiret (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"Après . ! ? la phrase suivante commence par une majuscule",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"« - » ou « 1. » en début de ligne commence une liste",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"Les guillemets utilisés dépendent de la langue de vérification (Général).",
+  "Automatisch anlegen":"Créer automatiquement",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Des instantanés de votre texte auxquels vous pouvez revenir dans l’historique des versions. Votre texte lui-même est enregistré en continu, indépendamment.",
+  "Versionsverlauf öffnen":"Ouvrir l’historique des versions",
   "Werkszustand":"Réglages d’usine",
   "Auf Werkszustand zurücksetzen":"Rétablir les réglages d’usine",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tous les réglages reviennent à leur état d’origine : jeu de couleurs, langue, police et format de page des nouveaux documents, correction automatique et affichage.",
@@ -2989,7 +3061,7 @@ fr:{
   "Erst sichern, dann löschen":"Sauvegarder d’abord, puis supprimer",
   "Ohne Sicherung löschen":"Supprimer sans sauvegarde",
   "Alles gelöscht":"Tout a été supprimé",
-  "Arbeitsstand in diesem Programm":"État de travail dans ce programme",
+  "Arbeitsstand im Programmspeicher":"État de travail dans la mémoire du programme",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"L’état de travail se trouve toujours ici — dans le dossier utilisateur de votre ordinateur. La désinstallation du programme ne le supprime pas.",
   "Vollsicherung laden":"Charger la sauvegarde complète",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Une sauvegarde complète remplace tous les documents, notes et entrées de glossaire actuellement enregistrés ici.",
@@ -3772,6 +3844,28 @@ es:{
   "Notizen und Glossar":"Notas y glosario",
   "Vollsicherung":"Copia de seguridad completa",
   "Alle Daten löschen":"Borrar todos los datos",
+  "aktiv":"activo",
+  "Zugriff nötig":"requiere acceso",
+  "nicht verfügbar":"no disponible",
+  "Programm":"Programa",
+  "Zeile beim Schreiben":"Línea al escribir",
+  "in der Fenstermitte halten":"mantener en el centro de la ventana",
+  "Leisten beim Schreiben":"Barras al escribir",
+  "abblenden, solange du tippst":"atenuar mientras escribes",
+  "Bearbeiten":"Edición",
+  "Maßeinheit":"Unidad",
+  "Millimeter":"Milímetros",
+  "im Menü Einfügen anbieten":"ofrecer en el menú Insertar",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Valores predeterminados para los documentos nuevos que crees a partir de ahora. El formato de los documentos existentes no cambia.",
+  "Standardwerte wiederherstellen":"Restablecer valores predeterminados",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"Las \" y ' rectas se convierten en comillas tipográficas",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dos guiones (--) se convierten en raya (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"Tras . ! ? la siguiente oración empieza en mayúscula",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"«- » o «1. » al inicio de línea empieza una lista",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"Las comillas que se usan dependen del idioma de la revisión ortográfica (General).",
+  "Automatisch anlegen":"Crear automáticamente",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Instantáneas de tu texto a las que puedes volver en el historial de versiones. Tu texto se guarda de forma continua, independientemente de esto.",
+  "Versionsverlauf öffnen":"Abrir historial de versiones",
   "Werkszustand":"Configuración de fábrica",
   "Auf Werkszustand zurücksetzen":"Restablecer la configuración de fábrica",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todos los ajustes vuelven a su estado original: combinación de colores, idioma, fuente y formato de página para documentos nuevos, autocorrección y vista.",
@@ -3781,7 +3875,7 @@ es:{
   "Erst sichern, dann löschen":"Guardar primero, luego borrar",
   "Ohne Sicherung löschen":"Borrar sin copia de seguridad",
   "Alles gelöscht":"Todo borrado",
-  "Arbeitsstand in diesem Programm":"Estado de trabajo en este programa",
+  "Arbeitsstand im Programmspeicher":"Estado de trabajo en la memoria del programa",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"El estado de trabajo está siempre aquí — en la carpeta de usuario de tu ordenador. Desinstalar el programa no lo elimina.",
   "Vollsicherung laden":"Cargar copia completa",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Una copia completa reemplaza todos los documentos, notas y entradas de glosario guardados aquí.",
@@ -4564,6 +4658,28 @@ pt:{
   "Notizen und Glossar":"Notas e glossário",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Apagar todos os dados",
+  "aktiv":"ativo",
+  "Zugriff nötig":"requer acesso",
+  "nicht verfügbar":"indisponível",
+  "Programm":"Programa",
+  "Zeile beim Schreiben":"Linha ao escrever",
+  "in der Fenstermitte halten":"manter no meio da janela",
+  "Leisten beim Schreiben":"Barras ao escrever",
+  "abblenden, solange du tippst":"escurecer enquanto escreves",
+  "Bearbeiten":"Edição",
+  "Maßeinheit":"Unidade",
+  "Millimeter":"Milímetros",
+  "im Menü Einfügen anbieten":"oferecer no menu Inserir",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Predefinições para novos documentos que criares a partir de agora. O formato dos documentos existentes mantém-se.",
+  "Standardwerte wiederherstellen":"Repor valores predefinidos",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"As \" e ' retas passam a aspas tipográficas",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dois hífenes (--) passam a travessão (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"Depois de . ! ? a frase seguinte começa com maiúscula",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"«- » ou «1. » no início da linha começa uma lista",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"As aspas usadas dependem do idioma da verificação ortográfica (Geral).",
+  "Automatisch anlegen":"Criar automaticamente",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Instantâneos do teu texto aos quais podes voltar no histórico de versões. O teu texto em si é guardado continuamente, independentemente disto.",
+  "Versionsverlauf öffnen":"Abrir histórico de versões",
   "Werkszustand":"Configuração de fábrica",
   "Auf Werkszustand zurücksetzen":"Repor a configuração de fábrica",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todas as definições voltam ao estado original: esquema de cores, idioma, tipo de letra e formato de página para novos documentos, correção automática e vista.",
@@ -4573,7 +4689,7 @@ pt:{
   "Erst sichern, dann löschen":"Fazer backup primeiro, depois apagar",
   "Ohne Sicherung löschen":"Apagar sem backup",
   "Alles gelöscht":"Tudo apagado",
-  "Arbeitsstand in diesem Programm":"Estado de trabalho neste programa",
+  "Arbeitsstand im Programmspeicher":"Estado de trabalho na memória do programa",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"O estado de trabalho fica sempre aqui — na pasta de usuário do seu computador. Desinstalar o programa não o remove.",
   "Vollsicherung laden":"Carregar backup completo",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Um backup completo substitui todos os documentos, notas e entradas de glossário salvos aqui no momento.",
@@ -5356,6 +5472,28 @@ pl:{
   "Notizen und Glossar":"Notatki i słowniczek",
   "Vollsicherung":"Pełna kopia zapasowa",
   "Alle Daten löschen":"Usuń wszystkie dane",
+  "aktiv":"aktywne",
+  "Zugriff nötig":"wymaga dostępu",
+  "nicht verfügbar":"niedostępne",
+  "Programm":"Program",
+  "Zeile beim Schreiben":"Wiersz podczas pisania",
+  "in der Fenstermitte halten":"trzymaj na środku okna",
+  "Leisten beim Schreiben":"Paski podczas pisania",
+  "abblenden, solange du tippst":"przyciemniaj podczas pisania",
+  "Bearbeiten":"Edycja",
+  "Maßeinheit":"Jednostka",
+  "Millimeter":"Milimetry",
+  "im Menü Einfügen anbieten":"pokazuj w menu Wstaw",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Ustawienia domyślne dla nowych dokumentów tworzonych od teraz. Format istniejących dokumentów pozostaje bez zmian.",
+  "Standardwerte wiederherstellen":"Przywróć wartości domyślne",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"Proste \" i ' zmieniają się w cudzysłowy typograficzne",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dwa łączniki (--) zmieniają się w pauzę (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"Po . ! ? kolejne zdanie zaczyna się wielką literą",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"„- ” lub „1. ” na początku wiersza rozpoczyna listę",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"Rodzaj cudzysłowów zależy od języka sprawdzania pisowni (Ogólne).",
+  "Automatisch anlegen":"Twórz automatycznie",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Migawki tekstu, do których możesz wrócić w historii wersji. Sam tekst jest niezależnie od tego zapisywany na bieżąco.",
+  "Versionsverlauf öffnen":"Otwórz historię wersji",
   "Werkszustand":"Ustawienia fabryczne",
   "Auf Werkszustand zurücksetzen":"Przywróć ustawienia fabryczne",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Wszystkie ustawienia wracają do stanu początkowego: schemat kolorów, język, czcionka i format strony nowych dokumentów, autokorekta i widok.",
@@ -5365,7 +5503,7 @@ pl:{
   "Erst sichern, dann löschen":"Najpierw kopia, potem usuwanie",
   "Ohne Sicherung löschen":"Usuń bez kopii zapasowej",
   "Alles gelöscht":"Wszystko usunięte",
-  "Arbeitsstand in diesem Programm":"Stan pracy w tym programie",
+  "Arbeitsstand im Programmspeicher":"Stan pracy w pamięci programu",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"Stan pracy jest zawsze tutaj — w folderze użytkownika Twojego komputera. Odinstalowanie programu go nie usuwa.",
   "Vollsicherung laden":"Wczytaj pełną kopię zapasową",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Pełna kopia zapasowa zastępuje wszystkie dokumenty, notatki i wpisy słowniczka aktualnie tutaj zapisane.",
@@ -6155,6 +6293,28 @@ it:{
   "Notizen und Glossar":"Note e glossario",
   "Vollsicherung":"Backup completo",
   "Alle Daten löschen":"Elimina tutti i dati",
+  "aktiv":"attivo",
+  "Zugriff nötig":"accesso necessario",
+  "nicht verfügbar":"non disponibile",
+  "Programm":"Programma",
+  "Zeile beim Schreiben":"Riga durante la scrittura",
+  "in der Fenstermitte halten":"tieni al centro della finestra",
+  "Leisten beim Schreiben":"Barre durante la scrittura",
+  "abblenden, solange du tippst":"attenua mentre scrivi",
+  "Bearbeiten":"Modifica",
+  "Maßeinheit":"Unità",
+  "Millimeter":"Millimetri",
+  "im Menü Einfügen anbieten":"proponi nel menu Inserisci",
+  "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Impostazioni predefinite per i nuovi documenti che crei da ora in poi. Il formato dei documenti esistenti resta invariato.",
+  "Standardwerte wiederherstellen":"Ripristina valori predefiniti",
+  "Gerade \" und ' werden zu typografischen Anführungszeichen":"Le \" e ' dritte diventano virgolette tipografiche",
+  "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Due trattini (--) diventano una lineetta (–)",
+  "Nach . ! ? beginnt der nächste Satz groß":"Dopo . ! ? la frase successiva inizia con la maiuscola",
+  "„- “ oder „1. “ am Zeilenanfang beginnt eine Liste":"«- » o «1. » a inizio riga avvia un elenco",
+  "Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).":"Le virgolette usate dipendono dalla lingua del controllo ortografico (Generale).",
+  "Automatisch anlegen":"Crea automaticamente",
+  "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Istantanee del tuo testo a cui puoi tornare nella cronologia delle versioni. Il testo in sé viene comunque salvato di continuo.",
+  "Versionsverlauf öffnen":"Apri cronologia versioni",
   "Werkszustand":"Impostazioni di fabbrica",
   "Auf Werkszustand zurücksetzen":"Ripristina le impostazioni di fabbrica",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tutte le impostazioni tornano allo stato originale: combinazione di colori, lingua, carattere e formato pagina dei nuovi documenti, correzione automatica e visualizzazione.",
@@ -6164,7 +6324,7 @@ it:{
   "Erst sichern, dann löschen":"Prima il backup, poi elimina",
   "Ohne Sicherung löschen":"Elimina senza backup",
   "Alles gelöscht":"Tutto eliminato",
-  "Arbeitsstand in diesem Programm":"Stato di lavoro in questo programma",
+  "Arbeitsstand im Programmspeicher":"Stato di lavoro nella memoria del programma",
   "Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht.":"Lo stato di lavoro è sempre qui — nella cartella utente del tuo computer. Disinstallare il programma non lo rimuove.",
   "Vollsicherung laden":"Carica backup completo",
   "Eine Vollsicherung ersetzt alle Dokumente, Notizen und Glossareinträge, die hier gerade gespeichert sind.":"Un backup completo sostituisce tutti i documenti, le note e le voci di glossario attualmente salvati qui.",
@@ -19048,13 +19208,22 @@ let setTab="allg";
 function settings(){
   const s=S.settings;
   const a=s.autoc||(s.autoc={quotes:true,dash:true,cap:true,lists:true});
-  const reiter=[["allg","Allgemein"],["auto","Autokorrektur"],["save","Speichern"]];
+  /* Seit 1.2 eine Seitenleiste wie im Optionsdialog von OpenOffice und Word:
+     „Allgemein“ trug bis dahin auch die Vorgaben für neue Dokumente und
+     musste gerollt werden. Jeder Bereich passt jetzt ohne Rollen, die Fläche
+     ist für alle gleich hoch, damit der Dialog beim Wechsel nicht springt. */
+  const reiter=[["allg","Allgemein",'<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>'],
+    ["neu","Neue Dokumente",'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M12 11v6M9 14h6"/>'],
+    ["auto","Autokorrektur",'<path d="m4 20 11-11 2 2L6 22zM15 4v2M19 8h2M18 5l1.5-1.5M12 6l1 1"/>'],
+    ["save","Speichern",'<path d="M5 4h11l3 3v13H5zM8 4v5h7V4M8 20v-6h8v6"/>'],
+    ["zwi","Zwischenstände",'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/>']];
+  if(!reiter.some(r=>r[0]===setTab))setTab="allg";
   const zeile=(titel,inhalt)=>`<div class="setrow"><label>${titel}</label><div class="ctl">${inhalt}</div></div>`;
   const haken=(id,an,text)=>`<input type="checkbox" id="${id}" ${an?"checked":""} style="width:auto">
       <span style="color:var(--ink-soft);font-size:12px;flex:1;text-align:left">${text}</span>`;
   const allg=`
     <div class="setsec">${tr("Sprache")}</div>
-    ${zeile(tr("Benutzeroberfläche"),`<select id="sUiLang">${UI_LANGS.map(([v,n])=>
+    ${zeile(tr("Programm"),`<select id="sUiLang">${UI_LANGS.map(([v,n])=>
       `<option value="${v}" ${s.uiLang===v?"selected":""}>${n}</option>`).join("")}</select>`)}
     ${zeile(tr("Rechtschreibprüfung"),`<select id="sLang">${SPELL_LANGS.map(([v,n])=>
       `<option value="${v}" ${s.lang===v?"selected":""}>${tr(n)}</option>`).join("")}</select>`)}
@@ -19062,45 +19231,48 @@ function settings(){
     ${zeile(tr("Farbschema"),`<button class="btn" id="sThemeBtn">${
       tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button>`)}
     <div class="setsec">${tr("Schreiben")}</div>
-    ${zeile(tr("Schreibmaschinen-Scrollen"),haken("sTw",s.typewriter!==false,tr("aktive Zeile bleibt mittig")))}
-    ${zeile(tr("Oberfläche beim Schreiben"),haken("sDim",s.dimUi,tr("tritt zurück")))}
+    ${zeile(tr("Zeile beim Schreiben"),haken("sTw",s.typewriter!==false,tr("in der Fenstermitte halten")))}
+    ${zeile(tr("Leisten beim Schreiben"),haken("sDim",s.dimUi,tr("abblenden, solange du tippst")))}
+    <div class="setsec">${tr("Bearbeiten")}</div>
+    ${zeile(tr("Maßeinheit"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>${tr("Millimeter")}</option>
+      <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
+    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("im Menü Einfügen anbieten")))}`;
+  const neu=`
     <div class="setsec">${tr("Neue Dokumente")}</div>
+    <p class="setnote">${tr("Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.")}</p>
     ${zeile(tr("Schriftart"),
       `<select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
        <select id="sSize" style="flex:0 0 62px">${[...new Set([...SIZES,s.size])].sort((x,y)=>x-y).map(x=>
          `<option value="${x}" ${s.size==x?"selected":""}>${zahlText(x)}</option>`).join("")}</select>`)}
     ${zeile(tr("Zeilenabstand"),`<select id="sLh">${[...new Set([...LINEHEIGHTS.map(x=>x[1]),s.lh||LH_STD])].sort((x,y)=>x-y).map(v=>
-      `<option value="${v}" ${Math.abs((s.lh||LH_STD)-v)<0.001?"selected":""}>${zahlText(v)}</option>`).join("")}</select>`)}
+      `<option value="${v}" ${Math.abs((s.lh||LH_STD)-v)<0.001?"selected":""}>${zahlText(v)}${Math.abs(v-LH_STD)<0.001?" · "+tr("Standard"):""}</option>`).join("")}</select>`)}
     ${zeile(tr("Absatzabstand"),`<select id="sPs">${(PARSPACES.some(([,v])=>Math.abs(v-psOf({}))<0.001)?PARSPACES:[...PARSPACES,[zahlText(Math.round(psOf({})*100)/100),psOf({})]]).map(([lab,v])=>
       `<option value="${v}" ${Math.abs(psOf({})-v)<0.001?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
     ${(()=>{const f=s.fmt||"a4",key=typeof f==="string"?f:null;
       return zeile(tr("Seitenformat"),`<select id="sFmt">${Object.entries(FORMATS).map(([k,o])=>
         `<option value="${k}" ${key===k?"selected":""}>${tr(o.n)}</option>`).join("")}${key?"":
         `<option value="eigen" selected>${esc(tr(f.n||"Eigene Maße"))}</option>`}</select>`)})()}
-    ${zeile("",`<button class="btn" id="sStdReset">${tr("Auf Word-Standard zurücksetzen")}</button>`)}
-    <div class="setsec">${tr("Dokument")}</div>
-    ${zeile(tr("Maßsystem"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>mm</option>
-      <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
-    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("als Einfügeoption anbieten")))}
-    <div class="setsec">${tr("Werkszustand")}</div>
-    ${zeile("",`<button class="btn" id="sWerk">${tr("Auf Werkszustand zurücksetzen")}&hellip;</button>`)}`;
+    ${zeile("",`<div class="setstd"><button class="btn" id="sStdReset">${tr("Standardwerte wiederherstellen")}</button>
+      <span>${WORD_VORGABE.font} ${zahlText(WORD_VORGABE.size)} · ${tr("Zeilenabstand")} ${zahlText(WORD_VORGABE.lh)} · ${tr(FORMATS[WORD_VORGABE.fmt].n)}</span></div>`)}`;
   const autoc=`
     <div class="setsec">${tr("Beim Tippen")}</div>
-    ${zeile(tr("Anführungszeichen"),haken("acQuotes",a.quotes,tr("Gerade Anführungszeichen werden beim Tippen ersetzt")))}
-    ${zeile(tr("Gedankenstrich"),haken("acDash",a.dash,tr("Zwei Bindestriche werden zu einem Gedankenstrich")))}
-    ${zeile(tr("Großschreibung"),haken("acCap",a.cap,tr("Erster Buchstabe nach einem Satzende wird groß")))}
-    ${zeile(tr("Listen"),haken("acLists",a.lists,tr("Ein Bindestrich oder eine Zahl am Zeilenanfang beginnt eine Liste")))}
+    ${zeile(tr("Anführungszeichen"),haken("acQuotes",a.quotes,tr("Gerade \" und ' werden zu typografischen Anführungszeichen")))}
+    ${zeile(tr("Gedankenstrich"),haken("acDash",a.dash,tr("Zwei Bindestriche (--) werden zum Gedankenstrich (–)")))}
+    ${zeile(tr("Großschreibung"),haken("acCap",a.cap,tr("Nach . ! ? beginnt der nächste Satz groß")))}
+    ${zeile(tr("Listen"),haken("acLists",a.lists,tr("„- “ oder „1. “ am Zeilenanfang beginnt eine Liste")))}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
-        ${tr("Anführungszeichen richten sich nach der oben gewählten Rechtschreibsprache.")}</label></div>`;
-  const spei=`
+        ${tr("Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).")}</label></div>`;
+  const zwi=`
     <div class="setsec">${tr("Zwischenstände")}</div>
-    ${zeile(tr("Anlegen"),`<input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
+    ${zeile(tr("Automatisch anlegen"),`<input type="checkbox" id="sAuto" ${s.autosave?"checked":""} style="width:auto">
       <select id="sInt" ${s.autosave?"":"disabled"}>${SNAPSHOTS.map(([lab,v])=>
         `<option value="${v}" ${s.interval==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
-        ${tr("Für den Versionsverlauf. Dein Text wird unabhängig davon fortlaufend gesichert.")}</label></div>
+        ${tr("Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.")}</label></div>
+    ${zeile("",`<button class="btn" id="sHist">${tr("Versionsverlauf öffnen")}&hellip;</button>`)}`;
+  const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
       <p class="storeintro">${tr("Drei Orte, die gleichzeitig gelten. Der erste ist immer da, die beiden anderen sind freiwillig.")}</p>
       <div class="storecard">
@@ -19108,9 +19280,9 @@ function settings(){
           <span class="storenum">1</span>
           <span class="storeicon">${ICO('<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z"/><path d="M4 10h16"/><circle cx="7.5" cy="7.6" r=".6"/>')}</span>
           <span style="min-width:0">
-            <b>${tr(istApp()?"Arbeitsstand in diesem Programm":"Arbeitsstand in diesem Browser")}</b><br>
+            <b>${tr(istApp()?"Arbeitsstand im Programmspeicher":"Arbeitsstand in diesem Browser")}</b><br>
             <span class="storecount">${tr("alles")} · ${S.docs.length}&nbsp;${tr("Dok.")} · ${S.notes.length}&nbsp;${tr("Notizen")} · ${S.glossary.length}&nbsp;${tr("Glossareinträge")}</span>
-          </span>
+          </span>${ampel("an")}
         </div>
         <p class="storenote">${tr(istApp()
           ?"Hier liegt immer der Arbeitsstand — im Benutzerordner deines Rechners. Eine Deinstallation des Programms entfernt ihn nicht."
@@ -19123,11 +19295,14 @@ function settings(){
       </div>
       ${dateiKarte()}
       ${abKarte()}`;
-  overlay(`<div class="modal"><h3>${tr("Einstellungen")}</h3>
-    <div class="settabs">${reiter.map(([k,n])=>
-      `<button class="settab ${setTab===k?"on":""}" data-tab="${k}">${tr(n)}</button>`).join("")}</div>
-    <div class="pad">${setTab==="save"?spei:setTab==="auto"?autoc:allg}</div>
-    <div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
+  overlay(`<div class="modal setwin"><h3>${tr("Einstellungen")}</h3>
+    <div class="setsplit">
+      <nav class="setnav" role="tablist" aria-orientation="vertical">${reiter.map(([k,n,ico])=>
+        `<button class="setnavi ${setTab===k?"on":""}" data-tab="${k}" role="tab" aria-selected="${setTab===k}">${ICO(ico)}<span>${tr(n)}</span></button>`).join("")}</nav>
+      <div class="pad setbody" role="tabpanel">${setTab==="save"?spei:setTab==="zwi"?zwi:setTab==="auto"?autoc:setTab==="neu"?neu:allg}</div>
+    </div>
+    <div class="rowend"><button class="btn" id="sWerk" style="margin-right:auto">${tr("Auf Werkszustand zurücksetzen")}&hellip;</button>
+      <button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
   /* Je Reiter ist nur ein Teil der Felder im Dokument — deshalb überall erst
      nachsehen, ob es das Feld gerade gibt, statt es vorauszusetzen. */
   const v=(id,rueck)=>{const e=$("#"+id);
@@ -19172,6 +19347,7 @@ function settings(){
      das Suchen im Menü. Beide Wege führen zu denselben Funktionen. */
   const anBtn=(id,fn)=>{const b=$("#"+id);if(b)b.onclick=fn};
   anBtn("sBackup",()=>{closeOvl();saveBundle("all")});
+  anBtn("sHist",()=>{closeOvl();history()});
   anBtn("sWipe",()=>{closeOvl();wipeDialog()});
   anBtn("sRestore",()=>{closeOvl();importJson()});
   /* Die Berechtigungsfrage des Browsers kommt so immer direkt nach einem
@@ -19259,6 +19435,12 @@ async function download(name,text,mime){
    Datei auf der Festplatte. Bewusst als eigene Karte neben dem Browserspeicher
    und nicht als Ersatz — beides gilt gleichzeitig, und genau das soll man
    sehen. Wer in seinen Dropbox-Ordner speichert, hat damit auch Dropbox. */
+/* Ampel an den drei Speicherorten (seit 1.2, Toms Wunsch): grün = schreibt
+   gerade mit, gelb = eingerichtet, braucht aber einen Klick (Zugriff nach
+   dem Neustart verloren), grau = aus oder hier nicht möglich. Bewusst kein
+   Rot für „aus“: Nummer 2 und 3 sind freiwillig, Rot würde einen Fehler
+   behaupten, wo keiner ist. */
+const ampel=z=>`<span class="storeamp ${z}">${tr(z==="an"?"aktiv":z==="warn"?"Zugriff nötig":z==="na"?"nicht verfügbar":"aus")}</span>`;
 function dateiKarte(){
   const d=doc();
   /* Vom Willkommensbildschirm aus gibt es noch kein Dokument — dann redet
@@ -19267,12 +19449,12 @@ function dateiKarte(){
   if(!$("#editor"))return `<div class="storecard" style="margin-top:8px;opacity:.75">
     <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
       <span><b>${tr("Datei auf der Festplatte")}</b><br>
-      <span class="storecount">${tr("kein Dokument offen")}</span></span></div>
+      <span class="storecount">${tr("kein Dokument offen")}</span></span>${ampel("na")}</div>
     <p class="storenote">${tr("Sobald ein Dokument offen ist, lässt es sich hier zusätzlich als Datei ablegen.")}</p></div>`;
   if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
     <div class="storehead"><span class="storenum">2</span><span class="storeicon">${ICO('<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/>')}</span>
       <span><b>${tr("Datei auf der Festplatte")}</b><br>
-      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span></div>
+      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span>${ampel("na")}</div>
     <p class="storenote">${tr("Chrome und Edge können Dokumente als Datei öffnen und speichern. Hier bleibt es bei „Alles sichern“.")}</p></div>`;
   const f=d&&d.file;
   return `<div class="storecard" style="margin-top:8px">
@@ -19280,7 +19462,7 @@ function dateiKarte(){
       <span style="min-width:0">
         <b>${f?esc(f.name):tr("Datei auf der Festplatte")}</b><br>
         <span class="storecount">${f?(f.lose?tr("Zugriff abgelaufen"):tr("verbunden")):tr("nicht verbunden")}</span>
-      </span></div>
+      </span>${ampel(f?(f.lose?"warn":"an"):"aus")}</div>
     <p class="storenote">${f
       ?(f.lose
         ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder mitgeschrieben.")
@@ -19302,7 +19484,7 @@ function abKarte(){
   if(!hatDateien())return `<div class="storecard" style="margin-top:8px;opacity:.75">
     <div class="storehead"><span class="storenum">3</span><span class="storeicon">${ICON}</span>
       <span><b>${tr("Automatische Sicherung")}</b><br>
-      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span></div>
+      <span class="storecount">${tr("in diesem Browser nicht möglich")}</span></span>${ampel("na")}</div>
     <p class="storenote">${tr("Chrome und Edge können von selbst in eine Datei sichern. Hier bleibt es bei „Alles sichern“.")}</p></div>`;
   const a=S.autoBackup;
   const wann=a&&a.at?new Date(a.at).toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"}):"";
@@ -19313,7 +19495,7 @@ function abKarte(){
         <span class="storecount">${a
           ?(a.lose?tr("Zugriff abgelaufen"):(wann?tr("zuletzt")+" "+wann:tr("eingerichtet")))
           :tr("nicht eingerichtet")}</span>
-      </span></div>
+      </span>${ampel(a?(a.lose?"warn":"an"):"aus")}</div>
     <p class="storenote">${a
       ?(a.lose
         ? tr("Der Browser hat den Zugriff nach dem Neustart zurückgesetzt. Einmal verbinden, dann wird wieder gesichert.")

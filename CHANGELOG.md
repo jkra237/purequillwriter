@@ -180,6 +180,42 @@ immer genau einen Commit, der sie anfasst.
   (`standardEinstellungen()`), danach lädt das Programm neu und die
   Migrationen ergänzen den Rest wie beim ersten Start. Geprüft:
   `werkzeuge/pruefen/werkszustand.cjs` (eigene, flüchtige Sitzung).
+- **Einstellungen mit Seitenleiste** wie im Optionsdialog von OpenOffice und
+  Word, statt drei Reitern oben (Toms Wunsch: „Allgemein“ war zu lang). Fünf
+  Bereiche mit Symbol: Allgemein (Sprache, Farbschema, Schreiben, Maßsystem,
+  Abbildungsverzeichnis), **Neue Dokumente** (Schrift, Abstände, Seitenformat,
+  Word-Standard — vorher in „Allgemein“), Autokorrektur, Speichern (die drei
+  Speicherorte) und **Zwischenstände** (vorher oben in „Speichern“, das
+  sonst nicht ohne Rollen passte). „Auf Werkszustand zurücksetzen …“ steht
+  unten links in der Knopfleiste wie OpenOffices „Zurücksetzen“. Die
+  Inhaltsfläche ist für alle Bereiche gleich hoch (580 px, im kleinen
+  Fenster weniger, dann rollt nur sie), der Dialog springt beim Wechsel
+  nicht; gemessen mit `dialog-reiter.cjs`. Unter 640 px Breite liegt die
+  Leiste waagerecht über dem Inhalt. Die Hilfe nennt weiter „Einstellungen ›
+  Allgemein/Speichern/Autokorrektur“ — das stimmt, weil Maßsystem und
+  Abbildungsverzeichnis in „Allgemein“ und die Speicherkarten in „Speichern“
+  geblieben sind.
+  - **Texte klarer** (Toms Durchsicht): „Programm“ statt „Benutzeroberfläche“;
+    „Zeile beim Schreiben · in der Fenstermitte halten“ statt „Schreib-
+    maschinen-Scrollen“; „Leisten beim Schreiben · abblenden, solange du
+    tippst“ statt „tritt zurück“; Abschnitt „Bearbeiten“ mit „Maßeinheit“
+    (Millimeter/Zoll) und „im Menü Einfügen anbieten“. „Neue Dokumente“ sagt
+    oben, dass es nur für künftig angelegte Dokumente gilt; „1,15 · Standard“
+    in der Liste; **„Standardwerte wiederherstellen“** statt „Auf Word-Standard
+    zurücksetzen“, darunter, was das setzt (Calibri 11 · Zeilenabstand 1,15 ·
+    DIN A4). Autokorrektur mit Beispielen (`--` → –, „1. “ → Liste); der
+    Hinweis zu den Anführungszeichen nannte die „oben gewählte“ Sprache, die
+    jetzt auf einer anderen Seite steht. Zwischenstände erklären, was sie
+    sind, und haben einen Knopf „Versionsverlauf öffnen…“. Alle neuen Texte
+    in sieben Sprachen.
+  - **Neue Dokumente**: Erklärungssatz in Toms Wortlaut („Voreinstellungen für
+    neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente
+    bleibt bestehen.“).
+  - **Speichern mit Ampel**: jede der drei Karten zeigt rechts ihren Zustand —
+    grün „aktiv“, gelb „Zugriff nötig“ (eingerichtet, Zugriff nach dem
+    Neustart verloren), grau „aus“ oder „nicht verfügbar“. Bewusst kein Rot
+    für „aus“: Nummer 2 und 3 sind freiwillig. In der App heißt Karte 1
+    „Arbeitsstand im Programmspeicher“.
 
 ### Behoben
 
