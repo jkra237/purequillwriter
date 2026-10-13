@@ -149,6 +149,43 @@ immer genau einen Commit, der sie anfasst.
   Lagen zur Seitengrenze (Absatz, Leerzeilen, H1+H2, Liste, kurze und lange
   Tabelle, überlanger Absatz).
 
+- **Absätze brechen am Seitenende zeilenweise um, mit Absatzkontrolle wie
+  in Word.** Bisher wanderte ein Absatz, der nicht ganz auf die Seite
+  passte, komplett weiter (gemessen: 22 mm leer bei fünf Zeilen), und einer,
+  der länger als eine Seite war, lief durch Fußzeile und Seitenabstand; der
+  Druck teilte ihn und hatte dann eine Seite mehr (10 statt 9, letzte Seite
+  ohne Kopf- und Fußzeile). Jetzt bricht er zwischen zwei Zeilen um,
+  mindestens zwei Zeilen stehen auf jeder Seite, unter vier Zeilen wandert
+  er als Ganzes — dieselbe Regel wie `orphans/widows: 2`, mit der Chromium
+  druckt, deshalb bricht der Druck von selbst an derselben Zeile.
+  Technik (`absatzTeilen`): an den Anfang der ersten Zeile der nächsten
+  Seite kommt ein Platzhalter der Breite 0 (`span.pgspalt-h`), der nur diese
+  Zeile höher macht. Er steckt mit dem ersten Buchstaben in einer
+  `white-space:nowrap`-Hülle (`span.pgspalt`): allein passte er noch ans
+  Ende der vorigen Zeile, und dort wanderte eine Zeile zu viel (auch ein
+  Wortverbinder U+2060 half nicht, nachgestellt). Reine Anzeige wie
+  `tr.pgzeile`: reflow, `flush()`, Kopieren und Druck nehmen ihn heraus, die
+  Markierung bleibt über Zeichenpositionen erhalten. Rücktaste am
+  Zeilenanfang und Entf am Zeilenende trafen den Platzhalter statt des
+  Zeichens und schienen nichts zu tun; sie werden umgelenkt
+  (`pgspaltUmgehen`). Geprüft in 90 Lagen (4 bis 20 Zeilen) und an einem
+  Absatz über drei Seiten: nie eine Einzelzeile, nie eine Zeile im Rand;
+  dazu Schreibmarke beim Neuumbruch, Tippen, Rücktaste, Entf, Speichern,
+  Kopieren. `check-export.mjs` hat einen Absatz länger als eine Seite im
+  Prüfdokument und schlug mit dem alten Stand in allen Formaten an.
+  Überschriften nehmen jetzt nur noch die ersten zwei Zeilen eines solchen
+  Absatzes mit auf die Seite. Nicht nachgestellt: echte Mausklicks und
+  Pfeiltasten am Platzhalter (die Tastatursimulation hier löst keine
+  Eingabeereignisse aus).
+
+- **Fette Zwischentitel blieben allein am Seitenende.** Aus Webseiten kommen
+  Zwischentitel oft als fetter Absatz statt als Überschrift („Mehr zum
+  Thema“ in Toms Test, mit zwei Testdateien bestätigt). Ein Absatz, der eine
+  Zeile lang und ganz fett ist (`istZwischentitel`), hält beim Umbruch jetzt
+  wie eine Überschrift zu seinem Text. Über Word hinaus, das nur die
+  Formatvorlage kennt; der Absatz bleibt ein Absatz. Teilweise fette und
+  mehrzeilige Absätze zählen nicht.
+
 ### Geändert
 
 - **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),

@@ -86,6 +86,9 @@ const setup = cfg => `(async()=>{
     /* Eine Liste laenger als eine Seite, mit Unterliste, mitten im Text:
        bis 1.3 brach sie nicht zwischen den Eintraegen um und lief durch
        Fusszeile und Seitenabstand — die Bandpruefung unten faengt das. */
+    /* Ein Absatz laenger als eine Seite: bis 1.3 lief er durch Fusszeile
+       und Seitenabstand, statt zeilenweise umzubrechen. */
+    if(i===20){t+="<p>";for(let k=0;k<110;k++)t+="Satz "+k+" eines sehr langen Absatzes ohne Absatzwechsel. ";t+="</p>"}
     if(i===60){t+="<ol>";for(let k=0;k<70;k++)t+="<li>Listenpunkt "+k+(k===30?"<ul><li>Unterpunkt a</li><li>Unterpunkt b</li></ul>":"")+"</li>";t+="</ol>"}}
   d.html='<h2>Kapitel &quot;eins&quot;</h2>'
     +'<p>Er sagte "hallo" &amp; es ist <b>fertig</b>.<sup class="fn" data-fn="f1">1</sup></p>'

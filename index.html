@@ -443,6 +443,11 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 @media print{#editor [data-wsect]{border-bottom:none!important}}
 /* Abstandszeile einer umbrochenen Tabelle (paginate) */
 #editor tr.pgzeile>td{padding:0!important;border:none!important;background:none!important}
+/* Platzhalter, der eine Zeile eines geteilten Absatzes auf die nächste
+   Seite schiebt (siehe absatzTeilen). Breite 0, an der Grundlinie: er macht
+   nur die Zeile höher, in der er steht, und ändert den Umbruch nicht. */
+#editor .pgspalt{white-space:nowrap}
+#editor .pgspalt-h{display:inline-block;width:0;vertical-align:baseline;user-select:none}
 .wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
@@ -7836,7 +7841,8 @@ function drawWrite(){
     box.setAttribute(PQW_MARK,"1");
     box.appendChild(sel.getRangeAt(0).cloneContents());
     box.querySelectorAll(".hit,.spellerr,.glossterm").forEach(unwrap);
-    box.querySelectorAll(".fhwrap").forEach(n=>n.remove());
+    box.querySelectorAll(".fhwrap,.pgspalt-h").forEach(n=>n.remove());
+    box.querySelectorAll(".pgspalt").forEach(unwrap);
     e.clipboardData.setData("text/html",box.outerHTML);
     e.clipboardData.setData("text/plain",sel.toString());
     e.preventDefault();
@@ -8023,6 +8029,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll(":scope > .enliste").forEach(w=>w.remove());
   c.querySelectorAll("tr.pgzeile").forEach(w=>w.remove());
   pgliWeg(c);
+  pgspaltWeg(c);
   c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
@@ -14709,6 +14716,143 @@ function queuePaginate(){
    des PDF-Exports länger als 1,2 s offen war — gemessen: jede Seite im Druck
    zu zwei Seiten zerfallen. */
 let druckLaeuft=false;
+/* ---- Absätze über die Seitengrenze teilen ----
+   Bis 1.3 wanderte ein Absatz, der nicht mehr ganz auf die Seite passte,
+   komplett weiter (gemessen: 22 mm leer bei fünf Zeilen), und einer, der
+   länger als eine Seite war, lief durch Fußzeile und Seitenabstand — der
+   Druck teilte ihn und hatte dann eine Seite mehr als die Ansicht. Jetzt
+   wie Word mit Absatzkontrolle (dort voreingestellt): der Absatz bricht
+   zwischen zwei Zeilen um, mindestens zwei Zeilen bleiben auf jeder Seite;
+   hat er weniger als vier, wandert er als Ganzes. Das ist dieselbe Regel wie
+   orphans/widows: 2, die Chromium im Druck anwendet — deshalb bricht der
+   Druck von selbst an derselben Zeile.
+   Die erste Zeile, die auf die nächste Seite gehört, bekommt an ihrem
+   Anfang einen Platzhalter (span.pgspalt-h, Breite 0): er macht nur diese
+   Zeile so hoch, dass ihr Text oben auf der nächsten Seite steht. Er steckt
+   zusammen mit dem ersten Buchstaben der Zeile in einer Hülle mit
+   white-space:nowrap (span.pgspalt) — allein passte er mit seiner Breite 0
+   noch ans Ende der VORIGEN Zeile und machte die hoch (nachgestellt: eine
+   Zeile zu viel wanderte, auch ein Wortverbinder U+2060 half nicht).
+   Reine Anzeige wie tr.pgzeile — reflow, flush(), Kopieren und der Druck
+   nehmen ihn heraus. Weil dabei Textknoten umgehängt werden, merkt sich
+   pgspaltWeg/absatzTeilen die Markierung als Zeichenposition (textPos). */
+const TEILBAR=b=>(b.tagName==="P"||b.tagName==="BLOCKQUOTE")&&
+  ![...b.children].some(k=>/^(P|DIV|UL|OL|TABLE|FIGURE|H[1-6]|BLOCKQUOTE)$/.test(k.tagName));
+function pgspaltWeg(root){
+  const huellen=root.querySelectorAll(".pgspalt");
+  if(!huellen.length)return;
+  const ed=$("#editor"),live=root===ed&&getSelection().rangeCount&&ed.contains(getSelection().anchorNode);
+  const pos=live?textPos(ed):null;
+  const eltern=new Set();
+  huellen.forEach(s=>{if(!s.parentNode)return;eltern.add(s.parentNode);
+    s.querySelectorAll(".pgspalt-h").forEach(h=>h.remove());s.replaceWith(...s.childNodes)});
+  eltern.forEach(e=>e.normalize());
+  if(live)setzeTextPos(ed,pos);
+}
+/* Die Zeilen eines Blocks, oben nach unten, je {top,bottom} relativ zu
+   bezug — aus den Rechtecken seiner Textstücke, überlappende zu einer Zeile
+   zusammengefasst. */
+function zeilenVon(b,bezug){
+  /* Nur Text und Bilder — nicht die Rechtecke der Elemente: ein Platzhalter
+     ist so hoch wie die Lücke bis zur nächsten Seite und hätte Zeilen
+     beider Seiten zu einer verschmolzen. */
+  const r=document.createRange(),roh=[];
+  const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);let t;
+  while(t=w.nextNode()){if(!t.length)continue;r.selectNodeContents(t);roh.push(...r.getClientRects())}
+  b.querySelectorAll("img").forEach(i=>roh.push(i.getBoundingClientRect()));
+  const rects=roh.filter(x=>x.height>0).map(x=>({top:x.top-bezug,bottom:x.bottom-bezug}))
+    .sort((a,c)=>a.top-c.top);
+  const zeilen=[];
+  rects.forEach(x=>{const z=zeilen[zeilen.length-1];
+    if(z&&x.top<z.bottom-2){z.top=Math.min(z.top,x.top);z.bottom=Math.max(z.bottom,x.bottom)}
+    else zeilen.push({...x})});
+  return zeilen;
+}
+/* Textstelle, an der Zeile `zeile` beginnt: das erste Zeichen, das kein
+   Leerraum ist und dessen Rechteck in dieser Zeile liegt. */
+function zeilenAnfang(b,zeile,bezug){
+  const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);
+  const r=document.createRange();let t;
+  const oben=(n,o)=>{r.setStart(n,o);r.setEnd(n,o+1);const q=r.getClientRects()[0];return q?q.top-bezug:-1e9};
+  while(t=w.nextNode()){
+    if(!t.length)continue;
+    r.selectNodeContents(t);const rs=r.getClientRects();
+    if(!rs.length||rs[rs.length-1].bottom-bezug<=zeile.top+2)continue;
+    let lo=0,hi=t.length-1;
+    while(lo<hi){const m=(lo+hi)>>1;if(oben(t,m)>=zeile.top-2)hi=m;else lo=m+1}
+    while(lo<t.length&&/\s/.test(t.data[lo]))lo++;
+    if(lo<t.length)return [t,lo];
+  }
+  return null;
+}
+function absatzTeilen(b,ctx){
+  const {edTop,stride,oben,contentHOf}=ctx;
+  const unten=p=>p*stride+oben(p)+contentHOf(p);
+  const seite=y=>Math.max(0,Math.floor(y/stride));
+  /* Abstand der Textoberkante zur Zeilenoberkante (halber Durchschuss) —
+     an der ersten Zeile gemessen, sie beginnt an der Blockoberkante. */
+  let zeilen=zeilenVon(b,edTop);
+  if(zeilen.length<4)return false;
+  const halb=zeilen[0].top-(b.getBoundingClientRect().top-edTop);
+  let i0=0,schutz=0;
+  while(schutz++<200){
+    const p=seite(zeilen[i0].top-halb);
+    let j=-1;
+    for(let k=i0;k<zeilen.length;k++)if(zeilen[k].bottom+halb>unten(p)+1){j=k;break}
+    if(j<0)return true;
+    if(zeilen.length-j<2)j=zeilen.length-2;
+    if(j-i0<2){
+      if(i0>0)return true;   /* kann nach einem Platzhalter nicht vorkommen */
+      /* Keine zwei Zeilen frei: ein Absatz, der auf eine Seite passt, wandert
+         als Ganzes (das erledigt der Aufrufer); ein längerer beginnt auf der
+         nächsten Seite und wird von dort aus geteilt. */
+      if(b.getBoundingClientRect().height<=contentHOf(p+1))return false;
+      const top=b.getBoundingClientRect().top-edTop,ziel=(p+1)*stride+oben(p+1);
+      const base=parseFloat(getComputedStyle(b).marginTop)||0;
+      b.style.marginTop=(base+ziel-top)+"px";
+      const rest=ziel-(b.getBoundingClientRect().top-edTop);
+      if(Math.abs(rest)>0.5)b.style.marginTop=(base+ziel-top+rest)+"px";
+      zeilen=zeilenVon(b,edTop);
+      continue;
+    }
+    const an=zeilenAnfang(b,zeilen[j],edTop);
+    if(!an)return true;
+    const ed=$("#editor"),live=getSelection().rangeCount&&ed&&ed.contains(getSelection().anchorNode);
+    const pos=live?textPos(ed):null;
+    const erst=an[0].splitText(an[1]);
+    if(erst.length>1)erst.splitText(1);
+    const huelle=document.createElement("span");huelle.className="pgspalt";
+    const sp=document.createElement("span");
+    sp.className="pgspalt-h";sp.contentEditable="false";sp.setAttribute("aria-hidden","true");
+    erst.before(huelle);huelle.append(sp,erst);
+    if(live)setzeTextPos(ed,pos);
+    const ziel=(p+1)*stride+oben(p+1)+halb;
+    const h=zeilen[j].bottom-zeilen[j].top;
+    sp.style.height=(ziel-zeilen[j].top+h)+"px";
+    /* Nachmessen: ab der Texthöhe wächst die Zeile linear mit */
+    const nach=zeilenVon(b,edTop),rest=ziel-nach[j].top;
+    if(Math.abs(rest)>0.5)sp.style.height=(ziel-zeilen[j].top+h+rest)+"px";
+    zeilen=zeilenVon(b,edTop);i0=j;
+  }
+  return true;
+}
+/* Ein Absatz, der eine Zeile lang und ganz fett ist, gilt beim Umbruch als
+   Zwischentitel und bleibt bei seinem Text wie eine Überschrift. Aus
+   Webseiten kommen Zwischentitel oft so an statt als <h2> — „Mehr zum
+   Thema“ blieb in Toms Test allein unten auf der Seite stehen (2026-10-13).
+   Word kennt das nicht, dort zählt nur die Formatvorlage. Nur für den
+   Umbruch: der Absatz bleibt ein Absatz. */
+function istZwischentitel(b){
+  if(b.tagName!=="P"||b.querySelector("img,br"))return false;
+  const text=b.textContent.trim();
+  if(!text||text.length>120)return false;
+  const w=document.createTreeWalker(b,NodeFilter.SHOW_TEXT);let t;
+  while(t=w.nextNode()){
+    if(!t.data.trim())continue;
+    if((parseInt(getComputedStyle(t.parentElement).fontWeight,10)||400)<600)return false;
+  }
+  return zeilenVon(b,0).length===1;
+}
 /* Die Bildschirm-Umbrüche zwischen Listeneinträgen (siehe reflow) */
 function pgliWeg(root){
   root.querySelectorAll("li.pgli").forEach(li=>{
@@ -14750,6 +14894,7 @@ function paginate(){
     blocks.forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
     ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
     pgliWeg(ed);
+    pgspaltWeg(ed);
     const edTop=ed.getBoundingClientRect().top;
     const fnByPage=[];
     let nachAbschnitt=false;
@@ -14784,10 +14929,10 @@ function paginate(){
          auf die Seite passen — ein Absatz, der ohnehin als Ganzes wandert,
          ganz, bei Liste und Tabelle der erste Eintrag bzw. die erste Zeile. */
       let mitNaechstem=false;
-      if(/^H[1-6]$/.test(b.tagName)&&!zwang&&top>p*stride+oben(p)+1){
+      if((/^H[1-6]$/.test(b.tagName)||istZwischentitel(b))&&!zwang&&top>p*stride+oben(p)+1){
         let k=blocks.indexOf(b)+1,n=null;
         while(k<blocks.length){const x=blocks[k];
-          if(/^H[1-6]$/.test(x.tagName)||(x.tagName==="P"&&!x.textContent.trim()&&!x.querySelector("img"))){k++;continue}
+          if(/^H[1-6]$/.test(x.tagName)||istZwischentitel(x)||(x.tagName==="P"&&!x.textContent.trim()&&!x.querySelector("img"))){k++;continue}
           n=x;break}
         if(n&&!n.classList.contains("pgbreak")){
           const nr=n.getBoundingClientRect(),nt=nr.top-edTop;
@@ -14796,6 +14941,9 @@ function paginate(){
           /* Eine Tabelle bricht nur zeilenweise, wenn sie länger als eine
              Seite ist — eine kürzere wandert als Ganzes, also zählt sie ganz */
           else if(n.tagName==="TABLE"&&n.rows[0]&&nr.height>contentH)anfang=n.rows[0].getBoundingClientRect().bottom-nr.top;
+          /* Ein teilbarer Absatz ab vier Zeilen bricht um; dann genügen,
+             wie bei der Absatzkontrolle, seine ersten zwei Zeilen */
+          else if(TEILBAR(n)){const zl=zeilenVon(n,nr.top);if(zl.length>=4)anfang=zl[1].bottom+zl[0].top}
           else if(nr.height>contentH)anfang=2*(parseFloat(getComputedStyle(n).lineHeight)||nr.height);
           const ende=nt+anfang;
           mitNaechstem=ende>limit+1&&ende-top<=contentHOf(p+1);
@@ -14864,6 +15012,9 @@ function paginate(){
           if(Math.abs(rest)>0.5)ziehe.style.marginTop=(base+(ziel-rt)+rest)+"px";
         });
       }
+      else if(!zwang&&!mitNaechstem&&TEILBAR(b)&&top+h>limit+1&&absatzTeilen(b,{edTop,stride,oben,contentHOf})){
+        /* geteilt — Fußnoten werden unten je Marke zugeordnet */
+      }
       else if(zwang||mitNaechstem||(top+h>limit+1&&h<=contentH)){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
@@ -14885,7 +15036,7 @@ function paginate(){
         p++;
       }
       if(hasFn)b.querySelectorAll&&b.querySelectorAll(".fn[data-fn]").forEach(m=>{
-        const pm=b.tagName==="TABLE"||LISTE_TAG.test(b.tagName)?Math.max(0,Math.floor((m.getBoundingClientRect().top-edTop)/stride)):p;
+        const pm=b.tagName==="TABLE"||LISTE_TAG.test(b.tagName)||b.querySelector(".pgspalt")?Math.max(0,Math.floor((m.getBoundingClientRect().top-edTop)/stride)):p;
         (fnByPage[pm]=fnByPage[pm]||[]).push(m.dataset.fn);
       });
     });
@@ -17315,6 +17466,7 @@ function stripScreenPagination(ed){
   });
   ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
   pgliWeg(ed);
+  pgspaltWeg(ed);
   ed.style.minHeight="";
   return ()=>{ed.style.minHeight=mh;if(S.mode==="write")paginate()};
 }
@@ -19172,7 +19324,30 @@ function acListeZuruecknehmen(){
   nachListe();
   return true;
 }
+/* Rücktaste direkt hinter, Entf direkt vor einem Platzhalter (pgspalt):
+   der Browser löschte sonst den Platzhalter statt des Zeichens dahinter,
+   und der nächste Umbruch setzte ihn neu — die Taste schien nichts zu tun. */
+function pgspaltUmgehen(e){
+  if(!/^delete(Content|Word)(Backward|Forward)$/.test(e.inputType))return;
+  const sel=getSelection();if(!sel.rangeCount||!sel.isCollapsed)return;
+  const r=sel.getRangeAt(0),rueck=/Backward$/.test(e.inputType);
+  let n=r.startContainer,o=r.startOffset,sp=null;
+  if(n.nodeType===3){
+    if(rueck&&o===0)sp=n.previousSibling;
+    else if(!rueck&&o===n.length)sp=n.nextSibling;
+  }else sp=n.childNodes[rueck?o-1:o]||null;
+  if(!sp||sp.nodeType!==1)return;
+  const nr=document.createRange();
+  /* Rücktaste am Zeilenanfang (hinter dem Platzhalter in der Hülle): vor die
+     Hülle, dann trifft sie das Zeichen davor. Entf am Ende der Zeile davor
+     (vor der Hülle): hinter den Platzhalter, dann trifft sie den Buchstaben. */
+  if(rueck&&sp.classList.contains("pgspalt-h"))nr.setStartBefore(sp.parentNode);
+  else if(!rueck&&sp.classList.contains("pgspalt")){const h=sp.querySelector(".pgspalt-h");if(!h)return;nr.setStartAfter(h)}
+  else return;
+  nr.collapse(true);sel.removeAllRanges();sel.addRange(nr);
+}
 function autoCorrectInput(e){
+  pgspaltUmgehen(e);
   const a=S.settings.autoc;
   if(!a||slashOn)return;
   acListe=null;
