@@ -93,6 +93,33 @@ immer genau einen Commit, der sie anfasst.
   Testdokument (285/285). Nicht in der echten Electron-App nachgemessen,
   nur mit Chrome headless und denselben `printToPDF`-Optionen.
 
+- **Listen: Unterpunkte gingen beim Speichern verloren, der Listenknopf
+  baute ungültiges HTML.** Durchgang über alle üblichen Wege, eine Liste
+  anzufangen (Tippen, Knopf, Menü, Palette, Enter/Tab/Rücktaste,
+  Einfügen), 34 Fälle. Gefunden und behoben:
+  - Mit **Tab** eingerückte Unterpunkte legte Chrome als `<ol><li>…</li><ol>`
+    ab; Word-, Markdown- und Textexport lasen nur `<li>`-Kinder und ließen
+    die Unterpunkte **ohne Warnung weg**.
+  - Der **Listenknopf** (auch Palette, „/“-Menü, Format › Liste) legte die
+    Liste in den Absatz: `<p><ol>…</ol></p>`. Nach dem Neuladen standen
+    leere Absätze davor und danach, Ausschalten verschmolz die Einträge zu
+    einem Absatz mit `<br>`, die Schreibmarke sprang an den Eintragsanfang.
+  - `listenOrdnen()` bringt beides in gültige Form, nach jeder
+    Listenaktion, in `flush()` und beim Laden (repariert Altbestand).
+    Ausschalten, Art wechseln (ganze Liste, wie Word) und Ausrücken
+    (`liAusruecken`) macht das Programm jetzt selbst, weil Chromes
+    `outdent` mit richtig verschachtelten Listen `<li>` in `<li>` baute und
+    Schriftgrößen-`<span>`s einstreute.
+  - **Rücktaste am Anfang eines Eintrags** tat beim ersten nichts (den Punkt
+    bekam man nie weg) und verschmolz spätere sofort mit dem vorigen. Jetzt
+    wie Word: der Punkt geht, der Text bleibt als Absatz, eine Nummerierung
+    danach zählt weiter; ein Unterpunkt rückt eine Ebene hinaus.
+  - **Strg+Z direkt nach „1. “** gibt den getippten Text zurück statt einer
+    leeren Liste.
+  - **„3. “ beginnt bei 3**, „1) “ zählt mit Klammer, „- “ setzt einen
+    Strich statt eines Punkts, wie in Word.
+  - Gleichartige Listen direkt hintereinander werden zusammengefasst.
+
 ### Geändert
 
 - **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),

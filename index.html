@@ -7751,13 +7751,16 @@ function drawWrite(){
      jedem Selektor, der gezielt "p" statt "div" listet (Bereinigen, Export). */
   document.execCommand("defaultParagraphSeparator",false,"p");
   ed.innerHTML=d.html||"<p><br></p>";
+  listenOrdnen(ed);   /* Dokumente von vor 1.3 tragen noch Chromes ungültige Listenformen */
   ed.style.fontFamily=schriftStapel(d.font||S.settings.font);
   ed.style.setProperty("--fs",(d.size||S.settings.size)+"pt");
   ed.style.setProperty("--lh",lhOf(d)*lhNatur(d.font||S.settings.font));
   ed.style.setProperty("--ps",psOf(d)+"em");
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
-  ed.addEventListener("input",()=>{dirty=true;queueSave();setTyping();markEmpty();
+  ed.addEventListener("input",e=>{
+    if(/^(insertOrderedList|insertUnorderedList|formatIndent|formatOutdent)$/.test(e.inputType))listenOrdnen(ed);
+    dirty=true;queueSave();setTyping();markEmpty();
     drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
   ed.addEventListener("beforeinput",autoCorrectInput);
   /* Bilder dekodiert der Browser asynchron - ihre Höhe ist beim ersten
@@ -7778,6 +7781,9 @@ function drawWrite(){
     }
     if(acGross&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
       &&acGrossZuruecknehmen()){e.preventDefault();return}
+    if(acListe&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
+      &&acListeZuruecknehmen()){e.preventDefault();return}
+    if(e.key==="Backspace"&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&listenPunktWeg()){e.preventDefault();return}
     /* Zweimal Enter auf einer bereits leeren Zitatzeile verlässt das Zitat -
        genau wie der Browser es bei Aufzählungen/Nummerierungen schon von
        selbst tut. Ohne diesen Sonderfall setzt formatBlock("blockquote")
@@ -8019,6 +8025,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
     const p=s.parentNode;while(s.firstChild)p.insertBefore(s.firstChild,s);p.removeChild(s)});
   c.querySelectorAll(".cleanp").forEach(p=>p.classList.remove("cleanp","cur"));
+  listenOrdnen(c);
   c.normalize();
   d.html=c.innerHTML;
   /* Titel aus dem bereinigten HTML, nicht aus dem lebenden Editor: dort steht
@@ -8051,6 +8058,7 @@ function sizeMenu(e){
     closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
 }
 function cmd(c){if(c==="removeFormat"){formatierungEntfernen();return}
+  if(c==="insertOrderedList"||c==="insertUnorderedList"){listeUmschalten(c);return}
   document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
 /* Die Werkzeugleiste zeigte nie, was an der Schreibmarke gerade gilt - der
    Fett-Knopf blieb inaktiv, auch mitten in fettem Text, und "Absatzformat"
@@ -8189,7 +8197,16 @@ function indentBlocks(dir){
   ed.focus();
   /* In Listen macht die native Verschachtelung mehr Sinn als ein Rand */
   if(curListItem()){
-    document.execCommand(dir>0?"indent":"outdent");
+    if(dir>0){document.execCommand("indent");listenOrdnen(ed)}
+    else{
+      /* Selbst ausrücken (liAusruecken); ein Eintrag der obersten Ebene
+         bleibt, wo er ist — wie in Word, Umschalt+Tab löst dort keine Liste
+         auf. Rückwärts, damit ein markierter Folgeeintrag nicht in die
+         Unterliste des vorigen rutscht, bevor er selbst dran ist. */
+      const m=merkeMarke();
+      markierteEintraege(ed).reverse().forEach(liAusruecken);
+      listenOrdnen(ed);setzeMarke(m);
+    }
     flush();dirty=true;commit();queuePaginate();drawStatus();return;
   }
   const blocks=selectedBlocks();
@@ -9585,8 +9602,8 @@ function commandList(){
   fmtCmd("Durchgestrichen","",()=>document.execCommand("strikeThrough"));
   fmtCmd("Fließtext","",fliesstext);
   [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
-  fmtCmd("Aufzählung","",()=>document.execCommand("insertUnorderedList"));
-  fmtCmd("Nummerierung","",()=>document.execCommand("insertOrderedList"));
+  fmtCmd("Aufzählung","",()=>listeUmschalten("insertUnorderedList"));
+  fmtCmd("Nummerierung","",()=>listeUmschalten("insertOrderedList"));
   const blockCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
     if(S.mode!=="write"){setMode("write");setTimeout(fn,40)}else fn()});
   blockCmd("Einrücken","Tab",()=>indentBlocks(1));
@@ -15308,6 +15325,198 @@ function curList(tag){
   if(n.nodeType!==1)n=n.parentElement;
   return n&&ed.contains(n)&&n.closest?n.closest(tag):null;
 }
+/* Listen in gültige Form bringen. Chrome baut zwei ungültige Formen, die
+   der Export nicht versteht (beide nachgestellt 2026-10-12, Toms Listen-
+   Durchgang):
+   - insertOrderedList/insertUnorderedList auf einem <p> legt die Liste IN
+     den Absatz: <p><ol>…</ol></p>. Beim nächsten Laden zerlegt der Parser
+     das in <p></p><ol>…</ol><p></p> — zwei leere Absätze —, und das
+     Ausschalten der Liste verschmolz die Einträge zu einem Absatz mit <br>.
+   - Tab in einer Liste (execCommand("indent")) legt die Unterliste direkt
+     in die Liste: <ol><li>Eins</li><ol>…</ol></ol>. Word-, Markdown- und
+     Textexport lesen nur <li>-Kinder und ließen die Unterpunkte ganz weg —
+     Text weg, ohne Warnung.
+   Richtig ist die Unterliste im vorigen Eintrag (<li>Eins<ol>…</ol></li>)
+   und die Liste neben dem Absatz. Läuft nach jeder Listenaktion am Editor
+   (input-Ereignis), in flush() an der Kopie, die gespeichert wird, und beim
+   Laden. Verschiebt nur Knoten — Textknoten und damit die Schreibmarke
+   bleiben, wo sie sind. */
+const LISTE_TAG=/^(UL|OL)$/;
+function listenOrdnen(root){
+  let geaendert=false;
+  root.querySelectorAll("ul>ul,ul>ol,ol>ul,ol>ol").forEach(l=>{
+    let v=l.previousElementSibling;
+    if(!v||v.tagName!=="LI"){v=document.createElement("li");v.style.listStyleType="none";l.before(v)}
+    v.appendChild(l);geaendert=true;
+  });
+  root.querySelectorAll(["p","h1","h2","h3","h4","h5","h6"].flatMap(t=>[t+">ul",t+">ol"]).join(",")).forEach(l=>{
+    const p=l.parentElement;if(!p||!p.parentNode)return;
+    const nach=p.cloneNode(false);
+    while(l.nextSibling)nach.appendChild(l.nextSibling);
+    p.after(l);l.after(nach);geaendert=true;
+  });
+  /* Zwei gleiche Listen direkt hintereinander — übrig, wenn ein Absatz
+     zwischen ihnen wieder verschwindet — werden eine: Aufzählungen gleichen
+     Stils immer, Nummerierungen nur, wenn die zweite genau weiterzählt. */
+  root.querySelectorAll("ul+ul,ol+ol").forEach(b=>{
+    const a=b.previousElementSibling;
+    if(!a||!a.isConnected||!b.isConnected||a.tagName!==b.tagName)return;
+    if((a.getAttribute("data-ls")||"")!==(b.getAttribute("data-ls")||""))return;
+    if(a.tagName==="OL"){const n=[...a.children].filter(c=>c.tagName==="LI").length;
+      if((+b.getAttribute("start")||1)!==(+a.getAttribute("start")||1)+n)return}
+    while(b.firstChild)a.appendChild(b.firstChild);
+    b.remove();geaendert=true;
+  });
+  /* Was davon übrig bleibt, und was ältere Dokumente nach dem Parser schon
+     tragen: Absätze ganz ohne Inhalt — nicht einmal ein <br>, das hat jeder
+     absichtlich leere Absatz — direkt neben einer Liste. */
+  root.querySelectorAll("p,h1,h2,h3,h4,h5,h6").forEach(p=>{
+    if([...p.childNodes].some(k=>k.nodeType!==3||k.nodeValue.trim()))return;
+    if([p.previousElementSibling,p.nextElementSibling].some(x=>x&&LISTE_TAG.test(x.tagName))){p.remove();geaendert=true}
+  });
+  return geaendert;
+}
+function nachListe(){dirty=true;commit();queuePaginate();drawAnchors();drawStatus();syncToolbarState()}
+/* Listenknopf, Palette, „/“-Menü und Format › Liste: Chrome setzt die
+   Schreibmarke nach dem Umwandeln an den Anfang des Eintrags; Word lässt sie
+   stehen. Deshalb die Grenzen vorher auf Textknoten legen (ftGrenze) und
+   danach zurücksetzen. */
+function listeUmschalten(befehl,still){
+  const ed=$("#editor");if(!ed)return;
+  if(S.mode!=="write"){setMode("write");setTimeout(()=>listeUmschalten(befehl,still),60);return}
+  ed.focus();
+  const sel=getSelection();
+  if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
+  const pos=textPos(ed);
+  /* Ausschalten selbst erledigen: Chrome machte aus drei Einträgen einen
+     Absatz mit <br> und Schriftgrößen-<span>s. Ausschalten heißt: alles
+     Markierte steht schon in einer Liste dieser Art. */
+  const tag=befehl==="insertOrderedList"?"OL":"UL";
+  const lis=markierteEintraege(ed);
+  if(lis.length&&lis.every(li=>li.parentElement.tagName===tag)){
+    lis.forEach(liZuAbsatz);
+  }else if(lis.length&&lis.every(li=>LISTE_TAG.test(li.parentElement.tagName))){
+    /* Aufzählung ↔ Nummerierung: die ganze Liste wechselt die Art, wie in
+       Word. Chrome teilte die Liste am Eintrag und streute Schriftgrößen-
+       <span>s ein. Der Stil (data-ls) gehört zur alten Art und fällt weg. */
+    [...new Set(lis.map(li=>li.parentElement))].forEach(alt=>{
+      const neu=document.createElement(tag);
+      while(alt.firstChild)neu.appendChild(alt.firstChild);
+      alt.replaceWith(neu);
+    });
+  }else{
+    document.execCommand(befehl);
+  }
+  listenOrdnen(ed);
+  setzeTextPos(ed,pos);
+  if(!still)nachListe();
+}
+/* Markierung als Zeichenpositionen im Editor. Die Listenbefehle von Chrome
+   erzeugen die Textknoten neu, eine gemerkte Range zeigte danach ins Leere;
+   der Text selbst bleibt aber derselbe. */
+function textPos(root){
+  const sel=getSelection();if(!sel.rangeCount)return null;
+  const r=sel.getRangeAt(0),a=document.createRange();
+  a.setStart(root,0);a.setEnd(r.startContainer,r.startOffset);
+  const anf=a.toString().length;
+  a.setEnd(r.endContainer,r.endOffset);
+  return [anf,a.toString().length];
+}
+/* Für reine Verschiebungen (ausrücken): die Knoten bleiben dieselben, also
+   die Grenzen selbst merken — Zeichenpositionen reichen dort nicht, ein
+   leerer Eintrag hat keinen Text, an dem sich die Marke festhalten könnte. */
+function merkeMarke(){
+  const sel=getSelection();if(!sel.rangeCount)return null;
+  const r=sel.getRangeAt(0);return [r.startContainer,r.startOffset,r.endContainer,r.endOffset];
+}
+function setzeMarke(m){
+  if(!m||!m[0].isConnected||!m[2].isConnected)return;
+  const r=document.createRange();r.setStart(m[0],m[1]);r.setEnd(m[2],m[3]);
+  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+}
+function setzeTextPos(root,pos){
+  if(!pos)return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+  const finde=z=>{let t,letzt=null;w.currentNode=root;
+    while(t=w.nextNode()){if(z<=t.length)return [t,z];z-=t.length;letzt=t}
+    return letzt?[letzt,letzt.length]:[root,0]};
+  const [a,ao]=finde(pos[0]),[b,bo]=finde(pos[1]);
+  const r=document.createRange();r.setStart(a,ao);r.setEnd(b,bo);
+  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+}
+function markierteEintraege(ed){
+  const sel=getSelection();if(!sel.rangeCount)return [];
+  const r=sel.getRangeAt(0);
+  if(r.collapsed){let n=r.startContainer;n=n.nodeType===1?n:n.parentElement;
+    const li=n&&n.closest("li");return li&&ed.contains(li)?[li]:[]}
+  return [...ed.querySelectorAll("li")].filter(li=>{try{return r.intersectsNode(li)}catch(e){return false}})
+    /* nur die äußersten: ein markierter Eintrag nimmt seine Unterpunkte mit */
+    .filter((li,i,alle)=>!alle.some(x=>x!==li&&x.contains(li)));
+}
+/* Ein Eintrag wird normaler Absatz an seiner Stelle; Einträge danach bilden
+   eine eigene Liste, die weiterzählt, wie Word nur Absätze in der Liste
+   zählt. Unterpunkte des Eintrags bleiben Liste, direkt nach dem Absatz. */
+function liZuAbsatz(li){
+  const liste=li.parentElement;if(!liste||!LISTE_TAG.test(liste.tagName))return null;
+  const p=document.createElement("p");
+  while(li.firstChild&&!LISTE_TAG.test(li.firstChild.nodeName))p.appendChild(li.firstChild);
+  if(!p.textContent&&!p.querySelector("img,br"))p.appendChild(document.createElement("br"));
+  const index=[...liste.children].filter(c=>c.tagName==="LI").indexOf(li);
+  const danach=[];for(let x=li.nextElementSibling;x;x=x.nextElementSibling)danach.push(x);
+  const unter=[...li.childNodes];
+  li.remove();
+  liste.after(p);
+  let anker=p;
+  unter.forEach(k=>{anker.after(k);anker=k});
+  if(danach.length){
+    const neu=liste.cloneNode(false);danach.forEach(x=>neu.appendChild(x));
+    if(neu.tagName==="OL"){const st=(+liste.getAttribute("start")||1)+index;
+      if(st>1)neu.setAttribute("start",st);else neu.removeAttribute("start")}
+    anker.after(neu);
+  }
+  if(!liste.querySelector("li"))liste.remove();
+  return p;
+}
+/* Eine Ebene hinaus (Umschalt+Tab, Rücktaste am Anfang eines Unterpunkts).
+   Chromes outdent kam mit der richtigen Verschachtelung <li>…<ol></ol></li>
+   nicht zurecht: es legte <li> direkt in <li> und streute Schriftgrößen-
+   <span>s ein. Wie Word: der Eintrag rückt hinter seinen Elterneintrag,
+   die Unterpunkte nach ihm bleiben eine Ebene tiefer — jetzt unter ihm. */
+function liAusruecken(li){
+  const liste=li.parentElement,eltern=liste&&liste.parentElement;
+  if(!eltern||eltern.tagName!=="LI")return false;
+  const danach=[];for(let x=li.nextElementSibling;x;x=x.nextElementSibling)danach.push(x);
+  if(danach.length){const neu=liste.cloneNode(false);neu.removeAttribute("start");
+    danach.forEach(x=>neu.appendChild(x));li.appendChild(neu)}
+  eltern.after(li);
+  if(!liste.querySelector("li"))liste.remove();
+  return true;
+}
+/* Rücktaste ganz am Anfang eines Listeneintrags — wie in Word: erst der
+   Punkt weg, der Text bleibt als normaler Absatz; ein Unterpunkt geht
+   stattdessen eine Ebene hinaus. Chrome tat am ersten Eintrag gar nichts
+   (den Punkt bekam man so nie weg) und verschmolz spätere Einträge sofort
+   mit dem vorigen. Die Einträge danach bilden eine eigene Liste; eine
+   Nummerierung zählt dort weiter, wo sie ohne den Eintrag stünde — wie
+   Word, das nur Absätze in der Liste zählt. Erst die nächste Rücktaste
+   verbindet den Absatz mit dem Text davor, wie sonst auch. */
+function listenPunktWeg(){
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount||!sel.isCollapsed)return false;
+  const r=sel.getRangeAt(0);
+  let n=r.startContainer;n=n.nodeType===1?n:n.parentElement;
+  const li=n&&n.closest("li");
+  if(!li||!ed.contains(li))return false;
+  const vor=document.createRange();vor.setStart(li,0);vor.setEnd(r.startContainer,r.startOffset);
+  if(vor.toString()!==""||vor.cloneContents().querySelector("img"))return false;
+  if(li.parentElement.parentElement&&li.parentElement.parentElement.tagName==="LI"){
+    const m=merkeMarke();liAusruecken(li);setzeMarke(m);nachListe();return true}
+  const p=liZuAbsatz(li);if(!p)return false;
+  listenOrdnen(ed);
+  const nr=document.createRange();nr.setStart(p,0);nr.collapse(true);sel.removeAllRanges();sel.addRange(nr);
+  nachListe();
+  return true;
+}
 /* Setzt Listenart und -stil in einem Schritt. Steht die Marke in einem
    normalen Absatz, wird daraus erst eine Liste; steht sie in einer Liste der
    anderen Art, wandelt execCommand sie um (ul <-> ol). Kein render(), sonst
@@ -15318,7 +15527,7 @@ function applyList(tag,k){
   ed.focus();
   let list=curList(tag);
   if(!list){
-    document.execCommand(tag==="ol"?"insertOrderedList":"insertUnorderedList");
+    listeUmschalten(tag==="ol"?"insertOrderedList":"insertUnorderedList",true);
     list=curList(tag);
   }
   if(!list)return;
@@ -18877,9 +19086,29 @@ function acGrossZuruecknehmen(){
   acLernen(g.wort);
   return true;
 }
+/* Strg+Z direkt nach „1. “ → Liste: wie in Word steht dann wieder der
+   getippte Text da, statt einer leeren Liste. acListe merkt den gerade
+   angelegten Eintrag, solange er leer ist; jede weitere Eingabe beendet es.
+   Das Leerzeichen am Ende als U+00A0 — so legt Chrome ein Leerzeichen am
+   Zeilenende selbst ab, ein normales wäre unsichtbar und ginge beim
+   Weitertippen verloren (siehe acSafeInsert). */
+let acListe=null;
+function acListeZuruecknehmen(){
+  const g=acListe;acListe=null;
+  const sel=getSelection();
+  if(!g||!g.li.isConnected||g.li.textContent||!sel.rangeCount||!g.li.contains(sel.anchorNode))return false;
+  const liste=g.li.parentElement;if(!liste||liste.children.length!==1)return false;
+  const p=document.createElement("p");p.textContent=g.text.replace(/ $/," ");
+  liste.replaceWith(p);
+  const r=document.createRange();r.setStart(p.firstChild,p.firstChild.length);r.collapse(true);
+  sel.removeAllRanges();sel.addRange(r);
+  nachListe();
+  return true;
+}
 function autoCorrectInput(e){
   const a=S.settings.autoc;
   if(!a||slashOn)return;
+  acListe=null;
   const z=acZurueck;acZurueck=null;
   const g=acGross;
   if(g&&/^delete/.test(e.inputType)){
@@ -18976,12 +19205,18 @@ function autoCorrectInput(e){
          der die Prüfung sonst am ersten Zeichen vorbeischlittern lässt. */
       if(!li.textContent&&!li.childElementCount){li.innerHTML="";li.appendChild(document.createElement("br"))}
       const liste=document.createElement(nummer?"ol":"ul");
+      /* Wie Word: „3. “ beginnt bei 3, „1) “ zählt mit Klammer, „- “ setzt
+         einen Strich statt eines Punkts. */
+      if(nummer){const z=parseInt(vor,10);if(z>1)liste.setAttribute("start",z);
+        if(vor.endsWith(")"))liste.setAttribute("data-ls","klammer")}
+      else if(vor==="-")liste.setAttribute("data-ls","strich");
       liste.appendChild(li);
       blk.replaceWith(liste);
       const sel2=getSelection();sel2.removeAllRanges();
       const r2=document.createRange();r2.setStart(li,0);r2.collapse(true);
       sel2.addRange(r2);
       flush();dirty=true;commit();queuePaginate();drawAnchors();
+      acListe={li,text:vor+" "};
     }
   }
 }
@@ -19145,8 +19380,8 @@ const SLASH=[
   {n:"Überschrift 1",k:"ueberschrift h1 titel heading title",f:()=>document.execCommand("formatBlock",false,"h1")},
   {n:"Überschrift 2",k:"ueberschrift h2 heading",f:()=>document.execCommand("formatBlock",false,"h2")},
   {n:"Überschrift 3",k:"ueberschrift h3 heading",f:()=>document.execCommand("formatBlock",false,"h3")},
-  {n:"Aufzählung",k:"liste punkte bullet list",f:()=>document.execCommand("insertUnorderedList")},
-  {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>document.execCommand("insertOrderedList")},
+  {n:"Aufzählung",k:"liste punkte bullet list",f:()=>listeUmschalten("insertUnorderedList")},
+  {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>listeUmschalten("insertOrderedList")},
   {n:"Tabelle",k:"tabelle table raster tabla tabela tableau tabella",f:()=>setTimeout(tablePicker,20)},
   {n:"Seitenumbruch",k:"umbruch seite break page salto quebra saut podział interruzione",f:insertPageBreak},
   {n:"Bild",k:"bild foto grafik image picture imagen imagem obraz immagine",f:pickImage},
