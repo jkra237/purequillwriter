@@ -186,7 +186,35 @@ immer genau einen Commit, der sie anfasst.
   Formatvorlage kennt; der Absatz bleibt ein Absatz. Teilweise fette und
   mehrzeilige Absätze zählen nicht.
 
+- **Öffnen-Fenster ging immer wieder auf** (im eingebauten Browser der
+  Claude-App, Toms Test). Ein einziges `catch` fing alles ab: scheiterte
+  erst das Lesen der schon gewählten Datei oder das Laden danach, öffnete
+  `loadDocumentFile()` noch einen Dialog. Jetzt nur dann ein Ersatzdialog,
+  wenn der Dialog selbst nicht aufging; sonst eine Meldung mit dem Grund.
+  Das Ersatz-Dateifeld hängt bis zur Wahl im Dokument, weil `change` an
+  einem losen Element nicht in jedem eingebetteten Chromium sicher feuert.
+  Nachgestellt mit nachgebildetem Dialog (Lesen scheitert, Dialog geht
+  nicht auf, Abbrechen, Normalfall); den echten Dialog der Claude-App kann
+  ich nicht bedienen. Chrome, Edge und die Store-App waren nicht betroffen.
+
 ### Geändert
+
+- **Schriftauswahl: nur Vorhandenes, alphabetisch, mehr Schriften.**
+  - Angezeigt wird nur, was auf dem Rechner installiert ist (`schriftDa`,
+    gemessen an der Breite eines Mustertextes; `document.fonts.check()`
+    meldet lokale Schriften immer als vorhanden). Bisher standen Garamond und
+    Book Antiqua auch auf PCs ohne Office in der Liste, geschrieben wurde in
+    einer Ersatzschrift. Die Schrift des Dokuments erscheint immer, fehlt sie,
+    mit „(nicht installiert)“.
+  - Alphabetisch wie in Word statt nach Art gemischt (Toms Wunsch).
+  - Neu, in jedem Windows enthalten: Candara, Comic Sans MS, Constantia,
+    Corbel, Ink Free, Sitka Text; mit Office: Aptos, Century Gothic.
+  - Linux: eine Schrift gilt als vorhanden, wenn ein freier Zwilling da ist
+    (`SCHRIFT_DOPPEL`: Liberation, Carlito, Caladea, Comic Neue, URW Gothic,
+    DejaVu, Open Sans …), und heißt weiter wie das Original, damit Word-
+    Dateien dieselbe Schrift nennen. Ohne Zwilling bleibt sie ausgeblendet.
+    Das .deb empfiehlt dafür zusätzlich `fonts-comic-neue` und
+    `fonts-open-sans`.
 
 - **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),
   Autor, unter „Weitere Angaben“ Betreff und Stichwörter. Lesezeichen aus

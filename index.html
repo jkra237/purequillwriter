@@ -1673,7 +1673,15 @@ body.focus .sheet{padding-top:9vh}
 <div class="toast" id="toast"></div>
 
 <script>
-const FONTS=["Georgia","Times New Roman","Garamond","Palatino Linotype","Cambria","Book Antiqua","Segoe UI","Arial","Verdana","Tahoma","Calibri","Trebuchet MS","Courier New","Consolas"];
+/* Alphabetisch wie in Word — dort sucht man (Toms Wunsch 2026-10-13; vorher
+   nach Art gemischt). Angezeigt wird nur, was auf dem Rechner wirklich da ist
+   (schriftDa), deshalb dürfen hier auch Schriften stehen, die nur mit Office
+   kommen (Aptos, Book Antiqua, Century Gothic, Garamond). Seit 1.3 dazu die
+   Schreibschriften, die jedes Windows mitbringt: Candara, Comic Sans,
+   Constantia, Corbel, Ink Free, Sitka. */
+const FONTS=["Aptos","Arial","Book Antiqua","Calibri","Cambria","Candara","Century Gothic","Comic Sans MS",
+  "Consolas","Constantia","Corbel","Courier New","Garamond","Georgia","Ink Free","Palatino Linotype",
+  "Segoe UI","Sitka Text","Tahoma","Times New Roman","Trebuchet MS","Verdana"];
 const SIZES=[9,10,11,12,13,14,16,18,20,24];
 const NOTECOLORS=[
   {c:"#EBDFC4",n:"Manila"},{c:"#F3ECC6",n:"Zitrone"},{c:"#D9E7D6",n:"Salbei"},
@@ -1753,22 +1761,68 @@ function lhNatur(font){
 /* Rückfall einer Schrift, die auf dem Rechner fehlt: serifenlose auf
    serifenlos, sonst auf Serif — vorher fiel jede auf Serif (Calibri auf einem
    Mac erschien als Times). */
-const SCHRIFT_OHNE_SERIFEN=new Set(["Segoe UI","Arial","Verdana","Tahoma","Calibri","Trebuchet MS"]);
+const SCHRIFT_OHNE_SERIFEN=new Set(["Aptos","Arial","Calibri","Candara","Century Gothic","Comic Sans MS",
+  "Corbel","Ink Free","Segoe UI","Tahoma","Trebuchet MS","Verdana"]);
+/* Freie Zwillinge, vor allem für Linux: Ist einer davon installiert, gilt
+   die Schrift als vorhanden und erscheint unter ihrem gewohnten Namen —
+   damit Word-Dateien dieselbe Schrift nennen. Metrisch gleich: Carlito,
+   Caladea, Liberation; sonst sehr ähnlich (Comic Neue, URW Gothic, DejaVu).
+   Ohne Zwilling (Candara, Constantia, Corbel, Ink Free, Sitka, Trebuchet)
+   bleibt die Schrift unter Linux ausgeblendet. */
+const SCHRIFT_DOPPEL={
+  "Arial":["Liberation Sans","Arimo"],
+  "Calibri":["Carlito"],
+  "Cambria":["Caladea"],
+  "Century Gothic":["URW Gothic","URW Gothic L","TeX Gyre Adventor"],
+  "Comic Sans MS":["Comic Neue"],
+  "Consolas":["DejaVu Sans Mono"],
+  "Courier New":["Liberation Mono","Cousine"],
+  "Garamond":["EB Garamond"],
+  "Georgia":["Gelasio"],
+  "Palatino Linotype":["Palatino","P052","TeX Gyre Pagella","URW Palladio L"],
+  "Segoe UI":["Open Sans","Noto Sans"],
+  "Tahoma":["DejaVu Sans Condensed"],
+  "Times New Roman":["Liberation Serif","Tinos"],
+  "Verdana":["DejaVu Sans"]};
+/* Ist die Schrift (oder ein Zwilling) installiert? Gemessen an der Breite
+   eines Mustertextes gegen drei Grundschriften — weicht sie bei einer davon
+   ab, hat der Browser die Schrift gefunden. document.fonts.check() taugt
+   dafür nicht, es meldet lokale Schriften immer als vorhanden. */
+function schriftDa(f){
+  const c=schriftDa.c||(schriftDa.c={});
+  if(f in c)return c[f];
+  const x=schriftDa.x||(schriftDa.x=document.createElement("canvas").getContext("2d"));
+  const t="mmmmmmmmmmlliWWQQ@@ ßäöü 0123456789";
+  const einzeln=n=>["monospace","serif","sans-serif"].some(b=>{
+    x.font="72px "+b;const w0=x.measureText(t).width;
+    x.font='72px "'+String(n).replace(/"/g,"")+'",'+b;return x.measureText(t).width!==w0});
+  try{return c[f]=[f,...(SCHRIFT_DOPPEL[f]||[])].some(einzeln)}catch(e){return c[f]=true}
+}
+/* Die <option>s einer Schriftauswahl: nur Vorhandenes, alphabetisch. Die
+   Schrift des Dokuments steht immer drin, auch wenn sie fehlt (eine Word-
+   Datei in Garamond auf einem PC ohne Office) — sonst zeigte das Feld eine
+   falsche Schrift an. Jede in ihrer eigenen Schrift. */
+function schriftOptionen(aktuell){
+  const da=FONTS.filter(schriftDa);
+  const liste=!aktuell||da.includes(aktuell)?da:[...da,aktuell].sort((a,b)=>a.localeCompare(b));
+  return liste.map(f=>`<option value="${esc(f)}" ${f===aktuell?"selected":""} style="font-family:${esc(schriftStapel(f))}">${esc(f)}${
+    schriftDa(f)?"":" ("+tr("nicht installiert")+")"}</option>`).join("");
+}
 /* Freie Doppelgänger, vor allem für Linux: Chromium ersetzt dort nur
    maßgleiche Schriften selbst (Calibri→Carlito, Cambria→Caladea, Arial/Times/
    Courier→Liberation), die übrigen fielen alle auf dieselbe Grundschrift.
    Greift nur, wo das Original fehlt; der Name im Dokument und im Word-Export
    bleibt das Original. Palatino für den Mac, P052/Pagella aus Ghostscript-
    bzw. TeX-Paketen, Book Antiqua ist selbst ein Palatino-Nachbau. */
+/* Nur zum Darstellen, falls weder die Schrift noch ein Zwilling da ist —
+   zählt nicht als „vorhanden“: Book Antiqua ist ein Palatino-Nachbau, Aptos
+   der Nachfolger von Calibri. */
 const SCHRIFT_ERSATZ={
-  "Georgia":["Gelasio"],
-  "Garamond":["EB Garamond"],
-  "Palatino Linotype":["Palatino","P052","TeX Gyre Pagella","URW Palladio L"],
   "Book Antiqua":["Palatino Linotype","Palatino","P052","TeX Gyre Pagella","URW Palladio L"],
-  "Verdana":["DejaVu Sans"]};
+  "Aptos":["Calibri","Carlito"]};
 function schriftStapel(f){
   const q=n=>'"'+String(n).replace(/"/g,"")+'"';
-  const kette=[f,...(SCHRIFT_ERSATZ[f]||[])].map(q).join(",");
+  const kette=[f,...(SCHRIFT_DOPPEL[f]||[]),...(SCHRIFT_ERSATZ[f]||[])].map(q).join(",");
   if(f==="Courier New"||f==="Consolas")return kette+",monospace";
   return kette+(SCHRIFT_OHNE_SERIFEN.has(f)?",Carlito,Arial,sans-serif":",serif");
 }
@@ -2205,6 +2259,7 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "nicht installiert":"not installed",
   "Weitere Angaben":"More details",
   "Betreff":"Subject",
   "Stichwörter":"Keywords",
@@ -3055,6 +3110,7 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "nicht installiert":"non installée",
   "Weitere Angaben":"Plus d’informations",
   "Betreff":"Objet",
   "Stichwörter":"Mots-clés",
@@ -3905,6 +3961,7 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "nicht installiert":"no instalada",
   "Weitere Angaben":"Más datos",
   "Betreff":"Asunto",
   "Stichwörter":"Palabras clave",
@@ -4755,6 +4812,7 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "nicht installiert":"não instalada",
   "Weitere Angaben":"Mais informações",
   "Betreff":"Assunto",
   "Stichwörter":"Palavras-chave",
@@ -5605,6 +5663,7 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "nicht installiert":"niezainstalowana",
   "Weitere Angaben":"Więcej informacji",
   "Betreff":"Temat",
   "Stichwörter":"Słowa kluczowe",
@@ -6462,6 +6521,7 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "nicht installiert":"non installato",
   "Weitere Angaben":"Altre informazioni",
   "Betreff":"Oggetto",
   "Stichwörter":"Parole chiave",
@@ -7644,7 +7704,7 @@ function drawTools(){
   const T=$("#tools"),d=doc();
   if(S.mode==="write"){
     T.innerHTML=`
-      <select id="fFont" title="${tr("Schriftart")}">${FONTS.map(f=>`<option ${(d.font||S.settings.font)===f?"selected":""} style="font-family:'${f}'">${f}</option>`).join("")}</select>
+      <select id="fFont" title="${tr("Schriftart")}">${schriftOptionen(d.font||S.settings.font)}</select>
       <span class="combo" title="${tr("Schriftgröße")}">
         <input type="text" id="fSize" inputmode="decimal" autocomplete="off"
           value="${d.size||S.settings.size}" aria-label="${tr("Schriftgröße")}">
@@ -11880,12 +11940,23 @@ function loadDocumentFile(){
       accept:{"application/octet-stream":DOKENDUNGEN}};
     const gruppen=DOKFORMATE.map(f=>({description:tr(f.n),
       accept:{"application/octet-stream":f.e}}));
+    /* Nur wenn der Dialog selbst nicht aufging, auf das Dateifeld ausweichen.
+       Bis 1.3 fing ein einziges catch alles: scheiterte erst das Lesen der
+       schon gewählten Datei (im eingebauten Browser der Claude-App, 2026-10-13)
+       oder das Laden danach, kam noch ein Dialog — der Nutzer wählte erneut,
+       und es sah aus, als öffne sich das Fenster endlos. */
+    let gewaehlt=false;
     window.showOpenFilePicker({multiple:true,types:[alle,...gruppen]})
-      .then(async handles=>ladeDokumente(await Promise.all(handles.map(async h=>{
-        const f=await h.getFile();f.pqwHandle=h;return f}))))
+      .then(async handles=>{gewaehlt=true;
+        const dateien=await Promise.all(handles.map(async h=>{const f=await h.getFile();f.pqwHandle=h;return f}));
+        await ladeDokumente(dateien)})
       /* Abbrechen wirft AbortError — das ist keine Störung, sondern die
          Antwort des Nutzers, und darf keine Meldung auslösen. */
-      .catch(err=>{if(err&&err.name!=="AbortError")dateiEingabeDialog()});
+      .catch(err=>{
+        if(err&&err.name==="AbortError")return;
+        if(!gewaehlt){dateiEingabeDialog();return}
+        toast(tr("Diese Datei ließ sich nicht lesen")+(err&&err.name?" ("+err.name+")":""));
+      });
     return;
   }
   dateiEingabeDialog();
@@ -11894,7 +11965,11 @@ function dateiEingabeDialog(){
   const i=document.createElement("input");
   i.type="file";i.multiple=true;
   i.accept=DOKENDUNGEN.join(",");
-  i.onchange=()=>ladeDokumente([...i.files]);
+  /* Im Dokument hängen lassen, bis gewählt ist: an einem losen Element
+     feuert change nicht in jedem eingebetteten Chromium zuverlässig. */
+  i.style.display="none";document.body.appendChild(i);
+  i.onchange=()=>{const f=[...i.files];i.remove();ladeDokumente(f)};
+  i.addEventListener("cancel",()=>i.remove());
   i.click();
 }
 /* Gemeinsamer Abschluss für alle Formate */
@@ -12116,7 +12191,9 @@ const SCHRIFT_NAEHE={"aptos":"Calibri","aptos display":"Calibri","calibri light"
   "liberation serif":"Times New Roman","tinos":"Times New Roman","caladea":"Cambria",
   "segoe ui light":"Segoe UI","segoe ui semilight":"Segoe UI","palatino":"Palatino Linotype",
   "garamond premier pro":"Garamond","eb garamond":"Garamond","liberation mono":"Courier New",
-  "courier":"Courier New","cousine":"Courier New"};
+  "courier":"Courier New","cousine":"Courier New","comic neue":"Comic Sans MS","urw gothic":"Century Gothic",
+  "dejavu sans":"Verdana","dejavu sans mono":"Consolas","sitka":"Sitka Text","sitka small":"Sitka Text",
+  "sitka heading":"Sitka Text","open sans":"Segoe UI"};
 function docxSchriftInListe(n){
   if(!n)return null;
   const k=String(n).trim().toLowerCase();
@@ -15168,8 +15245,7 @@ function formatDialog(mode,onDone){
     ${isNew?`
     <div class="mmrow">
       <label for="cFont">${tr("Schriftart")}</label>
-      <select id="cFont" style="flex:1">${FONTS.map(f=>
-        `<option ${schrift===f?"selected":""} style="font-family:'${f}'">${f}</option>`).join("")}</select>
+      <select id="cFont" style="flex:1">${schriftOptionen(schrift)}</select>
       <select id="cSize" style="flex:0 0 64px" title="${tr("Schriftgröße")}">${
         [...new Set([...SIZES,groesse])].sort((a,b)=>a-b).map(x=>
         `<option value="${x}" ${groesse==x?"selected":""}>${S.settings.uiLang==="en"?x:String(x).replace(".",",")}</option>`).join("")}</select>
@@ -20298,7 +20374,7 @@ function settings(){
     <div class="setsec">${tr("Neue Dokumente")}</div>
     <p class="setnote">${tr("Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.")}</p>
     ${zeile(tr("Schriftart"),
-      `<select id="sFont">${FONTS.map(f=>`<option ${s.font===f?"selected":""}>${f}</option>`).join("")}</select>
+      `<select id="sFont">${schriftOptionen(s.font)}</select>
        <select id="sSize" style="flex:0 0 62px">${[...new Set([...SIZES,s.size])].sort((x,y)=>x-y).map(x=>
          `<option value="${x}" ${s.size==x?"selected":""}>${zahlText(x)}</option>`).join("")}</select>`)}
     ${zeile(tr("Zeilenabstand"),`<select id="sLh">${[...new Set([...LINEHEIGHTS.map(x=>x[1]),s.lh||LH_STD])].sort((x,y)=>x-y).map(v=>

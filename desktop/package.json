@@ -86,7 +86,7 @@
     "deb": {
       "packageName": "purequillwriter",
       "packageCategory": "editors",
-      "recommends": ["fonts-crosextra-carlito", "fonts-crosextra-caladea", "fonts-liberation", "fonts-dejavu-core", "fonts-urw-base35", "fonts-ebgaramond"]
+      "recommends": ["fonts-crosextra-carlito", "fonts-crosextra-caladea", "fonts-liberation", "fonts-dejavu-core", "fonts-urw-base35", "fonts-ebgaramond", "fonts-comic-neue", "fonts-open-sans"]
     }
   }
 }
