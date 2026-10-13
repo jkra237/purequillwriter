@@ -82,7 +82,11 @@ const setup = cfg => `(async()=>{
   ${cfg.fuss ? `d.ftr={on:true,text:"Seite {seite} von {seiten}",align:"center"};`
              : `d.ftr={on:false,text:"",align:"center"};`}
   d.footnotes=[{id:"f1",text:'Fussnote mit "Zitat" und Apostroph \\u2019s.'}];
-  let t="";for(let i=0;i<130;i++)t+="<p>Absatz "+i+" \\u2014 Fuelltext fuer den Seitenumbruch, mehrere Woerter lang.</p>";
+  let t="";for(let i=0;i<130;i++){t+="<p>Absatz "+i+" \\u2014 Fuelltext fuer den Seitenumbruch, mehrere Woerter lang.</p>";
+    /* Eine Liste laenger als eine Seite, mit Unterliste, mitten im Text:
+       bis 1.3 brach sie nicht zwischen den Eintraegen um und lief durch
+       Fusszeile und Seitenabstand — die Bandpruefung unten faengt das. */
+    if(i===60){t+="<ol>";for(let k=0;k<70;k++)t+="<li>Listenpunkt "+k+(k===30?"<ul><li>Unterpunkt a</li><li>Unterpunkt b</li></ul>":"")+"</li>";t+="</ol>"}}
   d.html='<h2>Kapitel &quot;eins&quot;</h2>'
     +'<p>Er sagte "hallo" &amp; es ist <b>fertig</b>.<sup class="fn" data-fn="f1">1</sup></p>'
     +'<figure class="fig" contenteditable="false" data-w="70" style="text-align:center">'

@@ -120,6 +120,22 @@ immer genau einen Commit, der sie anfasst.
     Strich statt eines Punkts, wie in Word.
   - Gleichartige Listen direkt hintereinander werden zusammengefasst.
 
+- **Listen brechen am Seitenende zwischen den Einträgen um**, wie in Word.
+  Bisher war eine Liste für den Umbruch ein Block: passte sie nicht ganz,
+  sprang sie komplett auf die nächste Seite (gemessen: 65 mm leer bei zwölf
+  kurzen Punkten, die fast alle noch Platz gehabt hätten). Und war sie
+  länger als eine Seite, lief sie durch Fußzeile und Seitenabstand; der
+  Druck teilte sie richtig und hatte danach eine Seite mehr als die Ansicht
+  (8 statt 7, letzte Seite ohne Kopf- und Fußzeile). Jetzt wie beim
+  zeilenweisen Tabellenumbruch: der erste Eintrag, der über die Seite ragt,
+  bekommt einen Abstand bis zur nächsten Seite (Klasse `pgli`, reine
+  Anzeige, `flush()` und der Druck nehmen sie heraus), und der Druck bricht
+  vor genau diesem Eintrag um (`seitenAnfaenge`). `check-export.mjs` hat
+  dafür eine 70-Punkte-Liste mit Unterliste im Prüfdokument und schlug mit
+  dem alten Stand in allen sieben Formaten an (285/285 mit dem neuen).
+  Ein einzelner Eintrag länger als eine Seite bleibt stehen wie ein
+  überlanger Absatz; Absätze teilen weiterhin nicht zeilenweise.
+
 ### Geändert
 
 - **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),
