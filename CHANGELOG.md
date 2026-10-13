@@ -136,6 +136,19 @@ immer genau einen Commit, der sie anfasst.
   Ein einzelner Eintrag länger als eine Seite bleibt stehen wie ein
   überlanger Absatz; Absätze teilen weiterhin nicht zeilenweise.
 
+- **Überschriften blieben allein unten auf der Seite stehen**, der Text dazu
+  begann erst auf der nächsten. Jetzt wandert die Überschrift mit, wie in
+  Word („Nicht vom nächsten Absatz trennen“ ist dort bei Überschriften
+  voreingestellt). Anders als Word über Leerzeilen hinweg: Word bindet die
+  Überschrift nur an den nächsten Absatz, ist das eine Leerzeile, stehen
+  beide allein unten. Mehrere Überschriften untereinander (H1 + H2) zählen
+  als eine Einheit. Vom folgenden Inhalt muss der Anfang mit auf die Seite:
+  ein Absatz oder eine kurze Tabelle ganz (beide wandern bisher als
+  Ganzes), bei Liste und langer Tabelle der erste Eintrag bzw. die erste
+  Zeile, bei einem überlangen Absatz zwei Zeilen. Geprüft je Fall in 30
+  Lagen zur Seitengrenze (Absatz, Leerzeilen, H1+H2, Liste, kurze und lange
+  Tabelle, überlanger Absatz).
+
 ### Geändert
 
 - **PDF-Dialog:** Titel (vorausgefüllt mit dem Dokumentnamen, änderbar),

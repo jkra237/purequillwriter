@@ -14774,6 +14774,33 @@ function paginate(){
         return;
       }
       const limit=p*stride+oben(p)+contentH;
+      /* Überschrift nicht vom Text trennen — in Word bei Überschriften
+         voreingestellt („Nicht vom nächsten Absatz trennen“). Bis 1.3 blieb
+         sie allein unten auf der Seite stehen. Anders als Word über
+         Leerzeilen hinweg: Word bindet die Überschrift nur an den nächsten
+         Absatz, ist das eine Leerzeile, bleiben beide allein stehen (eine
+         bekannte Falle). Hier zählen Leerzeilen und weitere Überschriften
+         zur Einheit, bis echter Inhalt kommt; von dem muss der Anfang noch
+         auf die Seite passen — ein Absatz, der ohnehin als Ganzes wandert,
+         ganz, bei Liste und Tabelle der erste Eintrag bzw. die erste Zeile. */
+      let mitNaechstem=false;
+      if(/^H[1-6]$/.test(b.tagName)&&!zwang&&top>p*stride+oben(p)+1){
+        let k=blocks.indexOf(b)+1,n=null;
+        while(k<blocks.length){const x=blocks[k];
+          if(/^H[1-6]$/.test(x.tagName)||(x.tagName==="P"&&!x.textContent.trim()&&!x.querySelector("img"))){k++;continue}
+          n=x;break}
+        if(n&&!n.classList.contains("pgbreak")){
+          const nr=n.getBoundingClientRect(),nt=nr.top-edTop;
+          let anfang=nr.height;
+          if(LISTE_TAG.test(n.tagName)&&n.querySelector("li"))anfang=n.querySelector("li").getBoundingClientRect().bottom-nr.top;
+          /* Eine Tabelle bricht nur zeilenweise, wenn sie länger als eine
+             Seite ist — eine kürzere wandert als Ganzes, also zählt sie ganz */
+          else if(n.tagName==="TABLE"&&n.rows[0]&&nr.height>contentH)anfang=n.rows[0].getBoundingClientRect().bottom-nr.top;
+          else if(nr.height>contentH)anfang=2*(parseFloat(getComputedStyle(n).lineHeight)||nr.height);
+          const ende=nt+anfang;
+          mitNaechstem=ende>limit+1&&ende-top<=contentHOf(p+1);
+        }
+      }
       /* Eine Tabelle, die länger als eine Seite ist, wird zeilenweise
          umbrochen: vor die erste Zeile, die über die Seite ragt, kommt eine
          Abstandszeile (tr.pgzeile) bis zum Anfang der nächsten Seite. Bis
@@ -14837,7 +14864,7 @@ function paginate(){
           if(Math.abs(rest)>0.5)ziehe.style.marginTop=(base+(ziel-rt)+rest)+"px";
         });
       }
-      else if(zwang||(top+h>limit+1&&h<=contentH)){
+      else if(zwang||mitNaechstem||(top+h>limit+1&&h<=contentH)){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
         b.style.marginTop=(base+(ziel-top))+"px";
