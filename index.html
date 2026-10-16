@@ -754,6 +754,14 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
    eigenen Stapelebene — sonst rutschte z-index:-1 hinter das Papier. Zum
    Bearbeiten kommt das ausgewählte Bild nach vorn, damit Anfasser greifen. */
 #editor,.pvedit{isolation:isolate}
+/* „Text umfließt“: das Bild schwimmt links oder rechts, der Text läuft
+   daneben weiter (Words „Quadrat“). Breite in % der Textspalte am Bild-
+   Rahmen, das Bild füllt ihn. Steht im Dokument vor dem Absatz, den es
+   umfließen lässt. */
+:is(#editor,.pvedit) figure.fig.umfl{float:left;clear:both;margin:3px 14px 6px 0;width:var(--uw,40%)}
+:is(#editor,.pvedit) figure.fig.umfl[data-seite="rechts"]{float:right;margin:3px 0 6px 14px}
+:is(#editor,.pvedit) figure.fig.umfl img{width:100%!important}
+#editor figure.fig.umfl{cursor:move}
 :is(#editor,.pvedit) figure.fig.free[data-lage="hinter"]{z-index:-1}
 /* Ausgewählt bleibt es hinten, wie in Word — man sieht, wie es wird. Rahmen
    und Anfasser liegen dafür auf einer eigenen Ebene über dem Text. */
@@ -2282,6 +2290,7 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "Text umfließt":"Wrap text",
   "Layout":"Layout",
   "Weitere Optionen":"More options",
   "Bild ersetzen":"Replace image",
@@ -3139,6 +3148,7 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "Text umfließt":"Habillage du texte",
   "Layout":"Disposition",
   "Weitere Optionen":"Plus d’options",
   "Bild ersetzen":"Remplacer l’image",
@@ -3996,6 +4006,7 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "Text umfließt":"Ajustar texto",
   "Layout":"Diseño",
   "Weitere Optionen":"Más opciones",
   "Bild ersetzen":"Reemplazar imagen",
@@ -4853,6 +4864,7 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "Text umfließt":"Quebra de texto",
   "Layout":"Layout",
   "Weitere Optionen":"Mais opções",
   "Bild ersetzen":"Substituir imagem",
@@ -5710,6 +5722,7 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "Text umfließt":"Tekst opływa",
   "Layout":"Układ",
   "Weitere Optionen":"Więcej opcji",
   "Bild ersetzen":"Zamień obraz",
@@ -6574,6 +6587,7 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "Text umfließt":"Testo a capo",
   "Layout":"Layout",
   "Weitere Optionen":"Altre opzioni",
   "Bild ersetzen":"Sostituisci immagine",
@@ -8098,6 +8112,8 @@ function drawWrite(){
   ed.addEventListener("mousedown",e=>{
     const edge=findTableEdge(e.clientX,e.clientY);
     if(edge){startTableDrag(e,edge);return}
+    const uf=e.button===0&&e.target.closest("figure.fig.umfl");
+    if(uf&&!e.target.closest("figcaption")){umflZiehen(e,uf);return}
     freeFigMouseDown(e);
   });
   ed.addEventListener("click",e=>{
@@ -10364,6 +10380,8 @@ async function bildInfo(img){
    Tabellen) ab und baut daraus die eigentliche <w:body>-XML zusammen. */
 async function walkBlocks(root,ctx){
   let xml="";
+  const aussenAnker={a:ctx.umflAnker||"",s:ctx.umflStand};
+  ctx.umflAnker="";ctx.umflStand=undefined;
   for(const el of [...root.children]){
     const tag=el.tagName.toLowerCase();
     /* Die Endnotenliste ist Anzeige; Word baut sie aus endnotes.xml selbst */
@@ -10397,6 +10415,12 @@ async function walkBlocks(root,ctx){
       xml+=listeXml(el,docxNumInstanz(el,ctx),0,ctx);
     }else if(tag==="table"){
       xml+=await tabelleXml(el,ctx);
+    }else if(tag==="figure"&&el.classList.contains("umfl")){
+      /* Word verankert ein umflossenes Bild in einem Absatz; es wandert in
+         den nächsten, statt eine Leerzeile zu erzeugen (unten) */
+      if(ctx.umflStand===undefined)ctx.umflStand=xml.length;
+      ctx.umflAnker=(ctx.umflAnker||"")+await figurXml(el,ctx);
+      continue;
     }else if(tag==="figure"){
       xml+=await figurXml(el,ctx);
     }else if(el.querySelector&&(el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))){
@@ -10405,8 +10429,27 @@ async function walkBlocks(root,ctx){
       const a=absatzXml(el,"",null,ctx);
       xml+=absatzZuXml(a,ctx);
     }
+    xml=umflAnkerEinsetzen(xml,ctx,false);
   }
-  return xml;
+  const fertig=umflAnkerEinsetzen(xml,ctx,true);
+  /* walkBlocks ruft sich für Tabellenzellen selbst auf: ein Anker, der
+     draußen noch wartet, gehört nicht in die Zelle */
+  ctx.umflAnker=aussenAnker.a;ctx.umflStand=aussenAnker.s;
+  return fertig;
+}
+/* Wartende Anker umflossener Bilder in den nächsten Absatz setzen — gleich
+   hinter seine Eigenschaften (w:pPr), so steht das Bild an seinem Anfang
+   wie im Editor. Folgt kein Absatz (Tabelle, Dokumentende), bekommt es einen
+   eigenen. */
+function umflAnkerEinsetzen(xml,ctx,ende){
+  if(!ctx.umflAnker)return xml;
+  const stand=ctx.umflStand,lauf=ctx.umflAnker;
+  if(!ende&&xml.length===stand)return xml;
+  ctx.umflAnker="";ctx.umflStand=undefined;
+  const neu=xml.slice(stand);
+  const m=/^<w:p(?:\s[^>]*)?>(?:<w:pPr>[\s\S]*?<\/w:pPr>)?/.exec(neu);
+  if(m)return xml.slice(0,stand)+m[0]+lauf+neu.slice(m[0].length);
+  return xml.slice(0,stand)+"<w:p>"+lauf+"</w:p>"+neu;
 }
 function absatzZuXml(a,ctx){
   let runs=a.runs;
@@ -10475,7 +10518,7 @@ async function figurXml(fig,ctx){
   const info=await bildInfo(img);if(!info)return"";
   const id="rIdImg"+(ctx.imgId++);
   ctx.images.push({id,ext:info.ext,bytes:info.bytes});
-  const frei=fig.classList.contains("free");
+  const frei=fig.classList.contains("free"),umfl=fig.classList.contains("umfl");
   let wEmu,hEmu;
   if(frei){
     wEmu=mmToEmu(+fig.dataset.fw||40);hEmu=mmToEmu(+fig.dataset.fh||16);
@@ -10491,6 +10534,7 @@ async function figurXml(fig,ctx){
      (nicht 0). */
   const nr=ctx.imgId, name="Bild "+nr;
   const graphic=bildGrafikXml(id,nr,name,wEmu,hEmu);
+  if(umfl)return umflAnkerXml(id,nr,name,wEmu,hEmu,fig.dataset.seite==="rechts"?"right":"left");
   if(frei){
     const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
     return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y,fig.dataset.lage==="hinter")}</w:p>`;
@@ -10511,6 +10555,17 @@ function bildGrafikXml(id,nr,name,wEmu,hEmu){
     +`<a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">${bildXml}</a:graphicData></a:graphic>`;
   const frameLock=`<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>`;
   return frameLock+graphic;
+}
+/* Umflossenes Bild (Words „Quadrat“) als Textlauf: am linken bzw. rechten
+   Rand, oben an seinem Absatz, Abstand zum Text 3 mm wie im Editor. */
+function umflAnkerXml(id,nr,name,wEmu,hEmu,seite){
+  return `<w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"`
+    +` distT="38100" distB="76200" distL="${seite==="right"?177800:0}" distR="${seite==="right"?0:177800}" simplePos="0" relativeHeight="${nr}" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">`
+    +`<wp:simplePos x="0" y="0"/>`
+    +`<wp:positionH relativeFrom="margin"><wp:align>${seite}</wp:align></wp:positionH>`
+    +`<wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>`
+    +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapSquare wrapText="bothSides"/>`
+    +`<wp:docPr id="${nr}" name="${name}"/>${bildGrafikXml(id,nr,name,wEmu,hEmu)}</wp:anchor></w:drawing></w:r>`;
 }
 /* Frei verankertes Bild als Textlauf: Lage über relativeFrom + Versatz. */
 function bildAnkerXml(id,nr,name,wEmu,hEmu,relH,x,relV,y,hinter){
@@ -13060,6 +13115,21 @@ function docxLauf(p,ktx,innen){
         if(quelle){
           const br=docxBildBreite(c,ktx.bild.breiteMm);
           ktx.bild.zahl++;ktx.bild.bytes+=quelle.bytes;
+          /* Ein in Word umflossenes Bild (Quadrat, Passend, Transparent)
+             bleibt umflossen — bis 1.3 kam jedes Bild als zentrierte eigene
+             Zeile an. Seite aus der Ausrichtung, sonst aus der Lage. */
+          const anc=[...c.getElementsByTagName("*")].find(x=>x.localName==="anchor");
+          const umfl=anc&&[...anc.children].some(x=>/^wrap(Square|Tight|Through)$/.test(x.localName));
+          if(umfl){
+            const ph=[...anc.children].find(x=>x.localName==="positionH");
+            const al=ph&&[...ph.children].find(x=>x.localName==="align");
+            const po=ph&&[...ph.children].find(x=>x.localName==="posOffset");
+            const rechts=al?/right|outside/i.test(al.textContent):
+              po?(+po.textContent/36000+br/100*ktx.bild.breiteMm/2)>ktx.bild.breiteMm/2:false;
+            const bw=Math.min(90,br),s=rechts?"rechts":"links";
+            marke+=`<figure class="fig umfl" contenteditable="false" data-w="${bw}" data-seite="${s}" style="text-align:${rechts?"right":"left"};width:${bw}%">`+
+              `<img src="${quelle.uri}" alt="" draggable="false" style="width:100%"></figure>`;
+          }else
           marke+=`<figure class="fig" contenteditable="false" data-w="${br}" style="text-align:center">`+
             `<img src="${quelle.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
         } else if(rid!==null&&ktx.bild) ktx.bild.fehlend++;
@@ -13194,8 +13264,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const figuren=inhalt.match(/<figure[\s\S]*?<\/figure>/g);
     if(figuren){
       const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
+      /* Umflossene Bilder stehen vor ihrem Absatz, damit er sie umfließt */
+      const umfl=figuren.filter(f=>/^<figure class="fig umfl"/.test(f));
+      out+=umfl.join("");
       if(rest||wa)out+="<p"+wa+">"+(rest||"<br>")+"</p>";
-      out+=figuren.join("");
+      out+=figuren.filter(f=>!umfl.includes(f)).join("");
       return;
     }
     if(h)out+="<h"+h+wa+">"+(inhalt||"<br>")+"</h"+h+">";
@@ -20358,9 +20431,11 @@ function figResizeDrag(e){
   const faktor=(align==="center"?2:1)*(ecke.includes("e")?1:-1);
   zeigePct(startW);
   const move=ev=>{
-    const w=Math.min(100,Math.max(10,Math.round(startW+faktor*(ev.clientX-startX)/cw*100)));
+    const umfl=selFig.classList.contains("umfl");
+    const w=Math.min(umfl?90:100,Math.max(10,Math.round(startW+faktor*(ev.clientX-startX)/cw*100)));
     if(w===+(selFig.dataset.w||70))return;
-    selFig.dataset.w=w;im.style.width=w+"%";
+    selFig.dataset.w=w;
+    if(umfl)selFig.style.width=w+"%";else im.style.width=w+"%";
     placeFigHandle();zeigePct(w);
   };
   const up=()=>{
@@ -20381,20 +20456,21 @@ function figResizeDrag(e){
    gar keine hatte und immer vor dem Text lag. */
 const BILDLAGEN=[
   ["zeile","Eigene Zeile",'<rect x="3" y="2" width="24" height="2" rx="1"/><rect x="9" y="6" width="12" height="8" rx="1" fill="currentColor" opacity=".55"/><rect x="3" y="16" width="24" height="2" rx="1"/>'],
+  ["umfl","Text umfließt",'<rect x="3" y="3" width="11" height="10" rx="1" fill="currentColor" opacity=".55"/><rect x="16" y="3" width="11" height="2" rx="1"/><rect x="16" y="7" width="11" height="2" rx="1"/><rect x="16" y="11" width="11" height="2" rx="1"/><rect x="3" y="15" width="24" height="2" rx="1"/>'],
   ["hinter","Hinter dem Text",'<rect x="8" y="3" width="14" height="14" rx="1" fill="currentColor" opacity=".3"/><rect x="3" y="4" width="24" height="2" rx="1"/><rect x="3" y="9" width="24" height="2" rx="1"/><rect x="3" y="14" width="24" height="2" rx="1"/>'],
   ["vor","Vor dem Text",'<rect x="3" y="4" width="24" height="2" rx="1"/><rect x="3" y="9" width="24" height="2" rx="1"/><rect x="3" y="14" width="24" height="2" rx="1"/><rect x="8" y="3" width="14" height="14" rx="1" fill="currentColor" opacity=".75"/>']];
-const bildLageVon=f=>f.classList.contains("free")?(f.dataset.lage==="hinter"?"hinter":"vor"):"zeile";
+const bildLageVon=f=>f.classList.contains("free")?(f.dataset.lage==="hinter"?"hinter":"vor"):f.classList.contains("umfl")?"umfl":"zeile";
 const layIco=p=>`<svg class="layico" viewBox="0 0 30 20" fill="currentColor" aria-hidden="true">${p}</svg>`;
 function drawImgBar(){
   const f=selFig,bar=$("#imgbar");if(!f){bar.classList.remove("on");return}
-  const frei=f.classList.contains("free"),al=f.style.textAlign||"center";
+  const frei=f.classList.contains("free"),umfl=f.classList.contains("umfl"),al=f.style.textAlign||"center";
   const hasCap=!!f.querySelector("figcaption");
   const lage=BILDLAGEN.find(l=>l[0]===bildLageVon(f));
   bar.innerHTML=`
     <button class="iblay" data-ib="layout" title="${tr("Layout")}">${layIco(lage[2]).replace('class="layico"','class="layico" style="width:24px;height:16px;margin:0"')}${tr(lage[1])} <span style="font-size:10px;color:var(--ink-soft)">&#9662;</span></button>
     ${frei?"":`<div class="sep"></div>
     <button class="tb ${al==="left"?"on":""}" data-ia="left" title="${tr("Links")}">${ICOTB('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
-    <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
+    ${umfl?"":`<button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>`}
     <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICOTB('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
     <button class="tb ${hasCap?"on":""}" data-ic="cap" title="${tr("Bildunterschrift")}">${ICOTB('<rect x="4" y="3" width="16" height="11" rx="1.5"/><path d="M6 18h12M8 21h8"/>')}</button>`}
@@ -20412,10 +20488,40 @@ function imgApply(){flush();dirty=true;commit();queuePaginate();drawImgBar()}
 /* Lage wechseln. Aus dem Text heraus behält das Bild seine Stelle und Größe
    auf der Seite (nur der Text rückt nach); in den Text hinein kommt es vor
    den Absatz, auf dessen Höhe es lag, so breit wie bisher. */
+/* Text umfließt: Seite und Breite setzen. Der Rahmen trägt die Breite,
+   das Bild füllt ihn. */
+function umflSetzen(fig,seite,w){
+  const im=fig.querySelector("img");
+  fig.classList.add("umfl");fig.dataset.seite=seite;fig.dataset.w=w;
+  fig.style.textAlign=seite==="rechts"?"right":"left";
+  fig.style.width=w+"%";if(im){im.style.width="100%";im.style.height=""}
+}
+function umflWeg(fig){
+  const im=fig.querySelector("img");
+  fig.classList.remove("umfl");delete fig.dataset.seite;fig.style.width="";
+  if(im)im.style.width=(+fig.dataset.w||70)+"%";
+}
 function bildLage(fig,lage){
   const ed=$("#editor");if(!ed||!fig)return;
   const g=freeGeom(),frei=fig.classList.contains("free");
   const im=fig.querySelector("img");
+  if(lage!=="umfl"&&fig.classList.contains("umfl")){
+    umflWeg(fig);
+    if(lage==="zeile"){fig.style.textAlign="center";placeFreeFigs();flush();dirty=true;commit();queuePaginate();drawStatus();selectFig(fig);return}
+  }
+  if(lage==="umfl"){
+    /* Seite: wo das Bild bisher stand — rechtsbündig oder rechts von der
+       Mitte heißt rechts, sonst links. */
+    let seite=fig.style.textAlign==="right"?"rechts":"links",w=+fig.dataset.w||40;
+    if(frei){
+      seite=(+fig.dataset.fx||0)+(+fig.dataset.fw||40)/2>g.cw/2?"rechts":"links";
+      w=Math.max(10,Math.min(90,Math.round((+fig.dataset.fw||40)/g.cw*100)));
+      bildLage(fig,"zeile");
+    }
+    umflSetzen(fig,seite,Math.min(90,w));
+    placeFreeFigs();flush();dirty=true;commit();queuePaginate();drawStatus();selectFig(fig);
+    return;
+  }
   if(lage==="zeile"){
     if(!frei)return;
     const w=Math.max(10,Math.min(100,Math.round((+fig.dataset.fw||40)/g.cw*100)));
@@ -20447,6 +20553,39 @@ function bildLage(fig,lage){
   placeFreeFigs();
   flush();dirty=true;commit();queuePaginate();drawStatus();
   selectFig(fig);
+}
+/* Ein umflossenes Bild verschieben: es steht im Dokument vor einem Absatz
+   und schwimmt an dessen Anfang — Ziehen setzt es vor den Absatz unter dem
+   Zeiger, die Seite folgt der Zeigerhälfte (wie in Word, wo der Anker mit
+   dem Bild wandert). Erst ab 4 px Bewegung, sonst ist es ein Klick. */
+function umflZiehen(e,fig){
+  e.preventDefault();
+  const ed=$("#editor"),sx=e.clientX,sy=e.clientY;
+  let aktiv=false,letzt=null;
+  const bar=$("#imgbar");
+  const move=ev=>{
+    if(!aktiv){if(Math.abs(ev.clientX-sx)+Math.abs(ev.clientY-sy)<4)return;aktiv=true;
+      if(selFig!==fig)selectFig(fig);bar.classList.add("leise")}
+    const er=ed.getBoundingClientRect(),cs=getComputedStyle(ed);
+    const mitte=er.left+parseFloat(cs.paddingLeft)+(ed.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight))/2;
+    const seite=ev.clientX>mitte?"rechts":"links";
+    const bloecke=[...ed.children].filter(b=>b!==fig&&!b.classList.contains("free")&&!b.classList.contains("umfl")&&!b.classList.contains("enliste"));
+    let ziel=bloecke.find(b=>{const r=b.getBoundingClientRect();return ev.clientY<r.bottom});
+    if(!ziel)ziel=null;
+    const schluessel=(ziel?bloecke.indexOf(ziel):-1)+seite;
+    if(schluessel===letzt)return;letzt=schluessel;
+    if(ziel)ed.insertBefore(fig,ziel);else ed.appendChild(fig);
+    umflSetzen(fig,seite,+fig.dataset.w||40);
+    paginate();placeFigHandle();
+  };
+  const up=()=>{
+    document.removeEventListener("mousemove",move);
+    document.removeEventListener("mouseup",up);
+    bar.classList.remove("leise");
+    if(aktiv){flush();dirty=true;commit();queuePaginate();drawStatus();selectFig(fig)}
+  };
+  document.addEventListener("mousemove",move);
+  document.addEventListener("mouseup",up);
 }
 /* Ein kleines Klappmenü unter einem Knopf der Bildleiste */
 function bildMenue(knopf,items,cb){
@@ -20493,6 +20632,7 @@ $("#imgbar").addEventListener("click",e=>{
     });
     return}
   const al=e.target.closest("[data-ia]");
+  if(al&&selFig.classList.contains("umfl")){umflSetzen(selFig,al.dataset.ia==="right"?"rechts":"links",+selFig.dataset.w||40);imgApply();return}
   if(al){selFig.style.textAlign=al.dataset.ia;imgApply();return}
   const c=e.target.closest("[data-ic]");if(!c)return;
   if(c.dataset.ic==="del"){const f=selFig;selectFig(null);f.remove();
@@ -21277,7 +21417,8 @@ document.</p>
 caption, more options (alternative text for screen readers, replace image) and delete. Drag
 the round corners to resize.</p>
 <p><b>Layout</b> sets how the picture sits with the text: <b>In line with text</b> (between
-paragraphs), <b>Behind text</b> or <b>In front of text</b> (both can be moved freely). This also
+paragraphs), <b>Wrap text</b> (left or right, the text runs alongside; drag it to move it),
+<b>Behind text</b> or <b>In front of text</b> (both can be moved freely). This also
 works for a signature. To select a picture behind text, click next to the letters.</p>
 <p>A caption lets the picture be counted in a <b>table of figures</b>.</p>`},
 
@@ -21855,7 +21996,9 @@ Word-Dokument hereinkommen.</p>
 Ausrichtung, Bildunterschrift, weiteren Optionen (Alternativtext für Screenreader, Bild
 ersetzen) und Löschen. An den runden Ecken ziehst du die Größe.</p>
 <p><b>Layout</b> legt fest, wie das Bild zum Text steht: <b>Eigene Zeile</b> (zwischen den
-Absätzen), <b>Hinter dem Text</b> oder <b>Vor dem Text</b> (beide frei verschiebbar). Das gilt
+Absätzen), <b>Text umfließt</b> (links oder rechts, der Text läuft daneben weiter; zum
+Verschieben an eine andere Stelle ziehen), <b>Hinter dem Text</b> oder <b>Vor dem Text</b>
+(beide frei verschiebbar). Das gilt
 auch für eine Unterschrift. Ein Bild hinter dem Text wählst du mit einem Klick neben die Schrift.</p>
 <p>Eine Bildunterschrift lässt das Bild im <b>Abbildungsverzeichnis</b> mitzählen.</p>`},
 
@@ -22454,8 +22597,9 @@ las imágenes que llegan con un documento de Word.</p>
 alineación, pie de imagen, más opciones (texto alternativo para lectores de pantalla,
 reemplazar imagen) y eliminar. Arrastra las esquinas redondas para redimensionar.</p>
 <p><b>Diseño</b> define cómo queda la imagen respecto al texto: <b>En línea con el texto</b>
-(entre los párrafos), <b>Detrás del texto</b> o <b>Delante del texto</b> (ambas se mueven
-libremente). También sirve para una firma. Para seleccionar una imagen detrás del texto, haz
+(entre los párrafos), <b>Ajustar texto</b> (a la izquierda o a la derecha, el texto sigue al
+lado; arrástrala para moverla), <b>Detrás del texto</b> o <b>Delante del texto</b> (ambas se
+mueven libremente). También sirve para una firma. Para seleccionar una imagen detrás del texto, haz
 clic junto a las letras.</p>
 <p>Un pie de imagen permite que la imagen se cuente en una <b>lista de figuras</b>.</p>`},
 
@@ -23056,8 +23200,9 @@ com um documento do Word.</p>
 alinhamento, legenda, mais opções (texto alternativo para leitores de tela, substituir imagem) e
 excluir. Arraste os cantos redondos para redimensionar.</p>
 <p><b>Layout</b> define como a imagem fica em relação ao texto: <b>Alinhado com o texto</b>
-(entre os parágrafos), <b>Atrás do texto</b> ou <b>Na frente do texto</b> (os dois podem ser
-movidos livremente). Isso vale também para uma assinatura. Para selecionar uma imagem atrás do
+(entre os parágrafos), <b>Quebra de texto</b> (à esquerda ou à direita, o texto continua ao
+lado; arraste para mover), <b>Atrás do texto</b> ou <b>Na frente do texto</b> (os dois podem
+ser movidos livremente). Isso vale também para uma assinatura. Para selecionar uma imagem atrás do
 texto, clique ao lado das letras.</p>
 <p>Uma legenda permite que a imagem seja contada num <b>índice de figuras</b>.</p>`},
 
@@ -23664,8 +23809,9 @@ images qui arrivent avec un document Word.</p>
 disposition, l'alignement, une légende, plus d'options (texte alternatif pour les lecteurs
 d'écran, remplacer l'image) et supprimer. Faites glisser les coins ronds pour redimensionner.</p>
 <p><b>Disposition</b> définit la place de l'image par rapport au texte : <b>Aligné sur le
-texte</b> (entre les paragraphes), <b>Derrière le texte</b> ou <b>Devant le texte</b> (les deux se
-déplacent librement). Cela vaut aussi pour une signature. Pour sélectionner une image derrière
+texte</b> (entre les paragraphes), <b>Habillage du texte</b> (à gauche ou à droite, le texte
+continue à côté ; faites-la glisser pour la déplacer), <b>Derrière le texte</b> ou <b>Devant le
+texte</b> (les deux se déplacent librement). Cela vaut aussi pour une signature. Pour sélectionner une image derrière
 le texte, cliquez à côté des lettres.</p>
 <p>Une légende permet que l'image soit comptée dans une <b>table des illustrations</b>.</p>`},
 
@@ -24272,7 +24418,8 @@ przeglądarki</nur-b><nur-a>pamięć</nur-a>. To samo dotyczy obrazów, które p
 podpisem, dodatkowymi opcjami (tekst alternatywny dla czytników ekranu, zamiana obrazu) i
 usuwaniem. Przeciągnij okrągłe narożniki, aby zmienić rozmiar.</p>
 <p><b>Układ</b> określa położenie obrazu względem tekstu: <b>W wierszu z tekstem</b> (między
-akapitami), <b>Za tekstem</b> lub <b>Przed tekstem</b> (oba można swobodnie przesuwać). Dotyczy
+akapitami), <b>Tekst opływa</b> (z lewej lub z prawej, tekst biegnie obok; przeciągnij, aby
+przenieść), <b>Za tekstem</b> lub <b>Przed tekstem</b> (oba można swobodnie przesuwać). Dotyczy
 to także podpisu odręcznego. Aby zaznaczyć obraz za tekstem, kliknij obok liter.</p>
 <p>Podpis pozwala, aby obraz był liczony w <b>spisie ilustracji</b>.</p>`},
 
@@ -24863,7 +25010,8 @@ immagini che arrivano con un documento Word.</p>
 allineamento, didascalia, altre opzioni (testo alternativo per i lettori di schermo, sostituisci
 immagine) ed elimina. Trascina gli angoli rotondi per ridimensionare.</p>
 <p><b>Layout</b> stabilisce come sta l'immagine rispetto al testo: <b>In linea con il testo</b>
-(tra i paragrafi), <b>Dietro al testo</b> o <b>Davanti al testo</b> (entrambi spostabili
+(tra i paragrafi), <b>Testo a capo</b> (a sinistra o a destra, il testo scorre accanto;
+trascinala per spostarla), <b>Dietro al testo</b> o <b>Davanti al testo</b> (entrambi spostabili
 liberamente). Vale anche per una firma. Per selezionare un'immagine dietro al testo, fai clic
 accanto alle lettere.</p>
 <p>Una didascalia permette che l'immagine sia conteggiata in un <b>indice delle figure</b>.</p>`},

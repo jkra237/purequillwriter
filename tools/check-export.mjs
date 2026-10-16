@@ -88,6 +88,9 @@ const setup = cfg => `(async()=>{
        Fusszeile und Seitenabstand — die Bandpruefung unten faengt das. */
     /* Ein Absatz laenger als eine Seite: bis 1.3 lief er durch Fusszeile
        und Seitenabstand, statt zeilenweise umzubrechen. */
+    /* Ein umflossenes Bild (Text umfliesst, rechts, 45 %): Druck und
+       Ansicht muessen gleich umbrechen, der Word-Umlauf muss es halten. */
+    if(i===40)t+='<figure class="fig umfl" contenteditable="false" data-w="45" data-seite="rechts" style="text-align:right;width:45%"><img src="'+jpg(900,600)+'" style="width:100%"></figure>';
     if(i===20){t+="<p>";for(let k=0;k<110;k++)t+="Satz "+k+" eines sehr langen Absatzes ohne Absatzwechsel. ";t+="</p>"}
     if(i===60){t+="<ol>";for(let k=0;k<70;k++)t+="<li>Listenpunkt "+k+(k===30?"<ul><li>Unterpunkt a</li><li>Unterpunkt b</li></ul>":"")+"</li>";t+="</ol>"}}
   d.html='<h2>Kapitel &quot;eins&quot;</h2>'

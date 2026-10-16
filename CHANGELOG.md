@@ -199,6 +199,22 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Bilder: „Text umfließt“** (Schritt 2 von 2). Neue Layout-Art: das Bild
+  steht links oder rechts, der Text läuft daneben weiter (Words
+  „Quadrat“). Im Dokument steht es vor dem Absatz, den es umfließen lässt
+  (`figure.fig.umfl`, CSS-float, Breite am Rahmen). Ausrichtung in der
+  Leiste nur links/rechts; Verschieben per Ziehen setzt es vor den Absatz
+  unter dem Zeiger, die Seite folgt der Zeigerhälfte (`umflZiehen`).
+  Word-Export: Anker mit `wrapSquare`, am Rand ausgerichtet, eingesetzt in
+  den folgenden Textabsatz statt in einen eigenen (sonst entstünde in Word
+  eine Leerzeile; `umflAnkerEinsetzen`, sicher gegen Tabellenzellen).
+  Word-Import: bisher kam jedes Bild als zentrierte eigene Zeile an; ein
+  umflossenes (Quadrat, Passend, Transparent) bleibt jetzt umflossen, die
+  Seite aus der Ausrichtung oder Lage. Geprüft: Umfließen links und
+  rechts, Ziehen, Eckanfasser, Word hin und zurück; `check-export.mjs` hat
+  ein umflossenes Bild im Prüfdokument, Druck und Ansicht brechen gleich um
+  (285/285). Hilfe in allen sieben Sprachen.
+
 - **Bilder: neue Leiste und Layout „wie der Text zum Bild steht“** (Toms
   Wunsch, Schritt 1 von 2; Schritt 2 wird „Text umfließt“).
   - Die Leiste schwebt über dem Bild, mit Symbolen statt Textknöpfen wie in
