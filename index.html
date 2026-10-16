@@ -2299,6 +2299,7 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "Bitte die Datei noch einmal auswählen.":"Please select the file again.",
   "Text umfließt":"Wrap text",
   "Layout":"Layout",
   "Weitere Optionen":"More options",
@@ -3157,6 +3158,7 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "Bitte die Datei noch einmal auswählen.":"Veuillez sélectionner le fichier à nouveau.",
   "Text umfließt":"Habillage du texte",
   "Layout":"Disposition",
   "Weitere Optionen":"Plus d’options",
@@ -4015,6 +4017,7 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "Bitte die Datei noch einmal auswählen.":"Vuelve a seleccionar el archivo.",
   "Text umfließt":"Ajustar texto",
   "Layout":"Diseño",
   "Weitere Optionen":"Más opciones",
@@ -4873,6 +4876,7 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "Bitte die Datei noch einmal auswählen.":"Selecione o arquivo novamente.",
   "Text umfließt":"Quebra de texto",
   "Layout":"Layout",
   "Weitere Optionen":"Mais opções",
@@ -5731,6 +5735,7 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "Bitte die Datei noch einmal auswählen.":"Wybierz plik jeszcze raz.",
   "Text umfließt":"Tekst opływa",
   "Layout":"Układ",
   "Weitere Optionen":"Więcej opcji",
@@ -6596,6 +6601,7 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "Bitte die Datei noch einmal auswählen.":"Seleziona di nuovo il file.",
   "Text umfließt":"Testo a capo",
   "Layout":"Layout",
   "Weitere Optionen":"Altre opzioni",
@@ -12378,7 +12384,11 @@ function loadDocumentFile(){
      Firefox und Safari kennen showOpenFilePicker nicht, und ohne HTTPS
      steht sie auch dort nicht bereit — dann der bisherige Weg mit einer
      kombinierten Filterzeile. */
-  if(window.showOpenFilePicker&&window.isSecureContext){
+  /* Manche eingebetteten Browser (die Claude-App, 2026-10-16) zeigen den
+     modernen Dialog, geben die gewählte Datei aber nicht heraus
+     (NotAllowedError). Ist das einmal passiert, gleich der einfache Dialog. */
+  let ohnePicker=false;try{ohnePicker=localStorage.getItem("pqwOhnePicker")==="1"}catch(e){}
+  if(window.showOpenFilePicker&&window.isSecureContext&&!ohnePicker){
     const alle={description:tr("Alle unterstützten Dokumente"),
       accept:{"application/octet-stream":DOKENDUNGEN}};
     const gruppen=DOKFORMATE.map(f=>({description:tr(f.n),
@@ -12391,7 +12401,15 @@ function loadDocumentFile(){
     let gewaehlt=false;
     window.showOpenFilePicker({multiple:true,types:[alle,...gruppen]})
       .then(async handles=>{gewaehlt=true;
-        const dateien=await Promise.all(handles.map(async h=>{const f=await h.getFile();f.pqwHandle=h;return f}));
+        let dateien;
+        try{dateien=await Promise.all(handles.map(async h=>{const f=await h.getFile();f.pqwHandle=h;return f}))}
+        catch(e){
+          /* Gewählt, aber nicht lesbar: ab jetzt der einfache Dialog — und
+             einmal gleich hinterher, damit man nicht neu anfangen muss */
+          try{localStorage.setItem("pqwOhnePicker","1")}catch(x){}
+          toast(tr("Bitte die Datei noch einmal auswählen."));
+          dateiEingabeDialog();return;
+        }
         await ladeDokumente(dateien)})
       /* Abbrechen wirft AbortError — das ist keine Störung, sondern die
          Antwort des Nutzers, und darf keine Meldung auslösen. */

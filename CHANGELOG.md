@@ -196,6 +196,10 @@ immer genau einen Commit, der sie anfasst.
   Nachgestellt mit nachgebildetem Dialog (Lesen scheitert, Dialog geht
   nicht auf, Abbrechen, Normalfall); den echten Dialog der Claude-App kann
   ich nicht bedienen. Chrome, Edge und die Store-App waren nicht betroffen.
+  Nachtrag: Dort gibt der moderne Dialog die gewählte Datei gar nicht heraus
+  („file could not be read“). Scheitert das Lesen, merkt sich das Programm
+  das (`pqwOhnePicker`), bittet um eine neue Wahl und öffnet sofort den
+  einfachen Dateidialog; ab dann nur noch diesen.
 
 - **Listen aus Word einfügen.** Word legt beim Kopieren keine
   zusammenhängende Liste ab. Word im Browser und das neue Word liefern jeden
