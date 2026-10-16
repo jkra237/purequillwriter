@@ -750,6 +750,29 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 :is(#editor,.pvedit) figure.fig.free img{display:block;width:100%;height:100%;max-width:none}
 #editor figure.fig.free.sel img{outline:none}
 #editor figure.fig.free.sel{outline:1px dashed var(--stamp);outline-offset:3px}
+/* „Hinter dem Text“: unter den Absätzen. isolation macht den Editor zur
+   eigenen Stapelebene — sonst rutschte z-index:-1 hinter das Papier. Zum
+   Bearbeiten kommt das ausgewählte Bild nach vorn, damit Anfasser greifen. */
+#editor,.pvedit{isolation:isolate}
+:is(#editor,.pvedit) figure.fig.free[data-lage="hinter"]{z-index:-1}
+/* Ausgewählt bleibt es hinten, wie in Word — man sieht, wie es wird. Rahmen
+   und Anfasser liegen dafür auf einer eigenen Ebene über dem Text. */
+#editor figure.fig.free[data-lage="hinter"].sel{outline:none}
+.hinterbox{position:absolute;z-index:8;display:none;cursor:move;
+  outline:1px dashed var(--stamp);outline-offset:3px}
+.hinterbox.on{display:block}
+/* Bildleiste seit 1.3: Symbole statt Textknöpfen, Layout als Klappmenü */
+#imgbar{gap:2px;padding:3px 4px}
+#imgbar .tb{width:30px;height:30px}
+#imgbar .iblay{display:flex;align-items:center;gap:5px;height:30px;padding:0 8px;border-radius:var(--radius);
+  font-size:13px;color:var(--ink);background:none;border:none;cursor:pointer}
+#imgbar .iblay:hover,#imgbar .iblay.on{background:var(--chrome)}
+#imgbar .sep{width:1px;height:20px;background:var(--rule);margin:0 3px}
+#imgbar.leise{opacity:.15;pointer-events:none}
+.mi .layico{width:30px;height:20px;margin-right:9px;flex:0 0 auto;color:var(--ink-soft)}
+.figpct{position:absolute;z-index:9;display:none;background:var(--ink);color:var(--paper);
+  font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:2px;pointer-events:none}
+.figpct.on{display:block}
 .fhwrap{position:absolute;inset:0;pointer-events:none}
 .fh{position:absolute;width:9px;height:9px;background:var(--paper);border:1.5px solid var(--stamp);
   border-radius:50%;pointer-events:auto}
@@ -1416,7 +1439,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   /* Alles neben dem Weg zum Editor muss WEG, nicht nur unsichtbar:
      visibility:hidden lässt Breite und Höhe im Fluss stehen. */
   .topbar,.rail,#tools,#status,#outline,#side,#findbar,#pageflag,#anchcol,#ruler,
-  #pagelayer,#hfhint,#hfedit,#hfgrip,#figrsz,
+  #pagelayer,#hfhint,#hfedit,#hfgrip,#figrsz,.figrsz,.figpct,#hinterbox,
   #imgbar,#pastebar,#hfbar,#focusbar,#ovl,#readview,#pvwrap,#toast{display:none!important}
   /* #editor bleibt im normalen Fluss (position:relative, NICHT absolute): nur
      so bricht Chromium / printToPDF den Text selbst über @page um. Absolut
@@ -2259,6 +2282,12 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "Layout":"Layout",
+  "Weitere Optionen":"More options",
+  "Bild ersetzen":"Replace image",
+  "Eigene Zeile":"In line with text",
+  "Hinter dem Text":"Behind text",
+  "Vor dem Text":"In front of text",
   "nicht installiert":"not installed",
   "Weitere Angaben":"More details",
   "Betreff":"Subject",
@@ -3110,6 +3139,12 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "Layout":"Disposition",
+  "Weitere Optionen":"Plus d’options",
+  "Bild ersetzen":"Remplacer l’image",
+  "Eigene Zeile":"Aligné sur le texte",
+  "Hinter dem Text":"Derrière le texte",
+  "Vor dem Text":"Devant le texte",
   "nicht installiert":"non installée",
   "Weitere Angaben":"Plus d’informations",
   "Betreff":"Objet",
@@ -3961,6 +3996,12 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "Layout":"Diseño",
+  "Weitere Optionen":"Más opciones",
+  "Bild ersetzen":"Reemplazar imagen",
+  "Eigene Zeile":"En línea con el texto",
+  "Hinter dem Text":"Detrás del texto",
+  "Vor dem Text":"Delante del texto",
   "nicht installiert":"no instalada",
   "Weitere Angaben":"Más datos",
   "Betreff":"Asunto",
@@ -4812,6 +4853,12 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "Layout":"Layout",
+  "Weitere Optionen":"Mais opções",
+  "Bild ersetzen":"Substituir imagem",
+  "Eigene Zeile":"Alinhado com o texto",
+  "Hinter dem Text":"Atrás do texto",
+  "Vor dem Text":"Na frente do texto",
   "nicht installiert":"não instalada",
   "Weitere Angaben":"Mais informações",
   "Betreff":"Assunto",
@@ -5663,6 +5710,12 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "Layout":"Układ",
+  "Weitere Optionen":"Więcej opcji",
+  "Bild ersetzen":"Zamień obraz",
+  "Eigene Zeile":"W wierszu z tekstem",
+  "Hinter dem Text":"Za tekstem",
+  "Vor dem Text":"Przed tekstem",
   "nicht installiert":"niezainstalowana",
   "Weitere Angaben":"Więcej informacji",
   "Betreff":"Temat",
@@ -6521,6 +6574,12 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "Layout":"Layout",
+  "Weitere Optionen":"Altre opzioni",
+  "Bild ersetzen":"Sostituisci immagine",
+  "Eigene Zeile":"In linea con il testo",
+  "Hinter dem Text":"Dietro al testo",
+  "Vor dem Text":"Davanti al testo",
   "nicht installiert":"non installato",
   "Weitere Angaben":"Altre informazioni",
   "Betreff":"Oggetto",
@@ -7804,7 +7863,12 @@ function drawWrite(){
         <div class="hfgrip" id="hfgrip" title="${esc(tr("Ziehen: bis hierher bleibt die Seite frei von Text"))}"></div>
         <div class="hftip" id="hftip"></div>
         <div class="hfgrip abstand" id="hfgrip2" title="${esc(tr("Ziehen: Abstand der Zeile zum Blattrand"))}"></div>
-        <div class="figrsz" id="figrsz" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
+        <div class="figrsz" id="figrsz" data-ecke="se" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
+        <div class="figrsz" data-ecke="sw" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
+        <div class="figrsz" data-ecke="ne" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
+        <div class="figrsz" data-ecke="nw" title="${esc(tr("Ziehen, um die Bildgröße zu ändern"))}"></div>
+        <div class="figpct" id="figpct"></div>
+        <div class="hinterbox" id="hinterbox" title="${esc(tr("Ziehen zum Verschieben"))}"></div>
       </div>
     </div>
     <div class="anchcol" id="anchcol"></div>
@@ -7995,7 +8059,8 @@ function drawWrite(){
   });
   $("#hfgrip").addEventListener("mousedown",e=>hfGripDrag(e,"rand"));
   $("#hfgrip2").addEventListener("mousedown",e=>hfGripDrag(e,"abstand"));
-  $("#figrsz").addEventListener("mousedown",figResizeDrag);
+  document.querySelectorAll(".figrsz").forEach(h=>h.addEventListener("mousedown",figResizeDrag));
+  $("#hinterbox").addEventListener("mousedown",freeFigMouseDown);
   const hb=$("#hfedit");
   hb.addEventListener("keydown",e=>{
     /* Eingabe bricht die Zeile um, wie in Google Docs — Kopf- und Fußzeilen
@@ -8042,6 +8107,9 @@ function drawWrite(){
     const tocHit=e.target.closest(".toc");
     ed.querySelectorAll(".toc.sel").forEach(t=>{if(t!==tocHit)t.classList.remove("sel")});
     if(tocHit)tocHit.classList.add("sel");
+    /* Ein Bild hinter dem Text wurde eben über mousedown gewählt — der Klick
+       landet auf dem Absatz darüber und hätte die Wahl gleich wieder gelöscht */
+    if(hinterGewaehlt){hinterGewaehlt=false;return}
     const fig=e.target.closest("figure.fig");
     if(fig&&!e.target.closest("figcaption")){selectFig(fig);return}
     if(!fig)selectFig(null);
@@ -10425,7 +10493,7 @@ async function figurXml(fig,ctx){
   const graphic=bildGrafikXml(id,nr,name,wEmu,hEmu);
   if(frei){
     const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
-    return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y)}</w:p>`;
+    return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y,fig.dataset.lage==="hinter")}</w:p>`;
   }
   return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>`
     +`<wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0">`
@@ -10445,9 +10513,9 @@ function bildGrafikXml(id,nr,name,wEmu,hEmu){
   return frameLock+graphic;
 }
 /* Frei verankertes Bild als Textlauf: Lage über relativeFrom + Versatz. */
-function bildAnkerXml(id,nr,name,wEmu,hEmu,relH,x,relV,y){
+function bildAnkerXml(id,nr,name,wEmu,hEmu,relH,x,relV,y,hinter){
   return `<w:r><w:drawing><wp:anchor xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"`
-    +` distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${nr}" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="1">`
+    +` distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="${nr}" behindDoc="${hinter?1:0}" locked="0" layoutInCell="1" allowOverlap="1">`
     +`<wp:simplePos x="0" y="0"/>`
     +`<wp:positionH relativeFrom="${relH}"><wp:posOffset>${x}</wp:posOffset></wp:positionH>`
     +`<wp:positionV relativeFrom="${relV}"><wp:posOffset>${y}</wp:posOffset></wp:positionV>`
@@ -19893,6 +19961,7 @@ function placeFreeFigs(){
     fig.style.setProperty("--fpw",w+"mm");
     fig.style.setProperty("--fph",h+"mm");
   });
+  hinterBoxSetzen();
 }
 /* Lage der Schreibmarke in Millimetern — dort wird eine neue Signatur
    abgelegt. Gemessen wird die Grundlinie der Zeile, nicht die Oberkante:
@@ -19975,28 +20044,48 @@ function insertFreeFigure(src,wmm,hmm,anker){
   requestAnimationFrame(()=>inSichtBringen(fig));
   return fig;
 }
+/* Löschen läuft seit 1.3 über die Bildleiste (Papierkorb) und die Entf-
+   Taste — das kleine Kreuz am Bild entfällt. */
 function addFreeHandles(fig){
   const wrap=document.createElement("div");
   wrap.className="fhwrap";wrap.setAttribute("contenteditable","false");
-  wrap.innerHTML=FREE_HANDLES.map(k=>`<i class="fh ${k}" data-fdir="${k}"></i>`).join("")
-    +`<button class="fdel" data-fdel="1" title="${tr("Löschen")}">&times;</button>`;
+  wrap.innerHTML=FREE_HANDLES.map(k=>`<i class="fh ${k}" data-fdir="${k}"></i>`).join("");
   fig.appendChild(wrap);
+}
+/* Ein Bild hinter dem Text liegt unter den Absätzen und bekommt den Klick
+   nie selbst. Wie in Word: wer neben die Schrift klickt, wo das Bild liegt,
+   meint das Bild; auf einem Buchstaben bleibt es beim Text. */
+let hinterGewaehlt=false;
+function hinterBildAn(x,y){
+  const ed=$("#editor");if(!ed)return null;
+  const bilder=[...ed.querySelectorAll('figure.fig.free[data-lage="hinter"]')].filter(f=>{
+    const r=f.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom});
+  if(!bilder.length)return null;
+  const cp=document.caretRangeFromPoint&&document.caretRangeFromPoint(x,y);
+  if(cp&&cp.startContainer.nodeType===3){
+    const t=cp.startContainer,o=cp.startOffset,r=document.createRange();
+    for(const [a,b] of [[o,o+1],[o-1,o]]){
+      if(a<0||b>t.length)continue;
+      r.setStart(t,a);r.setEnd(t,b);
+      const q=r.getBoundingClientRect();
+      if(q.width&&x>=q.left-1&&x<=q.right+1&&y>=q.top-1&&y<=q.bottom+1&&t.data.slice(a,b).trim())return null;
+    }
+  }
+  return bilder[bilder.length-1];
 }
 function freeFigMouseDown(e){
   if(e.button!==0)return;
-  if(e.target.closest("[data-fdel]")){
-    e.preventDefault();
-    const f=e.target.closest("figure.fig.free");
-    selectFig(null);if(f)f.remove();
-    flush();dirty=true;commit();queuePaginate();drawStatus();return;
-  }
   /* Richtung der Anfasser bewusst data-fdir, nicht data-fh: die Grafik selbst
      trägt ihre Höhe in data-fh, und closest() würde sonst auf sie treffen. */
   const griff=e.target.closest("[data-fdir]");
-  const fig=e.target.closest("figure.fig.free");
+  let fig=e.target.closest("figure.fig.free");
+  /* Rahmen eines ausgewählten Bildes hinter dem Text (eigene Ebene) */
+  if(!fig&&e.target.closest("#hinterbox"))fig=selFig;
+  if(!fig){fig=hinterBildAn(e.clientX,e.clientY);if(fig)hinterGewaehlt=true}
   if(!fig)return;
   e.preventDefault();
   if(selFig!==fig)selectFig(fig);
+  const bar=$("#imgbar");bar.classList.add("leise");
   const ed=$("#editor"),g=freeGeom(),modus=griff?griff.dataset.fdir:"move";
   const fr=fig.getBoundingClientRect();
   const greifX=(e.clientX-fr.left)/g.mmPx, greifY=(e.clientY-fr.top)/g.mmPx;
@@ -20038,7 +20127,9 @@ function freeFigMouseDown(e){
   const up=()=>{
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
+    bar.classList.remove("leise");
     flush();dirty=true;commit();drawStatus();
+    if(selFig===fig)drawImgBar();
   };
   document.addEventListener("mousemove",move);
   document.addEventListener("mouseup",up);
@@ -20120,8 +20211,28 @@ function sigInit(){
     out.getContext("2d").drawImage(cv,Math.round(x*dpr),Math.round(y*dpr),out.width,out.height,0,0,out.width,out.height);
     const data=out.toDataURL("image/png");
     closeOvl();
-    insertFreeFigure(data,55,Math.max(1,Math.round(55*(h/w))),sigAnker);
+    insertSignaturZeile(data,55);
   };
+}
+/* Seit 1.3 kommt die Unterschrift wie jedes Bild in eine eigene Zeile an der
+   Schreibstelle, linksbündig, 55 mm breit (Toms Wahl: „Standard ist eigene
+   Zeile“). Frei vor oder hinter den Text legt man sie über Layout. Ohne
+   data-sig: placeFreeFigs hebt Signaturen mit dieser Marke aus alten
+   Dokumenten aus dem Text heraus. */
+function insertSignaturZeile(data,wmm){
+  const ed=$("#editor");if(!ed)return;
+  ed.focus();
+  const sel=getSelection();
+  if(letzteEdRange&&ed.contains(letzteEdRange.startContainer)){sel.removeAllRanges();sel.addRange(letzteEdRange)}
+  const g=freeGeom();
+  const w=Math.max(10,Math.min(100,Math.round(wmm/g.cw*100)));
+  const zeichen="pqsig"+Date.now();
+  document.execCommand("insertHTML",false,`<figure class="fig" contenteditable="false" data-w="${w}" style="text-align:left" data-neu="${zeichen}">`+
+    `<img src="${data}" alt="" draggable="false" style="width:${w}%"></figure><p><br></p>`);
+  const fig=ed.querySelector(`figure[data-neu="${zeichen}"]`);
+  if(fig)fig.removeAttribute("data-neu");
+  flush();dirty=true;markEmpty();commit();queuePaginate();drawStatus();
+  if(fig){selectFig(fig);requestAnimationFrame(()=>inSichtBringen(fig))}
 }
 let selFig=null;
 /* Markierte Elemente mit der Tastatur löschen, wie in Word: ein Bild (auch
@@ -20182,94 +20293,205 @@ function selectFig(f){
   }
   selFig=f||null;
   const bar=$("#imgbar");
-  if(!f){bar.classList.remove("on");placeFigHandle();return}
+  if(!f){bar.classList.remove("on");placeFigHandle();hinterBoxSetzen();return}
   f.classList.add("sel");
-  /* Frei platzierte Bilder tragen ihre Anfasser selbst — Ausrichtung und
-     Breitenregler wären dort sinnlos, also gar keine Leiste. */
+  /* Frei platzierte Bilder tragen ihre acht Anfasser selbst; die Leiste
+     haben sie seit 1.3 auch — für Layout, Ersetzen und Löschen. Hinter dem
+     Text lägen die Anfasser unter den Absätzen und wären nicht zu greifen,
+     dort kommen sie auf die eigene Ebene (hinterBoxSetzen). */
   if(f.classList.contains("free")){
-    bar.classList.remove("on");
-    const h=$("#figrsz");if(h)h.classList.remove("on");
-    addFreeHandles(f);return;
+    document.querySelectorAll(".figrsz").forEach(h=>h.classList.remove("on"));
+    if(f.dataset.lage!=="hinter")addFreeHandles(f);
   }
+  hinterBoxSetzen();
   drawImgBar();
+}
+/* Rahmen und acht Anfasser eines ausgewählten Bildes hinter dem Text, über
+   dem Text in #paper. Innerhalb des Rahmens verschiebt ein Zug das Bild,
+   auch über den Buchstaben — wer am Text arbeiten will, klickt daneben. */
+function hinterBoxSetzen(){
+  const box=$("#hinterbox"),paper=$("#paper");if(!box||!paper)return;
+  const f=selFig;
+  if(!f||!f.isConnected||!f.classList.contains("free")||f.dataset.lage!=="hinter"||S.mode!=="write"){
+    box.classList.remove("on");box.innerHTML="";return}
+  const pr=paper.getBoundingClientRect(),r=f.getBoundingClientRect();
+  box.style.left=(r.left-pr.left)+"px";box.style.top=(r.top-pr.top)+"px";
+  box.style.width=r.width+"px";box.style.height=r.height+"px";
+  if(!box.firstChild)box.innerHTML=FREE_HANDLES.map(k=>`<i class="fh ${k}" data-fdir="${k}"></i>`).join("");
+  box.classList.add("on");
 }
 /* Bei rechtsbündigen Bildern ist die rechte Kante fest — dort gehört der Anfasser nach links */
 const figFreeSide=f=>(f.style.textAlign==="right")?"left":"right";
+/* Vier Eckanfasser am Bild im Text, wie in jedem Programm (bis 1.3 einer
+   unten rechts plus ein Schieberegler in der Leiste). */
 function placeFigHandle(){
-  const h=$("#figrsz"),paper=$("#paper");
-  if(!h)return;
+  const griffe=[...document.querySelectorAll(".figrsz")],paper=$("#paper");
   const im=selFig&&selFig.querySelector("img");
-  if(!selFig||!im||!paper||S.mode!=="write"){h.classList.remove("on");return}
+  if(!selFig||!im||!paper||S.mode!=="write"||selFig.classList.contains("free")){griffe.forEach(h=>h.classList.remove("on"));return}
   const pr=paper.getBoundingClientRect(),ir=im.getBoundingClientRect();
-  const x=figFreeSide(selFig)==="right"?ir.right-pr.left:ir.left-pr.left;
-  h.style.left=(x-7)+"px";
-  h.style.top=(ir.bottom-pr.top-7)+"px";
-  h.style.cursor=figFreeSide(selFig)==="right"?"nwse-resize":"nesw-resize";
-  h.classList.add("on");
+  griffe.forEach(h=>{
+    const e=h.dataset.ecke||"se";
+    h.style.left=((e.includes("e")?ir.right:ir.left)-pr.left-7)+"px";
+    h.style.top=((e.includes("s")?ir.bottom:ir.top)-pr.top-7)+"px";
+    h.style.cursor=(e==="se"||e==="nw")?"nwse-resize":"nesw-resize";
+    h.classList.add("on");
+  });
 }
 function figResizeDrag(e){
   const im=selFig&&selFig.querySelector("img");
   if(!im)return;
   e.preventDefault();
+  const ecke=(e.currentTarget&&e.currentTarget.dataset.ecke)||"se";
+  const bar=$("#imgbar");bar.classList.add("leise");
+  const pct=$("#figpct"),paper=$("#paper");
+  const zeigePct=w=>{if(!pct||!paper)return;const pr=paper.getBoundingClientRect(),ir=im.getBoundingClientRect();
+    pct.textContent=w+" %";pct.style.left=(ir.right-pr.left-pct.offsetWidth-6)+"px";
+    pct.style.top=(ir.bottom-pr.top-pct.offsetHeight-6)+"px";pct.classList.add("on")};
   const ed=$("#editor");
   /* Prozent beziehen sich auf die Textbreite, nicht auf die Bildbreite */
   const cs=getComputedStyle(ed);
   const cw=ed.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
   const startX=e.clientX,startW=+(selFig.dataset.w||70);
   const align=selFig.style.textAlign||"center";
-  /* Zentrierte Bilder wachsen an beiden Seiten, brauchen also den doppelten Faktor */
-  const faktor=(align==="center"?2:1)*(figFreeSide(selFig)==="right"?1:-1);
+  /* Zentrierte Bilder wachsen an beiden Seiten, brauchen also den doppelten
+     Faktor; an einer linken Ecke wird nach links gezogen größer. */
+  const faktor=(align==="center"?2:1)*(ecke.includes("e")?1:-1);
+  zeigePct(startW);
   const move=ev=>{
     const w=Math.min(100,Math.max(10,Math.round(startW+faktor*(ev.clientX-startX)/cw*100)));
     if(w===+(selFig.dataset.w||70))return;
     selFig.dataset.w=w;im.style.width=w+"%";
-    const s=$("#ibW");if(s)s.value=w;
-    const p=$("#ibP");if(p)p.textContent=w+" %";
-    placeFigHandle();
+    placeFigHandle();zeigePct(w);
   };
   const up=()=>{
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
+    bar.classList.remove("leise");if(pct)pct.classList.remove("on");
     flush();dirty=true;commit();queuePaginate();drawStatus();
     setTimeout(()=>{drawImgBar();placeFigHandle()},0);
   };
   document.addEventListener("mousemove",move);
   document.addEventListener("mouseup",up);
 }
+/* Bildleiste seit 1.3 (Toms Wunsch: „modern wie andere Programme“): eine
+   schlanke Symbolleiste über dem Bild, wie in Word 365 und Google Docs.
+   „Layout“ sagt, wie das Bild zum Text steht; Größe über die Eckanfasser
+   statt eines Schiebereglers; Seltenes (Alternativtext, Ersetzen) hinter ⋯.
+   Dieselbe Leiste für jedes Bild — auch für die Unterschrift, die bis dahin
+   gar keine hatte und immer vor dem Text lag. */
+const BILDLAGEN=[
+  ["zeile","Eigene Zeile",'<rect x="3" y="2" width="24" height="2" rx="1"/><rect x="9" y="6" width="12" height="8" rx="1" fill="currentColor" opacity=".55"/><rect x="3" y="16" width="24" height="2" rx="1"/>'],
+  ["hinter","Hinter dem Text",'<rect x="8" y="3" width="14" height="14" rx="1" fill="currentColor" opacity=".3"/><rect x="3" y="4" width="24" height="2" rx="1"/><rect x="3" y="9" width="24" height="2" rx="1"/><rect x="3" y="14" width="24" height="2" rx="1"/>'],
+  ["vor","Vor dem Text",'<rect x="3" y="4" width="24" height="2" rx="1"/><rect x="3" y="9" width="24" height="2" rx="1"/><rect x="3" y="14" width="24" height="2" rx="1"/><rect x="8" y="3" width="14" height="14" rx="1" fill="currentColor" opacity=".75"/>']];
+const bildLageVon=f=>f.classList.contains("free")?(f.dataset.lage==="hinter"?"hinter":"vor"):"zeile";
+const layIco=p=>`<svg class="layico" viewBox="0 0 30 20" fill="currentColor" aria-hidden="true">${p}</svg>`;
 function drawImgBar(){
   const f=selFig,bar=$("#imgbar");if(!f){bar.classList.remove("on");return}
-  const w=+(f.dataset.w||70), al=f.style.textAlign||"center";
+  const frei=f.classList.contains("free"),al=f.style.textAlign||"center";
   const hasCap=!!f.querySelector("figcaption");
+  const lage=BILDLAGEN.find(l=>l[0]===bildLageVon(f));
   bar.innerHTML=`
-    <input type="range" id="ibW" min="10" max="100" step="5" value="${w}" title="${tr("Breite")}">
-    <span class="pct" id="ibP">${w} %</span>
-    <div class="sep"></div>
+    <button class="iblay" data-ib="layout" title="${tr("Layout")}">${layIco(lage[2]).replace('class="layico"','class="layico" style="width:24px;height:16px;margin:0"')}${tr(lage[1])} <span style="font-size:10px;color:var(--ink-soft)">&#9662;</span></button>
+    ${frei?"":`<div class="sep"></div>
     <button class="tb ${al==="left"?"on":""}" data-ia="left" title="${tr("Links")}">${ICOTB('<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>')}</button>
     <button class="tb ${al==="center"?"on":""}" data-ia="center" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
     <button class="tb ${al==="right"?"on":""}" data-ia="right" title="${tr("Rechts")}">${ICOTB('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
     <div class="sep"></div>
-    <button class="pill ${hasCap?"on":""}" data-ic="cap">${tr("Bildunterschrift")}</button>
-    <button class="pill" data-ic="alt">${tr("Alternativtext")}</button>
-    <button class="pill" data-ic="del">${tr("Löschen")}</button>`;
+    <button class="tb ${hasCap?"on":""}" data-ic="cap" title="${tr("Bildunterschrift")}">${ICOTB('<rect x="4" y="3" width="16" height="11" rx="1.5"/><path d="M6 18h12M8 21h8"/>')}</button>`}
+    <div class="sep"></div>
+    <button class="tb" data-ib="mehr" title="${tr("Weitere Optionen")}">${ICOTB('<circle cx="6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18" cy="12" r="1.3"/>')}</button>
+    <button class="tb" data-ic="del" title="${tr("Löschen")}">${ICOTB('<path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13M10.5 11v5M13.5 11v5"/>')}</button>`;
   bar.classList.add("on");
+  /* Über dem Bild, wie in Word und Docs; ist oben kein Platz, darunter. */
   const r=f.getBoundingClientRect();
-  /* Mit Anker: reicht der Platz darunter nicht, klappt die Leiste darüber auf,
-     statt sich an den unteren Rand zu kleben und die Auswahl zu überdecken. */
-  menuPlatzieren(bar,r.left,r.bottom+6,r);
+  const oben=r.top-bar.offsetHeight-10;
+  menuPlatzieren(bar,r.left+r.width/2-bar.offsetWidth/2,oben>=OVLRAND+40?oben:r.bottom+10);
   placeFigHandle();
 }
 function imgApply(){flush();dirty=true;commit();queuePaginate();drawImgBar()}
-$("#imgbar").addEventListener("input",e=>{
-  if(e.target.id!=="ibW"||!selFig)return;
-  const v=+e.target.value;
-  selFig.dataset.w=v;
-  const im=selFig.querySelector("img");if(im)im.style.width=v+"%";
-  $("#ibP").textContent=v+" %";
-  dirty=true;queuePaginate();placeFigHandle();
-});
-$("#imgbar").addEventListener("change",e=>{if(e.target.id==="ibW")imgApply()});
+/* Lage wechseln. Aus dem Text heraus behält das Bild seine Stelle und Größe
+   auf der Seite (nur der Text rückt nach); in den Text hinein kommt es vor
+   den Absatz, auf dessen Höhe es lag, so breit wie bisher. */
+function bildLage(fig,lage){
+  const ed=$("#editor");if(!ed||!fig)return;
+  const g=freeGeom(),frei=fig.classList.contains("free");
+  const im=fig.querySelector("img");
+  if(lage==="zeile"){
+    if(!frei)return;
+    const w=Math.max(10,Math.min(100,Math.round((+fig.dataset.fw||40)/g.cw*100)));
+    const ft=fig.getBoundingClientRect().top;
+    const ziel=[...ed.children].find(b=>b!==fig&&!b.classList.contains("free")&&b.getBoundingClientRect().top>=ft-2);
+    fig.querySelectorAll(".fhwrap").forEach(x=>x.remove());
+    fig.classList.remove("free");
+    ["free","fpage","fx","fy","fw","fh","lage","sig"].forEach(k=>delete fig.dataset[k]);
+    ["--fx","--fy","--fw","--fh","--fpx","--fpy","--fpw","--fph"].forEach(k=>fig.style.removeProperty(k));
+    fig.dataset.w=w;fig.style.textAlign="center";
+    if(im){im.style.height="";im.style.width=w+"%"}
+    if(ziel)ed.insertBefore(fig,ziel);else ed.appendChild(fig);
+  }else{
+    if(!frei&&im){
+      const r=im.getBoundingClientRect(),er=ed.getBoundingClientRect();
+      const relY=r.top-er.top;
+      const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor(relY/g.stride)));
+      const fw=Math.max(FREE_MIN_MM,Math.min(g.cw,Math.round(r.width/g.mmPx)));
+      const fh=Math.max(FREE_MIN_MM,Math.min(g.ch,Math.round(r.height/g.mmPx)));
+      fig.querySelectorAll("figcaption").forEach(c=>c.remove());
+      fig.classList.add("free");fig.dataset.free="1";
+      fig.dataset.fpage=pg;fig.dataset.fw=fw;fig.dataset.fh=fh;
+      fig.dataset.fx=Math.round(Math.max(0,Math.min(g.cw-fw,(r.left-er.left-g.ml)/g.mmPx)));
+      fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-fh,(relY-pg*g.stride-g.mt)/g.mmPx)));
+      delete fig.dataset.w;fig.style.textAlign="";im.style.width="";im.style.height="";
+    }
+    fig.dataset.lage=lage;
+  }
+  placeFreeFigs();
+  flush();dirty=true;commit();queuePaginate();drawStatus();
+  selectFig(fig);
+}
+/* Ein kleines Klappmenü unter einem Knopf der Bildleiste */
+function bildMenue(knopf,items,cb){
+  closeMenu();
+  const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
+  m.innerHTML=items.map(it=>`<button class="mi" data-sub="${it.a}"><span class="chk">${it.cur?"&#10003;":""}</span>${it.label}</button>`).join("");
+  document.body.appendChild(m);
+  const r=knopf.getBoundingClientRect();
+  menuPlatzieren(m,r.left,r.bottom+4,r);
+  m.onclick=e=>{const b=e.target.closest("[data-sub]");if(!b)return;closeMenu();cb(b.dataset.sub)};
+}
+function bildErsetzen(fig){
+  const im=fig&&fig.querySelector("img");if(!im)return;
+  const i=document.createElement("input");i.type="file";i.accept="image/*";
+  i.style.display="none";document.body.appendChild(i);
+  i.onchange=()=>{const file=i.files[0];i.remove();if(!file)return;
+    if(!file.type.startsWith("image/")){toast(tr("Keine Bilddatei"));return}
+    blobToDataUrl(file).then(roh=>scaleToDataUrl(roh,magPng(file.type))).then(data=>{
+      im.src=data;
+      /* Frei liegend: Breite bleibt, die Höhe folgt dem neuen Bild */
+      const neu=new Image();neu.onload=()=>{
+        if(fig.classList.contains("free")&&neu.naturalWidth){
+          fig.dataset.fh=Math.max(FREE_MIN_MM,Math.round((+fig.dataset.fw||40)*neu.naturalHeight/neu.naturalWidth));
+          placeFreeFigs()}
+        flush();dirty=true;commit();queuePaginate();drawImgBar()};
+      neu.src=data;
+    }).catch(()=>toast(tr("Bild konnte nicht gelesen werden")));
+  };
+  i.addEventListener("cancel",()=>i.remove());
+  i.click();
+}
 $("#imgbar").addEventListener("click",e=>{
   if(!selFig)return;
+  const ib=e.target.closest("[data-ib]");
+  if(ib&&ib.dataset.ib==="layout"){
+    const f=selFig,jetzt=bildLageVon(f);
+    bildMenue(ib,BILDLAGEN.map(([a,n,p])=>({a,cur:a===jetzt,label:layIco(p)+tr(n)})),a=>bildLage(f,a));
+    return}
+  if(ib&&ib.dataset.ib==="mehr"){
+    const f=selFig;
+    bildMenue(ib,[{a:"alt",label:tr("Alternativtext")+"&hellip;"},{a:"ersetzen",label:tr("Bild ersetzen")+"&hellip;"}],a=>{
+      selectFig(f);
+      if(a==="ersetzen")bildErsetzen(f);else bildAltDialog(f);
+    });
+    return}
   const al=e.target.closest("[data-ia]");
   if(al){selFig.style.textAlign=al.dataset.ia;imgApply();return}
   const c=e.target.closest("[data-ic]");if(!c)return;
@@ -20282,8 +20504,10 @@ $("#imgbar").addEventListener("click",e=>{
       fc.setAttribute("contenteditable","true");fc.textContent=tr("Bildunterschrift");
       selFig.appendChild(fc);putCaret(fc)}
     imgApply();return}
-  if(c.dataset.ic==="alt"){
-    const im=selFig.querySelector("img");if(!im)return;
+  if(c.dataset.ic==="alt"){bildAltDialog(selFig);return}
+});
+function bildAltDialog(fig){
+  const im=fig&&fig.querySelector("img");if(!im)return;
     overlay(`<div class="modal"><h3>${tr("Alternativtext")}</h3><div class="pad">
       <input type="text" id="altT" value="${esc(im.getAttribute("alt")||"")}" placeholder="${tr("Beschreibung des Bildes")}">
       <div style="color:var(--ink-soft);font-size:12px;line-height:1.5;margin-top:7px">
@@ -20293,8 +20517,7 @@ $("#imgbar").addEventListener("click",e=>{
     $("#altT").focus();
     $("#altC").onclick=closeOvl;
     $("#altO").onclick=()=>{im.setAttribute("alt",$("#altT").value);closeOvl();imgApply()};
-  }
-});
+}
 function glossSearch(){
   const gid=doc().glossaryId;
   const coll=S.glossaries.find(x=>x.id===gid);
@@ -21050,8 +21273,12 @@ are kept as percentages, so they survive zooming and a change of page format.</p
 the document, so it travels with your backups — bear in mind that several large
 photographs will fill <nur-b>the browser's storage</nur-b><nur-a>storage</nur-a> quickly. The same goes for pictures that arrive with a loaded Word
 document.</p>
-<p><b>Click a picture</b> to select it. A small bar appears with alignment, a caption,
-alternative text for screen readers, and delete. Drag the round corner handle to resize.</p>
+<p><b>Click a picture</b> to select it. A bar appears above it with layout, alignment, a
+caption, more options (alternative text for screen readers, replace image) and delete. Drag
+the round corners to resize.</p>
+<p><b>Layout</b> sets how the picture sits with the text: <b>In line with text</b> (between
+paragraphs), <b>Behind text</b> or <b>In front of text</b> (both can be moved freely). This also
+works for a signature. To select a picture behind text, click next to the letters.</p>
 <p>A caption lets the picture be counted in a <b>table of figures</b>.</p>`},
 
  {t:"Links and page breaks",k:"link;hyperlink;url;page break",b:`
@@ -21624,9 +21851,12 @@ des Seitenformats.</p>`},
 Dokument eingebettet und wandert damit in jede Sicherung mit — bedenke, dass einige große
 Fotos <nur-b>den Browserspeicher</nur-b><nur-a>den Speicher</nur-a> rasch füllen. Dasselbe gilt für Bilder, die mit einem geladenen
 Word-Dokument hereinkommen.</p>
-<p><b>Ein Klick auf ein Bild</b> wählt es aus. Eine kleine Leiste erscheint mit Ausrichtung,
-Bildunterschrift, Alternativtext für Screenreader und Löschen. Am runden Eckanfasser ziehst du
-die Größe.</p>
+<p><b>Ein Klick auf ein Bild</b> wählt es aus. Darüber erscheint eine Leiste mit Layout,
+Ausrichtung, Bildunterschrift, weiteren Optionen (Alternativtext für Screenreader, Bild
+ersetzen) und Löschen. An den runden Ecken ziehst du die Größe.</p>
+<p><b>Layout</b> legt fest, wie das Bild zum Text steht: <b>Eigene Zeile</b> (zwischen den
+Absätzen), <b>Hinter dem Text</b> oder <b>Vor dem Text</b> (beide frei verschiebbar). Das gilt
+auch für eine Unterschrift. Ein Bild hinter dem Text wählst du mit einem Klick neben die Schrift.</p>
 <p>Eine Bildunterschrift lässt das Bild im <b>Abbildungsverzeichnis</b> mitzählen.</p>`},
 
  {t:"Links und Seitenumbrüche",k:"link;verweis;url;seitenumbruch",b:`
@@ -22220,9 +22450,13 @@ formato de página.</p>`},
 queda incrustado en el documento, así que viaja con tus copias de seguridad; ten en cuenta que
 varias fotografías grandes llenan <nur-b>el almacenamiento del navegador</nur-b><nur-a>el almacenamiento</nur-a> enseguida. Lo mismo vale para
 las imágenes que llegan con un documento de Word.</p>
-<p><b>Haz clic en una imagen</b> para seleccionarla. Aparece una pequeña barra con alineación,
-un pie de imagen, texto alternativo para lectores de pantalla y eliminar. Arrastra el tirador
-redondo de la esquina para redimensionar.</p>
+<p><b>Haz clic en una imagen</b> para seleccionarla. Encima aparece una barra con diseño,
+alineación, pie de imagen, más opciones (texto alternativo para lectores de pantalla,
+reemplazar imagen) y eliminar. Arrastra las esquinas redondas para redimensionar.</p>
+<p><b>Diseño</b> define cómo queda la imagen respecto al texto: <b>En línea con el texto</b>
+(entre los párrafos), <b>Detrás del texto</b> o <b>Delante del texto</b> (ambas se mueven
+libremente). También sirve para una firma. Para seleccionar una imagen detrás del texto, haz
+clic junto a las letras.</p>
 <p>Un pie de imagen permite que la imagen se cuente en una <b>lista de figuras</b>.</p>`},
 
  {t:"Enlaces y saltos de página",k:"enlace;hipervínculo;url;salto de página",b:`
@@ -22818,9 +23052,13 @@ formato de página.</p>`},
 embutido no documento, então viaja com seus backups; tenha em mente que várias fotografias
 grandes enchem <nur-b>o armazenamento do navegador</nur-b><nur-a>o armazenamento</nur-a> rapidamente. O mesmo vale para imagens que chegam
 com um documento do Word.</p>
-<p><b>Clique numa imagem</b> para selecioná-la. Aparece uma pequena barra com alinhamento, uma
-legenda, texto alternativo para leitores de tela e excluir. Arraste a alça redonda do canto
-para redimensionar.</p>
+<p><b>Clique numa imagem</b> para selecioná-la. Acima dela aparece uma barra com layout,
+alinhamento, legenda, mais opções (texto alternativo para leitores de tela, substituir imagem) e
+excluir. Arraste os cantos redondos para redimensionar.</p>
+<p><b>Layout</b> define como a imagem fica em relação ao texto: <b>Alinhado com o texto</b>
+(entre os parágrafos), <b>Atrás do texto</b> ou <b>Na frente do texto</b> (os dois podem ser
+movidos livremente). Isso vale também para uma assinatura. Para selecionar uma imagem atrás do
+texto, clique ao lado das letras.</p>
 <p>Uma legenda permite que a imagem seja contada num <b>índice de figuras</b>.</p>`},
 
  {t:"Links e quebras de página",k:"link;hiperlink;url;quebra de página",b:`
@@ -23422,9 +23660,13 @@ au zoom et à un changement de format de page.</p>`},
 intégré dans le document, il voyage donc avec vos sauvegardes — gardez à l'esprit que plusieurs
 grandes photographies remplissent vite <nur-b>le stockage du navigateur</nur-b><nur-a>le stockage</nur-a>. Il en va de même pour les
 images qui arrivent avec un document Word.</p>
-<p><b>Cliquez sur une image</b> pour la sélectionner. Une petite barre apparaît avec
-l'alignement, une légende, un texte alternatif pour les lecteurs d'écran, et supprimer. Faites
-glisser la poignée ronde du coin pour redimensionner.</p>
+<p><b>Cliquez sur une image</b> pour la sélectionner. Une barre apparaît au-dessus avec la
+disposition, l'alignement, une légende, plus d'options (texte alternatif pour les lecteurs
+d'écran, remplacer l'image) et supprimer. Faites glisser les coins ronds pour redimensionner.</p>
+<p><b>Disposition</b> définit la place de l'image par rapport au texte : <b>Aligné sur le
+texte</b> (entre les paragraphes), <b>Derrière le texte</b> ou <b>Devant le texte</b> (les deux se
+déplacent librement). Cela vaut aussi pour une signature. Pour sélectionner une image derrière
+le texte, cliquez à côté des lettres.</p>
 <p>Une légende permet que l'image soit comptée dans une <b>table des illustrations</b>.</p>`},
 
  {t:"Liens et sauts de page",k:"lien;hyperlien;url;saut de page",b:`
@@ -24026,9 +24268,12 @@ formatu strony.</p>`},
 <p>Wstaw obraz z paska narzędzi albo wpisz <code>/obraz</code>. Plik jest osadzony w dokumencie,
 więc podróżuje z kopiami zapasowymi — pamiętaj, że kilka dużych zdjęć szybko zapełni <nur-b>pamięć
 przeglądarki</nur-b><nur-a>pamięć</nur-a>. To samo dotyczy obrazów, które przychodzą z dokumentem Word.</p>
-<p><b>Kliknij obraz</b>, aby go zaznaczyć. Pojawia się mały pasek z wyrównaniem, podpisem,
-tekstem alternatywnym dla czytników ekranu i usuwaniem. Przeciągnij okrągły uchwyt narożnika,
-aby zmienić rozmiar.</p>
+<p><b>Kliknij obraz</b>, aby go zaznaczyć. Nad nim pojawia się pasek z układem, wyrównaniem,
+podpisem, dodatkowymi opcjami (tekst alternatywny dla czytników ekranu, zamiana obrazu) i
+usuwaniem. Przeciągnij okrągłe narożniki, aby zmienić rozmiar.</p>
+<p><b>Układ</b> określa położenie obrazu względem tekstu: <b>W wierszu z tekstem</b> (między
+akapitami), <b>Za tekstem</b> lub <b>Przed tekstem</b> (oba można swobodnie przesuwać). Dotyczy
+to także podpisu odręcznego. Aby zaznaczyć obraz za tekstem, kliknij obok liter.</p>
 <p>Podpis pozwala, aby obraz był liczony w <b>spisie ilustracji</b>.</p>`},
 
  {t:"Linki i podziały strony",k:"link;hiperłącze;url;podział strony",b:`
@@ -24614,9 +24859,13 @@ cambio di formato pagina.</p>`},
 file viene incorporato nel documento, quindi viaggia con i tuoi backup — tieni presente che
 diverse fotografie grandi riempiono in fretta <nur-b>la memoria del browser</nur-b><nur-a>la memoria</nur-a>. Lo stesso vale per le
 immagini che arrivano con un documento Word.</p>
-<p><b>Fai clic su un'immagine</b> per selezionarla. Compare una piccola barra con allineamento,
-una didascalia, un testo alternativo per i lettori di schermo, ed elimina. Trascina la maniglia
-rotonda dell'angolo per ridimensionare.</p>
+<p><b>Fai clic su un'immagine</b> per selezionarla. Sopra compare una barra con layout,
+allineamento, didascalia, altre opzioni (testo alternativo per i lettori di schermo, sostituisci
+immagine) ed elimina. Trascina gli angoli rotondi per ridimensionare.</p>
+<p><b>Layout</b> stabilisce come sta l'immagine rispetto al testo: <b>In linea con il testo</b>
+(tra i paragrafi), <b>Dietro al testo</b> o <b>Davanti al testo</b> (entrambi spostabili
+liberamente). Vale anche per una firma. Per selezionare un'immagine dietro al testo, fai clic
+accanto alle lettere.</p>
 <p>Una didascalia permette che l'immagine sia conteggiata in un <b>indice delle figure</b>.</p>`},
 
  {t:"Link e interruzioni di pagina",k:"link;collegamento ipertestuale;url;interruzione di pagina",b:`

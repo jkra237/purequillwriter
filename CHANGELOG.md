@@ -199,6 +199,36 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Bilder: neue Leiste und Layout „wie der Text zum Bild steht“** (Toms
+  Wunsch, Schritt 1 von 2; Schritt 2 wird „Text umfließt“).
+  - Die Leiste schwebt über dem Bild, mit Symbolen statt Textknöpfen wie in
+    Word 365 und Google Docs: Layout ▾, Ausrichtung, Bildunterschrift,
+    ⋯ (Alternativtext, neu: **Bild ersetzen**), Papierkorb. Der
+    Breitenregler entfällt; Größe über **vier Eckanfasser**, beim Ziehen
+    steht die Breite in Prozent am Bild, die Leiste tritt zurück.
+  - **Layout** für jedes Bild: Eigene Zeile (wie bisher), **Hinter dem
+    Text** (neu) und Vor dem Text (bisher nur die Unterschrift). Wechsel
+    aus dem Text behält Stelle und Größe auf der Seite, zurück in den Text
+    landet das Bild vor dem Absatz auf seiner Höhe. Die Unterschrift hat
+    dieselbe Leiste und kann in eine eigene Zeile (data-sig fällt dann weg,
+    sonst höbe placeFreeFigs sie wieder heraus).
+  - Hinter dem Text: `z-index:-1` in einem isolierten Editor (sonst
+    verschwand das Bild hinter dem Papier). Es bleibt auch ausgewählt
+    hinten, wie in Word; Rahmen und acht Anfasser liegen auf einer eigenen
+    Ebene über dem Text (`#hinterbox`), innerhalb des Rahmens verschiebt
+    ein Zug das Bild auch über den Buchstaben. Gewählt wird es mit einem
+    Klick neben die Schrift (`hinterBildAn`), auf einem Buchstaben bleibt
+    der Klick beim Text. Word-Export setzt `behindDoc="1"`.
+  - **Die Unterschrift kommt in eine eigene Zeile** an der Schreibstelle,
+    linksbündig, 55 mm (Toms Wahl), statt frei vor dem Text. Frei legt man
+    sie über Layout. Ohne `data-sig`, sonst höbe `placeFreeFigs` sie als
+    Altbestand wieder heraus.
+  - Das kleine Kreuz an der Unterschrift entfällt, Löschen über die Leiste
+    oder Entf. Hilfe in allen sieben Sprachen angepasst.
+  - Nicht nachgestellt: „Bild ersetzen“ mit echtem Dateidialog; die
+    Bildunterschrift fällt beim Wechsel aus dem Text weg (frei liegende
+    Bilder haben keine, wie in Word).
+
 - **Schriftauswahl: nur Vorhandenes, alphabetisch, mehr Schriften.**
   - Angezeigt wird nur, was auf dem Rechner installiert ist (`schriftDa`,
     gemessen an der Breite eines Mustertextes; `document.fonts.check()`
