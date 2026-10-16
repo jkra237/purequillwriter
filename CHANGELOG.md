@@ -225,7 +225,22 @@ immer genau einen Commit, der sie anfasst.
   „a.“ beim Speichern als „a)“ zurück. Geprüft: Anzeige, Word-XML,
   Umlauf (unverändert), Text, Einfügen; check-export 285/285.
 
+- **Am Seitenende knapp passende Zeilen: Druck hatte eine Seite mehr.**
+  Mit Calibri 12 endete eine Zeile eines geteilten Absatzes am Bildschirm
+  0,9 px über der Unterkante; im Druck (andere Rundung) passte sie nicht,
+  wanderte weiter, und das PDF hatte 11 statt 10 Seiten, die letzte ohne
+  Fußzeile (`check-export.mjs`, Formate „ohne Kopfzeile“). Absatzteilung
+  rechnet jetzt mit 3 px Spielraum (wie Tabellenzeilen mit 6 px), Blöcke und
+  Listeneinträge mit 2 px statt bisher 1 px Überhang zugunsten des
+  Bildschirms. Geprüft mit 11 und 12 pt: 285/285.
+
 ### Geändert
+
+- **Standardschrift Calibri 12 statt 11** (Toms Wunsch) für neue Nutzer, für
+  „Standardwerte wiederherstellen“ und den Werkszustand. Word 365 und Word
+  online nehmen Aptos 12; Aptos gibt es aber nur mit Office, deshalb bleibt
+  Calibri (jedes Windows, unter Linux Carlito). Google Docs nimmt Arial 11.
+  Bestehende Einstellungen und Dokumente bleiben unverändert.
 
 - **Bilder: „Text umfließt“** (Schritt 2 von 2). Neue Layout-Art: das Bild
   steht links oder rechts, der Text läuft daneben weiter (Words

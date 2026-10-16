@@ -1879,8 +1879,12 @@ function dokAufWordWerte(d,alt){
   d.lhw=1;
 }
 const ALTE_VORGABEN={font:"Georgia",size:12,lh:1.62,fmt:"a4"};
-/* Der Word-Standard, auf den „Auf Word-Standard zurücksetzen“ führt */
-const WORD_VORGABE={font:"Calibri",size:11,lh:1.15,ps:.82,fmt:"a4"};
+/* Der Word-Standard, auf den „Auf Word-Standard zurücksetzen“ führt.
+   Seit 1.3 in 12 pt wie Word 365 und Word online (Toms Wunsch, besser
+   lesbar); deren Schrift Aptos gibt es aber nur mit Office, deshalb bleibt
+   Calibri, die jedes Windows hat (unter Linux der Zwilling Carlito). Bis 1.2
+   Calibri 11 wie Word 2007–2021. Bestehende Einstellungen bleiben. */
+const WORD_VORGABE={font:"Calibri",size:12,lh:1.15,ps:.82,fmt:"a4"};
 const zahlText=v=>S.settings.uiLang==="en"?String(v):String(v).replace(".",",");
 /* Was ein neues Dokument gerade bekommt, als kurze Zeile — für den Hinweis im
    Dialog und die Bestätigung. Ein konkretes Beispiel statt des Worts
@@ -7378,7 +7382,7 @@ const SYS_LANG=systemUiLang();
 const SYS_SPELL_LANGS=["de","en","fr","es","it","pt","pl"];
 /* Einstellungen beim allerersten Start — und nach „Auf Werkszustand
    zurücksetzen“. Was hier fehlt, ergänzen die Migrationen unten. */
-function standardEinstellungen(){return{font:"Calibri",size:11,lh:1.15,autosave:true,interval:30,
+function standardEinstellungen(){return{font:WORD_VORGABE.font,size:WORD_VORGABE.size,lh:WORD_VORGABE.lh,autosave:true,interval:30,
   lang:SYS_SPELL_LANGS.includes(SYS_LANG)?SYS_LANG:"en",uiLang:SYS_LANG,theme:STANDARD_THEMA}}
 let S=load()||{
   docs:[blankDoc("Ohne Titel")],active:null,glossary:[],notes:[],mode:"write",
@@ -15150,7 +15154,12 @@ function absatzTeilen(b,ctx){
   while(schutz++<200){
     const p=seite(zeilen[i0].top-halb);
     let j=-1;
-    for(let k=i0;k<zeilen.length;k++)if(zeilen[k].bottom+halb>unten(p)+1){j=k;break}
+    /* 3 px Spielraum wie bei den Tabellenzeilen: der Druck rundet die
+       Zeilenhöhen minimal anders. Mit Calibri 12 endete eine Zeile am
+       Bildschirm 0,9 px über der Unterkante — im Druck passte sie nicht
+       mehr, wanderte weiter, und am Ende stand eine Seite mehr im PDF.
+       Lieber am Bildschirm eine Zeile früher umbrechen. */
+    for(let k=i0;k<zeilen.length;k++)if(zeilen[k].bottom+halb>unten(p)-3*S.zoom){j=k;break}
     if(j<0)return true;
     if(zeilen.length-j<2)j=zeilen.length-2;
     if(j-i0<2){
@@ -15271,6 +15280,10 @@ function paginate(){
         return;
       }
       const limit=p*stride+oben(p)+contentH;
+      /* Was am Bildschirm knapper als 2 px an der Unterkante endet, passt im
+         Druck womöglich nicht mehr (andere Rundung, siehe absatzTeilen) —
+         dann lieber schon am Bildschirm auf die nächste Seite. */
+      const knapp=2*S.zoom;
       /* Überschrift nicht vom Text trennen — in Word bei Überschriften
          voreingestellt („Nicht vom nächsten Absatz trennen“). Bis 1.3 blieb
          sie allein unten auf der Seite stehen. Anders als Word über
@@ -15346,13 +15359,13 @@ function paginate(){
          margin-top (Klasse pgli — reine Anzeige wie tr.pgzeile, flush() und
          der Druck nehmen sie heraus). Ein einzelner Eintrag länger als eine
          Seite bleibt stehen, wie ein überlanger Absatz. */
-      else if(LISTE_TAG.test(b.tagName)&&!zwang&&top+h>limit+1){
+      else if(LISTE_TAG.test(b.tagName)&&!zwang&&top+h>limit-knapp){
         [...b.querySelectorAll("li")].forEach((li,i)=>{
           const rt=li.getBoundingClientRect().top-edTop;
           const unter=[...li.children].find(k=>LISTE_TAG.test(k.tagName));
           const rh=(unter?unter.getBoundingClientRect().top:li.getBoundingClientRect().bottom)-edTop-rt;
           const pp=Math.max(0,Math.floor(rt/stride));
-          if(rt+rh<=pp*stride+oben(pp)+contentHOf(pp)+1||rh>contentHOf(pp+1))return;
+          if(rt+rh<=pp*stride+oben(pp)+contentHOf(pp)-knapp||rh>contentHOf(pp+1))return;
           const ziel=(pp+1)*stride+oben(pp+1);
           /* Der erste Eintrag nimmt die ganze Liste mit — wie ein Absatz */
           const ziehe=i===0?b:li;
@@ -15364,10 +15377,10 @@ function paginate(){
           if(Math.abs(rest)>0.5)ziehe.style.marginTop=(base+(ziel-rt)+rest)+"px";
         });
       }
-      else if(!zwang&&!mitNaechstem&&TEILBAR(b)&&top+h>limit+1&&absatzTeilen(b,{edTop,stride,oben,contentHOf})){
+      else if(!zwang&&!mitNaechstem&&TEILBAR(b)&&top+h>limit-knapp&&absatzTeilen(b,{edTop,stride,oben,contentHOf})){
         /* geteilt — Fußnoten werden unten je Marke zugeordnet */
       }
-      else if(zwang||mitNaechstem||(top+h>limit+1&&h<=contentH)){
+      else if(zwang||mitNaechstem||(top+h>limit-knapp&&h<=contentH)){
         const ziel=(p+1)*stride+mt;
         const base=parseFloat(getComputedStyle(b).marginTop)||0;
         b.style.marginTop=(base+(ziel-top))+"px";
@@ -26240,7 +26253,7 @@ function aufWordWerteUmstellen(){
   const alt={font:S.settings.font||ALTE_VORGABEN.font,size:S.settings.size||ALTE_VORGABEN.size,
     lh:S.settings.lh||ALTE_VORGABEN.lh,fmt:S.settings.fmt||ALTE_VORGABEN.fmt};
   S.docs.forEach(d=>dokAufWordWerte(d,alt));
-  S.settings.font="Calibri";S.settings.size=11;S.settings.lh=LH_STD;
+  S.settings.font=WORD_VORGABE.font;S.settings.size=WORD_VORGABE.size;S.settings.lh=LH_STD;
   if(typeof S.settings.fmt!=="object")S.settings.fmt="a4";
   S.wordWerte=1;save();
 }
