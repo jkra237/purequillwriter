@@ -108,7 +108,8 @@ function ausHilfe(html) {
      zaehlt mit, sonst faende der Pruefer Einzeltasten wie F7 nie. Meldung 2
      stoert das nicht: sie sieht nur Kombinationen, die mit alt beginnen. */
   for (const m of html.matchAll(/(?:<kbd>[^<]*<\/kbd>\s*\+\s*)*<kbd>[^<]*<\/kbd>/g)) {
-    const teile = [...m[0].matchAll(/<kbd>([^<]*)<\/kbd>/g)].map(x => x[1]);
+    /* < und > stehen geschützt im HTML (Strg+< = Schrift kleiner) */
+    const teile = [...m[0].matchAll(/<kbd>([^<]*)<\/kbd>/g)].map(x => x[1].replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&"));
     const n = norm(teile);
     if (n) gefunden.add(n);
   }

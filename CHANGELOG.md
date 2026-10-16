@@ -236,6 +236,32 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Schrift und Größe für markierten Text, wie in Word** (Toms Entscheidung:
+  PureQuill soll eine vollwertige Word-/OpenOffice-Alternative sein). Bisher
+  galten Schrift- und Größenfeld immer für das ganze Dokument. Jetzt:
+  Markierung → nur die Markierung; nichts markiert → das als Nächstes
+  Getippte; alles markiert (Strg+A) → Grundschrift/-größe des Dokuments.
+  Die Felder zeigen, was an der Schreibmarke gilt, bei gemischter
+  Markierung bleiben sie leer. Neu: **Strg+Umschalt+> / Strg+<** (und
+  Strg+] / Strg+[) zur nächsten Größe der Word-Liste.
+  Technik: Größe am Text absolut als `calc(Npt * var(--zoom,1))` (im Druck
+  ist --zoom 1; relativ in em verschachtelte sie sich), Schrift als Stapel
+  mit Zwillingen. Gesetzt über execCommand `fontName`/`fontSize 7`, deren
+  `<font>`-Zwischenform `schriftNormalisieren()` in Spans mit dem echten Wert
+  verwandelt; was der Grundschrift entspricht, entfällt.
+  **Word-Import wortgenau:** Schriften am Text kamen bisher gar nicht mit,
+  Größen nur relativ und in Überschriften nicht. Jetzt jede abweichende
+  Schrift (Word-Name zuerst, damit er beim Speichern erhalten bleibt, auch
+  wenn sie hier fehlt) und Größe, auch in Überschriften und Titeln.
+  Geprüft an Toms echter Word-365-Datei (Titel Aptos Display 28, Überschrift
+  Aptos Display 20 blau, Times 16, Comic Sans 9 rot, Georgia 14, Tabelle
+  Arial 10): alles stimmt, und Speichern + Wiedereinlesen ist verlustfrei.
+  **Word-Export:** Schriften am Text als `w:rFonts`; die Überschrift-
+  Vorlagen stehen jetzt im Verhältnis zur Grundgröße wie in der Anzeige
+  (bisher fest 18/15/13 pt). HTML und EPUB bekommen feste pt.
+  Die Hilfe-Kürzel schützen < und > jetzt im HTML (`helpKuerzel`), das
+  Prüfskript liest sie entsprechend.
+
 - **Standardschrift Calibri 12 statt 11** (Toms Wunsch) für neue Nutzer, für
   „Standardwerte wiederherstellen“ und den Werkszustand. Word 365 und Word
   online nehmen Aptos 12; Aptos gibt es aber nur mit Office, deshalb bleibt

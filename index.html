@@ -7912,6 +7912,13 @@ function drawWrite(){
   $("#paper").style.setProperty("--zoom",S.zoom);
   ed.addEventListener("input",e=>{
     if(/^(insertOrderedList|insertUnorderedList|formatIndent|formatOutdent)$/.test(e.inputType))listenOrdnen(ed);
+    /* Schrift/Größe ohne Markierung gewählt: das gerade Getippte trägt sie
+       als <font> — in die echte Form bringen; ebenso nach Rückgängig/
+       Wiederholen, die execCommands Zwischenform zurückholen können */
+    if(schriftTippen||/^history/.test(e.inputType)||ed.querySelector("font")){
+      if(ed.querySelector("font,[style*='xxx-large']")){const pos=textPos(ed);schriftNormalisieren(ed);setzeTextPos(ed,pos)}
+      if(e.inputType==="insertText"||e.inputType==="insertParagraph")schriftTippen=false;
+    }
     dirty=true;queueSave();setTyping();markEmpty();
     drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
   ed.addEventListener("beforeinput",autoCorrectInput);
@@ -8199,11 +8206,167 @@ function setFontSize(v){
   const roh=parseFloat(String(v).replace(",","."));
   if(!isFinite(roh))return drawTools();
   const n=Math.min(FS_MAX,Math.max(FS_MIN,Math.round(roh*2)/2));
-  doc().size=n;
-  const ed=$("#editor");
-  if(ed)ed.style.setProperty("--fs",n+"pt");
-  commit();drawTools();queuePaginate();
+  groesseAnwenden(n);
   return n;
+}
+/* ---- Schrift und Größe für markierten Text, wie in Word ----
+   Bis 1.3 galten Schriftfeld und Größenfeld immer für das ganze Dokument
+   (d.font/d.size). Jetzt wie in Word (Toms Entscheidung 2026-10-16: eine
+   vollwertige Word-Alternative): markierter Text bekommt die Schrift bzw.
+   Größe an sich selbst; ohne Markierung gilt sie für das, was man als
+   Nächstes tippt; ist alles markiert (Strg+A), ändert sich die Grundschrift
+   des Dokuments.
+   Am Text steht die Größe absolut als calc(Npt * var(--zoom,1)) — mit dem
+   Zoom am Bildschirm, im Druck ist --zoom 1. Relativ in em verschachtelte
+   sie sich (in Überschriften, in anderen Größen) und ging bei jeder
+   Änderung der Grundgröße mit. Die Schrift steht als ganzer Stapel mit
+   Zwillingen (schriftStapel), damit sie unter Linux ebenso greift.
+   Gesetzt wird über execCommand fontName bzw. fontSize 7 — das teilt die
+   Auswahl über alle Elementgrenzen richtig auf und landet im Rückgängig-
+   Verlauf; die <font>-Elemente, die es erzeugt, macht schriftNormalisieren
+   danach zu Spans mit dem echten Wert. */
+let wartendeGroesse=null,schriftTippen=false;
+function edAuswahlHolen(){
+  const ed=$("#editor");if(!ed)return null;
+  ed.focus();
+  const sel=getSelection();
+  if(!(sel.rangeCount&&ed.contains(sel.anchorNode))&&letzteEdRange&&ed.contains(letzteEdRange.startContainer)){
+    sel.removeAllRanges();sel.addRange(letzteEdRange.cloneRange())}
+  return sel.rangeCount&&ed.contains(sel.anchorNode)?sel:null;
+}
+function ganzMarkiert(ed,sel){
+  const r=sel.getRangeAt(0);if(r.collapsed)return false;
+  const voll=document.createRange();voll.selectNodeContents(ed);
+  return r.toString().replace(/\s/g,"")===voll.toString().replace(/\s/g,"");
+}
+/* Schrift- bzw. Größenangaben am Text entfernen (bei Strg+A: dann gilt die
+   Grundschrift des Dokuments wieder für alles) */
+function schriftAuszeichnungWeg(root,art){
+  root.querySelectorAll("[style]").forEach(el=>{
+    if(art==="font")el.style.removeProperty("font-family");
+    else if(el.style.fontSize&&!/^(figure|img|table|td|th)$/i.test(el.tagName))el.style.removeProperty("font-size");
+    if(!el.getAttribute("style").trim())el.removeAttribute("style");
+  });
+  root.querySelectorAll("font").forEach(f=>{if(art==="font")f.removeAttribute("face");else f.removeAttribute("size");
+    if(!f.attributes.length)unwrap(f)});
+  root.querySelectorAll("span").forEach(s=>{if(!s.attributes.length)unwrap(s)});
+}
+function ganzesDokument(art,wert){
+  const d=doc(),ed=$("#editor");if(!ed)return;
+  const pos=textPos(ed);
+  schriftAuszeichnungWeg(ed,art);
+  if(art==="font"){d.font=wert;ed.style.fontFamily=schriftStapel(wert);ed.style.setProperty("--lh",lhOf(d)*lhNatur(wert))}
+  else{d.size=wert;ed.style.setProperty("--fs",wert+"pt")}
+  setzeTextPos(ed,pos);
+  flush();dirty=true;commit();drawTools();queuePaginate();drawStatus();
+  schriftFelderSetzen();
+}
+const istGroesseMarke=v=>/xxx-large|^7$/.test(String(v||""));
+function schriftNormalisieren(ed){
+  const d=doc(),grund=(d.font||S.settings.font).toLowerCase(),z=S.zoom||1;
+  /* execCommand ohne styleWithCSS legt <font face> bzw. <font size="7"> an */
+  ed.querySelectorAll("font").forEach(f=>{
+    const s=document.createElement("span");
+    if(f.getAttribute("face"))s.style.fontFamily=f.getAttribute("face");
+    if(istGroesseMarke(f.getAttribute("size")))s.style.fontSize="xxx-large";
+    if(f.getAttribute("color"))s.style.color=f.getAttribute("color");
+    if(f.getAttribute("style"))s.style.cssText+=";"+f.getAttribute("style");
+    while(f.firstChild)s.appendChild(f.firstChild);
+    f.replaceWith(s);
+  });
+  ed.querySelectorAll("[style*='xxx-large']").forEach(el=>{
+    el.querySelectorAll("[style*='font-size']").forEach(k=>{k.style.removeProperty("font-size");
+      if(!k.getAttribute("style").trim())k.removeAttribute("style")});
+    const pt=wartendeGroesse||d.size||S.settings.size;
+    el.style.fontSize=`calc(${pt}pt * var(--zoom,1))`;
+    /* Steht schon ohne Angabe so da (Grundgröße im Fließtext), entfällt sie */
+    el.style.removeProperty("font-size");
+    if(Math.abs(parseFloat(getComputedStyle(el).fontSize)-pt*96/72*z)>0.3)el.style.fontSize=`calc(${pt}pt * var(--zoom,1))`;
+  });
+  ed.querySelectorAll("[style*='font-family']").forEach(el=>{
+    const erst=el.style.fontFamily.split(",")[0].replace(/["']/g,"").trim();
+    if(!erst)return;
+    el.querySelectorAll("[style*='font-family']").forEach(k=>{if(k!==el&&k.dataset.schriftNeu)k.style.removeProperty("font-family")});
+    if(!el.style.fontFamily.includes(","))el.style.fontFamily=schriftStapel(erst);
+    if(erst.toLowerCase()===grund){
+      const alt=el.style.fontFamily;el.style.removeProperty("font-family");
+      const jetzt=getComputedStyle(el).fontFamily.split(",")[0].replace(/["']/g,"").trim().toLowerCase();
+      if(jetzt!==grund)el.style.fontFamily=alt;
+    }
+  });
+  ed.querySelectorAll("[style]").forEach(el=>{if(!el.getAttribute("style").trim())el.removeAttribute("style")});
+  ed.querySelectorAll("span").forEach(s=>{if(!s.attributes.length)unwrap(s)});
+}
+function schriftAnwenden(name){
+  const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
+  if(ganzMarkiert(ed,sel)){ganzesDokument("font",name);return}
+  const leer=sel.getRangeAt(0).collapsed,pos=textPos(ed);
+  document.execCommand("styleWithCSS",false,false);
+  document.execCommand("fontName",false,name);
+  if(leer){schriftTippen=true;return}
+  schriftNormalisieren(ed);setzeTextPos(ed,pos);
+  dirty=true;queuePaginate();drawStatus();schriftFelderSetzen();
+}
+function groesseAnwenden(pt){
+  const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
+  if(ganzMarkiert(ed,sel)){ganzesDokument("size",pt);return}
+  wartendeGroesse=pt;
+  const leer=sel.getRangeAt(0).collapsed,pos=textPos(ed);
+  document.execCommand("styleWithCSS",false,false);
+  document.execCommand("fontSize",false,"7");
+  if(leer){schriftTippen=true;const f=$("#fSize");if(f)f.value=String(pt).replace(".",S.settings.uiLang==="en"?".":",");return}
+  schriftNormalisieren(ed);setzeTextPos(ed,pos);
+  dirty=true;queuePaginate();drawStatus();schriftFelderSetzen();
+}
+/* Strg+> / Strg+<: zur nächsten Größe der Word-Liste, ab 72 in Zehnern */
+const GROESSEN_STUFEN=[8,9,10,10.5,11,12,14,16,18,20,22,24,26,28,36,48,72];
+function groesseStufe(richtung){
+  const ed=$("#editor");if(!ed||S.mode!=="write")return;
+  const f=$("#fSize");
+  let jetzt=f?parseFloat(String(f.value).replace(",",".")):NaN;
+  if(!isFinite(jetzt)){const sel=getSelection();const n=sel.rangeCount?sel.getRangeAt(0).startContainer:null;
+    const el=n?(n.nodeType===1?n:n.parentElement):ed;
+    jetzt=Math.round(parseFloat(getComputedStyle(el).fontSize)*72/96/(S.zoom||1)*2)/2}
+  let neu;
+  if(richtung>0)neu=GROESSEN_STUFEN.find(x=>x>jetzt+0.01)||Math.min(FS_MAX,Math.floor(jetzt/10)*10+10);
+  else neu=[...GROESSEN_STUFEN].reverse().find(x=>x<jetzt-0.01)||Math.max(FS_MIN,jetzt>72?Math.ceil(jetzt/10)*10-10:FS_MIN);
+  if(jetzt>72&&richtung<0)neu=Math.max(72,Math.ceil(jetzt/10)*10-10);
+  groesseAnwenden(neu);
+}
+/* Die Felder zeigen, was an der Schreibmarke bzw. in der Markierung gilt;
+   ist es gemischt, bleiben sie leer — wie in Word. */
+function schriftFelderSetzen(){
+  const ed=$("#editor"),ff=$("#fFont"),fs=$("#fSize");if(!ed||!ff||!fs)return;
+  if(document.activeElement===fs||document.activeElement===ff)return;
+  const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
+  const r=sel.getRangeAt(0),z=S.zoom||1,el=[];
+  if(r.collapsed){const n=r.startContainer;el.push(n.nodeType===1?n:n.parentElement)}
+  else{
+    const wurzel=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
+    const w=document.createTreeWalker(wurzel,NodeFilter.SHOW_TEXT);let t;
+    /* Nur Textstücke, von denen wirklich ein Zeichen markiert ist — eine
+       Markierung, die genau an einer Grenze beginnt, berührt das Stück davor */
+    while((t=w.nextNode())&&el.length<500){
+      if(!t.data.trim()||!r.intersectsNode(t))continue;
+      if(t===r.startContainer&&r.startOffset>=t.length)continue;
+      if(t===r.endContainer&&r.endOffset===0)continue;
+      el.push(t.parentElement);
+    }
+    if(!el.length){const n=r.startContainer;el.push(n.nodeType===1?n:n.parentElement)}
+  }
+  const namen=new Set(),groessen=new Set();
+  el.forEach(e=>{const cs=getComputedStyle(e);
+    namen.add(cs.fontFamily.split(",")[0].replace(/["']/g,"").trim());
+    groessen.add(Math.round(parseFloat(cs.fontSize)*72/96/z*2)/2)});
+  if(namen.size===1){
+    const n=[...namen][0];
+    if(![...ff.options].some(o=>o.value===n)){const o=document.createElement("option");o.value=n;o.textContent=n;o.style.fontFamily=schriftStapel(n);ff.appendChild(o)}
+    ff.value=n;
+  }else{
+    if(![...ff.options].some(o=>o.value===""))ff.insertAdjacentHTML("afterbegin",'<option value="" hidden></option>');
+    ff.value="";
+  }
+  fs.value=groessen.size===1?zahlText([...groessen][0]):"";
 }
 function sizeMenu(e){
   closeMenu();
@@ -8253,6 +8416,7 @@ function syncToolbarState(){
       fb.value="blockquote"+(k?":"+k:"");
     }else fb.value=block?block.tagName.toLowerCase():"p";
   }
+  schriftFelderSetzen();
 }
 document.addEventListener("selectionchange",syncToolbarState);
 
@@ -9557,8 +9721,17 @@ sup.fn a{color:${stamp};text-decoration:none;font-weight:600}
    Leere. Für den Export werden die Knöpfe entfernt, die Marken zu echten
    Ankerlinks, und die editierbaren Stellen festgestellt. Überschriften-IDs
    bleiben — die Verzeichnislinks hängen daran. */
+/* Größen am Text stehen im Editor als calc(Npt * var(--zoom,1)). Außerhalb
+   des Programms gibt es --zoom nicht — in HTML und EPUB als feste pt. */
+function zoomGroessenFest(root){
+  root.querySelectorAll("[style*='font-size']").forEach(el=>{
+    const m=/calc\(\s*([\d.]+)pt\s*\*\s*var\(\s*--zoom[^)]*\)\s*\)/.exec(el.getAttribute("style")||"");
+    if(m)el.style.fontSize=m[1]+"pt";
+  });
+}
 function exportHtmlBody(d){
   const box=document.createElement("div");box.innerHTML=d.html||"";
+  zoomGroessenFest(box);
   box.querySelectorAll("[contenteditable]").forEach(e=>e.removeAttribute("contenteditable"));
   box.querySelectorAll("[data-toc],[data-tof]").forEach(toc=>{
     toc.querySelectorAll(".toc-headbtns,.toc-leader,.toc-pg,.toc-num").forEach(x=>x.remove());
@@ -10145,8 +10318,14 @@ ${(instanzen||[]).map(n=>`<w:num w:numId="${n.numId}"><w:abstractNumId w:val="${
   `<w:lvlOverride w:ilvl="0"><w:startOverride w:val="${n.start}"/></w:lvlOverride></w:num>`).join("\n")}
 </w:numbering>`;
 }
+/* Überschriftgrößen im Verhältnis zur Grundgröße, wie das CSS der Anzeige
+   (h1 1,7em, h2 1,32em, h3 1,12em). Bis 1.3 schrieb der Export feste 18/15/
+   13 pt — bei 11 oder 12 pt Grundgröße stand die Überschrift in Word kleiner
+   als am Bildschirm. Der Import vergleicht mit denselben Werten. */
+const UEBERSCHRIFT_FAKTOR={1:1.7,2:1.32,3:1.12};
 function stylesXml(d){
   const fs=Math.round((d.size||S.settings.size)*2),lh=Math.round(lhOf(d)*240);
+  const hs=n=>Math.round((d.size||S.settings.size)*UEBERSCHRIFT_FAKTOR[n]*2);
   const after=Math.round(psOf(d)*(d.size||S.settings.size)*20);
   const ueberschrift=(n,sz)=>`<w:style w:type="paragraph" w:styleId="Heading${n}"><w:name w:val="heading ${n}"/>
     <w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
@@ -10160,7 +10339,7 @@ function stylesXml(d){
   <w:pPrDefault><w:pPr><w:spacing w:line="${lh}" w:lineRule="auto" w:after="${after}"/></w:pPr></w:pPrDefault>
 </w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
-${ueberschrift(1,36)}${ueberschrift(2,30)}${ueberschrift(3,26)}
+${ueberschrift(1,hs(1))}${ueberschrift(2,hs(2))}${ueberschrift(3,hs(3))}
 <w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>
   <w:rPr><w:color w:val="0563C1"/><w:u w:val="single"/></w:rPr></w:style>
 <w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/>
@@ -10216,6 +10395,8 @@ function docxEinebnen(root){
 function rPrXml(st){
   let x="";
   if(st.link)x+='<w:rStyle w:val="Hyperlink"/>';
+  /* rFonts steht im Schema direkt nach rStyle */
+  if(st.font){const f=xesc(st.font);x+=`<w:rFonts w:ascii="${f}" w:hAnsi="${f}" w:cs="${f}"/>`}
   if(st.b)x+="<w:b/>";
   if(st.i)x+="<w:i/>";
   if(st.caps)x+="<w:caps/>";
@@ -10347,12 +10528,19 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
        wird die aktuelle Größe in pt mitgeführt. w:sz in Halbpunkten, nur
        wenn sie von der Dokumentgröße abweicht. */
     if(n.style&&n.style.fontSize&&ctx&&ctx.docSize){
+      /* Seit 1.3 absolut: calc(14pt * var(--zoom,1)) */
+      const absolut=/calc\(\s*([\d.]+)pt/.exec(n.style.fontSize);
       const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
       const basis=st.pt||ctx.docSize;
-      const pt=u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
+      const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
       if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);
         if(hp!==Math.round(ctx.docSize*2))neu.sz=hp;else delete neu.sz}
     }
+    /* Schrift am Text (seit 1.3): erster Name des Stapels, sofern er von
+       der Grundschrift des Dokuments abweicht */
+    const fam=(n.style&&n.style.fontFamily)||(tag==="font"&&n.getAttribute("face"))||"";
+    if(fam&&ctx){const erst=fam.split(",")[0].replace(/["']/g,"").trim();
+      if(erst&&erst.toLowerCase()!==String(ctx.docFont||"").toLowerCase())neu.font=erst;else delete neu.font}
     if(tag==="a"){neu.link=true;links.push({href:n.getAttribute("href")||"",start:runs.length})}
     inlineAblaufen(n,neu,runs,links,ctx,ws);
     if(tag==="a")links[links.length-1].end=runs.length;
@@ -10757,7 +10945,7 @@ async function docxBlob(d){
   docxEinebnen(container);
   const kommentare=wKommentarePlanen(container);
   const ctx={imgId:0,linkId:0,images:[],links:[],
-    docSize:d.size||S.settings.size,
+    docSize:d.size||S.settings.size,docFont:d.font||S.settings.font,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
     footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],
@@ -11019,7 +11207,8 @@ function epubBildDaten(src){
    damit Leerelemente sich selbst schließen und & < > maskiert sind. */
 function epubXhtmlFragment(nodes){
   const xdoc=document.implementation.createDocument(EPUB_XHTMLNS,"body",null);
-  nodes.forEach(n=>xdoc.documentElement.appendChild(xdoc.importNode(n,true)));
+  nodes.forEach(n=>{const huelle=document.createElement("div");huelle.appendChild(n.cloneNode(true));
+    zoomGroessenFest(huelle);xdoc.documentElement.appendChild(xdoc.importNode(huelle.firstChild,true))});
   return new XMLSerializer().serializeToString(xdoc.documentElement)
     .replace(/^<body[^>]*>/,"").replace(/<\/body>\s*$/,"");
 }
@@ -12448,6 +12637,14 @@ const SCHRIFT_NAEHE={"aptos":"Calibri","aptos display":"Calibri","calibri light"
   "courier":"Courier New","cousine":"Courier New","comic neue":"Comic Sans MS","urw gothic":"Century Gothic",
   "dejavu sans":"Verdana","dejavu sans mono":"Consolas","sitka":"Sitka Text","sitka small":"Sitka Text",
   "sitka heading":"Sitka Text","open sans":"Segoe UI"};
+/* Stapel für eine Schrift aus Word: ihr eigener Name zuerst (so bleibt er
+   beim Speichern erhalten, auch wenn sie hier fehlt), dahinter die nächste
+   bekannte Schrift mit ihren Zwillingen */
+function wordSchriftStapel(name){
+  const nah=docxSchriftInListe(name);
+  if(nah&&nah.toLowerCase()!==String(name).toLowerCase())return '"'+String(name).replace(/"/g,"")+'",'+schriftStapel(nah);
+  return schriftStapel(nah||name);
+}
 function docxSchriftInListe(n){
   if(!n)return null;
   const k=String(n).trim().toLowerCase();
@@ -13300,9 +13497,18 @@ function docxLauf(p,ktx,innen){
     const stil=[];
     if(wirk.color)stil.push("color:#"+wirk.color);
     if(wirk.caps)stil.push("text-transform:uppercase");
+    /* Seit 1.3 wortgenau wie in Word (Toms Vorgabe: „astrein, so wie es
+       war“): Größe absolut in pt, auch in Überschriften, sobald sie von dem
+       abweicht, was die Anzeige ohnehin zeigt; Schrift, sobald sie von der
+       Grundschrift abweicht — als Word-Name zuerst, dahinter der Stapel der
+       nächsten Schrift, falls sie hier fehlt. */
     const gg=ktx&&ktx.groesse;
-    if(gg&&wirk.sz&&!ktx.ueberschrift&&Math.abs(wirk.sz-gg)>=0.25)
-      stil.push("font-size:"+(Math.round(wirk.sz/gg*1000)/1000)+"em");
+    const soll=gg&&ktx.ueberschrift?gg*(UEBERSCHRIFT_FAKTOR[ktx.stufe]||1):gg;
+    if(soll&&wirk.sz&&Math.abs(wirk.sz-soll)>=0.25)
+      stil.push("font-size:calc("+wirk.sz+"pt * var(--zoom,1))");
+    const lf=wirk.font&&wirk.font[0]==="@"?(ktx&&ktx.thema||{})[wirk.font]:wirk.font;
+    if(lf&&ktx&&ktx.grundSchrift&&lf.toLowerCase()!==ktx.grundSchrift.toLowerCase())
+      stil.push("font-family:"+wordSchriftStapel(lf).replace(/"/g,"'"));
     if(stil.length)t='<span style="'+stil.join(";")+'">'+t+"</span>";
     if(wirk.b&&!(ktx&&ktx.ohneFett))t="<b>"+t+"</b>";
     if(wirk.i)t="<i>"+t+"</i>";
@@ -13330,7 +13536,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
   const rahmenStile=docxTabellenRahmen(stilXml);
   const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
-    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh,kom}};
+    return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh,kom,
+      thema:z.thema||{},grundSchrift:gs.quelle||""}};
   let out="";
   /* Ein Stapel je Verschachtelungsebene. Eine Unterliste gehört nach HTML in
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
@@ -13354,7 +13561,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,groesse:grundGroesse,fn,en,bild,roh:z.roh,kom};
+    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,stufe:h,groesse:grundGroesse,fn,en,bild,roh:z.roh,kom,
+      thema:z.thema||{},grundSchrift:gs.quelle||""};
     const inhalt=docxLauf(p,lktx)||"";
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
@@ -21505,7 +21713,10 @@ to the selected text, or to what you type next if nothing is selected.</p>
 <tr><td>Italic</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Underline</td><td>{kz*:unter}</td></tr>
 <tr><td>Strikethrough</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
+<tr><td>Larger text</td><td>{kz*:groesser}</td></tr>
+<tr><td>Smaller text</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>Font and size apply only to the selection, like everything else here. To change the whole document, select everything first with <kbd>{kz:alles}</kbd>.</p>
 <p><b>Font size</b> is an editable box: pick a listed size from the arrow beside it, or
 type any value between 4 and 200 and press <kbd>Enter</kbd>. The arrow keys step it.</p>
 <p><b>Text colour</b> and <b>highlight</b> each open a palette of prepared colours and a
@@ -22079,7 +22290,10 @@ markierten Text — oder für das, was du als Nächstes tippst, wenn nichts mark
 <tr><td>Kursiv</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Unterstrichen</td><td>{kz*:unter}</td></tr>
 <tr><td>Durchgestrichen</td><td><b>Format</b> &rarr; <b>Text</b></td></tr>
+<tr><td>Schrift größer</td><td>{kz*:groesser}</td></tr>
+<tr><td>Schrift kleiner</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>Schriftart und -größe gelten wie alles hier nur für die Markierung. Für das ganze Dokument markierst du vorher alles mit <kbd>{kz:alles}</kbd>.</p>
 <p><b>Die Schriftgröße</b> ist ein beschreibbares Feld: Über den Pfeil daneben wählst du einen
 der vorgegebenen Werte, oder du tippst eine beliebige Zahl zwischen 4 und 200 und drückst
 <kbd>Eingabe</kbd>. Die Pfeiltasten ändern in Einerschritten.</p>
@@ -22679,7 +22893,10 @@ aplica al texto seleccionado, o a lo que escribas a continuación si no hay nada
 <tr><td>Cursiva</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Subrayado</td><td>{kz*:unter}</td></tr>
 <tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
+<tr><td>Texto más grande</td><td>{kz*:groesser}</td></tr>
+<tr><td>Texto más pequeño</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>La fuente y el tamaño se aplican solo a la selección, como todo lo demás aquí. Para cambiar todo el documento, selecciónalo antes con <kbd>{kz:alles}</kbd>.</p>
 <p>El <b>tamaño de fuente</b> es un cuadro editable: elige un tamaño de la lista con la flecha
 que hay al lado, o escribe cualquier valor entre 4 y 200 y pulsa <kbd>Intro</kbd>. Las flechas
 lo ajustan de uno en uno.</p>
@@ -23282,7 +23499,10 @@ ao texto selecionado, ou ao que você digitar em seguida se nada estiver selecio
 <tr><td>Itálico</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Sublinhado</td><td>{kz*:unter}</td></tr>
 <tr><td>Tachado</td><td><b>Formato</b> &rarr; <b>Texto</b></td></tr>
+<tr><td>Texto maior</td><td>{kz*:groesser}</td></tr>
+<tr><td>Texto menor</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>A fonte e o tamanho valem só para a seleção, como tudo aqui. Para mudar o documento inteiro, selecione tudo antes com <kbd>{kz:alles}</kbd>.</p>
 <p>O <b>tamanho da fonte</b> é uma caixa editável: escolha um tamanho da lista na seta ao lado,
 ou digite qualquer valor entre 4 e 200 e pressione <kbd>Enter</kbd>. As setas ajustam de um em
 um.</p>
@@ -23889,7 +24109,10 @@ sélectionné.</p>
 <tr><td>Italique</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Souligné</td><td>{kz*:unter}</td></tr>
 <tr><td>Barré</td><td><b>Format</b> &rarr; <b>Texte</b></td></tr>
+<tr><td>Texte plus grand</td><td>{kz*:groesser}</td></tr>
+<tr><td>Texte plus petit</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>La police et la taille ne s'appliquent qu'à la sélection, comme tout le reste ici. Pour modifier tout le document, sélectionnez d'abord tout avec <kbd>{kz:alles}</kbd>.</p>
 <p>La <b>taille de police</b> est un champ modifiable : choisissez une taille de la liste avec
 la flèche à côté, ou tapez n'importe quelle valeur entre 4 et 200 et appuyez sur
 <kbd>Entrée</kbd>. Les flèches la font varier d'une unité.</p>
@@ -24505,7 +24728,10 @@ zaznaczonego tekstu albo do tego, co napiszesz dalej, jeśli nic nie jest zaznac
 <tr><td>Kursywa</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Podkreślenie</td><td>{kz*:unter}</td></tr>
 <tr><td>Przekreślenie</td><td><b>Format</b> &rarr; <b>Tekst</b></td></tr>
+<tr><td>Większy tekst</td><td>{kz*:groesser}</td></tr>
+<tr><td>Mniejszy tekst</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>Czcionka i rozmiar dotyczą tylko zaznaczenia, jak wszystko tutaj. Aby zmienić cały dokument, zaznacz najpierw wszystko skrótem <kbd>{kz:alles}</kbd>.</p>
 <p><b>Rozmiar czcionki</b> to pole edytowalne: wybierz rozmiar z listy przy strzałce obok albo
 wpisz dowolną wartość od 4 do 200 i naciśnij <kbd>Enter</kbd>. Strzałki zmieniają go co
 jeden.</p>
@@ -25090,7 +25316,10 @@ selezionato.</p>
 <tr><td>Corsivo</td><td>{kz*:kursiv}</td></tr>
 <tr><td>Sottolineato</td><td>{kz*:unter}</td></tr>
 <tr><td>Barrato</td><td><b>Formato</b> &rarr; <b>Testo</b></td></tr>
+<tr><td>Testo più grande</td><td>{kz*:groesser}</td></tr>
+<tr><td>Testo più piccolo</td><td>{kz*:kleiner}</td></tr>
 </table>
+<p>Carattere e dimensione valgono solo per la selezione, come tutto il resto qui. Per cambiare tutto il documento, seleziona prima tutto con <kbd>{kz:alles}</kbd>.</p>
 <p>La <b>dimensione del carattere</b> è un campo modificabile: scegli una dimensione dall'elenco
 con la freccia accanto, oppure digita un valore qualsiasi tra 4 e 200 e premi <kbd>Invio</kbd>.
 Le frecce la variano di un'unità.</p>
@@ -25892,6 +26121,10 @@ const KUERZEL=[
   {id:"fett",     m:"c",  k:"b", tun:()=>zeichenFormat("bold")},
   {id:"kursiv",   m:"c",  k:"i", tun:()=>zeichenFormat("italic")},
   {id:"unter",    m:"c",  k:"u", tun:()=>zeichenFormat("underline")},
+  /* Schrift größer/kleiner wie in Word. Auf der deutschen Tastatur liegen
+     < und > auf einer Taste — Strg+Umschalt ergibt dort >, Strg allein <. */
+  {id:"groesser", m:"cs", k:">", auch:[["c",">"],["c","]"]], tun:()=>groesseStufe(1)},
+  {id:"kleiner",  m:"c",  k:"<", auch:[["cs","<"],["c","["]], tun:()=>groesseStufe(-1)},
   {id:"alles",    m:"c",  k:"a", tun:()=>document.execCommand("selectAll")},
   {id:"palette",  m:"as", k:"p", tun:()=>{if($("#ovl").innerHTML)closeOvl();else palette()}},
   {id:"notizHeft",m:"as", k:"m", tun:()=>linkSelection()},
@@ -26012,7 +26245,7 @@ function helpKuerzel(html,sprache,alsApp){
   if(html.indexOf("{kz")<0)return html;
   const bel=kzBelegung(sprache,alsApp),[strg,um]=KZ_HILFE[sprache]||KZ_HILFE.en;
   const kbd=p=>[...(p.m==="as"?["Alt",um]:p.m==="cs"?[strg,um]:p.m==="ca"?[strg,"Alt"]:p.m==="c"?[strg]:p.m==="alt"?["Alt"]:[]),
-    p.k.length===1?p.k.toUpperCase():p.k].map(t=>"<kbd>"+t+"</kbd>").join("+");
+    p.k.length===1?p.k.toUpperCase():p.k].map(t=>"<kbd>"+String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")+"</kbd>").join("+");   /* „<“ (Schrift kleiner) wäre sonst ein Tag; ohne esc(), das Prüfskript lädt nur diese Funktion */
   return html.replace(/\{kz(\*?):([a-zA-Z]+)\}/g,(_,alle,id)=>{
     const b=bel[id];if(!b||!b.zeige.length)return "";
     return (alle?b.zeige:b.zeige.slice(0,1)).map(kbd).join(" · ");
@@ -26155,8 +26388,7 @@ $("#tools").addEventListener("change",e=>{
   /* Derselbe Stapel und dieselbe Zeilenhöhe wie beim Öffnen des Dokuments —
      sonst fiel eine fehlende serifenlose Schrift hier auf Serif, und der
      Zeilenabstand blieb bis zum nächsten Öffnen bei der alten Schrift. */
-  if(e.target.id==="fFont"){const d=doc(),ed=$("#editor");d.font=e.target.value;
-    ed.style.fontFamily=schriftStapel(d.font);ed.style.setProperty("--lh",lhOf(d)*lhNatur(d.font));commit()}
+  if(e.target.id==="fFont"&&e.target.value)schriftAnwenden(e.target.value);
   if(e.target.id==="fSize")setFontSize(e.target.value);
   if(e.target.id==="fBlock"){
     /* „blockquote:toent" trägt Absatzart und Zitatstil in einem Wert — der
