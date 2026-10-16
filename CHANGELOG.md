@@ -212,6 +212,19 @@ immer genau einen Commit, der sie anfasst.
   aus Webseiten unverändert, Weiterschreiben mit Enter und der Word-Umlauf
   gehen.
 
+- **Verschachtelte Nummerierung zählt wie Word: 1. → a. → i.** Bisher zählte
+  jede Ebene 1., 2., 3. (Toms Vergleich mit Word). Jetzt per CSS für Listen
+  ohne eigenen Stil, ebenso im HTML-Export und im Nur-Text-Export (der auch
+  die Startnummer und die Listenstile übernimmt). Word-Export: die
+  Grundstile sind mehrstufig wie Words Standardlisten (Nummern decimal →
+  lowerLetter → lowerRoman, Punkte • → o → ▪), und eine Unterliste im
+  Grundstil hängt an der numId ihrer Liste. Mit eigener numId zählte Word die
+  Unterpunkte über verschiedene Hauptpunkte hinweg weiter (a, b, dann c, d).
+  Word-Import und Einfügen aus Word: Words Standardebenen (a., i.) werden zum
+  Grundstil statt zu einem eigenen Stil, sonst kam „i.“ als „I.“ an und
+  „a.“ beim Speichern als „a)“ zurück. Geprüft: Anzeige, Word-XML,
+  Umlauf (unverändert), Text, Einfügen; check-export 285/285.
+
 ### Geändert
 
 - **Bilder: „Text umfließt“** (Schritt 2 von 2). Neue Layout-Art: das Bild

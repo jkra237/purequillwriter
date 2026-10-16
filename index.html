@@ -606,6 +606,11 @@ ol[data-ls="roemisch"]{list-style-type:upper-roman}
 /* Für „1)" gibt es keinen eingebauten Wert — die Zahl kommt aus dem Zähler,
    den der Browser ohnehin für die Liste führt. */
 ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
+/* Ohne eigenen Stil zählt eine verschachtelte Nummerierung wie Words
+   Standardliste: 1. → a. → i. → 1. … (bis 1.3 jede Ebene 1., 2., 3.) */
+ol ol:not([data-ls]){list-style-type:lower-alpha}
+ol ol ol:not([data-ls]){list-style-type:lower-roman}
+ol ol ol ol:not([data-ls]){list-style-type:decimal}
 /* Browser setzen die Schrift von <table> per UA-Stylesheet auf einen festen
    Wert zurück, statt sie vom Elternelement zu erben — betraf bisher jeden
    Tabellentext, der dadurch nie mit Zoom, Dokumentschrift oder -größe
@@ -9313,7 +9318,8 @@ function mdInline(node,fnNum){
 }
 function mdList(list,fnNum,depth){
   const pad="  ".repeat(depth),ol=list.tagName.toLowerCase()==="ol";
-  let i=1;const lines=[];
+  /* Markdown kennt nur Zahlen; die Startnummer übernimmt es aber */
+  let i=Math.max(1,parseInt(list.getAttribute("start"),10)||1);const lines=[];
   [...list.children].forEach(li=>{
     if(li.tagName.toLowerCase()!=="li")return;
     const sub=li.querySelector(":scope > ul, :scope > ol");
@@ -9386,15 +9392,29 @@ function txtInline(el,fnNum){
   t.querySelectorAll("sup.fn[data-fn]").forEach(s=>s.replaceWith("["+(fnNum.get(s.dataset.fn)||"*")+"]"));
   return (t.textContent||"").replace(/[ \t]+\n/g,"\n").replace(/\n{3,}/g,"\n\n").replace(/[ \t]+$/gm,"").trim();
 }
+/* Das Zählzeichen eines Eintrags wie am Bildschirm: Stil der Liste, sonst
+   nach Tiefe 1. → a. → i. (Words Standard). Für den Nur-Text-Export. */
+function listenZaehler(list,n){
+  const abc=k=>{let s="";while(k>0){k--;s=String.fromCharCode(97+k%26)+s;k=Math.floor(k/26)}return s};
+  const rom=k=>{const t=[[1000,"m"],[900,"cm"],[500,"d"],[400,"cd"],[100,"c"],[90,"xc"],[50,"l"],[40,"xl"],[10,"x"],[9,"ix"],[5,"v"],[4,"iv"],[1,"i"]];
+    let s="";for(const [w,z] of t)while(k>=w){s+=z;k-=w}return s};
+  const ls=listStyleOf(list);
+  if(ls==="klammer")return n+")";
+  if(ls==="alpha")return abc(n)+")";
+  if(ls==="alphagross")return abc(n).toUpperCase()+".";
+  if(ls==="roemisch")return rom(n).toUpperCase()+".";
+  let tiefe=0;for(let x=list.parentElement;x;x=x.parentElement)if(x.tagName==="OL")tiefe++;
+  return [n+".",abc(n)+".",rom(n)+"."][tiefe%3];
+}
 function txtList(list,fnNum,depth){
   const pad="  ".repeat(depth),ol=list.tagName.toLowerCase()==="ol";
-  let i=1;const lines=[];
+  let i=Math.max(1,parseInt(list.getAttribute("start"),10)||1);const lines=[];
   [...list.children].forEach(li=>{
     if(li.tagName.toLowerCase()!=="li")return;
     const sub=li.querySelector(":scope > ul, :scope > ol");
     const clone=li.cloneNode(true);
     clone.querySelectorAll(":scope > ul, :scope > ol").forEach(x=>x.remove());
-    lines.push(pad+(ol?(i++)+". ":"- ")+txtInline(clone,fnNum).replace(/\n/g," "));
+    lines.push(pad+(ol?listenZaehler(list,i++)+" ":"- ")+txtInline(clone,fnNum).replace(/\n/g," "));
     if(sub)lines.push(txtList(sub,fnNum,depth+1));
   });
   return lines.join("\n");
@@ -9495,6 +9515,9 @@ ol[data-ls="alpha"]{list-style-type:lower-alpha}
 ol[data-ls="alphagross"]{list-style-type:upper-alpha}
 ol[data-ls="roemisch"]{list-style-type:upper-roman}
 ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
+ol ol:not([data-ls]){list-style-type:lower-alpha}
+ol ol ol:not([data-ls]){list-style-type:lower-roman}
+ol ol ol ol:not([data-ls]){list-style-type:decimal}
 blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;
   border-left:3px solid ${stamp};color:${soft};font-style:italic}
 blockquote p{margin:0 0 .5em}blockquote p:last-child{margin:0}
@@ -10069,13 +10092,15 @@ const DOCX_RELS=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
    Die Reihenfolge hier legt die numId fest (Index + 1), docxNumId() rechnet
    sie aus derselben Reihenfolge zurück. Reihenfolge und Schlüssel müssen zu
    BULLETSTYLES/NUMSTYLES passen. */
+/* Die Grundstile sind mehrstufig wie Words Standardlisten: Nummern
+   1. → a. → i. → 1., Punkte • → o → ▪ → • — passend zur Anzeige. */
 const DOCXLISTS=[
-  {tag:"ul",ls:"",          fmt:"bullet",     text:()=>"•"},
+  {tag:"ul",ls:"",          fmt:"bullet",     text:i=>["•","o","▪","•"][i]},
   {tag:"ul",ls:"kreis",     fmt:"bullet",     text:()=>"o"},
   {tag:"ul",ls:"quadrat",   fmt:"bullet",     text:()=>"▪"},
   {tag:"ul",ls:"strich",    fmt:"bullet",     text:()=>"–"},
   {tag:"ul",ls:"haken",     fmt:"bullet",     text:()=>"✓"},
-  {tag:"ol",ls:"",          fmt:"decimal",    text:i=>"%"+(i+1)+"."},
+  {tag:"ol",ls:"",          fmt:i=>["decimal","lowerLetter","lowerRoman","decimal"][i],text:i=>"%"+(i+1)+"."},
   {tag:"ol",ls:"klammer",   fmt:"decimal",    text:i=>"%"+(i+1)+")"},
   {tag:"ol",ls:"alpha",     fmt:"lowerLetter",text:i=>"%"+(i+1)+")"},
   {tag:"ol",ls:"alphagross",fmt:"upperLetter",text:i=>"%"+(i+1)+"."},
@@ -10106,7 +10131,7 @@ function docxNumInstanz(el,ctx){
 }
 function numberingXml(instanzen){
   const stufe=(fmt,text)=>[0,1,2,3].map(i=>
-    `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${fmt}"/><w:lvlText w:val="${text(i)}"/>`+
+    `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${typeof fmt==="function"?fmt(i):fmt}"/><w:lvlText w:val="${text(i)}"/>`+
     `<w:pPr><w:ind w:left="${(i+1)*360}" w:hanging="360"/></w:pPr></w:lvl>`).join("");
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -10472,7 +10497,14 @@ function listeXml(list,numId,ilvl,ctx){
     if(unterliste)klon.querySelector(":scope > ul, :scope > ol")?.remove();
     const a=absatzXml(klon,`<w:numPr><w:ilvl w:val="${ilvl}"/><w:numId w:val="${numId}"/></w:numPr>`,null,ctx);
     xml+=absatzZuXml(a,ctx);
-    if(unterliste)xml+=listeXml(unterliste,docxNumId(unterliste),Math.min(3,ilvl+1),ctx);
+    /* Eine Unterliste im Grundstil derselben Art gehört zur selben Liste
+       (selbe numId, eine Ebene tiefer) — wie in Word. Mit eigener numId
+       zählte Word die Unterpunkte über verschiedene Hauptpunkte hinweg
+       weiter (a, b, dann c, d statt wieder a, b). */
+    if(unterliste){
+      const gleich=unterliste.tagName===list.tagName&&!listStyleOf(unterliste)&&!listStyleOf(list);
+      xml+=listeXml(unterliste,gleich?numId:docxNumId(unterliste),Math.min(3,ilvl+1),ctx);
+    }
   });
   return xml;
 }
@@ -11567,7 +11599,8 @@ function wordListen(dom,b){
       if(liste.tagName==="UL"&&/^[-–]$/.test(lt.trim()))ls="strich";
       if(liste.tagName==="OL"&&/\)$/.test(lt.trim())&&!ls)ls="klammer";
       return {level:+li.getAttribute("data-aria-level")||1,tag:liste.tagName,ls,
-        start:+liste.getAttribute("start")||1,id:li.getAttribute("data-listid")||"",inhalt};
+        start:+liste.getAttribute("start")||1,id:li.getAttribute("data-listid")||"",inhalt,
+        punkt:/\.\s*$/.test(lt)};
     }
     const st=el.getAttribute("style")||"";
     const m=/mso-list:\s*l(\d+)\s+level(\d+)/i.exec(st);
@@ -11575,7 +11608,8 @@ function wordListen(dom,b){
     let marke=ign?ign.textContent:"";
     if(ign){let x=ign;while(x.parentElement&&x.parentElement!==el&&x.parentElement.textContent.trim()===x.textContent.trim())x=x.parentElement;x.remove()}
     const art=wordListenMarke(marke);
-    return {level:+m[2],tag:art.tag,ls:art.ls,start:art.start||1,id:m[1],inhalt:[...el.childNodes]};
+    return {level:+m[2],tag:art.tag,ls:art.ls,start:art.start||1,id:m[1],inhalt:[...el.childNodes],
+      punkt:/\.\s*$/.test(String(marke).replace(/ /g," ").trim())};
   };
   const erledigt=new Set();
   [...b.querySelectorAll("div,p")].filter(e=>istWeb(e)||istMso(e)).forEach(anf=>{
@@ -11588,6 +11622,8 @@ function wordListen(dom,b){
     }
     const frag=dom.createDocumentFragment(),stapel=[];
     lauf.map(eintrag).forEach(it=>{
+      /* Words Standardnummerierung (1. → a. → i.) als Grundstil der Ebene */
+      if(it.tag==="OL"&&it.level>1&&it.ls===["","alpha","roemisch"][(it.level-1)%3]&&it.punkt)it.ls="";
       while(stapel.length&&stapel[stapel.length-1].level>it.level)stapel.pop();
       let top=stapel[stapel.length-1];
       if(top&&top.level===it.level&&(top.list.tagName!==it.tag||top.id!==it.id||top.ls!==it.ls)){stapel.pop();top=stapel[stapel.length-1]}
@@ -13323,7 +13359,14 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
       const ilvl=Math.max(0,Math.min(8,parseInt(xattrN(KIND(numPr,"ilvl"),"val"),10)||0));
       const ebenen=nummern[numId];
-      const stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
+      let stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
+      /* Words Standardnummerierung (1. → a. → i.) ist hier der Grundstil
+         einer verschachtelten Liste, kein eigener Stil — sonst käme „i.“ als
+         „I.“ an und „a.“ beim Speichern als „a)“ zurück. */
+      if(stil&&stil.tag==="ol"&&ilvl>0){
+        const eb=ebenen[String(ilvl)]||{};
+        if(String(eb.fmt||"").toLowerCase()===["decimal","lowerletter","lowerroman"][ilvl%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
+      }
       /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
       if(stil){
         const ebene=ebenen?ebenen[String(ilvl)]:null;
