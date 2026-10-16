@@ -197,6 +197,21 @@ immer genau einen Commit, der sie anfasst.
   nicht auf, Abbrechen, Normalfall); den echten Dialog der Claude-App kann
   ich nicht bedienen. Chrome, Edge und die Store-App waren nicht betroffen.
 
+- **Listen aus Word einfügen.** Word legt beim Kopieren keine
+  zusammenhängende Liste ab. Word im Browser und das neue Word liefern jeden
+  Punkt als eigene Mini-Liste (`div.ListContainerWrapper`, Ebene nur in
+  `data-aria-level`); daraus wurde eine Liste je Punkt, jede begann bei 1
+  (aus 1, 2, 3 wurde 1, 1, 1), Unterpunkte standen nicht eingerückt, an
+  jedem Punkt hing ein geschütztes Leerzeichen. Word am PC (klassisch)
+  liefert Absätze mit `mso-list` und das Zeichen als Text davor; Punkte in
+  Symbol/Wingdings kamen als „·“, „o“, „§“ an, Listen gar nicht.
+  `wordListen()` baut beim Einfügen daraus eine verschachtelte Liste mit
+  Startnummer und Stil (a/b/c, römisch, Klammer, Strich, Kreis, Quadrat,
+  Haken). Geprüft mit Toms echter Zwischenablage (Word im Browser) und dem
+  bekannten Aufbau von Word am PC (nachgebaut, keine echte Probe); Listen
+  aus Webseiten unverändert, Weiterschreiben mit Enter und der Word-Umlauf
+  gehen.
+
 ### Geändert
 
 - **Bilder: „Text umfließt“** (Schritt 2 von 2). Neue Layout-Art: das Bild

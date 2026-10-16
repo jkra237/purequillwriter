@@ -11524,6 +11524,92 @@ function pasteLayoutTabellen(dom,b){
   /* Zeilen ohne Zellen in echten Tabellen (Bildzelle herausgefiltert) */
   b.querySelectorAll("tr").forEach(r=>{if(!r.cells.length)r.remove()});
 }
+/* ---- Listen aus Word einfügen ----
+   Word legt beim Kopieren keine zusammenhängende Liste in die Zwischenablage.
+   Zwei Formen, beide bis 1.3 kaputt angekommen:
+   - Word im Browser und das neue Word: jeder Punkt als eigene Mini-Liste in
+     einem div.ListContainerWrapper, die Ebene nur in data-aria-level. Hier
+     wurde daraus eine Liste je Punkt, jede begann bei 1 (aus 1, 2, 3 wurde
+     1, 1, 1), Unterpunkte standen nicht eingerückt (Toms echte
+     Zwischenablage, 2026-10-16).
+   - Word am PC (klassisch): normale Absätze mit mso-list:l0 level1 im Stil;
+     Nummer oder Aufzählungszeichen stehen als Text in einem
+     mso-list:Ignore-Span davor — Punkte in der Schrift Symbol/Wingdings
+     kamen als „·“, „o“, „§“ an, Listen gar nicht.
+   wordListen sammelt aufeinanderfolgende Punkte und baut daraus eine
+   verschachtelte Liste mit Startnummer und Stil (data-ls). */
+const WORD_LISTENSTIL={"lower-alpha":"alpha","lower-latin":"alpha","upper-alpha":"alphagross","upper-latin":"alphagross",
+  "upper-roman":"roemisch","lower-roman":"roemisch",circle:"kreis",square:"quadrat"};
+function wordListenMarke(t){
+  t=String(t||"").replace(/ /g," ").trim();
+  if(/^\d+\)$/.test(t))return {tag:"OL",ls:"klammer",start:+t.slice(0,-1)};
+  if(/^\d+\.?$/.test(t))return {tag:"OL",ls:"",start:parseInt(t,10)};
+  if(/^[ivxlc]+[.)]$/i.test(t))return {tag:"OL",ls:"roemisch",start:1};
+  if(/^[a-z][.)]$/.test(t))return {tag:"OL",ls:"alpha",start:t.charCodeAt(0)-96};
+  if(/^[A-Z][.)]$/.test(t))return {tag:"OL",ls:"alphagross",start:t.charCodeAt(0)-64};
+  if(t==="o")return {tag:"UL",ls:"kreis"};
+  if(t==="§"||t===""||t==="")return {tag:"UL",ls:"quadrat"};
+  if(/^[-–—]$/.test(t))return {tag:"UL",ls:"strich"};
+  if(t==="ü"||t===""||t==="✓")return {tag:"UL",ls:"haken"};
+  return {tag:"UL",ls:""};
+}
+function wordListen(dom,b){
+  const istWeb=el=>el.nodeType===1&&el.tagName==="DIV"&&!!el.querySelector(":scope>ol>li[data-aria-level],:scope>ul>li[data-aria-level]");
+  const istMso=el=>el.nodeType===1&&el.tagName==="P"&&/mso-list:\s*l\d+\s+level\d+/i.test(el.getAttribute("style")||"");
+  const eintrag=el=>{
+    if(istWeb(el)){
+      const liste=el.querySelector(":scope>ol,:scope>ul"),li=liste.querySelector(":scope>li");
+      li.querySelectorAll(".EOP").forEach(n=>n.remove());   /* Absatzende-Marke mit geschütztem Leerzeichen */
+      const inhalt=[];
+      [...li.childNodes].forEach(k=>{if(k.nodeType===1&&k.tagName==="P")inhalt.push(...k.childNodes);else inhalt.push(k)});
+      const lt=li.getAttribute("data-leveltext")||"";
+      let ls=WORD_LISTENSTIL[liste.style.listStyleType]||"";
+      if(liste.tagName==="UL"&&/^[-–]$/.test(lt.trim()))ls="strich";
+      if(liste.tagName==="OL"&&/\)$/.test(lt.trim())&&!ls)ls="klammer";
+      return {level:+li.getAttribute("data-aria-level")||1,tag:liste.tagName,ls,
+        start:+liste.getAttribute("start")||1,id:li.getAttribute("data-listid")||"",inhalt};
+    }
+    const st=el.getAttribute("style")||"";
+    const m=/mso-list:\s*l(\d+)\s+level(\d+)/i.exec(st);
+    const ign=[...el.querySelectorAll("span")].find(s=>/mso-list:\s*Ignore/i.test(s.getAttribute("style")||""));
+    let marke=ign?ign.textContent:"";
+    if(ign){let x=ign;while(x.parentElement&&x.parentElement!==el&&x.parentElement.textContent.trim()===x.textContent.trim())x=x.parentElement;x.remove()}
+    const art=wordListenMarke(marke);
+    return {level:+m[2],tag:art.tag,ls:art.ls,start:art.start||1,id:m[1],inhalt:[...el.childNodes]};
+  };
+  const erledigt=new Set();
+  [...b.querySelectorAll("div,p")].filter(e=>istWeb(e)||istMso(e)).forEach(anf=>{
+    if(erledigt.has(anf))return;
+    const lauf=[];let x=anf;
+    while(x){
+      if(x.nodeType===3&&!x.data.trim()){x=x.nextSibling;continue}
+      if(istWeb(x)||istMso(x)){lauf.push(x);erledigt.add(x);x=x.nextSibling;continue}
+      break;
+    }
+    const frag=dom.createDocumentFragment(),stapel=[];
+    lauf.map(eintrag).forEach(it=>{
+      while(stapel.length&&stapel[stapel.length-1].level>it.level)stapel.pop();
+      let top=stapel[stapel.length-1];
+      if(top&&top.level===it.level&&(top.list.tagName!==it.tag||top.id!==it.id||top.ls!==it.ls)){stapel.pop();top=stapel[stapel.length-1]}
+      if(!top||top.level<it.level){
+        const l=dom.createElement(it.tag);
+        if(it.ls)l.setAttribute("data-ls",it.ls);
+        if(it.tag==="OL"&&it.start>1)l.setAttribute("start",it.start);
+        if(top&&top.li)top.li.appendChild(l);else frag.appendChild(l);
+        top={level:it.level,list:l,id:it.id,ls:it.ls,li:null};stapel.push(top);
+      }
+      const li=dom.createElement("li");
+      it.inhalt.forEach(n=>li.appendChild(n));
+      /* Words Absatzende: ein geschütztes Leerzeichen am Ende jedes Punkts */
+      const w2=dom.createTreeWalker(li,NodeFilter.SHOW_TEXT);let t,letzt=null;while(t=w2.nextNode())if(t.data.trim()||t.data.includes(" "))letzt=t;
+      if(letzt)letzt.data=letzt.data.replace(/[\s ]+$/,"");
+      if(!li.textContent.trim()&&!li.querySelector("img"))li.innerHTML="<br>";
+      /* Unterlisten kommen ans Ende des Eintrags, nach seinem Text */
+      top.list.appendChild(li);top.li=li;
+    });
+    lauf[0].before(frag);lauf.forEach(n=>n.remove());
+  });
+}
 /* Von außen: die Gliederung wird übernommen, die Gestaltung der Quelle nicht.
    Überschrift bleibt Überschrift, Liste bleibt Liste — aber Breiten, Floats,
    Schriftgrößen und Farben der fremden Seite bleiben draußen, damit sich der
@@ -11536,6 +11622,8 @@ function cleanPasteForeign(src){
   const w=dom.createTreeWalker(b,NodeFilter.SHOW_COMMENT);
   const komm=[];let k;while(k=w.nextNode())komm.push(k);
   komm.forEach(n=>n.remove());
+  /* Vor dem Abräumen der Attribute: nur jetzt stehen Ebene und Art drin */
+  wordListen(dom,b);
 
   /* Die Massangaben eines eingefuegten Bildes fallen gleich mit den uebrigen
      Attributen — und damit weiss der Browser die Hoehe eines noch nicht
@@ -11558,6 +11646,9 @@ function cleanPasteForeign(src){
     [...el.attributes].forEach(a=>{
       const n=a.name.toLowerCase();
       if(n==="colspan"||n==="rowspan")return;
+      /* Startnummer und Listenstil (aus wordListen, oder start einer
+         fremden Liste) gehören zur Gliederung, nicht zur Gestaltung */
+      if((n==="start"||n==="data-ls")&&(el.tagName==="OL"||el.tagName==="UL"))return;
       if(n==="alt"&&el.tagName==="IMG")return;
       if(n==="style"){pasteKeepStyle(el,PASTE_STIL);return}
       if(n==="href"&&el.tagName==="A"){
