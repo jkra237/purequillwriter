@@ -2452,6 +2452,7 @@ en:{
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
   "Seitenansicht":"Page view",
+  "OpenDocument-Text":"OpenDocument Text",
   "Zuletzt verwendet":"Recently used",
   "Alle Schriftarten":"All fonts",
   "Schriftart wählen":"Choose font",
@@ -3318,6 +3319,7 @@ fr:{
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
   "Seitenansicht":"Affichage page",
+  "OpenDocument-Text":"Texte OpenDocument",
   "Zuletzt verwendet":"Récemment utilisées",
   "Alle Schriftarten":"Toutes les polices",
   "Schriftart wählen":"Choisir la police",
@@ -4184,6 +4186,7 @@ es:{
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
   "Seitenansicht":"Vista de página",
+  "OpenDocument-Text":"Texto OpenDocument",
   "Zuletzt verwendet":"Usadas recientemente",
   "Alle Schriftarten":"Todas las fuentes",
   "Schriftart wählen":"Elegir fuente",
@@ -5050,6 +5053,7 @@ pt:{
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
   "Seitenansicht":"Visualização de página",
+  "OpenDocument-Text":"Texto OpenDocument",
   "Zuletzt verwendet":"Usadas recentemente",
   "Alle Schriftarten":"Todos os tipos de letra",
   "Schriftart wählen":"Escolher tipo de letra",
@@ -5916,6 +5920,7 @@ pl:{
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
   "Seitenansicht":"Widok strony",
+  "OpenDocument-Text":"Tekst OpenDocument",
   "Zuletzt verwendet":"Ostatnio używane",
   "Alle Schriftarten":"Wszystkie czcionki",
   "Schriftart wählen":"Wybierz czcionkę",
@@ -6789,6 +6794,7 @@ it:{
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
   "Seitenansicht":"Vista pagina",
+  "OpenDocument-Text":"Testo OpenDocument",
   "Zuletzt verwendet":"Usati di recente",
   "Alle Schriftarten":"Tutti i tipi di carattere",
   "Schriftart wählen":"Scegli tipo di carattere",
@@ -11372,6 +11378,391 @@ ${relEintraege.join(String.fromCharCode(10))}
   ];
   return await zipSchreiben(eintraege);
 }
+/* ================= OpenDocument-Export (seit 1.3) =================
+   „Speichern als › OpenDocument-Text“. Bis 1.3 konnte das Programm .odt
+   nur öffnen — wer eine Datei aus LibreOffice bekam, gab sie als Word
+   zurück. Aufbau wie der Word-Export (gleiches Ablaufen des Editors,
+   gleiche Leerraumregel), geschrieben so, wie LibreOffice es selbst tut,
+   und so, dass odtLesen() es zeichengleich zurückliest (Umlauf-Fixpunkt,
+   geprüft in tools/check-export.mjs). Paket: mimetype unkomprimiert als
+   erster Eintrag, META-INF/manifest.xml, content.xml, styles.xml,
+   meta.xml, Pictures/. */
+const ODF_NS='xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" '+
+  'xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" '+
+  'xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" '+
+  'xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" '+
+  'xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" office:version="1.3"';
+const odfZahl=v=>String(Math.round(v*100)/100);
+const odfSchrift=n=>/\s/.test(n)?"'"+n+"'":n;
+/* Aufzählungszeichen je Ebene; odtLesen() erkennt sie als Grundstil */
+const ODT_PUNKTE=["•","◦","▪"];
+function odtListenEbene(tag,ls,i){
+  if(tag==="ul"){const z={kreis:"o",quadrat:"▪",strich:"–",haken:"✓"}[ls];return {bullet:z||ODT_PUNKTE[i%3]}}
+  if(ls==="klammer")return {num:"1",suffix:")"};
+  if(ls==="alpha")return {num:"a",suffix:")"};
+  if(ls==="alphagross")return {num:"A",suffix:"."};
+  if(ls==="roemisch")return {num:"I",suffix:"."};
+  return {num:["1","a","i"][i%3],suffix:"."};
+}
+async function odtBlob(d){
+  const f=fmtOf(d),groesse=d.size||S.settings.size,schrift=d.font||S.settings.font;
+  const textbreiteMm=f.w-f.m[1]-f.m[3];
+  const container=document.createElement("div");container.innerHTML=d.html||"";
+  docxEinebnen(container);
+  const kommentare=wKommentarePlanen(container);
+  /* Automatische Vorlagen, gleiche Eigenschaften nur einmal */
+  const auto=new Map(),listStile=[],zaehl={P:0,T:0,L:0,Tab:0,fr:0,tabelle:0};
+  const stilName=(fam,praefix,inhalt,eltern)=>{
+    const key=fam+"|"+(eltern||"")+"|"+inhalt;
+    if(auto.has(key))return auto.get(key);
+    const name=praefix+(++zaehl[praefix]);
+    auto.set(key,name);
+    listStile.push(`<style:style style:name="${name}" style:family="${fam}"${eltern?` style:parent-style-name="${eltern}"`:""}>${inhalt}</style:style>`);
+    return name;
+  };
+  const textStil=st=>{
+    const a=[];
+    if(st.b)a.push('fo:font-weight="bold"');
+    if(st.i)a.push('fo:font-style="italic"');
+    if(st.u)a.push('style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"');
+    if(st.strike)a.push('style:text-line-through-style="solid" style:text-line-through-type="single"');
+    if(st.vert)a.push(`style:text-position="${st.vert==="superscript"?"super":"sub"} 58%"`);
+    if(st.color)a.push(`fo:color="#${st.color.toLowerCase()}"`);
+    if(st.hi)a.push(`fo:background-color="#${st.hi.toLowerCase()}"`);
+    if(st.caps)a.push('fo:text-transform="uppercase"');
+    if(st.sz)a.push(`fo:font-size="${odfZahl(st.sz/2)}pt"`);
+    if(st.font)a.push(`fo:font-family="${xesc(odfSchrift(st.font))}"`);
+    return a.length?stilName("text","T",`<style:text-properties ${a.join(" ")}/>`):"";
+  };
+  const fnText=new Map((d.footnotes||[]).map(x=>[x.id,x.text])),enText=new Map((d.endnotes||[]).map(x=>[x.id,x.text]));
+  const notenIds=new Map();let fnNr=0,enNr=0;
+  const kommentarAbsaetze=n=>{const t=document.createElement("div");t.innerHTML=n.html||"";
+    const z=[...t.querySelectorAll("p,li,h1,h2,h3,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.textContent);
+    return z.length?z:[t.textContent||""]};
+  /* Inline-Inhalt — Leerraum wie im Editor (siehe inlineAblaufen) */
+  const inline=(node,st,ws,out)=>{
+    node.childNodes.forEach(n=>{
+      if(n.nodeType===3){
+        let t=n.nodeValue.replace(/[ \t\n\r\f]+/g," ");
+        if(ws.vorn&&t[0]===" ")t=t.slice(1);
+        if(!t)return;
+        ws.vorn=t[t.length-1]===" ";
+        const s=textStil(st);
+        out.push(s?`<text:span text:style-name="${s}">${xesc(t)}</text:span>`:xesc(t));
+        return;
+      }
+      if(n.nodeType!==1)return;
+      const tag=n.tagName.toLowerCase();
+      /* Fuß- und Endnoten; dieselbe Note an zweiter Stelle als Verweis */
+      if(tag==="sup"&&(n.classList.contains("fn")||n.classList.contains("en"))){
+        const end=n.classList.contains("en"),key=(end?"e:":"f:")+(end?n.dataset.en:n.dataset.fn);
+        const art=end?"endnote":"footnote";
+        if(notenIds.has(key)){const v=notenIds.get(key);
+          out.push(`<text:note-ref text:note-class="${art}" text:reference-format="text" text:ref-name="${v.id}">${v.zeichen}</text:note-ref>`)}
+        else{
+          const nr=end?++enNr:++fnNr,id=(end?"edn":"ftn")+nr,zeichen=end?roemisch(nr).toLowerCase():String(nr);
+          notenIds.set(key,{id,zeichen});
+          const txt=(end?enText.get(n.dataset.en):fnText.get(n.dataset.fn))||"";
+          out.push(`<text:note text:id="${id}" text:note-class="${art}"><text:note-citation>${zeichen}</text:note-citation>`+
+            `<text:note-body><text:p text:style-name="${end?"Endnote":"Footnote"}">${xesc(txt)}</text:p></text:note-body></text:note>`);
+        }
+        ws.vorn=false;return;
+      }
+      if(n.classList.contains("wroh"))return;
+      if(n.classList.contains("wtab")){out.push("<text:tab/>");ws.vorn=false;return}
+      /* Notiz aus einem Kommentar (n.wort): wieder ein Kommentar */
+      if(n.classList.contains("anch")&&(n.dataset.wkStart||n.dataset.wkEnde)){
+        if(n.dataset.wkStart){
+          const k=kommentare.find(x=>x.cid===n.dataset.wkStart),w=(k&&k.n.wort)||{};
+          out.push(`<office:annotation office:name="pqk${n.dataset.wkStart}"><dc:creator>${xesc(w.autor||"PureQuill")}</dc:creator>`+
+            (w.datum?`<dc:date>${xesc(w.datum)}</dc:date>`:"")+(k?kommentarAbsaetze(k.n):[]).map(t=>`<text:p>${xesc(t)}</text:p>`).join("")+"</office:annotation>");
+        }
+        inline(n,st,ws,out);
+        if(n.dataset.wkEnde)out.push(`<office:annotation-end office:name="pqk${n.dataset.wkEnde}"/>`);
+        return;
+      }
+      if(tag==="br"){out.push("<text:line-break/>");ws.vorn=true;return}
+      if(tag==="img"||tag==="figure")return;
+      const neu={...st};
+      if(tag==="b"||tag==="strong"||n.style?.fontWeight>="600")neu.b=true;
+      if(tag==="i"||tag==="em")neu.i=true;
+      if(tag==="u")neu.u=true;
+      if(tag==="s"||tag==="strike"||tag==="del")neu.strike=true;
+      if(tag==="sup")neu.vert="superscript";
+      if(tag==="sub")neu.vert="subscript";
+      if(tag==="font"&&n.getAttribute("color"))neu.color=n.getAttribute("color").replace("#","").toUpperCase();
+      if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+      if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
+      if(n.style&&n.style.textTransform==="uppercase")neu.caps=true;
+      if(n.style&&n.style.fontSize){
+        const absolut=/calc\(\s*([\d.]+)pt/.exec(n.style.fontSize);
+        const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
+        const basis=st.pt||groesse;
+        const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
+        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==Math.round(groesse*2))neu.sz=hp;else delete neu.sz}
+      }
+      const fam=(n.style&&n.style.fontFamily)||(tag==="font"&&n.getAttribute("face"))||"";
+      if(fam){const erst=fam.split(",")[0].replace(/["']/g,"").trim();
+        if(erst&&erst.toLowerCase()!==String(schrift).toLowerCase())neu.font=erst;else delete neu.font}
+      if(tag==="a"){
+        const innen=[];inline(n,neu,ws,innen);
+        out.push(`<text:a xlink:type="simple" xlink:href="${xesc(n.getAttribute("href")||"")}" text:style-name="Internet_20_link" text:visited-style-name="Visited_20_Internet_20_Link">${innen.join("")}</text:a>`);
+        return;
+      }
+      inline(n,neu,ws,out);
+    });
+  };
+  /* Seitenumbruch: an den nächsten Absatz (bzw. die Tabelle) als
+     „Umbruch davor“ — so liest odtLesen ihn zurück, und so schreibt
+     LibreOffice ihn selbst */
+  let umbruch=false,anker="";
+  const absatzStil=(pp,eltern)=>{
+    pp=pp.filter(Boolean);
+    if(umbruch){pp.push('fo:break-before="page"');umbruch=false}
+    if(!pp.length)return eltern||"Standard";
+    return stilName("paragraph","P",`<style:paragraph-properties ${pp.join(" ")}/>`,eltern||"Standard");
+  };
+  const ausr=j=>j==="center"?'fo:text-align="center"':j==="right"?'fo:text-align="end"':j==="both"?'fo:text-align="justify"':"";
+  const absatz=(el,pp,eltern,stufe)=>{
+    const out=[];inline(el,{},{vorn:true},out);
+    let inhalt=out.join("");
+    /* Ein <br> am Ende hält in HTML nur den leeren Absatz offen */
+    if(inhalt.endsWith("<text:line-break/>"))inhalt=inhalt.slice(0,-18);
+    const name=absatzStil(pp,eltern);
+    const a=anker;anker="";
+    return stufe?`<text:h text:style-name="${name}" text:outline-level="${stufe}">${a}${inhalt}</text:h>`
+      :`<text:p text:style-name="${name}">${a}${inhalt}</text:p>`;
+  };
+  const bilder=[];
+  const bild=async fig=>{
+    const img=fig.querySelector("img");if(!img)return null;
+    const info=await bildInfo(img);if(!info)return null;
+    const nr=bilder.length+1,datei=`Pictures/bild${nr}.${info.ext==="jpeg"?"jpg":info.ext}`;
+    bilder.push({name:datei,bytes:info.bytes,mime:"image/"+info.ext});
+    return {info,datei,nr};
+  };
+  const rahmen=(b,frs,anker,w,h,extra)=>`<draw:frame draw:style-name="${frs}" draw:name="Bild ${b.nr}" text:anchor-type="${anker}"${extra||""} svg:width="${odfZahl(w)}mm" svg:height="${odfZahl(h)}mm" draw:z-index="${b.nr}">`+
+    `<draw:image xlink:href="${b.datei}" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad" draw:mime-type="${b.mime||"image/"+b.info.ext}"/></draw:frame>`;
+  const figur=async fig=>{
+    const b=await bild(fig);if(!b)return "";
+    const umfl=fig.classList.contains("umfl"),frei=fig.classList.contains("free");
+    if(umfl){
+      /* Umflossen: am Zeichen des folgenden Absatzes verankert, wie Word */
+      const rechts=fig.dataset.seite==="rechts";
+      const w=textbreiteMm*(+fig.dataset.w||40)/100,h=w*b.info.h/b.info.w;
+      const frs=stilName("graphic","fr",`<style:graphic-properties style:wrap="parallel" style:number-wrapped-paragraphs="no-limit" style:wrap-contour="false" `+
+        `style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="${rechts?"right":"left"}" style:horizontal-rel="page-content" `+
+        `fo:margin-left="${rechts?"3mm":"0mm"}" fo:margin-right="${rechts?"0mm":"3mm"}" fo:margin-top="1mm" fo:margin-bottom="2mm"/>`,"Graphics");
+      anker+=rahmen(b,frs,"char",w,h,' svg:y="0mm"');
+      return "";
+    }
+    if(frei){
+      /* Frei: am Absatz verankert, Lage zum Satzspiegel, hinter oder vor dem Text */
+      const w=+fig.dataset.fw||40,h=+fig.dataset.fh||16;
+      const frs=stilName("graphic","fr",`<style:graphic-properties style:wrap="run-through" style:run-through="${fig.dataset.lage==="hinter"?"background":"foreground"}" `+
+        `style:vertical-pos="from-top" style:vertical-rel="page-content" style:horizontal-pos="from-left" style:horizontal-rel="page-content"/>`,"Graphics");
+      return `<text:p text:style-name="${absatzStil([])}">`+rahmen(b,frs,"paragraph",w,h,` svg:x="${odfZahl(+fig.dataset.fx||0)}mm" svg:y="${odfZahl(+fig.dataset.fy||0)}mm"`)+"</text:p>";
+    }
+    const w=textbreiteMm*(+fig.dataset.w||70)/100,h=w*b.info.h/b.info.w;
+    const frs=stilName("graphic","fr",'<style:graphic-properties style:wrap="none" style:vertical-pos="top" style:vertical-rel="baseline" style:horizontal-pos="center" style:horizontal-rel="paragraph"/>',"Graphics");
+    const j=jcVon(fig)||"center";
+    const a=anker;anker="";
+    let x=`<text:p text:style-name="${absatzStil([ausr(j)])}">${a}${rahmen(b,frs,"as-char",w,h)}</text:p>`;
+    const cap=fig.querySelector("figcaption");
+    if(cap&&cap.textContent.trim())x+=absatz(cap,[ausr(j)],"Caption");
+    return x;
+  };
+  const liste=el=>{
+    /* Eine Listenvorlage je Liste, ihre Ebenen aus den tatsächlich
+       verschachtelten Listen (LibreOffice beachtet nur die Vorlage der
+       äußersten) */
+    const ebenen=[];
+    const sammle=(l,i)=>{if(i>9)return;if(!ebenen[i])ebenen[i]={tag:l.tagName.toLowerCase(),ls:listStyleOf(l)};
+      l.querySelectorAll(":scope > li > ul, :scope > li > ol").forEach(u=>sammle(u,i+1))};
+    sammle(el,0);
+    const lname="L"+(++zaehl.L);
+    listStile.push(`<text:list-style style:name="${lname}">`+[...Array(10)].map((_,i)=>{
+      const e=ebenen[i]||{tag:(ebenen[ebenen.length-1]||{tag:"ul"}).tag,ls:""};
+      const v=odtListenEbene(e.tag,e.ls,i);
+      const lage=`<style:list-level-properties text:list-level-position-and-space-mode="label-alignment"><style:list-level-label-alignment text:label-followed-by="listtab" `+
+        `text:list-tab-stop-position="${odfZahl((i+1)*6.35)}mm" fo:text-indent="-6.35mm" fo:margin-left="${odfZahl((i+1)*6.35)}mm"/></style:list-level-properties>`;
+      return v.bullet?`<text:list-level-style-bullet text:level="${i+1}" text:bullet-char="${xesc(v.bullet)}">${lage}</text:list-level-style-bullet>`
+        :`<text:list-level-style-number text:level="${i+1}" style:num-suffix="${v.suffix}" style:num-format="${v.num}">${lage}</text:list-level-style-number>`;
+    }).join("")+"</text:list-style>");
+    const eintraege=(l,i)=>{
+      let x=`<text:list${i===0?` text:style-name="${lname}"`:""}>`,erst=true;
+      [...l.children].forEach(li=>{
+        if(li.tagName.toLowerCase()!=="li")return;
+        const unter=li.querySelector(":scope > ul, :scope > ol");
+        const klon=li.cloneNode(true);
+        if(unter)klon.querySelector(":scope > ul, :scope > ol").remove();
+        const s=parseInt(l.getAttribute("start"),10);
+        x+=`<text:list-item${erst&&l.tagName.toLowerCase()==="ol"&&s>1?` text:start-value="${s}"`:""}>`+
+          absatz(klon,[],"Standard")+(unter?eintraege(unter,i+1):"")+"</text:list-item>";
+        erst=false;
+      });
+      return x+"</text:list>";
+    };
+    return eintraege(el,0);
+  };
+  const tabelle=async t=>{
+    const zeilen=[...t.rows].filter(tr=>tr.children.length);
+    if(!zeilen.length)return "";
+    const belegt=zeilen.map(()=>[]);let breite=0;
+    zeilen.forEach((tr,r)=>{let g=0;
+      [...tr.children].forEach(td=>{while(belegt[r][g])g++;
+        const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilen.length-r));
+        for(let k=0;k<rs;k++)for(let j=0;j<cs;j++)if(k||j)belegt[r+k][g+j]=true;
+        g+=cs});
+      breite=Math.max(breite,g,belegt[r].length)});
+    const cg=t.querySelector(":scope > colgroup");
+    const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
+    const tn=stilName("table","Tab",`<style:table-properties style:width="${odfZahl(textbreiteMm)}mm" table:align="margins"${umbruch?' fo:break-before="page"':""}/>`);
+    umbruch=false;
+    let x=`<table:table table:name="Tabelle${++zaehl.tabelle}" table:style-name="${tn}">`;
+    for(let i=0;i<breite;i++){
+      const w=proz[i]?textbreiteMm*proz[i]/100:textbreiteMm/breite;
+      x+=`<table:table-column table:style-name="${stilName("table-column","Tab",`<style:table-column-properties style:column-width="${odfZahl(w)}mm"/>`)}"/>`;
+    }
+    const ohne=t.getAttribute("data-rahmen")==="ohne";
+    const zs=stilName("table-cell","Tab",`<style:table-cell-properties fo:padding="1mm" fo:border="${ohne?"none":"0.5pt solid #999999"}"/>`);
+    for(let r=0;r<zeilen.length;r++){
+      const tr=zeilen[r],hEm=parseFloat(tr.style.height);
+      x+=hEm?`<table:table-row table:style-name="${stilName("table-row","Tab",`<style:table-row-properties style:min-row-height="${odfZahl(hEm*groesse)}pt"/>`)}">`:"<table:table-row>";
+      const tds=[...tr.children];
+      for(let g=0;g<breite;g++){
+        if(belegt[r][g]){x+="<table:covered-table-cell/>";continue}
+        const td=tds.shift();
+        if(!td){x+=`<table:table-cell table:style-name="${zs}" office:value-type="string"><text:p text:style-name="Standard"/></table:table-cell>`;continue}
+        const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilen.length-r));
+        const aussen=anker;anker="";
+        const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")?await bloecke(td):absatz(td,[],"Standard");
+        anker=aussen;
+        x+=`<table:table-cell table:style-name="${zs}"${cs>1?` table:number-columns-spanned="${cs}"`:""}${rs>1?` table:number-rows-spanned="${rs}"`:""} office:value-type="string">`+
+          (inhalt||'<text:p text:style-name="Standard"/>')+"</table:table-cell>";
+      }
+      x+="</table:table-row>";
+    }
+    return x+"</table:table>";
+  };
+  const bloecke=async root=>{
+    let x="";
+    for(const el of [...root.children]){
+      const tag=el.tagName.toLowerCase();
+      if(el.classList.contains("enliste")||el.classList.contains("toc"))continue;
+      if(el.classList.contains("pgbreak")){umbruch=true;continue}
+      if(tag==="blockquote"){
+        const qs=el.getAttribute("data-qs")||"";
+        const vorlage=qs==="toent"?"Intense_20_Quote":qs==="typo"?"PQ_20_Zitat_20_typografisch":"Quotations";
+        const teile=el.querySelector(":scope > p, :scope > div")?[...el.children]:[el];
+        for(const t of teile)x+=absatz(t,[ausr(jcVon(t)||jcVon(el))],vorlage);
+      }else if(tag==="p"||tag==="div"){
+        const pt=v=>{const z=parseFloat(v);return z&&/em$/.test(v)?z*groesse:0};
+        const ml=el.style?pt(el.style.marginLeft):0,ti=el.style?pt(el.style.textIndent):0;
+        x+=absatz(el,[ausr(jcVon(el)),ml>0&&`fo:margin-left="${odfZahl(ml)}pt"`,ti&&`fo:text-indent="${odfZahl(ti)}pt"`],"Standard");
+      }else if(/^h[1-3]$/.test(tag)){
+        x+=absatz(el,[ausr(jcVon(el))],"Heading_20_"+tag[1],+tag[1]);
+      }else if(tag==="ul"||tag==="ol")x+=liste(el);
+      else if(tag==="table")x+=await tabelle(el);
+      else if(tag==="figure")x+=await figur(el);
+      else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))x+=await bloecke(el);
+      else x+=absatz(el,[],"Standard");
+    }
+    return x;
+  };
+  let body=await bloecke(container);
+  if(anker||umbruch)body+=`<text:p text:style-name="${absatzStil([])}">${anker}</text:p>`;
+  if(!body)body='<text:p text:style-name="Standard"/>';
+  const contentXml=`<?xml version="1.0" encoding="UTF-8"?>
+<office:document-content ${ODF_NS}><office:automatic-styles>${listStile.join("")}</office:automatic-styles>
+<office:body><office:text>${body}</office:text></office:body></office:document-content>`;
+
+  /* Kopf-/Fußzeile: Zeilen als Absätze, Platzhalter als Felder */
+  const an=w=>hfOf(d,w).on&&(!/1$/.test(w)||d.ersteAnders)&&(!/2$/.test(w)||d.geradeAnders);
+  const hfXml=(which,elem)=>{
+    if(!an(which))return "";
+    const v=hfOf(d,which);
+    let t=String(v.text||"");
+    if(v.html!=null){const b=document.createElement("div");b.innerHTML=String(v.html).replace(/<br\s*\/?>/gi,"\n");t=b.textContent}
+    const ps=v.align==="left"?"PQ_Zeile_links":v.align==="right"?"PQ_Zeile_rechts":"PQ_Zeile_Mitte";
+    const feld=z=>xesc(z).replace(/ {2,}/g,m=>" "+`<text:s text:c="${m.length-1}"/>`).replace(/\t/g,"<text:tab/>")
+      .replace(/\{(?:seiten|pages)\}/gi,"<text:page-count>1</text:page-count>")
+      .replace(/\{(?:seite|page)\}/gi,'<text:page-number text:select-page="current">1</text:page-number>')
+      .replace(/\{(?:titel|title)\}/gi,`<text:title>${xesc(tr(d.title)||"")}</text:title>`)
+      .replace(/\{(?:datum|date)\}/gi,`<text:date>${xesc(new Date().toLocaleDateString())}</text:date>`);
+    return `<style:${elem}>`+t.split("\n").map(z=>`<text:p text:style-name="${ps}">${feld(z)}</text:p>`).join("")+`</style:${elem}>`;
+  };
+  const kopf=an("hdr")||an("hdr1")||an("hdr2"),fuss=an("ftr")||an("ftr1")||an("ftr2");
+  const band=(a,b)=>Math.max(1,a-b);
+  const lang=String(S.settings.lang||"de").slice(0,2);
+  const ueberschrift=n=>`<style:style style:name="Heading_20_${n}" style:display-name="Heading ${n}" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:default-outline-level="${n}" style:class="text">`+
+    `<style:paragraph-properties fo:margin-top="12pt" fo:margin-bottom="4pt" fo:keep-with-next="always"/><style:text-properties fo:font-size="${odfZahl(groesse*UEBERSCHRIFT_FAKTOR[n])}pt" fo:font-weight="bold"/></style:style>`;
+  const zeile=(n,a)=>`<style:style style:name="${n}" style:family="paragraph" style:parent-style-name="Standard"><style:paragraph-properties fo:text-align="${a}" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/></style:style>`;
+  const stylesXml=`<?xml version="1.0" encoding="UTF-8"?>
+<office:document-styles ${ODF_NS}><office:styles>
+<style:default-style style:family="paragraph"><style:paragraph-properties fo:line-height="${Math.round(lhOf(d)*100)}%" fo:margin-top="0pt" fo:margin-bottom="${odfZahl(psOf(d)*groesse)}pt"/>`+
+`<style:text-properties fo:font-family="${xesc(odfSchrift(schrift))}" fo:font-size="${odfZahl(groesse)}pt" fo:language="${lang}"/></style:default-style>
+<style:default-style style:family="graphic"/>
+<style:style style:name="Standard" style:family="paragraph" style:class="text"/>
+${ueberschrift(1)}${ueberschrift(2)}${ueberschrift(3)}
+<style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Standard" style:class="html"><style:paragraph-properties fo:margin-left="5mm"/><style:text-properties fo:font-style="italic"/></style:style>
+<style:style style:name="Intense_20_Quote" style:display-name="Intense Quote" style:family="paragraph" style:parent-style-name="Standard"><style:paragraph-properties fo:margin-left="5mm" fo:margin-right="5mm" fo:background-color="#f2f2f2"/></style:style>
+<style:style style:name="PQ_20_Zitat_20_typografisch" style:display-name="PQ Zitat typografisch" style:family="paragraph" style:parent-style-name="Quotations"><style:paragraph-properties fo:margin-left="8mm" fo:margin-right="6mm"/></style:style>
+<style:style style:name="Caption" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:paragraph-properties fo:margin-top="1mm" fo:margin-bottom="3mm"/><style:text-properties fo:font-size="85%" fo:font-style="italic"/></style:style>
+<style:style style:name="Footnote" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:text-properties fo:font-size="10pt"/></style:style>
+<style:style style:name="Endnote" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:text-properties fo:font-size="10pt"/></style:style>
+<style:style style:name="Internet_20_link" style:display-name="Internet link" style:family="text"><style:text-properties fo:color="#0563c1" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>
+<style:style style:name="Visited_20_Internet_20_Link" style:display-name="Visited Internet Link" style:family="text"><style:text-properties fo:color="#800080" style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/></style:style>
+<style:style style:name="Graphics" style:family="graphic"/>
+<text:notes-configuration text:note-class="footnote" style:num-format="1" text:start-value="0" text:footnotes-position="page" text:start-numbering-at="document"/>
+<text:notes-configuration text:note-class="endnote" style:num-format="i" text:start-value="0"/>
+</office:styles><office:automatic-styles>
+${zeile("PQ_Zeile_links","start")}${zeile("PQ_Zeile_Mitte","center")}${zeile("PQ_Zeile_rechts","end")}
+<style:page-layout style:name="pm1"><style:page-layout-properties fo:page-width="${odfZahl(f.w)}mm" fo:page-height="${odfZahl(f.h)}mm" style:print-orientation="${f.w>f.h?"landscape":"portrait"}" `+
+`fo:margin-top="${odfZahl(kopf?f.hd:f.m[0])}mm" fo:margin-bottom="${odfZahl(fuss?f.fd:f.m[2])}mm" fo:margin-left="${odfZahl(f.m[3])}mm" fo:margin-right="${odfZahl(f.m[1])}mm"/>`+
+`<style:header-style>${kopf?`<style:header-footer-properties fo:min-height="${odfZahl(band(f.m[0],f.hd))}mm" fo:margin-bottom="${odfZahl(Math.max(0,band(f.m[0],f.hd)-5))}mm"/>`:""}</style:header-style>`+
+`<style:footer-style>${fuss?`<style:header-footer-properties fo:min-height="${odfZahl(band(f.m[2],f.fd))}mm" fo:margin-top="${odfZahl(Math.max(0,band(f.m[2],f.fd)-5))}mm"/>`:""}</style:footer-style></style:page-layout>
+</office:automatic-styles><office:master-styles><style:master-page style:name="Standard" style:page-layout-name="pm1">`+
+hfXml("hdr","header")+hfXml("hdr2","header-left")+hfXml("hdr1","header-first")+hfXml("ftr","footer")+hfXml("ftr2","footer-left")+hfXml("ftr1","footer-first")+
+`</style:master-page></office:master-styles></office:document-styles>`;
+  const autor=S.settings.meinName||"";
+  const metaXml=`<?xml version="1.0" encoding="UTF-8"?>
+<office:document-meta ${ODF_NS}><office:meta><meta:generator>PureQuill Writer</meta:generator><dc:title>${xesc(tr(d.title)||"")}</dc:title>`+
+(autor?`<dc:creator>${xesc(autor)}</dc:creator><meta:initial-creator>${xesc(autor)}</meta:initial-creator>`:"")+
+`<dc:date>${new Date().toISOString().slice(0,19)}</dc:date><dc:language>${lang}</dc:language></office:meta></office:document-meta>`;
+  const mimetype="application/vnd.oasis.opendocument.text";
+  const manifest=`<?xml version="1.0" encoding="UTF-8"?>
+<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.3">
+<manifest:file-entry manifest:full-path="/" manifest:version="1.3" manifest:media-type="${mimetype}"/>
+<manifest:file-entry manifest:full-path="content.xml" manifest:media-type="text/xml"/>
+<manifest:file-entry manifest:full-path="styles.xml" manifest:media-type="text/xml"/>
+<manifest:file-entry manifest:full-path="meta.xml" manifest:media-type="text/xml"/>
+${bilder.map(b=>`<manifest:file-entry manifest:full-path="${b.name}" manifest:media-type="${b.mime}"/>`).join("\n")}
+</manifest:manifest>`;
+  const enc=new TextEncoder();
+  return await zipSchreiben([
+    {name:"mimetype",bytes:enc.encode(mimetype),store:true},
+    {name:"META-INF/manifest.xml",bytes:enc.encode(manifest)},
+    {name:"content.xml",bytes:enc.encode(contentXml)},
+    {name:"styles.xml",bytes:enc.encode(stylesXml)},
+    {name:"meta.xml",bytes:enc.encode(metaXml)},
+    ...bilder.map(b=>({name:b.name,bytes:b.bytes,store:true}))
+  ]);
+}
+/* „Speichern als › OpenDocument-Text“ — wie exportDoc, aber ohne die
+   Datei zum Ziel von „Speichern“ zu machen: das bleibt die Word-Datei */
+async function exportOdt(){
+  flush();const d=doc();
+  const name=safeName(tr(d.title))+".odt";
+  let ziel=null;
+  try{ziel=await dateiZiel(name)}
+  catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
+  const blob=await odtBlob(d);
+  try{await dateiAblegen(name,blob,"application/vnd.oasis.opendocument.text",ziel)}
+  catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
+  commit();
+  return true;
+}
 /* ================= Speichern =================
    „Speichern“ schreibt das offene Dokument in seine Word-Datei — nur dieses,
    nur auf Befehl. Das laufende Sichern in den Programmspeicher bleibt davon
@@ -13991,6 +14382,13 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         const eb=ebenen[String(ilvl)]||{};
         if(String(eb.fmt||"").toLowerCase()===["decimal","lowerletter","lowerroman"][ilvl%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
       }
+      /* Ebenso die Grundpunkte (• → o → ▪, in Word  → o → §): beginnt die
+         Liste oben mit einem Punkt, ist „o“ darunter kein Kreis-Stil — sonst
+         kam jede Unterpunkt-Liste als eigene Art zurück */
+      if(stil&&stil.tag==="ul"&&ilvl>0){
+        const oben=String((ebenen["0"]||{}).text||"").trim(),z=String((ebenen[String(ilvl)]||{}).text||"").trim();
+        if(/^[•]$/.test(oben)&&[/^[•]$/,/^o$/,/^[▪§]$/][ilvl%3].test(z))stil={tag:"ul",ls:""};
+      }
       /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
       if(stil){
         const ebene=ebenen?ebenen[String(ilvl)]:null;
@@ -14451,7 +14849,7 @@ function odfHf(el,k){
     if(l==="title")return "{titel}";
     if(l==="date"||l==="time")return "{datum}";
     if(l==="s")return " ".repeat(parseInt(c.getAttribute("text:c"),10)||1);
-    if(l==="tab")return " ";
+    if(l==="tab")return "\t";
     if(l==="line-break")return "\n";
     if(l==="frame"||l==="note"||l==="annotation")return "";
     return text(c);
@@ -14519,7 +14917,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
     if(h2||f2){erg.geradeAnders=true;erg.hdr2=h2;erg.ftr2=f2}
   }
 
-  const fn=[],en=[],notizen=[],bild={zahl:0,bytes:0,fehlend:0};
+  const fn=[],en=[],notizen=[],bild={zahl:0,bytes:0,fehlend:0},notenKarte={};
   const textbreitePt=textbreiteMm*72/25.4;
   /* Ein Bild (draw:frame): eingebettet wie ein Zeichen = eigene Zeile,
      am Absatz/Zeichen verankert mit Umlauf = umflossen. Ein Rahmen mit
@@ -14597,9 +14995,13 @@ function odtLesen(inhaltXml,stilXml,bilder){
       if(l==="s"){out+=" ".repeat(Math.max(1,parseInt(c.getAttribute("text:c"),10)||1));continue}
       if(l==="tab"){out+='<span class="wtab" contenteditable="false">\t</span>';continue}
       if(l==="line-break"){out+="<br>";continue}
+      /* Dieselbe Note an zweiter Stelle (text:note-ref): dieselbe Marke */
+      if(l==="note-ref"){const v=notenKarte[c.getAttribute("text:ref-name")];
+        if(v)out+=v.end?`<sup class="en" data-en="${v.id}">i</sup>`:`<sup class="fn" data-fn="${v.id}">*</sup>`;continue}
       if(l==="note"){
         const body=odfKind(c,"note-body");const txt=body?notizText(body).join(" "):"";
         const id=uid();
+        notenKarte[c.getAttribute("text:id")]={id,end:c.getAttribute("text:note-class")==="endnote"};
         if(c.getAttribute("text:note-class")==="endnote"){en.push({id,text:txt});out+=`<sup class="en" data-en="${id}">i</sup>`}
         else{fn.push({id,text:txt});out+=`<sup class="fn" data-fn="${id}">*</sup>`}
         continue;
@@ -14685,6 +15087,11 @@ function odtLesen(inhaltXml,stilXml,bilder){
     const eb=ebenen[tiefe+1]||{fmt:tiefe%2?"bullet":"bullet",text:"•"};
     let stil=docxListenStil(eb)||{tag:"ul",ls:""};
     if(stil.tag==="ol"&&tiefe>0&&String(eb.fmt).toLowerCase()===["decimal","lowerletter","lowerroman"][tiefe%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
+    /* Die Grundpunkte je Ebene (so schreibt sie odtBlob) sind kein eigener Stil */
+    if(stil.tag==="ul"&&eb.text===ODT_PUNKTE[tiefe%3])stil={tag:"ul",ls:""};
+    /* … und die aus Word umgewandelten (• → o → ▪, siehe Word-Leser) */
+    if(stil.tag==="ul"&&tiefe>0&&/^[•]$/.test(String((ebenen[1]||{}).text||"").trim())&&
+      [/^[•]$/,/^o$/,/^[▪§]$/][tiefe%3].test(String(eb.text||"").trim()))stil={tag:"ul",ls:""};
     const items=[...el.children].filter(x=>x.localName==="list-item"||x.localName==="list-header");
     let start=1;
     if(tiefe===0){
@@ -15509,6 +15916,7 @@ function fileMenu(){
        für eine Zustandsanzeige der falsche Ort, weil man sie dort nicht sieht. */
     if(a==="expmore")return openSubMenu(b,[
       {a:"docw",label:tr("Word-Dokument"),k:".docx"},
+      {a:"odt",label:tr("OpenDocument-Text"),k:".odt"},
       {a:"pdf",label:tr("PDF-Dokument"),k:".pdf"},
       {a:"epub",label:tr("E-Book"),k:".epub"},
       {a:"html",label:tr("Webseite"),k:".html"},
@@ -15576,6 +15984,7 @@ function runFileAct(a){
   if(a==="html")exportHtml();
   if(a==="docw")exportDoc();
   if(a==="epub")exportEpub();
+  if(a==="odt")exportOdt();
   if(a==="csv")exportCsv();
   if(a==="set")settings();
   if(a==="pal")palette();
@@ -22184,6 +22593,7 @@ function settings(){
 }
 const DATEIART={
   docx:["Word-Dokument","application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  odt:["OpenDocument-Text","application/vnd.oasis.opendocument.text"],
   epub:["EPUB","application/epub+zip"],
   html:["Webseite","text/html"], md:["Markdown","text/markdown"],
   txt:["Nur Text","text/plain"], csv:["Tabelle","text/csv"], pqw:["PureQuill","application/json"],
@@ -22959,6 +23369,7 @@ first because it is the ordinary case — it can be read anywhere, with or witho
 program.</p>
 <table class="hkeys">
 <tr><td><b>Word document</b></td><td>.docx, with formatting</td></tr>
+<tr><td><b>OpenDocument Text</b></td><td>.odt, for LibreOffice and OpenOffice</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, for reading devices</td></tr>
 <tr><td><b>PDF</b></td><td>through the print dialog</td></tr>
 <tr><td><b>Web page</b></td><td>.html</td></tr>
@@ -23558,6 +23969,7 @@ Word-Format steht oben, weil es der Regelfall ist — es liest sich überall, au
 Programm.</p>
 <table class="hkeys">
 <tr><td><b>Word-Dokument</b></td><td>.docx, mit Formatierung</td></tr>
+<tr><td><b>OpenDocument-Text</b></td><td>.odt, für LibreOffice und OpenOffice</td></tr>
 <tr><td><b>E-Book</b></td><td>.epub, für Lesegeräte</td></tr>
 <tr><td><b>PDF</b></td><td>über den Druckdialog</td></tr>
 <tr><td><b>Webseite</b></td><td>.html</td></tr>
@@ -24160,6 +24572,7 @@ primero porque es el caso habitual: se puede leer en cualquier parte, con o sin 
 programa.</p>
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, con formato</td></tr>
+<tr><td><b>Texto OpenDocument</b></td><td>.odt, para LibreOffice y OpenOffice</td></tr>
 <tr><td><b>Libro electrónico</b></td><td>.epub, para dispositivos de lectura</td></tr>
 <tr><td><b>PDF</b></td><td>a través del cuadro de impresión</td></tr>
 <tr><td><b>Página web</b></td><td>.html</td></tr>
@@ -24760,6 +25173,7 @@ seção. O antigo formato binário .doc anterior a 2007 não pode ser lido.</p>
 primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem este programa.</p>
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, com formatação</td></tr>
+<tr><td><b>Texto OpenDocument</b></td><td>.odt, para LibreOffice e OpenOffice</td></tr>
 <tr><td><b>Livro eletrônico</b></td><td>.epub, para dispositivos de leitura</td></tr>
 <tr><td><b>PDF</b></td><td>pelo diálogo de impressão</td></tr>
 <tr><td><b>Página da web</b></td><td>.html</td></tr>
@@ -25388,6 +25802,7 @@ Word vient en premier parce que c'est le cas courant : il se lit partout, avec o
 programme.</p>
 <table class="hkeys">
 <tr><td><b>Document Word</b></td><td>.docx, avec la mise en forme</td></tr>
+<tr><td><b>Texte OpenDocument</b></td><td>.odt, pour LibreOffice et OpenOffice</td></tr>
 <tr><td><b>Livre numérique</b></td><td>.epub, pour les liseuses</td></tr>
 <tr><td><b>PDF</b></td><td>via la boîte de dialogue d'impression</td></tr>
 <tr><td><b>Page web</b></td><td>.html</td></tr>
@@ -25979,6 +26394,7 @@ Stary binarny format .doc sprzed 2007 roku nie może zostać wczytany.</p>
 ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym programem lub bez niego.</p>
 <table class="hkeys">
 <tr><td><b>Dokument Word</b></td><td>.docx, z formatowaniem</td></tr>
+<tr><td><b>Tekst OpenDocument</b></td><td>.odt, dla LibreOffice i OpenOffice</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, do czytników</td></tr>
 <tr><td><b>PDF</b></td><td>przez okno drukowania</td></tr>
 <tr><td><b>Strona internetowa</b></td><td>.html</td></tr>
@@ -26588,6 +27004,7 @@ sezione. Il vecchio formato binario .doc precedente al 2007 non può essere lett
 perché è il caso normale: si legge ovunque, con o senza questo programma.</p>
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, con la formattazione</td></tr>
+<tr><td><b>Testo OpenDocument</b></td><td>.odt, per LibreOffice e OpenOffice</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, per i dispositivi di lettura</td></tr>
 <tr><td><b>PDF</b></td><td>tramite la finestra di stampa</td></tr>
 <tr><td><b>Pagina web</b></td><td>.html</td></tr>

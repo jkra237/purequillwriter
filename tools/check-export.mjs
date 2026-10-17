@@ -175,6 +175,49 @@ const DATEIPRUEFUNG = String.raw`(async()=>{
     }catch(e){ ok("docx: Umlauf ist ein Fixpunkt",false,String(e)); }
   }
 
+  /* ================= ODT =================
+     Paketregeln wie bei EPUB (mimetype zuerst, unkomprimiert, wörtlich),
+     Manifest gegen Archiv, Wohlgeformtheit, und der Umlauf als Fixpunkt.
+     Ob LibreOffice die Datei liest, prüft dieses Skript nicht (kein
+     LibreOffice vorausgesetzt) — das Umlauf-Werkzeug der Entwicklung tat
+     es mit allen Merkmalen. */
+  {
+    const d0=doc(),merk={html:d0.html,footnotes:d0.footnotes};
+    const odtVon=async()=>new Uint8Array(await (await odtBlob(doc())).arrayBuffer());
+    const odt=await odtVon();
+    ok("odt: Datei erzeugt",odt&&odt.length>0,odt?odt.length+" Bytes":"nichts");
+    const teile=entpacke(odt),namen=Object.keys(teile);
+    ok("odt: mimetype ist der erste Eintrag",namen[0]==="mimetype",namen[0]);
+    ok("odt: mimetype unkomprimiert",teile.mimetype&&teile.mimetype.m===0);
+    ok("odt: mimetype wörtlich",teile.mimetype&&await text(teile.mimetype)==="application/vnd.oasis.opendocument.text");
+    for(const n of ["META-INF/manifest.xml","content.xml","styles.xml","meta.xml"])ok("odt: "+n+" vorhanden",!!teile[n]);
+    for(const [n,e] of Object.entries(teile)){
+      if(!/\.xml$/.test(n))continue;
+      const t=await text(e);
+      ok("odt: "+n+" wohlgeformt",wohlgeformt(t),wohlgeformt(t)?"":t.slice(0,120));
+    }
+    if(teile["META-INF/manifest.xml"]){
+      const m=await text(teile["META-INF/manifest.xml"]);
+      const gelistet=[...m.matchAll(/manifest:full-path="([^"]+)"/g)].map(x=>x[1]).filter(x=>x!=="/");
+      const fehlt=namen.filter(n=>n!=="mimetype"&&n!=="META-INF/manifest.xml"&&!gelistet.includes(n));
+      const zuviel=gelistet.filter(n=>!teile[n]);
+      ok("odt: Manifest deckt das Archiv",!fehlt.length&&!zuviel.length,[...fehlt.map(x=>"fehlt "+x),...zuviel.map(x=>"zuviel "+x)].join(", "));
+    }
+    ok("odt: Bild eingebettet",namen.some(n=>n.startsWith("Pictures/")));
+    try{
+      const ed=document.getElementById("editor");
+      const runde=async u8=>{const b=await zipDokument("x.odt",u8.buffer);
+        d0.html=b.html;d0.footnotes=b.footnotes||[];ed.innerHTML=b.html;flush();return b};
+      const b1=await runde(odt);
+      ok("odt: Kopf-/Fußzeile kommen zurück",!!(b1.hdr&&b1.ftr),(b1.hdr?"Kopf ":"")+(b1.ftr?"Fuß":""));
+      ok("odt: Fußnote kommt zurück",(b1.footnotes||[]).length===(merk.footnotes||[]).length,(b1.footnotes||[]).length+"");
+      const b2=await runde(await odtVon()),b3=await runde(await odtVon());
+      const ohneId=h=>String(h||"").replace(/data-(fn|en|n)="[^"]*"/g,"");
+      ok("odt: Umlauf ist ein Fixpunkt",ohneId(b2.html)===ohneId(b3.html),ohneId(b2.html)===ohneId(b3.html)?"":"Durchgang 2 und 3 unterscheiden sich");
+    }catch(e){ ok("odt: Umlauf ist ein Fixpunkt",false,String(e)); }
+    d0.html=merk.html;d0.footnotes=merk.footnotes;document.getElementById("editor").innerHTML=merk.html;flush();
+  }
+
   /* ================= EPUB =================
      Matrix statt eines einzelnen Dokuments: epubBauen() verzweigt an vier
      Stellen (Kapiteltrennung, Titelseite, Cover, ISBN gegen erzeugte UUID),

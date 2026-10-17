@@ -45,7 +45,40 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Neu
+
+- **Speichern als OpenDocument-Text (.odt)** unter Datei › Speichern als,
+  direkt unter Word. Bis jetzt konnte das Programm .odt nur öffnen; wer eine
+  Datei aus LibreOffice bekam, gab sie als Word zurück. Geschrieben so, wie
+  LibreOffice es selbst tut (`odtBlob`): Vorlagen „Heading 1–3“,
+  „Quotations“/„Intense Quote“, „Caption“, „Footnote“, „Internet link“;
+  automatische Vorlagen für Textformat, Ausrichtung, Einzug und Seiten-
+  umbruch („Umbruch davor“ am folgenden Absatz); eine Listenvorlage je
+  Liste mit den Ebenen der tatsächlich verschachtelten Listen; Tabellen mit
+  Spaltenbreiten, verbundenen und verdeckten Zellen; Bilder eingebettet,
+  umflossen (am folgenden Absatz verankert) oder frei; Bildunterschrift;
+  Fuß- und Endnoten (dieselbe Note an zweiter Stelle als Verweis);
+  Kommentare; Kopf-/Fußzeile mit Seitenzahl, Seitenanzahl, Titel, Datum,
+  erste und gerade Seite; Seitenformat; Metadaten mit dem eigenen Namen.
+  Das Ziel von „Speichern“ bleibt die Word-Datei. Geprüft: Umlauf ist ein
+  Fixpunkt, und LibreOffice öffnet die Datei und speichert sie mit allen
+  Merkmalen neu (Umlauf-Werkzeug); `check-export` prüft jetzt auch das
+  .odt-Paket (mimetype, Manifest, Wohlgeformtheit, Fixpunkt) — 302 statt
+  285 Prüfungen.
+- **`tools/check-umlauf.mjs`**: Umlauf-Prüfung für Word und OpenDocument
+  (`--modus word|odt|nativ`) — ein Dokument mit jedem Merkmal einmal wird
+  gespeichert, geöffnet und mit dem Original verglichen, dazu der Fixpunkt.
+  Mit installiertem LibreOffice zusätzlich die Gegenprobe mit dem echten
+  Programm. Fand die neun Word-Lücken und den fast leeren .odt-Leser.
+
 ### Behoben
+
+- **Unterpunkte kamen aus Word als eigene Aufzählungsart „Kreis“ zurück.**
+  Die zweite Ebene einer Grundliste schreibt Word (und dieses Programm) mit
+  dem Zeichen „o“, und der Leser hielt das für die Kreis-Liste. Beginnt die
+  Liste oben mit einem Punkt, sind „o“ und „▪“/„§“ darunter jetzt die
+  Grundpunkte — gilt auch für Words eigene mehrstufige Aufzählung und für
+  aus Word umgewandelte .odt.
 
 - **OpenDocument (.odt) öffnen auf dem Stand von Word.** Der Leser war rund
   60 Zeilen lang: Absätze, Überschriften, vier Textauszeichnungen, jede
@@ -451,6 +484,12 @@ immer genau einen Commit, der sie anfasst.
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
 
 ### Offen, noch nicht entschieden
+
+- **Frei platzierte Bilder** („hinter dem Text“/„vor dem Text“) schreiben
+  Word- und OpenDocument-Export richtig, beide Leser machen daraus aber ein
+  Bild in der Zeile (gefunden 2026-10-17 beim Umlauf). Schwierigkeit: das
+  Programm merkt sich die Seite des Bildes (data-fpage), Word und
+  LibreOffice nur den Absatz, an dem es hängt.
 
 - **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
   Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:

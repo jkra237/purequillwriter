@@ -134,6 +134,7 @@ ipcMain.on("pqw:clipboard", (e) => {
    der native Dialog hat aber keine ablaufende Freigabe. */
 const SAVE_FILTERS = {
   docx: { name: "Word-Dokument", extensions: ["docx"] },
+  odt:  { name: "OpenDocument-Text", extensions: ["odt"] },
   epub: { name: "EPUB", extensions: ["epub"] },
   pdf:  { name: "PDF", extensions: ["pdf"] },
   html: { name: "Webseite", extensions: ["html", "htm"] },
