@@ -10625,6 +10625,14 @@ function stylesXml(d){
 </w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
 ${ueberschrift(1,hs(1))}${ueberschrift(2,hs(2))}${ueberschrift(3,hs(3))}
+<w:style w:type="paragraph" w:styleId="Quote"><w:name w:val="Quote"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+  <w:pPr><w:ind w:left="284"/></w:pPr><w:rPr><w:i/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="IntenseQuote"><w:name w:val="Intense Quote"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+  <w:pPr><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/><w:ind w:left="284" w:right="284"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="PQZitatTypo"><w:name w:val="PQ Zitat typografisch"/><w:basedOn w:val="Quote"/><w:next w:val="Normal"/>
+  <w:pPr><w:ind w:left="440" w:right="320"/></w:pPr></w:style>
+<w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+  <w:pPr><w:spacing w:before="60" w:after="160"/></w:pPr><w:rPr><w:i/><w:sz w:val="${Math.round((d.size||S.settings.size)*1.7)}"/></w:rPr></w:style>
 <w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>
   <w:rPr><w:color w:val="0563C1"/><w:u w:val="single"/></w:rPr></w:style>
 <w:style w:type="character" w:styleId="FootnoteReference"><w:name w:val="footnote reference"/>
@@ -10894,12 +10902,24 @@ async function walkBlocks(root,ctx){
          seitenzahlgenaues Inhaltsverzeichnis einfügen (Referenzen-Menüband). */
       continue;
     }
+    /* Seitenumbruch: bis 1.3 schrieb der Export hier einen leeren Absatz */
+    if(el.classList&&el.classList.contains("pgbreak")){
+      xml+='<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+      if(ctx.umflAnker)ctx.umflStand=xml.length;
+      continue;
+    }
     if(tag==="blockquote"){
-      /* Wie im Editor: eingerückt und kursiv, statt wie ein normaler Absatz */
-      const jc=jcVon(el);
-      const pPr=`<w:ind w:left="284"/>${jc?`<w:jc w:val="${jc}"/>`:""}`;
-      const a=absatzXml(el,pPr,{i:true},ctx);
-      xml+=absatzZuXml(a,ctx);
+      /* Als Word-Vorlage „Zitat“ (bzw. „Intensives Zitat“, eigene für die
+         typografische Art): in Word sichtbar ein Zitat, und beim Öffnen
+         wieder eines. Bis 1.3 eingerückter Kursivtext, der als gewöhnlicher
+         Absatz zurückkam. Jeder innere Absatz ein eigener. */
+      const qs=el.getAttribute("data-qs")||"";
+      const sid=qs==="toent"?"IntenseQuote":qs==="typo"?"PQZitatTypo":"Quote";
+      const teile=el.querySelector(":scope > p, :scope > div")?[...el.children]:[el];
+      for(const t of teile){
+        const jc=jcVon(t)||jcVon(el);
+        xml+=absatzZuXml(absatzXml(t,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx),ctx);
+      }
     }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
       /* Einzug: im Editor margin-left in em (indentBlocks). Ging bis
@@ -10911,7 +10931,8 @@ async function walkBlocks(root,ctx){
       const a=absatzXml(el,ind+(jc?`<w:jc w:val="${jc}"/>`:""),null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(/^h[1-3]$/.test(tag)){
-      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>`,null,ctx);
+      const jc=jcVon(el);
+      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="ul"||tag==="ol"){
       xml+=listeXml(el,docxNumInstanz(el,ctx),0,ctx);
@@ -10986,29 +11007,56 @@ function listeXml(list,numId,ilvl,ctx){
   return xml;
 }
 async function tabelleXml(table,ctx){
-  const spalten=Math.max(0,...[...table.rows].map(r=>r.children.length));
+  /* Verbundene Zellen (bis 1.3 getrennt): colspan wird gridSpan, rowspan
+     wird vMerge — „restart“ in der ersten Zeile, in jeder weiteren eine
+     leere Fortsetzungszelle an derselben Rasterstelle, wie Word es verlangt.
+     Dafür zuerst das Raster belegen. */
+  const zeilenListe=[...table.rows].filter(tr=>tr.children.length);
+  const belegt=zeilenListe.map(()=>[]);
+  let rasterBreite=0;
+  zeilenListe.forEach((tr,r)=>{
+    let g=0;
+    [...tr.children].forEach(td=>{
+      while(belegt[r][g])g++;
+      const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilenListe.length-r));
+      for(let k=1;k<rs;k++)for(let j=0;j<cs;j++)belegt[r+k][g+j]=j===0?{cs}:{teil:true};
+      g+=cs;
+    });
+    rasterBreite=Math.max(rasterBreite,g,belegt[r].length);
+  });
+  const spalten=rasterBreite;
   const cg=table.querySelector(":scope > colgroup");
   const breiten=cg
     ?[...cg.children].map(c=>ctx.tableWidthTwip*parseFloat(c.style.width)/100)
     :Array(spalten).fill(ctx.tableWidthTwip/Math.max(1,spalten));
   const grid=breiten.map(w=>`<w:gridCol w:w="${Math.round(w)}"/>`).join("");
   let zeilen="";
-  for(const tr of table.rows){
-    /* Eine Zeile ohne Zelle ist in Word ungültig (w:tr verlangt mindestens
-       ein w:tc), und Word meldet die ganze Datei als beschädigt. Entstand
-       aus einer eingefügten Newsletter-Mail, deren Bildzellen herausgefiltert
-       waren. Solche Zeilen fallen weg; bleibt keine, entfällt die Tabelle. */
-    if(!tr.children.length)continue;
+  /* Eine Zeile ohne Zelle ist in Word ungültig (w:tr verlangt mindestens
+     ein w:tc), und Word meldet die ganze Datei als beschädigt. Entstand
+     aus einer eingefügten Newsletter-Mail, deren Bildzellen herausgefiltert
+     waren. Solche Zeilen fallen weg (zeilenListe); bleibt keine, entfällt
+     die Tabelle. */
+  const breiteVon=(g,cs)=>{let s=0;for(let j=g;j<g+cs;j++)s+=breiten[j]||ctx.tableWidthTwip/spalten;return Math.round(s)};
+  for(let r=0;r<zeilenListe.length;r++){
+    const tr=zeilenListe[r];
     const hEm=parseFloat(tr.style.height);
     const trHeight=hEm?`<w:trHeight w:val="${Math.round(hEm*(ctx.docSize)*20)}" w:hRule="atLeast"/>`:"";
-    let zellen="";
-    for(let i=0;i<tr.children.length;i++){
-      const td=tr.children[i];
-      const w=Math.round(breiten[i]||ctx.tableWidthTwip/spalten);
+    let zellen="",g=0;
+    const tds=[...tr.children];
+    while(tds.length||belegt[r][g]){
+      const b=belegt[r][g];
+      if(b&&b.cs){
+        zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,b.cs)}" w:type="dxa"/>${b.cs>1?`<w:gridSpan w:val="${b.cs}"/>`:""}<w:vMerge/></w:tcPr><w:p/></w:tc>`;
+        g+=b.cs;continue;
+      }
+      if(b){g++;continue}
+      const td=tds.shift();
+      const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,td.rowSpan||1);
       const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")
         ?await walkBlocks(td,ctx)
         :absatzZuXml(absatzXml(td,"",null,ctx),ctx);
-      zellen+=`<w:tc><w:tcPr><w:tcW w:w="${w}" w:type="dxa"/></w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
+      zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
+      g+=cs;
     }
     zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
   }
@@ -11048,10 +11096,15 @@ async function figurXml(fig,ctx){
     const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
     return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y,fig.dataset.lage==="hinter")}</w:p>`;
   }
-  return `<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>`
+  /* Ausrichtung des Bildes und seine Unterschrift als Absatz der Vorlage
+     „Beschriftung“ (caption) darunter — beides ging bis 1.3 verloren */
+  const jcB=jcVon(fig)||"center";
+  const cap=fig.querySelector("figcaption");
+  const capXml=cap&&cap.textContent.trim()?absatzZuXml(absatzXml(cap,`<w:pStyle w:val="Caption"/><w:jc w:val="${jcB}"/>`,null,ctx),ctx):"";
+  return `<w:p><w:pPr><w:jc w:val="${jcB}"/></w:pPr><w:r><w:drawing>`
     +`<wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" distT="0" distB="0" distL="0" distR="0">`
     +`<wp:extent cx="${wEmu}" cy="${hEmu}"/><wp:effectExtent l="0" t="0" r="0" b="0"/>`
-    +`<wp:docPr id="${nr}" name="${name}"/>${graphic}</wp:inline></w:drawing></w:r></w:p>`;
+    +`<wp:docPr id="${nr}" name="${name}"/>${graphic}</wp:inline></w:drawing></w:r></w:p>`+capXml;
 }
 /* Bild samt Rahmensperre, wie Word es schreibt (siehe figurXml). */
 function bildGrafikXml(id,nr,name,wEmu,hEmu){
@@ -12884,6 +12937,10 @@ function docxSchalter(pr,n){
   const s=String(v).toLowerCase();
   return s!=="0"&&s!=="false"&&s!=="off"&&s!=="none";
 }
+/* Words Textmarkerfarben (w:highlight) — feste Namen, keine Hexwerte */
+const WORD_MARKER={yellow:"FFFF00",green:"00FF00",cyan:"00FFFF",magenta:"FF00FF",blue:"0000FF",red:"FF0000",
+  darkBlue:"000080",darkCyan:"008080",darkGreen:"008000",darkMagenta:"800080",darkRed:"800000",
+  darkYellow:"808000",darkGray:"808080",lightGray:"C0C0C0",black:"000000",white:"FFFFFF"};
 function docxRPr(pr){
   const o={};["b","i","u","strike","caps"].forEach(n=>{
     const v=docxSchalter(pr,n);if(v!==undefined)o[n]=v});
@@ -12896,6 +12953,17 @@ function docxRPr(pr){
      Dokuments (docxGrundschrift). w:sz steht in Halbpunkten. Eine Designschrift
      (asciiTheme) wird als „@minor“/„@major“ vermerkt und erst mit theme1.xml
      aufgelöst; ein ausdrücklicher Name daneben hat Vorrang. */
+  /* Hoch-/Tiefstellung und Textmarker kamen bis 1.3 beim Öffnen nicht mit —
+     der Export schrieb sie, der Leser übersah sie (gemessen mit dem
+     Umlauf-Prüfwerkzeug). Textmarker gibt es in zwei Formen: w:highlight mit
+     festem Farbnamen (Words Textmarker) und w:shd als Schattierung (so
+     schreibt es dieses Programm, und so kommt es aus LibreOffice). */
+  const va=KIND(pr,"vertAlign");
+  if(va){const v=String(xattr(va,"val")||"");o.vert=v==="superscript"?"sup":v==="subscript"?"sub":null}
+  const shd=KIND(pr,"shd");
+  if(shd){const f=String(xattr(shd,"fill")||"");o.hi=/^[0-9a-f]{6}$/i.test(f)?f.toUpperCase():null}
+  const hl=KIND(pr,"highlight");
+  if(hl){const v=String(xattr(hl,"val")||"");o.hi=v==="none"?null:(WORD_MARKER[v]||o.hi||null)}
   const sz=KIND(pr,"sz");
   if(sz){const v=parseInt(xattr(sz,"val"),10);if(v>0)o.sz=v/2}
   const rf=KIND(pr,"rFonts");
@@ -13026,7 +13094,9 @@ function docxStile(xml){
       erbt:xattrN(KIND(e,"basedOn"),"val")||"",
       rPr:docxRPr(KIND(e,"rPr")),
       sp:docxAbstand(KIND(pPr,"spacing")),
-      gliederung:ol?parseInt(xattr(ol,"val"),10):null
+      gliederung:ol?parseInt(xattr(ol,"val"),10):null,
+      jc:KIND(pPr,"jc")?String(xattr(KIND(pPr,"jc"),"val")||""):null,
+      standard:xattr(e,"default")==="1"
     };
   });
   return {def,stile};
@@ -13041,6 +13111,29 @@ function docxKette(stile,id){
 }
 function docxVorlageWirkung(stile,id){
   const o={};docxKette(stile,id).forEach(s=>Object.assign(o,s.rPr));return o;
+}
+/* Ausrichtung eines Absatzes: direkt am Absatz, sonst aus der Vorlagenkette,
+   sonst aus der Standardvorlage. Bis 1.3 kam jeder Absatz linksbündig an. */
+function docxAusrichtung(stile,pr,vorlage){
+  let v=KIND(pr,"jc")?String(xattr(KIND(pr,"jc"),"val")||""):null;
+  if(v==null){
+    const id=vorlage||Object.keys(stile).find(k=>stile[k].standard&&stile[k].typ==="paragraph")||"";
+    docxKette(stile,id).forEach(s=>{if(s.jc)v=s.jc});
+  }
+  v=String(v||"").toLowerCase();
+  return v==="center"?"center":v==="right"||v==="end"?"right":/^(both|distribute|justify|lowkashida|mediumkashida|highkashida|thaidistribute)$/.test(v)?"justify":"";
+}
+/* Vorlagen, die hier ein eigenes Element haben: Zitat und Bildunterschrift.
+   Erkannt am englischen Namen, den Word für eingebaute Vorlagen in jeder
+   Sprache in die Datei schreibt (die Kennung heißt im deutschen Word
+   „Beschriftung“, der Name bleibt „caption“). */
+function docxVorlagenArt(stile,id){
+  const namen=docxKette(stile,id).map(s=>s.name.toLowerCase()).concat(String(id).toLowerCase());
+  if(namen.some(n=>n==="pq zitat typografisch"||n==="pqzitattypo"))return "zitat:typo";
+  if(namen.some(n=>n==="intense quote"||n==="intensequote"))return "zitat:toent";
+  if(namen.some(n=>n==="quote"))return "zitat:";
+  if(namen.some(n=>n==="caption"))return "unterschrift";
+  return "";
 }
 /* Der Name steht sprachabhängig in der Datei („Heading 1", „Überschrift 1“,
    „Titre 1“). Verlässlicher ist outlineLvl, das Word unabhängig davon setzt —
@@ -13712,6 +13805,18 @@ function docxLauf(p,ktx,innen){
       out+=`<ins class="wins" data-roh="${id}">`+docxLauf(el,ktx,true)+"</ins>";
       return;
     }
+    /* Ein Link bleibt ein Link (bis 1.3 blieb nur das Blau und der Strich):
+       Ziel aus der Beziehungsdatei, nur Web, Mail und FTP — ein
+       „javascript:“ aus einer fremden Datei darf hier nicht klickbar werden.
+       Unterstreichung und Farbe der Linkvorlage zeichnet der Link selbst. */
+    if(el.localName==="hyperlink"){
+      const rid=el.getAttribute("r:id")||el.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships","id");
+      const r=rid&&ktx&&ktx.roh&&ktx.roh.rels[rid];
+      const ziel=r&&r.mode==="External"&&/^(https?:|mailto:|ftp:)/i.test(r.target)?r.target:"";
+      const innen=docxLauf(el,ktx&&ziel?Object.assign({},ktx,{imLink:true}):ktx,true);
+      out+=ziel?`<a href="${esc(ziel)}">${innen}</a>`:innen;
+      return;
+    }
     if(DOCX_HUELLE_LAUF.has(el.localName)){out+=docxLauf(el,ktx,true);return}
     if(el.localName==="sdt"){const k=docxSdtInhalt(el);if(k)out+=docxLauf(k,ktx,true);return}
     if(WROH_ABSATZ.has(el.localName)){
@@ -13731,6 +13836,8 @@ function docxLauf(p,ktx,innen){
     let t="",marke="";
     [...el.children].forEach(c=>{
       if(c.localName==="t")t+=xesc(c.textContent);
+      /* Seitenumbruch: eine Marke, an der absatz() den Absatz teilt */
+      else if(c.localName==="br"&&String(xattr(c,"type")||"")==="page")marke+=DOCX_SEITENMARKE;
       else if(c.localName==="br")t+="<br>";
       /* Ein echter Tabulator statt eines Leerzeichens (bis 1.2) */
       else if(c.localName==="tab")t+='<span class="wtab" contenteditable="false">\t</span>';
@@ -13791,8 +13898,9 @@ function docxLauf(p,ktx,innen){
        in em zur Dokumentgröße: absolute pt gingen am Zoom vorbei, und
        ändert man die Dokumentgröße, bleiben die Verhältnisse. In
        Überschriften entscheidet weiter die Überschrift über die Größe. */
-    const stil=[];
-    if(wirk.color)stil.push("color:#"+wirk.color);
+    const stil=[],imLink=!!(ktx&&ktx.imLink);
+    if(wirk.color&&!imLink)stil.push("color:#"+wirk.color);
+    if(wirk.hi)stil.push("background-color:#"+wirk.hi);
     if(wirk.caps)stil.push("text-transform:uppercase");
     /* Seit 1.3 wortgenau wie in Word (Toms Vorgabe: „astrein, so wie es
        war“): Größe absolut in pt, auch in Überschriften, sobald sie von dem
@@ -13809,14 +13917,18 @@ function docxLauf(p,ktx,innen){
     if(stil.length)t='<span style="'+stil.join(";")+'">'+t+"</span>";
     if(wirk.b&&!(ktx&&ktx.ohneFett))t="<b>"+t+"</b>";
     if(wirk.i)t="<i>"+t+"</i>";
-    if(wirk.u)t="<u>"+t+"</u>";
+    if(wirk.u&&!imLink)t="<u>"+t+"</u>";
     if(wirk.strike)t="<s>"+t+"</s>";
+    if(wirk.vert==="sup")t="<sup>"+t+"</sup>";
+    else if(wirk.vert==="sub")t="<sub>"+t+"</sub>";
     out+=t+marke;
   });
   if(kom)out+="</span>".repeat(kom.offen.length);
   return out;
 }
 
+const DOCX_SEITENMARKE="";
+const seitenumbruchHtml=()=>'<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div>';
 function docxToHtml(xml,stilXml,numXml,zubehoer){
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return null;
@@ -13858,9 +13970,12 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const grund=Object.assign({},def,docxVorlageWirkung(stile,vorlage));
     const h=docxUeberschrift(stile,vorlage);
     if(h)delete grund.b;
-    const lktx={stile,grund,ohneFett:!!h,ueberschrift:!!h,stufe:h,groesse:grundGroesse,fn,en,bild,roh:z.roh,kom,
+    /* Zitat und Bildunterschrift: Kursiv und Größe der Vorlage sind deren
+       Aussehen, kein Textformat — sonst stünde danach <i> im Zitat */
+    const art=h?"":docxVorlagenArt(stile,vorlage);
+    const lktx={stile,grund:art?Object.assign({},def):grund,ohneFett:!!h,ueberschrift:!!h,stufe:h,groesse:grundGroesse,fn,en,bild,roh:z.roh,kom,
       thema:z.thema||{},grundSchrift:gs.quelle||""};
-    const inhalt=docxLauf(p,lktx)||"";
+    let inhalt=docxLauf(p,lktx)||"";
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
     const numPr=KIND(pr,"numPr");
@@ -13896,11 +14011,36 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         stapel[stapel.length-1].numId=numId;
         const jetzt=stapel[stapel.length-1];
         if(jetzt.offen)out+="</li>";
-        out+="<li"+wa+">"+(inhalt||"<br>");jetzt.offen=true;
+        out+="<li"+wa+">"+(inhalt.split(DOCX_SEITENMARKE).join("")||"<br>");jetzt.offen=true;
         return;
       }
     }
     alleZu();
+    /* Seitenumbruch vor dem Absatz (Absatzeigenschaft) oder mitten darin
+       (w:br w:type="page"): bis 1.3 ein bloßer Zeilenumbruch */
+    if(docxSchalter(pr,"pageBreakBefore"))out+=seitenumbruchHtml();
+    if(inhalt.includes(DOCX_SEITENMARKE)){
+      const teile=inhalt.split(DOCX_SEITENMARKE);
+      teile.forEach((t,i)=>{
+        if(i)out+=seitenumbruchHtml();
+        if(t.replace(/<[^>]+>/g,"").trim()||/<(img|figure|br)\b/.test(t))absatzTeil(t,pr,vorlage,h,art,wa);
+      });
+      return;
+    }
+    absatzTeil(inhalt,pr,vorlage,h,art,wa);
+  };
+  const absatzTeil=(inhalt,pr,vorlage,h,art,wa)=>{
+    const al=docxAusrichtung(stile,pr,vorlage);
+    /* Bildunterschrift direkt unter einem Bild: in dessen Figur */
+    if(art==="unterschrift"&&/<figure class="fig"[^>]*>(?:(?!<figure)[\s\S])*<\/figure>$/.test(out)&&!/<figcaption/.test(out.slice(out.lastIndexOf("<figure")))){
+      out=out.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+(inhalt||"")+"</figcaption></figure>");
+      return;
+    }
+    if(art.startsWith("zitat:")){
+      const qs=art.slice(6);
+      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</blockquote>";
+      return;
+    }
     /* Ein Bild ist hier ein eigener Block. Steht im Absatz nichts als das
        Bild, tritt die Figur an seine Stelle; steht Text daneben, folgt sie
        ihm — verschachtelt im <p> wäre sie ungültiges Markup. */
@@ -13911,10 +14051,13 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const umfl=figuren.filter(f=>/^<figure class="fig umfl"/.test(f));
       out+=umfl.join("");
       if(rest||wa)out+="<p"+wa+">"+(rest||"<br>")+"</p>";
-      out+=figuren.filter(f=>!umfl.includes(f)).join("");
+      /* Ein Bild steht, wie sein Absatz ausgerichtet ist — ohne Angabe links
+         wie in Word; bis 1.3 kam jedes zentriert an */
+      const bal=al==="right"||al==="center"?al:"left";
+      out+=figuren.filter(f=>!umfl.includes(f)).map(f=>f.replace('style="text-align:center"','style="text-align:'+bal+'"')).join("");
       return;
     }
-    if(h)out+="<h"+h+wa+">"+(inhalt||"<br>")+"</h"+h+">";
+    if(h)out+="<h"+h+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</h"+h+">";
     else{
       /* Linker Einzug, in em wie beim Einrücken im Editor (indentBlocks).
          Nur der direkte am Absatz: der einer Vorlage gehört meist zu einer
@@ -13925,7 +14068,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const links=zuEm("left")||zuEm("start");
       /* Erstzeileneinzug (firstLine) bzw. hängender Einzug (hanging) */
       const erste=zuEm("firstLine")||-zuEm("hanging");
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em"].filter(Boolean).join(";");
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
       out+=(st?'<p style="'+st+'"'+wa+">":"<p"+wa+">")+(inhalt||"<br>")+"</p>";
     }
   };
@@ -13939,6 +14082,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       .map(c=>parseInt(xattrN(c,"w"),10)||0):[];
     const summe=spalten.reduce((a,b)=>a+b,0);
     let r=docxTabelleMitRahmen(t,rahmenStile)?"<table>":'<table data-rahmen="ohne">';
+    /* senkrecht: Spalte → laufende Verbindung; alleSenkrecht hält jede fest */
+    const senkrecht={},alleSenkrecht={};let zellNr=0;
     if(spalten.length&&summe>0)
       r+="<colgroup>"+spalten.map(w=>
         `<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
@@ -13956,7 +14101,20 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         else if(x.localName==="sdt"){const k=docxSdtInhalt(x);if(k)sammle(k)}
         else if(DOCX_HUELLE_BLOCK.has(x.localName))sammle(x)});
       sammle(tr);
+      /* Verbundene Zellen (bis 1.3 getrennt): gridSpan waagerecht wird
+         colspan; vMerge senkrecht — „restart“ beginnt, eine Zelle ohne Wert
+         setzt fort und fällt weg, die obere bekommt rowspan dazu. Die
+         Spaltenposition im Raster sagt, welche obere gemeint ist. */
+      let spalte=0;
       zellen.forEach(tc=>{
+        const tcPr=KIND(tc,"tcPr");
+        const breit=Math.max(1,parseInt(xattrN(KIND(tcPr,"gridSpan"),"val"),10)||1);
+        const vm=KIND(tcPr,"vMerge"),vmw=vm?String(xattr(vm,"val")||"continue"):"";
+        const hier=spalte;spalte+=breit;
+        if(vmw==="continue"&&senkrecht[hier]){senkrecht[hier].n++;return}
+        const nr=++zellNr;
+        if(vmw==="restart"){const s={nr,n:1};senkrecht[hier]=s;alleSenkrecht[nr]=s}else delete senkrecht[hier];
+        const spanne=(breit>1?' colspan="'+breit+'"':"")+''+nr+'';
         /* Absätze einer Zelle bleiben Absätze — vorher wurden sie mit
            Zeilenumbrüchen zu einem zusammengezogen und verloren ihren
            Abstand. Eine Zelle mit nur einem Absatz bleibt schlicht Text,
@@ -13967,11 +14125,13 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         let inner;
         if(teile.length===1&&teile[0].text!==undefined)inner=teile[0].text;
         else inner=teile.map(x=>x.tabelle!==undefined?x.tabelle:"<p>"+(x.text||"<br>")+"</p>").join("");
-        r+="<td>"+(inner||"&nbsp;")+"</td>";
+        r+="<td"+spanne+">"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
-    return r+"</table>";
+    /* rowspan erst am Ende bekannt: die Platzhalter je Zelle auflösen */
+    const hoehe={};Object.values(alleSenkrecht).forEach(s=>{if(s.n>1)hoehe[s.nr]=s.n});
+    return (r+"</table>").replace(/(\d+)/g,(m,nr)=>hoehe[nr]?' rowspan="'+hoehe[nr]+'"':"");
   };
   let nachTabelle=false;
   docxBloecke(body).forEach(el=>{

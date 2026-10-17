@@ -47,6 +47,24 @@ immer genau einen Commit, der sie anfasst.
 
 ### Behoben
 
+- **Word-Umlauf: neun Merkmale gingen verloren** (gefunden mit einem neuen
+  Umlauf-Prüfwerkzeug, das ein Dokument mit allem als Word speichert, wieder
+  öffnet und mit dem Original vergleicht). Beim **Öffnen** jeder Word-Datei
+  fehlten Ausrichtung (alles kam linksbündig), Hoch-/Tiefstellung,
+  Textmarker (`w:highlight` und `w:shd`) und Linkziele (nur noch blauer,
+  unterstrichener Text); beim **Speichern** fehlten Seitenumbrüche (leerer
+  Absatz), verbundene Zellen, Bildunterschriften, und Zitate wurden zu
+  eingerücktem Kursivtext. Jetzt in beide Richtungen: Ausrichtung an
+  Absätzen, Überschriften und Bildern; `<sup>`/`<sub>`; Textmarker; Links
+  (nur http/https/mailto/ftp werden klickbar); Seitenumbruch als
+  `w:br w:type="page"` bzw. `pageBreakBefore`; colspan/rowspan als
+  `gridSpan`/`vMerge`; Bildunterschrift als Vorlage „Beschriftung“
+  (caption) unter dem Bild; Zitate als Vorlagen „Zitat“/„Intensives Zitat“
+  (und eine eigene für die typografische Art). Verhaltensänderung: Bilder
+  aus Word stehen wie ihr Absatz ausgerichtet, ohne Angabe links wie in
+  Word — bisher kam jedes zentriert. Umlauf ist ein Fixpunkt, Tom hat die
+  gespeicherte Datei in Word geöffnet und alles bestätigt (2026-10-17).
+
 - **Großschreibung nach Abkürzungen, und sie ließ sich nicht zurücknehmen.**
   Die Autokorrektur machte nach jedem „. “ groß, auch mitten im Satz nach
   „z.B.“, „ca.“ oder „bzw.“. Rücktaste und wieder klein getippt ergab sofort
