@@ -240,6 +240,25 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Schriftauswahl wie in Word.** Statt der festen Liste mit rund 30
+  Schriften ein beschreibbares Feld mit eigener Liste: oben „Zuletzt
+  verwendet“ (fünf), darunter „Alle Schriftarten“ mit Anzahl, beide
+  zuklappbar, jede Schrift größer und in ihrer eigenen Form. Tippen filtert
+  (Anfangstreffer zuerst), Pfeiltasten wandern, Eingabe übernimmt, Escape
+  bricht ab; ein Name, der nicht in der Liste steht, aber installiert ist,
+  lässt sich eintippen. Woher „alle“ kommen: in der App vom System
+  (queryLocalFonts), im Browser **ohne Erlaubnisabfrage** (Toms Wunsch) über
+  rund 300 bekannte Namen (Windows, Office, macOS, Linux), die einzeln auf
+  Vorhandensein geprüft werden — auf Toms Rechner 131 Schriften. Umleitungen
+  wie Helvetica → Arial und die Linux-Zwillinge erscheinen nicht doppelt.
+  Weggelassen: Schriften für andere Schriftsysteme (CJK, Arabisch,
+  Hebräisch, Thai, indische …) und Symbolschriften (Wingdings & Co.); steht
+  eine davon im Dokument, erscheint sie trotzdem. Dabei behoben: Kam der
+  Fokus aus einem Eingabefeld, setzte `edAuswahlHolen` die Schreibmarke an
+  den Dokumentanfang statt auf die Markierung — gilt auch fürs Größenfeld.
+  Die Auswahl im Dialog „Neues Dokument“ und in den Einstellungen bleibt
+  bei der kurzen Liste.
+
 - **Handy-Ansicht in der Browserfassung** (Bildschirm bis 600 px breit, die
   Store- und Desktopfassung bleibt unberührt). Bisher stand dort die A4-Seite
   in voller Breite, der Text lief rechts hinaus, und vier Werkzeugzeilen

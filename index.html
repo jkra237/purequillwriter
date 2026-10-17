@@ -366,6 +366,17 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   border-right:4px solid transparent;border-top:5px solid currentColor}
 .combo .cbdrop:hover{background:var(--chrome-2);color:var(--ink)}
 .combo:focus-within{border-color:var(--ink-soft)}
+/* Schriftfeld: beschreibbar wie die Größe, Liste wie Word (schriftMenue) */
+.tools .combo.fcombo input[type=text]{width:150px;text-align:left;padding:3px 4px 3px 7px;font-variant-numeric:normal;text-overflow:ellipsis}
+.fontmenu{min-width:250px!important;max-width:340px;padding:4px 4px 6px}
+.fontmenu .fi{font-size:15px;line-height:1.25;padding:5px 10px 5px 26px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.fontmenu .fi.on{background:var(--chrome-2)}
+.fontmenu .fi.mark{background:var(--chrome);outline:1px solid var(--rule)}
+.fontmenu .fsek{display:flex;align-items:center;gap:8px;width:100%;padding:7px 10px 4px;font-weight:600;font-size:12.5px;color:var(--ink);text-align:left}
+.fontmenu .fsek .fz{margin-left:auto;font-weight:400;color:var(--ink-soft);font-size:11.5px}
+.fontmenu .fsek .fpf{color:var(--ink-soft);width:10px;text-align:center}
+.fontmenu .fsek:not(:has(.fz)) .fpf{margin-left:auto}
+.fontmenu .fleer{padding:6px 10px 6px 26px;color:var(--ink-soft);font-size:12.5px}
 .tb{width:26px;height:24px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
 .tb:hover{background:var(--chrome-2);color:var(--ink)}
 .tb.on{background:var(--chrome);color:var(--stamp)}
@@ -1871,6 +1882,120 @@ function schriftOptionen(aktuell){
   return liste.map(f=>`<option value="${esc(f)}" ${f===aktuell?"selected":""} style="font-family:${esc(schriftStapel(f))}">${esc(f)}${
     schriftDa(f)?"":" ("+tr("nicht installiert")+")"}</option>`).join("");
 }
+/* ---- Schriftliste wie Word (seit 1.3) ----
+   Word zeigt alle installierten Schriften. Die App fragt dafür das System
+   (queryLocalFonts — Electron gibt die Erlaubnis ohne Rückfrage). Im Browser
+   bräuchte derselbe Weg eine Erlaubnisabfrage, die Tom nicht will; dort wird
+   stattdessen diese lange Liste bekannter Namen einzeln geprüft (schriftDa,
+   ohne Erlaubnis): Windows, Office samt Cloud-Schriften, macOS, gängige
+   Linux-Schriften. Was nicht darauf steht, lässt sich eintippen.
+   Nur Schriften für lateinische Schrift — siehe SCHRIFT_FREMD. */
+const SCHRIFT_KANDIDATEN=(
+  "Arial Black,Arial Narrow,Arial Nova,Arial Rounded MT Bold,Bahnschrift,Calibri Light,Candara Light,"+
+  "Cascadia Code,Cascadia Mono,Corbel Light,Franklin Gothic Medium,Gabriola,Impact,Lucida Console,"+
+  "Lucida Sans Unicode,Microsoft Sans Serif,Segoe Print,Segoe Script,Segoe UI Black,Segoe UI Light,"+
+  "Segoe UI Semibold,Segoe UI Semilight,Segoe UI Variable Display,Segoe UI Variable Text,"+
+  "Sitka Banner,Sitka Display,Sitka Heading,Sitka Small,Sitka Subheading,"+
+  "Agency FB,Algerian,Aptos Display,Aptos Mono,Aptos Narrow,Aptos Serif,Baskerville Old Face,Bauhaus 93,"+
+  "Bell MT,Berlin Sans FB,Berlin Sans FB Demi,Bernard MT Condensed,Blackadder ITC,Bodoni MT,Bodoni MT Black,"+
+  "Bodoni MT Condensed,Bookman Old Style,Bradley Hand ITC,Britannic Bold,Broadway,Brush Script MT,"+
+  "Californian FB,Calisto MT,Castellar,Centaur,Century,Century Schoolbook,Chiller,Colonna MT,Cooper Black,"+
+  "Copperplate Gothic Bold,Copperplate Gothic Light,Curlz MT,Edwardian Script ITC,Elephant,Engravers MT,"+
+  "Eras Bold ITC,Eras Demi ITC,Eras Light ITC,Eras Medium ITC,Felix Titling,Footlight MT Light,Forte,"+
+  "Franklin Gothic Book,Franklin Gothic Demi,Franklin Gothic Demi Cond,Franklin Gothic Heavy,"+
+  "Franklin Gothic Medium Cond,Freestyle Script,French Script MT,Gigi,Gill Sans MT,Gill Sans MT Condensed,"+
+  "Gill Sans Ultra Bold,Gloucester MT Extra Condensed,Goudy Old Style,Goudy Stout,Haettenschweiler,"+
+  "Harlow Solid Italic,Harrington,High Tower Text,Imprint MT Shadow,Informal Roman,Jokerman,Juice ITC,"+
+  "Kristen ITC,Kunstler Script,Lucida Bright,Lucida Calligraphy,Lucida Fax,Lucida Handwriting,Lucida Sans,"+
+  "Lucida Sans Typewriter,Magneto,Maiandra GD,Matura MT Script Capitals,Mistral,Modern No. 20,"+
+  "Monotype Corsiva,Niagara Engraved,Niagara Solid,OCR A Extended,Old English Text MT,Onyx,"+
+  "Palace Script MT,Papyrus,Parchment,Perpetua,Perpetua Titling MT,Playbill,Poor Richard,Pristina,"+
+  "Rage Italic,Ravie,Rockwell,Rockwell Condensed,Rockwell Extra Bold,Script MT Bold,Showcard Gothic,"+
+  "Snap ITC,Stencil,Tempus Sans ITC,Tw Cen MT,Tw Cen MT Condensed,Tw Cen MT Condensed Extra Bold,"+
+  "Viner Hand ITC,Vivaldi,Vladimir Script,Wide Latin,"+
+  "Abadi,Avenir Next LT Pro,Bierstadt,Daytona,Grandview,Seaford,Skeena,Tenorite,Walbaum Display,"+
+  "Helvetica,Helvetica Neue,Avenir,Avenir Next,Futura,Gill Sans,Optima,Palatino,Baskerville,Didot,"+
+  "Hoefler Text,American Typewriter,Menlo,Monaco,Courier,Times,Geneva,Lucida Grande,Charter,"+
+  "Iowan Old Style,Big Caslon,Bodoni 72,Cochin,Copperplate,Marker Felt,Noteworthy,Chalkboard,"+
+  "Chalkboard SE,Chalkduster,Bradley Hand,Snell Roundhand,Zapfino,Athelas,Seravek,Superclarendon,"+
+  "Skia,Herculanum,Luminari,Savoye LET,Apple Chancery,Andale Mono,PT Sans,PT Serif,PT Mono,"+
+  "DejaVu Sans,DejaVu Serif,DejaVu Sans Mono,Liberation Sans,Liberation Serif,Liberation Mono,"+
+  "Noto Sans,Noto Serif,Noto Sans Mono,Ubuntu,Ubuntu Mono,Ubuntu Condensed,Cantarell,Open Sans,Roboto,"+
+  "Roboto Slab,Roboto Mono,Roboto Condensed,Source Sans Pro,Source Sans 3,Source Serif Pro,Source Serif 4,"+
+  "Source Code Pro,Fira Sans,Fira Code,Fira Mono,Lato,Montserrat,Droid Sans,Droid Serif,Droid Sans Mono,"+
+  "Carlito,Caladea,Comic Neue,EB Garamond,Gelasio,Inter,Linux Libertine O,Linux Biolinum O,"+
+  "Libertinus Serif,Libertinus Sans,TeX Gyre Adventor,TeX Gyre Bonum,TeX Gyre Cursor,TeX Gyre Heros,"+
+  "TeX Gyre Pagella,TeX Gyre Schola,TeX Gyre Termes,URW Bookman,URW Gothic,P052,C059,Nimbus Sans,"+
+  "Nimbus Roman,Nimbus Mono PS,Bitstream Charter,Gentium,Gentium Plus,Crimson Text,Merriweather,"+
+  "Oswald,Raleway,Playfair Display,Hack,JetBrains Mono,IBM Plex Sans,IBM Plex Serif,IBM Plex Mono,"+
+  "Atkinson Hyperlegible,OpenDyslexic,Lexend,Arimo,Tinos,Cousine,Work Sans,Nunito,Poppins,Quicksand"
+).split(",");
+/* Schriften für andere Schriftsysteme (CJK, Arabisch, Hebräisch, Thai,
+   indische und afrikanische Schriften …) und Symbolschriften: sie stehen
+   nicht in der Liste, steht aber eine im Dokument, erscheint sie trotzdem.
+   Für Text in diesen Schriftsystemen sucht der Browser die Schrift selbst. */
+const SCHRIFT_FREMD=new RegExp("^("+[
+  "Malgun","MS Gothic","MS Mincho","MS PGothic","MS PMincho","MS UI Gothic","Meiryo","Yu Gothic","Yu Mincho",
+  "Microsoft (YaHei|JhengHei|Himalaya|New Tai Lue|PhagsPa|Tai Le|Uighur|Yi Baiti|MHei|NeoGothic)",
+  "SimSun","NSimSun","SimHei","SimKai","KaiTi","FangSong","DengXian","MingLiU","PMingLiU","Gulim","GulimChe",
+  "Dotum","DotumChe","Batang","BatangChe","Gungsuh","GungsuhChe","Ebrima","Gadugi","Nirmala","Leelawadee",
+  "Javanese Text","Myanmar Text","Mongolian Baiti","MV Boli","Khmer","Lao( |$)","Iskoola","Kalinga","Mangal",
+  "Raavi","Shruti","Tunga","Vrinda","Latha","Gautami","Kartika","Aparajita","Kokila","Utsaah","Vijaya",
+  "Vani$","Shonar","Sakkal","Traditional Arabic","Simplified Arabic","Arabic Typesetting","Urdu Typesetting",
+  "Aldhabi","Andalus","David( |$)","FrankRuehl","Miriam( |$)","Narkisim","Levenim","Gisha$","Rod$","Aharoni",
+  "Angsana","Browallia","Cordia","DilleniaUPC","EucrosiaUPC","FreesiaUPC","IrisUPC","JasmineUPC",
+  "KodchiangUPC","LilyUPC","DaunPenh","DokChampa","Estrangelo","Euphemia","Plantagenet","Sylfaen","Nyala",
+  "Segoe UI (Emoji|Symbol|Historic)","Segoe (MDL2|Fluent) Assets","HoloLens","Wingdings","Webdings",
+  "Symbol$","Marlett","MT Extra","Bookshelf Symbol","Cambria Math","Arial Unicode","Lucida Sans Unicode Symbols",
+  "Lohit","Kacst","Samyak","Gargi","Padauk","Abyssinica","Mukti","Rachana","Meera","Pothana","Waree",
+  "Umpush","Garuda","Loma$","Kinnari","Norasi","Purisa","Sawasdee","Tlwg","Laksaman","Tibetan","Jamrul",
+  "Likhan","Chandas","Kalimati","Nakula","Sahadeva","Suruma","Dyuthi","AnjaliOldLipi","Keraleeyam",
+  "Uroob","Manjari","Gubbi","Navilu","Saab$","Phetsarath","Droid Sans (Fallback|Arabic|Hebrew|Japanese|Thai|Armenian|Georgian|Ethiopic)",
+  "AR PL","WenQuanYi","Baekmuk","Un(Dotum|Batang)","Nanum","Takao","IPA","VL Gothic","Source Han",
+  "OpenSymbol","Standard Symbols","D050000L","Symbola","Font Awesome","Material (Icons|Symbols)",
+  "Hiragino","PingFang","Heiti","Songti","STHeiti","STSong","STKaiti","Kohinoor","Al Bayan","Baghdad",
+  "Damascus","Geeza","Mishafi","Nadeem","Ayuthaya","Thonburi","Krungthep","Apple SD Gothic","AppleGothic",
+  "AppleMyungjo","Apple Color Emoji","Apple Symbols","Zapf Dingbats","Bodoni Ornaments","Kailasa","Kefa$",
+  "Noto (Color )?Emoji","Noto (Sans|Serif) (?!(Mono|Display)$)","Noto (Kufi|Naskh|Nastaliq|Music|Rashi|Traditional|Znamenny)",
+  "Emoji","Twemoji","EmojiOne"
+].join("|")+")","i");
+const schriftLatein=n=>!!n&&!/[^\u0000-ɏ]/.test(n)&&!SCHRIFT_FREMD.test(n);
+/* Fingerabdruck einer Schrift über drei Grundschriften: zwei Namen mit
+   gleichem Abdruck sind dieselbe Schrift (Windows leitet „Helvetica“ still
+   auf Arial um) — die zweite entfällt. */
+function schriftAbdruck(n){
+  const x=schriftDa.x||(schriftDa.x=document.createElement("canvas").getContext("2d"));
+  const t="mmmmmmmmmmlliWWQQ@@ ßäöü 0123456789";
+  return ["monospace","serif","sans-serif"].map(b=>{x.font='72px "'+String(n).replace(/"/g,"")+'",'+b;return x.measureText(t).width.toFixed(2)}).join("/");
+}
+let schriftenCache=null;
+async function schriftenAlle(){
+  if(schriftenCache)return schriftenCache;
+  let namen=null;
+  if(PQWD()&&window.queryLocalFonts){
+    try{const l=await window.queryLocalFonts();if(l&&l.length)namen=[...new Set(l.map(f=>f.family))].filter(schriftLatein)}catch(e){}
+  }
+  if(namen){
+    /* Die bekannten über ihre Zwillinge dazu — unter Linux heißt Arial dort Liberation Sans */
+    const k=new Set(namen.map(n=>n.toLowerCase()));
+    FONTS.forEach(f=>{if(!k.has(f.toLowerCase())&&schriftDa(f))namen.push(f)});
+  }else{
+    const gesehen=new Map();namen=[];
+    for(const n of [...FONTS,...SCHRIFT_KANDIDATEN]){
+      if(namen.includes(n)||!schriftDa(n))continue;
+      const a=FONTS.includes(n)?null:schriftAbdruck(n);
+      if(a){if(gesehen.has(a))continue;gesehen.set(a,n)}
+      namen.push(n);
+    }
+    /* Abdrücke der FONTS nachtragen, damit z. B. Helvetica hinter Arial entfällt */
+    const fa=new Set(FONTS.filter(f=>namen.includes(f)).map(schriftAbdruck));
+    namen=namen.filter(n=>FONTS.includes(n)||!fa.has(schriftAbdruck(n)));
+  }
+  /* Zwillinge nicht doppelt: steht das Original drin, entfällt der Zwilling */
+  const zw=new Set();FONTS.forEach(f=>{if(namen.includes(f))(SCHRIFT_DOPPEL[f]||[]).forEach(z=>zw.add(z.toLowerCase()))});
+  namen=namen.filter(n=>!zw.has(n.toLowerCase()));
+  return schriftenCache=namen.sort((a,b)=>a.localeCompare(b));
+}
 /* Freie Doppelgänger, vor allem für Linux: Chromium ersetzt dort nur
    maßgleiche Schriften selbst (Calibri→Carlito, Cambria→Caladea, Arial/Times/
    Courier→Liberation), die übrigen fielen alle auf dieselbe Grundschrift.
@@ -2327,6 +2452,12 @@ en:{
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
   "Seitenansicht":"Page view",
+  "Zuletzt verwendet":"Recently used",
+  "Alle Schriftarten":"All fonts",
+  "Schriftart wählen":"Choose font",
+  "Eingabetaste übernimmt":"Press Enter to use",
+  "Keine Schrift gefunden":"No font found",
+  "Schrift nicht gefunden":"Font not found",
   "Bitte die Datei noch einmal auswählen.":"Please select the file again.",
   "Text umfließt":"Wrap text",
   "Layout":"Layout",
@@ -3187,6 +3318,12 @@ fr:{
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
   "Seitenansicht":"Affichage page",
+  "Zuletzt verwendet":"Récemment utilisées",
+  "Alle Schriftarten":"Toutes les polices",
+  "Schriftart wählen":"Choisir la police",
+  "Eingabetaste übernimmt":"Entrée pour utiliser",
+  "Keine Schrift gefunden":"Aucune police trouvée",
+  "Schrift nicht gefunden":"Police introuvable",
   "Bitte die Datei noch einmal auswählen.":"Veuillez sélectionner le fichier à nouveau.",
   "Text umfließt":"Habillage du texte",
   "Layout":"Disposition",
@@ -4047,6 +4184,12 @@ es:{
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
   "Seitenansicht":"Vista de página",
+  "Zuletzt verwendet":"Usadas recientemente",
+  "Alle Schriftarten":"Todas las fuentes",
+  "Schriftart wählen":"Elegir fuente",
+  "Eingabetaste übernimmt":"Pulse Intro para usar",
+  "Keine Schrift gefunden":"No se encontró ninguna fuente",
+  "Schrift nicht gefunden":"Fuente no encontrada",
   "Bitte die Datei noch einmal auswählen.":"Vuelve a seleccionar el archivo.",
   "Text umfließt":"Ajustar texto",
   "Layout":"Diseño",
@@ -4907,6 +5050,12 @@ pt:{
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
   "Seitenansicht":"Visualização de página",
+  "Zuletzt verwendet":"Usadas recentemente",
+  "Alle Schriftarten":"Todos os tipos de letra",
+  "Schriftart wählen":"Escolher tipo de letra",
+  "Eingabetaste übernimmt":"Prima Enter para usar",
+  "Keine Schrift gefunden":"Nenhum tipo de letra encontrado",
+  "Schrift nicht gefunden":"Tipo de letra não encontrado",
   "Bitte die Datei noch einmal auswählen.":"Selecione o arquivo novamente.",
   "Text umfließt":"Quebra de texto",
   "Layout":"Layout",
@@ -5767,6 +5916,12 @@ pl:{
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
   "Seitenansicht":"Widok strony",
+  "Zuletzt verwendet":"Ostatnio używane",
+  "Alle Schriftarten":"Wszystkie czcionki",
+  "Schriftart wählen":"Wybierz czcionkę",
+  "Eingabetaste übernimmt":"Naciśnij Enter, aby użyć",
+  "Keine Schrift gefunden":"Nie znaleziono czcionki",
+  "Schrift nicht gefunden":"Nie znaleziono czcionki",
   "Bitte die Datei noch einmal auswählen.":"Wybierz plik jeszcze raz.",
   "Text umfließt":"Tekst opływa",
   "Layout":"Układ",
@@ -6634,6 +6789,12 @@ it:{
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
   "Seitenansicht":"Vista pagina",
+  "Zuletzt verwendet":"Usati di recente",
+  "Alle Schriftarten":"Tutti i tipi di carattere",
+  "Schriftart wählen":"Scegli tipo di carattere",
+  "Eingabetaste übernimmt":"Premi Invio per usare",
+  "Keine Schrift gefunden":"Nessun tipo di carattere trovato",
+  "Schrift nicht gefunden":"Tipo di carattere non trovato",
   "Bitte die Datei noch einmal auswählen.":"Seleziona di nuovo il file.",
   "Text umfließt":"Testo a capo",
   "Layout":"Layout",
@@ -7441,6 +7602,7 @@ S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
 if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
+if(S.settings&&!Array.isArray(S.settings.schriftZuletzt))S.settings.schriftZuletzt=[];
 /* „Oberfläche ausblenden“ ist aus, bis der Benutzer es einschaltet. Die frühere
    Fassung war voreingestellt an und hat das auch so gespeichert — daher einmalig
    abschalten; wer es danach anschaltet, behält es. */
@@ -7825,7 +7987,11 @@ function drawTools(){
   const T=$("#tools"),d=doc();
   if(S.mode==="write"){
     T.innerHTML=`
-      <select id="fFont" title="${tr("Schriftart")}">${schriftOptionen(d.font||S.settings.font)}</select>
+      <span class="combo fcombo" title="${tr("Schriftart")}">
+        <input type="text" id="fFont" autocomplete="off" spellcheck="false" aria-label="${tr("Schriftart")}"
+          value="${esc(d.font||S.settings.font)}" data-wert="${esc(d.font||S.settings.font)}">
+        <button class="cbdrop" id="fFontList" aria-label="${tr("Schriftart wählen")}"></button>
+      </span>
       <span class="combo" title="${tr("Schriftgröße")}">
         <input type="text" id="fSize" inputmode="decimal" autocomplete="off"
           value="${d.size||S.settings.size}" aria-label="${tr("Schriftgröße")}">
@@ -8267,9 +8433,12 @@ function setFontSize(v){
 let wartendeGroesse=null,schriftTippen=false;
 function edAuswahlHolen(){
   const ed=$("#editor");if(!ed)return null;
+  /* Kam der Fokus aus einem Eingabefeld (Schrift, Größe), setzt ed.focus()
+     die Schreibmarke an den Anfang — dann gilt die zuletzt gemerkte Stelle */
+  const warDrin=document.activeElement===ed;
   ed.focus();
   const sel=getSelection();
-  if(!(sel.rangeCount&&ed.contains(sel.anchorNode))&&letzteEdRange&&ed.contains(letzteEdRange.startContainer)){
+  if((!warDrin||!(sel.rangeCount&&ed.contains(sel.anchorNode)))&&letzteEdRange&&ed.contains(letzteEdRange.startContainer)){
     sel.removeAllRanges();sel.addRange(letzteEdRange.cloneRange())}
   return sel.rangeCount&&ed.contains(sel.anchorNode)?sel:null;
 }
@@ -8400,15 +8569,89 @@ function schriftFelderSetzen(){
   el.forEach(e=>{const cs=getComputedStyle(e);
     namen.add(cs.fontFamily.split(",")[0].replace(/["']/g,"").trim());
     groessen.add(Math.round(parseFloat(cs.fontSize)*72/96/z*2)/2)});
-  if(namen.size===1){
-    const n=[...namen][0];
-    if(![...ff.options].some(o=>o.value===n)){const o=document.createElement("option");o.value=n;o.textContent=n;o.style.fontFamily=schriftStapel(n);ff.appendChild(o)}
-    ff.value=n;
-  }else{
-    if(![...ff.options].some(o=>o.value===""))ff.insertAdjacentHTML("afterbegin",'<option value="" hidden></option>');
-    ff.value="";
-  }
+  const n=namen.size===1?[...namen][0]:"";
+  ff.value=n;ff.dataset.wert=n;
   fs.value=groessen.size===1?zahlText([...groessen][0]):"";
+}
+/* ---- Schriftliste unter dem Schriftfeld, wie Word ----
+   Zwei Abschnitte, beide zuklappbar: „Zuletzt verwendet“ (fünf) und „Alle
+   Schriftarten“, jede in ihrer eigenen Schrift. Tippen filtert, Anfangs-
+   treffer zuerst; Pfeiltasten wandern, Eingabe übernimmt, Escape bricht ab.
+   Der Fokus bleibt im Feld (mousedown in der Liste wird abgefangen),
+   schriftAnwenden() holt die Auswahl im Text zurück. */
+let schriftFilter="",schriftMarke=-1;const schriftZu={r:false,a:false};
+function schriftZuletztMerken(n){
+  S.settings.schriftZuletzt=[n,...(S.settings.schriftZuletzt||[]).filter(x=>x!==n)].slice(0,5);save()}
+function schriftWaehlen(n){
+  const ff=$("#fFont");$("#fontmenu")&&$("#fontmenu").remove();
+  if(ff){ff.value=n;ff.dataset.wert=n}
+  schriftZuletztMerken(n);schriftAnwenden(n);
+}
+async function schriftMenue(){
+  const ff=$("#fFont");if(!ff)return;
+  const alle=await schriftenAlle();
+  if(document.activeElement!==ff)return;
+  let m=$("#fontmenu");
+  if(!m){
+    closeMenu();m=document.createElement("div");m.className="menu ctx fontmenu";m.id="fontmenu";
+    m.setAttribute("role","listbox");document.body.appendChild(m);
+    m.addEventListener("mousedown",e=>e.preventDefault());
+    m.onclick=e=>{
+      const h=e.target.closest("[data-fsek]");if(h){schriftZu[h.dataset.fsek]=!schriftZu[h.dataset.fsek];schriftMenue();return}
+      const b=e.target.closest("[data-font]");if(b)schriftWaehlen(b.dataset.font)};
+  }
+  const t=schriftFilter.trim().toLowerCase(),passt=n=>!t||n.toLowerCase().includes(t);
+  const vorn=l=>t?[...l.filter(n=>n.toLowerCase().startsWith(t)),...l.filter(n=>!n.toLowerCase().startsWith(t))]:l;
+  const akt=ff.dataset.wert||"";
+  const zl=(S.settings.schriftZuletzt||[]).filter(passt),al=vorn(alle.filter(passt));
+  const eintrag=(n,sek)=>`<button class="mi fi${n===akt?" on":""}" role="option" data-sek="${sek}" data-font="${esc(n)}" style="font-family:${esc(schriftStapel(n))}">${esc(n)}</button>`;
+  const kopf=(k,txt,zahl)=>`<button class="fsek" data-fsek="${k}" aria-expanded="${!schriftZu[k]}"><span>${esc(txt)}</span>${
+    zahl!=null?`<span class="fz">${zahl}</span>`:""}<span class="fpf">${schriftZu[k]?"&#9656;":"&#9662;"}</span></button>`;
+  let h="";
+  if(zl.length){h+=kopf("r",tr("Zuletzt verwendet"));if(!schriftZu.r)h+=zl.map(n=>eintrag(n,"r")).join("");h+='<div class="msep"></div>'}
+  h+=kopf("a",tr("Alle Schriftarten"),al.length);
+  if(!schriftZu.a){
+    if(al.length)h+=al.map(n=>eintrag(n,"a")).join("");
+    else{const roh=schriftFilter.trim();
+      h+=`<div class="fleer">${roh&&schriftDa(roh)?esc(tr("Eingabetaste übernimmt"))+": "+esc(roh):esc(tr("Keine Schrift gefunden"))}</div>`}
+  }
+  const oben=m.scrollTop;m.innerHTML=h;
+  const r=ff.closest(".combo").getBoundingClientRect();
+  m.style.maxHeight=Math.max(220,Math.min(480,innerHeight-r.bottom-16))+"px";m.style.overflowY="auto";
+  menuPlatzieren(m,r.left,r.bottom+3,r);
+  /* Beim Tippen den ersten Treffer vormerken, sonst die aktuelle Schrift zeigen */
+  const knoepfe=[...m.querySelectorAll("[data-font]")];
+  schriftMarke=t?knoepfe.findIndex(b=>b.dataset.sek==="a"):-1;
+  schriftMarkeZeigen(!t);
+  if(!t){const on=m.querySelectorAll(".fi.on");const ziel=on[on.length-1];
+    if(ziel)m.scrollTop=Math.max(0,ziel.offsetTop-m.clientHeight/3);else m.scrollTop=oben}
+}
+function schriftMarkeZeigen(still){
+  const m=$("#fontmenu");if(!m)return;
+  const k=[...m.querySelectorAll("[data-font]")];
+  k.forEach((b,i)=>b.classList.toggle("mark",i===schriftMarke));
+  if(!still&&k[schriftMarke])k[schriftMarke].scrollIntoView({block:"nearest"});
+}
+function schriftTaste(e){
+  const ff=e.target,m=$("#fontmenu");
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    e.preventDefault();
+    if(!m){schriftFilter="";schriftMenue();return}
+    const n=m.querySelectorAll("[data-font]").length;if(!n)return;
+    schriftMarke=e.key==="ArrowDown"?Math.min(n-1,schriftMarke+1):Math.max(0,schriftMarke-1);
+    schriftMarkeZeigen();return}
+  if(e.key==="Escape"){e.preventDefault();m&&m.remove();ff.value=ff.dataset.wert||"";edAuswahlHolen();return}
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const roh=ff.value.trim();if(!roh){m&&m.remove();edAuswahlHolen();return}
+    const alle=schriftenCache||[];
+    const genau=[...alle,...(S.settings.schriftZuletzt||[])].find(n=>n.toLowerCase()===roh.toLowerCase());
+    const mk=m&&m.querySelectorAll("[data-font]")[schriftMarke];
+    if(genau){schriftWaehlen(genau);return}
+    if(mk&&schriftFilter.trim()){schriftWaehlen(mk.dataset.font);return}
+    if(schriftDa(roh)){schriftWaehlen(roh);return}
+    toast(tr("Schrift nicht gefunden")+": "+roh);ff.select();
+  }
 }
 function sizeMenu(e){
   closeMenu();
@@ -26443,6 +26686,10 @@ document.addEventListener("visibilitychange",()=>{
 $("#tools").addEventListener("click",e=>{
   const b=e.target.closest("[data-cmd]");if(b){cmd(b.dataset.cmd);return}
   const fl=e.target.closest("#fSizeList");if(fl){sizeMenu({currentTarget:fl});return}
+  if(e.target.closest("#fFontList")){const ff=$("#fFont");
+    if(schriftListeWarOffen){schriftListeWarOffen=false;$("#fontmenu")&&$("#fontmenu").remove();edAuswahlHolen();return}
+    if(ff){ff.focus();ff.select();schriftFilter="";schriftMenue()}return}
+  if(e.target.id==="fFont"&&!$("#fontmenu")){schriftFilter="";schriftMenue();return}
   const fb=e.target.closest("#foreBtn");if(fb){colorMenu({currentTarget:fb},"fore");return}
   const mb=e.target.closest("#markBtn");if(mb){colorMenu({currentTarget:mb},"hilite");return}
   if(e.target.closest("#imgBtn")){pickImage();return}
@@ -26476,7 +26723,22 @@ $("#tools").addEventListener("contextmenu",e=>{
 $("#tools").addEventListener("mousedown",e=>{
   if(e.target.closest("#foreBtn,#markBtn"))e.preventDefault();
 });
+$("#tools").addEventListener("focusin",e=>{
+  if(e.target.id==="fFont"){e.target.select();schriftFilter="";schriftMenue()}});
+$("#tools").addEventListener("input",e=>{
+  if(e.target.id==="fFont"){schriftFilter=e.target.value;schriftMenue()}});
+/* Der Pfeil klappt die Liste auch wieder zu: ob sie offen war, muss vor dem
+   mousedown des Dokuments festgehalten werden, das alle Menüs schließt */
+let schriftListeWarOffen=false;
+$("#tools").addEventListener("mousedown",e=>{
+  if(e.target.closest("#fFontList")){e.preventDefault();schriftListeWarOffen=!!$("#fontmenu")}});
+/* Verlässt man das Feld ohne Wahl, steht wieder die gültige Schrift drin */
+$("#tools").addEventListener("focusout",e=>{
+  if(e.target.id!=="fFont")return;const ff=e.target;
+  setTimeout(()=>{if(document.activeElement===ff)return;
+    $("#fontmenu")&&$("#fontmenu").remove();ff.value=ff.dataset.wert||""},0)});
 $("#tools").addEventListener("keydown",e=>{
+  if(e.target.id==="fFont"){schriftTaste(e);return}
   if(e.target.id!=="fSize")return;
   if(e.key==="Enter"){e.preventDefault();setFontSize(e.target.value);const ed=$("#editor");ed&&ed.focus()}
   if(e.key==="Escape"){e.preventDefault();drawTools()}
@@ -26489,7 +26751,7 @@ $("#tools").addEventListener("change",e=>{
   /* Derselbe Stapel und dieselbe Zeilenhöhe wie beim Öffnen des Dokuments —
      sonst fiel eine fehlende serifenlose Schrift hier auf Serif, und der
      Zeilenabstand blieb bis zum nächsten Öffnen bei der alten Schrift. */
-  if(e.target.id==="fFont"&&e.target.value)schriftAnwenden(e.target.value);
+
   if(e.target.id==="fSize")setFontSize(e.target.value);
   if(e.target.id==="fBlock"){
     /* „blockquote:toent" trägt Absatzart und Zitatstil in einem Wert — der
@@ -26559,6 +26821,9 @@ $("#menuBtn").onclick=handyMenue;
 /* Handy-Ansicht beim Start und beim Drehen bzw. Ändern der Fensterbreite */
 handyAnwenden();
 window.matchMedia("(max-width:600px)").addEventListener("change",handyAnwenden);
+/* Die Schriftprüfung dauert beim ersten Mal rund eine halbe Sekunde (jede
+   Schrift wird geladen) — im Leerlauf vorab, damit die Liste sofort aufgeht */
+setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>schriftenAlle().catch(()=>{})),2500);
 $("#formatBtn").onclick=formatMenu;
 $("#toolsBtn").onclick=toolsMenu;
 $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
