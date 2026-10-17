@@ -2079,6 +2079,18 @@ const NUMSTYLES=[["Dezimal","",n=>n+"."],["Dezimal mit Klammer","klammer",n=>n+"
   ["Kleinbuchstaben","alpha",n=>"abc"[n-1]+")"],["Großbuchstaben","alphagross",n=>"ABC"[n-1]+"."],
   ["Römisch","roemisch",n=>["I","II","III"][n-1]+"."]];
 const listStyleOf=el=>(el&&el.getAttribute("data-ls"))||"";
+/* Der zuletzt im Format-Menü gewählte Stil je Art (S.settings.listStil) —
+   nur ein bekannter, sonst der Grundstil */
+function listStilGemerkt(tag){
+  const t=String(tag).toLowerCase(),k=((S.settings&&S.settings.listStil)||{})[t]||"";
+  return (t==="ol"?NUMSTYLES:BULLETSTYLES).some(([,x])=>x===k)?k:"";
+}
+/* „III“ → 3; Unsinn wie „IIII“ oder „VX“ → 0 */
+function roemischWert(s){
+  const w={I:1,V:5,X:10,L:50,C:100,D:500,M:1000};let n=0;
+  for(let i=0;i<s.length;i++){const a=w[s[i]],b=w[s[i+1]]||0;if(!a)return 0;n+=a<b?-a:a}
+  return n>0&&n<40&&roemisch(n).toUpperCase()===s?n:0;
+}
 function fmtOf(d){
   const f=d.fmt||S.settings.fmt||"a4";
   const o=typeof f==="object"?f:{...FORMATS[f]||FORMATS.a4,key:f};
@@ -7615,6 +7627,7 @@ S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
 if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
+if(S.settings&&(!S.settings.listStil||typeof S.settings.listStil!=="object"))S.settings.listStil={ul:"",ol:""};
 if(S.settings&&!Array.isArray(S.settings.schriftZuletzt))S.settings.schriftZuletzt=[];
 /* „Oberfläche ausblenden“ ist aus, bis der Benutzer es einschaltet. Die frühere
    Fassung war voreingestellt an und hat das auch so gespeichert — daher einmalig
@@ -17519,11 +17532,20 @@ function listeUmschalten(befehl,still){
        <span>s ein. Der Stil (data-ls) gehört zur alten Art und fällt weg. */
     [...new Set(lis.map(li=>li.parentElement))].forEach(alt=>{
       const neu=document.createElement(tag);
+      const k=listStilGemerkt(tag);if(k)neu.setAttribute("data-ls",k);
       while(alt.firstChild)neu.appendChild(alt.firstChild);
       alt.replaceWith(neu);
     });
   }else{
-    document.execCommand(befehl);
+    /* Eine neu angelegte Liste bekommt den zuletzt gewählten Stil (wie
+       Word); bestehende behalten ihren — darum vorher markieren, was schon
+       da ist. Verlängert Chrome eine Liste davor, ist nichts neu. */
+    ed.querySelectorAll("ol,ul").forEach(l=>l.setAttribute("data-pq-alt",""));
+    try{
+      document.execCommand(befehl);
+      const k=listStilGemerkt(tag);
+      if(k)ed.querySelectorAll(tag+":not([data-pq-alt])").forEach(l=>{if(!l.hasAttribute("data-ls"))l.setAttribute("data-ls",k)});
+    }finally{ed.querySelectorAll("[data-pq-alt]").forEach(l=>l.removeAttribute("data-pq-alt"))}
   }
   listenOrdnen(ed);
   setzeTextPos(ed,pos);
@@ -17650,6 +17672,9 @@ function applyList(tag,k){
   }
   if(!list)return;
   if(k)list.setAttribute("data-ls",k);else list.removeAttribute("data-ls");
+  /* Gemerkt für die nächste neue Liste dieser Art, auch über einen
+     Neustart (wie Words zuletzt verwendetes Aufzählungszeichen) */
+  S.settings.listStil={...(S.settings.listStil||{}),[tag]:k||""};save();
   dirty=true;commit();queuePaginate();syncToolbarState();
   const stile=tag==="ol"?NUMSTYLES:BULLETSTYLES;
   const t=stile.find(([,x])=>x===k);
@@ -21328,7 +21353,16 @@ function autoCorrectInput(e){
   }
   if(a.lists&&data===" "&&blk.tagName==="P"){
     const vor=acTextBefore(blk,range);
-    const nummer=/^\d+[.)]$/.test(vor);
+    /* Wie Word auch „a) “, „A. “ und „I. “ (römisch, auch „II. “ …). Nur
+       mit a/A beginnend — „z. B.“ oder „S. 3“ am Absatzanfang sollen keine
+       Liste werden; Strg+Z nimmt die Umwandlung ohnehin zurück. Getipptes
+       gewinnt über den gemerkten Stil: wer „1. “ tippt, meint „1.“ */
+    let numArt=null,numStart=1,m;
+    if(m=/^(\d+)([.)])$/.exec(vor)){numArt=m[2]===")"?"klammer":"";numStart=parseInt(m[1],10)}
+    else if(/^a[.)]$/.test(vor))numArt="alpha";
+    else if(/^A[.)]$/.test(vor))numArt="alphagross";
+    else if((m=/^([IVX]+)[.)]$/.exec(vor))&&roemischWert(m[1])){numArt="roemisch";numStart=roemischWert(m[1])}
+    const nummer=numArt!==null;
     if(nummer||/^[-*]$/.test(vor)){
       e.preventDefault();
       const r=document.createRange();
@@ -21350,8 +21384,8 @@ function autoCorrectInput(e){
       const liste=document.createElement(nummer?"ol":"ul");
       /* Wie Word: „3. “ beginnt bei 3, „1) “ zählt mit Klammer, „- “ setzt
          einen Strich statt eines Punkts. */
-      if(nummer){const z=parseInt(vor,10);if(z>1)liste.setAttribute("start",z);
-        if(vor.endsWith(")"))liste.setAttribute("data-ls","klammer")}
+      if(nummer){if(numStart>1)liste.setAttribute("start",numStart);
+        if(numArt)liste.setAttribute("data-ls",numArt)}
       else if(vor==="-")liste.setAttribute("data-ls","strich");
       liste.appendChild(li);
       blk.replaceWith(liste);

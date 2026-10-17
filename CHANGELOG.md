@@ -47,6 +47,17 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Listenstil wie in Word: der zuletzt gewählte gilt für neue Listen.**
+  Bisher galt ein im Format-Menü gewählter Stil nur für die eine Liste; jede
+  neue begann wieder mit „1.“ bzw. „•“. Jetzt merkt sich das Programm den
+  zuletzt gewählten Stil je Art (Aufzählung, Nummerierung), auch über einen
+  Neustart (`S.settings.listStil`), und Knopf, Tastenkürzel und Menü legen
+  neue Listen darin an — bestehende Listen ändern sich nicht. Getipptes
+  gewinnt: „1. “ ergibt „1.“, auch wenn zuletzt Römisch gewählt war. Neu
+  beim Tippen, wie Word: „a) “ (Kleinbuchstaben), „A. “ (Großbuchstaben),
+  „I. “/„III. “ (römisch, mit Startwert). Nur mit a/A beginnend, damit
+  „z. B.“ oder „S. 3“ am Absatzanfang keine Liste werden.
+
 - **Listen eingerückt wie in Word** (Toms Frage: in Word stehen Listen
   weiter rechts). Bisher 1,5 em — bei 12 pt Text bei 0,64 cm, halb so weit
   wie Word, und bei kleinerer Schrift noch weniger. Jetzt wie Word: Text
