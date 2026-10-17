@@ -240,6 +240,20 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Handy-Ansicht in der Browserfassung** (Bildschirm bis 600 px breit, die
+  Store- und Desktopfassung bleibt unberührt). Bisher stand dort die A4-Seite
+  in voller Breite, der Text lief rechts hinaus, und vier Werkzeugzeilen
+  fraßen den halben Bildschirm. Jetzt wie die Mobilansicht von Word und
+  Google Docs: der Text fließt über die Bildschirmbreite, ohne Seitenrahmen,
+  Lineal und Seitenumbrüche (Kopf-/Fußzeile und Seiten bleiben im Dokument
+  und im Druck). Eine wischbare Werkzeugzeile, die Menüs hinter ☰, die
+  Statuszeile zeigt nur Wörter und Sicherung. **Ansicht › Seitenansicht**
+  schaltet zur echten Seite zurück, eingepasst (dafür darf der Zoom auf dem
+  Handy bis 25 % statt 45 % sinken, sonst ragte die Seite hinaus). Die
+  Statuszeile lässt sich auf schmalen Bildschirmen seitlich wischen.
+  Technik: Klasse `body.handy` über `handyAnwenden()` (auch beim Drehen),
+  `paginate()` räumt dann nur Umbruchspuren ab, `S.handySeiten` merkt die Wahl.
+
 - **Schrift und Größe für markierten Text, wie in Word** (Toms Entscheidung:
   PureQuill soll eine vollwertige Word-/OpenOffice-Alternative sein). Bisher
   galten Schrift- und Größenfeld immer für das ganze Dokument. Jetzt:

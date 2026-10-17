@@ -1632,6 +1632,32 @@ body.focus .sheet{padding-top:9vh}
    user-scalable=no in der Viewport-Zeile wäre der kürzere Weg, aber der
    falsche — Pinch-Zoom ist für Menschen mit schwachem Sehvermögen die einzige
    Möglichkeit, den Text überhaupt zu lesen. */
+/* ---- Handy-Ansicht (seit 1.3, nur Browserfassung auf schmalem Bildschirm) ----
+   Eine A4-Seite in voller Größe ist breiter als ein Handy (der Text lief
+   rechts hinaus), eingepasst stünde die Schrift bei rund 7 px. Wie die
+   Mobilansicht von Word und Google Docs: der Text fließt über die Breite,
+   ohne Seitenrahmen, Lineal und Seitenumbruch; Kopf-/Fußzeile und Seiten
+   bleiben im Dokument und im Druck. Eine Werkzeugzeile zum Wischen statt
+   vier, die Menüs hinter ☰, die Statuszeile auf Wörter und Sicherung. Die
+   Klasse setzt handyAnwenden(); über Ansicht › Seitenansicht abschaltbar. */
+.handyonly{display:none}
+body.handy .handyonly{display:flex}
+body.handy .topbar .filebtn:not(#menuBtn){display:none}
+body.handy .tabbar{overflow-x:auto;scrollbar-width:none}
+body.handy .rail{display:none}
+@media (max-width:600px){.status{overflow-x:auto;scrollbar-width:none}}
+body.handy .tools{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:6px 8px;scrollbar-width:thin}
+body.handy .tools>*{flex:0 0 auto}
+body.handy .status>*:not(#wcHint):not(.grow):not(.sicherstand){display:none}
+body.handy .sheet{padding:0;background:var(--paper)}
+body.handy .ruler,body.handy #pagelayer,body.handy .side,body.handy .outline,body.handy .repside{display:none!important}
+body.handy .pagewrap{width:100%;display:block}
+body.handy #paper{--zoom:1!important;width:100%!important;height:auto!important;box-shadow:none!important}
+body.handy #editor{padding:16px 16px 40vh!important;min-height:calc(100vh - 150px)!important}
+body.handy #editor figure.fig.free{position:static;width:auto!important;height:auto!important;margin:.8em 0}
+body.handy #editor figure.fig.free img{width:auto!important;max-width:100%;height:auto!important}
+body.handy #editor figure.fig img{max-width:100%}
+body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)}
 @media (pointer:coarse){
   input,select,textarea,.tools select,.tools input[type=text],
   .modal select,.modal input,.modal textarea,.setrow select,.setrow input{font-size:16px}
@@ -1649,6 +1675,7 @@ body.focus .sheet{padding-top:9vh}
 
 <div class="app">
   <div class="topbar">
+    <button class="filebtn handyonly" id="menuBtn" aria-label="Menü"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <button class="filebtn" id="fileBtn">Datei</button>
     <button class="filebtn" id="viewBtn">Ansicht</button>
     <button class="filebtn" id="formatBtn">Format</button>
@@ -2299,6 +2326,7 @@ en:{
   "Ränder":"Margins",
   "Lesezeichen aus Überschriften":"Bookmarks from headings",
   "Vorname Nachname":"First name Last name",
+  "Seitenansicht":"Page view",
   "Bitte die Datei noch einmal auswählen.":"Please select the file again.",
   "Text umfließt":"Wrap text",
   "Layout":"Layout",
@@ -3158,6 +3186,7 @@ fr:{
   "Ränder":"Marges",
   "Lesezeichen aus Überschriften":"Signets à partir des titres",
   "Vorname Nachname":"Prénom Nom",
+  "Seitenansicht":"Affichage page",
   "Bitte die Datei noch einmal auswählen.":"Veuillez sélectionner le fichier à nouveau.",
   "Text umfließt":"Habillage du texte",
   "Layout":"Disposition",
@@ -4017,6 +4046,7 @@ es:{
   "Ränder":"Márgenes",
   "Lesezeichen aus Überschriften":"Marcadores a partir de los títulos",
   "Vorname Nachname":"Nombre Apellido",
+  "Seitenansicht":"Vista de página",
   "Bitte die Datei noch einmal auswählen.":"Vuelve a seleccionar el archivo.",
   "Text umfließt":"Ajustar texto",
   "Layout":"Diseño",
@@ -4876,6 +4906,7 @@ pt:{
   "Ränder":"Margens",
   "Lesezeichen aus Überschriften":"Marcadores a partir dos títulos",
   "Vorname Nachname":"Nome Apelido",
+  "Seitenansicht":"Visualização de página",
   "Bitte die Datei noch einmal auswählen.":"Selecione o arquivo novamente.",
   "Text umfließt":"Quebra de texto",
   "Layout":"Layout",
@@ -5735,6 +5766,7 @@ pl:{
   "Ränder":"Marginesy",
   "Lesezeichen aus Überschriften":"Zakładki z nagłówków",
   "Vorname Nachname":"Imię Nazwisko",
+  "Seitenansicht":"Widok strony",
   "Bitte die Datei noch einmal auswählen.":"Wybierz plik jeszcze raz.",
   "Text umfließt":"Tekst opływa",
   "Layout":"Układ",
@@ -6601,6 +6633,7 @@ it:{
   "Ränder":"Margini",
   "Lesezeichen aus Überschriften":"Segnalibri dai titoli",
   "Vorname Nachname":"Nome Cognome",
+  "Seitenansicht":"Vista pagina",
   "Bitte die Datei noch einmal auswählen.":"Seleziona di nuovo il file.",
   "Text umfließt":"Testo a capo",
   "Layout":"Layout",
@@ -8267,9 +8300,12 @@ function ganzesDokument(art,wert){
   flush();dirty=true;commit();drawTools();queuePaginate();drawStatus();
   schriftFelderSetzen();
 }
+/* Der Zoom, der wirklich am Papier gilt — in der Handy-Ansicht ist er 1,
+   auch wenn S.zoom noch die eingepasste Seitenansicht trägt */
+function zoomIst(){const p=$("#paper");return (p&&parseFloat(getComputedStyle(p).getPropertyValue("--zoom")))||S.zoom||1}
 const istGroesseMarke=v=>/xxx-large|^7$/.test(String(v||""));
 function schriftNormalisieren(ed){
-  const d=doc(),grund=(d.font||S.settings.font).toLowerCase(),z=S.zoom||1;
+  const d=doc(),grund=(d.font||S.settings.font).toLowerCase(),z=zoomIst();
   /* execCommand ohne styleWithCSS legt <font face> bzw. <font size="7"> an */
   ed.querySelectorAll("font").forEach(f=>{
     const s=document.createElement("span");
@@ -8332,7 +8368,7 @@ function groesseStufe(richtung){
   let jetzt=f?parseFloat(String(f.value).replace(",",".")):NaN;
   if(!isFinite(jetzt)){const sel=getSelection();const n=sel.rangeCount?sel.getRangeAt(0).startContainer:null;
     const el=n?(n.nodeType===1?n:n.parentElement):ed;
-    jetzt=Math.round(parseFloat(getComputedStyle(el).fontSize)*72/96/(S.zoom||1)*2)/2}
+    jetzt=Math.round(parseFloat(getComputedStyle(el).fontSize)*72/96/zoomIst()*2)/2}
   let neu;
   if(richtung>0)neu=GROESSEN_STUFEN.find(x=>x>jetzt+0.01)||Math.min(FS_MAX,Math.floor(jetzt/10)*10+10);
   else neu=[...GROESSEN_STUFEN].reverse().find(x=>x<jetzt-0.01)||Math.max(FS_MIN,jetzt>72?Math.ceil(jetzt/10)*10-10:FS_MIN);
@@ -8345,7 +8381,7 @@ function schriftFelderSetzen(){
   const ed=$("#editor"),ff=$("#fFont"),fs=$("#fSize");if(!ed||!ff||!fs)return;
   if(document.activeElement===fs||document.activeElement===ff)return;
   const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
-  const r=sel.getRangeAt(0),z=S.zoom||1,el=[];
+  const r=sel.getRangeAt(0),z=zoomIst(),el=[];
   if(r.collapsed){const n=r.startContainer;el.push(n.nodeType===1?n:n.parentElement)}
   else{
     const wurzel=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
@@ -9155,7 +9191,7 @@ function drawStatus(){
       "note")}</span>
     <span class="grow"></span>
     ${d.ziel?`<span id="zielHint" style="cursor:pointer" title="${esc(zielHinweis(d))}"><span class="dot ${zielGeaendert(d)?"dirty":""}"></span>${esc(d.ziel.name)}</span>`:""}
-    <span title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über {pfad}.").replace("{pfad}",mpfad("Datei","Alles sichern")))}"
+    <span class="sicherstand" title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über {pfad}.").replace("{pfad}",mpfad("Datei","Alles sichern")))}"
       ${storageOk?"":'class="savefail"'}>
       <span class="dot ${storageOk?(dirty?"dirty":""):"fail"}"></span>${
       !storageOk?tr("Nicht gesichert")
@@ -14733,6 +14769,38 @@ function runFileAct(a){
   if(a==="set")settings();
   if(a==="pal")palette();
 }
+/* ---- Handy-Ansicht ein/aus ---- */
+const istSchmal=()=>window.matchMedia("(max-width:600px)").matches;
+const handyAktiv=()=>!PQWD()&&istSchmal()&&!S.handySeiten;
+function handyAnwenden(){
+  const an=handyAktiv();
+  if(document.body.classList.contains("handy")===an)return;
+  document.body.classList.toggle("handy",an);
+  if(S.mode==="write"&&$("#editor")){paginate();drawStatus()}
+}
+/* ☰ auf dem Handy: die vier Menüs, die drei Ansichten, Einstellungen */
+function handyMenue(){
+  if($("#hmenu")){closeMenu();return}
+  closeMenu();
+  const m=document.createElement("div");m.className="menu";m.id="hmenu";
+  const pf='<span class="k">&rsaquo;</span>';
+  m.innerHTML=`
+    <button class="mi" data-h="datei"><span class="chk"></span>${tr("Datei")}${pf}</button>
+    <button class="mi" data-h="ansicht"><span class="chk"></span>${tr("Ansicht")}${pf}</button>
+    <button class="mi" data-h="format"><span class="chk"></span>${tr("Format")}${pf}</button>
+    <button class="mi" data-h="tools"><span class="chk"></span>${tr("Tools")}${pf}</button>
+    <div class="msep"></div>
+    <button class="mi" data-h="write"><span class="chk">${S.mode==="write"?"&#10003;":""}</span>${tr("Schreiben")}</button>
+    <button class="mi" data-h="notes"><span class="chk">${S.mode==="notes"?"&#10003;":""}</span>${tr("Notizen")}</button>
+    <button class="mi" data-h="gloss"><span class="chk">${S.mode==="gloss"?"&#10003;":""}</span>${tr("Glossar")}</button>
+    <div class="msep"></div>
+    <button class="mi" data-h="set"><span class="chk"></span>${tr("Einstellungen")}</button>`;
+  $(".topbar").appendChild(m);$("#menuBtn").classList.add("on");
+  menuUnterKnopf(m,$("#menuBtn"));
+  m.onclick=e=>{const b=e.target.closest("[data-h]");if(!b)return;const a=b.dataset.h;closeMenu();
+    if(a==="datei")fileMenu();else if(a==="ansicht")viewMenu();else if(a==="format")formatMenu();else if(a==="tools")toolsMenu();
+    else if(a==="set")settings();else setMode(a)};
+}
 function viewMenu(){
   if($("#vmenu")){closeMenu();return}
   closeMenu();
@@ -14740,6 +14808,7 @@ function viewMenu(){
   const c=v=>v?"&#10003;":"";
   m.innerHTML=`
     <div class="mlabel">${tr("Seite")}</div>
+    ${istSchmal()&&!PQWD()?`<button class="mi" data-v="handyseite"><span class="chk">${c(S.handySeiten)}</span>${tr("Seitenansicht")}</button>`:""}
     <button class="mi" data-v="guides"><span class="chk">${c(S.guides)}</span>${tr("Seitenränder")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Struktur")}</div>
@@ -14764,6 +14833,10 @@ function viewMenu(){
     const b=e.target.closest("[data-v]");if(!b)return;
     const a=b.dataset.v,stay=!["fit","focus","theme","read","pv","memo"].includes(a);
     if(a==="memo"){closeMenu();toggleMemo();return}
+    /* Auf dem Handy die echte Seite sehen (eingepasst), etwa vor dem Druck */
+    if(a==="handyseite"){S.handySeiten=!S.handySeiten;save();closeMenu();handyAnwenden();
+      if(S.handySeiten&&S.mode==="write"){if(S.fitPage===false)toggleFitPage();else{fitZoom();render()}}
+      return}
     if(a==="theme"){closeMenu();themeDialog();return}
     if(a==="read"){closeMenu();readView();return}
     if(a==="pv"){closeMenu();printPreview();return}
@@ -15451,6 +15524,15 @@ function pgliWeg(root){
 function paginate(){
   const ed=$("#editor"),paper=$("#paper"),layer=$("#pagelayer");
   if(!ed||!paper||druckLaeuft)return;
+  /* Handy-Ansicht: keine Seiten — nur die Spuren eines früheren Umbruchs
+     entfernen, damit keine Lücken im fließenden Text stehen */
+  if(document.body.classList.contains("handy")){
+    [...ed.children].forEach(b=>{b.style.marginTop="";if(b.classList.contains("pgbreak"))b.style.height=""});
+    ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+    pgliWeg(ed);pgspaltWeg(ed);
+    ed.style.minHeight="";paper.style.height="";pageCount=1;seitenAnfaenge=[];
+    return;
+  }
   renumberFootnotes(ed);
   const f=fmtOf(doc()),z=S.zoom;
   const pw=MM(f.w)*z, ph=MM(f.h)*z;
@@ -21457,7 +21539,8 @@ function fitZoom(){
   const sh=$("#sheet");if(!sh)return;
   const f=fmtOf(doc());
   const avail=sh.clientWidth-36-(S.showCol&&anchoredIds().length?268:0);
-  const z=Math.min(1.6,Math.max(.45,avail/MM(f.w)));
+  /* auf dem Handy darf die eingepasste Seite kleiner werden, sonst ragt sie hinaus */
+  const z=Math.min(1.6,Math.max(window.matchMedia("(max-width:600px)").matches?.25:.45,avail/MM(f.w)));
   S.zoom=Math.round(z*100)/100;save();
 }
 function setZoom(z,keepFit){
@@ -26472,6 +26555,10 @@ $("#pane").addEventListener("click",e=>{
 $("#setBtn").onclick=settings;
 $("#fileBtn").onclick=fileMenu;
 $("#viewBtn").onclick=viewMenu;
+$("#menuBtn").onclick=handyMenue;
+/* Handy-Ansicht beim Start und beim Drehen bzw. Ändern der Fensterbreite */
+handyAnwenden();
+window.matchMedia("(max-width:600px)").addEventListener("change",handyAnwenden);
 $("#formatBtn").onclick=formatMenu;
 $("#toolsBtn").onclick=toolsMenu;
 $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
