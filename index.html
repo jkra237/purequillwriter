@@ -1961,7 +1961,14 @@ const SCHRIFT_FREMD=new RegExp("^("+[
   "Damascus","Geeza","Mishafi","Nadeem","Ayuthaya","Thonburi","Krungthep","Apple SD Gothic","AppleGothic",
   "AppleMyungjo","Apple Color Emoji","Apple Symbols","Zapf Dingbats","Bodoni Ornaments","Kailasa","Kefa$",
   "Noto (Color )?Emoji","Noto (Sans|Serif) (?!(Mono|Display)$)","Noto (Kufi|Naskh|Nastaliq|Music|Rashi|Traditional|Znamenny)",
-  "Emoji","Twemoji","EmojiOne"
+  "Emoji","Twemoji","EmojiOne",
+  /* Mit Office und Sprachpaketen (gemessen an Toms Rechner 2026-10-17):
+     arabische und hebräische Schriften, Symbol- und Sammelschriften */
+  "AGA ","Akhbar","Amiri","DecoType","Diwani","Farsi","Kufi","Monotype Koufi","Mudir","Old Antic",
+  "PT (Bold|Separated|Simple) ","Reem Kufi","Scheherazade","Simple (Bold Jut|Indust|Outline Pat)",
+  "Bold Italic Art","Italic Outline Art","Led Italic","Arabic","Hebrew","Urdu",
+  "Alef$","Frank Ru(e)?hl","Nachlieli","Segoe Fluent Icons","MS Outlook","MS Reference Specialty",
+  "DejaVu Math","Sans Serif Collection"
 ].join("|")+")","i");
 const schriftLatein=n=>!!n&&!/[^\u0000-ɏ]/.test(n)&&!SCHRIFT_FREMD.test(n);
 /* Fingerabdruck einer Schrift über drei Grundschriften: zwei Namen mit
@@ -1972,12 +1979,18 @@ function schriftAbdruck(n){
   const t="mmmmmmmmmmlliWWQQ@@ ßäöü 0123456789";
   return ["monospace","serif","sans-serif"].map(b=>{x.font='72px "'+String(n).replace(/"/g,"")+'",'+b;return x.measureText(t).width.toFixed(2)}).join("/");
 }
-let schriftenCache=null;
+/* schriftenVorlaeufig: die App bekam die Systemliste nicht — queryLocalFonts
+   verlangt ein sichtbares Fenster („Page needs to be visible“, gemessen in
+   der Desktop-Fassung), und die Vorababfrage nach dem Start kann ein
+   verdecktes treffen. Dann gilt die Namensliste nur bis zum nächsten Mal. */
+let schriftenCache=null,schriftenVorlaeufig=false;
 async function schriftenAlle(){
-  if(schriftenCache)return schriftenCache;
+  if(schriftenCache&&!(schriftenVorlaeufig&&document.visibilityState==="visible"))return schriftenCache;
   let namen=null;
+  schriftenVorlaeufig=false;
   if(PQWD()&&window.queryLocalFonts){
-    try{const l=await window.queryLocalFonts();if(l&&l.length)namen=[...new Set(l.map(f=>f.family))].filter(schriftLatein)}catch(e){}
+    try{const l=await window.queryLocalFonts();if(l&&l.length)namen=[...new Set(l.map(f=>f.family))].filter(schriftLatein)}
+    catch(e){schriftenVorlaeufig=true}
   }
   if(namen){
     /* Die bekannten über ihre Zwillinge dazu — unter Linux heißt Arial dort Liberation Sans */

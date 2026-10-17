@@ -45,6 +45,20 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Behoben (Schriftliste der Desktop-Fassung, gefunden bei der Prüfung vor 1.3)
+
+- **Die App zeigt alle Systemschriften — aber nur bei sichtbarem Fenster.**
+  `queryLocalFonts` lieferte in der Projektfassung 266 Familien ohne
+  Rückfrage, verweigert aber bei verdecktem Fenster („Page needs to be
+  visible“). Die Vorababfrage nach dem Start konnte genau das treffen und
+  hielt dann bis zum Neustart die kürzere Namensliste fest. Jetzt gilt so ein
+  Rückfall nur vorläufig, beim nächsten Öffnen der Liste wird neu gefragt.
+- **Arabische, hebräische und Symbolschriften aus Office** standen noch in der
+  Liste (AGA Arabesque, Amiri, DecoType Naskh, Diwani, Kufi, Alef, Frank
+  Ruehl, Segoe Fluent Icons, MS Outlook, „Sans Serif Collection“ …) — der
+  Filter kannte nur die Windows-eigenen. Gemessen an Toms 356 Schriftnamen:
+  übrig bleiben nur Schriften für lateinische Buchstaben.
+
 ### Behoben (Bilder in Word und OpenDocument)
 
 - **Freie Bilder wandern mit dem Text, wie in Word („Mit Text
