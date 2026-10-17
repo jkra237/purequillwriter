@@ -47,6 +47,11 @@ immer genau einen Commit, der sie anfasst.
 
 ### Behoben (Schriftliste der Desktop-Fassung, gefunden bei der Prüfung vor 1.3)
 
+- **Portugiesisch der neuen Schriftauswahl war europäisch** („tipo de
+  letra“, „Prima Enter“) — die Oberfläche ist brasilianisch: „fonte“,
+  „Pressione Enter“. Beim Nachschlagen der Begriffe für die Store-
+  Neuigkeiten gefunden.
+
 - **Die App zeigt alle Systemschriften — aber nur bei sichtbarem Fenster.**
   `queryLocalFonts` lieferte in der Projektfassung 266 Familien ohne
   Rückfrage, verweigert aber bei verdecktem Fenster („Page needs to be
