@@ -47,6 +47,11 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Wolke ist das Farbschema neuer Nutzer** (vorher Azur, Toms Wahl):
+  reines Weiß, helle Leisten, Blauakzent, kein grauer Rahmen um die Seite.
+  Wer schon ein Schema hat, behält es. Im Schema-Dialog trägt jetzt Wolke
+  den Hinweis „Standard“.
+
 - **Speichern als OpenDocument-Text (.odt)** unter Datei › Speichern als,
   direkt unter Word. Bis jetzt konnte das Programm .odt nur öffnen; wer eine
   Datei aus LibreOffice bekam, gab sie als Word zurück. Geschrieben so, wie
