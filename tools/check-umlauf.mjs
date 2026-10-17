@@ -87,7 +87,7 @@ try {
     d.hdr={on:true,text:"Kopfzeile Pruefung",align:"center"};
     d.ftr={on:true,text:"Seite {seite} von {seiten}",align:"right"};
     d.footnotes=[{id:"f1",text:"Text der Fussnote."}];
-    d.html='<h1>Titel Eins</h1>'
+    d.html='<p data-fv="titel">Der Titel</p><p data-fv="untertitel">Der Untertitel</p><h1>Titel Eins</h1>'
      +'<p>Normal <b>fett</b> <i>kursiv</i> <u>unterstrichen</u> <s>durchgestrichen</s> H<sub>2</sub>O x<sup>2</sup>.</p>'
      +'<p><span style="font-family:Georgia, serif">Georgia</span> und <span style="font-size:calc(16pt * var(--zoom,1))">sechzehn</span> und <span style="color:#c00000">rot</span> und <span style="background-color:#fbeb9b">markiert</span>.</p>'
      +'<h2>Kapitel Zwei</h2>'
@@ -101,9 +101,13 @@ try {
      +'<ol start="3"><li>Drei</li><li>Vier</li></ol>'
      +'<ul><li>Punkt<ul><li>Unterpunkt</li></ul></li></ul>'
      +'<h3>Abschnitt Drei</h3>'
+     +'<h4>Abschnitt Vier</h4><p>Text unter vier.</p>'
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
      +'<blockquote><p>Ein Zitat.</p></blockquote>'
+     +'<blockquote data-qs="toent"><p>Ein intensives Zitat.</p></blockquote>'
+     +'<blockquote data-qs="typo"><p>Ein typografisches Zitat.</p></blockquote>'
+     +'<blockquote style="text-align:left"><p>Ein linksbündiges Zitat.</p></blockquote>'
      +'<div class="pgbreak" contenteditable="false" data-label="Seitenumbruch"></div>'
      +'<p>Nach dem Umbruch.</p>'
      +'<figure class="fig umfl" contenteditable="false" data-w="40" data-seite="rechts" style="text-align:right;width:40%"><img src="'+jpg(600,600,"#36c")+'" style="width:100%"></figure>'
@@ -139,13 +143,13 @@ try {
     const B=gerendert(${fremd64 ? `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))` : "null"});
     const merk=r=>{if(!r)return null;const t=document.createElement("div");t.innerHTML=r.html||"";const q=s=>t.querySelectorAll(s).length;
       const st=p=>[...t.querySelectorAll("[style]")].filter(e=>e.style[p]).length;
-      return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
+      return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"h4":q("h4"),"Titel/Untertitel":q('p[data-fv="titel"]')+"/"+q('p[data-fv="untertitel"]'),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
        "hoch":q("sup:not(.fn):not(.en)"),"tief":q("sub"),"Schriftart":st("fontFamily"),"Schriftgroesse":st("fontSize"),"Farbe":st("color"),
        "Hervorhebung":st("backgroundColor")+q("mark"),"Ausrichtung":st("textAlign"),"Einzug":st("marginLeft")+st("paddingLeft"),
        "ol":q("ol"),"ul":q("ul"),"ol verschachtelt":q("ol ol"),"li":q("li"),"ol start":q("ol[start]"),
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
-       "Zitat":q("blockquote"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
+       "Zitat":q("blockquote"),"Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Tab im Text":q(".wtab"),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",

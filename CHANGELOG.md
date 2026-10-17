@@ -45,6 +45,117 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Geändert
+
+- **Seitenumbruch-Symbol mit Farbakzent** (Toms Wahl „A“ aus drei
+  Entwürfen): die gestrichelte Schnittlinie zwischen den zwei Blättern in
+  Koralle `#E07052`, wie der Radierer — das Symbol stand als einziges der
+  Einfügen-Gruppe ganz grau neben dem farbigen Bild. Der Ton hält 3:1 auf
+  hellen und rund 5:1 auf dunklen Leisten.
+- **Lupe (Suchen und ersetzen) mit Farbakzent** (Toms Wahl „C“): Glas zart
+  blau getönt, dazu ein kleiner Lichtreflex in `#4A90D9` — macht die Lupe
+  als Glas lesbar. Kontrast wie beim Seitenumbruch.
+- **Rückgängig/Wiederholen als geschwungene Pfeile mit voller Spitze**, wie
+  in Word (Toms Wahl „A“; eine Uhr im Pfeilbogen war im Gespräch), und
+  beide in einem gemeinsamen Kasten im Rahmen der Felder für Schrift und
+  Größe (`.tbkasten`).
+- **Zitate wie in Word: „Zitat“, „Intensives Zitat“, „Typografisches
+  Zitat“** (Toms Wunsch, Vorbild sollte Google Docs sein — das hat aber gar
+  keine Zitatvorlagen, also Word). „Zitat“ mittig, kursiv, gedämpft und
+  beidseitig eingerückt; „Intensives Zitat“ in Akzentfarbe zwischen zwei
+  Linien; das typografische bleibt links mit großem Anführungszeichen.
+  Vorher Akzentlinie links und getönter Block — in der Vorschau des
+  Absatzformats kaum zu unterscheiden. Die Schlüssel (`data-qs`) sind
+  geblieben, alte Dokumente sehen nur neu aus. Unter den Namen „Quote“ und
+  „Intense Quote“ gingen die Zitate schon nach Word; jetzt tragen diese
+  Vorlagen dort auch Words Aussehen (mittig, Farbe, Linien, Abstände), in
+  OpenDocument ebenso. Beim Öffnen gilt die Mitte als Grundstellung
+  (`zitatAusrichtung`), damit nach dem Umlauf kein `text-align:center`
+  hinzukommt; ein ausdrücklich linksbündiges Zitat bleibt links. Menüs,
+  Meldung, Hilfe (7 Sprachen) nennen die Word-Namen statt „Zitat 1/2/3“.
+  Kontrast der Zitatfarben in allen 17 Schemata über 5:1; Umlauf Word und
+  ODT 38/38 mit Fixpunkt, Export 302/302. `check-umlauf` prüft jetzt alle
+  drei Zitatarten und ein linksbündiges Zitat (Merkmal „Zitatart“); dabei
+  fiel auf, dass der ODT-Export ausdrückliches Linksbündig gar nicht
+  schrieb (`ausr` kannte nur Mitte, Rechts, Blocksatz) — jetzt
+  `fo:text-align="start"`. Das typografische Zitat hat in Word und
+  LibreOffice kein großes Anführungszeichen (dort gibt es kein Gegenstück
+  zum `::before`), nur Einzug und Kursiv.
+
+### Neu
+
+- **Titel, Untertitel und Überschrift 4** (Toms Frage nach fehlenden
+  Formatvorlagen; Word, Google Docs und LibreOffice haben alle Titel und
+  Untertitel). Titel und Untertitel sind Absätze mit Vorlage
+  (`<p data-fv="titel|untertitel">`), keine Überschriften: sie zählen
+  nicht in Gliederung, Inhaltsverzeichnis und EPUB-Kapitel, wie Words
+  „Titel“ ohne Gliederungsebene. Aussehen wie Word/Docs: Titel groß und
+  nicht fett (2,3 em), Untertitel gedämpft (1,3 em). Eingabe am Ende geht
+  mit Fließtext weiter (Chrome hätte den Absatz samt Vorlage geklont);
+  Fließtext und „Formatierung entfernen“ nehmen die Vorlage weg.
+  Überschrift 4 kursiv in Grundgröße, wie in Word; Inhaltsverzeichnis mit
+  „Bis Ebene 4“, Gliederung bis Ebene 4. Word „Heading 5/6“ kommen jetzt als
+  Überschrift 4 statt 3 an. Gespeichert als Words „Title“/„Subtitle“/
+  „Heading 4“ bzw. ODT „Title“/„Subtitle“/„Heading 4“, beim Öffnen wieder
+  erkannt; das Kursiv der Überschrift 4 gilt beim Öffnen als ihr Aussehen,
+  nicht als Textformat (sonst stünde danach `<i>` darin). Absatzformat-
+  Feld, Format › Absatzformat, Befehlspalette und Schrägstrich-Menü bieten
+  alle neuen Formate, alle über `blockAnwenden`. Hilfe in 7 Sprachen.
+  `check-umlauf` mit Titel, Untertitel und Überschrift 4: Word und ODT
+  40/40 mit Fixpunkt. Nebenbei: der HTML-Import (`cleanHtml`) warf
+  `data-qs`/`data-ls` weg — Zitat- und Listenstile gingen beim Öffnen
+  eines eigenen HTML-Exports verloren; jetzt erlaubt, samt `data-fv`.
+- **Absatzformat mit Vorschau, wie Words Formatvorlagen.** Das Feld war eine
+  Auswahlliste des Systems und zeigte nur Text in einer Größe. Jetzt eine
+  eigene Liste (`blockMenue`): Fließtext, Überschrift 1–3 in Größe und fett,
+  die drei Zitate mit denselben Regeln wie im Text, alles in der
+  Grundschrift des Dokuments und den Farben des Schemas. Pfeiltasten,
+  Eingabe und Escape; der Fokus bleibt im Text.
+- **Uhr für den Versionsverlauf in der Werkzeugleiste**, im Kasten mit
+  Rückgängig/Wiederholen (Toms Idee, Fassung „E“ aus fünf Entwürfen):
+  Pfeilbogen um ein Zifferblatt, Zeiger blau wie der Glanz der Lupe. Bisher war der Versionsverlauf nur über
+  Datei › Zwischenstände erreichbar.
+
+### Nebenbei gefunden, noch nicht behoben
+
+- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
+  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
+  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
+  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
+  Einmal geschlossen durchsehen.
+
+- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
+  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
+  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
+  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
+  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
+  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
+  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
+  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
+  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
+  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
+  unter „Behoben“.
+- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
+  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
+  Haken samt Hinweis — ehrlich, aber kein Werbebild.
+
+### Offen, noch nicht entschieden
+
+
+- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
+  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
+  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
+  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
+  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
+  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
+
+---
+
+## 1.3.0 — eingereicht 2026-10-17 (Freigabe im Store steht aus)
+
+Gebaut aus `b6696a5` (Versions-Commit `3ce3e9a`). Browser-Fassung, Linux-
+Pakete und Website am 2026-10-17 live.
+
 ### Behoben (Schriftliste der Desktop-Fassung, gefunden bei der Prüfung vor 1.3)
 
 - **Portugiesisch der neuen Schriftauswahl war europäisch** („tipo de
@@ -538,41 +649,6 @@ immer genau einen Commit, der sie anfasst.
   anderer Buchstabe nach der Rücktaste wird weiter groß, denn das ist ein
   Tippfehler, keine Rücknahme. Bewusst nicht in der Liste sind Kürzel, die
   oft als Wort am Satzende stehen („Jan.“, „Max.“, „No.“, „Inc.“).
-
-### Nebenbei gefunden, noch nicht behoben
-
-- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
-  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
-  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
-  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
-  Einmal geschlossen durchsehen.
-
-- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
-  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
-  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
-  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
-  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
-  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
-  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
-  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
-  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
-  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
-  unter „Behoben“.
-- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
-  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
-  Haken samt Hinweis — ehrlich, aber kein Werbebild.
-
-### Offen, noch nicht entschieden
-
-
-- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
-  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
-  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
-  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
-  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
-  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
-
----
 
 ## 1.2.0 — 2026-10-12
 

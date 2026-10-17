@@ -229,8 +229,8 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .qprev i{position:absolute;display:block}
 .qprev .ql{height:2px;border-radius:1px;background:var(--ink-faint);opacity:.45}
 .qprev .qz{height:2px;border-radius:1px;background:var(--ink-soft);opacity:.6}
-.qprev .qb{width:2px;background:var(--stamp)}
-.qprev .qt{background:color-mix(in srgb,var(--stamp) 12%,var(--paper))}
+.qprev .qa{height:2px;border-radius:1px;background:var(--stamp);opacity:.8}
+.qprev .qr{height:1px;background:var(--stamp)}
 .qprev .qm{font:normal 19px/1 Georgia,serif;color:var(--rule)}
 /* Dasselbe Bildformat für die Listenstile, nur als drei Zeilen aus echtem
    Zeichen plus Textbalken — das Zeichen selbst ist der Unterschied, den man
@@ -404,6 +404,34 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 /* Gruppen trennt Abstand statt einer Linie: 7px Lücke innerhalb einer Gruppe,
    gut das Dreifache dazwischen. Das Element bleibt, nur unsichtbar. */
 .sep{width:12px;height:17px;background:none;flex:none}
+/* Absatzformat-Feld: sieht aus wie die Auswahlfelder, öffnet blockMenue() */
+.tools .blockfeld{font:inherit;color:var(--ink);min-width:118px;text-align:left;white-space:nowrap;
+  border:1px solid var(--rule);border-radius:var(--radius);padding:3px 21px 3px 7px;background-color:var(--paper);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);
+  background-position:right 11px center,right 6.5px center;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.tools .blockfeld:hover{border-color:var(--ink-soft)}
+.blockmenu{min-width:230px!important;max-width:340px;padding:4px}
+.blockmenu .bv{display:block;font-family:inherit;font-size:15px;line-height:1.25;padding:6px 10px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Markiert wird mit Rahmen, nicht mit Fläche — eine Fläche verschluckte die
+   Tönung von Zitat 2 (Toms Fund: Zitat 1 und 2 sahen gleich aus) */
+.blockmenu .bv:hover{background:transparent;outline:1px solid var(--rule);outline-offset:-1px}
+.blockmenu .bv.on{background:transparent;box-shadow:inset 3px 0 0 var(--ink-soft)}
+.blockmenu .bv.mark{background:transparent;outline:1.5px solid var(--ink-soft);outline-offset:-1.5px}
+.blockmenu .bv-h1{font-size:1.55em;font-weight:600}
+.blockmenu .bv-h2{font-size:1.28em;font-weight:600}
+.blockmenu .bv-h3{font-size:1.1em;font-weight:600}
+.blockmenu .bv-h4{font-size:1em;font-weight:600;font-style:italic}
+.blockmenu .bv-titel{font-size:1.9em;font-weight:400;letter-spacing:-.01em}
+.blockmenu .bv-untertitel{font-size:1.2em;color:var(--ink-soft)}
+/* Zitate in fester Breite, damit die mittige Stellung der beiden Word-Arten
+   neben dem linksbündigen typografischen Zitat sichtbar wird */
+.blockmenu blockquote{margin:0;white-space:nowrap;width:190px;box-sizing:border-box}
+.blockmenu blockquote[data-qs="toent"]{margin:0;padding:.35em .6em}
+.blockmenu blockquote[data-qs="typo"]{margin:0;padding:.2em 1.6em .2em 2.2em}
+/* Zusammengehörige Knöpfe in einem Kasten (Rückgängig/Wiederholen), im
+   Rahmen der Felder für Schrift und Größe */
+.tbkasten{display:inline-flex;align-items:center;gap:2px;padding:1px 2px;border:1px solid var(--rule);
+  border-radius:var(--radius);background:var(--paper)}
 /* Knöpfe erben über `button{font:inherit}` die Schrift ihrer Umgebung — in
    einer Monospace-Leiste wie der Notizfußzeile oder dem Versionsverlauf sah
    derselbe Knopf darum anders aus als anderswo. Beschriftungen sind Fließtext
@@ -570,32 +598,45 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 :is(#editor,.pvedit) h1{font-size:1.7em;font-weight:600;margin:1.1em 0 .45em}
 :is(#editor,.pvedit) h2{font-size:1.32em;font-weight:600;margin:1.1em 0 .4em}
 :is(#editor,.pvedit) h3{font-size:1.12em;font-weight:600;margin:1em 0 .35em}
+/* Überschrift 4 wie in Word kursiv, in Grundgröße (seit 2026-10-17) */
+:is(#editor,.pvedit) h4{font-size:1em;font-weight:600;font-style:italic;margin:1em 0 .3em}
 :is(#editor,.pvedit) p{margin:0 0 var(--ps,.82em)}
+/* Titel und Untertitel wie in Word und Google Docs: Absätze mit eigener
+   Vorlage (data-fv), keine Überschriften — sie zählen nicht in Gliederung
+   und Inhaltsverzeichnis, wie Words „Titel“ ohne Gliederungsebene. Größe
+   in em, wie die Überschriften. .rinner ist die Leseansicht. */
+:is(#editor,.pvedit,.rinner) p[data-fv="titel"]{font-size:2.3em;font-weight:400;line-height:1.15;letter-spacing:-.01em;margin:0 0 .2em}
+:is(#editor,.pvedit,.rinner) p[data-fv="untertitel"]{font-size:1.3em;color:var(--ink-soft);margin:0 0 1em}
 /* Listen eingerückt wie in Word: Text bei 1,27 cm, jede Ebene 1,27 cm
    tiefer, die Nummer davor (in Word bei 0,63 cm). Fest in cm statt em —
    Word hängt den Einzug nicht an die Schriftgröße —, mit dem Zoom
    skaliert wie die Schriftgrößen. Bis 1.3 waren es 1,5 em, halb so weit. */
 :is(#editor,.pvedit) ul,:is(#editor,.pvedit) ol{margin:0 0 .82em;padding-left:calc(1.27cm * var(--zoom,1))}
 /* Drei Zitatstile, gewählt je Zitat — über Format → Zitat oder das
-   Absatzformat-Feld der Werkzeugleiste („Zitat 1/2/3"). Der Stil steht als
+   Absatzformat-Feld der Werkzeugleiste. Der Stil steht als
    data-qs am <blockquote> selbst, nicht am Dokument: dadurch lassen sich in
    einem Text mehrere Zitate verschieden setzen, der Stil wandert beim
    Kopieren mit und übersteht Speichern wie Export. Ohne Attribut gilt
-   Zitat 1, das ist zugleich die Grundlage, auf der die beiden anderen nur
+   „Zitat“, das ist zugleich die Grundlage, auf der die beiden anderen nur
    noch ändern, was sie ändern.
+   Seit 2026-10-17 wie Words eingebaute Vorlagen „Zitat“ (mittig, kursiv,
+   gedämpft, beidseitig eingerückt) und „Intensives Zitat“ (Akzentfarbe,
+   Linie darüber und darunter); unter diesen Namen gingen sie schon vorher
+   nach Word, sahen dort aber anders aus als hier. Vorher: Akzentlinie links,
+   getönter Block. Die Schlüssel (data-qs "", "toent", "typo") sind
+   geblieben, damit alte Dokumente nichts verlieren — sie sehen nur neu aus.
    Bewusst nicht an #editor gebunden: so tragen dieselben Regeln auch
    Leseansicht und Druckvorschau, statt an drei Stellen gepflegt zu werden.
    Eine ID-gebundene Regel (#editor blockquote) würde sie schlagen — deshalb
    gibt es keine mehr. */
-blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;
-  border-left:3px solid var(--stamp);color:var(--ink-soft);font-style:italic}
-/* Die Tönung mischt sich aus Akzent- und Papierfarbe, statt fest zu stehen —
-   sonst wäre sie auf den fünf dunklen Schemata ein heller Kasten. */
-blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;
-  border-radius:0 var(--radius-paper) var(--radius-paper) 0;
-  background:color-mix(in srgb,var(--stamp) 7%,var(--paper))}
+blockquote{margin:1.2em 2.4em;padding:.2em 0;color:var(--ink-soft);font-style:italic;text-align:center}
+/* Die Textfarbe mischt sich aus Akzent und Tinte, statt fest zu stehen —
+   reine Akzentfarbe läge auf einigen Schemata unter 4,5:1. */
+blockquote[data-qs="toent"]{margin:1.6em 2.4em;padding:.7em 1em;
+  border-top:1px solid var(--stamp);border-bottom:1px solid var(--stamp);
+  color:color-mix(in srgb,var(--stamp) 70%,var(--ink))}
 blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;
-  border-left:none;position:relative}
+  text-align:left;position:relative}
 /* Ein Pseudoelement, kein Zeichen im Text: es ist nicht bearbeitbar, landet
    nicht in d.html und stört die Schreibmarke nicht (dieselbe Bauart wie beim
    Seitenumbruch-Etikett). */
@@ -638,7 +679,7 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
    Breitenangaben zwar heraus, aber hier darf nichts durchrutschen. */
 :is(#editor,.pvedit) img{max-width:100%;height:auto}
 :is(#editor,.pvedit) pre{white-space:pre-wrap;overflow-wrap:anywhere}
-:is(#editor,.pvedit) blockquote,:is(#editor,.pvedit) p,:is(#editor,.pvedit) li,:is(#editor,.pvedit) h1,:is(#editor,.pvedit) h2,:is(#editor,.pvedit) h3{overflow-wrap:break-word}
+:is(#editor,.pvedit) blockquote,:is(#editor,.pvedit) p,:is(#editor,.pvedit) li,:is(#editor,.pvedit) h1,:is(#editor,.pvedit) h2,:is(#editor,.pvedit) h3,:is(#editor,.pvedit) h4{overflow-wrap:break-word}
 :is(#editor,.pvedit) td,:is(#editor,.pvedit) th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
 :is(#editor,.pvedit) td>p:last-child,:is(#editor,.pvedit) th>p:last-child{margin-bottom:0}
@@ -676,6 +717,7 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
 :is(#editor,.pvedit) .toc-list a.toc-l1,.toc-list a.toc-l1{font-size:1em}
 :is(#editor,.pvedit) .toc-list a.toc-l2,.toc-list a.toc-l2{padding-left:1.3em;font-size:.93em}
 :is(#editor,.pvedit) .toc-list a.toc-l3,.toc-list a.toc-l3{padding-left:2.6em;font-size:.86em}
+:is(#editor,.pvedit) .toc-list a.toc-l4,.toc-list a.toc-l4{padding-left:3.9em;font-size:.82em}
 .toc-leader{flex:1;margin-bottom:3px}
 .toc[data-leader="dots"] .toc-leader{border-bottom:1px dotted var(--ink-faint)}
 .toc[data-leader="dash"] .toc-leader{border-bottom:1px dashed var(--ink-faint)}
@@ -1540,7 +1582,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      eine geerbte Höhe es stauchen kann. */
   #editor figure,#editor img{break-inside:avoid;page-break-inside:avoid}
   #editor figure.fig:not(.free) img{max-width:100%!important;height:auto!important}
-  #editor h1,#editor h2,#editor h3{break-after:avoid;page-break-after:avoid}
+  #editor h1,#editor h2,#editor h3,#editor h4,#editor p[data-fv]{break-after:avoid;page-break-after:avoid}
   #editor .pgbreak{break-after:page;page-break-after:always;border:none!important;
     height:0!important;visibility:hidden!important}
   #editor td,#editor th{border:1px solid #000!important}
@@ -1567,6 +1609,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .readview .rinner h1{font-size:1.7em;font-weight:600;margin:1.2em 0 .5em}
 .readview .rinner h2{font-size:1.35em;font-weight:600;margin:1.15em 0 .45em}
 .readview .rinner h3{font-size:1.15em;font-weight:600;margin:1.1em 0 .4em}
+.readview .rinner h4{font-size:1em;font-weight:600;font-style:italic;margin:1em 0 .35em}
 .readview .rinner p{margin:0 0 .9em}
 .readview .rinner ul,.readview .rinner ol{margin:0 0 .9em;padding-left:1.5em}
 .readview .rinner img{max-width:100%;height:auto}
@@ -2079,7 +2122,8 @@ const psOf=d=>d.ps!=null?d.ps:(S.settings.ps!=null?S.settings.ps:.82);
    Grundstil: er steht als gar kein Attribut am Zitat, siehe CSS oben.
    Der Name steht im Format-Menü, die Nummer in der Werkzeugleiste — beides
    zeigt dort aufeinander, damit die Zuordnung nicht geraten werden muss. */
-const QUOTESTYLES=[["Akzentlinie",""],["Getönt","toent"],["Typografisch","typo"]];
+/* Namen wie Words eingebaute Vorlagen, unter denen sie auch gespeichert werden */
+const QUOTESTYLES=[["Zitat",""],["Intensives Zitat","toent"],["Typografisches Zitat","typo"]];
 const quoteStyleOf=bq=>(bq&&bq.getAttribute("data-qs"))||"";
 /* Listenstile, je Liste wählbar (data-ls an ul/ol). Wie bei den Zitaten ist
    der leere Schlüssel der Grundstil und steht als gar kein Attribut da — so
@@ -2266,6 +2310,9 @@ en:{
   "Überschrift 1":"Heading 1",
   "Überschrift 2":"Heading 2",
   "Überschrift 3":"Heading 3",
+  "Untertitel":"Subtitle",
+  "Überschrift 4":"Heading 4",
+  "Bis Ebene 4":"Up to level 4",
   "Aufzählung":"Bulleted list",
   "Punkt":"Dot","Kreis":"Circle","Quadrat":"Square","Strich":"Dash","Haken":"Check",
   "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal with bracket",
@@ -2746,9 +2793,8 @@ en:{
   "Normseite":"Manuscript page",
   "Taschenbuch":"Paperback",
   "Buchsatz":"Book typesetting",
-  "Akzentlinie":"Accent rule",
-  "Getönt":"Tinted",
-  "Typografisch":"Typographic",
+  "Intensives Zitat":"Intense Quote",
+  "Typografisches Zitat":"Typographic Quote",
   "Eigene Maße":"Custom size",
   "Breite und Höhe frei wählen":"Choose width and height freely",
   "Eigenes Format speichern":"Save custom format",
@@ -3133,6 +3179,9 @@ fr:{
   "Überschrift 1":"Titre 1",
   "Überschrift 2":"Titre 2",
   "Überschrift 3":"Titre 3",
+  "Untertitel":"Sous-titre",
+  "Überschrift 4":"Titre 4",
+  "Bis Ebene 4":"Jusqu'au niveau 4",
   "Aufzählung":"Liste à puces",
   "Punkt":"Point","Kreis":"Cercle","Quadrat":"Carré","Strich":"Tiret","Haken":"Coche",
   "Dezimal":"Décimal","Dezimal mit Klammer":"Décimal avec parenthèse",
@@ -3613,9 +3662,8 @@ fr:{
   "Normseite":"Page manuscrit standard",
   "Taschenbuch":"Livre de poche",
   "Buchsatz":"Composition de livre",
-  "Akzentlinie":"Filet d'accent",
-  "Getönt":"Teinté",
-  "Typografisch":"Typographique",
+  "Intensives Zitat":"Citation intense",
+  "Typografisches Zitat":"Citation typographique",
   "Eigene Maße":"Dimensions personnalisées",
   "Breite und Höhe frei wählen":"Choisir librement largeur et hauteur",
   "Eigenes Format speichern":"Enregistrer le format personnalisé",
@@ -4000,6 +4048,9 @@ es:{
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
   "Überschrift 3":"Título 3",
+  "Untertitel":"Subtítulo",
+  "Überschrift 4":"Título 4",
+  "Bis Ebene 4":"Hasta el nivel 4",
   "Aufzählung":"Lista con viñetas",
   "Punkt":"Punto","Kreis":"Círculo","Quadrat":"Cuadrado","Strich":"Guion","Haken":"Marca",
   "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal con paréntesis",
@@ -4480,9 +4531,8 @@ es:{
   "Normseite":"Página manuscrito estándar",
   "Taschenbuch":"Libro de bolsillo",
   "Buchsatz":"Maquetación de libro",
-  "Akzentlinie":"Línea de acento",
-  "Getönt":"Con fondo",
-  "Typografisch":"Tipográfico",
+  "Intensives Zitat":"Cita destacada",
+  "Typografisches Zitat":"Cita tipográfica",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Elegir libremente ancho y alto",
   "Eigenes Format speichern":"Guardar formato personalizado",
@@ -4867,6 +4917,9 @@ pt:{
   "Überschrift 1":"Título 1",
   "Überschrift 2":"Título 2",
   "Überschrift 3":"Título 3",
+  "Untertitel":"Subtítulo",
+  "Überschrift 4":"Título 4",
+  "Bis Ebene 4":"Até o nível 4",
   "Aufzählung":"Lista com marcadores",
   "Punkt":"Ponto","Kreis":"Círculo","Quadrat":"Quadrado","Strich":"Traço","Haken":"Marca",
   "Dezimal":"Decimal","Dezimal mit Klammer":"Decimal com parêntese",
@@ -5347,9 +5400,8 @@ pt:{
   "Normseite":"Página padrão de manuscrito",
   "Taschenbuch":"Livro de bolso",
   "Buchsatz":"Diagramação de livro",
-  "Akzentlinie":"Linha de destaque",
-  "Getönt":"Com fundo",
-  "Typografisch":"Tipográfico",
+  "Intensives Zitat":"Citação Intensa",
+  "Typografisches Zitat":"Citação tipográfica",
   "Eigene Maße":"Medidas personalizadas",
   "Breite und Höhe frei wählen":"Escolher largura e altura livremente",
   "Eigenes Format speichern":"Salvar formato personalizado",
@@ -5734,6 +5786,9 @@ pl:{
   "Überschrift 1":"Nagłówek 1",
   "Überschrift 2":"Nagłówek 2",
   "Überschrift 3":"Nagłówek 3",
+  "Untertitel":"Podtytuł",
+  "Überschrift 4":"Nagłówek 4",
+  "Bis Ebene 4":"Do poziomu 4",
   "Aufzählung":"Lista punktowana",
   "Punkt":"Kropka","Kreis":"Kółko","Quadrat":"Kwadrat","Strich":"Myślnik","Haken":"Ptaszek",
   "Dezimal":"Dziesiętne","Dezimal mit Klammer":"Dziesiętne z nawiasem",
@@ -6214,9 +6269,8 @@ pl:{
   "Normseite":"Strona znormalizowana",
   "Taschenbuch":"Książka kieszonkowa",
   "Buchsatz":"Skład książkowy",
-  "Akzentlinie":"Linia akcentu",
-  "Getönt":"Z tłem",
-  "Typografisch":"Typograficzny",
+  "Intensives Zitat":"Cytat intensywny",
+  "Typografisches Zitat":"Cytat typograficzny",
   "Eigene Maße":"Własne wymiary",
   "Breite und Höhe frei wählen":"Dowolnie wybierz szerokość i wysokość",
   "Eigenes Format speichern":"Zapisz własny format",
@@ -6601,6 +6655,9 @@ it:{
   "Überschrift 1":"Titolo 1",
   "Überschrift 2":"Titolo 2",
   "Überschrift 3":"Titolo 3",
+  "Untertitel":"Sottotitolo",
+  "Überschrift 4":"Titolo 4",
+  "Bis Ebene 4":"Fino al livello 4",
   "Aufzählung":"Elenco puntato",
   "Punkt":"Punto",
   "Kreis":"Cerchio",
@@ -7088,9 +7145,8 @@ it:{
   "Normseite":"Cartella standard",
   "Taschenbuch":"Tascabile",
   "Buchsatz":"Impaginazione libro",
-  "Akzentlinie":"Linea di accento",
-  "Getönt":"Sfondo colorato",
-  "Typografisch":"Tipografico",
+  "Intensives Zitat":"Citazione intensa",
+  "Typografisches Zitat":"Citazione tipografica",
   "Eigene Maße":"Dimensioni personalizzate",
   "Breite und Höhe frei wählen":"Scegli liberamente larghezza e altezza",
   "Eigenes Format speichern":"Salva formato personalizzato",
@@ -8047,11 +8103,7 @@ function drawTools(){
         <i style="background:${S.settings.markColor||MARKCOLORS[0].c}"></i></button>
       <button class="tb" data-cmd="removeFormat" title="${tr("Formatierung entfernen")}" aria-label="${tr("Formatierung entfernen")}">${ICOTB(ICO_RADIERER)}</button>
       <div class="sep"></div>
-      <select id="fBlock" title="${tr("Absatzformat")}">
-        <option value="p">${tr("Fließtext")}</option><option value="h1">${tr("Überschrift 1")}</option>
-        <option value="h2">${tr("Überschrift 2")}</option><option value="h3">${tr("Überschrift 3")}</option>
-        ${QUOTESTYLES.map(([lab,k],i)=>
-          `<option value="blockquote${k?":"+k:""}" title="${tr(lab)}">${tr("Zitat")} ${i+1}</option>`).join("")}</select>
+      <button type="button" class="blockfeld" id="fBlock" title="${tr("Absatzformat")}" aria-haspopup="listbox" data-wert="p"><span>${tr("Fließtext")}</span></button>
       <button class="tb" data-cmd="insertUnorderedList" title="${tr("Aufzählung")}">${ICOTB('<circle cx="4" cy="6" r="1.4"/><circle cx="4" cy="12" r="1.4"/><circle cx="4" cy="18" r="1.4"/><path d="M9 6h11M9 12h11M9 18h11"/>')}</button>
       <button class="tb" data-cmd="insertOrderedList" title="${tr("Nummerierung")}">${ICOTB('<path d="M10.5 6h10M10.5 12h10M10.5 18h10"/>'+'<text x="7.6" y="6" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">1</text>'+'<text x="7.6" y="12" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">2</text>'+'<text x="7.6" y="18" text-anchor="end" dominant-baseline="central" font-size="8.6" font-family="Segoe UI,system-ui,sans-serif" font-weight="600" fill="currentColor" stroke="none">3</text>')}</button>
       <span style="display:flex;gap:7px">
@@ -8071,12 +8123,23 @@ function drawTools(){
         <path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6" stroke="#4E8C6A"/></svg></button>
       <button class="tb" id="lnkBtn" title="${tr("Link einfügen (Alt+⇧+K)")}">${ICOTB('<path d="M10 13.5a4 4 0 0 0 5.7 0l3-3a4 4 0 1 0-5.7-5.7l-1.5 1.5"/><path d="M14 10.5a4 4 0 0 0-5.7 0l-3 3a4 4 0 1 0 5.7 5.7l1.5-1.5"/>')}</button>
       <button class="tb" id="tblBtn" title="${tr("Tabelle einfügen")}">${ICOTB('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/>')}</button>
-      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICOTB('<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2"/>')}</button>
+      <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICOTB(/* Schnittlinie in Koralle wie der Radierer (Toms Wahl „A“): #E07052
+          hält 3:1 auf hellen und rund 5:1 auf dunklen Leisten */
+          '<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2" stroke="#E07052" stroke-width="1.6"/>')}</button>
       <span style="display:flex;gap:7px;margin-left:auto">
-        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB('<circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
+        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB(/* Glas zart blau getönt mit Lichtreflex (Toms Wahl „C“); der
+          Reflex #4A90D9 hält 3:1 auf hellen und rund 5:1 auf dunklen Leisten */
+          '<circle cx="10.5" cy="10.5" r="6.5" fill="#7FA7D6" fill-opacity=".32"/><path d="M7.6 9.2a3.2 3.2 0 0 1 2.4-2.4" stroke="#4A90D9" stroke-width="1.4"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
         <div class="sep"></div>
-        <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICOTB('<path d="M20 18a8 8 0 0 0-8-8H4"/><path d="M8 6 4 10l4 4"/>')}</button>
-        <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICOTB('<path d="M4 18a8 8 0 0 1 8-8h8"/><path d="m16 6 4 4-4 4"/>')}</button>
+        <!-- Geschwungener Pfeil mit voller Spitze wie in Word (Toms Wahl „A“),
+             beide in einem Kasten wie die Felder für Schrift und Größe -->
+        <span class="tbkasten">
+          <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICOTB('<path d="M19 18.5c0-5.2-3.8-8.5-9-8.5H7.5"/><path d="M8.5 5.5 3.5 10l5 4.5z" fill="currentColor"/>')}</button>
+          <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICOTB('<path d="M5 18.5c0-5.2 3.8-8.5 9-8.5h2.5"/><path d="M15.5 5.5 20.5 10l-5 4.5z" fill="currentColor"/>')}</button>
+          <!-- Versionsverlauf: Uhr im Pfeilbogen, Zeiger blau wie der Glanz der
+               Lupe (Toms Idee, Fassung „E“) — bisher nur über Datei › Zwischenstände -->
+          <button class="tb" id="histBtn" title="${tr("Versionsverlauf")}" aria-label="${tr("Versionsverlauf")}">${ICOTB('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2 6.6 4.3 10.4 8.1 8.6z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8" stroke="#4A90D9" stroke-width="1.6"/>')}</button>
+        </span>
       </span>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
@@ -8197,6 +8260,23 @@ function drawWrite(){
       if(sel.rangeCount&&sel.isCollapsed){
         let n=sel.getRangeAt(0).startContainer;
         if(n.nodeType!==1)n=n.parentElement;
+        /* Eingabe am Ende von Titel oder Untertitel: weiter mit Fließtext,
+           wie Words „Formatvorlage für Folgeabsatz“. Chrome würde den
+           Absatz samt data-fv klonen. In der Mitte geteilt bleiben beide
+           Hälften Titel, auch wie in Word. */
+        const fvp=n&&ed.contains(n)?n.closest("p[data-fv]"):null;
+        if(fvp){
+          const rr=document.createRange();rr.selectNodeContents(fvp);rr.setStart(sel.getRangeAt(0).endContainer,sel.getRangeAt(0).endOffset);
+          if(!rr.toString().length){
+            e.preventDefault();
+            const p=document.createElement("p");p.innerHTML="<br>";
+            fvp.after(p);
+            const r=document.createRange();r.selectNodeContents(p);r.collapse(true);
+            sel.removeAllRanges();sel.addRange(r);
+            dirty=true;drawStatus();queuePaginate();syncToolbarState();
+            return;
+          }
+        }
         const bq=n&&ed.contains(n)?n.closest("blockquote"):null;
         if(bq&&!bq.textContent.trim()){
           e.preventDefault();
@@ -8692,6 +8772,72 @@ function schriftTaste(e){
     toast(tr("Schrift nicht gefunden")+": "+roh);ff.select();
   }
 }
+/* ---- Absatzformat mit Vorschau, wie Words Formatvorlagen ----
+   Statt einer Auswahlliste des Systems (zeigt nur Text in einer Größe) eine
+   eigene Liste: jeder Eintrag in seinem Aussehen — Überschriften in Größe
+   und fett, Zitate mit denselben Regeln wie im Text (blockquote[data-qs]),
+   in der Grundschrift des Dokuments. Zeigen statt erklären (Toms Wunsch);
+   die Zitate heißen wie in Word („Zitat“, „Intensives Zitat“). Der Fokus
+   bleibt im Text (mousedown abgefangen), Pfeiltasten/Eingabe/Escape gehen
+   über einen Tastenhorcher, solange die Liste offen ist. Wert wie bisher:
+   "p", "titel", "untertitel", "h1"…"h4", "blockquote" bzw. "blockquote:toent".
+   Reihenfolge wie in Google Docs: Fließtext, Titel, Untertitel, Überschriften. */
+const blockFormate=()=>[["p",tr("Fließtext")],["titel",tr("Titel")],["untertitel",tr("Untertitel")],
+  ["h1",tr("Überschrift 1")],["h2",tr("Überschrift 2")],["h3",tr("Überschrift 3")],["h4",tr("Überschrift 4")],
+  ...QUOTESTYLES.map(([lab,k])=>["blockquote"+(k?":"+k:""),tr(lab)])];
+function blockFeldSetzen(wert){
+  const fb=$("#fBlock");if(!fb)return;
+  fb.dataset.wert=wert;
+  const f=blockFormate().find(x=>x[0]===wert);
+  fb.firstElementChild.textContent=f?f[1]:tr("Fließtext");
+}
+function blockAnwenden(wert){
+  const [tag,qs]=String(wert).split(":");
+  if(tag==="blockquote"){applyQuote(qs||"");return}
+  if(S.mode!=="write"){setMode("write");setTimeout(()=>blockAnwenden(wert),60);return}
+  $("#editor").focus();
+  if(tag==="p")fliesstext();
+  else if(tag==="titel"||tag==="untertitel"){fliesstext();fvSetzen(tag)}
+  else{document.execCommand("formatBlock",false,tag);fvSetzen("")}
+  dirty=true;queuePaginate();drawStatus();syncToolbarState();
+}
+/* Titel/Untertitel an den markierten Absätzen setzen ("" nimmt sie weg) */
+function fvSetzen(fv){
+  selectedBlocks().forEach(b=>{
+    if(fv&&b.tagName==="P")b.setAttribute("data-fv",fv);
+    else if(!fv)b.removeAttribute("data-fv");
+  });
+}
+function blockMenue(){
+  if($("#blockmenu")){closeMenu();return}
+  closeMenu();
+  const fb=$("#fBlock");if(!fb)return;
+  const d=doc(),akt=fb.dataset.wert||"p",f=blockFormate();
+  const zeile=([w,lab,tip])=>{
+    const qs=w.includes(":")?w.split(":")[1]:"";
+    const inhalt=w.startsWith("blockquote")?`<blockquote${qs?` data-qs="${qs}"`:""}>${esc(lab)}</blockquote>`
+      :`<span class="bv-${w}">${esc(lab)}</span>`;
+    return `<button type="button" class="mi bv${w===akt?" on":""}" role="option" data-blk="${w}"${tip?` title="${esc(tip)}"`:""}>${inhalt}</button>`;
+  };
+  const m=document.createElement("div");m.className="menu ctx blockmenu";m.id="blockmenu";m.setAttribute("role","listbox");
+  m.style.fontFamily=schriftStapel(d.font||S.settings.font);
+  m.innerHTML=zeile(f[0])+'<div class="msep"></div>'+f.slice(1,3).map(zeile).join("")+'<div class="msep"></div>'+f.slice(3,7).map(zeile).join("")+'<div class="msep"></div>'+f.slice(7).map(zeile).join("");
+  document.body.appendChild(m);
+  const r=fb.getBoundingClientRect();menuPlatzieren(m,r.left,r.bottom+3,r);
+  m.addEventListener("mousedown",e=>e.preventDefault());
+  m.onclick=e=>{const b=e.target.closest("[data-blk]");if(!b)return;closeMenu();blockAnwenden(b.dataset.blk)};
+  const knoepfe=[...m.querySelectorAll("[data-blk]")];
+  let marke=Math.max(0,knoepfe.findIndex(b=>b.dataset.blk===akt));
+  const zeige=()=>knoepfe.forEach((b,i)=>b.classList.toggle("mark",i===marke));
+  const taste=e=>{
+    if(!document.getElementById("blockmenu")){document.removeEventListener("keydown",taste,true);return}
+    const weg=()=>{e.preventDefault();e.stopPropagation()};
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){weg();marke=Math.max(0,Math.min(knoepfe.length-1,marke+(e.key==="ArrowDown"?1:-1)));zeige()}
+    else if(e.key==="Enter"){weg();const w=knoepfe[marke]&&knoepfe[marke].dataset.blk;closeMenu();document.removeEventListener("keydown",taste,true);if(w)blockAnwenden(w)}
+    else if(e.key==="Escape"){weg();closeMenu();document.removeEventListener("keydown",taste,true)}
+  };
+  document.addEventListener("keydown",taste,true);
+}
 function sizeMenu(e){
   closeMenu();
   const akt=doc().size||S.settings.size;
@@ -8729,16 +8875,16 @@ function syncToolbarState(){
     try{aktiv=document.queryCommandState(c)}catch(e){}
     btn.classList.toggle("on",aktiv);
   });
-  const fb=$("#fBlock");
-  if(fb){
+  if($("#fBlock")){
     let n=sel.anchorNode;n=n.nodeType===1?n:n.parentElement;
-    const block=n&&n.closest("h1,h2,h3,blockquote");
+    const block=n&&n.closest("h1,h2,h3,h4,blockquote,p[data-fv]");
     /* Bei einem Zitat gehört der Stil mit in den Wert, sonst zeigte das Feld
        immer „Zitat 1", egal welcher der drei gerade gesetzt ist. */
     if(block&&block.tagName==="BLOCKQUOTE"){
       const k=quoteStyleOf(block);
-      fb.value="blockquote"+(k?":"+k:"");
-    }else fb.value=block?block.tagName.toLowerCase():"p";
+      blockFeldSetzen("blockquote"+(k?":"+k:""));
+    }else if(block&&block.tagName==="P")blockFeldSetzen(block.getAttribute("data-fv"));
+    else blockFeldSetzen(block?block.tagName.toLowerCase():"p");
   }
   schriftFelderSetzen();
 }
@@ -9840,7 +9986,7 @@ function mdBlocks(root,fnNum,depth){
     if(/^h[1-6]$/.test(tag)){
       const s=mdInline(el,fnNum).trim();if(s)out.push("#".repeat(+tag[1])+" "+s);
     }else if(tag==="blockquote"){
-      const inner=el.querySelector("p,ul,ol,blockquote,h1,h2,h3")
+      const inner=el.querySelector("p,ul,ol,blockquote,h1,h2,h3,h4")
         ? mdBlocks(el,fnNum,0).join("\n\n") : mdInline(el,fnNum).trim();
       if(inner)out.push(inner.split("\n").map(l=>l?"> "+l:">").join("\n"));
     }else if(tag==="ul"||tag==="ol"){
@@ -9992,7 +10138,9 @@ body{margin:0;background:${paper};color:${ink};
   -webkit-text-size-adjust:100%}
 main{max-width:40em;margin:0 auto;padding:6vh 24px 16vh}
 h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.25;margin:1.1em 0 .4em}
-h1{font-size:1.7em}h2{font-size:1.32em}h3{font-size:1.12em}
+h1{font-size:1.7em}h2{font-size:1.32em}h3{font-size:1.12em}h4{font-size:1em;font-style:italic}
+p[data-fv="titel"]{font-size:2.3em;line-height:1.15;letter-spacing:-.01em;margin:0 0 .2em}
+p[data-fv="untertitel"]{font-size:1.3em;color:${soft};margin:0 0 1em}
 p{margin:0 0 ${ps}em}
 a{color:${stamp};text-underline-offset:2px}
 img{max-width:100%;height:auto}
@@ -10010,12 +10158,11 @@ ol[data-ls="klammer"]>li::marker{content:counter(list-item) ")  "}
 ol ol:not([data-ls]){list-style-type:lower-alpha}
 ol ol ol:not([data-ls]){list-style-type:lower-roman}
 ol ol ol ol:not([data-ls]){list-style-type:decimal}
-blockquote{margin:1.2em 1.5em 1.2em 0;padding:.2em 0 .2em 1.15em;
-  border-left:3px solid ${stamp};color:${soft};font-style:italic}
+blockquote{margin:1.2em 2.4em;padding:.2em 0;color:${soft};font-style:italic;text-align:center}
 blockquote p{margin:0 0 .5em}blockquote p:last-child{margin:0}
-blockquote[data-qs="toent"]{margin-right:1.2em;padding:.75em 1.1em;font-style:normal;
-  border-radius:0 3px 3px 0;background:color-mix(in srgb,${stamp} 7%,${paper})}
-blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;border-left:none;position:relative}
+blockquote[data-qs="toent"]{margin:1.6em 2.4em;padding:.7em 1em;
+  border-top:1px solid ${stamp};border-bottom:1px solid ${stamp};color:color-mix(in srgb,${stamp} 70%,${ink})}
+blockquote[data-qs="typo"]{margin:1.4em 0;padding:0 1.6em 0 2.2em;text-align:left;position:relative}
 blockquote[data-qs="typo"]::before{content:'“';position:absolute;left:.1em;top:-.06em;
   font-size:2.4em;line-height:1;color:${rule};font-style:normal}
 table{border-collapse:collapse;width:100%;margin:0 0 ${ps}em}
@@ -10033,6 +10180,7 @@ sup.fn a{color:${stamp};text-decoration:none;font-weight:600}
 .toc .toc-list a:hover{color:${stamp}}
 .toc .toc-list a.toc-l2{padding-left:1.3em;font-size:.95em}
 .toc .toc-list a.toc-l3{padding-left:2.6em;font-size:.9em}
+.toc .toc-list a.toc-l4{padding-left:3.9em;font-size:.86em}
 .footnotes{margin-top:3em;padding-top:.8em;border-top:1px solid ${rule};font-size:.9em;color:${soft}}
 .footnotes h2{font-size:1em;margin:0 0 .5em;color:${ink}}
 .footnotes li{margin:0 0 .35em}
@@ -10277,7 +10425,9 @@ function commandList(){
   fmtCmd("Unterstrichen",kz("unter"),()=>document.execCommand("underline"));
   fmtCmd("Durchgestrichen","",()=>document.execCommand("strikeThrough"));
   fmtCmd("Fließtext","",fliesstext);
-  [1,2,3].forEach(n=>fmtCmd("Überschrift "+n,"",()=>document.execCommand("formatBlock",false,"h"+n)));
+  fmtCmd("Titel","",()=>blockAnwenden("titel"));
+  fmtCmd("Untertitel","",()=>blockAnwenden("untertitel"));
+  [1,2,3,4].forEach(n=>fmtCmd("Überschrift "+n,"",()=>blockAnwenden("h"+n)));
   fmtCmd("Aufzählung","",()=>listeUmschalten("insertUnorderedList"));
   fmtCmd("Nummerierung","",()=>listeUmschalten("insertOrderedList"));
   const blockCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
@@ -10648,7 +10798,9 @@ ${(instanzen||[]).map(n=>`<w:num w:numId="${n.numId}"><w:abstractNumId w:val="${
    (h1 1,7em, h2 1,32em, h3 1,12em). Bis 1.3 schrieb der Export feste 18/15/
    13 pt — bei 11 oder 12 pt Grundgröße stand die Überschrift in Word kleiner
    als am Bildschirm. Der Import vergleicht mit denselben Werten. */
-const UEBERSCHRIFT_FAKTOR={1:1.7,2:1.32,3:1.12};
+const UEBERSCHRIFT_FAKTOR={1:1.7,2:1.32,3:1.12,4:1};
+/* Titel und Untertitel, ebenfalls zur Grundgröße wie das CSS */
+const TITEL_FAKTOR={titel:2.3,untertitel:1.3};
 function stylesXml(d){
   const fs=Math.round((d.size||S.settings.size)*2),lh=Math.round(lhOf(d)*240);
   const hs=n=>Math.round((d.size||S.settings.size)*UEBERSCHRIFT_FAKTOR[n]*2);
@@ -10656,7 +10808,8 @@ function stylesXml(d){
   const ueberschrift=(n,sz)=>`<w:style w:type="paragraph" w:styleId="Heading${n}"><w:name w:val="heading ${n}"/>
     <w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
     <w:pPr><w:spacing w:before="240" w:after="80"/><w:outlineLvl w:val="${n-1}"/></w:pPr>
-    <w:rPr><w:b/><w:sz w:val="${sz}"/></w:rPr></w:style>`;
+    <w:rPr><w:b/>${n===4?"<w:i/>":""}<w:sz w:val="${sz}"/></w:rPr></w:style>`;
+  const ts=k=>Math.round((d.size||S.settings.size)*TITEL_FAKTOR[k]*2);
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
 <w:docDefaults><w:rPrDefault><w:rPr>
@@ -10665,13 +10818,17 @@ function stylesXml(d){
   <w:pPrDefault><w:pPr><w:spacing w:line="${lh}" w:lineRule="auto" w:after="${after}"/></w:pPr></w:pPrDefault>
 </w:docDefaults>
 <w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>
-${ueberschrift(1,hs(1))}${ueberschrift(2,hs(2))}${ueberschrift(3,hs(3))}
+${ueberschrift(1,hs(1))}${ueberschrift(2,hs(2))}${ueberschrift(3,hs(3))}${ueberschrift(4,hs(4))}
+<w:style w:type="paragraph" w:styleId="Title"><w:name w:val="Title"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+  <w:pPr><w:spacing w:after="80"/><w:contextualSpacing/></w:pPr><w:rPr><w:kern w:val="28"/><w:sz w:val="${ts("titel")}"/></w:rPr></w:style>
+<w:style w:type="paragraph" w:styleId="Subtitle"><w:name w:val="Subtitle"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
+  <w:pPr><w:spacing w:after="160"/></w:pPr><w:rPr><w:color w:val="595959"/><w:spacing w:val="15"/><w:sz w:val="${ts("untertitel")}"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="Quote"><w:name w:val="Quote"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
-  <w:pPr><w:ind w:left="284"/></w:pPr><w:rPr><w:i/></w:rPr></w:style>
+  <w:pPr><w:spacing w:before="200" w:after="160"/><w:ind w:left="864" w:right="864"/><w:jc w:val="center"/></w:pPr><w:rPr><w:i/><w:color w:val="404040"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="IntenseQuote"><w:name w:val="Intense Quote"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
-  <w:pPr><w:shd w:val="clear" w:color="auto" w:fill="F2F2F2"/><w:ind w:left="284" w:right="284"/></w:pPr></w:style>
+  <w:pPr><w:pBdr><w:top w:val="single" w:sz="4" w:space="10" w:color="4472C4"/><w:bottom w:val="single" w:sz="4" w:space="10" w:color="4472C4"/></w:pBdr><w:spacing w:before="360" w:after="360"/><w:ind w:left="864" w:right="864"/><w:jc w:val="center"/></w:pPr><w:rPr><w:i/><w:color w:val="4472C4"/></w:rPr></w:style>
 <w:style w:type="paragraph" w:styleId="PQZitatTypo"><w:name w:val="PQ Zitat typografisch"/><w:basedOn w:val="Quote"/><w:next w:val="Normal"/>
-  <w:pPr><w:ind w:left="440" w:right="320"/></w:pPr></w:style>
+  <w:pPr><w:ind w:left="440" w:right="320"/><w:jc w:val="left"/></w:pPr></w:style>
 <w:style w:type="paragraph" w:styleId="Caption"><w:name w:val="caption"/><w:basedOn w:val="Normal"/><w:next w:val="Normal"/>
   <w:pPr><w:spacing w:before="60" w:after="160"/></w:pPr><w:rPr><w:i/><w:sz w:val="${Math.round((d.size||S.settings.size)*1.7)}"/></w:rPr></w:style>
 <w:style w:type="character" w:styleId="Hyperlink"><w:name w:val="Hyperlink"/>
@@ -10964,6 +11121,10 @@ async function walkBlocks(root,ctx){
         const jc=jcVon(t)||jcVon(el);
         xml+=absatzZuXml(absatzXml(t,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx),ctx);
       }
+    }else if(tag==="p"&&el.dataset&&el.dataset.fv){
+      /* Titel/Untertitel als Words eingebaute Vorlagen „Title“/„Subtitle“ */
+      const jc=jcVon(el),sid=el.dataset.fv==="titel"?"Title":"Subtitle";
+      xml+=absatzZuXml(absatzXml(el,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx),ctx);
     }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
       /* Einzug: im Editor margin-left in em (indentBlocks). Ging bis
@@ -10974,7 +11135,7 @@ async function walkBlocks(root,ctx){
       const ind=indA.length?`<w:ind ${indA.join(" ")}/>`:"";
       const a=absatzXml(el,ind+(jc?`<w:jc w:val="${jc}"/>`:""),null,ctx);
       xml+=absatzZuXml(a,ctx);
-    }else if(/^h[1-3]$/.test(tag)){
+    }else if(/^h[1-4]$/.test(tag)){
       const jc=jcVon(el);
       const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx);
       xml+=absatzZuXml(a,ctx);
@@ -10990,7 +11151,7 @@ async function walkBlocks(root,ctx){
       continue;
     }else if(tag==="figure"){
       xml+=await figurXml(el,ctx);
-    }else if(el.querySelector&&(el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))){
+    }else if(el.querySelector&&(el.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4"))){
       xml+=await walkBlocks(el,ctx);   /* fremdes Wrapper-Element: einfach hindurchsehen */
     }else{
       const a=absatzXml(el,"",null,ctx);
@@ -11101,7 +11262,7 @@ async function tabelleXml(table,ctx){
       if(b){g++;continue}
       const td=tds.shift();
       const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,td.rowSpan||1);
-      const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")
+      const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4")
         ?await walkBlocks(td,ctx)
         :absatzZuXml(absatzXml(td,"",null,ctx),ctx);
       zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
@@ -11317,7 +11478,7 @@ function wKommentarePlanen(container){
 }
 function kommentareXml(liste){
   const absaetze=n=>{const t=document.createElement("div");t.innerHTML=n.html||"";
-    const z=[...t.querySelectorAll("p,li,h1,h2,h3,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.innerText!==undefined?e.textContent:"");
+    const z=[...t.querySelectorAll("p,li,h1,h2,h3,h4,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.innerText!==undefined?e.textContent:"");
     return z.length?z:[t.textContent||""]};
   const body=liste.map(({cid,n})=>{
     const w=n.wort||{};
@@ -11491,7 +11652,7 @@ async function odtBlob(d){
   const fnText=new Map((d.footnotes||[]).map(x=>[x.id,x.text])),enText=new Map((d.endnotes||[]).map(x=>[x.id,x.text]));
   const notenIds=new Map();let fnNr=0,enNr=0;
   const kommentarAbsaetze=n=>{const t=document.createElement("div");t.innerHTML=n.html||"";
-    const z=[...t.querySelectorAll("p,li,h1,h2,h3,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.textContent);
+    const z=[...t.querySelectorAll("p,li,h1,h2,h3,h4,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.textContent);
     return z.length?z:[t.textContent||""]};
   /* Inline-Inhalt — Leerraum wie im Editor (siehe inlineAblaufen) */
   const inline=(node,st,ws,out)=>{
@@ -11576,7 +11737,7 @@ async function odtBlob(d){
     if(!pp.length)return eltern||"Standard";
     return stilName("paragraph","P",`<style:paragraph-properties ${pp.join(" ")}/>`,eltern||"Standard");
   };
-  const ausr=j=>j==="center"?'fo:text-align="center"':j==="right"?'fo:text-align="end"':j==="both"?'fo:text-align="justify"':"";
+  const ausr=j=>j==="center"?'fo:text-align="center"':j==="right"?'fo:text-align="end"':j==="both"?'fo:text-align="justify"':j==="left"?'fo:text-align="start"':"";
   const absatz=(el,pp,eltern,stufe)=>{
     const out=[];inline(el,{},{vorn:true},out);
     let inhalt=out.join("");
@@ -11692,7 +11853,7 @@ async function odtBlob(d){
         if(!td){x+=`<table:table-cell table:style-name="${zs}" office:value-type="string"><text:p text:style-name="Standard"/></table:table-cell>`;continue}
         const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilen.length-r));
         const aussen=anker;anker="";
-        const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3")?await bloecke(td):absatz(td,[],"Standard");
+        const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4")?await bloecke(td):absatz(td,[],"Standard");
         anker=aussen;
         x+=`<table:table-cell table:style-name="${zs}"${cs>1?` table:number-columns-spanned="${cs}"`:""}${rs>1?` table:number-rows-spanned="${rs}"`:""} office:value-type="string">`+
           (inhalt||'<text:p text:style-name="Standard"/>')+"</table:table-cell>";
@@ -11714,16 +11875,18 @@ async function odtBlob(d){
         const vorlage=qs==="toent"?"Intense_20_Quote":qs==="typo"?"PQ_20_Zitat_20_typografisch":"Quotations";
         const teile=el.querySelector(":scope > p, :scope > div")?[...el.children]:[el];
         for(const t of teile)x+=absatz(t,[ausr(jcVon(t)||jcVon(el))],vorlage);
+      }else if(tag==="p"&&el.dataset&&el.dataset.fv){
+        x+=absatz(el,[ausr(jcVon(el))],el.dataset.fv==="titel"?"Title":"Subtitle");
       }else if(tag==="p"||tag==="div"){
         const pt=v=>{const z=parseFloat(v);return z&&/em$/.test(v)?z*groesse:0};
         const ml=el.style?pt(el.style.marginLeft):0,ti=el.style?pt(el.style.textIndent):0;
         x+=absatz(el,[ausr(jcVon(el)),ml>0&&`fo:margin-left="${odfZahl(ml)}pt"`,ti&&`fo:text-indent="${odfZahl(ti)}pt"`],"Standard");
-      }else if(/^h[1-3]$/.test(tag)){
+      }else if(/^h[1-4]$/.test(tag)){
         x+=absatz(el,[ausr(jcVon(el))],"Heading_20_"+tag[1],+tag[1]);
       }else if(tag==="ul"||tag==="ol")x+=liste(el);
       else if(tag==="table")x+=await tabelle(el);
       else if(tag==="figure")x+=await figur(el);
-      else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))x+=await bloecke(el);
+      else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4"))x+=await bloecke(el);
       else x+=absatz(el,[],"Standard");
       if(el.dataset&&el.dataset.fziel){
         const rahmenXml=el.dataset.fziel.split(",").map(n=>frei[n]||"").join("");
@@ -11764,7 +11927,7 @@ async function odtBlob(d){
   const band=(a,b)=>Math.max(1,a-b);
   const lang=String(S.settings.lang||"de").slice(0,2);
   const ueberschrift=n=>`<style:style style:name="Heading_20_${n}" style:display-name="Heading ${n}" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:default-outline-level="${n}" style:class="text">`+
-    `<style:paragraph-properties fo:margin-top="12pt" fo:margin-bottom="4pt" fo:keep-with-next="always"/><style:text-properties fo:font-size="${odfZahl(groesse*UEBERSCHRIFT_FAKTOR[n])}pt" fo:font-weight="bold"/></style:style>`;
+    `<style:paragraph-properties fo:margin-top="12pt" fo:margin-bottom="4pt" fo:keep-with-next="always"/><style:text-properties fo:font-size="${odfZahl(groesse*UEBERSCHRIFT_FAKTOR[n])}pt" fo:font-weight="bold"${n===4?' fo:font-style="italic"':""}/></style:style>`;
   const zeile=(n,a)=>`<style:style style:name="${n}" style:family="paragraph" style:parent-style-name="Standard"><style:paragraph-properties fo:text-align="${a}" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/></style:style>`;
   const stylesXml=`<?xml version="1.0" encoding="UTF-8"?>
 <office:document-styles ${ODF_NS}><office:styles>
@@ -11772,10 +11935,12 @@ async function odtBlob(d){
 `<style:text-properties fo:font-family="${xesc(odfSchrift(schrift))}" fo:font-size="${odfZahl(groesse)}pt" fo:language="${lang}"/></style:default-style>
 <style:default-style style:family="graphic"/>
 <style:style style:name="Standard" style:family="paragraph" style:class="text"/>
-${ueberschrift(1)}${ueberschrift(2)}${ueberschrift(3)}
-<style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Standard" style:class="html"><style:paragraph-properties fo:margin-left="5mm"/><style:text-properties fo:font-style="italic"/></style:style>
-<style:style style:name="Intense_20_Quote" style:display-name="Intense Quote" style:family="paragraph" style:parent-style-name="Standard"><style:paragraph-properties fo:margin-left="5mm" fo:margin-right="5mm" fo:background-color="#f2f2f2"/></style:style>
-<style:style style:name="PQ_20_Zitat_20_typografisch" style:display-name="PQ Zitat typografisch" style:family="paragraph" style:parent-style-name="Quotations"><style:paragraph-properties fo:margin-left="8mm" fo:margin-right="6mm"/></style:style>
+${ueberschrift(1)}${ueberschrift(2)}${ueberschrift(3)}${ueberschrift(4)}
+<style:style style:name="Title" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="chapter"><style:paragraph-properties fo:margin-top="0pt" fo:margin-bottom="4pt"/><style:text-properties fo:font-size="${odfZahl(groesse*TITEL_FAKTOR.titel)}pt"/></style:style>
+<style:style style:name="Subtitle" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="chapter"><style:paragraph-properties fo:margin-top="0pt" fo:margin-bottom="8pt"/><style:text-properties fo:font-size="${odfZahl(groesse*TITEL_FAKTOR.untertitel)}pt" fo:color="#595959"/></style:style>
+<style:style style:name="Quotations" style:family="paragraph" style:parent-style-name="Standard" style:class="html"><style:paragraph-properties fo:margin-left="15mm" fo:margin-right="15mm" fo:margin-top="3.5mm" fo:margin-bottom="2.8mm" fo:text-align="center"/><style:text-properties fo:font-style="italic" fo:color="#404040"/></style:style>
+<style:style style:name="Intense_20_Quote" style:display-name="Intense Quote" style:family="paragraph" style:parent-style-name="Standard"><style:paragraph-properties fo:margin-left="15mm" fo:margin-right="15mm" fo:margin-top="6.4mm" fo:margin-bottom="6.4mm" fo:text-align="center" fo:border-top="0.5pt solid #4472c4" fo:border-bottom="0.5pt solid #4472c4" fo:border-left="none" fo:border-right="none" fo:padding-top="3.5mm" fo:padding-bottom="3.5mm"/><style:text-properties fo:font-style="italic" fo:color="#4472c4"/></style:style>
+<style:style style:name="PQ_20_Zitat_20_typografisch" style:display-name="PQ Zitat typografisch" style:family="paragraph" style:parent-style-name="Quotations"><style:paragraph-properties fo:margin-left="8mm" fo:margin-right="6mm" fo:text-align="start"/></style:style>
 <style:style style:name="Caption" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:paragraph-properties fo:margin-top="1mm" fo:margin-bottom="3mm"/><style:text-properties fo:font-size="85%" fo:font-style="italic"/></style:style>
 <style:style style:name="Footnote" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:text-properties fo:font-size="10pt"/></style:style>
 <style:style style:name="Endnote" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"><style:text-properties fo:font-size="10pt"/></style:style>
@@ -11952,8 +12117,13 @@ h1,h2,h3,h4,h5,h6{line-height:1.25;break-after:avoid;page-break-after:avoid}
 h1{font-size:1.6em;margin:1em 0 .6em}
 h2{font-size:1.3em;margin:1.2em 0 .5em}
 h3{font-size:1.1em;margin:1em 0 .4em}
+h4{font-size:1em;font-style:italic;margin:1em 0 .3em}
 p{margin:0 0 .7em}
-blockquote{margin:1em 1.6em;font-style:italic}
+p[data-fv="titel"]{font-size:2em;line-height:1.15;margin:0 0 .2em}
+p[data-fv="untertitel"]{font-size:1.25em;margin:0 0 1em}
+blockquote{margin:1em 2em;font-style:italic;text-align:center}
+blockquote[data-qs="toent"]{margin:1.4em 2em;padding:.6em 0;border-top:1px solid;border-bottom:1px solid}
+blockquote[data-qs="typo"]{margin:1em 0 1em 1.6em;text-align:left}
 ul,ol{margin:0 0 .8em;padding-left:1.4em}
 img{max-width:100%;height:auto}
 figure{margin:1.2em 0;text-align:center;page-break-inside:avoid;break-inside:avoid}
@@ -12412,7 +12582,7 @@ function mdToHtml(src){
   String(src).replace(/\r\n?/g,"\n").split("\n").forEach(zeile=>{
     const l=zeile.trimEnd();let m;
     if(!l.trim()){absatzZu();listeZu();return}
-    if(m=/^(#{1,3})\s+(.*)$/.exec(l)){absatzZu();listeZu();
+    if(m=/^(#{1,4})\s+(.*)$/.exec(l)){absatzZu();listeZu();
       out+=`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`;return}
     if(/^\s*(---+|\*\*\*+|___+)\s*$/.test(l)){absatzZu();listeZu();
       out+='<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div>';return}
@@ -12429,7 +12599,7 @@ function cleanHtml(src){
   const body=new DOMParser().parseFromString(String(src),"text/html").body;
   body.querySelectorAll("script,style,link,meta,base,title,iframe,object,embed,noscript,form,input,button,select,textarea")
     .forEach(n=>n.remove());
-  const erlaubt=new Set(["href","src","alt","style","class","colspan","rowspan","data-w","data-label","data-n","data-fn","data-toc","data-tof","data-style","data-levels","data-pagenums","data-leader","title","contenteditable"]);
+  const erlaubt=new Set(["href","src","alt","style","class","colspan","rowspan","data-w","data-label","data-n","data-fn","data-toc","data-tof","data-style","data-levels","data-pagenums","data-leader","data-qs","data-ls","data-fv","title","contenteditable"]);
   body.querySelectorAll("*").forEach(el=>{
     [...el.attributes].forEach(a=>{
       const n=a.name.toLowerCase(),v=String(a.value||"");
@@ -13582,6 +13752,17 @@ function docxAusrichtung(stile,pr,vorlage){
   v=String(v||"").toLowerCase();
   return v==="center"?"center":v==="right"||v==="end"?"right":/^(both|distribute|justify|lowkashida|mediumkashida|highkashida|thaidistribute)$/.test(v)?"justify":"";
 }
+/* Ausrichtung eines geöffneten Zitats, gemessen an der eigenen Grundstellung:
+   „Zitat“ und „Intensives Zitat“ stehen mittig (wie in Word), das
+   typografische links. Was der Grundstellung entspricht, bekommt keine
+   Angabe — sonst trüge jedes Zitat nach dem ersten Umlauf ein
+   text-align:center, das es vorher nicht hatte. Linksbündig ("") bei einer
+   mittigen Art wird ausdrücklich, sonst stünde es hier mittig. Gilt für
+   den Word- und den OpenDocument-Leser. */
+function zitatAusrichtung(qs,al){
+  const grund=qs==="typo"?"":"center";
+  return al===grund?"":al||"left";
+}
 /* Vorlagen, die hier ein eigenes Element haben: Zitat und Bildunterschrift.
    Erkannt am englischen Namen, den Word für eingebaute Vorlagen in jeder
    Sprache in die Datei schreibt (die Kennung heißt im deutschen Word
@@ -13592,6 +13773,8 @@ function docxVorlagenArt(stile,id){
   if(namen.some(n=>n==="intense quote"||n==="intensequote"))return "zitat:toent";
   if(namen.some(n=>n==="quote"))return "zitat:";
   if(namen.some(n=>n==="caption"))return "unterschrift";
+  if(namen.some(n=>n==="title"))return "titel";
+  if(namen.some(n=>n==="subtitle"))return "untertitel";
   return "";
 }
 /* Der Name steht sprachabhängig in der Datei („Heading 1", „Überschrift 1“,
@@ -13601,11 +13784,11 @@ function docxUeberschrift(stile,id){
   const kette=docxKette(stile,id);
   for(let i=kette.length-1;i>=0;i--){
     const g=kette[i].gliederung;
-    if(g!=null&&!isNaN(g)&&g>=0&&g<=5)return Math.min(3,g+1);
+    if(g!=null&&!isNaN(g)&&g>=0&&g<=5)return Math.min(4,g+1);
   }
   const treffer=(id+" "+kette.map(s=>s.name).join(" "))
     .match(/(?:heading|überschrift|berschrift|titre|título|ttulo|nagłówek|naglowek|kop)\s*([1-6])/i);
-  return treffer?Math.min(3,+treffer[1]):0;
+  return treffer?Math.min(4,+treffer[1]):0;
 }
 
 /* numbering.xml: numId → abstractNumId → Ebene → Zahlenformat. */
@@ -14403,7 +14586,8 @@ function docxLauf(p,ktx,innen){
       stil.push("font-family:"+wordSchriftStapel(lf).replace(/"/g,"'"));
     if(stil.length)t='<span style="'+stil.join(";")+'">'+t+"</span>";
     if(wirk.b&&!(ktx&&ktx.ohneFett))t="<b>"+t+"</b>";
-    if(wirk.i)t="<i>"+t+"</i>";
+    /* Überschrift 4 ist von sich aus kursiv (wie in Word), das ist ihr Aussehen, kein Textformat */
+    if(wirk.i&&!(ktx&&ktx.ueberschrift&&ktx.stufe===4))t="<i>"+t+"</i>";
     if(wirk.u&&!imLink)t="<u>"+t+"</u>";
     if(wirk.strike)t="<s>"+t+"</s>";
     if(wirk.vert==="sup")t="<sup>"+t+"</sup>";
@@ -14541,8 +14725,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       return;
     }
     if(art.startsWith("zitat:")){
-      const qs=art.slice(6);
-      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</blockquote>";
+      const qs=art.slice(6),za=zitatAusrichtung(qs,al);
+      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+wa+">"+(inhalt||"<br>")+"</blockquote>";
       return;
     }
     /* Ein Bild ist hier ein eigener Block. Steht im Absatz nichts als das
@@ -14562,6 +14746,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       return;
     }
     if(h)out+="<h"+h+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</h"+h+">";
+    else if(art==="titel"||art==="untertitel")out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</p>";
     else{
       /* Linker Einzug, in em wie beim Einrücken im Editor (indentBlocks).
          Nur der direkte am Absatz: der einer Vorlage gehört meist zu einer
@@ -14934,12 +15119,14 @@ function odfArt(k,name){
   if(namen.includes("intense quote"))return "zitat:toent";
   if(namen.some(n=>n==="quotations"||n==="quote"))return "zitat:";
   if(namen.some(n=>/^(caption|illustration|figure|drawing)$/.test(n)))return "unterschrift";
+  if(namen.includes("title"))return "titel";
+  if(namen.includes("subtitle"))return "untertitel";
   return "";
 }
 function odfStufe(k,el){
-  if(el.localName==="h")return Math.max(1,Math.min(3,parseInt(el.getAttribute("text:outline-level"),10)||1));
+  if(el.localName==="h")return Math.max(1,Math.min(4,parseInt(el.getAttribute("text:outline-level"),10)||1));
   const kette=odfKette(k,"paragraph",el.getAttribute("text:style-name"));
-  for(let i=kette.length-1;i>=0;i--)if(kette[i].gliederung)return Math.min(3,kette[i].gliederung);
+  for(let i=kette.length-1;i>=0;i--)if(kette[i].gliederung)return Math.min(4,kette[i].gliederung);
   return 0;
 }
 /* Kopf-/Fußzeile: Text mit den Platzhaltern dieses Programms */
@@ -15094,7 +15281,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
         if(w.font&&grundQuelle&&w.font.toLowerCase()!==grundQuelle.toLowerCase())stil.push("font-family:"+wordSchriftStapel(w.font).replace(/"/g,"'"));
         if(stil.length)s='<span style="'+stil.join(";")+'">'+s+"</span>";
         if(w.b&&!ctx.stufe)s="<b>"+s+"</b>";
-        if(w.i)s="<i>"+s+"</i>";
+        if(w.i&&ctx.stufe!==4)s="<i>"+s+"</i>";
         if(w.u&&!ctx.imLink)s="<u>"+s+"</u>";
         if(w.s)s="<s>"+s+"</s>";
         if(w.vert==="sup")s="<sup>"+s+"</sup>";else if(w.vert==="sub")s="<sub>"+s+"</sub>";
@@ -15186,10 +15373,12 @@ function odtLesen(inhaltXml,stilXml,bilder){
     }else if(art==="unterschrift"&&/<figure class="fig"[^>]*>(?:(?!<figure)[\s\S])*<\/figure>$/.test(out)&&!/<figcaption/.test(out.slice(out.lastIndexOf("<figure")))){
       out=out.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+inhalt+"</figcaption></figure>");
     }else if(art.startsWith("zitat:")){
-      const qs=art.slice(6);
-      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</blockquote>";
+      const qs=art.slice(6),za=zitatAusrichtung(qs,al);
+      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inhalt||"<br>")+"</blockquote>";
     }else if(stufe){
       out+="<h"+stufe+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</h"+stufe+">";
+    }else if(art==="titel"||art==="untertitel"){
+      out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</p>";
     }else{
       const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
       const links=em(pe.ml),erste=em(pe.ti);
@@ -16233,8 +16422,8 @@ function formatMenu(){
     const sel=getSelection();if(!sel.rangeCount)return "p";
     let n=sel.anchorNode;n=n&&n.nodeType===1?n:(n&&n.parentElement);
     const ed=$("#editor");
-    const block=n&&ed&&ed.contains(n)&&n.closest&&n.closest("h1,h2,h3,blockquote");
-    return block?block.tagName.toLowerCase():"p";
+    const block=n&&ed&&ed.contains(n)&&n.closest&&n.closest("h1,h2,h3,h4,blockquote,p[data-fv]");
+    return !block?"p":block.tagName==="P"?block.getAttribute("data-fv"):block.tagName.toLowerCase();
   };
   m.onclick=e=>{
     const b=e.target.closest("[data-f]");if(!b)return;
@@ -16248,12 +16437,9 @@ function formatMenu(){
       {a:"subscript",label:tr("Tiefgestellt"),cur:qState("subscript")}
     ],sub=>formatAct(()=>document.execCommand(sub)));
     if(a==="block"){const cb=curBlockTag();return openSubMenu(b,[
-      {a:"p",label:tr("Fließtext"),cur:cb==="p"},
-      {a:"h1",label:tr("Überschrift 1"),cur:cb==="h1"},
-      {a:"h2",label:tr("Überschrift 2"),cur:cb==="h2"},
-      {a:"h3",label:tr("Überschrift 3"),cur:cb==="h3"},
+      ...blockFormate().filter(([w])=>!w.startsWith("blockquote")).map(([w,lab])=>({a:w,label:lab,cur:cb===w})),
       {a:"blockquote",label:tr("Zitat"),cur:cb==="blockquote"}
-    ],sub=>formatAct(()=>sub==="p"?fliesstext():document.execCommand("formatBlock",false,sub)));}
+    ],sub=>formatAct(()=>blockAnwenden(sub)));}
     if(a==="align")return openSubMenu(b,[
       {a:"justifyLeft",label:tr("Linksbündig"),k:"Alt ⇧ L",cur:qState("justifyLeft")},
       {a:"justifyCenter",label:tr("Zentriert"),k:"Alt ⇧ E",cur:qState("justifyCenter")},
@@ -16276,7 +16462,7 @@ function formatMenu(){
        dann eins an. Mit Zitat zeigt der Haken dessen Stil. */
     if(a==="qs"){const bq=curQuote(),cq=bq?quoteStyleOf(bq):null;
       return openSubMenu(b,QUOTESTYLES.map(([lab,k],i)=>
-      ({a:k,label:quotePreviewHtml(k)+tr(lab),k:tr("Zitat")+" "+(i+1),cur:cq===k})),
+      ({a:k,label:quotePreviewHtml(k)+tr(lab),cur:cq===k})),
       sub=>formatAct(()=>applyQuote(sub)));}
     /* Wie beim Zitat: ohne Liste an der Schreibmarke steht nirgends ein Haken,
        ein Klick legt dann eine an. Steht die Marke in einer Liste der anderen
@@ -16349,7 +16535,7 @@ function contextMenu(e){
   const sel=getSelection(),hasSel=sel.rangeCount&&!sel.isCollapsed;
   const onAnch=e.target.closest(".anch");
   const cell=e.target.closest("td,th");
-  const onHeading=e.target.closest("#editor h1,#editor h2,#editor h3");
+  const onHeading=e.target.closest("#editor h1,#editor h2,#editor h3,#editor h4");
   if(onHeading&&!onHeading.id)onHeading.id="h_"+uid();
   const headingHidden=onHeading&&(doc().tocHidden||[]).includes(onHeading.id);
   const m=document.createElement("div");m.className="menu ctx";m.id="cmenu";
@@ -17397,13 +17583,13 @@ function setParSpace(v){
 function quotePreviewHtml(k){
   const rahmen=`<i class="ql" style="left:6px;top:6px;right:6px"></i>`+
                `<i class="ql" style="left:6px;bottom:6px;right:14px"></i>`;
-  const ein=k==="typo"?18:12;
-  const zitat=`<i class="qz" style="left:${ein}px;top:18px;right:${k==="typo"?14:12}px"></i>`+
-              `<i class="qz" style="left:${ein}px;top:25px;right:${k==="typo"?24:22}px"></i>`;
-  const deko=k==="typo"
-    ? `<i class="qm" style="left:6px;top:11px">"</i>`
-    : (k==="toent"?`<i class="qt" style="left:6px;top:14px;right:10px;height:18px;border-radius:0 2px 2px 0"></i>`:"")
-      +`<i class="qb" style="left:6px;top:15px;height:16px"></i>`;
+  if(k==="typo")return `<span class="qprev">${rahmen}<i class="qm" style="left:6px;top:11px">"</i>`+
+    `<i class="qz" style="left:18px;top:18px;right:14px"></i><i class="qz" style="left:18px;top:25px;right:24px"></i></span>`;
+  /* „Zitat“ und „Intensives Zitat“: mittig gesetzte Zeilen, beim
+     intensiven in Akzentfarbe und zwischen zwei Linien */
+  const z=k==="toent"?"qa":"qz";
+  const zitat=`<i class="${z}" style="left:24px;top:18px;right:24px"></i><i class="${z}" style="left:34px;top:25px;right:34px"></i>`;
+  const deko=k==="toent"?`<i class="qr" style="left:16px;right:16px;top:13px"></i><i class="qr" style="left:16px;right:16px;top:32px"></i>`:"";
   return `<span class="qprev">${rahmen}${deko}${zitat}</span>`;
 }
 /* Das Zitat, in dem die Schreibmarke gerade steht — null, wenn keins. */
@@ -17429,7 +17615,7 @@ function applyQuote(k){
   if(k)bq.setAttribute("data-qs",k);else bq.removeAttribute("data-qs");
   dirty=true;commit();queuePaginate();syncToolbarState();
   const i=QUOTESTYLES.findIndex(([,x])=>x===k);
-  toast(tr("Zitat")+" "+(i+1)+" · "+tr(QUOTESTYLES[i<0?0:i][0]));
+  toast(tr(QUOTESTYLES[i<0?0:i][0]));
 }
 /* Aus Überschriften und Zitaten wird Fließtext — für „Formatierung
    entfernen“ und Absatzformat → Fließtext. formatBlock("p") allein reicht
@@ -17488,6 +17674,7 @@ function alsFliesstext(absatzAuch){
   if(!tops.length){const b=curBlock();if(b)tops=[b]}
   let geaendert=false,erster=null;
   tops.forEach(b=>{
+    if(b.tagName==="P"&&b.hasAttribute("data-fv")){b.removeAttribute("data-fv");geaendert=true;return}
     if(/^H[1-6]$/.test(b.tagName)){
       const neu=ftAufloesen(b);b.replaceWith(...neu);erster=erster||neu[0];geaendert=true;return}
     if(b.tagName!=="BLOCKQUOTE")return;
@@ -19621,14 +19808,14 @@ const TOC_LEADERS=[
 const ICO_REFRESH='<path d="M21 12a9 9 0 1 1-2.6-6.4M21 4v5h-5"/>';
 const ICO_GEAR='<circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="12" r="6.3"/><path d="M18.3 12h2.4M16.5 16.5l1.7 1.7M12 18.3v2.4M7.5 16.5l-1.7 1.7M5.7 12H3.3M7.5 7.5 5.8 5.8M12 5.7V3.3M16.5 7.5l1.7-1.7"/>';
 function tocHeadings(ed){
-  return [...ed.querySelectorAll("h1,h2,h3")].filter(h=>(h.textContent||"").trim());
+  return [...ed.querySelectorAll("h1,h2,h3,h4")].filter(h=>(h.textContent||"").trim());
 }
 function ensureHeadingIds(ed){
   tocHeadings(ed).forEach(h=>{if(!h.id)h.id="h_"+uid()});
 }
 function tocCfgOf(block){
   const style=TOC_STYLES.some(s=>s.k===block?.dataset.style)?block.dataset.style:"classic";
-  const levels=[1,2,3].includes(+block?.dataset.levels)?+block.dataset.levels:3;
+  const levels=[1,2,3,4].includes(+block?.dataset.levels)?+block.dataset.levels:3;
   const pagenums=block?.dataset.pagenums!=="0";
   const leader=TOC_LEADERS.some(l=>l.k===block?.dataset.leader)
     ?block.dataset.leader:TOC_STYLES.find(s=>s.k===style).leader;
@@ -19639,14 +19826,14 @@ function tocCfgOf(block){
    Dokuments - eine ausgeblendete Überschrift reißt sonst eine Lücke in die
    Zählung (1, 3, 4 …), was für eine reine Leseliste seltsam wirkt. */
 function tocNumbering(shown){
-  const counter=[0,0,0],out=[];
+  const counter=[0,0,0,0],out=[];
   shown.forEach(h=>{
     const lvl=+h.tagName[1];
     /* Eine übersprungene Zwischenebene (z.B. h1 direkt gefolgt von h3) zählt
        als 1, statt eine "2.0.1" mit einer Null darin zu erzeugen. */
     for(let i=0;i<lvl-1;i++)if(counter[i]===0)counter[i]=1;
     counter[lvl-1]++;
-    for(let i=lvl;i<3;i++)counter[i]=0;
+    for(let i=lvl;i<4;i++)counter[i]=0;
     out.push(counter.slice(0,lvl).join("."));
   });
   return out;
@@ -19733,6 +19920,7 @@ function tocSettingsDialog(block){
       <button class="pill ${cfg.levels===1?"on":""}" data-toclvl="1" style="flex:1">${tr("Nur Ebene 1")}</button>
       <button class="pill ${cfg.levels===2?"on":""}" data-toclvl="2" style="flex:1">${tr("Bis Ebene 2")}</button>
       <button class="pill ${cfg.levels===3?"on":""}" data-toclvl="3" style="flex:1">${tr("Bis Ebene 3")}</button>
+      <button class="pill ${cfg.levels===4?"on":""}" data-toclvl="4" style="flex:1">${tr("Bis Ebene 4")}</button>
     </div>
     <div class="mmrow" style="margin-bottom:11px">
       <label>${tr("Trennlinie")}</label>
@@ -19856,7 +20044,7 @@ function outlineSections(ed){
     const lvl=+h.tagName[1];
     const run=[h];
     let n=h.nextElementSibling;
-    while(n&&!(/^H[1-3]$/.test(n.tagName)&&+n.tagName[1]<=lvl)){run.push(n);n=n.nextElementSibling}
+    while(n&&!(/^H[1-4]$/.test(n.tagName)&&+n.tagName[1]<=lvl)){run.push(n);n=n.nextElementSibling}
     return {h,lvl,id:h.id,run};
   });
 }
@@ -21657,9 +21845,12 @@ $("#fdToggleRep").onclick=()=>{
 
 /* ================= Schrägstrich-Menü ================= */
 const SLASH=[
-  {n:"Überschrift 1",k:"ueberschrift h1 titel heading title",f:()=>document.execCommand("formatBlock",false,"h1")},
-  {n:"Überschrift 2",k:"ueberschrift h2 heading",f:()=>document.execCommand("formatBlock",false,"h2")},
-  {n:"Überschrift 3",k:"ueberschrift h3 heading",f:()=>document.execCommand("formatBlock",false,"h3")},
+  {n:"Titel",k:"titel title dokumenttitel titre titulo tytul titolo",f:()=>blockAnwenden("titel")},
+  {n:"Untertitel",k:"untertitel subtitle sous-titre subtitulo podtytul sottotitolo",f:()=>blockAnwenden("untertitel")},
+  {n:"Überschrift 1",k:"ueberschrift h1 heading",f:()=>blockAnwenden("h1")},
+  {n:"Überschrift 2",k:"ueberschrift h2 heading",f:()=>blockAnwenden("h2")},
+  {n:"Überschrift 3",k:"ueberschrift h3 heading",f:()=>blockAnwenden("h3")},
+  {n:"Überschrift 4",k:"ueberschrift h4 heading",f:()=>blockAnwenden("h4")},
   {n:"Aufzählung",k:"liste punkte bullet list",f:()=>listeUmschalten("insertUnorderedList")},
   {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>listeUmschalten("insertOrderedList")},
   {n:"Tabelle",k:"tabelle table raster tabla tabela tableau tabella",f:()=>setTimeout(tablePicker,20)},
@@ -23331,9 +23522,10 @@ formulas and for figures you want to set by hand.</p>
 <p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words. Headings and quotes become normal text, and alignment and indentation are reset; lists stay lists.</p>`},
 
  {t:"Paragraphs and headings",k:"heading;paragraph;alignment;indent;line spacing;paragraph spacing",b:`
-<p>The <b>paragraph style</b> box turns the current paragraph into body text or one of
-three heading levels. Headings are what the outline and the table of contents are built
-from, so use them rather than merely making a line bigger and bold.</p>
+<p>The <b>paragraph style</b> box turns the current paragraph into body text, a title, a
+subtitle or one of four heading levels. Headings are what the outline and the table of
+contents are built from, so use them rather than merely making a line bigger and bold.
+Title and subtitle stay out of both, as in Word.</p>
 <table class="hkeys">
 <tr><td>Align left</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centre</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
@@ -23354,8 +23546,8 @@ you type the space.</p>
 <p><b>Format &rsaquo; Bulleted list</b> and <b>Numbered list</b> also offer marker styles —
 dots, circles, squares, dashes and ticks; decimal, bracketed, letters and Roman numerals.
 The style applies to the list you are standing in, so different lists can differ.</p>
-<p><b>Quotations</b> come from <b>Format &rsaquo; Quotation</b> in three styles: an accent
-rule, a tinted block, and a typographic mark. Pressing <kbd>Enter</kbd> twice on an empty
+<p><b>Quotations</b> come from <b>Format &rsaquo; Quotation</b> or the paragraph style box in
+three styles, as in Word: Quote, Intense Quote and Typographic Quote. Pressing <kbd>Enter</kbd> twice on an empty
 quotation line leaves the quotation.</p>`},
 
  {t:"Tables",k:"table;rows;columns;cells;header row",b:`
@@ -23911,9 +24103,10 @@ Maßeinheiten, Formeln und für Ziffern, die du von Hand setzen willst.</p>
 die Wörter stehen. Überschriften und Zitate werden zu normalem Text, Ausrichtung und Einrückung gehen zurück; Listen bleiben Listen.</p>`},
 
  {t:"Absätze und Überschriften",k:"überschrift;absatz;ausrichtung;einrücken;zeilenabstand;absatzabstand",b:`
-<p>Das Feld <b>Absatzformat</b> macht aus dem Absatz Fließtext oder eine von drei
-Überschriftsebenen. Aus Überschriften bauen sich Gliederung und Inhaltsverzeichnis — nimm
-also sie, statt eine Zeile nur größer und fett zu machen.</p>
+<p>Das Feld <b>Absatzformat</b> macht aus dem Absatz Fließtext, einen Titel, einen Untertitel
+oder eine von vier Überschriftsebenen. Aus Überschriften bauen sich Gliederung und
+Inhaltsverzeichnis — nimm also sie, statt eine Zeile nur größer und fett zu machen. Titel und
+Untertitel zählen dort nicht mit, wie in Word.</p>
 <table class="hkeys">
 <tr><td>Linksbündig</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Zentriert</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd></td></tr>
@@ -23936,8 +24129,8 @@ Liste. <kbd>Tab</kbd> rückt einen Punkt eine Ebene ein.</p>
 Punkt, Kreis, Quadrat, Strich und Haken für Aufzählungen; dezimal, mit Klammer, Buchstaben und
 römisch für Nummerierungen. Der Stil gilt für die Liste, in der du stehst, verschiedene Listen
 im Dokument dürfen also verschieden aussehen.</p>
-<p><b>Zitate</b> kommen aus <b>Format &rsaquo; Zitat</b> und haben drei Stile: Akzentlinie,
-getönter Block und typografische Marke. Zweimal <kbd>Eingabe</kbd> auf einer leeren Zitatzeile
+<p><b>Zitate</b> kommen aus <b>Format &rsaquo; Zitat</b> oder dem Feld für das Absatzformat und
+haben drei Stile, wie in Word: Zitat, Intensives Zitat und Typografisches Zitat. Zweimal <kbd>Eingabe</kbd> auf einer leeren Zitatzeile
 verlässt das Zitat.</p>`},
 
  {t:"Tabellen",k:"tabelle;zeilen;spalten;zellen;kopfzeile",b:`
@@ -24515,9 +24708,10 @@ fórmulas y figuras que quieras componer a mano.</p>
 <p><b>Formato &rsaquo; Borrar formato</b> quita el formato de carácter y deja las palabras. Los títulos y las citas pasan a ser texto normal, y la alineación y la sangría vuelven a su estado inicial; las listas siguen siendo listas.</p>`},
 
  {t:"Párrafos y títulos",k:"título;párrafo;alineación;sangría;interlineado;espacio entre párrafos",b:`
-<p>El cuadro de <b>estilo de párrafo</b> convierte el párrafo actual en texto normal o en uno de
-tres niveles de título. Los títulos son la base del esquema y del índice, así que úsalos en
-lugar de limitarte a hacer una línea más grande y en negrita.</p>
+<p>El cuadro de <b>estilo de párrafo</b> convierte el párrafo actual en texto normal, un título
+de documento, un subtítulo o uno de cuatro niveles de título. Los títulos son la base del
+esquema y del índice, así que úsalos en lugar de limitarte a hacer una línea más grande y en
+negrita. El título de documento y el subtítulo no cuentan en ellos, como en Word.</p>
 <table class="hkeys">
 <tr><td>Alinear a la izquierda</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centrar</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>E</kbd></td></tr>
@@ -24540,8 +24734,8 @@ lista en cuanto escribes el espacio.</p>
 marcador: puntos, círculos, cuadrados, guiones y marcas de verificación; decimal, con
 paréntesis, letras y números romanos. El estilo se aplica a la lista en la que estás, así que
 distintas listas pueden diferir.</p>
-<p>Las <b>citas</b> vienen de <b>Formato &rsaquo; Cita</b> en tres estilos: una línea de acento,
-un bloque con tinte y una marca tipográfica. Pulsar <kbd>Intro</kbd> dos veces en una línea de
+<p>Las <b>citas</b> vienen de <b>Formato &rsaquo; Cita</b> o del cuadro de estilo de párrafo en
+tres estilos, como en Word: Cita, Cita destacada y Cita tipográfica. Pulsar <kbd>Intro</kbd> dos veces en una línea de
 cita vacía sale de la cita.</p>`},
 
  {t:"Tablas",k:"tabla;filas;columnas;celdas;fila de encabezado",b:`
@@ -25122,9 +25316,10 @@ fórmulas e figuras que você queira compor à mão.</p>
 palavras. Títulos e citações viram texto normal, e o alinhamento e o recuo voltam ao padrão; as listas continuam sendo listas.</p>`},
 
  {t:"Parágrafos e títulos",k:"título;parágrafo;alinhamento;recuo;espaçamento entre linhas;espaço entre parágrafos",b:`
-<p>A caixa de <b>estilo de parágrafo</b> transforma o parágrafo atual em texto normal ou em um
-de três níveis de título. Os títulos são a base da estrutura de tópicos e do sumário, então
-use-os em vez de apenas deixar uma linha maior e em negrito.</p>
+<p>A caixa de <b>estilo de parágrafo</b> transforma o parágrafo atual em texto normal, um título
+do documento, um subtítulo ou um de quatro níveis de título. Os títulos são a base da
+estrutura de tópicos e do sumário, então use-os em vez de apenas deixar uma linha maior e em
+negrito. O título do documento e o subtítulo ficam de fora, como no Word.</p>
 <table class="hkeys">
 <tr><td>Alinhar à esquerda</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
 <tr><td>Centralizar</td><td>{kz:mitte} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd></td></tr>
@@ -25147,8 +25342,8 @@ item um nível.</p>
 de marcador: pontos, círculos, quadrados, traços e marcas de seleção; decimal, com parênteses,
 letras e algarismos romanos. O estilo se aplica à lista em que você está, então listas
 diferentes podem diferir.</p>
-<p>As <b>citações</b> vêm de <b>Formato &rsaquo; Citação</b> em três estilos: uma linha de
-acento, um bloco com fundo e uma marca tipográfica. Pressionar <kbd>Enter</kbd> duas vezes numa
+<p>As <b>citações</b> vêm de <b>Formato &rsaquo; Citação</b> ou da caixa de estilo de parágrafo
+em três estilos, como no Word: Citação, Citação Intensa e Citação tipográfica. Pressionar <kbd>Enter</kbd> duas vezes numa
 linha de citação vazia sai da citação.</p>`},
 
  {t:"Tabelas",k:"tabela;linhas;colunas;células;linha de cabeçalho",b:`
@@ -25734,8 +25929,9 @@ unités, les formules et les figures que vous voulez composer à la main.</p>
 laisse les mots. Les titres et les citations redeviennent du texte normal, l’alignement et le retrait sont réinitialisés ; les listes restent des listes.</p>`},
 
  {t:"Paragraphes et titres",k:"titre;paragraphe;alignement;retrait;interligne;espacement entre paragraphes",b:`
-<p>Le champ <b>style de paragraphe</b> transforme le paragraphe courant en corps de texte ou en
-l'un des trois niveaux de titre. Les titres sont ce à partir de quoi le plan et la table des
+<p>Le champ <b>style de paragraphe</b> transforme le paragraphe courant en corps de texte, en
+titre du document, en sous-titre ou en l'un des quatre niveaux de titre (le titre du document
+et le sous-titre restent hors du plan et de la table des matières, comme dans Word). Les titres sont ce à partir de quoi le plan et la table des
 matières sont construits, alors utilisez-les au lieu de simplement agrandir une ligne et la
 mettre en gras.</p>
 <table class="hkeys">
@@ -25760,8 +25956,9 @@ que vous tapez l'espace.</p>
 marqueur : points, cercles, carrés, tirets et coches ; décimale, avec parenthèse, lettres et
 chiffres romains. Le style s'applique à la liste dans laquelle vous vous trouvez, donc des
 listes différentes peuvent différer.</p>
-<p>Les <b>citations</b> viennent de <b>Format &rsaquo; Citation</b> en trois styles : un filet
-d'accent, un bloc teinté et une marque typographique. Appuyer deux fois sur <kbd>Entrée</kbd>
+<p>Les <b>citations</b> viennent de <b>Format &rsaquo; Citation</b> ou de la zone de style de
+paragraphe en trois styles, comme dans Word : Citation, Citation intense et Citation
+typographique. Appuyer deux fois sur <kbd>Entrée</kbd>
 sur une ligne de citation vide quitte la citation.</p>`},
 
  {t:"Tableaux",k:"tableau;lignes;colonnes;cellules;ligne d'en-tête",b:`
@@ -26352,8 +26549,9 @@ i rysunków, które chcesz złożyć ręcznie.</p>
 <p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa. Nagłówki i cytaty stają się zwykłym tekstem, a wyrównanie i wcięcie wracają do domyślnych; listy pozostają listami.</p>`},
 
  {t:"Akapity i tytuły",k:"tytuł;akapit;wyrównanie;wcięcie;interlinia;odstęp między akapitami",b:`
-<p>Pole <b>styl akapitu</b> zamienia bieżący akapit w tekst podstawowy albo w jeden z trzech
-poziomów tytułu. Tytuły są tym, z czego budowany jest konspekt i spis treści, więc używaj ich
+<p>Pole <b>styl akapitu</b> zamienia bieżący akapit w tekst podstawowy, tytuł dokumentu,
+podtytuł albo w jeden z czterech poziomów tytułu (tytuł dokumentu i podtytuł nie trafiają do
+konspektu ani spisu treści, jak w Wordzie). Tytuły są tym, z czego budowany jest konspekt i spis treści, więc używaj ich
 zamiast po prostu powiększać wiersz i pogrubiać.</p>
 <table class="hkeys">
 <tr><td>Wyrównaj do lewej</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd></td></tr>
@@ -26375,8 +26573,8 @@ wpiszesz spację.</p>
 <p><b>Format &rsaquo; Lista punktowana</b> i <b>Lista numerowana</b> oferują też style znacznika
 — kropki, kółka, kwadraty, kreski i ptaszki; dziesiętny, z nawiasem, litery i cyfry rzymskie.
 Styl dotyczy listy, w której stoisz, więc różne listy mogą się różnić.</p>
-<p><b>Cytaty</b> pochodzą z <b>Format &rsaquo; Cytat</b> w trzech stylach: linia akcentu,
-zabarwiony blok i znak typograficzny. Naciśnięcie <kbd>Enter</kbd> dwa razy w pustym wierszu
+<p><b>Cytaty</b> pochodzą z <b>Format &rsaquo; Cytat</b> lub z pola stylu akapitu w trzech
+stylach, jak w Wordzie: Cytat, Cytat intensywny i Cytat typograficzny. Naciśnięcie <kbd>Enter</kbd> dwa razy w pustym wierszu
 cytatu opuszcza cytat.</p>`},
 
  {t:"Tabele",k:"tabela;wiersze;kolumny;komórki;wiersz nagłówka",b:`
@@ -26944,8 +27142,9 @@ e figure che vuoi comporre a mano.</p>
 le parole. Titoli e citazioni tornano testo normale, e allineamento e rientro vengono azzerati; gli elenchi restano elenchi.</p>`},
 
  {t:"Paragrafi e titoli",k:"titolo;paragrafo;allineamento;rientro;interlinea;spaziatura tra paragrafi",b:`
-<p>Il campo <b>stile paragrafo</b> trasforma il paragrafo corrente in corpo del testo o in uno
-di tre livelli di titolo. I titoli sono ciò con cui vengono costruiti la struttura e il
+<p>Il campo <b>stile paragrafo</b> trasforma il paragrafo corrente in corpo del testo, titolo
+del documento, sottotitolo o uno di quattro livelli di titolo (titolo del documento e
+sottotitolo restano fuori da struttura e sommario, come in Word). I titoli sono ciò con cui vengono costruiti la struttura e il
 sommario, quindi usali invece di limitarti a ingrandire una riga e metterla in grassetto.</p>
 <table class="hkeys">
 <tr><td>Allinea a sinistra</td><td>{kz:links} · <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd></td></tr>
@@ -26969,8 +27168,9 @@ appena digiti lo spazio.</p>
 indicatore: punti, cerchi, quadrati, trattini e spunte; decimale, con parentesi, lettere e
 numeri romani. Lo stile si applica all'elenco in cui ti trovi, quindi elenchi diversi possono
 differire.</p>
-<p>Le <b>citazioni</b> vengono da <b>Formato &rsaquo; Citazione</b> in tre stili: una linea di
-accento, un blocco con sfondo colorato e un segno tipografico. Premere <kbd>Invio</kbd> due
+<p>Le <b>citazioni</b> vengono da <b>Formato &rsaquo; Citazione</b> o dalla casella dello stile
+di paragrafo in tre stili, come in Word: Citazione, Citazione intensa e Citazione
+tipografica. Premere <kbd>Invio</kbd> due
 volte su una riga di citazione vuota esce dalla citazione.</p>`},
 
  {t:"Tabelle",k:"tabella;righe;colonne;celle;riga di intestazione",b:`
@@ -27952,6 +28152,7 @@ document.addEventListener("visibilitychange",()=>{
 $("#tools").addEventListener("click",e=>{
   const b=e.target.closest("[data-cmd]");if(b){cmd(b.dataset.cmd);return}
   const fl=e.target.closest("#fSizeList");if(fl){sizeMenu({currentTarget:fl});return}
+  if(e.target.closest("#fBlock")){blockMenue();return}
   if(e.target.closest("#fFontList")){const ff=$("#fFont");
     if(schriftListeWarOffen){schriftListeWarOffen=false;$("#fontmenu")&&$("#fontmenu").remove();edAuswahlHolen();return}
     if(ff){ff.focus();ff.select();schriftFilter="";schriftMenue()}return}
@@ -27965,6 +28166,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
   if(e.target.closest("#findBtn")){fdOpen(false);return}
+  if(e.target.closest("#histBtn")){history();return}
   if(e.target.closest("#undoBtn")){undoRedo("undo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
   if(e.target.closest("#redoBtn")){undoRedo("redo");$("#editor")&&$("#editor").focus();drawStatus();syncToolbarState();return}
   if(e.target.closest("#addNote")){const n=addNote("");render();openNote(n.id,"titel");return}
@@ -27987,7 +28189,7 @@ $("#tools").addEventListener("contextmenu",e=>{
 /* Die Farbknöpfe dürfen den Fokus nicht aus dem Editor ziehen, sonst
    verliert execCommand die Textauswahl. */
 $("#tools").addEventListener("mousedown",e=>{
-  if(e.target.closest("#foreBtn,#markBtn"))e.preventDefault();
+  if(e.target.closest("#foreBtn,#markBtn,#fBlock"))e.preventDefault();
 });
 $("#tools").addEventListener("focusin",e=>{
   if(e.target.id==="fFont"){e.target.select();schriftFilter="";schriftMenue()}});
@@ -28019,14 +28221,7 @@ $("#tools").addEventListener("change",e=>{
      Zeilenabstand blieb bis zum nächsten Öffnen bei der alten Schrift. */
 
   if(e.target.id==="fSize")setFontSize(e.target.value);
-  if(e.target.id==="fBlock"){
-    /* „blockquote:toent" trägt Absatzart und Zitatstil in einem Wert — der
-       Doppelpunkt trennt beides, damit das eine Auswahlfeld beides kann. */
-    const [tag,qs]=e.target.value.split(":");
-    if(tag==="blockquote"){applyQuote(qs||"");return}
-    $("#editor").focus();
-    if(tag==="p")fliesstext();else document.execCommand("formatBlock",false,tag);
-    dirty=true}
+
 });
 $("#tools").addEventListener("input",e=>{
   if(e.target.id==="nSearch"){window._nq=e.target.value;drawNotes()}
