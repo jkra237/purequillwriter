@@ -45,6 +45,17 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Geändert
+
+- **Listen eingerückt wie in Word** (Toms Frage: in Word stehen Listen
+  weiter rechts). Bisher 1,5 em — bei 12 pt Text bei 0,64 cm, halb so weit
+  wie Word, und bei kleinerer Schrift noch weniger. Jetzt wie Word: Text
+  bei 1,27 cm, jede Ebene 1,27 cm tiefer, die Nummer davor; fest in cm,
+  mit dem Zoom skaliert. Word- und OpenDocument-Export schreiben dieselben
+  Werte (Nummer bei 0,63 cm), unsere Listen sehen in Word jetzt aus wie
+  Words eigene. Bestehende Listen rücken um gut 0,6 cm nach rechts; lange
+  Listen können dadurch anders umbrechen.
+
 ### Neu
 
 - **Wolke ist das Farbschema neuer Nutzer** (vorher Azur, Toms Wahl):
