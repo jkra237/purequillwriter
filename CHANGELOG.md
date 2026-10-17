@@ -45,6 +45,39 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Behoben (Bilder in Word und OpenDocument)
+
+- **Freie Bilder wandern mit dem Text, wie in Word („Mit Text
+  verschieben“).** Bisher hing ein Bild „hinter/vor dem Text“ an der Seite:
+  fügte man davor einen Seitenumbruch ein, rückte der Text weiter, die
+  Unterschrift blieb stehen (Toms Fund). Jetzt hängt jedes freie Bild am
+  Block direkt nach ihm (Abstand `data-fabsatz`), Seite und Höhe folgen
+  bei jedem Umbruch diesem Block; wer das Bild verschiebt, hängt es an den
+  Absatz an der neuen Stelle. Bestehende Dokumente bekommen den Anker beim
+  ersten Öffnen, ohne dass sich etwas bewegt — verankert wird erst, wenn
+  alle Bilder geladen und die Schriften da sind, sonst wäre der Abstand
+  falsch gemessen (so beim ersten Versuch im Umlauf gefunden).
+
+- **Frei platzierte Bilder** („hinter dem Text“/„vor dem Text“) gehen jetzt
+  in beide Richtungen verlustfrei. Beim Öffnen von Word und .odt wurden sie
+  zu Bildern in der Zeile. Beim Speichern als Word stand das Bild an seiner
+  Stelle im Text in einem eigenen leeren Absatz: eine Unterschrift von
+  Seite 1 (Unterschriften hängen am Dokumentende) landete in Word auf der
+  letzten Seite, und der leere Absatz schob den Text um eine Zeile. Grund:
+  dieses Programm merkt sich die Seite des Bildes, Word und LibreOffice den
+  Absatz, an dem es hängt. Jetzt: verankert am Absatz direkt über dem Bild,
+  die Höhe zu diesem Absatz, waagerecht zum Rand (`freiZiele`, Tabellen
+  ausgenommen) — so bleibt eine Unterschrift unter ihrem Text, auch wenn
+  Word die Seiten etwas anders umbricht (ein erster Versuch mit dem ersten
+  Absatz der Seite schob das Bild in Word auf die Vorseite);
+  beim Öffnen kommt ein freies Bild zurück, Seite und Höhe rechnet
+  `placeFreeFigs()` nach dem ersten Umbruch aus dem Absatz aus, an dem es
+  hängt (Bezug Rand, Blatt oder Absatz).
+- **Ein Absatz mit umflossenem oder freiem Bild blieb nicht, was er war.**
+  Hing in Word oder LibreOffice ein Bild an einer Überschrift (Logo neben dem
+  Titel) oder einem Zitat, kam daraus ein einfacher Absatz. Jetzt steht das
+  Bild davor, und der Absatz behält Stufe, Zitat oder Unterschrift.
+
 ### Geändert
 
 - **Listenstil wie in Word: der zuletzt gewählte gilt für neue Listen.**
@@ -512,11 +545,6 @@ immer genau einen Commit, der sie anfasst.
 
 ### Offen, noch nicht entschieden
 
-- **Frei platzierte Bilder** („hinter dem Text“/„vor dem Text“) schreiben
-  Word- und OpenDocument-Export richtig, beide Leser machen daraus aber ein
-  Bild in der Zeile (gefunden 2026-10-17 beim Umlauf). Schwierigkeit: das
-  Programm merkt sich die Seite des Bildes (data-fpage), Word und
-  LibreOffice nur den Absatz, an dem es hängt.
 
 - **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
   Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:

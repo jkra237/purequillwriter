@@ -107,7 +107,9 @@ try {
      +'<div class="pgbreak" contenteditable="false" data-label="Seitenumbruch"></div>'
      +'<p>Nach dem Umbruch.</p>'
      +'<figure class="fig umfl" contenteditable="false" data-w="40" data-seite="rechts" style="text-align:right;width:40%"><img src="'+jpg(600,600,"#36c")+'" style="width:100%"></figure>'
-     +'<p>${lang}</p><p>Schlussmarke</p>';
+     +'<p>${lang}</p><p>Schlussmarke</p>'
+     /* Frei platziert auf Seite 2, hinter dem Text, am Dokumentende wie eine Unterschrift */
+     +'<figure class="fig free" contenteditable="false" data-free="1" data-fpage="1" data-fx="30" data-fy="50" data-fw="40" data-fh="20" data-lage="hinter"><img src="'+jpg(400,200,"#3a3")+'" alt="" draggable="false"></figure>';
     S.docs=[d];S.active=d.id;S.mode="write";save();render();
     await new Promise(r=>setTimeout(r,800));
     return base64Von(await (${fang})());
@@ -127,8 +129,14 @@ try {
   }
   const erg = await ev(`(async()=>{
     const b=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)).buffer;
-    const A=${MODUS === "nativ" ? "null" : `await zipDokument("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`};
-    const B=${fremd64 ? `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))` : "null"};
+    /* Wie in der App: das Geöffnete einmal umbrechen — erst dann stehen
+       Seite und Höhe freier Bilder fest (placeFreeFigs) */
+    const ed0=document.getElementById("editor"),d0=doc();
+    const umbrechen=()=>{paginate();paginate();flush()};
+    const gerendert=r=>{if(!r||!r.html)return r;const alt=d0.html;ed0.innerHTML=r.html;umbrechen();const h=d0.html;
+      d0.html=alt;ed0.innerHTML=alt;flush();return {...r,html:h}};
+    const A=gerendert(${MODUS === "nativ" ? "null" : `await zipDokument("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`});
+    const B=gerendert(${fremd64 ? `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))` : "null"});
     const merk=r=>{if(!r)return null;const t=document.createElement("div");t.innerHTML=r.html||"";const q=s=>t.querySelectorAll(s).length;
       const st=p=>[...t.querySelectorAll("[style]")].filter(e=>e.style[p]).length;
       return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
@@ -140,10 +148,11 @@ try {
        "Zitat":q("blockquote"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Tab im Text":q(".wtab"),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
-       "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-"}};
+       "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",
+       "freies Bild":[...t.querySelectorAll("figure.free")].map(f=>"S"+(+f.dataset.fpage+1)+" "+f.dataset.fx+"/"+f.dataset.fy+" "+f.dataset.fw+"x"+f.dataset.fh+" "+(f.dataset.lage||"vor")).join(" ")||"-"}};
     /* Fixpunkt: das Ergebnis erneut speichern und öffnen — muss gleich bleiben */
     const dq=doc(),merkHtml=dq.html,merkFn=dq.footnotes;
-    const runde=async r=>{dq.html=r.html;dq.footnotes=r.footnotes||[];document.getElementById("editor").innerHTML=r.html;flush();
+    const runde=async r=>{dq.html=r.html;dq.footnotes=r.footnotes||[];document.getElementById("editor").innerHTML=r.html;umbrechen();
       return await zipDokument("x.${ENDUNG}",(await (${fang})()).buffer)};
     let fixpunkt=null;
     if(A){const A2=await runde(A),A3=await runde(A2);

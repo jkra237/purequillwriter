@@ -10930,6 +10930,9 @@ async function walkBlocks(root,ctx){
          seitenzahlgenaues Inhaltsverzeichnis einfügen (Referenzen-Menüband). */
       continue;
     }
+    /* Freie Bilder gehen mit ihrem Zielabsatz hinaus (freiZiele) */
+    if(tag==="figure"&&el.classList.contains("free"))continue;
+    const start=xml.length;
     /* Seitenumbruch: bis 1.3 schrieb der Export hier einen leeren Absatz */
     if(el.classList&&el.classList.contains("pgbreak")){
       xml+='<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
@@ -10979,6 +10982,11 @@ async function walkBlocks(root,ctx){
     }else{
       const a=absatzXml(el,"",null,ctx);
       xml+=absatzZuXml(a,ctx);
+    }
+    if(el.dataset&&el.dataset.fziel&&ctx.frei){
+      const laeufe=el.dataset.fziel.split(",").map(n=>ctx.frei[n]||"").join("");
+      const teil=xml.slice(start),m=/<w:p(?:\s[^>]*)?>(?:<w:pPr>[\s\S]*?<\/w:pPr>)?/.exec(teil);
+      xml=xml.slice(0,start)+(m?teil.slice(0,m.index+m[0].length)+laeufe+teil.slice(m.index+m[0].length):"<w:p>"+laeufe+"</w:p>"+teil);
     }
     xml=umflAnkerEinsetzen(xml,ctx,false);
   }
@@ -11120,9 +11128,13 @@ async function figurXml(fig,ctx){
   const nr=ctx.imgId, name="Bild "+nr;
   const graphic=bildGrafikXml(id,nr,name,wEmu,hEmu);
   if(umfl)return umflAnkerXml(id,nr,name,wEmu,hEmu,fig.dataset.seite==="rechts"?"right":"left");
+  /* Frei: nur der Lauf — docxBlob setzt ihn in den ersten Absatz der Seite
+     (freiZiele). Die Lage gilt zum Rand, unser Satzspiegel kann unter einer
+     hohen Kopfzeile tiefer beginnen. */
   if(frei){
-    const x=mmToEmu(+fig.dataset.fx||0),y=mmToEmu(+fig.dataset.fy||0);
-    return `<w:p>${bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,"margin",y,fig.dataset.lage==="hinter")}</w:p>`;
+    const x=mmToEmu(+fig.dataset.fx||0),zumAbsatz=fig.dataset.fabsatz!=null;
+    const y=mmToEmu(zumAbsatz?+fig.dataset.fabsatz:(+fig.dataset.fy||0)+(ctx.freiDy||0));
+    return bildAnkerXml(id,nr,name,wEmu,hEmu,"margin",x,zumAbsatz?"paragraph":"margin",y,fig.dataset.lage==="hinter");
   }
   /* Ausrichtung des Bildes und seine Unterschrift als Absatz der Vorlage
      „Beschriftung“ (caption) darunter — beides ging bis 1.3 verloren */
@@ -11308,9 +11320,10 @@ function kommentareXml(liste){
 async function docxBlob(d){
   const f=fmtOf(d);
   const container=document.createElement("div");container.innerHTML=d.html||"";
+  freiZiele(d,container);
   docxEinebnen(container);
   const kommentare=wKommentarePlanen(container);
-  const ctx={imgId:0,linkId:0,images:[],links:[],
+  const ctx={imgId:0,linkId:0,images:[],links:[],freiDy:freiVersatzMm(d),frei:{},
     docSize:d.size||S.settings.size,docFont:d.font||S.settings.font,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
@@ -11318,7 +11331,11 @@ async function docxBlob(d){
     footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text])),
     endnoteId:1,endnotes:[],endnoteIds:new Map(),endnoteLookup:new Map((d.endnotes||[]).map(e=>[e.id,e.text])),
     word:d.word||null};
-  const bodyXml=await walkBlocks(container,ctx);
+  for(const fig of container.querySelectorAll("figure.fig.free"))ctx.frei[fig.dataset.fnr]=await figurXml(fig,ctx);
+  let bodyXml=await walkBlocks(container,ctx);
+  /* Bilder ohne Absatz zum Verankern (leeres Dokument) */
+  const verankert=new Set([...container.querySelectorAll("[data-fziel]")].flatMap(b=>b.dataset.fziel.split(",")));
+  for(const [nr,lauf] of Object.entries(ctx.frei))if(!verankert.has(nr))bodyXml+="<w:p>"+lauf+"</w:p>";
   /* Reihenfolge im sectPr ist im Schema festgelegt: erst die Verweise auf
      Kopf und Fuß, dann die Maße. */
   /* Bis zu vier Teildateien: Kopf und Fuß, mit „Erste Seite anders“ dazu je
@@ -11430,8 +11447,10 @@ async function odtBlob(d){
   const f=fmtOf(d),groesse=d.size||S.settings.size,schrift=d.font||S.settings.font;
   const textbreiteMm=f.w-f.m[1]-f.m[3];
   const container=document.createElement("div");container.innerHTML=d.html||"";
+  freiZiele(d,container);
   docxEinebnen(container);
   const kommentare=wKommentarePlanen(container);
+  const freiDy=freiVersatzMm(d),frei={};
   /* Automatische Vorlagen, gleiche Eigenschaften nur einmal */
   const auto=new Map(),listStile=[],zaehl={P:0,T:0,L:0,Tab:0,fr:0,tabelle:0};
   const stilName=(fam,praefix,inhalt,eltern)=>{
@@ -11579,11 +11598,13 @@ async function odtBlob(d){
       return "";
     }
     if(frei){
-      /* Frei: am Absatz verankert, Lage zum Satzspiegel, hinter oder vor dem Text */
-      const w=+fig.dataset.fw||40,h=+fig.dataset.fh||16;
+      /* Frei: am ersten Absatz der Seite verankert (freiZiele), Lage zum
+         Satzspiegel, hinter oder vor dem Text — nur der Rahmen, bloecke()
+         setzt ihn in den Zielabsatz */
+      const w=+fig.dataset.fw||40,h=+fig.dataset.fh||16,zumAbsatz=fig.dataset.fabsatz!=null;
       const frs=stilName("graphic","fr",`<style:graphic-properties style:wrap="run-through" style:run-through="${fig.dataset.lage==="hinter"?"background":"foreground"}" `+
-        `style:vertical-pos="from-top" style:vertical-rel="page-content" style:horizontal-pos="from-left" style:horizontal-rel="page-content"/>`,"Graphics");
-      return `<text:p text:style-name="${absatzStil([])}">`+rahmen(b,frs,"paragraph",w,h,` svg:x="${odfZahl(+fig.dataset.fx||0)}mm" svg:y="${odfZahl(+fig.dataset.fy||0)}mm"`)+"</text:p>";
+        `style:vertical-pos="from-top" style:vertical-rel="${zumAbsatz?"paragraph":"page-content"}" style:horizontal-pos="from-left" style:horizontal-rel="page-content"/>`,"Graphics");
+      return rahmen(b,frs,"paragraph",w,h,` svg:x="${odfZahl(+fig.dataset.fx||0)}mm" svg:y="${odfZahl(zumAbsatz?+fig.dataset.fabsatz:(+fig.dataset.fy||0)+freiDy)}mm"`);
     }
     const w=textbreiteMm*(+fig.dataset.w||70)/100,h=w*b.info.h/b.info.w;
     const frs=stilName("graphic","fr",'<style:graphic-properties style:wrap="none" style:vertical-pos="top" style:vertical-rel="baseline" style:horizontal-pos="center" style:horizontal-rel="paragraph"/>',"Graphics");
@@ -11673,6 +11694,8 @@ async function odtBlob(d){
       const tag=el.tagName.toLowerCase();
       if(el.classList.contains("enliste")||el.classList.contains("toc"))continue;
       if(el.classList.contains("pgbreak")){umbruch=true;continue}
+      if(tag==="figure"&&el.classList.contains("free"))continue;
+      const start=x.length;
       if(tag==="blockquote"){
         const qs=el.getAttribute("data-qs")||"";
         const vorlage=qs==="toent"?"Intense_20_Quote":qs==="typo"?"PQ_20_Zitat_20_typografisch":"Quotations";
@@ -11689,10 +11712,20 @@ async function odtBlob(d){
       else if(tag==="figure")x+=await figur(el);
       else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3"))x+=await bloecke(el);
       else x+=absatz(el,[],"Standard");
+      if(el.dataset&&el.dataset.fziel){
+        const rahmenXml=el.dataset.fziel.split(",").map(n=>frei[n]||"").join("");
+        const teil=x.slice(start),m=/<text:(p|h)\b([^>]*?)(\/?)>/.exec(teil);
+        x=x.slice(0,start)+(!m?`<text:p text:style-name="Standard">${rahmenXml}</text:p>`+teil
+          :m[3]?teil.slice(0,m.index)+`<text:${m[1]}${m[2]}>${rahmenXml}</text:${m[1]}>`+teil.slice(m.index+m[0].length)
+          :teil.slice(0,m.index+m[0].length)+rahmenXml+teil.slice(m.index+m[0].length));
+      }
     }
     return x;
   };
+  for(const fig of container.querySelectorAll("figure.fig.free"))frei[fig.dataset.fnr]=await figur(fig);
   let body=await bloecke(container);
+  const verankert=new Set([...container.querySelectorAll("[data-fziel]")].flatMap(b=>b.dataset.fziel.split(",")));
+  for(const [nr,r] of Object.entries(frei))if(!verankert.has(nr))body+=`<text:p text:style-name="Standard">${r}</text:p>`;
   if(anker||umbruch)body+=`<text:p text:style-name="${absatzStil([])}">${anker}</text:p>`;
   if(!body)body='<text:p text:style-name="Standard"/>';
   const contentXml=`<?xml version="1.0" encoding="UTF-8"?>
@@ -13934,6 +13967,29 @@ const hfRefId=(sect,art,typ)=>{
 /* Alle Bildverweise der Beziehungsdatei einsammeln und die Bytes dazu aus
    dem ZIP holen. Vorab statt bei Bedarf, weil das Lesen asynchron ist und
    docxToHtml von oben bis unten synchron durchläuft. */
+/* Ein freies Bild aus Word/OpenDocument. Seite und Höhe sind beim Lesen
+   noch unbekannt: vbezug sagt, worauf sich voff bezieht — „margin“ (oberer
+   Rand der Seite), „seite“ (Blattkante), „absatz“ (der Absatz, an dem das
+   Bild hängt). placeFreeFigs() rechnet daraus nach dem Umbruch fpage/fy. */
+function freiBildHtml(uri,o){
+  const r=v=>Math.round(v);
+  return `<figure class="fig free" contenteditable="false" data-free="1" data-fw="${r(Math.max(FREE_MIN_MM,o.fw))}" data-fh="${r(Math.max(FREE_MIN_MM,o.fh))}" `+
+    `data-fx="${r(Math.max(0,o.fx))}" data-fy="0" data-fpage="0" data-fvbezug="${o.vbezug}" data-fvoff="${Math.round(o.voff*10)/10}"`+
+    `${o.hinter?' data-lage="hinter"':""}><img src="${uri}" alt="" draggable="false"></figure>`;
+}
+function docxFreiBild(an,uri,bild){
+  const K=(el,n)=>el?[...el.children].find(c=>c.localName===n):null;
+  const ext=K(an,"extent");
+  const fw=(parseInt(ext&&ext.getAttribute("cx"),10)||0)*EMU_MM,fh=(parseInt(ext&&ext.getAttribute("cy"),10)||0)*EMU_MM;
+  const lage=pos=>{const off=K(pos,"posOffset"),al=K(pos,"align");
+    return {von:String(pos&&pos.getAttribute("relativeFrom")||""),off:off?(parseInt(off.textContent,10)||0)*EMU_MM:null,al:al?al.textContent.trim():""}};
+  const h=lage(K(an,"positionH")),v=lage(K(an,"positionV"));
+  const cw=bild.breiteMm||170,rl=bild.randLinksMm||25;
+  let fx=h.off!=null?h.off:h.al==="center"?(cw-fw)/2:/right|outside/.test(h.al)?cw-fw:0;
+  if(h.off!=null&&/^(page|leftMargin|insideMargin|outsideMargin)$/.test(h.von))fx-=rl;
+  const vbezug=/^(page|topMargin|bottomMargin)$/.test(v.von)?"seite":/^(paragraph|line)$/.test(v.von)?"absatz":"margin";
+  return freiBildHtml(uri,{fw,fh,fx,vbezug,voff:v.off||0,hinter:String(an.getAttribute("behindDoc"))==="1"});
+}
 async function docxBildKarte(buf,relXml){
   const karte={};
   if(!relXml)return karte;
@@ -14265,7 +14321,12 @@ function docxLauf(p,ktx,innen){
              Zeile an. Seite aus der Ausrichtung, sonst aus der Lage. */
           const anc=[...c.getElementsByTagName("*")].find(x=>x.localName==="anchor");
           const umfl=anc&&[...anc.children].some(x=>/^wrap(Square|Tight|Through)$/.test(x.localName));
-          if(umfl){
+          /* Ohne Umlauf (hinter oder vor dem Text) ein freies Bild — bis 1.3
+             kam es als Bild in der Zeile an. Seite und Höhe rechnet
+             placeFreeFigs() nach dem ersten Umbruch aus (data-fvbezug). */
+          const frei=anc&&!umfl&&[...anc.children].some(x=>x.localName==="wrapNone");
+          if(frei)marke+=docxFreiBild(anc,quelle.uri,ktx.bild);
+          else if(umfl){
             const ph=[...anc.children].find(x=>x.localName==="positionH");
             const al=ph&&[...ph.children].find(x=>x.localName==="align");
             const po=ph&&[...ph.children].find(x=>x.localName==="posOffset");
@@ -14355,7 +14416,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   const fn={karte:z.fussnoten||new Map(),zu:new Map(),liste:[]};
   const en={karte:z.endnoten||new Map(),zu:new Map(),liste:[]};
   const kom=z.roh?{zu:new Map(),notizen:[],offen:[]}:null;
-  const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,zahl:0,bytes:0,fehlend:0};
+  const bild={karte:z.bilder||{},breiteMm:z.breiteMm||0,randLinksMm:z.randLinksMm!=null?z.randLinksMm:25,zahl:0,bytes:0,fehlend:0};
   const rahmenStile=docxTabellenRahmen(stilXml);
   const lautKtx=p=>{const v=xattrN(KIND(KIND(p,"pPr"),"pStyle"),"val")||"";
     return {stile,grund:Object.assign({},def,docxVorlageWirkung(stile,v)),groesse:grundGroesse,fn,en,bild,roh:z.roh,kom,
@@ -14451,6 +14512,16 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
   };
   const absatzTeil=(inhalt,pr,vorlage,h,art,wa)=>{
     const al=docxAusrichtung(stile,pr,vorlage);
+    /* Umflossene und freie Bilder hängen nur an diesem Absatz: sie stehen
+       davor, und der Absatz bleibt, was er ist — Überschrift, Zitat,
+       Unterschrift. Bis 1.3 wurde jeder Absatz mit einem Bild zum
+       einfachen Absatz (eine Überschrift mit Logo verlor ihre Stufe). */
+    const anker=inhalt.match(/<figure class="fig (umfl|free)"[\s\S]*?<\/figure>/g);
+    if(anker){
+      out+=anker.join("");
+      inhalt=inhalt.replace(/<figure class="fig (umfl|free)"[\s\S]*?<\/figure>/g,"").trim();
+      if(!inhalt.replace(/<[^>]+>| |\s/g,"")&&!/<(img|br)\b/.test(inhalt)&&!wa&&!h&&!art)return;
+    }
     /* Bildunterschrift direkt unter einem Bild: in dessen Figur */
     if(art==="unterschrift"&&/<figure class="fig"[^>]*>(?:(?!<figure)[\s\S])*<\/figure>$/.test(out)&&!/<figcaption/.test(out.slice(out.lastIndexOf("<figure")))){
       out=out.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+(inhalt||"")+"</figcaption></figure>");
@@ -14468,7 +14539,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     if(figuren){
       const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
       /* Umflossene Bilder stehen vor ihrem Absatz, damit er sie umfließt */
-      const umfl=figuren.filter(f=>/^<figure class="fig umfl"/.test(f));
+      const umfl=figuren.filter(f=>/^<figure class="fig (umfl|free)"/.test(f));
       out+=umfl.join("");
       if(rest||wa)out+="<p"+wa+">"+(rest||"<br>")+"</p>";
       /* Ein Bild steht, wie sein Absatz ausgerichtet ist — ohne Angabe links
@@ -14824,7 +14895,8 @@ function odfStile(dom,k,teil){
       zelle:odfKind(el,"table-cell-properties"),
       spalte:odfKind(el,"table-column-properties"),
       zeile:odfKind(el,"table-row-properties"),
-      g:gp?{wrap:gp.getAttribute("style:wrap"),hpos:gp.getAttribute("style:horizontal-pos")}:null};
+      g:gp?{wrap:gp.getAttribute("style:wrap"),hpos:gp.getAttribute("style:horizontal-pos"),hrel:gp.getAttribute("style:horizontal-rel"),
+        vrel:gp.getAttribute("style:vertical-rel"),durch:gp.getAttribute("style:run-through")}:null};
   }
 }
 function odfKette(k,fam,name){
@@ -14967,6 +15039,16 @@ function odtLesen(inhaltXml,stilXml,bilder){
     const br=Math.max(5,Math.min(100,Math.round((breitePt?breitePt/textbreitePt*100:70)*10)/10));
     const g=(odfKette(k,"graphic",fr.getAttribute("draw:style-name")).reduce((o,s)=>Object.assign(o,s.g||{}),{}));
     const anker=fr.getAttribute("text:anchor-type")||"paragraph";
+    /* Durchlaufend (hinter oder vor dem Text): ein freies Bild, wie beim
+       Word-Leser — Seite und Höhe nach dem Umbruch (placeFreeFigs) */
+    if(anker!=="as-char"&&g.wrap==="run-through"){
+      const mm=a=>{const v=odfPt(fr.getAttribute(a));return v!=null?v*25.4/72:0};
+      /* Zur Blattkante gemessen: den linken Rand abziehen; „page-content“
+         ist der Satzspiegel und bleibt */
+      let fx=mm("svg:x");if(/^(page|page-start-margin|page-end-margin)$/.test(g.hrel||""))fx-=fmt?fmt.m[3]:25;
+      const vbezug=/^page$/.test(g.vrel||"")?"seite":/^(paragraph|paragraph-content|char|line|baseline|text)$/.test(g.vrel||"")?"absatz":"margin";
+      return freiBildHtml(quelle.uri,{fw:mm("svg:width"),fh:mm("svg:height"),fx,vbezug,voff:mm("svg:y"),hinter:g.durch==="background"});
+    }
     if(anker!=="as-char"&&/^(parallel|dynamic|left|right|optimal|biggest)$/.test(g.wrap||"")){
       const rechts=/right|outside/.test(g.hpos||"")||g.wrap==="left";
       const bw=Math.min(90,br),s=rechts?"rechts":"links";
@@ -15071,13 +15153,20 @@ function odtLesen(inhaltXml,stilXml,bilder){
     const {name,stufe,art,basis}=absatzKtx(p);
     const pe=odfWirkP(k,name);
     if(pe.umbVor)out+=seitenumbruchHtml();
-    const inhalt=absatzLauf(p,{basis,stufe});
+    let inhalt=absatzLauf(p,{basis,stufe});
     const al=pe.al||"";
+    /* Umflossene und freie Bilder stehen vor ihrem Absatz, der Absatz
+       bleibt, was er ist (wie beim Word-Leser) */
+    const anker=inhalt.match(/<figure class="fig (umfl|free)"[\s\S]*?<\/figure>/g);
+    if(anker){
+      out+=anker.join("");
+      inhalt=inhalt.replace(/<figure class="fig (umfl|free)"[\s\S]*?<\/figure>/g,"").trim();
+      if(!inhalt.replace(/<[^>]+>| |\s/g,"")&&!/<(img|br)\b/.test(inhalt)&&!stufe&&!art){if(pe.umbNach)out+=seitenumbruchHtml();return}
+    }
     const figuren=inhalt.match(/<figure[\s\S]*?<\/figure>/g);
     if(figuren){
       const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
-      const umfl=figuren.filter(f=>/^<figure class="fig umfl"/.test(f));
-      out+=umfl.join("");
+      const umfl=[];
       if(rest.replace(/<[^>]+>| |\s/g,""))out+="<p"+(al?' style="text-align:'+al+'"':"")+">"+rest+"</p>";
       const bal=al==="right"||al==="center"?al:"left";
       out+=figuren.filter(f=>!umfl.includes(f)).map(f=>f.replace('style="text-align:center"','style="text-align:'+bal+'"')).join("");
@@ -15358,7 +15447,8 @@ async function zipDokument(name,buf){
         rels:Object.fromEntries(wRelsListe(rel).map(r=>[r.id,r])),
         kommentare:wKommentare(await hol("word/comments.xml"))};
       const erg=docxToHtml(xml,stil,num,
-        {fussnoten:docxFussnoten(fuss),endnoten:docxFussnoten(endn,"endnote"),bilder,breiteMm,thema,roh});
+        {fussnoten:docxFussnoten(fuss),endnoten:docxFussnoten(endn,"endnote"),bilder,breiteMm,thema,roh,
+         randLinksMm:vorabFmt?vorabFmt.m[3]:25});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
          sectPr nur über eine Kennung zeigt. */
@@ -21723,9 +21813,119 @@ function freeGeom(){
     ml:MM(f.m[3])*z, mt:Math.max(MM(f.m[0])*z,hfBand(doc(),"hdr",z)),
     cw:f.w-f.m[1]-f.m[3], ch:f.h-f.m[0]-f.m[2]};
 }
+/* Freie Bilder beim Speichern als Word oder OpenDocument: Word und
+   LibreOffice hängen ein freies Bild an einen Absatz, die Lage gilt auf
+   der Seite dieses Absatzes. Dieses Programm merkt sich die Seite (fpage)
+   und hängt Bilder irgendwo an (Unterschriften ans Ende). Bis 1.3 ging das
+   Bild an seiner Stelle im Text hinaus, in einem eigenen leeren Absatz —
+   eine Unterschrift von Seite 1 stand in Word auf der letzten Seite, und
+   der leere Absatz schob den Text um eine Zeile. Jetzt: verankert im
+   ersten Absatz der Seite fpage (Tabellen ausgenommen, dort bezöge Word
+   die Lage auf die Zelle). Ohne Umbruch am Bildschirm (anderes Dokument,
+   Handy-Ansicht) der Absatz davor. Markiert Ziel (data-fziel) und Bild
+   (data-fnr) im Exportbaum, bevor docxEinebnen ihn umbaut. */
+function freiZiele(d,container){
+  const istFrei=b=>b.matches&&b.matches("figure.fig.free");
+  const figs=[...container.children].filter(istFrei);
+  if(!figs.length)return;
+  const geeignet=b=>!istFrei(b)&&!/^(TABLE|FIGURE)$/.test(b.tagName)&&!(b.classList&&(b.classList.contains("pgbreak")||b.classList.contains("toc")||b.classList.contains("enliste")));
+  const bloeckeC=[...container.children].filter(b=>!istFrei(b));
+  let seiten=null,oben=null,g=null;
+  const ed=$("#editor");
+  if(ed&&d===doc()&&S.mode==="write"&&!document.body.classList.contains("handy")){
+    const bloeckeE=[...ed.children].filter(b=>!istFrei(b));
+    if(bloeckeE.length===bloeckeC.length){
+      g=freeGeom();const top=ed.getBoundingClientRect().top;
+      oben=bloeckeE.map(b=>b.getBoundingClientRect().top-top);
+      seiten=oben.map(t=>Math.floor((t+1)/g.stride));
+    }
+  }
+  figs.forEach((f,nr)=>{
+    f.dataset.fnr=nr;
+    let ziel=null;
+    if(seiten){
+      /* Der Absatz direkt über dem Bild auf seiner Seite, die Höhe zu ihm
+         (data-fabsatz, mm). Word und dieses Programm brechen nie ganz gleich
+         um; am „ersten Absatz der Seite“ wanderte das Bild bei zwei Zeilen
+         Unterschied auf die Vorseite. So bleibt es bei seinem Text — eine
+         Unterschrift unter „Mit freundlichen Grüßen“, wie man es in Word
+         selbst verankert. */
+      const p=+(f.dataset.fpage||0);
+      const bildOben=p*g.stride+g.mt+MM(+f.dataset.fy||0)*g.z;
+      let i=-1;
+      bloeckeC.forEach((b,k)=>{if(seiten[k]===p&&geeignet(b)&&oben[k]<=bildOben+1)i=k});
+      if(i<0)i=bloeckeC.findIndex((b,k)=>seiten[k]===p&&geeignet(b));
+      /* Beginnt auf der Seite kein Absatz (ein überlanger läuft hinüber),
+         der letzte davor */
+      if(i<0)for(let k=bloeckeC.length-1;k>=0;k--)if(seiten[k]<p&&geeignet(bloeckeC[k])){i=k;break}
+      if(i>=0){ziel=bloeckeC[i];f.dataset.fabsatz=Math.round((bildOben-oben[i])/g.mmPx*10)/10}
+    }
+    /* Ohne Umbruch am Bildschirm: der eigene Anker (der Block nach dem Bild,
+       data-fabsatz zu ihm), sonst der Absatz davor mit Lage zum Rand */
+    if(!ziel&&f.dataset.fabsatz!=null){const x=f.nextElementSibling;if(x&&geeignet(x))ziel=x;else delete f.dataset.fabsatz}
+    if(!ziel){
+      let x=f.previousElementSibling;while(x&&!geeignet(x))x=x.previousElementSibling;
+      if(!x){x=f.nextElementSibling;while(x&&!geeignet(x))x=x.nextElementSibling}
+      ziel=x;
+    }
+    if(ziel)ziel.dataset.fziel=(ziel.dataset.fziel?ziel.dataset.fziel+",":"")+nr;
+  });
+}
+/* Anker freier Bilder (siehe placeFreeFigs): das gerade gezogene Bild und
+   der zuletzt errechnete Stand je Bild, an dem ein Verschieben auffällt */
+let freiZiehen=null;
+const freiStand=new WeakMap();
+const freiAnkerTauglich=b=>!b.matches("figure.fig.free")&&!/^(TABLE|FIGURE)$/.test(b.tagName)&&
+  !b.classList.contains("pgbreak")&&!b.classList.contains("toc")&&!b.classList.contains("enliste");
+/* An den Block über dem Bild auf seiner Seite hängen — davor im Dokument */
+function freiVerankern(fig,ed,g){
+  const bl=[...ed.children].filter(freiAnkerTauglich);if(!bl.length)return;
+  const top=ed.getBoundingClientRect().top;
+  const p=+(fig.dataset.fpage||0),bildOben=p*g.stride+g.mt+MM(+fig.dataset.fy||0)*g.z;
+  const o=bl.map(b=>b.getBoundingClientRect().top-top),s=o.map(t=>Math.floor((t+1)/g.stride));
+  let i=-1;o.forEach((t,k)=>{if(s[k]===p&&t<=bildOben+1)i=k});
+  if(i<0)i=s.findIndex(x=>x===p);
+  if(i<0)for(let k=bl.length-1;k>=0;k--)if(s[k]<p){i=k;break}
+  if(i<0)i=0;
+  if(fig.nextElementSibling!==bl[i])bl[i].before(fig);
+  fig.dataset.fabsatz=Math.round((bildOben-o[i])/g.mmPx*10)/10;
+}
+/* Seite und Höhe aus dem Anker (dem nächsten Block, sonst dem vorigen) */
+function freiAusAnker(fig,ed,g){
+  let b=fig.nextElementSibling;while(b&&b.matches("figure.fig.free"))b=b.nextElementSibling;
+  if(!b){b=fig.previousElementSibling;while(b&&b.matches("figure.fig.free"))b=b.previousElementSibling}
+  if(!b)return;
+  const relY=b.getBoundingClientRect().top-ed.getBoundingClientRect().top;
+  const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((relY+1)/g.stride)));
+  const y=(relY-pg*g.stride-g.mt)/g.mmPx+(+fig.dataset.fabsatz||0);
+  fig.dataset.fpage=pg;
+  fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-(+fig.dataset.fh||16),y)));
+}
+/* Abstand zwischen Seitenrand oben (Word: „Rand“) und dem Satzspiegel
+   dieses Programms, der unter einer hohen Kopfzeile tiefer beginnt */
+const freiVersatzMm=d=>{const f=fmtOf(d);return Math.max(0,hfBandMm(d,"hdr")-f.m[0])};
 function placeFreeFigs(){
   const ed=$("#editor");if(!ed)return;
   const g=freeGeom();
+  /* Aus Word/OpenDocument geöffnet: Seite und Höhe stehen erst nach dem
+     Umbruch fest — die Lage gilt dort zum Absatz, an dem das Bild hängt
+     (das ist der Block nach der Figur), zum Rand oder zur Blattkante */
+  let nachgetragen=false;
+  ed.querySelectorAll("figure.fig.free[data-fvbezug]").forEach(fig=>{
+    let b=fig.nextElementSibling;while(b&&b.matches("figure.fig.free"))b=b.nextElementSibling;
+    if(!b){b=fig.previousElementSibling;while(b&&b.matches("figure.fig.free"))b=b.previousElementSibling}
+    const er=ed.getBoundingClientRect(),relY=b?b.getBoundingClientRect().top-er.top:0;
+    const pg=Math.max(0,Math.min(Math.max(0,pageCount-1),Math.floor((relY+1)/g.stride)));
+    const off=+fig.dataset.fvoff||0,bez=fig.dataset.fvbezug,mtMm=g.mt/g.mmPx;
+    const y=bez==="seite"?off-mtMm:bez==="absatz"?(relY-pg*g.stride-g.mt)/g.mmPx+off:off-(mtMm-g.f.m[0]);
+    /* Zum Absatz gemessen: das ist schon der Anker (siehe unten) */
+    if(bez==="absatz")fig.dataset.fabsatz=Math.round(off*10)/10;
+    fig.dataset.fpage=pg;
+    fig.dataset.fy=Math.round(Math.max(0,Math.min(g.ch-(+fig.dataset.fh||16),y)));
+    fig.dataset.fx=Math.round(Math.max(0,Math.min(g.cw-(+fig.dataset.fw||40),+fig.dataset.fx||0)));
+    delete fig.dataset.fvbezug;delete fig.dataset.fvoff;nachgetragen=true;
+  });
+  if(nachgetragen)dirty=true;
   /* Signaturen aus früheren Fassungen lagen noch im Textfluss — einmalig
      auf die freie Platzierung heben, mit ihrem echten Seitenverhältnis. */
   ed.querySelectorAll("figure.fig[data-sig]:not(.free)").forEach(fig=>{
@@ -21739,6 +21939,28 @@ function placeFreeFigs(){
     fig.dataset.fy=Math.round(g.ch*.62);
     if(im){im.style.width="";im.style.height=""}
   });
+  /* „Mit Text verschieben“ wie in Word: jedes freie Bild hängt am Block
+     direkt nach ihm (data-fabsatz: Abstand zu dessen Oberkante, mm), Seite
+     und Höhe folgen bei jedem Umbruch diesem Block. Bis 1.3 hing das Bild an
+     der Seite — ein Seitenumbruch schob den Text weiter, die Unterschrift
+     blieb stehen (Toms Fund). Wurde das Bild verschoben (fpage/fy weichen
+     vom zuletzt Errechneten ab) oder hat es noch keinen Anker (ältere
+     Dokumente, neu eingefügt), wird es an den Block über ihm gehängt. */
+  /* Verankert wird erst, wenn der Umbruch steht: solange Bilder noch laden
+     (ihre Höhe ist 0, der Text steht zu weit oben) oder Schriften fehlen,
+     wäre der Abstand zum Anker falsch gemessen. Das load-Event der Bilder
+     stößt danach ohnehin einen neuen Umbruch an. */
+  const umbruchSteht=[...ed.querySelectorAll("img")].every(i=>i.complete)&&(!document.fonts||document.fonts.status==="loaded");
+  if(!document.body.classList.contains("handy"))ed.querySelectorAll("figure.fig.free").forEach(fig=>{
+    if(fig===freiZiehen)return;
+    const stand=freiStand.get(fig),jetzt=fig.dataset.fpage+"/"+fig.dataset.fy;
+    if(fig.dataset.fabsatz==null||(stand&&stand!==jetzt)){
+      if(!umbruchSteht)return;
+      freiVerankern(fig,ed,g);nachgetragen=true}
+    freiAusAnker(fig,ed,g);
+    freiStand.set(fig,fig.dataset.fpage+"/"+fig.dataset.fy);
+  });
+  if(nachgetragen)dirty=true;
   ed.querySelectorAll("figure.fig.free").forEach(fig=>{
     const pg=+(fig.dataset.fpage||0);
     const x=+(fig.dataset.fx||0), y=+(fig.dataset.fy||0);
@@ -21876,6 +22098,7 @@ function freeFigMouseDown(e){
   if(!fig)return;
   e.preventDefault();
   if(selFig!==fig)selectFig(fig);
+  freiZiehen=fig;
   const bar=$("#imgbar");bar.classList.add("leise");
   const ed=$("#editor"),g=freeGeom(),modus=griff?griff.dataset.fdir:"move";
   const fr=fig.getBoundingClientRect();
@@ -21919,6 +22142,8 @@ function freeFigMouseDown(e){
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
     bar.classList.remove("leise");
+    /* Losgelassen: an den Block an der neuen Stelle hängen */
+    freiZiehen=null;placeFreeFigs();
     flush();dirty=true;commit();drawStatus();
     if(selFig===fig)drawImgBar();
   };
@@ -22247,7 +22472,7 @@ function bildLage(fig,lage){
     const ziel=[...ed.children].find(b=>b!==fig&&!b.classList.contains("free")&&b.getBoundingClientRect().top>=ft-2);
     fig.querySelectorAll(".fhwrap").forEach(x=>x.remove());
     fig.classList.remove("free");
-    ["free","fpage","fx","fy","fw","fh","lage","sig"].forEach(k=>delete fig.dataset[k]);
+    ["free","fpage","fx","fy","fw","fh","lage","sig","fabsatz"].forEach(k=>delete fig.dataset[k]);
     ["--fx","--fy","--fw","--fh","--fpx","--fpy","--fpw","--fph"].forEach(k=>fig.style.removeProperty(k));
     fig.dataset.w=w;fig.style.textAlign="center";
     if(im){im.style.height="";im.style.width=w+"%"}
