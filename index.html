@@ -328,6 +328,12 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .rb:hover{background:var(--chrome)}
 .rb.on{background:var(--paper);color:var(--stamp);box-shadow:inset 0 0 0 1px var(--rule)}
 .rb svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* Einstellungen: Zahnrad mit Zähnen wie in Windows/Word, Nabe gefüllt in der
+   Farbe des Symbols (Tom: schwarz statt blau); dreht sich beim Darüberfahren einmal um 45° (eine Zahnteilung bei acht Zähnen,
+   steht danach wieder gleich da). „Bewegung reduzieren“ schaltet die
+   Drehung über die allgemeine Regel ab. */
+#setBtn .zahnrad{transform-origin:12px 12px;transition:transform .5s cubic-bezier(.3,.7,.4,1)}
+#setBtn:hover .zahnrad,#setBtn:focus-visible .zahnrad{transform:rotate(45deg)}
 .main{flex:1;min-width:0;display:flex;flex-direction:column}
 
 /* ---- Werkzeugleiste ---- */
@@ -1746,7 +1752,7 @@ body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)
       <button class="rb" data-mode="notes" title="Notizen (Alt+2)"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></svg></button>
       <button class="rb" data-mode="gloss" title="Glossar (Alt+3)"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"/><path d="M8 7h7M8 11h5"/></svg></button>
       <div style="flex:1"></div>
-      <button class="rb" id="setBtn" title="Einstellungen"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="12" r="6.3"/><path d="M18.3 12h2.4M16.5 16.5l1.7 1.7M12 18.3v2.4M7.5 16.5l-1.7 1.7M5.7 12H3.3M7.5 7.5 5.8 5.8M12 5.7V3.3M16.5 7.5l1.7-1.7"/></svg></button>
+      <button class="rb" id="setBtn" title="Einstellungen"><svg viewBox="0 0 24 24"><g class="zahnrad"><path d="M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.5 1.1c1.6-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.5c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.5c.9 1.6-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.5 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.5-1.1c-1.6.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.5c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.5c-.9-1.6.8-3.3 2.4-2.4a1.7 1.7 0 0 0 2.5-1.1z"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></g></svg></button>
     </div>
     <div class="main">
       <div class="tools" id="tools"></div>

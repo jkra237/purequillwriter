@@ -47,6 +47,12 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Einstellungen-Symbol als Zahnrad, das sich dreht** (Toms Wahl „D“ aus
+  vier Entwürfen): echtes Zahnrad mit acht Zähnen wie in Windows und Word
+  statt der Sonne mit Strahlen, Nabe gefüllt in der Farbe des Symbols (erst blau wie die Lupe, Tom wollte schwarz). Beim
+  Darüberfahren oder Ansteuern mit der Tastatur dreht es sich einmal um
+  45° — eine Zahnteilung, danach steht es wieder gleich da. „Bewegung
+  reduzieren“ schaltet die Drehung über die allgemeine Regel ab.
 - **Seitenumbruch-Symbol mit Farbakzent** (Toms Wahl „A“ aus drei
   Entwürfen): die gestrichelte Schnittlinie zwischen den zwei Blättern in
   Koralle `#E07052`, wie der Radierer — das Symbol stand als einziges der
