@@ -14167,7 +14167,7 @@ function grundAusZaehlung(gr,sch,zab,nab){
   const g=top(gr),f=top(sch),z=top(zab),n=top(nab);
   const size=g?Math.min(FS_MAX,Math.max(FS_MIN,Math.round(g[0]*2)/2)):null;
   const bezug=size||S.settings.size||11;
-  return {size,font:f?docxSchriftInListe(f[0]):null,
+  return {size,font:f?docxSchriftInListe(f[0]):null,quelle:f?f[0]:null,
     lh:z?Math.min(3,Math.max(0.8,z[0])):null,
     ps:n?Math.round(n[0]/bezug*1000)/1000:null};
 }
@@ -14191,7 +14191,7 @@ function odtGrundschrift(inhaltXml,stilXml){
     for(const el of dom.getElementsByTagName("*")){
       if(el.localName==="font-face"){
         const n=el.getAttribute("style:name");
-        if(n)schriften[n]=(el.getAttribute("svg:font-family")||n).replace(/['"]/g,"").trim();
+        if(n)schriften[n]=(el.getAttribute("svg:font-family")||n).replace(/['"]/g,"").split(",")[0].trim();
         continue;
       }
       if(el.localName!=="style"&&el.localName!=="default-style")continue;
@@ -14203,7 +14203,7 @@ function odtGrundschrift(inhaltXml,stilXml){
         const fs=tp.getAttribute("fo:font-size");
         if(fs&&!/%/.test(fs)){const v=odfPt(fs);if(v>0)o.sz=v}
         const fn=tp.getAttribute("style:font-name")||tp.getAttribute("fo:font-family");
-        if(fn)o.font=fn.replace(/['"]/g,"").trim();
+        if(fn)o.font=fn.replace(/['"]/g,"").split(",")[0].trim();
       }
       if(pp){
         const lh=pp.getAttribute("fo:line-height");
@@ -14314,67 +14314,475 @@ function rtfGrundschrift(raw){
   }
   return grundAusZaehlung(gr,sch,zab,nab);
 }
-function odtToHtml(xml){
-  const dom=new DOMParser().parseFromString(xml,"application/xml");
-  if(dom.querySelector("parsererror"))return null;
-  /* Auszeichnungen stecken in den automatischen Formatvorlagen */
-  const stile={};
-  [...dom.getElementsByTagName("*")].forEach(el=>{
-    if(el.localName!=="style")return;
-    const n=el.getAttribute("style:name");if(!n)return;
-    const tp=[...el.children].find(c=>c.localName==="text-properties");if(!tp)return;
-    stile[n]={
-      b:/bold/i.test(tp.getAttribute("fo:font-weight")||""),
-      i:/italic|oblique/i.test(tp.getAttribute("fo:font-style")||""),
-      u:!!(tp.getAttribute("style:text-underline-style")||"").replace(/none/i,""),
-      s:!!(tp.getAttribute("style:text-line-through-style")||"").replace(/none/i,"")
-    };
-  });
-  const inhalt=[...dom.getElementsByTagName("*")].find(e=>e.localName==="text"&&
-    e.parentElement&&e.parentElement.localName==="body");
-  if(!inhalt)return null;
-  const lauf=el=>{
-    let t="";
-    [...el.childNodes].forEach(k=>{
-      if(k.nodeType===3){t+=xesc(k.nodeValue);return}
-      if(k.nodeType!==1)return;
-      if(k.localName==="line-break"){t+="<br>";return}
-      if(k.localName==="s"){t+=" ";return}
-      if(k.localName==="tab"){t+=" ";return}
-      let s=lauf(k);
-      if(k.localName==="span"){
-        const st=stile[k.getAttribute("text:style-name")];
-        if(st){if(st.b)s="<b>"+s+"</b>";if(st.i)s="<i>"+s+"</i>";
-               if(st.u)s="<u>"+s+"</u>";if(st.s)s="<s>"+s+"</s>"}
-      }
-      t+=s;
-    });
-    return t;
-  };
-  let out="";
-  const block=el=>{
-    if(el.localName==="h"){
-      const n=Math.min(3,+(el.getAttribute("text:outline-level")||1));
-      out+="<h"+n+">"+(lauf(el)||"<br>")+"</h"+n+">";
-    } else if(el.localName==="p"){
-      out+="<p>"+(lauf(el)||"<br>")+"</p>";
-    } else if(el.localName==="list"){
-      out+="<ul>";
-      [...el.children].filter(x=>x.localName==="list-item").forEach(li=>{
-        out+="<li>"+[...li.children].map(lauf).join(" ")+"</li>"});
-      out+="</ul>";
-    } else if(el.localName==="table"){
-      out+="<table>";
-      [...el.children].filter(x=>x.localName==="table-row").forEach(tr=>{
-        out+="<tr>";
-        [...tr.children].filter(x=>x.localName==="table-cell").forEach(tc=>{
-          out+="<td>"+([...tc.children].map(lauf).join("<br>")||"&nbsp;")+"</td>"});
-        out+="</tr>"});
-      out+="</table>";
+/* ---- OpenDocument lesen (seit 1.3 auf dem Stand des Word-Lesers) ----
+   Bis 1.3 rund 60 Zeilen: Absätze, Überschriften, fett/kursiv/unter-/durch-
+   gestrichen aus den automatischen Vorlagen, jede Liste als flache
+   Punktliste, einfache Tabellen. Gemessen mit dem Umlauf-Prüfwerkzeug kamen
+   9 von 37 Merkmalen an — Bilder, Fußnoten, Kopf-/Fußzeile, Seitenformat,
+   Nummerierung, Ausrichtung und Schrift am Text fehlten ganz.
+   ODF legt Formate in Vorlagen mit Elternkette ab (style:parent-style-name):
+   gemeinsame in styles.xml, automatische je Teildatei. Automatische aus
+   content.xml und styles.xml dürfen gleich heißen („P1“), deshalb zwei
+   Karten — eine für den Text, eine für Kopf- und Fußzeile. Namen tragen
+   Leerzeichen als _20_ („Heading_20_1“). */
+const ODF_NAME=n=>String(n||"").replace(/_([0-9a-f]{2})_/gi,(m,h)=>String.fromCharCode(parseInt(h,16)));
+const odfKind=(el,n)=>el?[...el.children].find(c=>c.localName===n):null;
+function odfTextEig(tp,schriften){
+  const o={};if(!tp)return o;
+  const g=n=>tp.getAttribute(n);
+  const fw=g("fo:font-weight");if(fw)o.b=fw==="bold"||parseInt(fw,10)>=600;
+  const fs=g("fo:font-style");if(fs)o.i=/italic|oblique/.test(fs);
+  const us=g("style:text-underline-style");if(us)o.u=us!=="none";
+  const ls=g("style:text-line-through-style");if(ls)o.s=ls!=="none";
+  /* „super 58%“, „sub 58%“ oder ein Versatz in Prozent */
+  const pos=g("style:text-position");
+  if(pos){const v=pos.trim().split(/\s+/)[0];o.vert=v==="super"||parseFloat(v)>0?"sup":v==="sub"||parseFloat(v)<0?"sub":null}
+  const sz=g("fo:font-size");
+  if(sz){if(/%$/.test(sz))o.szProz=parseFloat(sz)/100;else{const v=odfPt(sz);if(v>0)o.sz=v}}
+  /* fo:font-family darf eine Liste sein („Georgia, serif“) — gemeint ist die erste */
+  const fn=g("style:font-name")||g("fo:font-family");
+  if(fn)o.font=(schriften[fn]||fn).replace(/['"]/g,"").split(",")[0].trim();
+  const c=g("fo:color");if(c)o.color=/^#[0-9a-f]{6}$/i.test(c)?c.slice(1).toUpperCase():null;
+  if(g("style:use-window-font-color")==="true")o.color=null;
+  const bg=g("fo:background-color");if(bg)o.hi=/^#[0-9a-f]{6}$/i.test(bg)?bg.slice(1).toUpperCase():null;
+  const tt=g("fo:text-transform");if(tt)o.caps=tt==="uppercase";
+  return o;
+}
+function odfAbsatzEig(pp){
+  const o={};if(!pp)return o;
+  const g=n=>pp.getAttribute(n);
+  const a=g("fo:text-align");
+  if(a)o.al=a==="center"?"center":a==="end"||a==="right"?"right":a==="justify"?"justify":"";
+  const ml=g("fo:margin-left");if(ml!=null){const v=odfPt(ml);if(v!=null)o.ml=v}
+  const ti=g("fo:text-indent");if(ti!=null){const v=odfPt(ti);if(v!=null)o.ti=v}
+  const bb=g("fo:break-before"),ba=g("fo:break-after");
+  if(bb)o.umbVor=bb==="page";
+  if(ba)o.umbNach=ba==="page";
+  return o;
+}
+/* Vorlagen, Listenvorlagen, Seitenlayouts und Schriftnamen einer Teildatei.
+   teil: nur office:styles bzw. office:automatic-styles (null: beides). */
+function odfStile(dom,k,teil){
+  if(!dom)return;
+  for(const el of dom.getElementsByTagName("*")){
+    const ln=el.localName,eltern=el.parentElement&&el.parentElement.localName;
+    if(ln==="font-face"){const n=el.getAttribute("style:name");
+      if(n)k.schriften[n]=(el.getAttribute("svg:font-family")||n).replace(/['"]/g,"").split(",")[0].trim();continue}
+    if(eltern!=="styles"&&eltern!=="automatic-styles")continue;
+    if(teil&&eltern!==teil)continue;
+    if(ln==="list-style"){
+      const ebenen={};
+      [...el.children].forEach(l=>{
+        const n=parseInt(l.getAttribute("text:level"),10)||1;
+        if(l.localName==="list-level-style-bullet")ebenen[n]={fmt:"bullet",text:l.getAttribute("text:bullet-char")||"•"};
+        else if(l.localName==="list-level-style-number"){
+          const f=l.getAttribute("style:num-format")||"";
+          ebenen[n]={fmt:{"1":"decimal","a":"lowerLetter","A":"upperLetter","i":"lowerRoman","I":"upperRoman"}[f]||(f?"decimal":"none"),
+            text:(l.getAttribute("style:num-suffix")||""),start:parseInt(l.getAttribute("text:start-value"),10)||1};
+        }else if(l.localName==="list-level-style-image")ebenen[n]={fmt:"bullet",text:"•"};
+      });
+      k.listen[el.getAttribute("style:name")]=ebenen;continue;
     }
+    if(ln==="page-layout"){
+      const pl=odfKind(el,"page-layout-properties");
+      const hh=odfKind(odfKind(el,"header-style"),"header-footer-properties");
+      const fh=odfKind(odfKind(el,"footer-style"),"header-footer-properties");
+      k.layouts[el.getAttribute("style:name")]={pl,hh,fh};continue;
+    }
+    if(ln!=="style"&&ln!=="default-style")continue;
+    const fam=el.getAttribute("style:family")||"paragraph";
+    const name=ln==="default-style"?"#vorgabe":el.getAttribute("style:name");if(!name)continue;
+    const gp=odfKind(el,"graphic-properties");
+    k.stile[fam+":"+name]={
+      eltern:ln==="default-style"?"":(el.getAttribute("style:parent-style-name")||"#vorgabe"),
+      anzeige:(el.getAttribute("style:display-name")||ODF_NAME(name)).toLowerCase(),
+      liste:el.getAttribute("style:list-style-name"),
+      seite:el.getAttribute("style:master-page-name"),
+      gliederung:parseInt(el.getAttribute("style:default-outline-level"),10)||0,
+      t:odfTextEig(odfKind(el,"text-properties"),k.schriften),
+      p:odfAbsatzEig(odfKind(el,"paragraph-properties")),
+      zelle:odfKind(el,"table-cell-properties"),
+      spalte:odfKind(el,"table-column-properties"),
+      zeile:odfKind(el,"table-row-properties"),
+      g:gp?{wrap:gp.getAttribute("style:wrap"),hpos:gp.getAttribute("style:horizontal-pos")}:null};
+  }
+}
+function odfKette(k,fam,name){
+  const kette=[];let n=0;
+  while(name&&k.stile[fam+":"+name]&&n++<30){const s=k.stile[fam+":"+name];kette.unshift(s);name=s.eltern}
+  return kette;
+}
+/* Wirksame Zeichen- bzw. Absatzformate entlang der Kette; Prozentgrößen
+   beziehen sich auf die geerbte Größe */
+function odfWirkT(k,fam,name,basis){
+  const o=Object.assign({},basis||{});
+  odfKette(k,fam,name).forEach(s=>{const {szProz,...rest}=s.t;Object.assign(o,rest);if(szProz&&o.sz)o.sz=Math.round(o.sz*szProz*10)/10});
+  return o;
+}
+function odfWirkP(k,name){const o={};odfKette(k,"paragraph",name).forEach(s=>Object.assign(o,s.p));return o}
+/* Zitat und Bildunterschrift erkennt man an der Vorlage — LibreOffice
+   nennt das Zitat „Quotations“, aus Word kommt „Quote“; Beschriftungen
+   heißen nach ihrer Nummernkette „Illustration“, „Figure“, „Drawing“ */
+function odfArt(k,name){
+  const namen=odfKette(k,"paragraph",name).map(s=>s.anzeige);
+  if(namen.includes("pq zitat typografisch"))return "zitat:typo";
+  if(namen.includes("intense quote"))return "zitat:toent";
+  if(namen.some(n=>n==="quotations"||n==="quote"))return "zitat:";
+  if(namen.some(n=>/^(caption|illustration|figure|drawing)$/.test(n)))return "unterschrift";
+  return "";
+}
+function odfStufe(k,el){
+  if(el.localName==="h")return Math.max(1,Math.min(3,parseInt(el.getAttribute("text:outline-level"),10)||1));
+  const kette=odfKette(k,"paragraph",el.getAttribute("text:style-name"));
+  for(let i=kette.length-1;i>=0;i--)if(kette[i].gliederung)return Math.min(3,kette[i].gliederung);
+  return 0;
+}
+/* Kopf-/Fußzeile: Text mit den Platzhaltern dieses Programms */
+function odfHf(el,k){
+  if(!el||el.getAttribute("style:display")==="false")return null;
+  const ps=[...el.children].filter(c=>c.localName==="p"||c.localName==="h");
+  if(!ps.length)return null;
+  const text=n=>[...n.childNodes].map(c=>{
+    if(c.nodeType===3)return c.nodeValue.replace(/[\t\n\r]+/g," ");
+    if(c.nodeType!==1)return "";
+    const l=c.localName;
+    if(l==="page-number")return "{seite}";
+    if(l==="page-count")return "{seiten}";
+    if(l==="title")return "{titel}";
+    if(l==="date"||l==="time")return "{datum}";
+    if(l==="s")return " ".repeat(parseInt(c.getAttribute("text:c"),10)||1);
+    if(l==="tab")return " ";
+    if(l==="line-break")return "\n";
+    if(l==="frame"||l==="note"||l==="annotation")return "";
+    return text(c);
+  }).join("");
+  const t=ps.map(text).join("\n").replace(/\s+$/,"");
+  if(!t.trim())return null;
+  const al=odfWirkP(k,ps[0].getAttribute("text:style-name")).al;
+  return {on:true,text:t,align:al==="center"?"center":al==="right"?"right":"left"};
+}
+const ODF_ZELLE_RAHMEN=z=>{if(!z)return false;
+  return ["fo:border","fo:border-top","fo:border-bottom","fo:border-left","fo:border-right"].some(a=>{const v=z.getAttribute(a);return v&&!/^none\b|^0(\.0+)?(pt|cm|mm|in)?\s/.test(v)&&v!=="none"})};
+function odtLesen(inhaltXml,stilXml,bilder){
+  const P=x=>{if(!x)return null;const d=new DOMParser().parseFromString(x,"application/xml");return d.querySelector("parsererror")?null:d};
+  const inhalt=P(inhaltXml);if(!inhalt)return null;
+  const stilDom=P(stilXml);
+  const neueKarte=()=>({stile:{},listen:{},layouts:{},schriften:{}});
+  const k=neueKarte(),kHf=neueKarte();
+  odfStile(stilDom,k,"styles");odfStile(inhalt,k,null);
+  odfStile(stilDom,kHf,null);
+  const text=[...inhalt.getElementsByTagName("*")].find(e=>e.localName==="text"&&e.parentElement&&e.parentElement.localName==="body");
+  if(!text)return null;
+  const gs=odtGrundschrift(inhaltXml,stilXml);
+  const grundGroesse=gs.size||S.settings.size||11,grundQuelle=gs.quelle||"";
+
+  /* Seitenformat und Kopf-/Fußzeile aus der Musterseite des ersten
+     Absatzes (sonst „Standard“, sonst der ersten) */
+  const muster=[...(stilDom?stilDom.getElementsByTagName("*"):[])].filter(e=>e.localName==="master-page");
+  let mName=null;
+  for(const el of text.getElementsByTagName("*")){
+    if(el.localName!=="p"&&el.localName!=="h")continue;
+    const kt=odfKette(k,"paragraph",el.getAttribute("text:style-name"));
+    for(let i=kt.length-1;i>=0;i--)if(kt[i].seite){mName=kt[i].seite;break}
+    break;
+  }
+  const mp=muster.find(m=>m.getAttribute("style:name")===mName)||muster.find(m=>m.getAttribute("style:name")==="Standard")||muster[0];
+  let fmt=null,textbreiteMm=170;
+  const erg={};
+  if(mp){
+    const lay=kHf.layouts[mp.getAttribute("style:page-layout-name")];
+    const pl=lay&&lay.pl;
+    if(pl){
+      const mm=a=>{const v=odfPt(pl.getAttribute(a));return v!=null?Math.round(v*25.4/72*10)/10:null};
+      let w=mm("fo:page-width"),h=mm("fo:page-height");
+      if(w>0&&h>0){
+        if(pl.getAttribute("style:print-orientation")==="landscape"&&w<h){const t=w;w=h;h=t}
+        const hoch=e=>{const v=e&&odfPt(e.getAttribute("fo:min-height")||e.getAttribute("svg:height"));return v?Math.round(v*25.4/72*10)/10:0};
+        const kopf=odfKind(mp,"header"),fuss=odfKind(mp,"footer");
+        const mo=mm("fo:margin-top")||0,mu=mm("fo:margin-bottom")||0;
+        /* Mit Kopfzeile steht der Text erst unter deren Bereich; der Abstand
+           zur Kante ist dann Words „Kopfzeile von oben“ */
+        const mit=(e,b)=>e&&e.getAttribute("style:display")!=="false"&&b;
+        const m=[mit(kopf,lay.hh)?mo+hoch(lay.hh):mo,mm("fo:margin-right")||0,mit(fuss,lay.fh)?mu+hoch(lay.fh):mu,mm("fo:margin-left")||0].map(v=>Math.max(0,Math.round(v*10)/10));
+        const hd=mit(kopf,lay.hh)?mo:12,fd=mit(fuss,lay.fh)?mu:12;
+        fmt=null;
+        for(const key in FORMATS){const f=FORMATS[key];
+          if((Math.abs(f.w-w)<=1&&Math.abs(f.h-h)<=1)||(Math.abs(f.w-h)<=1&&Math.abs(f.h-w)<=1)){fmt={...f,key,w,h,m,hd,fd};break}}
+        if(!fmt)fmt={n:"OpenDocument-Vorlage",key:"odt",w,h,m,hd,fd,d:""};
+        textbreiteMm=Math.max(20,w-m[1]-m[3]);
+      }
+    }
+    erg.hdr=odfHf(odfKind(mp,"header"),kHf);erg.ftr=odfHf(odfKind(mp,"footer"),kHf);
+    const h1=odfHf(odfKind(mp,"header-first"),kHf),f1=odfHf(odfKind(mp,"footer-first"),kHf);
+    if(h1||f1){erg.ersteAnders=true;erg.hdr1=h1;erg.ftr1=f1}
+    const h2=odfHf(odfKind(mp,"header-left"),kHf),f2=odfHf(odfKind(mp,"footer-left"),kHf);
+    if(h2||f2){erg.geradeAnders=true;erg.hdr2=h2;erg.ftr2=f2}
+  }
+
+  const fn=[],en=[],notizen=[],bild={zahl:0,bytes:0,fehlend:0};
+  const textbreitePt=textbreiteMm*72/25.4;
+  /* Ein Bild (draw:frame): eingebettet wie ein Zeichen = eigene Zeile,
+     am Absatz/Zeichen verankert mit Umlauf = umflossen. Ein Rahmen mit
+     Textfeld ist LibreOffices „Beschriftung“: Bild und Unterschrift darin. */
+  const rahmen=(fr,ctx)=>{
+    const box=odfKind(fr,"text-box");
+    if(box){
+      let figur="",rest="";
+      [...box.children].forEach(p=>{
+        if(p.localName!=="p"&&p.localName!=="h")return;
+        const h=lauf(p,Object.assign({},ctx,{basis:odfWirkT(k,"paragraph","Standard"),stufe:0}));
+        const f=h.match(/<figure[\s\S]*?<\/figure>/g);
+        if(f&&!figur)figur=f[0];
+        const r=h.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
+        if(r)rest+=(rest?"<br>":"")+r;
+      });
+      if(figur&&rest)return figur.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+rest+"</figcaption></figure>");
+      return figur||rest;
+    }
+    const img=odfKind(fr,"image");if(!img)return "";
+    const quelle=bilder[img.getAttribute("xlink:href")||""];
+    if(!quelle){bild.fehlend++;return ""}
+    bild.zahl++;bild.bytes+=quelle.bytes;
+    const breitePt=odfPt(fr.getAttribute("svg:width"));
+    const br=Math.max(5,Math.min(100,Math.round((breitePt?breitePt/textbreitePt*100:70)*10)/10));
+    const g=(odfKette(k,"graphic",fr.getAttribute("draw:style-name")).reduce((o,s)=>Object.assign(o,s.g||{}),{}));
+    const anker=fr.getAttribute("text:anchor-type")||"paragraph";
+    if(anker!=="as-char"&&/^(parallel|dynamic|left|right|optimal|biggest)$/.test(g.wrap||"")){
+      const rechts=/right|outside/.test(g.hpos||"")||g.wrap==="left";
+      const bw=Math.min(90,br),s=rechts?"rechts":"links";
+      return `<figure class="fig umfl" contenteditable="false" data-w="${bw}" data-seite="${s}" style="text-align:${rechts?"right":"left"};width:${bw}%">`+
+        `<img src="${quelle.uri}" alt="" draggable="false" style="width:100%"></figure>`;
+    }
+    return `<figure class="fig" contenteditable="false" data-w="${br}" style="text-align:center">`+
+      `<img src="${quelle.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
   };
-  [...inhalt.children].forEach(block);
-  return out||null;
+  const notizText=body=>[...body.children].filter(p=>p.localName==="p"||p.localName==="h")
+    .map(p=>p.textContent.replace(/\s+/g," ").trim()).filter(Boolean);
+  /* Inline-Inhalt eines Absatzes. ctx.basis: Zeichenformat des Absatzes;
+     ctx.offen zählt offene Kommentarbereiche */
+  const lauf=(el,ctx)=>{
+    if(!ctx.offen)ctx.offen={n:0,namen:{}};
+    let out="";
+    for(const c of el.childNodes){
+      if(c.nodeType===3){
+        const t=c.nodeValue.replace(/[\t\n\r]+/g," ");if(!t)continue;
+        const w=ctx.wirk||ctx.basis;
+        let s=xesc(t);const stil=[];
+        /* Die Grundfarbe des Dokuments (Vorlage „Standard“) ist kein
+           Textformat — sonst trüge jedes Wort sie, und in einem dunklen
+           Farbschema stünde fast schwarzer Text auf dunklem Papier */
+        if(w.color&&!ctx.imLink&&w.color!==grundFarbe)stil.push("color:#"+w.color);
+        if(w.hi)stil.push("background-color:#"+w.hi);
+        if(w.caps)stil.push("text-transform:uppercase");
+        const soll=ctx.stufe?grundGroesse*(UEBERSCHRIFT_FAKTOR[ctx.stufe]||1):grundGroesse;
+        if(w.sz&&Math.abs(w.sz-soll)>=0.25)stil.push("font-size:calc("+w.sz+"pt * var(--zoom,1))");
+        if(w.font&&grundQuelle&&w.font.toLowerCase()!==grundQuelle.toLowerCase())stil.push("font-family:"+wordSchriftStapel(w.font).replace(/"/g,"'"));
+        if(stil.length)s='<span style="'+stil.join(";")+'">'+s+"</span>";
+        if(w.b&&!ctx.stufe)s="<b>"+s+"</b>";
+        if(w.i)s="<i>"+s+"</i>";
+        if(w.u&&!ctx.imLink)s="<u>"+s+"</u>";
+        if(w.s)s="<s>"+s+"</s>";
+        if(w.vert==="sup")s="<sup>"+s+"</sup>";else if(w.vert==="sub")s="<sub>"+s+"</sub>";
+        out+=s;continue;
+      }
+      if(c.nodeType!==1)continue;
+      const l=c.localName;
+      if(l==="span"){out+=lauf(c,Object.assign({},ctx,{wirk:odfWirkT(k,"text",c.getAttribute("text:style-name"),ctx.wirk||ctx.basis)}));continue}
+      if(l==="a"){
+        /* Nur Web, Mail und FTP werden klickbar (wie beim Word-Leser) */
+        const href=c.getAttribute("xlink:href")||"";
+        const innen=lauf(c,Object.assign({},ctx,{imLink:/^(https?:|mailto:|ftp:)/i.test(href)}));
+        out+=/^(https?:|mailto:|ftp:)/i.test(href)?`<a href="${esc(href)}">${innen}</a>`:innen;continue;
+      }
+      if(l==="s"){out+=" ".repeat(Math.max(1,parseInt(c.getAttribute("text:c"),10)||1));continue}
+      if(l==="tab"){out+='<span class="wtab" contenteditable="false">\t</span>';continue}
+      if(l==="line-break"){out+="<br>";continue}
+      if(l==="note"){
+        const body=odfKind(c,"note-body");const txt=body?notizText(body).join(" "):"";
+        const id=uid();
+        if(c.getAttribute("text:note-class")==="endnote"){en.push({id,text:txt});out+=`<sup class="en" data-en="${id}">i</sup>`}
+        else{fn.push({id,text:txt});out+=`<sup class="fn" data-fn="${id}">*</sup>`}
+        continue;
+      }
+      /* Kommentar: Notiz wie bei Word, die kommentierte Stelle als
+         verknüpfte Markierung (bis zum Absatzende, wenn das Ende woanders
+         liegt). Ohne diese Weiche stünde der Kommentartext im Fließtext. */
+      if(l==="annotation"){
+        const autor=[...c.children].find(x=>x.localName==="creator"),datum=[...c.children].find(x=>x.localName==="date");
+        const zeit=Date.parse(datum?datum.textContent:"");
+        const id=uid();
+        notizen.push({id,title:((autor&&autor.textContent)||tr("Kommentar")).slice(0,60),
+          html:notizText(c).map(t=>"<p>"+esc(t)+"</p>").join("")||"<p><br></p>",
+          color:NOTECOLORS[1].c,fs:14,created:isFinite(zeit)?zeit:Date.now(),
+          wort:{autor:autor?autor.textContent:"",datum:datum?datum.textContent:"",initialen:""}});
+        const name=c.getAttribute("office:name");
+        if(name){out+=wAnchAuf(id);ctx.offen.n++;ctx.offen.namen[name]=true}
+        continue;
+      }
+      if(l==="annotation-end"){const n=c.getAttribute("office:name");
+        if(n&&ctx.offen.namen[n]){out+="</span>";ctx.offen.n--;delete ctx.offen.namen[n]}continue}
+      if(l==="frame"){out+=rahmen(c,ctx);continue}
+      if(/^(soft-page-break|bookmark|bookmark-start|bookmark-end|reference-mark|reference-mark-start|reference-mark-end|alphabetical-index-mark|alphabetical-index-mark-start|alphabetical-index-mark-end|toc-mark|toc-mark-start|toc-mark-end|change|change-start|change-end|tracked-changes)$/.test(l))continue;
+      out+=lauf(c,ctx);
+    }
+    return out;
+  };
+  const absatzLauf=(p,ctx)=>{
+    const offen={n:0,namen:{}};
+    const h=lauf(p,Object.assign({},ctx,{offen}));
+    return h+"</span>".repeat(Math.max(0,offen.n));
+  };
+  const standard=odfWirkT(k,"paragraph",k.stile["paragraph:Standard"]?"Standard":"#vorgabe");
+  const grundFarbe=standard.color||null;
+  const absatzKtx=p=>{
+    const name=p.getAttribute("text:style-name");
+    const stufe=odfStufe(k,p),art=stufe?"":odfArt(k,name);
+    const basis=art?Object.assign({},standard):odfWirkT(k,"paragraph",name);
+    return {name,stufe,art,basis};
+  };
+
+  let out="";
+  /* Bilder stehen wie ihr Absatz — ohne Angabe links, wie in Writer */
+  const absatz=p=>{
+    const {name,stufe,art,basis}=absatzKtx(p);
+    const pe=odfWirkP(k,name);
+    if(pe.umbVor)out+=seitenumbruchHtml();
+    const inhalt=absatzLauf(p,{basis,stufe});
+    const al=pe.al||"";
+    const figuren=inhalt.match(/<figure[\s\S]*?<\/figure>/g);
+    if(figuren){
+      const rest=inhalt.replace(/<figure[\s\S]*?<\/figure>/g,"").trim();
+      const umfl=figuren.filter(f=>/^<figure class="fig umfl"/.test(f));
+      out+=umfl.join("");
+      if(rest.replace(/<[^>]+>| |\s/g,""))out+="<p"+(al?' style="text-align:'+al+'"':"")+">"+rest+"</p>";
+      const bal=al==="right"||al==="center"?al:"left";
+      out+=figuren.filter(f=>!umfl.includes(f)).map(f=>f.replace('style="text-align:center"','style="text-align:'+bal+'"')).join("");
+    }else if(art==="unterschrift"&&/<figure class="fig"[^>]*>(?:(?!<figure)[\s\S])*<\/figure>$/.test(out)&&!/<figcaption/.test(out.slice(out.lastIndexOf("<figure")))){
+      out=out.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+inhalt+"</figcaption></figure>");
+    }else if(art.startsWith("zitat:")){
+      const qs=art.slice(6);
+      out+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</blockquote>";
+    }else if(stufe){
+      out+="<h"+stufe+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</h"+stufe+">";
+    }else{
+      const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
+      const links=em(pe.ml),erste=em(pe.ti);
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
+      out+=(st?'<p style="'+st+'">':"<p>")+(inhalt||"<br>")+"</p>";
+    }
+    if(pe.umbNach)out+=seitenumbruchHtml();
+  };
+
+  /* Listen: Art je Ebene aus der Listenvorlage (an der Liste, geerbt von
+     der äußeren, sonst an der Absatzvorlage). Nummern zählen über
+     text:continue-list / continue-numbering weiter. */
+  const zaehler={};let letzteListe=null;
+  const listeHtml=(el,tiefe,erbt)=>{
+    let sn=el.getAttribute("text:style-name")||erbt;
+    if(!sn){const p=[...el.getElementsByTagName("*")].find(x=>x.localName==="p"||x.localName==="h");
+      if(p){const kt=odfKette(k,"paragraph",p.getAttribute("text:style-name"));for(let i=kt.length-1;i>=0;i--)if(kt[i].liste){sn=kt[i].liste;break}}}
+    const ebenen=k.listen[sn]||{};
+    const eb=ebenen[tiefe+1]||{fmt:tiefe%2?"bullet":"bullet",text:"•"};
+    let stil=docxListenStil(eb)||{tag:"ul",ls:""};
+    if(stil.tag==="ol"&&tiefe>0&&String(eb.fmt).toLowerCase()===["decimal","lowerletter","lowerroman"][tiefe%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
+    const items=[...el.children].filter(x=>x.localName==="list-item"||x.localName==="list-header");
+    let start=1;
+    if(tiefe===0){
+      const fort=el.getAttribute("text:continue-list");
+      if(fort&&zaehler[fort])start=zaehler[fort]+1;
+      else if(el.getAttribute("text:continue-numbering")==="true"&&letzteListe)start=letzteListe.n+1;
+      else start=eb.start||1;
+    }
+    const sv=items[0]&&parseInt(items[0].getAttribute("text:start-value"),10);
+    if(sv)start=sv;
+    let h="<"+stil.tag+(stil.ls?' data-ls="'+stil.ls+'"':"")+(stil.tag==="ol"&&start>1?' start="'+start+'"':"")+">";
+    items.forEach(it=>{
+      let li="",unter="";
+      [...it.children].forEach(x=>{
+        if(x.localName==="p"||x.localName==="h"){const c=absatzKtx(x);const t=absatzLauf(x,{basis:c.basis,stufe:0});li+=(li&&t?"<br>":"")+t}
+        else if(x.localName==="list")unter+=listeHtml(x,tiefe+1,sn);
+      });
+      h+="<li>"+(li||(unter?"":"<br>"))+unter+"</li>";
+    });
+    h+="</"+stil.tag+">";
+    if(tiefe===0){
+      const n=start+items.filter(x=>x.localName==="list-item").length-1;
+      const id=el.getAttribute("xml:id");if(id)zaehler[id]=n;
+      const fort=el.getAttribute("text:continue-list");if(fort)zaehler[fort]=n;
+      letzteListe={n};
+    }
+    return h;
+  };
+
+  /* Tabellen: Spaltenbreiten aus den Spaltenvorlagen (auch wiederholte),
+     verbundene Zellen, verdeckte Zellen fallen weg, rahmenlos bleibt
+     rahmenlos */
+  const tabelleHtml=t=>{
+    const spalten=[],zeilen=[];
+    const sammle=el=>[...el.children].forEach(x=>{
+      if(x.localName==="table-column"){
+        const s=k.stile["table-column:"+x.getAttribute("table:style-name")];
+        const w=s&&s.spalte?odfPt(s.spalte.getAttribute("style:column-width"))||parseFloat(s.spalte.getAttribute("style:rel-column-width"))||0:0;
+        for(let i=0;i<(parseInt(x.getAttribute("table:number-columns-repeated"),10)||1);i++)spalten.push(w);
+      }else if(x.localName==="table-row")zeilen.push(x);
+      else if(/^table-(columns|header-columns|column-group|rows|header-rows|row-group)$/.test(x.localName))sammle(x);
+    });
+    sammle(t);
+    let rahmen=false;
+    zeilen.forEach(z=>[...z.children].forEach(c=>{const s=k.stile["table-cell:"+c.getAttribute("table:style-name")];if(s&&ODF_ZELLE_RAHMEN(s.zelle))rahmen=true}));
+    let r=rahmen?"<table>":'<table data-rahmen="ohne">';
+    const summe=spalten.reduce((a,b)=>a+b,0);
+    if(spalten.length&&summe>0)r+="<colgroup>"+spalten.map(w=>`<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
+    zeilen.forEach(z=>{
+      const zs=k.stile["table-row:"+z.getAttribute("table:style-name")];
+      const hp=zs&&zs.zeile?odfPt(zs.zeile.getAttribute("style:row-height")||zs.zeile.getAttribute("style:min-row-height")):0;
+      const em=hp?Math.round(hp/grundGroesse*100)/100:0;
+      r+=em>0?`<tr style="height:${em}em">`:"<tr>";
+      [...z.children].forEach(c=>{
+        if(c.localName!=="table-cell")return;
+        const cs=parseInt(c.getAttribute("table:number-columns-spanned"),10)||1,rs=parseInt(c.getAttribute("table:number-rows-spanned"),10)||1;
+        const teile=[...c.children].map(x=>{
+          if(x.localName==="p"||x.localName==="h"){const kx=absatzKtx(x);return {text:absatzLauf(x,{basis:kx.basis,stufe:0})}}
+          if(x.localName==="table")return {block:tabelleHtml(x)};
+          if(x.localName==="list")return {block:listeHtml(x,0,null)};
+          return null}).filter(Boolean);
+        const inner=teile.length===1&&teile[0].text!==undefined?teile[0].text:teile.map(x=>x.block!==undefined?x.block:"<p>"+(x.text||"<br>")+"</p>").join("");
+        r+="<td"+(cs>1?' colspan="'+cs+'"':"")+(rs>1?' rowspan="'+rs+'"':"")+">"+(inner||"&nbsp;")+"</td>";
+      });
+      r+="</tr>";
+    });
+    return r+"</table>";
+  };
+
+  const bloecke=el=>[...el.children].forEach(x=>{
+    const l=x.localName;
+    if(l==="p"||l==="h")absatz(x);
+    else if(l==="list")out+=listeHtml(x,0,null);
+    else if(l==="table")out+=tabelleHtml(x);
+    /* Bereiche und Verzeichnisse: ihr Inhalt zählt, das Gerüst nicht */
+    else if(l==="section"||l==="index-body")bloecke(x);
+    else if(/^(table-of-content|illustration-index|table-index|object-index|user-index|alphabetical-index|bibliography)$/.test(l)){const b=odfKind(x,"index-body");if(b)bloecke(b)}
+    else if(l==="frame"){const f=rahmen(x,{basis:standard,stufe:0});if(f)out+=f}
+  });
+  bloecke(text);
+  return {html:out||null,fmt,...erg,footnotes:fn,endnotes:en,kommentare:notizen,bilder:bild,
+    size:gs.size,font:gs.font,lh:gs.lh,ps:gs.ps};
+}
+/* Bilder des Pakets (Pictures/…) vorab laden — das Lesen ist asynchron,
+   odtLesen() läuft synchron durch */
+async function odtBildKarte(buf,xmls){
+  const karte={};
+  const pfade=new Set();
+  xmls.filter(Boolean).forEach(x=>{for(const m of x.matchAll(/<draw:image\b[^>]*\bxlink:href="([^"]+)"/g))pfade.add(m[1])});
+  for(const p of pfade){
+    if(/^[a-z]+:/i.test(p))continue;   /* verknüpft statt eingebettet */
+    const ext=(p.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase(),typ=BILDTYP[ext];
+    if(!typ)continue;
+    let bytes=null;
+    try{bytes=await zipBytes(buf,p.replace(/^\.\//,""))}catch(e){}
+    if(bytes&&bytes.length)karte[p]={uri:"data:"+typ+";base64,"+base64Von(bytes),bytes:bytes.length};
+  }
+  return karte;
 }
 /* ---- Word-Paket bewahren: Hilfen ---- */
 function wRelsListe(xml){
@@ -14546,11 +14954,11 @@ async function zipDokument(name,buf){
       return erg;
     }
     const xml=await zipEintrag(buf,"content.xml");
-    const html=xml?odtToHtml(xml):null;
-    if(!html)return null;
-    /* Die Grundschrift steht in ODT meist in styles.xml (Standardvorlage) */
+    if(!xml)return null;
+    /* Grundschrift, Vorlagen, Musterseiten stehen in styles.xml */
     const stil=await zipEintrag(buf,"styles.xml").catch(()=>null);
-    return {html,...odtGrundschrift(xml,stil)};
+    const erg=odtLesen(xml,stil,await odtBildKarte(buf,[xml,stil]));
+    return erg&&erg.html?erg:null;
   }catch(e){return null}
 }
 

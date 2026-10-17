@@ -47,6 +47,28 @@ immer genau einen Commit, der sie anfasst.
 
 ### Behoben
 
+- **OpenDocument (.odt) öffnen auf dem Stand von Word.** Der Leser war rund
+  60 Zeilen lang: Absätze, Überschriften, vier Textauszeichnungen, jede
+  Liste als flache Punktliste, einfache Tabellen — gemessen kamen 9 von 37
+  Merkmalen an (Bilder, Fußnoten, Kopf-/Fußzeile, Seitenformat, Nummerierung,
+  Ausrichtung, Schrift am Text fehlten ganz; Tabulatoren wurden Leerzeichen).
+  Neu geschrieben (`odtLesen`): Vorlagen mit Elternkette aus styles.xml und
+  content.xml (getrennte Karten für Text und Kopf-/Fußzeile, weil die
+  automatischen Vorlagen beider Teile gleich heißen dürfen); Schrift, Größe,
+  Farbe, Textmarker, hoch/tief, Großbuchstaben am Text; Ausrichtung, Einzug,
+  Seitenumbruch vor/nach; Zitat- und Beschriftungsvorlagen (LibreOffice
+  „Quotations“, aus Word „Quote“; „Caption“, „Illustration“ …, auch
+  LibreOffices Beschriftungsrahmen); Listen mit Art je Ebene, Startwert und
+  Weiterzählen; Tabellen mit Spaltenbreiten, verbundenen Zellen, Zeilenhöhe,
+  rahmenlos; Bilder eingebettet oder umflossen; Fuß- und Endnoten;
+  Kommentare als Notizen; Links (nur http/https/mailto/ftp); Kopf-/Fußzeile
+  mit Seitenzahl, erster und gerader Seite; Seitenformat aus der
+  Musterseite. Die Grundfarbe der Vorlage „Standard“ gilt nicht als
+  Textfarbe, und Schriftlisten („Georgia, serif“) zählen mit ihrem ersten
+  Namen. Gemessen an einer von LibreOffice erzeugten Datei: alle Merkmale
+  wie beim Word-Weg, das Ergebnis bis auf zwei leere Absätze (Reste aus der
+  Word-Vorlage) zeichengleich.
+
 - **Word-Umlauf: neun Merkmale gingen verloren** (gefunden mit einem neuen
   Umlauf-Prüfwerkzeug, das ein Dokument mit allem als Word speichert, wieder
   öffnet und mit dem Original vergleicht). Beim **Öffnen** jeder Word-Datei
