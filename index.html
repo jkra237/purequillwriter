@@ -16850,9 +16850,13 @@ function docLesen(buf){
      Kopf, gerade/ungerade Fuß, erste Seite Kopf/Fuß), davor sechs für die
      Trennlinien der Fußnoten. Ein leerer Teiltext erbt vom Abschnitt
      davor. Felder werden zu Platzhaltern ({seite}, {seiten} …). */
-  const hf={};
+  const hf={};let kopfText=false;
   {const [fc,lcb]=fcl(11);if(inTab([fc,lcb])){
     const cps=[];for(let i=0;i*4<lcb;i++)cps.push(t.getInt32(fc+i*4,true));
+    /* Die ersten sechs Teiltexte sind Trennlinien der Fuß- und Endnoten —
+       ein Dokument mit Fußnote hat sie immer, auch ohne Kopfzeile. Nur
+       Text dahinter ist eine Kopf- oder Fußzeile. */
+    if(cps.length>7)for(let cp=BASIS_HDD+cps[6];cp<BASIS_HDD+cps[cps.length-1]&&cp<zch.length;cp++)if(zch[cp].charCodeAt(0)>=0x20){kopfText=true;break}
     const geschichte=k=>{
       for(let sek=nSek-1;sek>=0;sek--){const i=6+sek*6+k;if(i+1>=cps.length)continue;
         const a=BASIS_HDD+cps[i],e=BASIS_HDD+cps[i+1];if(e-a>1)return [a,e]}
@@ -16880,7 +16884,7 @@ function docLesen(buf){
     if(titelSeite){const h1=lies(geschichte(4)),f1=lies(geschichte(5));
       hf.ersteAnders=true;hf.hdr1=h1||{on:false,text:"",align:"center"};hf.ftr1=f1||{on:false,text:"",align:"center"}}
   }}
-  if(ccpHdd>0&&!hf.hdr&&!hf.ftr)fehlt.kopf=true;
+  if(kopfText&&!hf.hdr&&!hf.ftr)fehlt.kopf=true;
 
   const lh=meist(zab),ps=meist(nab);
   const erg={html:html||"<p><br></p>",fmt,font:grundF,size:Math.min(FS_MAX,Math.max(FS_MIN,Math.round(grundGr*2)/2)),fehlt,
@@ -16969,7 +16973,7 @@ function rtfLesen(roh){
   const dok=baum.k.find(x=>x.k)||baum;
   let ansi=1252,deff=0,defSz=12;
   const schriften={},farben=[],stile={},listen={},lsListe={};
-  const seite={w:12240,h:15840,l:1800,r:1800,o:1440,u:1440,kh:720,kf:720};let titelpg=false,facing=false;
+  const seite={w:12240,h:15840,l:1800,r:1800,o:1440,u:1440,kh:720,kf:720};let titelpg=false,facing=false,papier=false;
   const fehlt={bilder:0,grafiken:0,fussnoten:0,kopf:false,kommentare:false,textfelder:false};
   const bildStat={zahl:0,bytes:0,fehlend:0};
   /* Text einer Gruppe als Zeichenkette (Schriftnamen, Vorlagennamen,
@@ -17174,7 +17178,7 @@ function rtfLesen(roh){
         case "clvmgf":gs.tcAkt.mVer=true;gs.tcAkt.startVer=true;break;
         case "clvmrg":gs.tcAkt.mVer=true;gs.tcAkt.startVer=false;break;
         case "cellx":gs.zeile.gr.push(p||0);gs.zeile.tc.push(gs.tcAkt);gs.tcAkt={};rahmen=null;break;
-        case "paperw":case "pgwsxn":seite.w=p;break;case "paperh":case "pghsxn":seite.h=p;break;
+        case "paperw":case "pgwsxn":seite.w=p;papier=true;break;case "paperh":case "pghsxn":seite.h=p;papier=true;break;
         case "margl":case "marglsxn":seite.l=p;break;case "margr":case "margrsxn":seite.r=p;break;
         case "margt":case "margtsxn":seite.o=Math.abs(p);break;case "margb":case "margbsxn":seite.u=Math.abs(p);break;
         case "headery":seite.kh=p;break;case "footery":seite.kf=p;break;
@@ -17333,7 +17337,9 @@ function rtfLesen(roh){
   if(titelpg&&(kopf.headerf||kopf.footerf)){hf.ersteAnders=true;hf.hdr1=hfVon(kopf.headerf)||{on:false,text:"",align:"center"};hf.ftr1=hfVon(kopf.footerf)||{on:false,text:"",align:"center"}}
   if(facing&&(kopf.headerl||kopf.footerl)){hf.geradeAnders=true;hf.hdr2=hfVon(kopf.headerl)||{on:false,text:"",align:"center"};hf.ftr2=hfVon(kopf.footerl)||{on:false,text:"",align:"center"}}
 
-  const fmt=formatAusMm(twipMm(seite.w),twipMm(seite.h),[twipMm(seite.o),twipMm(seite.r),twipMm(seite.u),twipMm(seite.l)],twipMm(seite.kh),twipMm(seite.kf));
+  /* WordPad schreibt kein Papierformat; dann gilt die eigene Voreinstellung
+     statt des US-Letter-Formats, das RTF ohne Angabe annimmt */
+  const fmt=papier?formatAusMm(twipMm(seite.w),twipMm(seite.h),[twipMm(seite.o),twipMm(seite.r),twipMm(seite.u),twipMm(seite.l)],twipMm(seite.kh),twipMm(seite.kf)):null;
   const erg={html:html||"<p><br></p>",fmt,font:grundF,size:Math.min(FS_MAX,Math.max(FS_MIN,Math.round(grundGr*2)/2)),fehlt,
     footnotes:fussnoten,endnotes:endnoten,kommentare,bilder:bildStat,...hf};
   const lh=meist(zab),ps=meist(nab);

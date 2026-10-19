@@ -166,6 +166,13 @@ immer genau einen Commit, der sie anfasst.
   Prüfdokument eine echte .doc, 33/42 — die neun fehlenden sind genau
   Bilder, Fußnoten und Kopf-/Fußzeile. Neu im Prüfdokument aller Modi: eine
   Zeile mit Umlauten, Polnisch, Griechisch, € und Anführungszeichen.
+  Mit Toms ersten echten Dateien geprüft (eine .doc mit Aufzählung,
+  Fußnote, Comic-Sans-Abschnitten; eine RTF aus WordPad): Text, Format,
+  Listen, Fußnote kamen an. Zwei Fehlalarme behoben: die ersten sechs
+  Teiltexte der Kopfzeilen sind die Trennlinien der Fußnoten — ein .doc mit
+  Fußnote meldete deshalb eine fehlende Kopfzeile; und eine RTF ohne
+  Papierangabe (WordPad schreibt keine) bekam US-Letter statt der eigenen
+  Voreinstellung.
   **Ausgebaut am selben Tag** (Toms „was fehlt noch“, alle vier Punkte):
   Bilder im Text (PICF im Data-Strom, JPEG/PNG/DIB aus den OfficeArt-
   Sätzen) und schwebende Bilder (FSPA plus Form-Eigenschaften — Word
