@@ -116,23 +116,25 @@ immer genau einen Commit, der sie anfasst.
   eigene Datei hat. Alles kommt mit, nur keine Dateiverknüpfung — sonst
   schriebe „Speichern“ in die Datei des Originals — und keine Zwischenstände
   (dokKopie, die der E-Book-Assistent jetzt mitbenutzt). Hilfe in 7 Sprachen.
-- **Dateiformat in der Statusleiste, .odt und .rtf bleiben beim Speichern,
-  was sie sind** (Toms Frage „sollte nicht unten das aktuelle Dateiformat
-  stehen?“, Variante B). Neben dem Dateinamen (jetzt ohne Endung) steht eine
-  Kennung DOCX, ODT oder RTF; die übrigen Angaben bleiben. Dateien, die
-  PureQuill nur lesen kann (.doc, .dot, .docm, .dotx, .dotm, .ott, .fodt),
-  zeigen wie Word „DOC · Kompatibilitätsmodus“ (bei schmalem Fenster nur
-  „DOC“), mit Tooltip; ein Klick speichert als .docx. Neu dazu, wie in
-  LibreOffice: eine geöffnete .odt oder .rtf schreibt „Speichern“ wieder in
-  ihr eigenes Format zurück (d.ziel.art), statt nach einer .docx zu fragen,
-  und „Speichern als › ODT/RTF“ macht die gewählte Datei zur Datei des
-  Dokuments wie bei Word. .docm bewusst nicht (Makros gingen verloren).
+- **Dateiformat in der Titelleiste, .odt und .rtf bleiben beim Speichern,
+  was sie sind** (Toms Frage „sollte nicht das aktuelle Dateiformat
+  stehen?“). Erst als Kennung DOCX/ODT/RTF in der Statusleiste gebaut — das
+  war Tom zu aufdringlich; jetzt wie in LibreOffice in der Titelleiste (Toms
+  Wahl „A“): der echte Dateiname mit Endung, „anschreiben.docx — PureQuill
+  Writer“, bei Formaten, die PureQuill nur lesen kann (.doc, .dot, .docm,
+  .dotx, .dotm, .ott, .fodt), wie in Word „Brief.doc [Kompatibilitätsmodus]“
+  (d.herkunft, d.herkunftName). Ohne Datei nur der Titel; Kopien tragen
+  keine Herkunft. Die Statusleiste zeigt wieder nur Punkt und Dateiname
+  einer verbundenen Datei. In der Browser-Fassung steht derselbe Text im
+  Browser-Reiter. Neu dazu, wie in LibreOffice: eine geöffnete .odt oder
+  .rtf schreibt „Speichern“ wieder in ihr eigenes Format zurück
+  (d.ziel.art), statt nach einer .docx zu fragen — ohne Schreibzugriff
+  (Drag & Drop, einfacher Dateidialog) fragt es im eigenen Format nach dem
+  Ort —, und „Speichern als › ODT/RTF“ macht die gewählte Datei zur Datei
+  des Dokuments wie bei Word. .docm bewusst nicht (Makros gingen verloren).
   Hilfe „Speichern als“ in 7 Sprachen ergänzt. Geprüft mit nachgestelltem
   Desktop-Schreibzugriff: .odt/.rtf/.docx kommen je im richtigen Format an,
-  Öffnen von .odt/.rtf setzt das Ziel, .docm zeigt den Kompatibilitätsmodus.
-  Die Kennung steht auch ohne Schreibzugriff da (Drag & Drop, einfacher
-  Dateidialog wie im eingebauten Browser der Claude-App — dort sah Tom sie
-  zuerst nicht); „Speichern“ fragt dann im Format der Herkunft nach dem Ort.
+  Öffnen von .odt/.rtf setzt das Ziel, .doc zeigt den Kompatibilitätsmodus.
   Dazu: die Statusleiste zeigt „Gesichert“ mit Uhrzeit auch nach einem
   Neustart (Zeitpunkt in localStorage, an einem anderen Tag mit Datum) —
   vorher stand bis zum ersten Sichern „Alles gesichert“ (Toms Hinweis).
