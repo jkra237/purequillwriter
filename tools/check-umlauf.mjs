@@ -8,6 +8,10 @@
  *          LibreOffice wandelt die .docx in .odt, die wird geöffnet.
  *   odt    Speichern als OpenDocument → öffnen. Mit LibreOffice zusätzlich:
  *          LibreOffice öffnet unsere .odt und speichert sie selbst neu.
+ *   doc    (nur mit LibreOffice) Speichern als Word → LibreOffice macht daraus
+ *          eine alte .doc (Word 97–2003), die öffnet der .doc-Leser. Bilder,
+ *          Fußnoten, Kopf-/Fußzeile liest er nicht — dort steht „-“, das ist
+ *          gewollt; alles andere soll ankommen.
  *   nativ  (nur mit LibreOffice) Webseiten-Export → LibreOffice macht daraus
  *          ein Writer-eigenes Dokument (andere Vorlagennamen als nach einer
  *          Umwandlung aus Word). Vieles geht schon über HTML verloren — hier
@@ -36,7 +40,7 @@ const SOFFICE = arg("--soffice") || ["C:/Program Files/LibreOffice/program/soffi
   "/usr/bin/soffice", "/usr/bin/libreoffice", "/Applications/LibreOffice.app/Contents/MacOS/soffice"].find(p => fs.existsSync(p)) || null;
 /* Eigenes LibreOffice-Profil, damit die Einstellungen des Nutzers unberührt bleiben */
 const PROFIL = "file:///" + path.join(aus, "lo-profil").split(path.sep).join("/");
-if (MODUS === "nativ" && !SOFFICE) { console.error("--modus nativ braucht LibreOffice (--soffice <pfad>)"); process.exit(2); }
+if ((MODUS === "nativ" || MODUS === "doc") && !SOFFICE) { console.error("--modus nativ/doc braucht LibreOffice (--soffice <pfad>)"); process.exit(2); }
 const bin = arg("--chrome") || process.env.CHROME || ["C:/Program Files/Google/Chrome/Application/chrome.exe",
   "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe", "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
   "C:/Program Files/Microsoft/Edge/Application/msedge.exe", "/usr/bin/google-chrome", "/usr/bin/chromium",
@@ -67,8 +71,8 @@ const ev = async x => { const r = await send("Runtime.evaluate", { expression: x
   if (r.result.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description || r.result.exceptionDetails.text); return r.result.result.value; };
 
 /* Wie gespeichert und wie zurückgelesen wird, je Modus */
-const SPEICHERN = { word: "await exportDoc()", odt: "blob=await odtBlob(doc())", nativ: "await exportHtml()" }[MODUS];
-const ENDUNG = { word: "docx", odt: "odt", nativ: "html" }[MODUS];
+const SPEICHERN = { word: "await exportDoc()", doc: "await exportDoc()", odt: "blob=await odtBlob(doc())", nativ: "await exportHtml()" }[MODUS];
+const ENDUNG = { word: "docx", doc: "docx", odt: "odt", nativ: "html" }[MODUS];
 const fang = `async()=>{let blob=null;const oZ=window.dateiZiel,oA=window.dateiAblegen;
   window.dateiZiel=async()=>null;window.dateiAblegen=async(n,b)=>{blob=b};
   try{${SPEICHERN}}finally{window.dateiZiel=oZ;window.dateiAblegen=oA}
@@ -102,6 +106,7 @@ try {
      +'<ul><li>Punkt<ul><li>Unterpunkt</li></ul></li></ul>'
      +'<h3>Abschnitt Drei</h3>'
      +'<h4>Abschnitt Vier</h4><p>Text unter vier.</p>'
+     +'<p>Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“</p>'
      +'<hr><p>Zwischen Linien.</p><hr data-linie="dick"><p>Zwischen Linien.</p><hr data-linie="doppelt"><p>Zwischen Linien.</p><hr data-linie="punkte">'
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
@@ -128,8 +133,9 @@ try {
     const zielOrdner = path.join(aus, "lo");
     const filter = MODUS === "nativ" ? ["--infilter=HTML (StarWriter)"] : [];
     try {
-      execFileSync(SOFFICE, ["-env:UserInstallation=" + PROFIL, "--headless", "--norestore", ...filter, "--convert-to", "odt:writer8", "--outdir", zielOrdner, eigen], { stdio: "ignore", timeout: 120000 });
-      fremd64 = (await fsp.readFile(path.join(zielOrdner, "pruefung.odt"))).toString("base64");
+      const zielFmt = MODUS === "doc" ? "doc:MS Word 97" : "odt:writer8", zielEnd = MODUS === "doc" ? "doc" : "odt";
+      execFileSync(SOFFICE, ["-env:UserInstallation=" + PROFIL, "--headless", "--norestore", ...filter, "--convert-to", zielFmt, "--outdir", zielOrdner, eigen], { stdio: "ignore", timeout: 120000 });
+      fremd64 = (await fsp.readFile(path.join(zielOrdner, "pruefung." + zielEnd))).toString("base64");
     } catch (e) { console.log("LibreOffice-Schritt gescheitert: " + e.message); }
   }
   const erg = await ev(`(async()=>{
@@ -141,7 +147,7 @@ try {
     const gerendert=r=>{if(!r||!r.html)return r;const alt=d0.html;ed0.innerHTML=r.html;umbrechen();const h=d0.html;
       d0.html=alt;ed0.innerHTML=alt;flush();return {...r,html:h}};
     const A=gerendert(${MODUS === "nativ" ? "null" : `await zipDokument("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`});
-    const B=gerendert(${fremd64 ? `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))` : "null"});
+    const B=gerendert(${fremd64 ? (MODUS === "doc" ? `docLesen(b(${JSON.stringify(fremd64)}))` : `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))`) : "null"});
     const merk=r=>{if(!r)return null;const t=document.createElement("div");t.innerHTML=r.html||"";const q=s=>t.querySelectorAll(s).length;
       const st=p=>[...t.querySelectorAll("[style]")].filter(e=>e.style[p]).length;
       return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"h4":q("h4"),"Titel/Untertitel":q('p[data-fv="titel"]')+"/"+q('p[data-fv="untertitel"]'),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
@@ -151,7 +157,7 @@ try {
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
        "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
-       "Tab im Text":q(".wtab"),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
+       "Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",
        "freies Bild":[...t.querySelectorAll("figure.free")].map(f=>"S"+(+f.dataset.fpage+1)+" "+f.dataset.fx+"/"+f.dataset.fy+" "+f.dataset.fw+"x"+f.dataset.fh+" "+(f.dataset.lage||"vor")).join(" ")||"-"}};
@@ -170,7 +176,7 @@ try {
   const { Q, A, B, Ahtml, Bhtml, fixpunkt } = JSON.parse(erg);
   await fsp.writeFile(path.join(aus, "import-a.html"), Ahtml || "");
   await fsp.writeFile(path.join(aus, "import-b.html"), Bhtml || "");
-  const kopfA = { word: "Word", odt: "PQ-ODT", nativ: "—" }[MODUS], kopfB = { word: "LO-ODT", odt: "LO neu gesp.", nativ: "LO-Writer" }[MODUS];
+  const kopfA = { word: "Word", doc: "Word", odt: "PQ-ODT", nativ: "—" }[MODUS], kopfB = { word: "LO-ODT", doc: "LO-.doc", odt: "LO neu gesp.", nativ: "LO-Writer" }[MODUS];
   const breite = Math.max(...Object.keys(Q).map(k => k.length));
   let aOk = 0, bOk = 0; const n = Object.keys(Q).length;
   console.log("      " + "Merkmal".padEnd(breite) + "  " + "Original".padEnd(26) + kopfA.padEnd(26) + kopfB);

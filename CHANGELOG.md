@@ -103,6 +103,57 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Alte Word-Dateien (.doc, Word 97–2003) öffnen** (Toms Frage, Stufe 1–3
+  gewählt): eigener Leser `docLesen()`, ohne Bibliothek, wie der
+  Word-Leser. Übernimmt Text samt Sonderzeichen (8-Bit- und Unicode-Stücke),
+  fett/kursiv/unterstrichen/durchgestrichen, hoch/tief, Schrift, Größe,
+  Farbe, Textmarker, Ausrichtung, Einzug, Überschriften 1–4, Titel,
+  Untertitel, die drei Zitate, Listen samt Art, Verschachtelung und Start,
+  Tabellen mit verbundenen Zellen, Links, Tabulatoren, Seitenumbrüche,
+  horizontale Linien und das Seitenformat; Grundschrift und -größe wie
+  beim Word-Leser aus dem häufigsten Fließtext. Nicht übernommen werden
+  Bilder, Fußnoten, Kopf-/Fußzeile und Kommentare — ein Hinweis nach dem
+  Öffnen nennt, was davon in der Datei war, und rät, sie in Word als .docx
+  zu speichern. Word 6/95 und kennwortgeschützte Dateien bekommen eine
+  eigene Meldung. Erkannt am Dateikopf, eine .doc mit RTF oder HTML darin
+  geht weiter den bisherigen Weg. Hilfe (7 Sprachen) sagt nicht mehr, .doc
+  sei nicht lesbar. `check-umlauf --modus doc`: LibreOffice macht aus dem
+  Prüfdokument eine echte .doc, 33/42 — die neun fehlenden sind genau
+  Bilder, Fußnoten und Kopf-/Fußzeile. Neu im Prüfdokument aller Modi: eine
+  Zeile mit Umlauten, Polnisch, Griechisch, € und Anführungszeichen.
+  **Ausgebaut am selben Tag** (Toms „was fehlt noch“, alle vier Punkte):
+  Bilder im Text (PICF im Data-Strom, JPEG/PNG/DIB aus den OfficeArt-
+  Sätzen) und schwebende Bilder (FSPA plus Form-Eigenschaften — Word
+  schreibt Umlauf und Bezug in die FSPA, LibreOffice nur in die Form:
+  0x03BF hinter dem Text, 0x038F/0x0390/0x0392 Ausrichtung und Bezug),
+  umflossen oder frei wie beim Word-Leser, Bildunterschrift in die Figur;
+  Fuß- und Endnoten; Kopf- und Fußzeile mit Feldern als Platzhalter und
+  abweichender erster Seite; Kommentare als Notizen mit Verfasser und
+  markiertem Bereich (über die Kommentar-Lesezeichen). Korrektheit:
+  verborgener Text und als gelöscht markierte Änderungen erscheinen nicht
+  mehr (angenommene Ansicht, wie der Word-Leser w:del weglässt),
+  Zeilen- und Absatzabstand der Datei, Spaltenbreiten der Tabellen. Nicht
+  übernommen nur noch WMF/EMF-Grafiken und Textfelder — der Hinweis nennt
+  sie. `--modus doc`: 42/42, also so viel wie der Word-Weg. Kommentare,
+  Endnote, verborgener Text, Änderungen, Abstände und Spaltenbreiten an
+  einer eigenen Testdatei (von Hand geschriebenes .fodt, von LibreOffice
+  zu .doc gewandelt) geprüft.
+  Nebenbei: ein frei platziertes Bild, das an einer horizontalen Linie
+  hing, machte die Linie beim Öffnen aus Word/ODT zum Absatz; jetzt steht
+  das Bild davor und die Linie bleibt.
+- **„Öffnen mit“ unter Windows** (Toms Fund): PureQuill Writer erschien
+  beim Rechtsklick auf eine .docx nicht unter „Öffnen mit“, weil das
+  Store-Paket nur .pqw als Dateityp anmeldete. Jetzt meldet es zusätzlich
+  .docx, .doc, .odt, .rtf, .md, .markdown und .txt an
+  (`desktop/build/appx-dateitypen.xml`, eingebunden über
+  `appx.customExtensionsPath`). Bewusst nicht über `fileAssociations`:
+  das gilt auch für den NSIS-Installer, und der schreibt sich als
+  Standardprogramm in die Registrierung — PureQuill hätte Word die .docx
+  weggenommen. Im Store-Paket heißt die Anmeldung nur „kann öffnen“, das
+  Standardprogramm bleibt, wie es ist. Öffnen selbst konnte die App schon
+  (`dateienAus`/`desktopDateienLaden`). Wirkt erst mit dem nächsten
+  Store-Paket; Testbau geprüft (makeappx nimmt das Manifest an).
+  Seit dem .doc-Leser (unten) gehört auch .doc dazu.
 - **Horizontale Linie wie in Word** (Toms Wunsch): „---“, „___“, „===“
   oder „***“ allein im Absatz und Eingabe ergeben eine dünne, dicke,
   doppelte bzw. gepunktete Linie (Words AutoFormat „Rahmenlinien“). Der

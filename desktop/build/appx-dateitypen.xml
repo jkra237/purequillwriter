@@ -3,6 +3,7 @@
             <uap:FileTypeAssociation Name="dokumente">
               <uap:SupportedFileTypes>
                 <uap:FileType>.docx</uap:FileType>
+                <uap:FileType>.doc</uap:FileType>
                 <uap:FileType>.odt</uap:FileType>
                 <uap:FileType>.rtf</uap:FileType>
                 <uap:FileType>.md</uap:FileType>
