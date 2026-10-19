@@ -102,6 +102,7 @@ try {
      +'<ul><li>Punkt<ul><li>Unterpunkt</li></ul></li></ul>'
      +'<h3>Abschnitt Drei</h3>'
      +'<h4>Abschnitt Vier</h4><p>Text unter vier.</p>'
+     +'<hr><p>Zwischen Linien.</p><hr data-linie="dick"><p>Zwischen Linien.</p><hr data-linie="doppelt"><p>Zwischen Linien.</p><hr data-linie="punkte">'
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
      +'<blockquote><p>Ein Zitat.</p></blockquote>'
@@ -149,7 +150,7 @@ try {
        "ol":q("ol"),"ul":q("ul"),"ol verschachtelt":q("ol ol"),"li":q("li"),"ol start":q("ol[start]"),
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
-       "Zitat":q("blockquote"),"Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
+       "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Tab im Text":q(".wtab"),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",

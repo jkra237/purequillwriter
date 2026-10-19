@@ -103,6 +103,20 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Horizontale Linie wie in Word** (Toms Wunsch): „---“, „___“, „===“
+  oder „***“ allein im Absatz und Eingabe ergeben eine dünne, dicke,
+  doppelte bzw. gepunktete Linie (Words AutoFormat „Rahmenlinien“). Der
+  Gedankenstrich der Autokorrektur (-- → —) zählt als zwei Bindestriche,
+  sonst käme „---“ nie an. Strg+Z direkt danach bringt die Zeichen zurück.
+  Abschaltbar unter Einstellungen › Beim Tippen › Linien. Zusätzlich
+  Einfügen › Horizontale Linie (Kontextmenü), Befehlspalette und
+  Schrägstrich-Menü — „Trennlinie“ ist schon das Füllzeichen im
+  Inhaltsverzeichnis, darum der Name aus Google Docs. Im Dokument
+  `<hr data-linie>`; in Word wie dort ein leerer Absatz mit unterem Rand
+  (`w:pBdr`), in ODT `fo:border-bottom`, beim Öffnen beider wieder eine
+  Linie (auch aus Writer, das `fo:border-top="none"` mitschreibt).
+  Markdown `---` hin und zurück, Text 40 Bindestriche. `check-umlauf` mit
+  allen vier Arten: Word, ODT und LibreOffice 41/41.
 - **Titel, Untertitel und Überschrift 4** (Toms Frage nach fehlenden
   Formatvorlagen; Word, Google Docs und LibreOffice haben alle Titel und
   Untertitel). Titel und Untertitel sind Absätze mit Vorlage

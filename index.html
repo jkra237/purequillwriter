@@ -607,6 +607,14 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 /* Überschrift 4 wie in Word kursiv, in Grundgröße (seit 2026-10-17) */
 :is(#editor,.pvedit) h4{font-size:1em;font-weight:600;font-style:italic;margin:1em 0 .3em}
 :is(#editor,.pvedit) p{margin:0 0 var(--ps,.82em)}
+/* Horizontale Linie (seit 2026-10-19): wie Words Rahmenlinie aus „---“,
+   „___“, „===“, „***“ + Eingabe, oder Einfügen › Horizontale Linie.
+   Ohne data-linie dünn, sonst dick, doppelt oder gepunktet. In Word ein
+   leerer Absatz mit unterem Rand, so wird sie auch gespeichert. */
+:is(#editor,.pvedit,.rinner) hr{height:0;border:0;border-top:1px solid var(--ink);margin:.5em 0 var(--ps,.82em)}
+:is(#editor,.pvedit,.rinner) hr[data-linie="dick"]{border-top-width:3px}
+:is(#editor,.pvedit,.rinner) hr[data-linie="doppelt"]{border-top:3px double var(--ink)}
+:is(#editor,.pvedit,.rinner) hr[data-linie="punkte"]{border-top:2px dotted var(--ink)}
 /* Titel und Untertitel wie in Word und Google Docs: Absätze mit eigener
    Vorlage (data-fv), keine Überschriften — sie zählen nicht in Gliederung
    und Inhaltsverzeichnis, wie Words „Titel“ ohne Gliederungsebene. Größe
@@ -2322,6 +2330,9 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Horizontale Linie":"Horizontal line",
+  "Linien":"Lines",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"“---” and Enter draws a line, as do ___, === and ***",
   "Datei":"File",
   "Ansicht":"View",
   "Tools":"Tools",
@@ -3193,6 +3204,9 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Horizontale Linie":"Ligne horizontale",
+  "Linien":"Lignes",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"« --- » et Entrée tracent une ligne, de même ___, === et ***",
   "Datei":"Fichier",
   "Ansicht":"Affichage",
   "Tools":"Outils",
@@ -4064,6 +4078,9 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Horizontale Linie":"Línea horizontal",
+  "Linien":"Líneas",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"«---» e Intro trazan una línea, igual que ___, === y ***",
   "Datei":"Archivo",
   "Ansicht":"Vista",
   "Tools":"Herramientas",
@@ -4935,6 +4952,9 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Horizontale Linie":"Linha horizontal",
+  "Linien":"Linhas",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"“---” e Enter traçam uma linha, assim como ___, === e ***",
   "Datei":"Arquivo",
   "Ansicht":"Exibir",
   "Tools":"Ferramentas",
@@ -5806,6 +5826,9 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Horizontale Linie":"Linia pozioma",
+  "Linien":"Linie",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"„---” i Enter rysują linię, podobnie ___, === i ***",
   "Datei":"Plik",
   "Ansicht":"Widok",
   "Tools":"Narzędzia",
@@ -6677,6 +6700,9 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Horizontale Linie":"Linea orizzontale",
+  "Linien":"Linee",
+  "„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***":"«---» e Invio tracciano una linea, così come ___, === e ***",
   "Datei":"File",
   "Ansicht":"Vista",
   "Tools":"Strumenti",
@@ -7844,9 +7870,9 @@ if(S.settings&&S.settings.tofEnabled===undefined)S.settings.tofEnabled=false;
    wieder auf verbunden setzen, statt Verbundenheit zu behaupten. */
 if(S.autoBackup&&typeof S.autoBackup!=="object")delete S.autoBackup;
 if(S.autoBackup){S.autoBackup.lose=true;if(!S.autoBackup.jede&&S.autoBackup.jede!==0)S.autoBackup.jede=900}
-if(S.settings&&!S.settings.autoc)S.settings.autoc={quotes:true,dash:true,cap:true,lists:true};
+if(S.settings&&!S.settings.autoc)S.settings.autoc={quotes:true,dash:true,cap:true,lists:true,linien:true};
 if(S.settings&&!S.settings.histSpan)S.settings.histSpan=604800;
-if(S.settings&&S.settings.autoc)["quotes","dash","cap","lists"].forEach(k=>{
+if(S.settings&&S.settings.autoc)["quotes","dash","cap","lists","linien"].forEach(k=>{
   if(S.settings.autoc[k]===undefined)S.settings.autoc[k]=true});
 if(S.settings&&!S.settings.unit)S.settings.unit="mm";
 /* Das Intervall war früher frei eintippbar (5–600 s) und ist jetzt eine feste
@@ -8310,6 +8336,8 @@ function drawWrite(){
     }
     if(acGross&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
       &&acGrossZuruecknehmen()){e.preventDefault();return}
+    if(acLinie&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
+      &&acLinieZuruecknehmen()){e.preventDefault();return}
     if(acListe&&(e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==="z"
       &&acListeZuruecknehmen()){e.preventDefault();return}
     if(e.key==="Backspace"&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&listenPunktWeg()){e.preventDefault();return}
@@ -8327,6 +8355,7 @@ function drawWrite(){
            wie Words „Formatvorlage für Folgeabsatz“. Chrome würde den
            Absatz samt data-fv klonen. In der Mitte geteilt bleiben beide
            Hälften Titel, auch wie in Word. */
+        if(acLinieEnter(ed,sel)){e.preventDefault();return}
         const fvp=n&&ed.contains(n)?n.closest("p[data-fv]"):null;
         if(fvp){
           const rr=document.createRange();rr.selectNodeContents(fvp);rr.setStart(sel.getRangeAt(0).endContainer,sel.getRangeAt(0).endOffset);
@@ -10048,6 +10077,8 @@ function mdBlocks(root,fnNum,depth){
     if(el.hasAttribute&&el.hasAttribute("data-toc"))return;
     if(/^h[1-6]$/.test(tag)){
       const s=mdInline(el,fnNum).trim();if(s)out.push("#".repeat(+tag[1])+" "+s);
+    }else if(tag==="hr"){
+      out.push("---");
     }else if(tag==="blockquote"){
       const inner=el.querySelector("p,ul,ol,blockquote,h1,h2,h3,h4")
         ? mdBlocks(el,fnNum,0).join("\n\n") : mdInline(el,fnNum).trim();
@@ -10142,6 +10173,8 @@ function txtBlocks(root,fnNum,depth){
       if(tag==="h1")out.push(s+"\n"+"=".repeat(Math.min(s.length,60)));
       else if(tag==="h2")out.push(s+"\n"+"-".repeat(Math.min(s.length,60)));
       else out.push(s);
+    }else if(tag==="hr"){
+      out.push("-".repeat(40));
     }else if(tag==="blockquote"){
       const inner=el.querySelector("p,ul,ol,blockquote")
         ? txtBlocks(el,fnNum,0).join("\n\n") : txtInline(el,fnNum);
@@ -10204,6 +10237,8 @@ h1,h2,h3,h4,h5,h6{font-weight:600;line-height:1.25;margin:1.1em 0 .4em}
 h1{font-size:1.7em}h2{font-size:1.32em}h3{font-size:1.12em}h4{font-size:1em;font-style:italic}
 p[data-fv="titel"]{font-size:2.3em;line-height:1.15;letter-spacing:-.01em;margin:0 0 .2em}
 p[data-fv="untertitel"]{font-size:1.3em;color:${soft};margin:0 0 1em}
+hr{height:0;border:0;border-top:1px solid ${ink};margin:.5em 0 ${ps}em}
+hr[data-linie="dick"]{border-top-width:3px}hr[data-linie="doppelt"]{border-top:3px double ${ink}}hr[data-linie="punkte"]{border-top:2px dotted ${ink}}
 p{margin:0 0 ${ps}em}
 a{color:${stamp};text-underline-offset:2px}
 img{max-width:100%;height:auto}
@@ -10506,6 +10541,7 @@ function commandList(){
   fmtCmd("Blocksatz",kz("blocksatz"),()=>document.execCommand("justifyFull"));
   fmtCmd("Link einfügen oder bearbeiten…",kz("link"),linkDialog);
   fmtCmd("Seitenumbruch einfügen",kz("umbruch"),insertPageBreak);
+  fmtCmd("Horizontale Linie","",()=>linieEinfuegen(""));
   fmtCmd("Fußnote einfügen","",insertFootnote);
   fmtCmd("Endnote einfügen","",insertEndnote);
   fmtCmd("Inhaltsverzeichnis einfügen",kz("toc"),insertToc);
@@ -11184,6 +11220,11 @@ async function walkBlocks(root,ctx){
         const jc=jcVon(t)||jcVon(el);
         xml+=absatzZuXml(absatzXml(t,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx),ctx);
       }
+    }else if(tag==="hr"){
+      /* Wie Word sie aus „---“ macht: ein leerer Absatz mit unterem Rand */
+      const k=el.getAttribute("data-linie")||"";
+      const b=k==="doppelt"?'w:val="double" w:sz="6"':k==="punkte"?'w:val="dotted" w:sz="12"':k==="dick"?'w:val="single" w:sz="18"':'w:val="single" w:sz="6"';
+      xml+=`<w:p><w:pPr><w:pBdr><w:bottom ${b} w:space="1" w:color="auto"/></w:pBdr></w:pPr></w:p>`;
     }else if(tag==="p"&&el.dataset&&el.dataset.fv){
       /* Titel/Untertitel als Words eingebaute Vorlagen „Title“/„Subtitle“ */
       const jc=jcVon(el),sid=el.dataset.fv==="titel"?"Title":"Subtitle";
@@ -11938,6 +11979,10 @@ async function odtBlob(d){
         const vorlage=qs==="toent"?"Intense_20_Quote":qs==="typo"?"PQ_20_Zitat_20_typografisch":"Quotations";
         const teile=el.querySelector(":scope > p, :scope > div")?[...el.children]:[el];
         for(const t of teile)x+=absatz(t,[ausr(jcVon(t)||jcVon(el))],vorlage);
+      }else if(tag==="hr"){
+        const k=el.getAttribute("data-linie")||"";
+        const rand=k==="doppelt"?"1.1pt double #000000":k==="punkte"?"1pt dotted #000000":k==="dick"?"2.2pt solid #000000":"0.5pt solid #000000";
+        x+=absatz(el,[`fo:border-bottom="${rand}"`,'fo:padding-bottom="0.05cm"'],"Standard");
       }else if(tag==="p"&&el.dataset&&el.dataset.fv){
         x+=absatz(el,[ausr(jcVon(el))],el.dataset.fv==="titel"?"Title":"Subtitle");
       }else if(tag==="p"||tag==="div"){
@@ -12184,6 +12229,8 @@ h4{font-size:1em;font-style:italic;margin:1em 0 .3em}
 p{margin:0 0 .7em}
 p[data-fv="titel"]{font-size:2em;line-height:1.15;margin:0 0 .2em}
 p[data-fv="untertitel"]{font-size:1.25em;margin:0 0 1em}
+hr{height:0;border:0;border-top:1px solid;margin:.5em 0 .7em}
+hr[data-linie="dick"]{border-top-width:3px}hr[data-linie="doppelt"]{border-top:3px double}hr[data-linie="punkte"]{border-top:2px dotted}
 blockquote{margin:1em 2em;font-style:italic;text-align:center}
 blockquote[data-qs="toent"]{margin:1.4em 2em;padding:.6em 0;border-top:1px solid;border-bottom:1px solid}
 blockquote[data-qs="typo"]{margin:1em 0 1em 1.6em;text-align:left}
@@ -12649,6 +12696,7 @@ function mdToHtml(src){
       out+=`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`;return}
     if(/^\s*(---+|\*\*\*+|___+)\s*$/.test(l)){absatzZu();listeZu();
       out+='<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div>';return}
+    if(/^\s*([-*_])(\s*\1){2,}\s*$/.test(l)){absatzZu();listeZu();out+="<hr>";return}
     if(m=/^\s*[-*+]\s+(.*)$/.exec(l)){absatzZu();
       if(liste!=="ul"){listeZu();out+="<ul>";liste="ul"}out+="<li>"+inline(m[1])+"</li>";return}
     if(m=/^\s*\d+[.)]\s+(.*)$/.exec(l)){absatzZu();
@@ -14663,6 +14711,17 @@ function docxLauf(p,ktx,innen){
 
 const DOCX_SEITENMARKE="";
 const seitenumbruchHtml=()=>'<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div>';
+/* Horizontale Linie: "" dünn, "dick", "doppelt", "punkte" */
+const linieHtml=k=>"<hr"+(k?' data-linie="'+k+'"':"")+">";
+/* Unterer Absatzrand eines Word-Absatzes als Linienart, null ohne Rand.
+   Ein Rand auch oben ist ein Kasten, keine Linie. */
+function docxLinie(pr){
+  const bdr=KIND(pr,"pBdr");if(!bdr||KIND(bdr,"top"))return null;
+  const b=KIND(bdr,"bottom");if(!b)return null;
+  const val=String(xattrN(b,"val")||"");if(!val||val==="none"||val==="nil")return null;
+  const sz=parseInt(xattrN(b,"sz"),10)||4;
+  return val==="double"?"doppelt":/dot|dash/i.test(val)?"punkte":(sz>=12||/thick/i.test(val))?"dick":"";
+}
 function docxToHtml(xml,stilXml,numXml,zubehoer){
   const dom=new DOMParser().parseFromString(xml,"application/xml");
   if(dom.querySelector("parsererror"))return null;
@@ -14713,6 +14772,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
     const numPr=KIND(pr,"numPr");
+    /* Leerer Absatz mit nur unterem Rand: Words Linie aus „---“ */
+    if(!numPr&&!h&&!art&&!wa&&!inhalt.replace(/<br\s*\/?>/g,"").trim()){
+      const lin=docxLinie(pr);
+      if(lin!==null){alleZu();out+=linieHtml(lin);return}
+    }
     if(numPr){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
       const ilvl=Math.max(0,Math.min(8,parseInt(xattrN(KIND(numPr,"ilvl"),"val"),10)||0));
@@ -15107,6 +15171,7 @@ function odfAbsatzEig(pp){
   if(a)o.al=a==="center"?"center":a==="end"||a==="right"?"right":a==="justify"?"justify":"";
   const ml=g("fo:margin-left");if(ml!=null){const v=odfPt(ml);if(v!=null)o.ml=v}
   const ti=g("fo:text-indent");if(ti!=null){const v=odfPt(ti);if(v!=null)o.ti=v}
+  const rb=g("fo:border-bottom"),rt=g("fo:border-top");if(rb!=null&&(!rt||rt==="none"))o.randUnten=rb;
   const bb=g("fo:break-before"),ba=g("fo:break-after");
   if(bb)o.umbVor=bb==="page";
   if(ba)o.umbNach=ba==="page";
@@ -15418,6 +15483,14 @@ function odtLesen(inhaltXml,stilXml,bilder){
     if(pe.umbVor)out+=seitenumbruchHtml();
     let inhalt=absatzLauf(p,{basis,stufe});
     const al=pe.al||"";
+    /* Leerer Absatz mit unterem Rand: eine horizontale Linie (so legt sie
+       auch Writers Autokorrektur aus „---“ an) */
+    if(pe.randUnten&&pe.randUnten!=="none"&&!stufe&&!art&&!inhalt.replace(/<br\s*\/?>/g,"").trim()){
+      const r=pe.randUnten,w=odfPt(r.trim().split(/\s+/)[0])||0;
+      out+=linieHtml(/double/.test(r)?"doppelt":/dotted|dashed/.test(r)?"punkte":w>=1.5?"dick":"");
+      if(pe.umbNach)out+=seitenumbruchHtml();
+      return;
+    }
     /* Umflossene und freie Bilder stehen vor ihrem Absatz, der Absatz
        bleibt, was er ist (wie beim Word-Leser) */
     const anker=inhalt.match(/<figure class="fig (umfl|free)"[\s\S]*?<\/figure>/g);
@@ -16647,6 +16720,7 @@ function contextMenu(e){
         {a:"img",label:tr("Bild einfügen")},
         ...(cell?[]:[{a:"tblNew",label:tr("Tabelle einfügen")}]),
         {a:"pgbr",label:tr("Seitenumbruch einfügen"),k:"Alt ⇧ ⏎"},
+        {a:"hr",label:tr("Horizontale Linie")},
         {a:"fn",label:tr("Fußnote einfügen")},
         {a:"en",label:tr("Endnote einfügen")}
       ];
@@ -16734,6 +16808,7 @@ function insertAct(a){
   if(a==="img")pickImage();
   if(a==="tblNew")setTimeout(tablePicker,10);
   if(a==="pgbr")insertPageBreak();
+  if(a==="hr")linieEinfuegen("");
   if(a==="fn")insertFootnote();
   if(a==="en")insertEndnote();
 }
@@ -19552,6 +19627,59 @@ function linkDialog(){
     finish();
   };
 }
+/* Einfügen › Horizontale Linie: hinter dem Absatz der Schreibmarke, ein
+   leerer Absatz wird selbst zur Linie; danach steht die Marke in einem
+   Absatz unter der Linie. */
+function linieEinfuegen(k){
+  const ed=$("#editor");if(S.mode!=="write"||!ed)return;
+  ed.focus();
+  const sel=getSelection();
+  let b=sel.rangeCount?sel.getRangeAt(0).startContainer:null;
+  while(b&&b.parentElement!==ed)b=b.parentElement;
+  const tmp=document.createElement("div");tmp.innerHTML=linieHtml(k||"");const hr=tmp.firstChild;
+  let p;
+  if(b&&b.tagName==="P"&&!b.textContent.trim()&&!b.querySelector("img")){b.replaceWith(hr);p=document.createElement("p");p.innerHTML="<br>";hr.after(p)}
+  else{
+    if(b)b.after(hr);else ed.appendChild(hr);
+    p=hr.nextElementSibling;
+    if(!p||p.tagName!=="P"||p.textContent.trim()){p=document.createElement("p");p.innerHTML="<br>";hr.after(p)}
+  }
+  const r=document.createRange();r.selectNodeContents(p);r.collapse(true);sel.removeAllRanges();sel.addRange(r);
+  flush();dirty=true;commit();queuePaginate();drawStatus();
+}
+/* „---“, „___“, „===“ oder „***“ allein im Absatz + Eingabe → Linie, wie
+   Words AutoFormat „Rahmenlinien“. Der Gedankenstrich der Autokorrektur
+   (-- → —) zählt als zwei Bindestriche, sonst käme „---“ nie an. */
+const AC_LINIE={"-":"","_":"dick","=":"doppelt","*":"punkte"};
+let acLinie=null;
+function acLinieEnter(ed,sel){
+  const a=S.settings.autoc;if(!a||!a.linien)return false;
+  let b=sel.getRangeAt(0).startContainer;
+  while(b&&b.parentElement!==ed)b=b.parentElement;
+  if(!b||b.tagName!=="P"||b.hasAttribute("data-fv"))return false;
+  const t=b.textContent.replace(/[—–]/g,"--").replace(/ /g," ").trim();
+  const m=/^(-{3,}|_{3,}|={3,}|\*{3,})$/.exec(t);if(!m)return false;
+  const rr=document.createRange();rr.selectNodeContents(b);rr.setStart(sel.getRangeAt(0).endContainer,sel.getRangeAt(0).endOffset);
+  if(rr.toString().trim())return false;
+  const alt=b.cloneNode(true);
+  const tmp=document.createElement("div");tmp.innerHTML=linieHtml(AC_LINIE[m[1][0]]);const hr=tmp.firstChild;
+  const p=document.createElement("p");p.innerHTML="<br>";
+  b.replaceWith(hr,p);
+  const r=document.createRange();r.selectNodeContents(p);r.collapse(true);sel.removeAllRanges();sel.addRange(r);
+  acLinie={hr,p,alt};
+  dirty=true;drawStatus();queuePaginate();syncToolbarState();
+  return true;
+}
+/* Strg+Z direkt danach: die getippten Zeichen kommen zurück, wie in Word */
+function acLinieZuruecknehmen(){
+  const g=acLinie;acLinie=null;
+  const sel=getSelection();
+  if(!g||!g.hr.isConnected||!g.p.isConnected||g.p.textContent||!sel.rangeCount||!g.p.contains(sel.anchorNode))return false;
+  g.p.remove();g.hr.replaceWith(g.alt);
+  const r=document.createRange();r.selectNodeContents(g.alt);r.collapse(false);sel.removeAllRanges();sel.addRange(r);
+  dirty=true;drawStatus();queuePaginate();
+  return true;
+}
 function insertPageBreak(){
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   ed.focus();
@@ -21630,7 +21758,7 @@ function autoCorrectInput(e){
   pgspaltUmgehen(e);
   const a=S.settings.autoc;
   if(!a||slashOn)return;
-  acListe=null;
+  acListe=null;acLinie=null;
   const z=acZurueck;acZurueck=null;
   const g=acGross;
   if(g&&/^delete/.test(e.inputType)){
@@ -21934,6 +22062,7 @@ const SLASH=[
   {n:"Nummerierung",k:"liste nummer ordered numbered",f:()=>listeUmschalten("insertOrderedList")},
   {n:"Tabelle",k:"tabelle table raster tabla tabela tableau tabella",f:()=>setTimeout(tablePicker,20)},
   {n:"Seitenumbruch",k:"umbruch seite break page salto quebra saut podział interruzione",f:insertPageBreak},
+  {n:"Horizontale Linie",k:"linie trennlinie strich horizontal line rule ligne línea linha linia linea",f:()=>linieEinfuegen("")},
   {n:"Bild",k:"bild foto grafik image picture imagen imagem obraz immagine",f:pickImage},
   {n:"Link",k:"link url verweis",f:()=>setTimeout(linkDialog,20)},
   {n:"Notiz anheften",k:"notiz kommentar anker note pin",f:()=>setTimeout(linkSelection,20)},
@@ -22926,7 +23055,7 @@ function history(){
 let setTab="allg";
 function settings(){
   const s=S.settings;
-  const a=s.autoc||(s.autoc={quotes:true,dash:true,cap:true,lists:true});
+  const a=s.autoc||(s.autoc={quotes:true,dash:true,cap:true,lists:true,linien:true});
   /* Seit 1.2 eine Seitenleiste wie im Optionsdialog von OpenOffice und Word:
      „Allgemein“ trug bis dahin auch die Vorgaben für neue Dokumente und
      musste gerollt werden. Jeder Bereich passt jetzt ohne Rollen, die Fläche
@@ -22986,6 +23115,7 @@ function settings(){
         `<button class="pill" data-acx="${i}" title="${tr("Entfernen")}">${esc(w)}. ✕</button>`).join("")}</div>`:""}
       <span style="color:var(--ink-soft);font-size:12px;line-height:1.45">${tr("Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.")}</span></div>`)}
     ${zeile(tr("Listen"),haken("acLists",a.lists,tr("„- “ oder „1. “ am Zeilenanfang beginnt eine Liste")))}
+    ${zeile(tr("Linien"),haken("acLinien",a.linien,tr("„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***")))}
     <div class="setrow" style="border-bottom:none;padding-top:2px">
       <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
         ${tr("Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).")}</label></div>`;
@@ -23086,11 +23216,11 @@ function settings(){
     s.typewriter=v("sTw",s.typewriter);s.dimUi=v("sDim",s.dimUi);s.tofEnabled=v("sTof",s.tofEnabled);
     if(!s.dimUi)document.body.classList.remove("typing");
     a.quotes=v("acQuotes",a.quotes);a.dash=v("acDash",a.dash);
-    a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);
+    a.cap=v("acCap",a.cap);a.lists=v("acLists",a.lists);a.linien=v("acLinien",a.linien);
     save();resetTimer();applyTheme();applyStaticLabels();render();
     if(langChanged)settings()};
   ["sFont","sSize","sLh","sPs","sFmt","sUnit","sInt","sSpan","sLang","sUiLang","sTw","sDim","sTof","sName",
-   "acQuotes","acDash","acCap","acLists"]
+   "acQuotes","acDash","acCap","acLists","acLinien"]
     .forEach(id=>{const e=$("#"+id);if(e)e.onchange=app});
   $("#ovl").querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{
     setTab=b.dataset.tab;settings()});
@@ -23670,6 +23800,7 @@ individually under <b>Settings &rsaquo; AutoCorrect</b>.</p>
 <tr><td><b>Dash</b></td><td>Two hyphens become a dash.</td></tr>
 <tr><td><b>Capitalisation</b></td><td>The first letter of a sentence is capitalised, but not after abbreviations such as “e.g.” or “etc.”. If you turn the capital back to lowercase with Backspace or Ctrl+Z, it stays that way, and the program remembers the word before the full stop. You can remove learned words under Settings → AutoCorrect.</td></tr>
 <tr><td><b>Lists</b></td><td><code>- </code> or <code>1. </code> starts a list.</td></tr>
+<tr><td><b>Lines</b></td><td><code>---</code> and <kbd>Enter</kbd> draws a line; <code>___</code> thick, <code>===</code> double, <code>***</code> dotted.</td></tr>
 </table>
 <p>Which quotation marks are used follows the <b>spelling language</b>, not the language of
 the menus — German and Polish open low, French and Spanish use guillemets, English and
@@ -24255,6 +24386,7 @@ sich einzeln unter <b>Einstellungen &rsaquo; Autokorrektur</b> abschalten.</p>
 <tr><td><b>Gedankenstrich</b></td><td>Zwei Bindestriche werden zu einem Gedankenstrich.</td></tr>
 <tr><td><b>Großschreibung</b></td><td>Der erste Buchstabe eines Satzes wird groß, nicht aber nach Abkürzungen wie „z. B.“ oder „bzw.“. Machst du den Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, bleibt er klein, und das Programm merkt sich das Wort vor dem Punkt. Gelernte Wörter lassen sich unter Einstellungen → Autokorrektur wieder entfernen.</td></tr>
 <tr><td><b>Listen</b></td><td><code>- </code> oder <code>1. </code> beginnt eine Liste.</td></tr>
+<tr><td><b>Linien</b></td><td><code>---</code> und <kbd>Eingabe</kbd> zieht eine Linie; <code>___</code> dick, <code>===</code> doppelt, <code>***</code> gepunktet.</td></tr>
 </table>
 <p>Welche Anführungszeichen gesetzt werden, richtet sich nach der <b>Rechtschreibsprache</b>,
 nicht nach der Sprache der Menüs — Deutsch und Polnisch öffnen unten, Französisch und Spanisch
@@ -24861,6 +24993,7 @@ desactivar por separado en <b>Configuración &rsaquo; Autocorrección</b>.</p>
 <tr><td><b>Raya</b></td><td>Dos guiones se vuelven una raya.</td></tr>
 <tr><td><b>Mayúsculas</b></td><td>La primera letra de una frase se pone en mayúscula, pero no después de abreviaturas como «p. ej.» o «etc.». Si vuelves a ponerla en minúscula con Retroceso o Ctrl+Z, se queda así, y el programa recuerda la palabra anterior al punto. Las palabras aprendidas se pueden quitar en Configuración → Autocorrección.</td></tr>
 <tr><td><b>Listas</b></td><td><code>- </code> o <code>1. </code> empieza una lista.</td></tr>
+<tr><td><b>Líneas</b></td><td><code>---</code> e <kbd>Intro</kbd> traza una línea; <code>___</code> gruesa, <code>===</code> doble, <code>***</code> punteada.</td></tr>
 </table>
 <p>Qué comillas se usan depende del <b>idioma de ortografía</b>, no del idioma de los menús: el
 alemán y el polaco abren abajo, el francés y el español usan comillas angulares, el inglés y el
@@ -25470,6 +25603,7 @@ desligadas individualmente em <b>Configurações &rsaquo; Correção automática
 <tr><td><b>Travessão</b></td><td>Dois hifens viram um travessão.</td></tr>
 <tr><td><b>Maiúsculas</b></td><td>A primeira letra de uma frase fica maiúscula, mas não depois de abreviações como “p. ex.” ou “etc.”. Se você voltar a maiúscula para minúscula com Backspace ou Ctrl+Z, ela fica assim, e o programa memoriza a palavra antes do ponto. As palavras aprendidas podem ser removidas em Configurações → Correção automática.</td></tr>
 <tr><td><b>Listas</b></td><td><code>- </code> ou <code>1. </code> começa uma lista.</td></tr>
+<tr><td><b>Linhas</b></td><td><code>---</code> e <kbd>Enter</kbd> traça uma linha; <code>___</code> grossa, <code>===</code> dupla, <code>***</code> pontilhada.</td></tr>
 </table>
 <p>Quais aspas são usadas segue o <b>idioma de ortografia</b>, não o idioma dos menus: alemão e
 polonês abrem embaixo, francês e espanhol usam aspas angulares, inglês e português usam aspas
@@ -26085,6 +26219,7 @@ automatique</b>.</p>
 <tr><td><b>Tiret</b></td><td>Deux traits d'union deviennent un tiret.</td></tr>
 <tr><td><b>Majuscules</b></td><td>La première lettre d'une phrase est mise en majuscule, mais pas après une abréviation comme « p. ex. » ou « etc. ». Si vous remettez la majuscule en minuscule avec Retour arrière ou Ctrl+Z, elle reste ainsi, et le programme retient le mot avant le point. Les mots appris peuvent être retirés dans Paramètres → Correction automatique.</td></tr>
 <tr><td><b>Listes</b></td><td><code>- </code> ou <code>1. </code> commence une liste.</td></tr>
+<tr><td><b>Lignes</b></td><td><code>---</code> et <kbd>Entrée</kbd> trace une ligne ; <code>___</code> épaisse, <code>===</code> double, <code>***</code> pointillée.</td></tr>
 </table>
 <p>Les guillemets utilisés suivent la <b>langue d'orthographe</b>, pas la langue des menus :
 l'allemand et le polonais ouvrent en bas, le français et l'espagnol utilisent les chevrons,
@@ -26697,6 +26832,7 @@ można je wyłączyć osobno w <b>Ustawienia &rsaquo; Autokorekta</b>.</p>
 <tr><td><b>Myślnik</b></td><td>Dwa dywizy stają się myślnikiem.</td></tr>
 <tr><td><b>Wielkie litery</b></td><td>Pierwsza litera zdania jest zamieniana na wielką, ale nie po skrótach takich jak „np.” czy „itd.”. Jeśli zamienisz wielką literę z powrotem na małą klawiszem Backspace lub Ctrl+Z, zostanie mała, a program zapamięta słowo przed kropką. Zapamiętane słowa można usunąć w Ustawienia → Autokorekta.</td></tr>
 <tr><td><b>Listy</b></td><td><code>- </code> lub <code>1. </code> rozpoczyna listę.</td></tr>
+<tr><td><b>Linie</b></td><td><code>---</code> i <kbd>Enter</kbd> rysuje linię; <code>___</code> grubą, <code>===</code> podwójną, <code>***</code> kropkowaną.</td></tr>
 </table>
 <p>To, których cudzysłowów się używa, zależy od <b>języka pisowni</b>, nie od języka menu —
 niemiecki i polski otwierają na dole, francuski i hiszpański używają cudzysłowów ostrokątnych,
@@ -27297,6 +27433,7 @@ possono disattivare singolarmente in <b>Impostazioni &rsaquo; Correzione automat
 <tr><td><b>Lineetta</b></td><td>Due trattini diventano una lineetta.</td></tr>
 <tr><td><b>Maiuscole</b></td><td>La prima lettera di una frase viene messa in maiuscolo, ma non dopo abbreviazioni come «ad es.» o «ecc.». Se la riporti in minuscolo con Backspace o Ctrl+Z, resta così, e il programma memorizza la parola prima del punto. Le parole memorizzate si possono rimuovere in Impostazioni → Correzione automatica.</td></tr>
 <tr><td><b>Elenchi</b></td><td><code>- </code> o <code>1. </code> avvia un elenco.</td></tr>
+<tr><td><b>Linee</b></td><td><code>---</code> e <kbd>Invio</kbd> traccia una linea; <code>___</code> spessa, <code>===</code> doppia, <code>***</code> punteggiata.</td></tr>
 </table>
 <p>Quali virgolette vengono usate dipende dalla <b>lingua di ortografia</b>, non dalla lingua
 dei menu: tedesco e polacco aprono in basso, francese e spagnolo usano le virgolette
