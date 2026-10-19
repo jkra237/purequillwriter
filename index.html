@@ -775,6 +775,9 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
   border:1px solid var(--rule);border-radius:var(--radius-lg);box-shadow:0 10px 30px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);
   padding:10px;display:none;min-width:360px}
 .findbar.on{display:block;animation:fdEin .18s ease-out}
+.tab.tabneu{animation:tabEin .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes tabEin{from{opacity:0;transform:translateX(-14px) scale(.96)}}
+@media (prefers-reduced-motion:reduce){.tab.tabneu{animation:none}}
 @keyframes fdEin{from{opacity:0;transform:translateY(-6px)}}
 .findbar .fr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .findbar .fr:last-child{margin-bottom:0}
@@ -2375,6 +2378,10 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Duplizieren":"Duplicate",
+  "Dokument duplizieren":"Duplicate document",
+  "Kopie":"Copy",
+  "Kopie angelegt – noch ohne eigene Datei.":"Copy created – it has no file of its own yet.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Opened from “{name}”. The first time you save, the program asks where to put it.",
   "Kompatibilitätsmodus":"Compatibility mode",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Opened from a .{art} file. PureQuill can read this format but not write it; “Save” creates a Word file (.docx).",
@@ -3300,6 +3307,10 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Duplizieren":"Dupliquer",
+  "Dokument duplizieren":"Dupliquer le document",
+  "Kopie":"copie",
+  "Kopie angelegt – noch ohne eigene Datei.":"Copie créée – elle n'a pas encore de fichier.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Ouvert à partir de « {name} ». Au premier enregistrement, le programme demande où.",
   "Kompatibilitätsmodus":"Mode de compatibilité",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Ouvert à partir d'un fichier .{art}. PureQuill sait lire ce format mais pas l'écrire ; « Enregistrer » crée un fichier Word (.docx).",
@@ -4225,6 +4236,10 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Duplizieren":"Duplicar",
+  "Dokument duplizieren":"Duplicar documento",
+  "Kopie":"copia",
+  "Kopie angelegt – noch ohne eigene Datei.":"Copia creada: aún no tiene archivo propio.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Abierto desde «{name}». La primera vez que guardes, el programa preguntará dónde.",
   "Kompatibilitätsmodus":"Modo de compatibilidad",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Abierto desde un archivo .{art}. PureQuill puede leer este formato, pero no escribirlo; «Guardar» crea un archivo de Word (.docx).",
@@ -5150,6 +5165,10 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Duplizieren":"Duplicar",
+  "Dokument duplizieren":"Duplicar documento",
+  "Kopie":"cópia",
+  "Kopie angelegt – noch ohne eigene Datei.":"Cópia criada – ainda sem arquivo próprio.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Aberto a partir de “{name}”. Ao salvar pela primeira vez, o programa pergunta onde.",
   "Kompatibilitätsmodus":"Modo de compatibilidade",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Aberto a partir de um arquivo .{art}. O PureQuill lê este formato, mas não o grava; “Salvar” cria um arquivo do Word (.docx).",
@@ -6075,6 +6094,10 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Duplizieren":"Duplikuj",
+  "Dokument duplizieren":"Duplikuj dokument",
+  "Kopie":"kopia",
+  "Kopie angelegt – noch ohne eigene Datei.":"Utworzono kopię – nie ma jeszcze własnego pliku.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Otwarto z „{name}”. Przy pierwszym zapisie program zapyta, gdzie zapisać.",
   "Kompatibilitätsmodus":"Tryb zgodności",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Otwarto z pliku .{art}. PureQuill potrafi odczytać ten format, ale nie zapisać; „Zapisz” tworzy plik Worda (.docx).",
@@ -7000,6 +7023,10 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Duplizieren":"Duplica",
+  "Dokument duplizieren":"Duplica documento",
+  "Kopie":"copia",
+  "Kopie angelegt – noch ohne eigene Datei.":"Copia creata – non ha ancora un file proprio.",
   "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Aperto da «{name}». Al primo salvataggio il programma chiede dove.",
   "Kompatibilitätsmodus":"Modalità compatibilità",
   "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Aperto da un file .{art}. PureQuill sa leggere questo formato ma non scriverlo; «Salva» crea un file di Word (.docx).",
@@ -8261,9 +8288,11 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove("on"),1700)}
 
 /* ================= Tabs ================= */
+let tabNeu=null;
 function drawTabs(){
+  const neu=tabNeu;tabNeu=null;
   $("#tabbar").innerHTML=S.docs.map(d=>
-    `<div class="tab ${d.id===S.active?"on":""}" data-id="${d.id}" ${d.tabColor?`style="background:${d.tabColor};color:#22242A;border-color:rgba(0,0,0,.18)"`:""}>
+    `<div class="tab ${d.id===S.active?"on":""}${d.id===neu?" tabneu":""}" data-id="${d.id}" ${d.tabColor?`style="background:${d.tabColor};color:#22242A;border-color:rgba(0,0,0,.18)"`:""}>
       <span>${esc(tr(d.title))}</span>${d.file?`<i class="tabfile${d.file.lose?" warn":""}" title="${esc((d.file.lose?tr("Zugriff auf {x} abgelaufen – zum Verbinden klicken"):tr("Wird auch in {x} gespeichert")).replace("{x}",d.file.name))}">${ICOSZ(ICO_BLATT,12,1.8)}</i>`:""}<button class="x" data-close="${d.id}" title="${tr("Dokument schließen")}" ${d.tabColor?'style="color:#22242A"':""}>&times;</button></div>`
   ).join("")+`<button class="tabadd" id="newdoc" title="${tr("Neues Dokument")}">+</button>`;
   $("#tabbar").querySelectorAll(".tabfile.warn").forEach(i=>i.onclick=e=>{e.stopPropagation();
@@ -8453,6 +8482,7 @@ function tabContextMenu(e,id){
   const m=document.createElement("div");m.className="menu ctx";m.id="tabmenu";
   m.innerHTML=`
     <button class="mi" data-ta="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
+    <button class="mi" data-ta="dupl"><span class="chk"></span>${tr("Duplizieren")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Farbe")}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;padding:2px 9px 8px">
@@ -8465,7 +8495,7 @@ function tabContextMenu(e,id){
   menuPlatzieren(m,e.clientX,e.clientY);
   m.onclick=ev=>{
     const rb=ev.target.closest("[data-ta]");
-    if(rb){closeMenu();renameTab(id);return}
+    if(rb){closeMenu();if(rb.dataset.ta==="dupl")dokDuplizieren(id);else renameTab(id);return}
     const cb=ev.target.closest("[data-tc]");
     if(cb){d.tabColor=cb.dataset.tc||null;save();closeMenu();drawTabs();return}
   };
@@ -10910,6 +10940,7 @@ function commandList(){
   fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
 
   add("Dokument","Neues Dokument mit Format",kz("neuDok"),newDocument);
+  add("Dokument","Dokument duplizieren","",()=>dokDuplizieren(S.active));
   add("Dokument","Datei öffnen…",kz("dateiAuf"),loadDocumentFile);
   add("Dokument","Seitenformat ändern","",changeFormat);
   LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
@@ -18325,6 +18356,7 @@ function fileMenu(){
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">${kz("neuDok")}</span></button>
     <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}<span class="k">${kz("dateiAuf")}</span></button>
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
+    <button class="mi" data-act="dupl"><span class="chk"></span>${tr("Duplizieren")}</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
     <button class="mi" data-act="print"><span class="chk"></span>${tr("Drucken")}<span class="k">${kz("drucken")}</span></button>
     <button class="mi" data-act="closedoc"><span class="chk"></span>${tr("Dokument schließen")}<span class="k">${kz("dokZu")}</span></button>
@@ -18405,6 +18437,7 @@ function runFileAct(a){
   if(a==="new")newDocument();
   if(a==="loaddoc")loadDocumentFile();
   if(a==="rename")renameTab(S.active);
+  if(a==="dupl")dokDuplizieren(S.active);
   if(a==="closedoc")closeDoc(S.active);
   if(a==="fmt")changeFormat();
   if(a==="fileopen")fileOpen();
@@ -23405,14 +23438,35 @@ function epubBuchsatzCss(b){
    heißt sie „Titel (E-Book)“; ins E-Book und in den Dateinamen kommt der
    ursprüngliche Titel (d.epub.titel). */
 function ebKopie(d){
+  const t=tr(d.title);
+  return dokKopie(d,t+" ("+tr("E-Book")+")",k=>{k.epub=Object.assign({},d.epub||{},{titel:(d.epub&&d.epub.titel)||t})});
+}
+/* Eine Kopie gleich rechts neben dem Original, aktiv. Alles kommt mit,
+   nur keine Dateiverknüpfung (sonst schriebe „Speichern“ in die Datei des
+   Originals) und keine Zwischenstände. d.herkunft bleibt, die Statusleiste
+   zeigt also weiter, woher der Text stammt. */
+function dokKopie(d,titel,vorher){
+  flush();
   const k=JSON.parse(JSON.stringify(d));
   k.id=uid();k.history=[];
   delete k.file;delete k.ziel;
-  const t=tr(d.title);
-  k.title=t+" ("+tr("E-Book")+")";k.customTitle=true;
-  k.epub=Object.assign({},d.epub||{},{titel:(d.epub&&d.epub.titel)||t});
+  k.title=titel;k.customTitle=true;
+  if(vorher)vorher(k);
   S.docs.splice(S.docs.indexOf(d)+1,0,k);S.active=k.id;
+  tabNeu=k.id;
   save();render();
+  return k;
+}
+/* Reiter › Duplizieren (Toms Wunsch). Name wie im Explorer: „Titel
+   (Kopie)“, gibt es den schon, „Titel (Kopie 2)“ usw. */
+function dokDuplizieren(id){
+  const d=S.docs.find(x=>x.id===id);if(!d)return;
+  const basis=tr(d.title).replace(/ \((Kopie|Copy|copie|copia|cópia|kopia)( \d+)?\)$/i,"");
+  const namen=new Set(S.docs.map(x=>tr(x.title)));
+  let n=1,t;
+  do{t=basis+" ("+(n===1?tr("Kopie"):tr("Kopie")+" "+n)+")";n++}while(namen.has(t));
+  const k=dokKopie(d,t);
+  toast(tr("Kopie angelegt – noch ohne eigene Datei."));
   return k;
 }
 function ebookAssistent(danach){
@@ -25966,7 +26020,7 @@ document or an existing file.</p>
 or choose <b>File &rsaquo; New document</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
 You are asked for a page format first; it can be changed at any time afterwards.</p>
 <p>Documents appear as tabs along the top. Drag a tab to reorder it. Right-click one to
-rename it or give it a colour. Closing the last document returns you to the welcome screen.</p>
+rename it, duplicate it or give it a colour. A duplicate opens next to it as “Title (Copy)”, with everything but the file: its first save asks where to put it. Closing the last document returns you to the welcome screen.</p>
 <p>Each document keeps its own title, page format, font and line spacing. Changing those
 affects only the document you are in.</p>`},
 
@@ -26591,8 +26645,8 @@ neues Dokument oder eine vorhandene Datei an.</p>
 <p><b>Ein weiteres Dokument</b> legst du mit dem <b>+</b> rechts in der Reiterleiste an oder
 über <b>Datei &rsaquo; Neues Dokument</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd>). Zuerst
 wird nach dem Seitenformat gefragt; ändern lässt es sich jederzeit.</p>
-<p>Dokumente erscheinen als Reiter oben. Ziehen ordnet sie um. Ein Rechtsklick benennt um oder
-gibt eine Farbe. Wird der letzte Reiter geschlossen, kehrt der Startbildschirm zurück.</p>
+<p>Dokumente erscheinen als Reiter oben. Ziehen ordnet sie um. Ein Rechtsklick benennt um, dupliziert oder
+gibt eine Farbe. Ein Duplikat öffnet sich daneben als „Titel (Kopie)“, mit allem außer der Datei: das erste Speichern fragt, wohin. Wird der letzte Reiter geschlossen, kehrt der Startbildschirm zurück.</p>
 <p>Jedes Dokument behält seinen eigenen Titel, sein Seitenformat, seine Schrift und seinen
 Zeilenabstand. Änderungen daran betreffen nur das Dokument, in dem du gerade bist.</p>`},
 
@@ -27249,7 +27303,7 @@ documento nuevo o un archivo existente.</p>
 elige <b>Archivo &rsaquo; Nuevo documento</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd>).
 Primero se pregunta por un formato de página; se puede cambiar en cualquier momento después.</p>
 <p>Los documentos aparecen como pestañas en la parte superior. Arrastra una pestaña para
-reordenarla. Haz clic derecho sobre ella para renombrarla o darle un color. Cerrar el último
+reordenarla. Haz clic derecho sobre ella para renombrarla, duplicarla o darle un color. Un duplicado se abre al lado como «Título (copia)», con todo menos el archivo: al guardarlo por primera vez se pregunta dónde. Cerrar el último
 documento devuelve a la pantalla de bienvenida.</p>
 <p>Cada documento conserva su propio título, formato de página, fuente e interlineado.
 Cambiarlos solo afecta al documento en el que estás.</p>`},
@@ -27907,7 +27961,7 @@ documento novo ou um arquivo existente.</p>
 <b>Arquivo &rsaquo; Novo documento</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>). Primeiro é
 perguntado um formato de página; ele pode ser mudado a qualquer momento depois.</p>
 <p>Os documentos aparecem como abas na parte de cima. Arraste uma aba para reordená-la. Clique
-com o botão direito nela para renomeá-la ou dar uma cor. Fechar o último documento leva de volta
+com o botão direito nela para renomeá-la, duplicá-la ou dar uma cor. Uma duplicata abre ao lado como “Título (cópia)”, com tudo menos o arquivo: ao salvar pela primeira vez, o programa pergunta onde. Fechar o último documento leva de volta
 à tela de boas-vindas.</p>
 <p>Cada documento mantém o próprio título, formato de página, fonte e espaçamento entre linhas.
 Mudar isso afeta apenas o documento em que você está.</p>`},
@@ -28564,7 +28618,7 @@ ou choisissez <b>Fichier &rsaquo; Nouveau document</b>
 (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd>). Un format de page est demandé d'abord ; il peut
 être modifié à tout moment ensuite.</p>
 <p>Les documents apparaissent sous forme d'onglets en haut. Faites glisser un onglet pour le
-réordonner. Faites un clic droit dessus pour le renommer ou lui donner une couleur. Fermer le
+réordonner. Faites un clic droit dessus pour le renommer, le dupliquer ou lui donner une couleur. Un duplicata s’ouvre à côté sous le nom « Titre (copie) », avec tout sauf le fichier : au premier enregistrement, le programme demande où. Fermer le
 dernier document ramène à l'écran d'accueil.</p>
 <p>Chaque document conserve son propre titre, son format de page, sa police et son interligne.
 Les modifier n'affecte que le document dans lequel vous vous trouvez.</p>`},
@@ -29244,7 +29298,7 @@ dokument albo istniejący plik.</p>
 wybierz <b>Plik &rsaquo; Nowy dokument</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
 Najpierw program pyta o format strony; można go zmienić w dowolnej chwili później.</p>
 <p>Dokumenty pojawiają się jako karty u góry. Przeciągnij kartę, aby zmienić kolejność. Kliknij
-ją prawym przyciskiem, aby zmienić nazwę lub nadać kolor. Zamknięcie ostatniego dokumentu wraca
+ją prawym przyciskiem, aby zmienić nazwę, zduplikować ją lub nadać kolor. Duplikat otwiera się obok jako „Tytuł (kopia)”, ze wszystkim oprócz pliku: przy pierwszym zapisie program pyta, gdzie zapisać. Zamknięcie ostatniego dokumentu wraca
 do ekranu powitalnego.</p>
 <p>Każdy dokument ma własny tytuł, format strony, czcionkę i odstęp między wierszami. Ich zmiana
 dotyczy tylko dokumentu, w którym jesteś.</p>`},
@@ -29882,7 +29936,7 @@ schede, oppure scegli <b>File &rsaquo; Nuovo documento</b>
 (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd>). Prima viene chiesto un formato pagina; può
 essere cambiato in qualsiasi momento.</p>
 <p>I documenti compaiono come schede in alto. Trascina una scheda per riordinarla. Fai clic
-destro su di essa per rinominarla o darle un colore. Chiudere l'ultimo documento riporta alla
+destro su di essa per rinominarla, duplicarla o darle un colore. Un duplicato si apre accanto come «Titolo (copia)», con tutto tranne il file: al primo salvataggio il programma chiede dove. Chiudere l'ultimo documento riporta alla
 schermata di benvenuto.</p>
 <p>Ogni documento mantiene il proprio titolo, formato pagina, carattere e interlinea. Cambiarli
 riguarda solo il documento in cui ti trovi.</p>`},

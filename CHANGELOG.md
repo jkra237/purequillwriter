@@ -103,6 +103,14 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Reiter duplizieren** (Toms Wunsch): Rechtsklick auf einen Reiter ›
+  „Duplizieren“, ebenso im Datei-Menü und in der Befehlspalette. Die Kopie
+  „Titel (Kopie)“ (dann „Kopie 2“ usw., nie „(Kopie) (Kopie)“) öffnet sich
+  gleich rechts daneben, aktiv, mit einer kurzen Einblend-Animation (bei
+  reduzierter Bewegung ohne), und eine Meldung sagt, dass sie noch keine
+  eigene Datei hat. Alles kommt mit, nur keine Dateiverknüpfung — sonst
+  schriebe „Speichern“ in die Datei des Originals — und keine Zwischenstände
+  (dokKopie, die der E-Book-Assistent jetzt mitbenutzt). Hilfe in 7 Sprachen.
 - **Dateiformat in der Statusleiste, .odt und .rtf bleiben beim Speichern,
   was sie sind** (Toms Frage „sollte nicht unten das aktuelle Dateiformat
   stehen?“, Variante B). Neben dem Dateinamen (jetzt ohne Endung) steht eine
