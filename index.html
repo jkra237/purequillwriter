@@ -18657,7 +18657,6 @@ function toolsMenu(){
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">${tr("Strg")} H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
-    <button class="mi" data-t="ebook"><span class="chk"></span>${tr("E-Book vorbereiten&hellip;")}</button>
     <button class="mi" data-t="rep"><span class="chk"></span>${tr("Wortwiederholungen")}&hellip;</button>
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
@@ -18681,7 +18680,6 @@ function toolsMenu(){
     if(a==="spell"){spellState="idle";spellDialog()}
     if(a==="rep")toggleRep();
     if(a==="clean")cleanDialog();
-    if(a==="ebook")ebookAssistent();
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
     if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
@@ -26412,7 +26410,7 @@ numbers become Word fields that keep counting there.</p>
 contents for the reader. A short dialog asks for the author and where chapters begin before
 saving — every field is optional. Font, margins and night mode are set by the reading device,
 not the file.</p>
-<p><b>From a raw text file to an e-book:</b> <b>Tools &rsaquo; Prepare e-book</b> sets the chapters, tidies up the text and adds book typography. Step by step: <b>Creating an e-book</b>.</p>
+<p><b>From a raw text file to an e-book:</b> <b>File &rsaquo; Save as &rsaquo; E-book &rsaquo; Prepare e-book</b> sets the chapters, tidies up the text and adds book typography. Step by step: <b>Creating an e-book</b>.</p>
 <p><b>Onto an e-reader:</b> copy the saved <b>.epub</b> to the device's folder over USB, or
 send it through Calibre. For a Kindle: email the file as an attachment to your personal
 <b>@kindle.com</b> address (listed in your Amazon account under “Manage Your Content and
@@ -26426,7 +26424,7 @@ Tolino, Apple Books and most reading apps. This is the way through:</p>
 <ol>
 <li><b>Open or write the text.</b> A Word, OpenOffice, RTF or plain text file opens with
 <b>File &rsaquo; Open</b>.</li>
-<li><b>Prepare it:</b> <b>Tools &rsaquo; Prepare e-book…</b> leads through three steps —
+<li><b>Prepare it:</b> <b>File &rsaquo; Save as &rsaquo; E-book &rsaquo; Prepare e-book…</b> leads through three steps —
 chapters, tidying up, book typography. Details below.</li>
 <li><b>Export:</b> <b>File &rsaquo; Save as &rsaquo; E-book</b>. Check title and author, add a
 cover if you have one, and press <b>Export</b>.</li>
@@ -27063,7 +27061,7 @@ darin werden zu Word-Feldern und zählen dort weiter.</p>
 Inhaltsverzeichnis für den Reader an. Vor dem Speichern fragt ein kurzer Dialog nach Autor und
 Kapitelschnitt — alle Angaben sind freiwillig. Schrift, Rand und Nachtmodus bestimmt das
 Lesegerät, nicht die Datei.</p>
-<p><b>Aus einer rohen Textdatei ein E-Book:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten</b> setzt die Kapitel, räumt den Text auf und sorgt für den Buchsatz. Schritt für Schritt: <b>E-Book erstellen</b>.</p>
+<p><b>Aus einer rohen Textdatei ein E-Book:</b> <b>Datei &rsaquo; Speichern als &rsaquo; E-Book &rsaquo; E-Book vorbereiten</b> setzt die Kapitel, räumt den Text auf und sorgt für den Buchsatz. Schritt für Schritt: <b>E-Book erstellen</b>.</p>
 <p><b>Auf den E-Reader:</b> die gespeicherte <b>.epub</b> per USB in den Ordner des Geräts
 kopieren, oder über Calibre übertragen. Für den Kindle: die Datei als E-Mail-Anhang an deine
 persönliche <b>@kindle.com</b>-Adresse schicken (im Amazon-Konto unter „Meine Geräte
@@ -27077,7 +27075,7 @@ Apple Books und den meisten Lese-Apps läuft. So gehst du vor:</p>
 <ol>
 <li><b>Text öffnen oder schreiben.</b> Eine Word-, OpenOffice-, RTF- oder Textdatei öffnest du
 mit <b>Datei &rsaquo; Öffnen</b>.</li>
-<li><b>Vorbereiten:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten…</b> führt durch drei
+<li><b>Vorbereiten:</b> <b>Datei &rsaquo; Speichern als &rsaquo; E-Book &rsaquo; E-Book vorbereiten…</b> führt durch drei
 Schritte — Kapitel, Aufräumen, Buchsatz. Einzelheiten unten.</li>
 <li><b>Exportieren:</b> <b>Datei &rsaquo; Speichern als &rsaquo; E-Book</b>. Titel und Autor
 prüfen, wenn vorhanden ein Cover wählen, <b>Exportieren</b> drücken.</li>
@@ -27718,7 +27716,7 @@ notas al pie, y los números de página se vuelven campos de Word que siguen con
 índice para el lector. Antes de guardar, un breve cuadro pregunta por el autor y por dónde
 empiezan los capítulos; todos los campos son opcionales. La tipografía, los márgenes y el modo
 nocturno los define el dispositivo de lectura, no el archivo.</p>
-<p><b>De un archivo de texto en bruto a un e-book:</b> <b>Herramientas &rsaquo; Preparar e-book</b> marca los capítulos, ordena el texto y aplica la composición de libro. Paso a paso: <b>Crear un e-book</b>.</p>
+<p><b>De un archivo de texto en bruto a un e-book:</b> <b>Archivo &rsaquo; Guardar como &rsaquo; Libro electrónico &rsaquo; Preparar e-book</b> marca los capítulos, ordena el texto y aplica la composición de libro. Paso a paso: <b>Crear un e-book</b>.</p>
 <p><b>Al lector electrónico:</b> copia el <b>.epub</b> guardado a la carpeta del dispositivo por
 USB, o envíalo a través de Calibre. Para un Kindle: manda el archivo como adjunto a tu dirección
 personal <b>@kindle.com</b> (aparece en tu cuenta de Amazon, en «Administrar contenido y
@@ -27732,7 +27730,7 @@ Kindle, Kobo, Tolino, Apple Books y la mayoría de las apps de lectura. Así se 
 <ol>
 <li><b>Abre o escribe el texto.</b> Un archivo de Word, OpenOffice, RTF o de texto se abre con
 <b>Archivo &rsaquo; Abrir</b>.</li>
-<li><b>Prepáralo:</b> <b>Herramientas &rsaquo; Preparar e-book…</b> guía en tres pasos:
+<li><b>Prepáralo:</b> <b>Archivo &rsaquo; Guardar como &rsaquo; Libro electrónico &rsaquo; Preparar e-book…</b> guía en tres pasos:
 capítulos, limpieza y composición de libro. Detalles más abajo.</li>
 <li><b>Exporta:</b> <b>Archivo &rsaquo; Guardar como &rsaquo; Libro electrónico</b>. Revisa el
 título y el autor, añade una portada si la tienes y pulsa <b>Exportar</b>.</li>
@@ -28370,7 +28368,7 @@ de rodapé, e os números de página viram campos do Word que continuam contando
 para o leitor. Antes de salvar, um breve diálogo pergunta pelo autor e por onde os capítulos
 começam; todos os campos são opcionais. A tipografia, as margens e o modo noturno são definidos
 pelo dispositivo de leitura, não pelo arquivo.</p>
-<p><b>De um arquivo de texto bruto a um e-book:</b> <b>Ferramentas &rsaquo; Preparar e-book</b> define os capítulos, arruma o texto e aplica a composição de livro. Passo a passo: <b>Criar um e-book</b>.</p>
+<p><b>De um arquivo de texto bruto a um e-book:</b> <b>Arquivo &rsaquo; Salvar como &rsaquo; Livro eletrônico &rsaquo; Preparar e-book</b> define os capítulos, arruma o texto e aplica a composição de livro. Passo a passo: <b>Criar um e-book</b>.</p>
 <p><b>Para um leitor de e-books:</b> copie o <b>.epub</b> salvo para a pasta do dispositivo por
 USB, ou envie-o pelo Calibre. Para um Kindle: mande o arquivo como anexo para o seu endereço
 pessoal <b>@kindle.com</b> (que aparece na sua conta da Amazon, em «Gerenciar conteúdo e
@@ -28384,7 +28382,7 @@ Tolino, Apple Books e na maioria dos apps de leitura. O caminho é este:</p>
 <ol>
 <li><b>Abra ou escreva o texto.</b> Um arquivo do Word, OpenOffice, RTF ou de texto abre com
 <b>Arquivo &rsaquo; Abrir</b>.</li>
-<li><b>Prepare:</b> <b>Ferramentas &rsaquo; Preparar e-book…</b> guia por três passos —
+<li><b>Prepare:</b> <b>Arquivo &rsaquo; Salvar como &rsaquo; Livro eletrônico &rsaquo; Preparar e-book…</b> guia por três passos —
 capítulos, arrumação, composição de livro. Detalhes abaixo.</li>
 <li><b>Exporte:</b> <b>Arquivo &rsaquo; Salvar como &rsaquo; Livro eletrônico</b>. Confira
 título e autor, adicione uma capa se tiver e clique em <b>Exportar</b>.</li>
@@ -29051,7 +29049,7 @@ bas de page, et les numéros de page deviennent des champs Word qui continuent d
 table des matières pour la liseuse. Avant l'enregistrement, une brève boîte de dialogue demande
 l'auteur et où commencent les chapitres — tous les champs sont facultatifs. La police, les
 marges et le mode nuit sont réglés par la liseuse, pas par le fichier.</p>
-<p><b>D'un fichier texte brut à un e-book :</b> <b>Outils &rsaquo; Préparer l'e-book</b> définit les chapitres, nettoie le texte et applique la mise en page de livre. Pas à pas : <b>Créer un e-book</b>.</p>
+<p><b>D'un fichier texte brut à un e-book :</b> <b>Fichier &rsaquo; Enregistrer sous &rsaquo; Livre numérique &rsaquo; Préparer l'e-book</b> définit les chapitres, nettoie le texte et applique la mise en page de livre. Pas à pas : <b>Créer un e-book</b>.</p>
 <p><b>Vers une liseuse :</b> copiez le <b>.epub</b> enregistré dans le dossier de l'appareil par
 USB, ou envoyez-le via Calibre. Pour un Kindle : envoyez le fichier en pièce jointe à votre
 adresse personnelle <b>@kindle.com</b> (indiquée dans votre compte Amazon, sous « Gérer votre
@@ -29065,7 +29063,7 @@ Apple Books et la plupart des applications de lecture. Voici la marche à suivre
 <ol>
 <li><b>Ouvrez ou écrivez le texte.</b> Un fichier Word, OpenOffice, RTF ou texte s'ouvre avec
 <b>Fichier &rsaquo; Ouvrir</b>.</li>
-<li><b>Préparez-le :</b> <b>Outils &rsaquo; Préparer l'e-book…</b> guide en trois étapes —
+<li><b>Préparez-le :</b> <b>Fichier &rsaquo; Enregistrer sous &rsaquo; Livre numérique &rsaquo; Préparer l'e-book…</b> guide en trois étapes —
 chapitres, nettoyage, mise en page de livre. Détails ci-dessous.</li>
 <li><b>Exportez :</b> <b>Fichier &rsaquo; Enregistrer sous &rsaquo; Livre numérique</b>.
 Vérifiez le titre et l'auteur, ajoutez une couverture si vous en avez une, puis cliquez sur
@@ -29697,7 +29695,7 @@ stron stają się polami Worda, które nadal tam liczą.</p>
 czytnika. Przed zapisem krótkie okno pyta o autora i o to, gdzie zaczynają się rozdziały —
 wszystkie pola są opcjonalne. Czcionkę, marginesy i tryb nocny ustala urządzenie czytające, a
 nie plik.</p>
-<p><b>Od surowego pliku tekstowego do e-booka:</b> <b>Narzędzia &rsaquo; Przygotuj e-book</b> ustawia rozdziały, porządkuje tekst i nadaje skład książkowy. Krok po kroku: <b>Tworzenie e-booka</b>.</p>
+<p><b>Od surowego pliku tekstowego do e-booka:</b> <b>Plik &rsaquo; Zapisz jako &rsaquo; E-book &rsaquo; Przygotuj e-book</b> ustawia rozdziały, porządkuje tekst i nadaje skład książkowy. Krok po kroku: <b>Tworzenie e-booka</b>.</p>
 <p><b>Na czytnik e-booków:</b> skopiuj zapisany plik <b>.epub</b> do folderu urządzenia przez
 USB albo wyślij go przez Calibre. Na Kindle: wyślij plik jako załącznik na swój osobisty adres
 <b>@kindle.com</b> (widoczny na koncie Amazon, w sekcji „Zarządzaj treścią i urządzeniami”),
@@ -29711,7 +29709,7 @@ Tolino, w Apple Books i w większości aplikacji do czytania. Tak to wygląda:</
 <ol>
 <li><b>Otwórz lub napisz tekst.</b> Plik Worda, OpenOffice, RTF lub tekstowy otwierasz przez
 <b>Plik &rsaquo; Otwórz</b>.</li>
-<li><b>Przygotuj go:</b> <b>Narzędzia &rsaquo; Przygotuj e-book…</b> prowadzi przez trzy
+<li><b>Przygotuj go:</b> <b>Plik &rsaquo; Zapisz jako &rsaquo; E-book &rsaquo; Przygotuj e-book…</b> prowadzi przez trzy
 kroki — rozdziały, porządki, skład książkowy. Szczegóły poniżej.</li>
 <li><b>Eksportuj:</b> <b>Plik &rsaquo; Zapisz jako &rsaquo; E-book</b>. Sprawdź tytuł i autora,
 dodaj okładkę, jeśli ją masz, i kliknij <b>Eksportuj</b>.</li>
@@ -30360,7 +30358,7 @@ contare lì.</p>
 costruisce un sommario per il dispositivo di lettura. Prima del salvataggio, una breve finestra
 chiede l'autore e dove iniziano i capitoli — tutti i campi sono facoltativi. Il carattere, i
 margini e la modalità notturna li decide il dispositivo di lettura, non il file.</p>
-<p><b>Da un file di testo grezzo a un e-book:</b> <b>Strumenti &rsaquo; Prepara e-book</b> imposta i capitoli, mette in ordine il testo e applica l'impaginazione da libro. Passo per passo: <b>Creare un e-book</b>.</p>
+<p><b>Da un file di testo grezzo a un e-book:</b> <b>File &rsaquo; Salva come &rsaquo; E-book &rsaquo; Prepara e-book</b> imposta i capitoli, mette in ordine il testo e applica l'impaginazione da libro. Passo per passo: <b>Creare un e-book</b>.</p>
 <p><b>Su un lettore di e-book:</b> copia il file <b>.epub</b> salvato nella cartella del
 dispositivo via USB, oppure invialo tramite Calibre. Per un Kindle: manda il file come allegato
 al tuo indirizzo personale <b>@kindle.com</b> (indicato nel tuo account Amazon, in «Gestisci
@@ -30374,7 +30372,7 @@ Tolino, Apple Books e nella maggior parte delle app di lettura. Ecco come:</p>
 <ol>
 <li><b>Apri o scrivi il testo.</b> Un file di Word, OpenOffice, RTF o di testo si apre con
 <b>File &rsaquo; Apri</b>.</li>
-<li><b>Preparalo:</b> <b>Strumenti &rsaquo; Prepara e-book…</b> guida in tre passi —
+<li><b>Preparalo:</b> <b>File &rsaquo; Salva come &rsaquo; E-book &rsaquo; Prepara e-book…</b> guida in tre passi —
 capitoli, pulizia, impaginazione da libro. Dettagli più sotto.</li>
 <li><b>Esporta:</b> <b>File &rsaquo; Salva come &rsaquo; E-book</b>. Controlla titolo e autore,
 aggiungi una copertina se ce l'hai e premi <b>Esporta</b>.</li>

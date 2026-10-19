@@ -103,6 +103,11 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **„E-Book vorbereiten“ nicht mehr im Werkzeuge-Menü** (Toms Wunsch).
+  Erreichbar ist der Assistent über Datei › Speichern als › E-Book, dort
+  oben unter der Ampel. Ein eigener, als Kasten hervorgehobener Eintrag am
+  Ende von „Speichern als“ war Tom zu auffällig und ist wieder entfernt.
+  Hilfe in 7 Sprachen auf diesen Weg umgestellt.
 - **Reiter duplizieren** (Toms Wunsch): Rechtsklick auf einen Reiter ›
   „Duplizieren“, ebenso im Datei-Menü und in der Befehlspalette. Die Kopie
   „Titel (Kopie)“ (dann „Kopie 2“ usw., nie „(Kopie) (Kopie)“) öffnet sich
