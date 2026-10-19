@@ -103,6 +103,29 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Statusleiste im Fokusmodus halb ausgegraut** (Toms Wunsch): 50 %
+  Deckkraft, beim Überfahren mit der Maus wieder voll; beim Tippen so blass
+  wie außerhalb des Fokusmodus.
+- **Strg + Mausrad zoomt das Dokument wie in Word** (Toms Wunsch; in der App
+  geschah bisher nichts, im Browser wuchs die ganze Seite): 10 % je Rastung,
+  die Anzeige unten läuft mit, Menüs und Leisten bleiben gleich groß.
+  Touchpad-Zusammenziehen wirkt genauso (kommt als Strg + Rad mit kleinen
+  Werten, wird gesammelt). Umbruch und Speichern folgen gebündelt, sobald
+  das Rad kurz ruht. Nur in der Schreibansicht und ohne offenen Dialog.
+  Hilfe „Zoom und Seitenbreite“ in 7 Sprachen ergänzt.
+- **Takt der Zwischenstände direkt im Datei-Menü** (Toms Wunsch): Fährt man
+  über „Automatisch“, klappt ein Untermenü auf — Aus, alle 30 Sekunden bis
+  alle 15 Minuten, der aktuelle mit Häkchen. Bisher schaltete ein Klick nur
+  an/aus, der Takt ging nur in den Einstellungen. Der Eintrag zeigt weiter
+  den Takt („alle 30 Sekunden ›“); armHoverSubs kennt dafür data-hover.
+- **Werkzeugleiste bricht beim Schmalziehen ohne Lücke rechts um** (Toms
+  Hinweis): die Lupe hing mit Rückgängig/Wiederholen/Verlauf in einem Block
+  und rutschte mit ihm nach unten, die erste Zeile endete dann mit einer
+  breiten Lücke. Jetzt steht sie für sich; Reihenfolge und Abstände bleiben.
+  Ein erster Versuch, die rechte Ecke fest oben zu halten, sah für Tom nach
+  geänderter Reihenfolge aus und ist verworfen.
+- **Reitermenü ohne Häkchen-Spalte** (Toms Hinweis): Einträge, „Farbe“ und
+  Farbpunkte stehen bündig; die übrigen Menüs behalten die Spalte für Häkchen.
 - **„E-Book vorbereiten“ nicht mehr im Werkzeuge-Menü** (Toms Wunsch).
   Erreichbar ist der Assistent über Datei › Speichern als › E-Book, dort
   oben unter der Ampel. Ein eigener, als Kasten hervorgehobener Eintrag am

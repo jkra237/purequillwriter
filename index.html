@@ -1769,6 +1769,11 @@ body.focus .focusbar{display:flex}
 .focusbar button{color:inherit;text-decoration:underline;text-underline-offset:2px}
 body.focus .topbar,body.focus .rail,body.focus .tools{display:none}
 body.focus .sheet{padding-top:9vh}
+/* Statusleiste im Fokusmodus halb ausgegraut, beim Überfahren wieder voll
+   (Toms Wunsch); beim Tippen bleibt sie so blass wie sonst auch */
+body.focus .status{opacity:.5}
+body.focus .status:hover{opacity:1}
+body.focus.typing .status{opacity:.34}
 .toast{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--paper);
   padding:7px 15px;border-radius:var(--radius);font-size:12px;z-index:70;opacity:0;transition:opacity .18s}
 .toast.on{opacity:1}
@@ -8588,8 +8593,10 @@ function drawTools(){
       <button class="tb" id="pgbBtn" title="${tr("Seitenumbruch einfügen (Alt+⇧+⏎)")}">${ICOTB(/* Schnittlinie in Koralle wie der Radierer (Toms Wahl „A“): #E07052
           hält 3:1 auf hellen und rund 5:1 auf dunklen Leisten */
           '<path d="M6 3h12v5H6z"/><path d="M6 16h12v5H6z"/><path d="M3 12h3M9 12h2M14 12h2M19 12h2" stroke="#E07052" stroke-width="1.6"/>')}</button>
-      <span style="display:flex;gap:7px;margin-left:auto">
-        <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB(/* Glas zart blau getönt mit Lichtreflex (Toms Wahl „C“); der
+      <!-- Die Lupe steht für sich (Toms Idee): mit Rückgängig/Verlauf in einem
+           Block rutschte sie beim Schmalziehen mit nach unten, und die erste
+           Zeile endete mit einer Lücke -->
+      <button class="tb" id="findBtn" style="margin-left:auto" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB(/* Glas zart blau getönt mit Lichtreflex (Toms Wahl „C“); der
           Reflex #4A90D9 hält 3:1 auf hellen und rund 5:1 auf dunklen Leisten */
           '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M7.6 9.2a3.2 3.2 0 0 1 2.4-2.4" stroke="#4A90D9" stroke-width="1.3"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
         <div class="sep"></div>
@@ -8601,8 +8608,7 @@ function drawTools(){
           <!-- Versionsverlauf: Uhr im Pfeilbogen, Zeiger blau wie der Glanz der
                Lupe (Toms Idee, Fassung „E“) — bisher nur über Datei › Zwischenstände -->
           <button class="tb" id="histBtn" title="${tr("Versionsverlauf")}" aria-label="${tr("Versionsverlauf")}">${ICOTB('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2 6.6 4.3 10.4 8.1 8.6z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8" stroke="#4A90D9" stroke-width="1.6"/>')}</button>
-        </span>
-      </span>`;
+        </span>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
         ICOSZ('<path d="M4.5 4.5h15v10l-5 5h-10z"/><path d="M19.5 14.5h-5v5"/><path d="M9 9h6M9 12h4"/>',22,1.9)}</button>
@@ -18318,7 +18324,9 @@ function subMenuSchliessenPlanen(){
 function armHoverSubs(m){
   m.querySelectorAll(".mi").forEach(b=>{
     const k=b.querySelector(".k");
-    if(k&&k.textContent.trim()==="›"){
+    /* data-hover: Eintrag mit Zustandsanzeige und Untermenü zugleich
+       („Automatisch  alle 30 Sekunden ›“) */
+    if(k&&k.textContent.trim()==="›"||b.dataset.hover){
       b.addEventListener("mouseenter",()=>{
         clearTimeout(subZuTimer);
         const sm=document.getElementById("submenu");
@@ -18346,8 +18354,8 @@ function fileMenu(){
     <div class="mlabel">${tr("Zwischenstände")}</div>
     <button class="mi" data-act="hist"><span class="chk"></span>${tr("Versionsverlauf&hellip;")}</button>
     <button class="mi" data-act="save"><span class="chk"></span>${tr("Zwischenstand anlegen")}<span class="k">${kz("stand")}</span></button>
-    <button class="mi" data-act="auto"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch")}
-      <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}</span></button>
+    <button class="mi" data-act="auto" data-hover="1"><span class="chk">${s.autosave?"&#10003;":""}</span>${tr("Automatisch")}
+      <span class="k">${s.autosave?tr((SNAPSHOTS.find(([,v])=>v===s.interval)||SNAPSHOTS[1])[0]):tr("aus")}&ensp;&rsaquo;</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="speichern"><span class="chk"></span>${SPEICHERN()}<span class="k">${kz("speichern")}</span></button>
     <button class="mi" data-act="expmore"><span class="chk"></span>${tr("Speichern als")}&hellip;<span class="k">&rsaquo;</span></button>
@@ -18390,7 +18398,12 @@ function fileMenu(){
         ...(doc().file&&doc().file.lose?[{a:"filere",label:tr("Verbinden"),k:esc(doc().file.name)}]:[]),
         ...(doc().file?[{a:"fileoff",label:tr("Verbindung lösen"),k:esc(doc().file.name)}]:[]),
         {a:"fileopen",label:tr("Verknüpfte Datei öffnen…"),k:PQWEXT}]:[])]);
-    if(a==="auto"){s.autosave=!s.autosave;save();resetTimer();drawStatus();closeMenu();fileMenu();return}
+    /* Takt der Zwischenstände direkt hier wählen (Toms Wunsch), statt nur in
+       den Einstellungen; „Aus“ ersetzt das frühere Umschalten per Klick */
+    if(a==="auto")return openSubMenu(b,[{a:"0",label:tr("Aus"),cur:!s.autosave},
+      ...SNAPSHOTS.map(([lab,v])=>({a:String(v),label:tr(lab),cur:s.autosave&&s.interval===v}))],
+      w=>{const v=+w;s.autosave=v>0;if(v)s.interval=v;save();resetTimer();drawStatus();
+        toast(v?tr("Zwischenstände")+": "+tr(SNAPSHOTS.find(([,z])=>z===v)[0]):tr("Zwischenstände aus"))});
     closeMenu();runFileAct(a);
   };
 }
@@ -25773,6 +25786,28 @@ function setZoom(z,keepFit){
   if($("#editor"))paginate();
   queueAnchors();drawStatus();   /* baut die Zoomanzeige neu auf */
 }
+/* Strg + Mausrad zoomt das Dokument wie in Word, in 10-%-Schritten je
+   Rastung (Toms Wunsch; vorher geschah in der App nichts, im Browser
+   vergrößerte sich die ganze Seite). Touchpad-Zusammenziehen meldet der
+   Browser ebenfalls als Strg + Rad, mit kleinen Werten — darum wird
+   gesammelt. Die Seite wächst sofort über --zoom; Umbruch und Speichern
+   folgen gebündelt, wenn das Drehen kurz ruht, statt bei jeder Rastung. */
+let radRest=0,radTimer=null;
+window.addEventListener("wheel",e=>{
+  if(!e.ctrlKey||S.mode!=="write"||!$("#editor"))return;
+  if(document.querySelector("#ovl .modal"))return;
+  e.preventDefault();
+  radRest+=e.deltaMode===1?e.deltaY*33:e.deltaY;
+  const stufen=Math.trunc(radRest/100);
+  if(!stufen)return;
+  radRest-=stufen*100;
+  S.zoom=Math.min(4,Math.max(.25,Math.round((S.zoom-stufen*.1)*100)/100));
+  S.fitPage=false;
+  const p=$("#paper");if(p)p.style.setProperty("--zoom",S.zoom);
+  const zv=$("#zVal");if(zv)zv.textContent=Math.round(S.zoom*100)+" %";
+  clearTimeout(radTimer);
+  radTimer=setTimeout(()=>{radRest=0;setZoom(S.zoom)},160);
+},{passive:false});
 /* Seitenbreite einpassen ist ein Schalter: ein zweiter Klick kehrt zur
    Zoomstufe zurück, die galt bevor eingepasst wurde - nicht zu einem
    festen Vorgabewert. */
@@ -26178,6 +26213,7 @@ enter your own.</p>
 <table class="hkeys">
 <tr><td>Zoom in</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Zoom out</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoom with the mouse wheel</td><td><kbd>Ctrl</kbd> + mouse wheel</td></tr>
 <tr><td>Fit page width</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>With <b>fit page width</b> active the zoom follows the window as you resize it. Setting a
@@ -26816,6 +26852,7 @@ der auch ein eigener Wert eingetragen werden kann.</p>
 <table class="hkeys">
 <tr><td>Vergrößern</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Verkleinern</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoomen mit dem Mausrad</td><td><kbd>Strg</kbd> + Mausrad</td></tr>
 <tr><td>Seitenbreite einpassen</td><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Ist <b>Seitenbreite einpassen</b> aktiv, folgt der Zoom dem Fenster, während du es
@@ -27475,6 +27512,7 @@ introducir el tuyo.</p>
 <table class="hkeys">
 <tr><td>Acercar</td><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Alejar</td><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoom con la rueda del ratón</td><td><kbd>Ctrl</kbd> + rueda del ratón</td></tr>
 <tr><td>Ajustar al ancho de página</td><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Con <b>ajustar al ancho de página</b> activo, el zoom sigue a la ventana cuando la
@@ -28130,6 +28168,7 @@ inserir o seu.</p>
 <table class="hkeys">
 <tr><td>Aproximar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Afastar</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoom com a roda do mouse</td><td><kbd>Ctrl</kbd> + roda do mouse</td></tr>
 <tr><td>Ajustar à largura da página</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Com <b>ajustar à largura da página</b> ativo, o zoom acompanha a janela quando você a
@@ -28800,6 +28839,7 @@ niveau ou saisir le vôtre.</p>
 <table class="hkeys">
 <tr><td>Zoom avant</td><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Zoom arrière</td><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoom avec la molette</td><td><kbd>Ctrl</kbd> + molette</td></tr>
 <tr><td>Ajuster à la largeur de page</td><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Avec <b>ajuster à la largeur de page</b> actif, le zoom suit la fenêtre quand vous la
@@ -29461,6 +29501,7 @@ poziom albo wpisać własny.</p>
 <table class="hkeys">
 <tr><td>Powiększ</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Pomniejsz</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Powiększanie kółkiem myszy</td><td><kbd>Ctrl</kbd> + kółko myszy</td></tr>
 <tr><td>Dopasuj do szerokości strony</td><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Przy aktywnym <b>dopasowaniu do szerokości strony</b> powiększenie podąża za oknem podczas
@@ -30115,6 +30156,7 @@ un livello o inserirne uno tuo.</p>
 <table class="hkeys">
 <tr><td>Aumenta zoom</td><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>+</kbd></td></tr>
 <tr><td>Riduci zoom</td><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>−</kbd></td></tr>
+<tr><td>Zoom con la rotellina</td><td><kbd>Ctrl</kbd> + rotellina</td></tr>
 <tr><td>Adatta alla larghezza della pagina</td><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>0</kbd></td></tr>
 </table>
 <p>Con <b>adatta alla larghezza della pagina</b> attivo, lo zoom segue la finestra quando la
