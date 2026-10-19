@@ -63,6 +63,7 @@
       "publisher": "CN=46D2EB28-AC45-4F73-ABEB-F2221D008BAB",
       "publisherDisplayName": "Suvantra",
       "applicationId": "PureQuillWriter",
+      "customExtensionsPath": "build/appx-dateitypen.xml",
       "displayName": "PureQuill Writer",
       "backgroundColor": "#8C3B2E",
       "minVersion": "10.0.17763.0",

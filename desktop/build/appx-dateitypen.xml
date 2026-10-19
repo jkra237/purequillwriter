@@ -1,0 +1,13 @@
+
+          <uap:Extension Category="windows.fileTypeAssociation">
+            <uap:FileTypeAssociation Name="dokumente">
+              <uap:SupportedFileTypes>
+                <uap:FileType>.docx</uap:FileType>
+                <uap:FileType>.odt</uap:FileType>
+                <uap:FileType>.rtf</uap:FileType>
+                <uap:FileType>.md</uap:FileType>
+                <uap:FileType>.markdown</uap:FileType>
+                <uap:FileType>.txt</uap:FileType>
+              </uap:SupportedFileTypes>
+            </uap:FileTypeAssociation>
+          </uap:Extension>
