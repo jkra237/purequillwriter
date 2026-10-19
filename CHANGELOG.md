@@ -103,6 +103,33 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **RTF neu: lesen und „Speichern als › RTF“** (Toms Frage „wie steht es um
+  RTF?“). Der alte Leser arbeitete mit Textersetzungen und kannte keine
+  Gruppen: Fett, das RTF mit der schließenden Klammer beendet, blieb bis zum
+  Absatzende hängen; \uN kam samt Ersatzzeichen an („Gröößße“, „5 €€“);
+  Bilddaten standen als Hexkolonnen im Text, Listendefinitionen als
+  Steuerzeichen-Salat; Schrift, Größe, Farbe, Ausrichtung, Listen,
+  Tabellen, Links, Fußnoten, Kopfzeilen fehlten. Jetzt rtfLesen(): erst ein
+  Gruppenbaum, dann ein Durchlauf mit Zustand je Gruppe, Codepage je Schrift
+  (\fcharset) bzw. Datei (\ansicpg), Zielgruppen eigens (Vorlagen, Listen,
+  Fuß-/Endnoten auch als {\*\footnote}, Kopf-/Fußzeilen samt erster/gerader
+  Seite, Bilder PNG/JPEG/DIB, schwebende Formen \shp mit Lage und Umlauf,
+  Felder/Links, Kommentare mit Bereich, verborgener und gelöschter Text,
+  Tabellen mit verbundenen Zellen, Breiten und „ohne Rahmen“). RTF-Dateien
+  werden als Bytes gelesen, nicht als UTF-8. Die Startnummer einer
+  fortgeführten Liste nimmt er aus \listtext — LibreOffice schreibt sie nur
+  dort.
+  rtfBlob()/exportRtf(): Aufbau wie odtBlob, jeder Absatz wiederholt das
+  Format seiner Vorlage (so lesen es Word und LibreOffice), Text außerhalb
+  ASCII als \uN. Menü Speichern als › Rich Text Format, Hilfe (7 Sprachen).
+  Der Satzbau (Absätze aus Läufen → HTML) ist dafür aus dem .doc-Leser
+  herausgelöst: wortSatz() und wortListenStil() gelten jetzt für .doc und
+  .rtf. In Links fallen Unterstreichung und Farbe weg, wie beim Word-Leser.
+  `check-umlauf --modus rtf`: eigener Umlauf 42/42 mit Fixpunkt, und
+  LibreOffice öffnet unsere RTF und speichert sie neu — auch 42/42. Eine
+  RTF, die LibreOffice direkt aus der Word-Datei macht, und die Testdatei
+  mit Kommentar, Endnote, Änderungen und Abständen kamen ebenfalls richtig
+  an. Alle anderen Modi weiter 42/42, Export 302/302.
 - **Alte Word-Dateien (.doc, Word 97–2003) öffnen** (Toms Frage, Stufe 1–3
   gewählt): eigener Leser `docLesen()`, ohne Bibliothek, wie der
   Word-Leser. Übernimmt Text samt Sonderzeichen (8-Bit- und Unicode-Stücke),

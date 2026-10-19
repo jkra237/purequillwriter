@@ -8,6 +8,9 @@
  *          LibreOffice wandelt die .docx in .odt, die wird geöffnet.
  *   odt    Speichern als OpenDocument → öffnen. Mit LibreOffice zusätzlich:
  *          LibreOffice öffnet unsere .odt und speichert sie selbst neu.
+ *   rtf    Speichern als RTF → öffnen. Mit LibreOffice zusätzlich: LibreOffice
+ *          öffnet unsere .rtf und speichert sie als eigene RTF neu, die
+ *          wird geöffnet (prüft Schreiben und Lesen gegen ein echtes Programm).
  *   doc    (nur mit LibreOffice) Speichern als Word → LibreOffice macht daraus
  *          eine alte .doc (Word 97–2003), die öffnet der .doc-Leser. Bilder,
  *          Fußnoten, Kopf-/Fußzeile liest er nicht — dort steht „-“, das ist
@@ -71,8 +74,8 @@ const ev = async x => { const r = await send("Runtime.evaluate", { expression: x
   if (r.result.exceptionDetails) throw new Error(r.result.exceptionDetails.exception?.description || r.result.exceptionDetails.text); return r.result.result.value; };
 
 /* Wie gespeichert und wie zurückgelesen wird, je Modus */
-const SPEICHERN = { word: "await exportDoc()", doc: "await exportDoc()", odt: "blob=await odtBlob(doc())", nativ: "await exportHtml()" }[MODUS];
-const ENDUNG = { word: "docx", doc: "docx", odt: "odt", nativ: "html" }[MODUS];
+const SPEICHERN = { word: "await exportDoc()", doc: "await exportDoc()", rtf: "blob=await rtfBlob(doc())", odt: "blob=await odtBlob(doc())", nativ: "await exportHtml()" }[MODUS];
+const ENDUNG = { word: "docx", doc: "docx", rtf: "rtf", odt: "odt", nativ: "html" }[MODUS];
 const fang = `async()=>{let blob=null;const oZ=window.dateiZiel,oA=window.dateiAblegen;
   window.dateiZiel=async()=>null;window.dateiAblegen=async(n,b)=>{blob=b};
   try{${SPEICHERN}}finally{window.dateiZiel=oZ;window.dateiAblegen=oA}
@@ -133,7 +136,7 @@ try {
     const zielOrdner = path.join(aus, "lo");
     const filter = MODUS === "nativ" ? ["--infilter=HTML (StarWriter)"] : [];
     try {
-      const zielFmt = MODUS === "doc" ? "doc:MS Word 97" : "odt:writer8", zielEnd = MODUS === "doc" ? "doc" : "odt";
+      const zielFmt = MODUS === "doc" ? "doc:MS Word 97" : MODUS === "rtf" ? "rtf" : "odt:writer8", zielEnd = MODUS === "doc" ? "doc" : MODUS === "rtf" ? "rtf" : "odt";
       execFileSync(SOFFICE, ["-env:UserInstallation=" + PROFIL, "--headless", "--norestore", ...filter, "--convert-to", zielFmt, "--outdir", zielOrdner, eigen], { stdio: "ignore", timeout: 120000 });
       fremd64 = (await fsp.readFile(path.join(zielOrdner, "pruefung." + zielEnd))).toString("base64");
     } catch (e) { console.log("LibreOffice-Schritt gescheitert: " + e.message); }
@@ -146,8 +149,9 @@ try {
     const umbrechen=()=>{paginate();paginate();flush()};
     const gerendert=r=>{if(!r||!r.html)return r;const alt=d0.html;ed0.innerHTML=r.html;umbrechen();const h=d0.html;
       d0.html=alt;ed0.innerHTML=alt;flush();return {...r,html:h}};
-    const A=gerendert(${MODUS === "nativ" ? "null" : `await zipDokument("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`});
-    const B=gerendert(${fremd64 ? (MODUS === "doc" ? `docLesen(b(${JSON.stringify(fremd64)}))` : `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))`) : "null"});
+    const oeffne=(name,buf)=>name.endsWith(".rtf")?rtfLesen(new TextDecoder("latin1").decode(buf)):zipDokument(name,buf);
+    const A=gerendert(${MODUS === "nativ" ? "null" : `await oeffne("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`});
+    const B=gerendert(${fremd64 ? (MODUS === "doc" ? `docLesen(b(${JSON.stringify(fremd64)}))` : MODUS === "rtf" ? `await oeffne("p.rtf",b(${JSON.stringify(fremd64)}))` : `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))`) : "null"});
     const merk=r=>{if(!r)return null;const t=document.createElement("div");t.innerHTML=r.html||"";const q=s=>t.querySelectorAll(s).length;
       const st=p=>[...t.querySelectorAll("[style]")].filter(e=>e.style[p]).length;
       return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"h4":q("h4"),"Titel/Untertitel":q('p[data-fv="titel"]')+"/"+q('p[data-fv="untertitel"]'),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
@@ -164,7 +168,7 @@ try {
     /* Fixpunkt: das Ergebnis erneut speichern und öffnen — muss gleich bleiben */
     const dq=doc(),merkHtml=dq.html,merkFn=dq.footnotes;
     const runde=async r=>{dq.html=r.html;dq.footnotes=r.footnotes||[];document.getElementById("editor").innerHTML=r.html;umbrechen();
-      return await zipDokument("x.${ENDUNG}",(await (${fang})()).buffer)};
+      return await oeffne("x.${ENDUNG}",(await (${fang})()).buffer)};
     let fixpunkt=null;
     if(A){const A2=await runde(A),A3=await runde(A2);
       const ohneId=h=>String(h||"").replace(/data-(fn|en|n)="[^"]*"/g,"").replace(/src="data:[^"]*"/g,"");
@@ -176,7 +180,7 @@ try {
   const { Q, A, B, Ahtml, Bhtml, fixpunkt } = JSON.parse(erg);
   await fsp.writeFile(path.join(aus, "import-a.html"), Ahtml || "");
   await fsp.writeFile(path.join(aus, "import-b.html"), Bhtml || "");
-  const kopfA = { word: "Word", doc: "Word", odt: "PQ-ODT", nativ: "—" }[MODUS], kopfB = { word: "LO-ODT", doc: "LO-.doc", odt: "LO neu gesp.", nativ: "LO-Writer" }[MODUS];
+  const kopfA = { word: "Word", doc: "Word", rtf: "PQ-RTF", odt: "PQ-ODT", nativ: "—" }[MODUS], kopfB = { word: "LO-ODT", doc: "LO-.doc", rtf: "LO-RTF", odt: "LO neu gesp.", nativ: "LO-Writer" }[MODUS];
   const breite = Math.max(...Object.keys(Q).map(k => k.length));
   let aOk = 0, bOk = 0; const n = Object.keys(Q).length;
   console.log("      " + "Merkmal".padEnd(breite) + "  " + "Original".padEnd(26) + kopfA.padEnd(26) + kopfB);

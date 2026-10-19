@@ -12144,6 +12144,329 @@ ${bilder.map(b=>`<manifest:file-entry manifest:full-path="${b.name}" manifest:me
     ...bilder.map(b=>({name:b.name,bytes:b.bytes,store:true}))
   ]);
 }
+/* ================= RTF schreiben =================
+   „Speichern als › RTF“ (seit 2026-10-19). Aufbau wie odtBlob: dieselbe
+   Vorbereitung (freiZiele, docxEinebnen, Kommentare), dieselben Merkmale.
+   RTF kennt keine Vererbung von Vorlagenformat in den Absatz: jeder Absatz
+   wiederholt nach \pard\plain, was seine Vorlage vorgibt — so schreibt es
+   Word, und so lesen es LibreOffice und rtfLesen. Text außerhalb von ASCII
+   als \uN mit „?“ als Ersatz (\uc1); die Datei ist reines ASCII. */
+const RTF_VORLAGEN={p:0,h1:1,h2:2,h3:3,h4:4,titel:15,untertitel:16,zitat:17,toent:18,typo:19,unterschrift:20,fuss:21,end:22};
+async function rtfBlob(d){
+  const f=fmtOf(d),groesse=d.size||S.settings.size,schrift=d.font||S.settings.font;
+  const tw=mm=>Math.round(mm*1440/25.4);
+  const textbreiteTw=tw(f.w-f.m[1]-f.m[3]);
+  const container=document.createElement("div");container.innerHTML=d.html||"";
+  freiZiele(d,container);
+  docxEinebnen(container);
+  const kommentare=wKommentarePlanen(container);
+  const freiDy=freiVersatzMm(d),frei={};
+  const schriften=[schrift];
+  const fNr=n=>{let i=schriften.findIndex(x=>x.toLowerCase()===String(n).toLowerCase());if(i<0){schriften.push(n);i=schriften.length-1}return i};
+  const farben=[];
+  const cNr=hex=>{hex=String(hex).toUpperCase();let i=farben.indexOf(hex);if(i<0){farben.push(hex);i=farben.length-1}return i+1};
+  const txt=s=>{let o="";for(const ch of String(s)){const c=ch.charCodeAt(0);
+    if(ch==="\\"||ch==="{"||ch==="}")o+="\\"+ch;
+    else if(ch==="\u00a0")o+="\\~";else if(ch==="\u00ad")o+="\\-";else if(ch==="\u2011")o+="\\_";
+    else if(ch==="\t")o+="\\tab ";
+    else if(c<128)o+=ch;
+    else for(let k=0;k<ch.length;k++){let u=ch.charCodeAt(k);if(u>32767)u-=65536;o+="\\u"+u+"?"}}
+    return o};
+  const lhTw=Math.round(lhOf(d)*240),nachTw=Math.round(psOf(d)*groesse*20);
+  const fs=pt=>Math.round(pt*2);
+  /* Was eine Vorlage am Absatz und an den Zeichen vorgibt — einmal für die
+     Vorlagentabelle, und an jedem Absatz wiederholt */
+  const VOR={
+    0:{name:"Normal",p:"",c:""},
+    1:{name:"heading 1",p:"\\outlinelevel0\\keepn\\sb240\\sa80",c:`\\b\\fs${fs(groesse*UEBERSCHRIFT_FAKTOR[1])}`},
+    2:{name:"heading 2",p:"\\outlinelevel1\\keepn\\sb240\\sa80",c:`\\b\\fs${fs(groesse*UEBERSCHRIFT_FAKTOR[2])}`},
+    3:{name:"heading 3",p:"\\outlinelevel2\\keepn\\sb240\\sa80",c:`\\b\\fs${fs(groesse*UEBERSCHRIFT_FAKTOR[3])}`},
+    4:{name:"heading 4",p:"\\outlinelevel3\\keepn\\sb240\\sa80",c:`\\b\\i\\fs${fs(groesse*UEBERSCHRIFT_FAKTOR[4])}`},
+    15:{name:"Title",p:"\\sa80",c:`\\fs${fs(groesse*TITEL_FAKTOR.titel)}`},
+    16:{name:"Subtitle",p:"\\sa160",c:`\\fs${fs(groesse*TITEL_FAKTOR.untertitel)}\\cf${cNr("595959")}`},
+    17:{name:"Quote",p:"\\qc\\li864\\ri864\\sb200\\sa160",c:`\\i\\cf${cNr("404040")}`},
+    18:{name:"Intense Quote",p:`\\qc\\li864\\ri864\\sb360\\sa360\\brdrt\\brdrs\\brdrw10\\brsp200\\brdrcf${cNr("4472C4")}\\brdrb\\brdrs\\brdrw10\\brsp200\\brdrcf${cNr("4472C4")}`,c:`\\i\\cf${cNr("4472C4")}`},
+    19:{name:"PQ Zitat typografisch",p:"\\ql\\li440\\ri320\\sb200\\sa160",c:`\\i\\cf${cNr("404040")}`},
+    20:{name:"caption",p:"\\sb60\\sa160",c:`\\i\\fs${fs(groesse*0.85)}`},
+    21:{name:"footnote text",p:"",c:"\\fs20"},
+    22:{name:"endnote text",p:"",c:"\\fs20"}
+  };
+  /* Absatzbeginn: Vorlage, deren Format, Abstände, eigenes Absatzformat */
+  let umbruch=false,anker="";
+  const kopfVon=(s,extra,intbl)=>{
+    const v=VOR[s]||VOR[0];
+    let a=`\\pard\\plain\\s${s}${intbl?"\\intbl":""}`+v.p+(/\\s[ab]\d/.test(v.p)?"":`\\sa${nachTw}`)+`\\sl${lhTw}\\slmult1`+(extra||"");
+    if(umbruch){a+="\\pagebb";umbruch=false}
+    return a+`\\f0\\fs${fs(groesse)}`+v.c+" ";
+  };
+  const ausr=j=>j==="center"?"\\qc":j==="right"?"\\qr":j==="both"?"\\qj":j==="left"?"\\ql":"";
+  /* Inline-Inhalt — Leerraum wie im Editor (siehe inlineAblaufen) */
+  const fnText=new Map((d.footnotes||[]).map(x=>[x.id,x.text])),enText=new Map((d.endnotes||[]).map(x=>[x.id,x.text]));
+  const notenGesehen=new Set();
+  const kommentarAbsaetze=n=>{const t=document.createElement("div");t.innerHTML=n.html||"";
+    const z=[...t.querySelectorAll("p,li,h1,h2,h3,h4,div")].filter(e=>!e.querySelector("p,li,div")).map(e=>e.textContent);
+    return z.length?z:[t.textContent||""]};
+  const zeichen=st=>{
+    let a="";
+    if(st.b)a+="\\b";if(st.i)a+="\\i";if(st.u)a+="\\ul";if(st.strike)a+="\\strike";
+    if(st.vert)a+=st.vert==="superscript"?"\\super":"\\sub";
+    if(st.color)a+="\\cf"+cNr(st.color);if(st.hi)a+="\\chcbpat"+cNr(st.hi);
+    if(st.caps)a+="\\caps";if(st.sz)a+="\\fs"+st.sz;if(st.font)a+="\\f"+fNr(st.font);
+    return a;
+  };
+  const inline=(node,st,ws,out)=>{
+    node.childNodes.forEach(n=>{
+      if(n.nodeType===3){
+        let t=n.nodeValue.replace(/[ \t\n\r\f]+/g," ");
+        if(ws.vorn&&t[0]===" ")t=t.slice(1);
+        if(!t)return;
+        ws.vorn=t[t.length-1]===" ";
+        const z=zeichen(st);
+        out.push(z?`{${z} ${txt(t)}}`:txt(t));
+        return;
+      }
+      if(n.nodeType!==1)return;
+      const tag=n.tagName.toLowerCase();
+      if(tag==="sup"&&(n.classList.contains("fn")||n.classList.contains("en"))){
+        const end=n.classList.contains("en"),key=(end?"e:":"f:")+(end?n.dataset.en:n.dataset.fn);
+        if(notenGesehen.has(key)){out.push("{\\super *}");ws.vorn=false;return}
+        notenGesehen.add(key);
+        const t=(end?enText.get(n.dataset.en):fnText.get(n.dataset.fn))||"";
+        out.push(`{\\super\\chftn}{\\footnote${end?"\\ftnalt":""}\\pard\\plain\\s${end?22:21}\\f0\\fs20 {\\super\\chftn} ${txt(t)}}`);
+        ws.vorn=false;return;
+      }
+      if(n.classList.contains("wroh"))return;
+      if(n.classList.contains("wtab")){out.push("\\tab ");ws.vorn=false;return}
+      if(n.classList.contains("anch")&&(n.dataset.wkStart||n.dataset.wkEnde)){
+        if(n.dataset.wkStart)out.push(`{\\*\\atrfstart ${n.dataset.wkStart}}`);
+        inline(n,st,ws,out);
+        if(n.dataset.wkEnde){
+          const k=kommentare.find(x=>x.cid===n.dataset.wkEnde),w=(k&&k.n.wort)||{};
+          out.push(`{\\*\\atrfend ${n.dataset.wkEnde}}{\\*\\atnid ${txt(w.initialen||"PQ")}}{\\*\\atnauthor ${txt(w.autor||"PureQuill")}}\\chatn`+
+            `{\\*\\annotation{\\*\\atnref ${n.dataset.wkEnde}}\\pard\\plain\\f0\\fs20 `+(k?kommentarAbsaetze(k.n):[]).map(txt).join("\\par\\pard\\plain\\f0\\fs20 ")+"}");
+        }
+        return;
+      }
+      if(tag==="br"){out.push("\\line ");ws.vorn=true;return}
+      if(tag==="img"||tag==="figure")return;
+      const neu={...st};
+      if(tag==="b"||tag==="strong"||n.style?.fontWeight>="600")neu.b=true;
+      if(tag==="i"||tag==="em")neu.i=true;
+      if(tag==="u")neu.u=true;
+      if(tag==="s"||tag==="strike"||tag==="del")neu.strike=true;
+      if(tag==="sup")neu.vert="superscript";
+      if(tag==="sub")neu.vert="subscript";
+      if(tag==="font"&&n.getAttribute("color"))neu.color=n.getAttribute("color").replace("#","").toUpperCase();
+      if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+      if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
+      if(n.style&&n.style.textTransform==="uppercase")neu.caps=true;
+      if(n.style&&n.style.fontSize){
+        const absolut=/calc\(\s*([\d.]+)pt/.exec(n.style.fontSize);
+        const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
+        const basis=st.pt||groesse;
+        const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
+        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==Math.round(groesse*2))neu.sz=hp;else delete neu.sz}
+      }
+      const fam=(n.style&&n.style.fontFamily)||(tag==="font"&&n.getAttribute("face"))||"";
+      if(fam){const erst=fam.split(",")[0].replace(/["']/g,"").trim();
+        if(erst&&erst.toLowerCase()!==String(schrift).toLowerCase())neu.font=erst;else delete neu.font}
+      if(tag==="a"){
+        const innen=[];inline(n,neu,ws,innen);
+        out.push(`{\\field{\\*\\fldinst HYPERLINK "${txt(n.getAttribute("href")||"")}"}{\\fldrslt ${innen.join("")}}}`);
+        return;
+      }
+      inline(n,neu,ws,out);
+    });
+  };
+  const absatz=(el,s,extra,o)=>{
+    o=o||{};
+    const out=[];inline(el,{},{vorn:true},out);
+    let inhalt=out.join("");
+    if(inhalt.endsWith("\\line "))inhalt=inhalt.slice(0,-6);
+    const a=anker;anker="";
+    return kopfVon(s,extra,o.intbl)+a+inhalt+(o.ende||"\\par")+"\n";
+  };
+  const hexVon=bytes=>{let h="";for(let i=0;i<bytes.length;i++){h+=(bytes[i]<16?"0":"")+bytes[i].toString(16);if(i%64===63)h+="\n"}return h};
+  const pict=(info,wTw,hTw)=>`{\\pict\\${info.ext==="png"?"pngblip":"jpegblip"}\\picw${info.w}\\pich${info.h}\\picwgoal${wTw}\\pichgoal${hTw}\n${hexVon(info.bytes)}}`;
+  const form=(info,wTw,hTw,w)=>`{\\shp{\\*\\shpinst\\shpleft${w.x}\\shptop${w.y}\\shpright${w.x+wTw}\\shpbottom${w.y+hTw}\\shpfhdr0${w.bx}\\shpbxignore${w.by}\\shpbyignore`+
+    `\\shpwr${w.wr}\\shpwrk0\\shpfblwtxt${w.hinter?1:0}\\shpz0{\\sp{\\sn shapeType}{\\sv 75}}`+
+    (w.posh!=null?`{\\sp{\\sn posh}{\\sv ${w.posh}}}{\\sp{\\sn posrelh}{\\sv 0}}`:"")+
+    (w.hinter?"{\\sp{\\sn fBehindDocument}{\\sv 1}}":"")+
+    `{\\sp{\\sn pib}{\\sv ${pict(info,wTw,hTw)}}}}}`;
+  const figur=async fig=>{
+    const img=fig.querySelector("img");if(!img)return "";
+    const info=await bildInfo(img);if(!info)return "";
+    if(fig.classList.contains("umfl")){
+      const rechts=fig.dataset.seite==="rechts";
+      const wTw=Math.round(textbreiteTw*(+fig.dataset.w||40)/100),hTw=Math.round(wTw*info.h/info.w);
+      anker+=form(info,wTw,hTw,{x:0,y:0,bx:"\\shpbxcolumn",by:"\\shpbypara",wr:2,posh:rechts?3:1});
+      return "";
+    }
+    if(fig.classList.contains("free")){
+      const wTw=tw(+fig.dataset.fw||40),hTw=tw(+fig.dataset.fh||16),zumAbsatz=fig.dataset.fabsatz!=null;
+      return form(info,wTw,hTw,{x:tw(+fig.dataset.fx||0),y:tw(zumAbsatz?+fig.dataset.fabsatz:(+fig.dataset.fy||0)+freiDy),
+        bx:"\\shpbxmargin",by:zumAbsatz?"\\shpbypara":"\\shpbymargin",wr:3,hinter:fig.dataset.lage==="hinter"});
+    }
+    const wTw=Math.round(textbreiteTw*(+fig.dataset.w||70)/100),hTw=Math.round(wTw*info.h/info.w);
+    const j=jcVon(fig)||"center";
+    const a=anker;anker="";
+    let x=kopfVon(0,ausr(j))+a+pict(info,wTw,hTw)+"\\par\n";
+    const cap=fig.querySelector("figcaption");
+    if(cap&&cap.textContent.trim())x+=absatz(cap,RTF_VORLAGEN.unterschrift,ausr(j));
+    return x;
+  };
+  /* Listen: eine Listendefinition je Liste, Ebenen aus den tatsächlich
+     verschachtelten Listen; \lsN am Absatz */
+  const listDefs=[],listOver=[];
+  const liste=el=>{
+    const ebenen=[];
+    const sammle=(l,i)=>{if(i>8)return;if(!ebenen[i])ebenen[i]={tag:l.tagName.toLowerCase(),ls:listStyleOf(l),start:parseInt(l.getAttribute("start"),10)||1};
+      l.querySelectorAll(":scope > li > ul, :scope > li > ol").forEach(u=>sammle(u,i+1))};
+    sammle(el,0);
+    const nr=listDefs.length+1,id=1000+nr;
+    listDefs.push(`{\\list\\listtemplateid${id}\\listhybrid`+[...Array(9)].map((_,i)=>{
+      const e=ebenen[i]||{tag:(ebenen[ebenen.length-1]||{tag:"ul"}).tag,ls:"",start:1};
+      const v=odtListenEbene(e.tag,e.ls,i);
+      const lage=`\\fi-360\\li${(i+1)*720}\\jclisttab\\tx${(i+1)*720}`;
+      if(v.bullet)return `{\\listlevel\\levelnfc23\\levelnfcn23\\leveljc0\\leveljcn0\\levelfollow0\\levelstartat1{\\leveltext\\'01${txt(v.bullet)};}{\\levelnumbers;}${lage}}`;
+      const nfc={"1":0,"a":4,"A":3,"i":2,"I":1}[v.num]||0;
+      return `{\\listlevel\\levelnfc${nfc}\\levelnfcn${nfc}\\leveljc0\\leveljcn0\\levelfollow0\\levelstartat${e.start||1}{\\leveltext\\'02\\'0${i}${txt(v.suffix)};}{\\levelnumbers\\'01;}${lage}}`;
+    }).join("")+`{\\listname ;}\\listid${id}}`);
+    listOver.push(`{\\listoverride\\listid${id}\\listoverridecount0\\ls${nr}}`);
+    const eintraege=(l,i)=>{
+      let x="";
+      [...l.children].forEach(li=>{
+        if(li.tagName.toLowerCase()!=="li")return;
+        const unter=li.querySelector(":scope > ul, :scope > ol");
+        const klon=li.cloneNode(true);
+        if(unter)klon.querySelector(":scope > ul, :scope > ol").remove();
+        x+=absatz(klon,0,`\\ls${nr}\\ilvl${i}\\fi-360\\li${(i+1)*720}`);
+        if(unter)x+=eintraege(unter,i+1);
+      });
+      return x;
+    };
+    return eintraege(el,0);
+  };
+  const tabelle=async t=>{
+    const zeilen=[...t.rows].filter(tr=>tr.children.length);
+    if(!zeilen.length)return "";
+    /* Raster wie bei odtBlob: welche Rasterzelle von welcher td stammt */
+    const raster=zeilen.map(()=>[]);let breite=0;
+    zeilen.forEach((tr,r)=>{let g=0;
+      [...tr.children].forEach(td=>{while(raster[r][g])g++;
+        const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilen.length-r));
+        for(let k=0;k<rs;k++)for(let j=0;j<cs;j++)raster[r+k][g+j]={td,erst:k===0&&j===0,hor:j>0,ver:k>0,rs,cs};
+        g+=cs});
+      breite=Math.max(breite,raster[r].length)});
+    const cg=t.querySelector(":scope > colgroup");
+    const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
+    const ohne=t.getAttribute("data-rahmen")==="ohne";
+    const grenze=[];let x0=0;
+    for(let i=0;i<breite;i++){x0+=Math.round(proz[i]?textbreiteTw*proz[i]/100:textbreiteTw/breite);grenze.push(x0)}
+    const rahmenTw=ohne?"":"\\clbrdrt\\brdrs\\brdrw10\\clbrdrl\\brdrs\\brdrw10\\clbrdrb\\brdrs\\brdrw10\\clbrdrr\\brdrs\\brdrw10";
+    let x="";
+    for(let r=0;r<zeilen.length;r++){
+      let def="\\trowd\\trgaph108\\trleft0"+(umbruch?"":"");
+      for(let g=0;g<breite;g++){
+        const z=raster[r][g]||{};
+        def+=(z.cs>1&&!z.hor?"\\clmgf":"")+(z.hor?"\\clmrg":"")+(z.rs>1&&!z.ver?"\\clvmgf":"")+(z.ver?"\\clvmrg":"")+rahmenTw+"\\cellx"+grenze[g];
+      }
+      x+=def+"\n";
+      for(let g=0;g<breite;g++){
+        const z=raster[r][g];
+        if(!z||!z.erst){x+="\\pard\\plain\\intbl\\f0\\fs"+fs(groesse)+" \\cell\n";continue}
+        const td=z.td;
+        const bl=td.querySelector("p,ul,ol,figure,h1,h2,h3,h4")?[...td.children].filter(c=>!/^(ul|ol|table)$/i.test(c.tagName)):[td];
+        const teile=bl.length?bl:[td];
+        teile.forEach((b,k)=>{x+=absatz(b,0,ausr(jcVon(b)),{intbl:true,ende:k===teile.length-1?"\\cell":"\\par"})});
+      }
+      x+=def+"\\row\n";
+    }
+    return x;
+  };
+  const bloecke=async root=>{
+    let x="";
+    for(const el of [...root.children]){
+      const tag=el.tagName.toLowerCase();
+      if(el.classList.contains("enliste")||el.classList.contains("toc"))continue;
+      if(el.classList.contains("pgbreak")){umbruch=true;continue}
+      if(tag==="figure"&&el.classList.contains("free"))continue;
+      if(el.dataset&&el.dataset.fziel)anker+=el.dataset.fziel.split(",").map(n=>frei[n]||"").join("");
+      if(tag==="blockquote"){
+        const qs=el.getAttribute("data-qs")||"";
+        const s=qs==="toent"?RTF_VORLAGEN.toent:qs==="typo"?RTF_VORLAGEN.typo:RTF_VORLAGEN.zitat;
+        const teile=el.querySelector(":scope > p, :scope > div")?[...el.children]:[el];
+        for(const t of teile)x+=absatz(t,s,ausr(jcVon(t)||jcVon(el)));
+      }else if(tag==="hr"){
+        const k=el.getAttribute("data-linie")||"";
+        const r=k==="doppelt"?"\\brdrdb\\brdrw15":k==="punkte"?"\\brdrdot\\brdrw15":k==="dick"?"\\brdrs\\brdrw45":"\\brdrs\\brdrw10";
+        x+=absatz(el,0,"\\brdrb"+r+"\\brsp20");
+      }else if(tag==="p"&&el.dataset&&el.dataset.fv){
+        x+=absatz(el,el.dataset.fv==="titel"?RTF_VORLAGEN.titel:RTF_VORLAGEN.untertitel,ausr(jcVon(el)));
+      }else if(tag==="p"||tag==="div"){
+        const twv=v=>{const z=parseFloat(v);return z&&/em$/.test(v)?Math.round(z*groesse*20):0};
+        const ml=el.style?twv(el.style.marginLeft):0,ti=el.style?twv(el.style.textIndent):0;
+        x+=absatz(el,0,ausr(jcVon(el))+(ml>0?"\\li"+ml:"")+(ti?"\\fi"+ti:""));
+      }else if(/^h[1-4]$/.test(tag)){
+        x+=absatz(el,+tag[1],ausr(jcVon(el)));
+      }else if(tag==="ul"||tag==="ol")x+=liste(el);
+      else if(tag==="table")x+=await tabelle(el);
+      else if(tag==="figure")x+=await figur(el);
+      else if(el.querySelector&&el.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4"))x+=await bloecke(el);
+      else x+=absatz(el,0,"");
+    }
+    return x;
+  };
+  for(const fig of container.querySelectorAll("figure.fig.free"))frei[fig.dataset.fnr]=await figur(fig);
+  let body=await bloecke(container);
+  const verankert=new Set([...container.querySelectorAll("[data-fziel]")].flatMap(b=>b.dataset.fziel.split(",")));
+  for(const [nr,r] of Object.entries(frei))if(!verankert.has(nr))anker+=r;
+  if(anker||umbruch)body+=kopfVon(0,"")+anker+"\\par\n";
+
+  /* Kopf-/Fußzeilen: Zeilen als Absätze, Platzhalter als Felder */
+  const an=w=>hfOf(d,w).on&&(!/1$/.test(w)||d.ersteAnders)&&(!/2$/.test(w)||d.geradeAnders);
+  const feld=(befehl,erg)=>`{\\field{\\*\\fldinst ${befehl}}{\\fldrslt ${txt(erg)}}}`;
+  const hfRtf=(which,ziel)=>{
+    if(!an(which))return "";
+    const v=hfOf(d,which);
+    let t=String(v.text||"");
+    if(v.html!=null){const b=document.createElement("div");b.innerHTML=String(v.html).replace(/<br\s*\/?>/gi,"\n");t=b.textContent}
+    const q=v.align==="left"?"\\ql":v.align==="right"?"\\qr":"\\qc";
+    const zeile=z=>z.split(/(\{(?:seiten|pages|seite|page|titel|title|datum|date)\})/i).map(s=>
+      /^\{(seiten|pages)\}$/i.test(s)?feld("NUMPAGES","1"):/^\{(seite|page)\}$/i.test(s)?feld("PAGE","1"):
+      /^\{(titel|title)\}$/i.test(s)?feld("TITLE",tr(d.title)||""):/^\{(datum|date)\}$/i.test(s)?feld("DATE",new Date().toLocaleDateString()):txt(s)).join("");
+    return `{\\${ziel}`+t.split("\n").map(z=>`\\pard\\plain${q}\\f0\\fs${fs(groesse*0.85)} ${zeile(z)}\\par`).join("")+"}\n";
+  };
+  const kopf=hfRtf("hdr",d.geradeAnders?"headerr":"header")+hfRtf("hdr2","headerl")+hfRtf("hdr1","headerf")+
+    hfRtf("ftr",d.geradeAnders?"footerr":"footer")+hfRtf("ftr2","footerl")+hfRtf("ftr1","footerf");
+
+  const stilTab="{\\stylesheet"+Object.entries(VOR).map(([n,v])=>`{${n==="0"?"":"\\s"+n}${v.p}\\f0\\fs${fs(groesse)}${v.c}\\sbasedon0\\snext0 ${txt(v.name)};}`).join("")+"}";
+  const kopfRtf="{\\rtf1\\ansi\\ansicpg1252\\deff0\\uc1\n"+
+    "{\\fonttbl"+schriften.map((s,i)=>`{\\f${i}\\fnil\\fcharset0 ${txt(s)};}`).join("")+"}\n"+
+    "{\\colortbl;"+farben.map(h=>`\\red${parseInt(h.slice(0,2),16)}\\green${parseInt(h.slice(2,4),16)}\\blue${parseInt(h.slice(4,6),16)};`).join("")+"}\n"+
+    stilTab+"\n"+
+    (listDefs.length?`{\\*\\listtable${listDefs.join("")}}\n{\\*\\listoverridetable${listOver.join("")}}\n`:"")+
+    `{\\info{\\title ${txt(tr(d.title)||"")}}${S.settings.meinName?`{\\author ${txt(S.settings.meinName)}}`:""}}\n`+
+    `{\\*\\defchp\\f0\\fs${fs(groesse)}}\n`+
+    `\\paperw${tw(f.w)}\\paperh${tw(f.h)}\\margl${tw(f.m[3])}\\margr${tw(f.m[1])}\\margt${tw(f.m[0])}\\margb${tw(f.m[2])}`+
+    `\\headery${tw(f.hd)}\\footery${tw(f.fd)}${f.w>f.h?"\\landscape":""}${d.ersteAnders?"\\titlepg":""}${d.geradeAnders?"\\facingp":""}\\deftab709\n`+
+    `\\sectd${d.ersteAnders?"\\titlepg":""}\n`;
+  return new Blob([kopfRtf+kopf+body+"}"],{type:"application/rtf"});
+}
+/* „Speichern als › RTF“ — wie exportOdt: das Ziel von „Speichern“ bleibt
+   die Word-Datei */
+async function exportRtf(){
+  flush();const d=doc();
+  const name=safeName(tr(d.title))+".rtf";
+  let ziel=null;
+  try{ziel=await dateiZiel(name)}
+  catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
+  const blob=await rtfBlob(d);
+  try{await dateiAblegen(name,blob,"application/rtf",ziel)}
+  catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
+  commit();
+  return true;
+}
 /* „Speichern als › OpenDocument-Text“ — wie exportDoc, aber ohne die
    Datei zum Ziel von „Speichern“ zu machen: das bleibt die Word-Datei */
 async function exportOdt(){
@@ -13477,6 +13800,17 @@ async function ladeDokumente(dateien){
           continue;
         }
       }
+      /* RTF als Bytes lesen: rohe 8-Bit-Zeichen im Text gehören zur Codepage
+         der Datei, nicht zu UTF-8 */
+      if(ext==="rtf"){
+        const roh=new TextDecoder("latin1").decode(await f.arrayBuffer());
+        if(/^\s*\{\\rtf/.test(roh)){
+          const erg=rtfLesen(roh);
+          if(neuesDokumentAus(f.name,erg)){geladen++;docFehlt=erg.fehlt;
+            if(erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes}}else abgelehnt++;
+          continue;
+        }
+      }
       if(ZIPFORMATE.includes(ext)){
         const erg=await zipDokument(f.name,await f.arrayBuffer());
         if(neuesDokumentAus(f.name,erg)){geladen++;
@@ -13621,60 +13955,10 @@ function importDocumentText(name,raw){
   const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
   let html;
   if(ext==="md"||ext==="markdown")html=mdToHtml(raw);
-  else if(ext==="rtf"||/^\s*\{\\rtf/i.test(raw)){
-    /* Schrift, Größe und Abstände der Datei mitgeben, wie bei .docx */
-    const h=rtfToHtml(raw);html=h?{html:h,...rtfGrundschrift(raw)}:h;
-  }
+  else if(ext==="rtf"||/^\s*\{\\rtf/i.test(raw))html=rtfLesen(raw);
   else if(["html","htm","doc"].includes(ext)||/^\s*<(!doctype|html|meta|body|div|p|h[1-6])\b/i.test(raw))html=cleanHtml(raw);
   else html=textToHtml(raw);
   return neuesDokumentAus(name,html);
-}
-/* RTF ist reiner Text mit Steuerworten. Absätze, Auszeichnungen und
-   Sonderzeichen decken ab, was Textverarbeitungen üblicherweise ausgeben. */
-/* \'xx ist ein BYTE in der Codepage der Datei (\ansicpg, in der Praxis fast
-   immer 1252) — kein Unicode-Zeichen. String.fromCharCode() liest es als
-   Latin-1; für Umlaute stimmt das zufällig, aber der Bereich 0x80–0x9F geht
-   verloren, und genau dort liegen in Windows-1252 die typografischen
-   Anführungszeichen, die Gedankenstriche und das Eurozeichen. Gemessen kamen
-   aus Word-RTF „Zitat“, – und € als unsichtbare Steuerzeichen an. Die
-   Tabelle liefert der Browser selbst. */
-const RTF_CP=(()=>{try{return new TextDecoder("windows-1252")}catch(e){return null}})();
-const rtfByte=b=>RTF_CP?RTF_CP.decode(new Uint8Array([b])):String.fromCharCode(b);
-function rtfToHtml(raw){
-  let t=String(raw);
-  t=t.replace(/\\'([0-9a-f]{2})/gi,(m,h)=>rtfByte(parseInt(h,16)));
-  t=t.replace(/\\u(-?\d+) ?\??/g,(m,n)=>String.fromCharCode(+n<0?+n+65536:+n));
-  /* Gruppen, die nicht in den Text gehören */
-  t=t.replace(/\{\\\*[^{}]*\}/g,"");
-  t=t.replace(/\{\\(?:fonttbl|colortbl|stylesheet|info|generator)[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/gi,"");
-  const marken=[];
-  t=t.replace(/\\(par|line|b0|b|i0|i|ul0|ulnone|ul|strike0|strike)\b ?/g,(m,w)=>{
-    marken.push(w);return "\u0000"+(marken.length-1)+"\u0000"});
-  t=t.replace(/\\[a-z]+-?\d* ?/gi,"");     /* übrige Steuerworte */
-  t=t.replace(/[{}]/g,"");
-  let out="",offen=[],absatz="";
-  const zu=()=>{while(offen.length)absatz+="</"+offen.pop()+">"};
-  const auf=tag=>{if(!offen.includes(tag)){absatz+="<"+tag+">";offen.push(tag)}};
-  const ab=tag=>{const k=offen.indexOf(tag);if(k<0)return;
-    for(let j=offen.length-1;j>=k;j--)absatz+="</"+offen[j]+">";
-    const wieder=offen.slice(k+1);offen=offen.slice(0,k);
-    wieder.forEach(x=>{absatz+="<"+x+">";offen.push(x)})};
-  t.split(/\u0000(\d+)\u0000/).forEach((teil,idx)=>{
-    if(idx%2===1){
-      const w=marken[+teil];
-      if(w==="par"){zu();out+="<p>"+(absatz.trim()||"<br>")+"</p>";absatz=""}
-      else if(w==="line")absatz+="<br>";
-      else if(w==="b")auf("b"); else if(w==="b0")ab("b");
-      else if(w==="i")auf("i"); else if(w==="i0")ab("i");
-      else if(w==="ul")auf("u"); else if(w==="ul0"||w==="ulnone")ab("u");
-      else if(w==="strike")auf("s"); else if(w==="strike0")ab("s");
-      return;
-    }
-    absatz+=esc(teil.replace(/\r?\n/g,""));
-  });
-  zu();
-  if(absatz.trim())out+="<p>"+absatz+"</p>";
-  return out||null;
 }
 
 /* ---- .docx und .odt ----
@@ -15144,71 +15428,6 @@ function odtGrundschrift(inhaltXml,stilXml){
   }
   return grundAusZaehlung(gr,sch,zab,nab);
 }
-/* RTF: Schrifttabelle (\fonttbl), dann laufender Zustand je Gruppe —
-   \f Schrift, \fs Halbpunkte, \plain setzt zurück; \sl mit \slmult1 ist
-   ein Vielfaches (/240), \sa der Abstand danach in Twips. Gruppen, die keinen
-   Fließtext tragen (Tabellen der Kopfdaten, Bilder, Kopf-/Fußzeilen, alles
-   mit \*), werden übersprungen. */
-const RTF_UEBERSPRINGEN=/^\\(?:\*|fonttbl|colortbl|stylesheet|info|pict|header[lrf]?|footer[lrf]?|listtable|listoverridetable|themedata|colorschememapping|latentstyles|datastore|xmlnstbl|rsidtbl|generator|object|shp|footnote|field|fldinst)\b/;
-function rtfGrundschrift(raw){
-  const s=String(raw||"");
-  const schriften={};
-  const ft=s.indexOf("\\fonttbl");
-  if(ft>=0){
-    let tiefe=1,i=ft;while(i<s.length&&tiefe>0){i++;if(s[i]==="{")tiefe++;else if(s[i]==="}")tiefe--}
-    const tab=s.slice(ft,i);
-    const rx=/\{\\f(\d+)(?:\\[a-z]+-?\d* ?)*\s*([^;{}\\]+);/g;let m;
-    while(m=rx.exec(tab))schriften[m[1]]=m[2].trim();
-  }
-  const deffM=/\\deff(\d+)/.exec(s);const deff=deffM?deffM[1]:"0";
-  const gr=new Map(),sch=new Map(),zab=new Map(),nab=new Map();
-  const plus=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
-  let st={f:deff,fs:24,sl:0,mult:0,sa:null};const stapel=[];
-  const zaehle=n=>{
-    plus(gr,st.fs/2,n);
-    if(schriften[st.f])plus(sch,schriften[st.f],n);
-    if(st.sl>0&&st.mult)plus(zab,Math.round(st.sl/240*100)/100,n);
-    if(st.sa!=null)plus(nab,st.sa/20,n);
-  };
-  let i=0;
-  while(i<s.length){
-    const c=s[i];
-    if(c==="{"){
-      if(RTF_UEBERSPRINGEN.test(s.slice(i+1,i+40))){
-        let tiefe=1;i++;
-        while(i<s.length&&tiefe>0){if(s[i]==="\\"){i+=2;continue}if(s[i]==="{")tiefe++;else if(s[i]==="}")tiefe--;i++}
-        continue;
-      }
-      stapel.push({...st});i++;continue;
-    }
-    if(c==="}"){st=stapel.pop()||st;i++;continue}
-    if(c==="\\"){
-      const m=/^\\([a-z]+)(-?\d+)? ?/.exec(s.slice(i,i+40));
-      if(m){
-        const w=m[1],n=m[2]!=null?parseInt(m[2],10):null;
-        if(w==="f"&&n!=null)st.f=String(n);
-        else if(w==="fs"&&n>0)st.fs=n;
-        else if(w==="plain"){st.f=deff;st.fs=24}
-        else if(w==="pard"){st.sl=0;st.mult=0;st.sa=null}
-        else if(w==="sl")st.sl=n||0;
-        else if(w==="slmult")st.mult=n||0;
-        else if(w==="sa")st.sa=n;
-        else if(w==="tab")zaehle(1);
-        i+=m[0].length;
-        /* \binN: N rohe Bytes folgen */
-        if(w==="bin"&&n>0)i+=n;
-        continue;
-      }
-      /* \'xx ist ein Zeichen, \\ \{ \} ebenso; andere Steuerzeichen nicht */
-      if(s[i+1]==="'"){zaehle(1);i+=4;continue}
-      if("\\{}".includes(s[i+1]))zaehle(1);
-      i+=2;continue;
-    }
-    if(c!=="\r"&&c!=="\n")zaehle(1);
-    i++;
-  }
-  return grundAusZaehlung(gr,sch,zab,nab);
-}
 /* ---- OpenDocument lesen (seit 1.3 auf dem Stand des Word-Lesers) ----
    Bis 1.3 rund 60 Zeilen: Absätze, Überschriften, fett/kursiv/unter-/durch-
    gestrichen aus den automatischen Vorlagen, jede Liste als flache
@@ -15975,6 +16194,199 @@ function docPap(o,g){
   });
   return o;
 }
+/* ================= Gemeinsamer Satzbau für .doc und .rtf =================
+   Beide Leser liefern dieselbe Zwischenform: Absätze aus Läufen. Ein Absatz
+   trägt h (Überschriftsebene), art (Zitat, Titel, Bildunterschrift), jc,
+   links/erste (Twips), umbruch, linie, tief/ttp/zelle/tdef (Tabelle),
+   liste ({ebene,stil,nummer}) und runs. Läufe sind entweder Text ({h:HTML,
+   f:Zeichenformat}) oder besondere Stellen: seite (Umbruch im Absatz),
+   bild, fehlbild, schwebend, roh (fertiges HTML), linkAuf/linkZu,
+   ankerAuf/ankerZu (Kommentarbereich). Daraus entsteht hier das HTML nach
+   den Regeln des Word-Lesers. Zuerst für .doc geschrieben (2026-10-19),
+   für RTF herausgelöst. */
+const WORT_FORMATE=["b","i","u","s","vert","sz","font","color","hi","caps"];
+function wortSatz(absaetze,ctx){
+  const {grundGr,grundF,textBreite}=ctx;
+  const stilVon=(f,h,art)=>{
+    const st=[];
+    if(f.color&&f.color!=="000000")st.push("color:#"+f.color);
+    if(f.hi)st.push("background-color:#"+f.hi);
+    if(f.caps)st.push("text-transform:uppercase");
+    const soll=h?grundGr*(UEBERSCHRIFT_FAKTOR[h]||1):grundGr;
+    if(f.sz&&Math.abs(f.sz-soll)>=0.25&&!art)st.push("font-size:calc("+f.sz+"pt * var(--zoom,1))");
+    if(f.font&&f.font.toLowerCase()!==String(grundF).toLowerCase())st.push("font-family:"+wordSchriftStapel(f.font).replace(/"/g,"'"));
+    return st.join(";");
+  };
+  const inhalt=ab=>{
+    const h=ab.h,art=ab.art;
+    const teile=[];teile.bilder=[];teile.schwebend=[];
+    let out="",lauf="",lf=null,links=0;const anker=[];
+    const zu=()=>{
+      if(lauf&&lf){
+        /* In einem Link sind Unterstreichung und Farbe das Aussehen des
+           Links, kein Textformat — wie beim Word-Leser (imLink) */
+        const f=links?{...lf,u:false,color:null}:lf;
+        let x=lauf;const st=stilVon(f,h,art);
+        if(st)x='<span style="'+st+'">'+x+"</span>";
+        if(f.b&&!h)x="<b>"+x+"</b>";
+        if(f.i&&!(h===4))x="<i>"+x+"</i>";
+        if(f.u)x="<u>"+x+"</u>";
+        if(f.s)x="<s>"+x+"</s>";
+        if(f.vert==="sup")x="<sup>"+x+"</sup>";else if(f.vert==="sub")x="<sub>"+x+"</sub>";
+        out+=x;
+      }
+      lauf="";
+    };
+    for(const r of ab.runs){
+      if(r.h!=null){
+        const gleich=lf&&WORT_FORMATE.every(q=>(lf[q]||null)===(r.f[q]||null));
+        if(!gleich){zu();lf=r.f}
+        lauf+=r.h;continue;
+      }
+      zu();
+      if(r.seite){teile.push(out);out="";continue}
+      if(r.bild){teile.bilder.push(r.bild);continue}
+      if(r.schwebend){teile.schwebend.push(r.schwebend);continue}
+      if(r.roh){out+=r.roh;continue}
+      if(r.linkAuf!=null){out+='<a href="'+esc(r.linkAuf)+'" target="_blank" rel="noopener">';links++;continue}
+      if(r.linkZu){if(links){out+="</a>";links--}continue}
+      if(r.ankerAuf){anker.push(r.ankerAuf);out+=wAnchAuf(r.ankerAuf);continue}
+      if(r.ankerZu){const i=anker.indexOf(r.ankerZu);if(i>=0){anker.splice(i,1);out+="</span>"}continue}
+    }
+    zu();
+    out+="</a>".repeat(links);
+    /* Ein Kommentarbereich endet spätestens mit seinem Absatz */
+    out+="</span>".repeat(anker.length);
+    teile.push(out);
+    return teile;
+  };
+  /* Bilder im Text: steht im Absatz nur das Bild, tritt die Figur an seine
+     Stelle, sonst folgt sie ihm — wie beim Word-Leser */
+  const figurHtml=(b,al)=>{
+    const br=Math.min(100,Math.max(5,Math.round(b.breiteMm/textBreite*100)||50));
+    return `<figure class="fig" contenteditable="false" data-w="${br}" style="text-align:${al==="right"||al==="center"?al:"left"}">`+
+      `<img src="${b.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
+  };
+  let html="",offen=[];
+  /* Ein Absatz außerhalb von Liste und Tabelle */
+  const absatzHtml=ab=>{
+    const h=ab.h,art=ab.art,al=ab.jc||"";
+    const teile=inhalt(ab);
+    let r=(ab.umbruch?seitenumbruchHtml():"")+teile.schwebend.join("");
+    const figuren=teile.bilder.map(b=>figurHtml(b,al)).join("");
+    const nurBild=teile.every(x=>!x.replace(/<br>/g,"").trim());
+    /* Bildunterschrift direkt unter einem Bild: in dessen Figur */
+    if(art==="unterschrift"&&!nurBild&&/<\/figure>$/.test(html)&&!/<figcaption/.test(html.slice(html.lastIndexOf("<figure")))){
+      html=html.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+teile.join("")+"</figcaption></figure>");
+      return r;
+    }
+    if(figuren&&nurBild&&!h)return r+figuren;
+    /* Ein Absatz, der nur ein nicht lesbares Bild trug, fällt mit ihm weg */
+    if(ab.runs.some(x=>x.fehlbild)&&nurBild&&(h||art||ab.linie==null))return r;
+    teile.forEach((inh,ti)=>{
+      if(ti)r+=seitenumbruchHtml();
+      const leer=!inh.replace(/<br>/g,"").trim();
+      if(ti&&leer&&ti===teile.length-1)return;
+      if(leer&&!h&&!art&&ab.linie!=null){r+=linieHtml(ab.linie);return}
+      if(h){r+="<h"+h+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</h"+h+">";return}
+      if(art.startsWith("zitat:")){const qs=art.slice(6),za=zitatAusrichtung(qs,al);
+        r+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inh||"<br>")+"</blockquote>";return}
+      if(art==="titel"||art==="untertitel"){r+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</p>";return}
+      const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
+      const links=em(ab.links),erste=em(ab.erste);
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
+      r+=(st?'<p style="'+st+'">':"<p>")+(inh||"<br>")+"</p>";
+    });
+    return r+figuren;
+  };
+  /* Listen: offene Listen je Ebene; ein Wechsel der Art auf derselben Ebene
+     beginnt eine neue Liste. Nummer und Art rechnet der Leser aus. */
+  const listenZu=bis=>{while(offen.length>bis){const l=offen.pop();html+="</li></"+l.tag+">"}};
+  const listeHtml=ab=>{
+    const {ebene,stil,nummer}=ab.liste;
+    if(offen.length>ebene+1)listenZu(ebene+1);
+    const da=offen[ebene];
+    if(da&&(da.tag!==stil.tag||da.ls!==stil.ls))listenZu(ebene);
+    if(offen.length===ebene+1)html+="</li>";
+    while(offen.length<ebene+1){
+      const tiefer=offen.length<ebene;
+      const s=tiefer?{tag:"ul",ls:""}:stil;
+      html+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(s.tag==="ol"&&!tiefer&&nummer!==1?' start="'+nummer+'"':"")+">";
+      offen.push(s);
+      if(tiefer)html+="<li>";
+    }
+    html+="<li>"+(inhalt(ab).join("")||"<br>");
+  };
+  /* Tabellen: Zellen bis zur Zeilenmarke; die Zellgrenzen der Zeile ergeben
+     colspan, die Verbund-Merker rowspan, die Grenzen die Spaltenbreiten. */
+  let zeilen=[],zellen=[],zelleTeile=[];
+  const tabelleZu=()=>{
+    if(!zeilen.length&&!zellen.length)return;
+    if(zellen.length)zeilen.push({zellen,tdef:null});
+    const grenzen=[...new Set(zeilen.flatMap(z=>z.tdef?z.tdef.gr:[]))].sort((a,b)=>a-b);
+    const spalte=x=>{let i=grenzen.findIndex(g=>Math.abs(g-x)<=20);return i<0?0:i};
+    const raster=[];
+    let r=zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen)&&!zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen===false)?'<table data-rahmen="ohne">':"<table>";
+    if(grenzen.length>2){const summe=grenzen[grenzen.length-1]-grenzen[0];
+      if(summe>0)r+="<colgroup>"+grenzen.slice(1).map((g,i)=>`<col style="width:${Math.round((g-grenzen[i])/summe*1000)/10}%">`).join("")+"</colgroup>"}
+    zeilen.forEach((z,zi)=>{
+      r+="<tr>";raster[zi]=[];
+      z.zellen.forEach((inh,ci)=>{
+        const td=z.tdef,tc=td&&td.tc[ci]||{};
+        if(tc.mHor&&!tc.erstHor)return;
+        let von=ci,breit=1;
+        if(td&&td.gr.length>ci+1){von=spalte(td.gr[ci]);let ende=ci+1;
+          while(td.tc[ende]&&td.tc[ende].mHor&&!td.tc[ende].erstHor)ende++;
+          breit=Math.max(1,spalte(td.gr[Math.min(ende,td.gr.length-1)])-von)}
+        if(tc.mVer&&!tc.startVer){
+          for(let oz=zi-1;oz>=0;oz--){const oben=raster[oz]&&raster[oz][von];if(oben){oben.rs++;break}}
+          return;
+        }
+        const zelle={rs:1,i:r.length};raster[zi][von]=zelle;
+        r+="<td"+(breit>1?' colspan="'+breit+'"':"")+"\u0001"+zelle.i+"\u0001>"+(inh||"&nbsp;")+"</td>";
+      });
+      r+="</tr>";
+    });
+    r=r.replace(/\u0001(\d+)\u0001/g,(m,i)=>{const z=raster.flat().find(x=>x&&x.i===+i);return z&&z.rs>1?' rowspan="'+z.rs+'"':""});
+    html+=r+"</table>";
+    zeilen=[];zellen=[];zelleTeile=[];
+  };
+  for(const ab of absaetze){
+    if(ab.tief>=1){
+      listenZu(0);
+      if(ab.tief===1&&ab.ttp){zeilen.push({zellen,tdef:ab.tdef});zellen=[];zelleTeile=[];continue}
+      if(ab.tief>1&&ab.innerTtp)continue;
+      const tz=inhalt(ab);
+      zelleTeile.push(tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join(""));
+      if(ab.zelle&&ab.tief===1){
+        zellen.push(zelleTeile.length===1?zelleTeile[0]:zelleTeile.map(x=>"<p>"+(x||"<br>")+"</p>").join(""));
+        zelleTeile=[];
+      }
+      continue;
+    }
+    tabelleZu();
+    if(ab.liste){listeHtml(ab);continue}
+    listenZu(0);
+    /* Erst aufrufen, dann anhängen: absatzHtml schreibt eine Bild-
+       unterschrift selbst in die Figur davor (html+=… läse html vorher) */
+    const r=absatzHtml(ab);html+=r;
+  }
+  tabelleZu();listenZu(0);
+  /* Word hängt hinter jede Tabelle einen Pflichtabsatz und ans Ende einen
+     leeren — wie beim Word-Leser weg damit */
+  return html.replace(/(<\/table>)<p><br><\/p>/g,"$1").replace(/(<p><br><\/p>)+$/,"");
+}
+/* Listenart aus Zahlenformat und Ebenentext, mit Words Grundketten als
+   Grundstil (1. → a. → i. und • → o → ▪) — gemeinsam für .doc und .rtf */
+function wortListenStil(ebenen,ebene){
+  const eb=ebenen[ebene]||ebenen[0]||{fmt:"bullet",text:"•"};
+  const norm={...eb,text:String(eb.text||"").replace(/^[○◦]$/,"o").replace(/^[■]$/,"▪")};
+  let stil=docxListenStil(norm)||{tag:"ul",ls:""};
+  if(stil.tag==="ol"&&ebene>0&&String(eb.fmt).toLowerCase()===["decimal","lowerletter","lowerroman"][ebene%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
+  if(stil.tag==="ul"&&ebene>0){const oben=String((ebenen[0]||{}).text||"").trim(),z=String(norm.text||"").trim();
+    if(/^[•·]$/.test(oben)&&[/^[•·]$/,/^o$/,/^[▪§]$/][ebene%3].test(z))stil={tag:"ul",ls:""}}
+  return {stil,start:eb.start||1};
+}
 function docLesen(buf){
   const strom=oleStroeme(buf);
   const wd=strom("WordDocument");
@@ -16320,68 +16732,46 @@ function docLesen(buf){
         if(m&&m[0]<m[1]&&m[1]<=cp+1){komAuf.set(m[0],(komAuf.get(m[0])||[]).concat(id));komZu.set(m[1],(komZu.get(m[1])||[]).concat(id))}
       }
     }}
-  /* Inhalt eines Absatzes als HTML. Felder: Befehl (0x13…0x14) fällt weg,
-     das Ergebnis bleibt; HYPERLINK wird ein Link. 0x0C ist ein Seiten- oder
-     Abschnittswechsel und teilt den Absatz. */
-  const inhaltHtml=(ab,h,art)=>{
+  /* Läufe eines Absatzes für den gemeinsamen Satzbau (wortSatz). Felder:
+     Befehl (0x13…0x14) fällt weg, das Ergebnis bleibt; HYPERLINK wird ein
+     Link. 0x0C ist ein Seiten- oder Abschnittswechsel und teilt den Absatz. */
+  const laeufe=(ab,art)=>{
     const sc=stilChp(ab.istd);
     const basis=art?{sz:sc.sz,font:sc.font}:sc;
-    const teile=[];let out="",lauf="",lp=null,felder=[],anker=[];
-    teile.bilder=[];teile.schwebend=[];
-    const stilVon=chp=>{
-      const st=[];
-      if(chp.color&&chp.color!=="000000")st.push("color:#"+chp.color);
-      if(chp.hi)st.push("background-color:#"+chp.hi);
-      if(chp.caps)st.push("text-transform:uppercase");
-      const soll=h?grundGr*(UEBERSCHRIFT_FAKTOR[h]||1):grundGr;
-      if(chp.sz&&Math.abs(chp.sz-soll)>=0.25&&!art)st.push("font-size:calc("+chp.sz+"pt * var(--zoom,1))");
-      if(chp.font&&chp.font.toLowerCase()!==String(grundF).toLowerCase())st.push("font-family:"+wordSchriftStapel(chp.font).replace(/"/g,"'"));
-      return st.join(";");
-    };
-    const zu=()=>{
-      if(!lauf||!lp){lauf="";return}
-      let x=lauf;const st=stilVon(lp);
-      if(st)x='<span style="'+st+'">'+x+"</span>";
-      if(lp.b&&!h)x="<b>"+x+"</b>";
-      if(lp.i&&!(h===4))x="<i>"+x+"</i>";
-      if(lp.u)x="<u>"+x+"</u>";
-      if(lp.s)x="<s>"+x+"</s>";
-      if(lp.vert==="sup")x="<sup>"+x+"</sup>";else if(lp.vert==="sub")x="<sub>"+x+"</sub>";
-      out+=x;lauf="";
-    };
+    const runs=[],felder=[],leer=new Uint8Array(0);
     for(let cp=ab.von;cp<ab.bis;cp++){
       const c=zch[cp],k=c.charCodeAt(0);
-      if(komZu.has(cp)&&anker.length){zu();komZu.get(cp).forEach(id=>{const i=anker.indexOf(id);if(i>=0){anker.splice(i,1);out+="</span>"}})}
-      if(komAuf.has(cp)){zu();komAuf.get(cp).forEach(id=>{anker.push(id);out+=wAnchAuf(id)})}
+      if(komZu.has(cp))komZu.get(cp).forEach(id=>runs.push({ankerZu:id}));
+      if(komAuf.has(cp))komAuf.get(cp).forEach(id=>runs.push({ankerAuf:id}));
       const x=finde(chpx,fcs[cp]);
-      const chp=art?docChp({...basis},x?x.g:new Uint8Array(0),basis,schriften):(x?docChp({...sc},x.g,sc,schriften):sc);
+      const chp=art?docChp({...basis},x?x.g:leer,basis,schriften):(x?docChp({...sc},x.g,sc,schriften):sc);
       if(chp.versteckt||chp.weg)continue;
       const fd=felder[felder.length-1];
-      if(k===0x13){zu();felder.push({phase:"befehl",befehl:""});continue}
-      if(k===0x14&&fd){zu();fd.phase="ergebnis";
+      if(k===0x13){felder.push({phase:"befehl",befehl:""});continue}
+      if(k===0x14&&fd){fd.phase="ergebnis";
         const m=/HYPERLINK\s+(?:\\l\s+)?"([^"]+)"/i.exec(fd.befehl);
-        if(m){fd.link=true;out+='<a href="'+esc(m[1])+'" target="_blank" rel="noopener">'}
+        if(m){fd.link=true;runs.push({linkAuf:m[1]})}
         continue}
-      if(k===0x15&&fd){zu();if(fd.link)out+="</a>";felder.pop();continue}
+      if(k===0x15&&fd){if(fd.link)runs.push({linkZu:1});felder.pop();continue}
       if(fd&&fd.phase==="befehl"){fd.befehl+=c;continue}
       if(k===0x01){
         const b=chp.bildAn!=null?bildImText(chp.bildAn):null;
-        if(b&&b.alt)fehlt.grafiken++;
-        else if(b){bildStat.zahl++;bildStat.bytes+=b.bytes;teile.bilder.push(b)}
-        else if(chp.spez)fehlt.bilder++;
+        if(b&&b.alt){fehlt.grafiken++;runs.push({fehlbild:1})}
+        else if(b){bildStat.zahl++;bildStat.bytes+=b.bytes;runs.push({bild:b})}
+        else if(chp.spez){fehlt.bilder++;runs.push({fehlbild:1})}
         continue;
       }
       if(k===0x08){
         const b=schwebend(cp);
-        if(b&&b.alt)fehlt.grafiken++;else if(b)teile.schwebend.push(b.html);else fehlt.bilder++;
+        if(b&&b.alt){fehlt.grafiken++;runs.push({fehlbild:1})}else if(b)runs.push({schwebend:b.html});else{fehlt.bilder++;runs.push({fehlbild:1})}
         continue;
       }
-      if(k===0x02){zu();
-        if(fn.karte.has(cp))out+=`<sup class="fn" data-fn="${fn.karte.get(cp)}">*</sup>`;
-        else if(en.karte.has(cp))out+=`<sup class="en" data-en="${en.karte.get(cp)}">i</sup>`;
+      if(k===0x02){
+        if(fn.karte.has(cp))runs.push({roh:`<sup class="fn" data-fn="${fn.karte.get(cp)}">*</sup>`});
+        else if(en.karte.has(cp))runs.push({roh:`<sup class="en" data-en="${en.karte.get(cp)}">i</sup>`});
         continue}
       if(k===0x05)continue;
-      if(k===0x0C){zu();teile.push(out);out="";continue}
+      if(k===0x0C){runs.push({seite:1});continue}
       let s;
       if(k===0x09)s='<span class="wtab" contenteditable="false">\t</span>';
       else if(k===0x0B)s="<br>";
@@ -16389,23 +16779,10 @@ function docLesen(buf){
       else if(k===0x1F)s="­";
       else if(k<0x20)continue;
       else s=esc(c);
-      const gleich=lp&&["b","i","u","s","vert","sz","font","color","hi","caps"].every(q=>(lp[q]||null)===(chp[q]||null));
-      if(!gleich){zu();lp=chp}
-      lauf+=s;
+      runs.push({h:s,f:chp});
     }
-    zu();
-    while(felder.length){if(felder.pop().link)out+="</a>"}
-    /* Ein Kommentarbereich endet spätestens mit seinem Absatz */
-    out+="</span>".repeat(anker.length);
-    teile.push(out);
-    return teile;
-  };
-  /* Bilder im Text: steht im Absatz nur das Bild, tritt die Figur an seine
-     Stelle, sonst folgt sie ihm — wie beim Word-Leser */
-  const figurHtml=(b,al)=>{
-    const br=Math.min(100,Math.max(5,Math.round(b.breiteMm/textBreite*100)||50));
-    return `<figure class="fig" contenteditable="false" data-w="${br}" style="text-align:${al==="right"||al==="center"?al:"left"}">`+
-      `<img src="${b.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
+    while(felder.length){if(felder.pop().link)runs.push({linkZu:1})}
+    return runs;
   };
   const ausrichtung=pap=>pap.jc===1?"center":pap.jc===2?"right":pap.jc===3||pap.jc===4?"justify":"";
   const linieVon=pap=>{
@@ -16413,132 +16790,25 @@ function docLesen(buf){
     const a=pap.unten.art;if(!a||a===0xFF)return null;
     return a===3?"doppelt":a===6||a===7||a===8||a===9?"punkte":(pap.unten.breite>=12||a===2)?"dick":"";
   };
-  /* Ein Absatz außerhalb von Liste und Tabelle */
-  const absatzHtml=ab=>{
-    const {h:hs,art}=stilArt(ab.istd);
-    const h=hs||(ab.pap.outLvl!=null&&ab.pap.outLvl<9?Math.min(4,ab.pap.outLvl+1):0);
-    const bilderVor=fehlt.bilder+fehlt.grafiken;
-    const teile=inhaltHtml(ab,h,h?"":art);
-    let r=(ab.pap.umbruch?seitenumbruchHtml():"")+teile.schwebend.join("");
-    const al0=ausrichtung(ab.pap),figuren=teile.bilder.map(b=>figurHtml(b,al0)).join("");
-    const nurBild=teile.every(x=>!x.replace(/<br>/g,"").trim());
-    /* Bildunterschrift direkt unter einem Bild: in dessen Figur */
-    if(art==="unterschrift"&&!nurBild&&/<\/figure>$/.test(html)&&!/<figcaption/.test(html.slice(html.lastIndexOf("<figure")))){
-      html=html.replace(/<\/figure>$/,'<figcaption contenteditable="true">'+teile.join("")+"</figcaption></figure>");
-      return r;
-    }
-    if(figuren&&nurBild&&!h)return r+figuren;
-    /* Ein Absatz, der nur ein nicht lesbares Bild trug, fällt mit ihm weg */
-    if(fehlt.bilder+fehlt.grafiken>bilderVor&&nurBild&&(h||art||linieVon(ab.pap)===null))return r;
-    teile.forEach((inh,ti)=>{
-      if(ti)r+=seitenumbruchHtml();
-      const leer=!inh.replace(/<br>/g,"").trim();
-      if(ti&&leer&&ti===teile.length-1)return;
-      if(leer&&!h&&!art){const l=linieVon(ab.pap);if(l!==null){r+=linieHtml(l);return}}
-      const al=ausrichtung(ab.pap);
-      if(h){r+="<h"+h+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</h"+h+">";return}
-      if(art.startsWith("zitat:")){const qs=art.slice(6),za=zitatAusrichtung(qs,al);
-        r+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inh||"<br>")+"</blockquote>";return}
-      if(art==="titel"||art==="untertitel"){r+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</p>";return}
-      const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
-      const links=em(ab.pap.links),erste=em(ab.pap.erste);
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
-      r+=(st?'<p style="'+st+'">':"<p>")+(inh||"<br>")+"</p>";
-    });
-    return r+figuren;
-  };
-
-  /* Listen: offene Listen je Ebene; ein Wechsel der Art auf derselben Ebene
-     beginnt eine neue Liste. Nummern zählen je ilfo und Ebene weiter. */
-  let html="",offen=[];const zaehler={};
-  const listenZu=bis=>{while(offen.length>bis){const l=offen.pop();html+="</li></"+l.tag+">"}};
-  const listeHtml=ab=>{
-    const ilvl=Math.min(8,ab.pap.ilvl||0),lsid=lfo[ab.pap.ilfo-1],ebenen=listen.get(lsid)||[];
-    const eb=ebenen[ilvl]||ebenen[0]||{fmt:"bullet",text:"•"};
-    let stil=docxListenStil(eb)||{tag:"ul",ls:""};
-    if(stil.tag==="ol"&&ilvl>0&&String(eb.fmt).toLowerCase()===["decimal","lowerletter","lowerroman"][ilvl%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
-    if(stil.tag==="ul"&&ilvl>0){const oben=String((ebenen[0]||{}).text||"").trim(),z=String(eb.text||"").trim();
-      if(/^[•·]$/.test(oben)&&[/^[•·]$/,/^o$/,/^[▪§]$/][ilvl%3].test(z))stil={tag:"ul",ls:""}}
-    const k=ab.pap.ilfo+":"+ilvl;
-    Object.keys(zaehler).forEach(x=>{const [f,l]=x.split(":");if(f===String(ab.pap.ilfo)&&+l>ilvl)delete zaehler[x]});
-    const nummer=zaehler[k]?zaehler[k]+1:(eb.start||1);zaehler[k]=nummer;
-    if(offen.length>ilvl+1)listenZu(ilvl+1);
-    const da=offen[ilvl];
-    if(da&&(da.tag!==stil.tag||da.ls!==stil.ls))listenZu(ilvl);
-    if(offen.length===ilvl+1)html+="</li>";
-    while(offen.length<ilvl+1){
-      const tiefer=offen.length<ilvl;
-      const s=tiefer?{tag:"ul",ls:""}:stil;
-      html+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(s.tag==="ol"&&!tiefer&&nummer!==1?' start="'+nummer+'"':"")+">";
-      offen.push(s);
-      if(tiefer)html+="<li>";
-    }
-    const inh=inhaltHtml(ab,0,"").join("");
-    html+="<li>"+(inh||"<br>");
-  };
-
-  /* Tabellen: Zellen bis zur Zeilenmarke (TTP); die Zellgrenzen der
-     Zeile ergeben colspan, die Verbund-Merker rowspan. */
-  let zeilen=[],zellen=[],zelleTeile=[];
-  const tabelleZu=()=>{
-    if(!zeilen.length&&!zellen.length)return;
-    if(zellen.length)zeilen.push({zellen,tdef:null});
-    const grenzen=[...new Set(zeilen.flatMap(z=>z.tdef?z.tdef.gr:[]))].sort((a,b)=>a-b);
-    const spalte=x=>{let i=grenzen.findIndex(g=>Math.abs(g-x)<=20);return i<0?0:i};
-    const raster=[];
-    let r="<table>";
-    /* Spaltenbreiten in Prozent, wie beim Word-Leser */
-    if(grenzen.length>2){const summe=grenzen[grenzen.length-1]-grenzen[0];
-      if(summe>0)r+="<colgroup>"+grenzen.slice(1).map((g,i)=>`<col style="width:${Math.round((g-grenzen[i])/summe*1000)/10}%">`).join("")+"</colgroup>"}
-    zeilen.forEach((z,zi)=>{
-      r+="<tr>";raster[zi]=[];
-      z.zellen.forEach((inh,ci)=>{
-        const td=z.tdef,tc=td&&td.tc[ci]||{};
-        if(tc.mHor&&!tc.erstHor)return;
-        let von=ci,breit=1;
-        if(td&&td.gr.length>ci+1){von=spalte(td.gr[ci]);let ende=ci+1;
-          while(td.tc[ende]&&td.tc[ende].mHor&&!td.tc[ende].erstHor)ende++;
-          breit=Math.max(1,spalte(td.gr[Math.min(ende,td.gr.length-1)])-von)}
-        if(tc.mVer&&!tc.startVer){
-          for(let oz=zi-1;oz>=0;oz--){const oben=raster[oz]&&raster[oz][von];if(oben){oben.rs++;break}}
-          return;
-        }
-        const zelle={rs:1,i:r.length};raster[zi][von]=zelle;
-        r+="<td"+(breit>1?' colspan="'+breit+'"':"")+"\u0001"+zelle.i+"\u0001>"+(inh||"&nbsp;")+"</td>";
-      });
-      r+="</tr>";
-    });
-    r=r.replace(/\u0001(\d+)\u0001/g,(m,i)=>{const z=raster.flat().find(x=>x&&x.i===+i);return z&&z.rs>1?' rowspan="'+z.rs+'"':""});
-    html+=r+"</table>";
-    zeilen=[];zellen=[];zelleTeile=[];
-  };
-
-  for(const ab of absaetze){
+  /* Zwischenform für wortSatz; Listennummern zählen je ilfo und Ebene */
+  const zaehler={};
+  const norm=absaetze.map(ab=>{
     const tief=ab.pap.itap||(ab.pap.inTable?1:0);
-    if(tief>=1){
-      listenZu(0);
-      if(tief===1&&ab.pap.ttp){zeilen.push({zellen,tdef:ab.pap.tdef});zellen=[];zelleTeile=[];continue}
-      if(tief>1&&ab.pap.innerTtp)continue;
-      const tz=inhaltHtml(ab,0,"");
-      const inh=tz.join("")+tz.bilder.map(b=>figurHtml(b,ausrichtung(ab.pap))).join("");
-      zelleTeile.push(inh);
-      if(ab.zelle&&tief===1){
-        zellen.push(zelleTeile.length===1?zelleTeile[0]:zelleTeile.map(x=>"<p>"+(x||"<br>")+"</p>").join(""));
-        zelleTeile=[];
-      }
-      continue;
+    const sa=stilArt(ab.istd);
+    let h=sa.h||(ab.pap.outLvl!=null&&ab.pap.outLvl<9?Math.min(4,ab.pap.outLvl+1):0),art=h?"":sa.art,liste=null;
+    if(tief<1&&ab.pap.ilfo>0&&ab.pap.ilfo<=lfo.length){
+      const ilvl=Math.min(8,ab.pap.ilvl||0),ebenen=listen.get(lfo[ab.pap.ilfo-1])||[];
+      const {stil,start}=wortListenStil(ebenen,ilvl);
+      const k=ab.pap.ilfo+":"+ilvl;
+      Object.keys(zaehler).forEach(x=>{const [f,l]=x.split(":");if(f===String(ab.pap.ilfo)&&+l>ilvl)delete zaehler[x]});
+      const nummer=zaehler[k]?zaehler[k]+1:start;zaehler[k]=nummer;
+      liste={ebene:ilvl,stil,nummer};
     }
-    tabelleZu();
-    if(ab.pap.ilfo>0&&ab.pap.ilfo<=lfo.length){listeHtml(ab);continue}
-    listenZu(0);
-    /* Erst aufrufen, dann anhängen: absatzHtml schreibt eine Bild-
-       unterschrift selbst in die Figur davor (html+=… läse html vorher) */
-    const r=absatzHtml(ab);html+=r;
-  }
-  tabelleZu();listenZu(0);
-  /* Word hängt hinter jede Tabelle einen Pflichtabsatz und ans Ende einen
-     leeren — wie beim Word-Leser weg damit */
-  html=html.replace(/(<\/table>)<p><br><\/p>/g,"$1").replace(/(<p><br><\/p>)+$/,"");
+    if(liste||tief>=1){h=0;art=""}
+    return {h,art,jc:ausrichtung(ab.pap),links:ab.pap.links,erste:ab.pap.erste,umbruch:ab.pap.umbruch,linie:linieVon(ab.pap),
+      tief,ttp:ab.pap.ttp,innerTtp:ab.pap.innerTtp,zelle:ab.zelle,tdef:ab.pap.tdef,liste,runs:laeufe(ab,art)};
+  });
+  const html=wortSatz(norm,{grundGr,grundF,textBreite});
 
   /* Kopf- und Fußzeilen: je Abschnitt sechs Teiltexte (gerade/ungerade
      Kopf, gerade/ungerade Fuß, erste Seite Kopf/Fuß), davor sechs für die
@@ -16600,6 +16870,460 @@ function docHinweis(fehlt){
     </div>
     <div class="rowend"><button class="btn prim" id="docOk">OK</button></div></div>`);
   $("#docOk").onclick=closeOvl;
+}
+/* ================= RTF (Rich Text Format) lesen =================
+   Seit 2026-10-19 neu (Tom: „wie steht es um RTF?“). Der alte Leser
+   arbeitete mit Textersetzungen und kannte keine Gruppen: RTF beendet Fett
+   oft nur mit der schließenden Klammer, also blieb alles danach fett;
+   \uN und sein Ersatzzeichen kamen beide an („Gröößße“); Bilddaten
+   standen als Hexkolonnen im Text. Jetzt: erst ein Baum aus Gruppen
+   (rtfBaum), dann ein Durchlauf mit Zustand je Gruppe. Zielgruppen
+   (Schrift-, Farb-, Vorlagen-, Listentabelle, Fußnote, Kopfzeile, Bild,
+   Form, Feld, Kommentar) werden eigens behandelt, unbekannte \*-Gruppen
+   übersprungen. Ergebnis über den gemeinsamen Satzbau wortSatz, also
+   dieselben Regeln wie bei .doc und .docx.
+   Die Datei kommt als Byte-Zeichenkette (latin1) herein: Text außerhalb von
+   \'xx kann rohe 8-Bit-Bytes enthalten, die erst die Codepage der Schrift
+   (\fcharset) bzw. des Dokuments (\ansicpg) zu Zeichen macht. */
+const RTF_CHARSET={0:1252,1:1252,2:1252,77:10000,128:932,129:949,134:936,136:950,161:1253,162:1254,163:1258,177:1255,178:1256,186:1257,204:1251,222:874,238:1250};
+const rtfDecoder=new Map();
+function rtfDekodieren(bytes,cp){
+  const name=cp===10000?"macintosh":cp===932?"shift_jis":cp===936?"gbk":cp===949?"euc-kr":cp===950?"big5":"windows-"+(cp||1252);
+  let d=rtfDecoder.get(name);
+  if(!d){try{d=new TextDecoder(name)}catch(e){d=new TextDecoder("windows-1252")}rtfDecoder.set(name,d)}
+  return d.decode(Uint8Array.from(bytes));
+}
+/* Gruppenbaum: {k:[…]} mit Steuerworten {w,p}, Symbolen {sym}, Bytes
+   {hex} und Text {t}; \bin N liefert seine Rohdaten mit */
+function rtfBaum(s){
+  const wurzel={k:[]},stapel=[wurzel];let akt=wurzel,i=0;const n=s.length;
+  const buchst=c=>(c>="a"&&c<="z")||(c>="A"&&c<="Z");
+  while(i<n){
+    const c=s[i];
+    if(c==="{"){const g={k:[]};akt.k.push(g);stapel.push(g);akt=g;i++;continue}
+    if(c==="}"){if(stapel.length>1)stapel.pop();akt=stapel[stapel.length-1];i++;continue}
+    if(c==="\\"){
+      const d=s[i+1];
+      if(d!==undefined&&buchst(d)){
+        let j=i+1;while(j<n&&buchst(s[j]))j++;
+        const w=s.slice(i+1,j);let p=null;
+        const m=/^-?\d+/.exec(s.slice(j,j+12));if(m){p=+m[0];j+=m[0].length}
+        if(s[j]===" ")j++;
+        if(w==="bin"&&p>0){akt.k.push({w,p,daten:s.slice(j,j+p)});j+=p}
+        else akt.k.push({w,p});
+        i=j;continue;
+      }
+      if(d==="'"){akt.k.push({hex:parseInt(s.substr(i+2,2),16)||0});i+=4;continue}
+      if(d==="\r"||d==="\n"){akt.k.push({w:"par",p:null});i+=2;continue}
+      akt.k.push({sym:d});i+=2;continue;
+    }
+    if(c==="\r"||c==="\n"){i++;continue}
+    let j=i;while(j<n&&s[j]!=="\\"&&s[j]!=="{"&&s[j]!=="}"&&s[j]!=="\r"&&s[j]!=="\n")j++;
+    akt.k.push({t:s.slice(i,j)});i=j;
+  }
+  return wurzel;
+}
+/* Gruppen, deren Inhalt nicht in den Text gehört (ohne \*) */
+const RTF_WEG=new Set(["fonttbl","colortbl","stylesheet","listtable","listoverridetable","info","themedata","colorschememapping",
+  "latentstyles","datastore","xmlnstbl","rsidtbl","mmathPr","generator","pntext","listtext","ftnsep","ftnsepc","aftnsep","aftnsepc",
+  "pgdsctbl","revtbl","filetbl","nonshppict","shprslt","fldrslt","fldinst","template","userprops","docvar","pnseclvl","xe","tc","objdata","listpicture","wgrffmtfilter"]);
+const RTF_KOPF=new Set(["header","headerr","headerl","headerf","footer","footerr","footerl","footerf"]);
+function rtfLesen(roh){
+  const baum=rtfBaum(String(roh));
+  const dok=baum.k.find(x=>x.k)||baum;
+  let ansi=1252,deff=0,defSz=12;
+  const schriften={},farben=[],stile={},listen={},lsListe={};
+  const seite={w:12240,h:15840,l:1800,r:1800,o:1440,u:1440,kh:720,kf:720};let titelpg=false,facing=false;
+  const fehlt={bilder:0,grafiken:0,fussnoten:0,kopf:false,kommentare:false,textfelder:false};
+  const bildStat={zahl:0,bytes:0,fehlend:0};
+  /* Text einer Gruppe als Zeichenkette (Schriftnamen, Vorlagennamen,
+     Feldbefehle, Ebenentexte) */
+  const textVon=(g,cp)=>{
+    let s="",bytes=[],uc=1,skip=0;
+    const fl=()=>{if(bytes.length){s+=rtfDekodieren(bytes,cp||ansi);bytes=[]}};
+    const geh=k=>k.forEach(x=>{
+      if(x.k){fl();geh(x.k);return}
+      if(x.hex!=null){if(skip>0){skip--;return}bytes.push(x.hex);return}
+      fl();
+      if(x.t!=null){let t=x.t;if(skip>0){const d=Math.min(skip,t.length);t=t.slice(d);skip-=d}
+        if(/[\x80-\xff]/.test(t))s+=rtfDekodieren([...t].map(c=>c.charCodeAt(0)),cp||ansi);else s+=t;return}
+      if(x.w==="u"){s+=String.fromCharCode(x.p<0?x.p+65536:x.p);skip=uc;return}
+      if(x.w==="uc"){uc=x.p||0;return}
+      if(x.w==="tab"){s+="\t";return}
+      if(x.sym==="~")s+="\u00a0";
+    });
+    geh(g.k);fl();return s;
+  };
+  const kw=(g,w)=>g.k.find(x=>x.w===w);
+  /* Kopf: Schriften, Farben, Vorlagen, Listen */
+  for(const x of dok.k){
+    if(x.w==="ansicpg"&&x.p)ansi=x.p;
+    if(x.w==="deff")deff=x.p||0;
+    if(!x.k)continue;
+    /* {\*\listtable …} wie {\listtable …}: Word und LibreOffice setzen den Stern */
+    const erst=x.k[0]&&x.k[0].sym==="*"?(x.k[1]&&x.k[1].w):(x.k[0]&&x.k[0].w);
+    if(erst==="fonttbl")x.k.filter(g=>g.k).forEach(g=>{
+      const f=kw(g,"f");if(!f)return;
+      const cs=kw(g,"fcharset");
+      const ohne={k:g.k.filter(y=>!y.k)};
+      schriften[f.p]={name:textVon(ohne,1252).replace(/;.*$/,"").trim(),cp:cs?RTF_CHARSET[cs.p]||ansi:null};
+    });
+    if(erst==="colortbl"){let c={};x.k.forEach(y=>{
+      if(y.w==="red")c.r=y.p;else if(y.w==="green")c.g=y.p;else if(y.w==="blue")c.b=y.p;
+      else if(y.t)for(const ch of y.t)if(ch===";"){farben.push(c.r!=null||c.g!=null||c.b!=null?docHex(c.r||0,c.g||0,c.b||0):null);c={}}})}
+    if(erst==="stylesheet")x.k.filter(g=>g.k).forEach(g=>{
+      const stern=g.k[0]&&g.k[0].sym==="*";
+      const s=kw(g,"s"),cs=kw(g,"cs");if(stern&&!cs)return;
+      const ol=kw(g,"outlinelevel");
+      const f={};g.k.forEach(y=>{if(y.w)rtfZeichen(f,y,{schriften,farben,defSz,deff})});
+      const ohne={k:g.k.filter(y=>!y.k)};
+      const name=textVon(ohne).replace(/;.*$/,"").trim();
+      if(s&&!cs)stile[s.p]={name,outline:ol?ol.p:null,f};
+      else if(!s&&!cs)stile[0]={name:name||"Normal",outline:null,f};
+    });
+    if(erst==="listtable")x.k.filter(g=>g.k&&g.k[0]&&g.k[0].w==="list").forEach(g=>{
+      const id=kw(g,"listid");if(!id)return;
+      listen[id.p]=g.k.filter(l=>l.k&&l.k[0]&&l.k[0].w==="listlevel").map(l=>{
+        const nfc=kw(l,"levelnfc")||kw(l,"levelnfcn"),st=kw(l,"levelstartat");
+        const lt=l.k.find(y=>y.k&&y.k[0]&&y.k[0].w==="leveltext");
+        let txt="";
+        if(lt){const roh=[];let skip=0,uc=1;
+          lt.k.forEach(y=>{if(y.hex!=null){if(skip>0){skip--;return}roh.push(y.hex<9?"%"+(y.hex+1):rtfDekodieren([y.hex],ansi))}
+            else if(y.t!=null){let t=y.t;if(skip>0){const d=Math.min(skip,t.length);t=t.slice(d);skip-=d}roh.push(...t)}
+            else if(y.w==="u"){roh.push(String.fromCharCode(y.p<0?y.p+65536:y.p));skip=uc}
+            else if(y.w==="uc")uc=y.p||0});
+          txt=roh.slice(1).join("").replace(/;$/,"");
+          txt=txt.replace(/[\uF000-\uF0FF]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xF000));
+        }
+        const fmt={0:"decimal",1:"upperRoman",2:"lowerRoman",3:"upperLetter",4:"lowerLetter",23:"bullet",255:"none"}[nfc?nfc.p:0]||"decimal";
+        return {fmt,start:st?st.p:1,text:txt};
+      });
+    });
+    if(erst==="listoverridetable")x.k.filter(g=>g.k&&g.k[0]&&g.k[0].w==="listoverride").forEach(g=>{
+      const id=kw(g,"listid"),ls=kw(g,"ls");if(id&&ls)lsListe[ls.p]=id.p});
+    if(x.k[0]&&x.k[0].sym==="*"&&x.k[1]&&x.k[1].w==="defchp"){const fs=kw(x,"fs");if(fs)defSz=fs.p/2}
+  }
+  const ctxZ={schriften,farben,defSz,deff};
+  const fGrund=()=>({sz:defSz,font:schriften[deff]?schriften[deff].name:undefined});
+  const papGrund=()=>({s:0,jc:"",li:0,fi:0,intbl:false,itap:0,ls:0,ilvl:0,umbruch:false,unten:null,oben:null,sl:null,slmult:false,sa:null,outline:null});
+
+  /* Geschichten: Haupttext, Fuß-/Endnoten, Kopf-/Fußzeilen, Kommentare */
+  const neu=art=>({art,abs:[],runs:[],zeile:{gr:[0],tc:[],ohneRahmen:true},tcAkt:{}});
+  const haupt=neu("haupt");
+  const fussnoten=[],endnoten=[],kommentare=[],kopf={};
+  const komIds=new Map(),komId=n=>{if(!komIds.has(n))komIds.set(n,uid());return komIds.get(n)};
+  let autor="",initialen="";
+  const zuAbs=(gs,st,zelle)=>{gs.abs.push({runs:gs.runs,pap:st.pap,zelle,listtext:gs.listtext});gs.runs=[];gs.listtext=null};
+  const plain=gs=>gs.abs.map(a=>a.runs.map(r=>r.t!=null?r.t:"").join("")).join(" ").replace(/\s+/g," ").trim();
+  const absHtml=gs=>gs.abs.map(a=>"<p>"+(a.runs.map(r=>r.t!=null?esc(r.t):"").join("").trim()||"<br>")+"</p>").join("");
+
+  /* Bild aus {\pict …}: PNG/JPEG direkt, DIB als BMP; WMF/EMF/PICT nicht */
+  const pictBild=g=>{
+    let typ="",wg=0,sx=100,pw=0;let hex="",bin=null;
+    const geh=k=>k.forEach(y=>{
+      if(y.k){if(!(y.k[0]&&y.k[0].sym==="*"))geh(y.k);return}
+      if(y.w){if(/^(pngblip|jpegblip|emfblip|wmetafile|macpict|dibitmap|wbitmap|pmmetafile)$/.test(y.w))typ=y.w;
+        else if(y.w==="picwgoal")wg=y.p;else if(y.w==="picscalex")sx=y.p;else if(y.w==="picw")pw=y.p;else if(y.w==="bin")bin=y.daten;return}
+      if(y.t)hex+=y.t;
+    });
+    geh(g.k);
+    if(!/^(pngblip|jpegblip|dibitmap)$/.test(typ))return typ?{alt:true}:null;
+    let bytes;
+    if(bin)bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+    else{const h=hex.replace(/[^0-9a-fA-F]/g,"");bytes=new Uint8Array(h.length>>1);for(let i=0;i<bytes.length;i++)bytes[i]=parseInt(h.substr(i*2,2),16)}
+    let mime=typ==="pngblip"?"image/png":typ==="jpegblip"?"image/jpeg":"image/bmp";
+    if(typ==="dibitmap"){const dv=new DataView(bytes.buffer),hl=dv.getUint32(0,true),bits=dv.getUint16(14,true),farbenN=dv.getUint32(32,true)||(bits<=8?1<<bits:0);
+      const ganz=new Uint8Array(14+bytes.length),kd=new DataView(ganz.buffer);ganz[0]=0x42;ganz[1]=0x4D;kd.setUint32(2,ganz.length,true);kd.setUint32(10,14+hl+farbenN*4,true);ganz.set(bytes,14);bytes=ganz}
+    const breiteTw=(wg||pw*15)*(sx||100)/100;
+    return {uri:"data:"+mime+";base64,"+base64Von(bytes),bytes:bytes.length,breiteMm:twipMm(breiteTw)};
+  };
+  const textBreite=()=>twipMm(seite.w-seite.l-seite.r);
+  /* Schwebende Form {\shp …}: Bild über die Eigenschaft pib; Lage und
+     Umlauf wie beim .doc-Leser (frei, umflossen oder als Block) */
+  const formHtml=g=>{
+    const inst=g.k.find(y=>y.k&&y.k[0]&&y.k[0].sym==="*"&&y.k[1]&&y.k[1].w==="shpinst");if(!inst)return null;
+    const w={};let bild=null,textfeld=false;
+    inst.k.forEach(y=>{
+      if(y.w)w[y.w]=y.p==null?true:y.p;
+      if(y.k&&y.k[0]&&y.k[0].w==="sp"){
+        const sn=y.k.find(z=>z.k&&z.k[0]&&z.k[0].w==="sn"),sv=y.k.find(z=>z.k&&z.k[0]&&z.k[0].w==="sv");
+        const name=sn?textVon({k:sn.k.slice(1)}).trim():"";
+        if(name==="pib"&&sv){const p=sv.k.find(z=>z.k&&z.k[0]&&z.k[0].w==="pict");if(p)bild=pictBild(p)}
+        else if(sv)w["sp:"+name]=textVon({k:sv.k.slice(1)}).trim();
+      }
+      if(y.k&&y.k[0]&&y.k[0].w==="shptxt")textfeld=true;
+    });
+    if(textfeld&&!bild){fehlt.textfelder=true;return null}
+    if(!bild)return null;if(bild.alt)return {alt:true};
+    const fw=twipMm((w.shpright||0)-(w.shpleft||0)),fh=twipMm((w.shpbottom||0)-(w.shptop||0));
+    const tb=textBreite(),links=twipMm(seite.l);
+    const fx=twipMm(w.shpleft||0)-(w.shpbxpage?links:0);
+    const hinter=w.shpfblwtxt===1||w["sp:fBehindDocument"]==="1",wr=w.shpwr==null?2:w.shpwr;
+    bildStat.zahl++;bildStat.bytes+=bild.bytes;
+    if(wr===3)return {html:freiBildHtml(bild.uri,{fw,fh,fx,vbezug:w.shpbypage?"seite":w.shpbypara?"absatz":"margin",voff:twipMm(w.shptop||0),hinter})};
+    const bw=Math.min(90,Math.max(5,Math.round(fw/tb*100)));
+    if(wr===1)return {html:`<figure class="fig" contenteditable="false" data-w="${bw}" style="text-align:center"><img src="${bild.uri}" alt="" draggable="false" style="width:${bw}%"></figure>`};
+    const posh=+(w["sp:posh"]||0);
+    const rechts=posh===3||posh===5?true:posh===1||posh===4?false:fx+fw/2>tb/2;
+    return {html:`<figure class="fig umfl" contenteditable="false" data-w="${bw}" data-seite="${rechts?"rechts":"links"}" style="text-align:${rechts?"right":"left"};width:${bw}%">`+
+      `<img src="${bild.uri}" alt="" draggable="false" style="width:100%"></figure>`};
+  };
+
+  /* Der Durchlauf. st ist der Zustand der Gruppe (f Zeichen, pap Absatz,
+     uc Ersatzzeichen nach \u); Änderungen erzeugen neue Objekte, damit
+     Läufe ihr Format behalten und die äußere Gruppe unberührt bleibt. */
+  const lauf=(k,st,gs)=>{
+    let bytes=[],skip=0,rahmen=null;
+    const cpAkt=()=>{const s=schriften[st.fontNr];return (s&&s.cp)||ansi};
+    const text=t=>{if(!t||st.f.versteckt||st.f.weg)return;gs.runs.push({h:esc(t),t,f:st.f})};
+    const roh=r=>{if(!st.f.versteckt&&!st.f.weg)gs.runs.push(r)};
+    const fl=()=>{if(bytes.length){text(rtfDekodieren(bytes,cpAkt()));bytes=[]}};
+    const setF=(k2,v)=>{st.f={...st.f,[k2]:v}};
+    const setP=(k2,v)=>{st.pap={...st.pap,[k2]:v}};
+    const rand=(ziel,a,b)=>{if(ziel==="zelle"){if(a!=="brdrnone")gs.zeile.ohneRahmen=false;return}
+      if(!ziel)return;const alt=st.pap[ziel]||{};setP(ziel,a==="brdrnone"?null:{art:a||alt.art,breite:b!=null?b:alt.breite||0})};
+    for(const x of k){
+      if(x.hex!=null){if(skip>0){skip--;continue}bytes.push(x.hex);continue}
+      fl();
+      if(x.t!=null){
+        let t=x.t;if(skip>0){const d=Math.min(skip,t.length);t=t.slice(d);skip-=d}
+        if(/[\x80-\xff]/.test(t))text(rtfDekodieren([...t].map(c=>c.charCodeAt(0)),cpAkt()));else text(t);
+        continue;
+      }
+      if(x.k){gruppe(x,st,gs);continue}
+      if(x.sym!=null){
+        if(skip>0){skip--;continue}
+        if(x.sym==="~")text("\u00a0");else if(x.sym==="-")text("\u00AD");else if(x.sym==="_")text("\u2011");
+        else if(x.sym==="\\"||x.sym==="{"||x.sym==="}")text(x.sym);
+        continue;
+      }
+      const w=x.w,p=x.p;
+      switch(w){
+        case "par":zuAbs(gs,st,false);break;
+        case "cell":zuAbs(gs,st,true);break;
+        case "nestcell":zuAbs(gs,st,true);break;
+        case "row":gs.abs.push({runs:[],pap:{...st.pap,intbl:true,itap:1},ttp:true,tdef:{gr:[...gs.zeile.gr],tc:[...gs.zeile.tc],ohneRahmen:gs.zeile.ohneRahmen}});break;
+        case "nestrow":gs.abs.push({runs:[],pap:{...st.pap},innerTtp:true});break;
+        case "line":roh({h:"<br>",t:"\n",f:st.f});break;
+        case "tab":roh({h:'<span class="wtab" contenteditable="false">\t</span>',t:"\t",f:st.f});break;
+        case "page":roh({seite:1});break;
+        case "sect":break;
+        case "emdash":text("—");break;case "endash":text("–");break;case "bullet":text("•");break;
+        case "lquote":text("‘");break;case "rquote":text("’");break;case "ldblquote":text("“");break;case "rdblquote":text("”");break;
+        case "emspace":case "enspace":case "qmspace":text(" ");break;
+        case "chpgn":if(gs.art==="kopf")text("{seite}");break;
+        case "u":text(String.fromCharCode(p<0?p+65536:p));skip=st.uc;break;
+        case "uc":st.uc=p==null?1:p;break;
+        case "plain":st.f=fGrund();st.fontNr=deff;break;
+        case "pard":st.pap=papGrund();rahmen=null;break;
+        case "f":st.fontNr=p;rtfZeichen(st,x,ctxZ,true);break;
+        case "s":setP("s",p);break;
+        case "ql":setP("jc","");break;case "qc":setP("jc","center");break;case "qr":setP("jc","right");break;
+        case "qj":case "qd":setP("jc","justify");break;
+        case "li":case "lin":setP("li",p||0);break;case "fi":setP("fi",p||0);break;
+        case "intbl":setP("intbl",true);break;case "itap":setP("itap",p||0);break;
+        case "ls":setP("ls",p||0);break;case "ilvl":setP("ilvl",p||0);break;
+        case "pagebb":setP("umbruch",p!==0);break;
+        case "sl":setP("sl",p);break;case "slmult":setP("slmult",p===1);break;case "sa":setP("sa",p);break;
+        case "outlinelevel":setP("outline",p);break;
+        case "brdrt":rahmen="oben";setP("oben",{art:"",breite:0});break;
+        case "brdrb":rahmen="unten";setP("unten",{art:"",breite:0});break;
+        case "brdrl":case "brdrr":case "box":rahmen="seitlich";break;
+        case "clbrdrt":case "clbrdrb":case "clbrdrl":case "clbrdrr":rahmen="zelle";break;
+        case "brdrw":if(rahmen==="oben"||rahmen==="unten")rand(rahmen,null,p);break;
+        case "trowd":gs.zeile={gr:[0],tc:[],ohneRahmen:true};gs.tcAkt={};rahmen=null;break;
+        case "trleft":gs.zeile.gr[0]=p||0;break;
+        case "clmgf":gs.tcAkt.mHor=true;gs.tcAkt.erstHor=true;break;
+        case "clmrg":gs.tcAkt.mHor=true;gs.tcAkt.erstHor=false;break;
+        case "clvmgf":gs.tcAkt.mVer=true;gs.tcAkt.startVer=true;break;
+        case "clvmrg":gs.tcAkt.mVer=true;gs.tcAkt.startVer=false;break;
+        case "cellx":gs.zeile.gr.push(p||0);gs.zeile.tc.push(gs.tcAkt);gs.tcAkt={};rahmen=null;break;
+        case "paperw":case "pgwsxn":seite.w=p;break;case "paperh":case "pghsxn":seite.h=p;break;
+        case "margl":case "marglsxn":seite.l=p;break;case "margr":case "margrsxn":seite.r=p;break;
+        case "margt":case "margtsxn":seite.o=Math.abs(p);break;case "margb":case "margbsxn":seite.u=Math.abs(p);break;
+        case "headery":seite.kh=p;break;case "footery":seite.kf=p;break;
+        case "titlepg":titelpg=true;break;case "facingp":facing=true;break;
+        default:
+          if(/^brdr(s|th|db|dot|dash|dashsm|dashd|dashdd|hair|triple|none|sh|wavy|inset|outset|emboss|engrave)$/.test(w)){rand(rahmen,w,null);break}
+          rtfZeichen(st,x,ctxZ,true);
+      }
+    }
+    fl();
+  };
+  const gruppe=(g,st0,gs)=>{
+    const st={...st0};
+    const a=g.k[0];if(!a)return;
+    if(a.sym==="*"){
+      const w=g.k[1]&&g.k[1].w;
+      if(w==="shppict"){const p=g.k.find(y=>y.k&&y.k[0]&&y.k[0].w==="pict");if(p)bildRun(pictBild(p),st,gs);return}
+      if(w==="footnote"){fussnote({k:g.k.slice(1)},gs);return}
+      if(w==="atnid"){initialen=textVon({k:g.k.slice(2)}).trim();return}
+      if(w==="atnauthor"){autor=textVon({k:g.k.slice(2)}).trim();return}
+      if(w==="atrfstart"){gs.runs.push({ankerAuf:komId(textVon({k:g.k.slice(2)}).trim())});return}
+      if(w==="atrfend"){gs.runs.push({ankerZu:komId(textVon({k:g.k.slice(2)}).trim())});return}
+      if(w==="annotation"){
+        const ref=g.k.find(y=>y.k&&y.k[0]&&y.k[0].sym==="*"&&y.k[1]&&y.k[1].w==="atnref");
+        const id=ref?komId(textVon({k:ref.k.slice(2)}).trim()):uid();
+        const ks=neu("kom");lauf(g.k.slice(2),{f:fGrund(),pap:papGrund(),uc:1,fontNr:deff},ks);
+        if(ks.runs.length)zuAbs(ks,{pap:papGrund()},false);
+        kommentare.push({id,title:(autor||tr("Kommentar")).slice(0,60),html:absHtml(ks)||"<p><br></p>",
+          color:NOTECOLORS[1].c,fs:14,created:Date.now(),wort:{autor,datum:"",initialen}});
+        return;
+      }
+      return;
+    }
+    const w=a.w;
+    /* Die angezeigte Nummer eines Listeneintrags: LibreOffice führt eine
+       unterbrochene Nummerierung über eine neue Liste fort, deren Start nur
+       hier steht */
+    if(w==="listtext"){gs.listtext=textVon(g);return}
+    if(w&&RTF_WEG.has(w))return;
+    if(w==="field"){
+      const inst=g.k.find(y=>y.k&&((y.k[0]&&y.k[0].w==="fldinst")||(y.k[0]&&y.k[0].sym==="*"&&y.k[1]&&y.k[1].w==="fldinst")));
+      const erg=g.k.find(y=>y.k&&y.k[0]&&y.k[0].w==="fldrslt");
+      const befehl=inst?textVon(inst):"";
+      const m=/HYPERLINK\s+(?:\\l\s+)?"([^"]+)"/i.exec(befehl);
+      if(gs.art==="kopf"){const ph=feldPlatzhalter(befehl);if(ph){gs.runs.push({h:esc(ph),t:ph,f:st.f});return}}
+      if(m)gs.runs.push({linkAuf:m[1]});
+      if(erg)lauf(erg.k.slice(1),st,gs);
+      if(m)gs.runs.push({linkZu:1});
+      return;
+    }
+    if(w==="pict"){bildRun(pictBild(g),st,gs);return}
+    if(w==="shp"){const r=formHtml(g);
+      if(r&&r.alt){fehlt.grafiken++;gs.runs.push({fehlbild:1})}else if(r)gs.runs.push({schwebend:r.html});return}
+    if(w==="shpgrp"){fehlt.bilder++;return}
+    if(w==="object"){const r=g.k.find(y=>y.k&&y.k[0]&&y.k[0].w==="result");if(r)lauf(r.k.slice(1),st,gs);else fehlt.grafiken++;return}
+    if(w==="footnote"){fussnote(g,gs);return}
+    if(RTF_KOPF.has(w)){
+      const ks=neu("kopf");lauf(g.k.slice(1),{f:fGrund(),pap:papGrund(),uc:1,fontNr:deff},ks);
+      if(ks.runs.length)zuAbs(ks,{pap:papGrund()},false);
+      kopf[w]=ks;return;
+    }
+    lauf(g.k,st,gs);
+  };
+  /* Fuß- oder Endnote (\ftnalt); g beginnt mit dem Steuerwort footnote */
+  const fussnote=(g,gs)=>{
+    const end=g.k.some(y=>y.w==="ftnalt");
+    const fs=neu("fuss");lauf(g.k.slice(1),{f:fGrund(),pap:papGrund(),uc:1,fontNr:deff},fs);
+    if(fs.runs.length)zuAbs(fs,{pap:papGrund()},false);
+    const liste=end?endnoten:fussnoten,id=(end?"e":"f")+(liste.length+1);
+    liste.push({id,text:plain(fs)});
+    gs.runs.push({roh:end?`<sup class="en" data-en="${id}">i</sup>`:`<sup class="fn" data-fn="${id}">*</sup>`});
+  };
+  const bildRun=(b,st,gs)=>{
+    if(!b){fehlt.bilder++;gs.runs.push({fehlbild:1});return}
+    if(b.alt){fehlt.grafiken++;gs.runs.push({fehlbild:1});return}
+    bildStat.zahl++;bildStat.bytes+=b.bytes;gs.runs.push({bild:b});
+  };
+  const st0={f:fGrund(),pap:papGrund(),uc:1,fontNr:deff};
+  lauf(dok.k,st0,haupt);
+  if(haupt.runs.some(r=>r.t!=null&&r.t.trim()||r.bild||r.schwebend))zuAbs(haupt,st0,false);
+
+  /* Vorlagenart: Überschrift, Zitat, Titel, Bildunterschrift — am Namen,
+     wie beim .doc-Leser, sonst an der Gliederungsebene */
+  const vorlage=s=>{
+    const v=stile[s];if(!v)return {h:0,art:""};
+    const n=v.name.toLowerCase();
+    const m=/^(?:heading|überschrift|titre|título|nagłówek|titolo)\s*([1-9])$/.exec(n);
+    if(m)return {h:Math.min(4,+m[1]),art:""};
+    if(v.outline!=null&&v.outline<9)return {h:Math.min(4,v.outline+1),art:""};
+    if(n==="pq zitat typografisch")return {h:0,art:"zitat:typo"};
+    if(n==="intense quote"||n==="intensives zitat")return {h:0,art:"zitat:toent"};
+    if(n==="quote"||n==="quotations"||n==="zitat")return {h:0,art:"zitat:"};
+    if(n==="title"||n==="titel")return {h:0,art:"titel"};
+    if(n==="subtitle"||n==="untertitel")return {h:0,art:"untertitel"};
+    if(n==="caption"||n==="beschriftung")return {h:0,art:"unterschrift"};
+    return {h:0,art:""};
+  };
+  const linieVon=pap=>{
+    const u=pap.unten;if(!u||!u.art||u.art==="brdrnone"||(pap.oben&&pap.oben.art&&pap.oben.art!=="brdrnone"))return null;
+    return u.art==="brdrdb"?"doppelt":/dot|dash/.test(u.art)?"punkte":(u.art==="brdrth"||u.breite>=30)?"dick":"";
+  };
+  /* Grundschrift und -größe, Zeilen- und Absatzabstand: was im Fließtext
+     am meisten vorkommt, nach Textmenge */
+  const zaehl=new Map(),zaehlF=new Map(),zab=new Map(),nab=new Map();
+  const plus=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
+  for(const ab of haupt.abs){
+    const va=vorlage(ab.pap.s);if(va.h||va.art)continue;
+    let n=0;
+    ab.runs.forEach(r=>{if(r.t==null||!r.f)return;n+=r.t.length;if(r.f.sz)plus(zaehl,r.f.sz,r.t.length);if(r.f.font)plus(zaehlF,r.f.font,r.t.length)});
+    if(!n||ab.pap.ls||ab.pap.intbl)continue;
+    if(ab.pap.slmult&&ab.pap.sl>0)plus(zab,Math.round(ab.pap.sl/240*100)/100,n);
+    if(ab.pap.sa!=null)plus(nab,ab.pap.sa,n);
+  }
+  const meist=m=>[...m.entries()].sort((x,y)=>y[1]-x[1])[0];
+  const grundGr=(meist(zaehl)||[defSz])[0],grundF=(meist(zaehlF)||[schriften[deff]?schriften[deff].name:"Calibri"])[0];
+  /* Zwischenform für wortSatz */
+  const zaehler={};
+  const norm=haupt.abs.map(ab=>{
+    const pap=ab.pap,tief=ab.ttp?1:ab.innerTtp?2:pap.itap||(pap.intbl?1:0);
+    let {h,art}=vorlage(pap.s),liste=null;
+    if(!h&&pap.outline!=null&&pap.outline<9)h=Math.min(4,pap.outline+1);
+    if(tief<1&&pap.ls&&lsListe[pap.ls]!=null){
+      const ebenen=listen[lsListe[pap.ls]]||[],ilvl=Math.min(8,pap.ilvl||0);
+      const {stil,start}=wortListenStil(ebenen,ilvl);
+      const k2=pap.ls+":"+ilvl;
+      Object.keys(zaehler).forEach(x=>{const [f,l]=x.split(":");if(f===String(pap.ls)&&+l>ilvl)delete zaehler[x]});
+      let nummer=zaehler[k2]?zaehler[k2]+1:start;
+      const lt=stil.tag==="ol"&&ab.listtext&&/^\s*(\d+)\s*[.)]?\s*$/.exec(ab.listtext.replace(/\t/g,""));
+      if(lt)nummer=+lt[1];
+      zaehler[k2]=nummer;
+      liste={ebene:ilvl,stil,nummer};
+    }
+    if(liste||tief>=1){h=0;art=""}
+    if(h)art="";
+    /* Das Aussehen einer Zitat-, Titel- oder Bildunterschrift-Vorlage ist
+       kein Textformat: RTF wiederholt es an jedem Lauf, hier fällt weg,
+       was die Vorlage ohnehin vorgibt */
+    let runs=ab.runs;
+    if(art&&stile[pap.s]){const sf=stile[pap.s].f;
+      runs=runs.map(r=>{if(!r.f)return r;const f={...r.f};for(const q in sf)if(q!=="sz"&&q!=="font"&&f[q]===sf[q])delete f[q];return {...r,f}})}
+    return {h,art,jc:pap.jc,links:pap.li,erste:pap.fi,umbruch:pap.umbruch,linie:linieVon(pap),
+      tief,ttp:!!ab.ttp,innerTtp:!!ab.innerTtp,zelle:!!ab.zelle,tdef:ab.tdef||null,liste,runs};
+  });
+  const html=wortSatz(norm,{grundGr,grundF,textBreite:textBreite()});
+
+  /* Kopf- und Fußzeilen als Text mit Platzhaltern */
+  const hfVon=gs=>{
+    if(!gs)return null;
+    const zeilen=gs.abs.map(a=>a.runs.map(r=>r.t!=null?r.t.replace(/\t/g," "):"").join("").replace(/\s+$/,""));
+    while(zeilen.length&&!zeilen[zeilen.length-1].trim())zeilen.pop();
+    if(!zeilen.join("").trim())return null;
+    const jc=gs.abs[0]&&gs.abs[0].pap.jc;
+    return {on:true,text:zeilen.join("\n"),align:jc==="center"?"center":jc==="right"?"right":"left"};
+  };
+  const hf={hdr:hfVon(kopf.header||kopf.headerr),ftr:hfVon(kopf.footer||kopf.footerr)};
+  if(titelpg&&(kopf.headerf||kopf.footerf)){hf.ersteAnders=true;hf.hdr1=hfVon(kopf.headerf)||{on:false,text:"",align:"center"};hf.ftr1=hfVon(kopf.footerf)||{on:false,text:"",align:"center"}}
+  if(facing&&(kopf.headerl||kopf.footerl)){hf.geradeAnders=true;hf.hdr2=hfVon(kopf.headerl)||{on:false,text:"",align:"center"};hf.ftr2=hfVon(kopf.footerl)||{on:false,text:"",align:"center"}}
+
+  const fmt=formatAusMm(twipMm(seite.w),twipMm(seite.h),[twipMm(seite.o),twipMm(seite.r),twipMm(seite.u),twipMm(seite.l)],twipMm(seite.kh),twipMm(seite.kf));
+  const erg={html:html||"<p><br></p>",fmt,font:grundF,size:Math.min(FS_MAX,Math.max(FS_MIN,Math.round(grundGr*2)/2)),fehlt,
+    footnotes:fussnoten,endnotes:endnoten,kommentare,bilder:bildStat,...hf};
+  const lh=meist(zab),ps=meist(nab);
+  if(lh)erg.lh=Math.min(3,Math.max(0.8,lh[0]));
+  if(ps)erg.ps=Math.round(ps[0]/20/grundGr*100)/100;
+  return erg;
+}
+/* Zeichenformat eines Steuerworts. In einer Vorlagendefinition (direkt=
+   false) wird ins Objekt geschrieben, im Text ein neues Objekt erzeugt. */
+function rtfZeichen(ziel,x,ctx,direkt){
+  const w=x.w,p=x.p,an=p==null||p!==0;
+  const set=(k,v)=>{if(direkt)ziel.f={...ziel.f,[k]:v};else ziel[k]=v};
+  switch(w){
+    case "b":set("b",an);break;case "i":set("i",an);break;case "caps":set("caps",an);break;
+    case "strike":case "striked":set("s",an);break;
+    case "ul":case "uld":case "uldb":case "ulw":case "ulth":case "uldash":case "uldashd":case "uldashdd":case "ulwave":case "ulhwave":case "ulldash":case "ulthd":case "ulthdash":
+      set("u",an);break;
+    case "ulnone":set("u",false);break;
+    case "super":set("vert","sup");break;case "sub":set("vert","sub");break;case "nosupersub":set("vert",null);break;
+    case "fs":if(p)set("sz",p/2);break;
+    case "f":{const s=ctx.schriften[p];if(s)set("font",s.name);break}
+    case "cf":set("color",p?ctx.farben[p]||null:null);break;
+    case "highlight":case "cb":case "chcbpat":set("hi",p?ctx.farben[p]||null:null);break;
+    case "v":set("versteckt",an);break;
+    case "deleted":set("weg",an);break;
+  }
 }
 async function zipDokument(name,buf){
   const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
@@ -17212,6 +17936,7 @@ function fileMenu(){
     if(a==="expmore")return openSubMenu(b,[
       {a:"docw",label:tr("Word-Dokument"),k:".docx"},
       {a:"odt",label:tr("OpenDocument-Text"),k:".odt"},
+      {a:"rtf",label:"Rich Text Format",k:".rtf"},
       {a:"pdf",label:tr("PDF-Dokument"),k:".pdf"},
       {a:"epub",label:tr("E-Book"),k:".epub"},
       {a:"html",label:tr("Webseite"),k:".html"},
@@ -17280,6 +18005,7 @@ function runFileAct(a){
   if(a==="docw")exportDoc();
   if(a==="epub")exportEpub();
   if(a==="odt")exportOdt();
+  if(a==="rtf")exportRtf();
   if(a==="csv")exportCsv();
   if(a==="set")settings();
   if(a==="pal")palette();
@@ -24120,6 +24846,7 @@ function settings(){
 const DATEIART={
   docx:["Word-Dokument","application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
   odt:["OpenDocument-Text","application/vnd.oasis.opendocument.text"],
+  rtf:["Rich Text Format","application/rtf"],
   epub:["EPUB","application/epub+zip"],
   html:["Webseite","text/html"], md:["Markdown","text/markdown"],
   txt:["Nur Text","text/plain"], csv:["Tabelle","text/csv"], pqw:["PureQuill","application/json"],
@@ -24900,6 +25627,7 @@ program.</p>
 <table class="hkeys">
 <tr><td><b>Word document</b></td><td>.docx, with formatting</td></tr>
 <tr><td><b>OpenDocument Text</b></td><td>.odt, for LibreOffice and OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, for older programs and exchange</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, for reading devices</td></tr>
 <tr><td><b>PDF</b></td><td>through the print dialog</td></tr>
 <tr><td><b>Web page</b></td><td>.html</td></tr>
@@ -25505,6 +26233,7 @@ Programm.</p>
 <table class="hkeys">
 <tr><td><b>Word-Dokument</b></td><td>.docx, mit Formatierung</td></tr>
 <tr><td><b>OpenDocument-Text</b></td><td>.odt, für LibreOffice und OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, für ältere Programme und zum Austausch</td></tr>
 <tr><td><b>E-Book</b></td><td>.epub, für Lesegeräte</td></tr>
 <tr><td><b>PDF</b></td><td>über den Druckdialog</td></tr>
 <tr><td><b>Webseite</b></td><td>.html</td></tr>
@@ -26113,6 +26842,7 @@ programa.</p>
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, con formato</td></tr>
 <tr><td><b>Texto OpenDocument</b></td><td>.odt, para LibreOffice y OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, para programas antiguos e intercambio</td></tr>
 <tr><td><b>Libro electrónico</b></td><td>.epub, para dispositivos de lectura</td></tr>
 <tr><td><b>PDF</b></td><td>a través del cuadro de impresión</td></tr>
 <tr><td><b>Página web</b></td><td>.html</td></tr>
@@ -26719,6 +27449,7 @@ primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem est
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, com formatação</td></tr>
 <tr><td><b>Texto OpenDocument</b></td><td>.odt, para LibreOffice e OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, para programas antigos e intercâmbio</td></tr>
 <tr><td><b>Livro eletrônico</b></td><td>.epub, para dispositivos de leitura</td></tr>
 <tr><td><b>PDF</b></td><td>pelo diálogo de impressão</td></tr>
 <tr><td><b>Página da web</b></td><td>.html</td></tr>
@@ -27354,6 +28085,7 @@ programme.</p>
 <table class="hkeys">
 <tr><td><b>Document Word</b></td><td>.docx, avec la mise en forme</td></tr>
 <tr><td><b>Texte OpenDocument</b></td><td>.odt, pour LibreOffice et OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, pour les anciens programmes et l'échange</td></tr>
 <tr><td><b>Livre numérique</b></td><td>.epub, pour les liseuses</td></tr>
 <tr><td><b>PDF</b></td><td>via la boîte de dialogue d'impression</td></tr>
 <tr><td><b>Page web</b></td><td>.html</td></tr>
@@ -27951,6 +28683,7 @@ ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym program
 <table class="hkeys">
 <tr><td><b>Dokument Word</b></td><td>.docx, z formatowaniem</td></tr>
 <tr><td><b>Tekst OpenDocument</b></td><td>.odt, dla LibreOffice i OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, dla starszych programów i wymiany</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, do czytników</td></tr>
 <tr><td><b>PDF</b></td><td>przez okno drukowania</td></tr>
 <tr><td><b>Strona internetowa</b></td><td>.html</td></tr>
@@ -28567,6 +29300,7 @@ perché è il caso normale: si legge ovunque, con o senza questo programma.</p>
 <table class="hkeys">
 <tr><td><b>Documento Word</b></td><td>.docx, con la formattazione</td></tr>
 <tr><td><b>Testo OpenDocument</b></td><td>.odt, per LibreOffice e OpenOffice</td></tr>
+<tr><td><b>Rich Text Format</b></td><td>.rtf, per programmi più vecchi e lo scambio</td></tr>
 <tr><td><b>E-book</b></td><td>.epub, per i dispositivi di lettura</td></tr>
 <tr><td><b>PDF</b></td><td>tramite la finestra di stampa</td></tr>
 <tr><td><b>Pagina web</b></td><td>.html</td></tr>
