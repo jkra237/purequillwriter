@@ -13717,10 +13717,10 @@ function looksBinary(s){
 const PQWEXT=".pqw";
 const PQWLESEN=[".pqw",".json"];
 const DOKFORMATE=[
-  {n:"Word-Dokumente",   e:[".doc",".docx"]},
+  {n:"Word-Dokumente",   e:[".doc",".docx",".docm",".dot",".dotx",".dotm"]},
   {n:"Text und Markdown",e:[".txt",".text",".md",".markdown"]},
   {n:"Webseiten",        e:[".html",".htm"]},
-  {n:"OpenDocument und RTF",e:[".odt",".rtf"]},
+  {n:"OpenDocument und RTF",e:[".odt",".ott",".fodt",".rtf"]},
   {n:"PureQuill-Sicherungen",e:PQWLESEN}
 ];
 const DOKENDUNGEN=DOKFORMATE.flatMap(f=>f.e);
@@ -13799,6 +13799,13 @@ async function ladeDokumente(dateien){
             if(erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes}}else abgelehnt++;
           continue;
         }
+      }
+      /* Flaches OpenDocument (.fodt): alles in einer XML-Datei */
+      if(ext==="fodt"){
+        const erg=fodtLesen(new TextDecoder().decode(await f.arrayBuffer()));
+        if(erg&&neuesDokumentAus(f.name,erg)){geladen++;
+          if(erg.bilder){bildZahl+=erg.bilder.zahl||0;bildBytes+=erg.bilder.bytes||0}}else abgelehnt++;
+        continue;
       }
       /* RTF als Bytes lesen: rohe 8-Bit-Zeichen im Text gehören zur Codepage
          der Datei, nicht zu UTF-8 */
@@ -13964,7 +13971,7 @@ function importDocumentText(name,raw){
 /* ---- .docx und .odt ----
    Beide sind ZIP-Archive. Browser können seit 2023 selbst entpacken
    (DecompressionStream), deshalb braucht es dafür keine Fremdbibliothek. */
-const ZIPFORMATE=["docx","odt"];
+const ZIPFORMATE=["docx","docm","dotx","dotm","odt","ott"];
 async function zipEintrag(buf,name){
   const b=await zipBytes(buf,name);
   return b?new TextDecoder().decode(b):null;
@@ -14282,6 +14289,12 @@ function docxNummern(xml){
     const id=xattr(e,"numId");if(id==null)return;
     const ziel=String(xattrN(KIND(e,"abstractNumId"),"val")||"");
     const ebenen=Object.assign({},abstrakt[ziel]||{});
+    /* Word zählt je Listendefinition (abstractNum), nicht je w:num: zwei
+       w:num auf dieselbe Definition sind eine fortlaufende Liste. Nur ein
+       startOverride beginnt neu. LibreOffice schreibt so: der erste Eintrag
+       über eine w:num mit startOverride, alle weiteren über die Grund-w:num. */
+    Object.defineProperty(ebenen,"_abs",{value:ziel,enumerable:false});
+    Object.defineProperty(ebenen,"_neu",{value:{},enumerable:false});
     /* lvlOverride ersetzt einzelne Ebenen für genau diese Liste */
     [...e.children].filter(c=>c.localName==="lvlOverride").forEach(o=>{
       const l=KIND(o,"lvl"),so=KIND(o,"startOverride");
@@ -14291,8 +14304,8 @@ function docxNummern(xml){
         text:String(xattrN(KIND(l,"lvlText"),"val")||""),
         start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1};
       /* startOverride: diese Liste beginnt bei einer eigenen Nummer */
-      if(so&&ebenen[ilvl])ebenen[ilvl]=Object.assign({},ebenen[ilvl],
-        {start:parseInt(xattrN(so,"val"),10)||1});
+      if(so&&ebenen[ilvl]){ebenen[ilvl]=Object.assign({},ebenen[ilvl],
+        {start:parseInt(xattrN(so,"val"),10)||1});ebenen._neu[ilvl]=true}
     });
     karte[String(id)]=ebenen;
   });
@@ -15113,7 +15126,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
      zwischen den fünf nummerierten Abschnitten Aufzählungspunkte; ohne
      diese Zählung hieß jeder Abschnitt „1.“. Wird eine Ebene tiefer
      gezählt, beginnt die nächste Unterebene wieder vorn. */
-  const zaehler={};
+  const zaehler={},neuBegonnen=new Set();
   const zuBis=n=>{while(stapel.length>n){const t=stapel.pop();
     if(t.offen)out+="</li>";out+="</"+t.tag+">"}};
   const alleZu=()=>zuBis(0);
@@ -15162,21 +15175,27 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
       if(stil){
         const ebene=ebenen?ebenen[String(ilvl)]:null;
-        const k=numId+":"+ilvl;
-        const nummer=zaehler[k]?zaehler[k]+1:((ebene&&ebene.start)||1);
+        /* Gezählt und zusammengefasst wird je Listendefinition; eine w:num
+           mit startOverride beginnt bei ihrem ersten Gebrauch neu */
+        const liste=ebenen&&ebenen._abs!=null?"a"+ebenen._abs:"n"+numId;
+        const k=liste+":"+ilvl;
+        const neuStart=!!(ebenen&&ebenen._neu&&ebenen._neu[ilvl]&&!neuBegonnen.has(numId+":"+ilvl));
+        if(neuStart)neuBegonnen.add(numId+":"+ilvl);
+        const nummer=zaehler[k]&&!neuStart?zaehler[k]+1:((ebene&&ebene.start)||1);
         zaehler[k]=nummer;
-        for(let t=ilvl+1;t<9;t++)delete zaehler[numId+":"+t];
+        for(let t=ilvl+1;t<9;t++)delete zaehler[liste+":"+t];
         const startHier=stil.tag==="ol"?nummer:0;
         const oeffne=()=>auf(stil,stapel.length===ilvl?startHier:0);
+        const schonOffen=stapel.length>ilvl;
         if(!stapel.length)oeffne();
         zuBis(ilvl+1);
         while(stapel.length<ilvl+1)oeffne();
         const oben=stapel[stapel.length-1];
-        /* Eine andere Liste (numId) beginnt eine neue, auch bei gleichem
-           Aussehen — sonst verschmolzen zwei direkt aufeinanderfolgende
-           Listen, und eine Startnummer ging verloren. */
-        if(oben.tag!==stil.tag||oben.ls!==stil.ls||(oben.numId&&oben.numId!==numId)){zuBis(stapel.length-1);oeffne()}
-        stapel[stapel.length-1].numId=numId;
+        /* Eine andere Liste beginnt eine neue, auch bei gleichem Aussehen —
+           sonst verschmolzen zwei direkt aufeinanderfolgende Listen, und eine
+           Startnummer ging verloren. Ebenso ein Neubeginn derselben Liste. */
+        if(oben.tag!==stil.tag||oben.ls!==stil.ls||(oben.liste&&oben.liste!==liste)||(neuStart&&schonOffen)){zuBis(stapel.length-1);oeffne()}
+        stapel[stapel.length-1].liste=liste;
         const jetzt=stapel[stapel.length-1];
         if(jetzt.offen)out+="</li>";
         out+="<li"+wa+">"+(inhalt.split(DOCX_SEITENMARKE).join("")||"<br>");jetzt.offen=true;
@@ -15924,6 +15943,23 @@ function odtLesen(inhaltXml,stilXml,bilder){
 }
 /* Bilder des Pakets (Pictures/…) vorab laden — das Lesen ist asynchron,
    odtLesen() läuft synchron durch */
+/* .fodt: dasselbe XML wie content.xml und styles.xml zusammen, Bilder als
+   Base64 in <office:binary-data> statt als Datei im ZIP. Die Bilder werden
+   vorab zu Verweisen umgehängt, dann liest odtLesen wie gewohnt. */
+function fodtLesen(xml){
+  if(!/<office:document\b/.test(xml))return null;
+  const karte={};let n=0;
+  const typ=b=>b.startsWith("iVBOR")?"image/png":b.startsWith("/9j/")?"image/jpeg":b.startsWith("R0lG")?"image/gif":b.startsWith("UklG")?"image/webp":null;
+  xml=xml.replace(/(<draw:image\b[^>]*?)(\/?)>\s*<office:binary-data>([\s\S]*?)<\/office:binary-data>/g,(m,auf,zu,b64)=>{
+    const daten=b64.replace(/\s+/g,""),t=typ(daten);
+    if(!t)return m;
+    const name="fodt-bild-"+(++n);
+    karte[name]={uri:"data:"+t+";base64,"+daten,bytes:Math.round(daten.length*3/4)};
+    return auf.replace(/\sxlink:href="[^"]*"/,"")+' xlink:href="'+name+'">';
+  });
+  const erg=odtLesen(xml,xml,karte);
+  return erg&&erg.html?erg:null;
+}
 async function odtBildKarte(buf,xmls){
   const karte={};
   const pfade=new Set();
@@ -17325,10 +17361,16 @@ function rtfZeichen(ziel,x,ctx,direkt){
     case "deleted":set("weg",an);break;
   }
 }
+/* Geschwister der beiden ZIP-Formate: Vorlagen (.dotx/.dotm, .ott) und
+   Word mit Makros (.docm, .dotm) sind innen gebaut wie .docx bzw. .odt.
+   Makros liest PureQuill nicht; sie bleiben in der Datei und kommen nicht
+   mit. Eine Vorlage öffnet wie in Word als neues Dokument — sie wird nicht
+   zum Ziel von „Speichern“, das bleibt einer echten .docx vorbehalten. */
+const WORD_ZIP=["docx","docm","dotx","dotm"];
 async function zipDokument(name,buf){
   const ext=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
   try{
-    if(ext==="docx"){
+    if(WORD_ZIP.includes(ext)){
       const xml=await zipEintrag(buf,"word/document.xml");
       if(!xml)return null;
       /* Alle Nebendateien sind freiwillig: fehlt eine, fällt der Leser auf
@@ -25588,7 +25630,9 @@ dims everything but the page and lets you keep writing.</p>`}]},
 several can be opened at once.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Word templates and Word with macros (without the macros)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>OpenDocument template, OpenDocument as a single XML file</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>web pages</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -26190,7 +26234,9 @@ dämpft alles außer der Seite und lässt dich weiterschreiben.</p>`}]},
 neuer Reiter; mehrere lassen sich auf einmal öffnen.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Word-Vorlagen und Word mit Makros (ohne die Makros)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>OpenDocument-Vorlage, OpenDocument als eine XML-Datei</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>Webseiten</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -26800,7 +26846,9 @@ todo salvo la página y te deja seguir escribiendo.</p>`}]},
 convierte en una pestaña nueva; se pueden abrir varios a la vez.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Plantillas de Word y Word con macros (sin las macros)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>Plantilla OpenDocument, OpenDocument como un solo archivo XML</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>páginas web</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -27408,7 +27456,9 @@ tudo menos a página e deixa você continuar escrevendo.</p>`}]},
 vira uma aba nova; vários podem ser abertos de uma vez.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Modelos do Word e Word com macros (sem as macros)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>Modelo OpenDocument, OpenDocument como um único arquivo XML</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>páginas da web</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -28040,7 +28090,9 @@ tout sauf la page et vous laisse continuer à écrire.</p>`}]},
 devient un nouvel onglet ; plusieurs peuvent être ouverts à la fois.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Modèles Word et Word avec macros (sans les macros)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>Modèle OpenDocument, OpenDocument en un seul fichier XML</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>pages web</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -28644,7 +28696,9 @@ wszystko poza stroną i pozwala dalej pisać.</p>`}]},
 nową kartą; można otworzyć kilka naraz.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Szablony Worda i Word z makrami (bez makr)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>Szablon OpenDocument, OpenDocument jako jeden plik XML</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>strony internetowe</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>
@@ -29258,7 +29312,9 @@ cosa: attenua tutto tranne la pagina e ti lascia continuare a scrivere.</p>`}]},
 scheda; se ne possono aprire diversi in una volta.</p>
 <table class="hkeys">
 <tr><td>.docx</td><td>Word</td></tr>
+<tr><td>.doc</td><td>Word 97–2003</td></tr><tr><td>.dotx, .dot, .docm</td><td>Modelli di Word e Word con macro (senza le macro)</td></tr>
 <tr><td>.odt</td><td>OpenDocument (LibreOffice)</td></tr>
+<tr><td>.ott, .fodt</td><td>Modello OpenDocument, OpenDocument come un unico file XML</td></tr>
 <tr><td>.rtf</td><td>Rich Text</td></tr>
 <tr><td>.html, .htm</td><td>pagine web</td></tr>
 <tr><td>.md</td><td>Markdown</td></tr>

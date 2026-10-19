@@ -4,7 +4,13 @@
               <uap:SupportedFileTypes>
                 <uap:FileType>.docx</uap:FileType>
                 <uap:FileType>.doc</uap:FileType>
+                <uap:FileType>.docm</uap:FileType>
+                <uap:FileType>.dot</uap:FileType>
+                <uap:FileType>.dotx</uap:FileType>
+                <uap:FileType>.dotm</uap:FileType>
                 <uap:FileType>.odt</uap:FileType>
+                <uap:FileType>.ott</uap:FileType>
+                <uap:FileType>.fodt</uap:FileType>
                 <uap:FileType>.rtf</uap:FileType>
                 <uap:FileType>.md</uap:FileType>
                 <uap:FileType>.markdown</uap:FileType>

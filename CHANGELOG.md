@@ -103,6 +103,24 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Word- und OpenDocument-Vorlagen, Word mit Makros, flaches ODT**
+  (Toms Wahl „Stufe 1“): .dotx, .dotm, .docm gehen den .docx-Weg, .dot den
+  .doc-Weg, .ott den .odt-Weg; .fodt (OpenDocument als eine XML-Datei)
+  liest fodtLesen(), das die Base64-Bilder aus <office:binary-data> vorab
+  zu Verweisen umhängt und dann odtLesen nimmt. Makros kommen nicht mit.
+  Eine Vorlage öffnet wie in Word als neues Dokument und wird nicht zum
+  Ziel von „Speichern“. Öffnen-Dialog, Windows-Dateitypen für „Öffnen mit“
+  und die Hilfe (7 Sprachen, dort fehlte auch .doc) nennen die Formate.
+  Alle sechs, aus dem Prüfdokument von LibreOffice erzeugt, bringen
+  dieselben Merkmale wie das Original.
+- **Word-Listen aus LibreOffice zerfielen** (gefunden beim Prüfen der
+  Vorlagen): LibreOffice schreibt den ersten Eintrag einer Liste über eine
+  w:num mit startOverride, alle weiteren über die Grund-w:num derselben
+  Definition. Der Word-Leser zählte und gruppierte je w:num — aus einer
+  Liste wurden zwei, „Vier“ hieß „2.“. Jetzt wie Word: gezählt und
+  zusammengefasst je abstractNum, eine w:num mit startOverride beginnt bei
+  ihrem ersten Gebrauch neu. Dateien aus Word und PureQuill bleiben gleich
+  (alle Umläufe 42/42).
 - **RTF neu: lesen und „Speichern als › RTF“** (Toms Frage „wie steht es um
   RTF?“). Der alte Leser arbeitete mit Textersetzungen und kannte keine
   Gruppen: Fett, das RTF mit der schließenden Klammer beendet, blieb bis zum
