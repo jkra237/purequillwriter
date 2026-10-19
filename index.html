@@ -1245,7 +1245,26 @@ body.focus .outline{display:none}
 .ebz{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px}
 .ebz:last-of-type{border-bottom:0}
 .ebmodal .ebz input{width:auto;flex:none;margin:0;accent-color:var(--stamp)}
-.ebz>span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ebz .ebgo{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.epbereit{margin:2px 0 10px;padding:9px 11px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--chrome-2);font-size:12.5px;line-height:1.45}
+.epbereit .btn{margin-top:8px}
+.epst{display:flex;gap:8px;align-items:flex-start;padding:2px 0}
+.epsym{flex:none;width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;margin-top:1px;color:var(--paper)}
+.epst.gut .epsym{background:var(--ok)}
+.epst.rot .epsym{background:var(--err);color:var(--on-err)}
+.epst.gut{color:color-mix(in srgb,var(--ok) 55%,var(--ink))}
+.epst.rot{color:color-mix(in srgb,var(--err) 55%,var(--ink))}
+.ebgr{margin:12px 0 2px;font-size:12px;color:var(--ink-soft)}
+.ebtag{flex:none;font-family:var(--mono);font-size:10.5px;color:var(--ink-soft);border:1px solid var(--rule);border-radius:4px;padding:0 4px}
+.ebfuss{display:flex;align-items:center;gap:8px;margin-top:12px}
+.ebll{border:0;background:none;padding:3px 0;color:var(--stamp);font-size:12px}
+.ebll:hover{text-decoration:underline}
+.ebseiten{margin-left:auto;display:flex;align-items:center;gap:3px}
+.ebs{min-width:28px;height:28px;padding:0 6px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink);font-size:12.5px}
+.ebs:hover:not(:disabled){background:var(--chrome-2)}
+.ebs.on{background:var(--stamp);border-color:var(--stamp);color:var(--paper)}
+.ebs:disabled{color:var(--ink-faint);cursor:default}
+.ebpunkte{color:var(--ink-soft);padding:0 2px}
 .ebn{margin-left:auto;font-size:12px;color:var(--ink-soft);white-space:nowrap;padding-left:8px}
 .ebgo{cursor:pointer}
 .ebgo:hover{color:var(--stamp);text-decoration:underline}
@@ -2353,14 +2372,26 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Apply creates a copy; the original stays unchanged.",
-  "Stattdessen im Original ändern":"Change the original instead",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copy for the e-book created; the original stays unchanged.",
+  "Sieht aus wie ein Kapitelanfang":"Looks like a chapter start",
+  "Bereits als Überschrift formatiert":"Already formatted as a heading",
+  "Vielleicht eine Zwischenüberschrift":"Possibly a subheading",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Apply creates a new document, “{neu}”. “{alt}” stays unchanged, both in the app and as a file.",
+  "Stattdessen „{alt}“ selbst ändern":"Change “{alt}” itself instead",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"New document “{neu}” created. “{alt}” stays unchanged.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"No chapters – the e-book will be one long section without a table of contents",
+  "Text aufgeräumt":"Text tidied up",
+  "Text noch roh":"Text still raw",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Tick = a chapter starts here. Click the text to see the spot.",
+  "fett":"bold",
+  "kurze Zeile":"short line",
+  "Alle auswählen":"Select all",
+  "Alle abwählen":"Deselect all",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"To set chapters yourself: click into the line where a chapter begins and choose “Heading 1” in the paragraph style box at the top – or type “/” at the start of the line. Then start the assistant again.",
+  "Kapitel selbst setzen":"Set chapters myself",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Click into the first line of a chapter and choose “Heading 1” at the top.",
   "E-Book vorbereiten":"Prepare e-book",
   "E-Book vorbereiten&hellip;":"Prepare e-book&hellip;",
-  "Noch keine Kapitel?":"No chapters yet?",
   "Kapitel":"Chapters",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"These lines look like chapter openings. Click one to see it in the text.",
   "Keine Kapitelanfänge gefunden.":"No chapter openings found.",
   "Absatz":"Paragraph",
   "zentriert":"centred",
@@ -3263,14 +3294,26 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Appliquer crée une copie ; l'original reste inchangé.",
-  "Stattdessen im Original ändern":"Modifier plutôt l'original",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copie pour l'e-book créée ; l'original reste inchangé.",
+  "Sieht aus wie ein Kapitelanfang":"Ressemble à un début de chapitre",
+  "Bereits als Überschrift formatiert":"Déjà mis en forme comme titre",
+  "Vielleicht eine Zwischenüberschrift":"Peut-être un intertitre",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Appliquer crée un nouveau document, « {neu} ». « {alt} » reste inchangé, dans l'application comme dans son fichier.",
+  "Stattdessen „{alt}“ selbst ändern":"Modifier plutôt « {alt} » lui-même",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"Nouveau document « {neu} » créé. « {alt} » reste inchangé.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"Aucun chapitre – l'e-book sera une seule longue section sans table des matières",
+  "Text aufgeräumt":"Texte propre",
+  "Text noch roh":"Texte encore brut",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Coché = un chapitre commence ici. Un clic sur le texte montre l'endroit.",
+  "fett":"gras",
+  "kurze Zeile":"ligne courte",
+  "Alle auswählen":"Tout sélectionner",
+  "Alle abwählen":"Tout désélectionner",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"Pour définir les chapitres vous-même : cliquez dans la ligne où commence un chapitre et choisissez « Titre 1 » dans la zone de style de paragraphe en haut – ou tapez « / » en début de ligne. Puis relancez l'assistant.",
+  "Kapitel selbst setzen":"Définir les chapitres moi-même",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Cliquez dans la première ligne d'un chapitre et choisissez « Titre 1 » en haut.",
   "E-Book vorbereiten":"Préparer l'e-book",
   "E-Book vorbereiten&hellip;":"Préparer l'e-book&hellip;",
-  "Noch keine Kapitel?":"Pas encore de chapitres ?",
   "Kapitel":"Chapitres",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Ces lignes ressemblent à des débuts de chapitre. Un clic montre l'endroit dans le texte.",
   "Keine Kapitelanfänge gefunden.":"Aucun début de chapitre trouvé.",
   "Absatz":"Paragraphe",
   "zentriert":"centré",
@@ -4173,14 +4216,26 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Aplicar crea una copia; el original no cambia.",
-  "Stattdessen im Original ändern":"Cambiar el original en su lugar",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copia para el e-book creada; el original no cambia.",
+  "Sieht aus wie ein Kapitelanfang":"Parece el inicio de un capítulo",
+  "Bereits als Überschrift formatiert":"Ya tiene formato de título",
+  "Vielleicht eine Zwischenüberschrift":"Quizá un subtítulo",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Aplicar crea un documento nuevo, «{neu}». «{alt}» no cambia, ni en el programa ni como archivo.",
+  "Stattdessen „{alt}“ selbst ändern":"Cambiar «{alt}» directamente",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"Documento nuevo «{neu}» creado. «{alt}» no cambia.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"Sin capítulos: el e-book será una única sección larga sin índice",
+  "Text aufgeräumt":"Texto ordenado",
+  "Text noch roh":"Texto aún sin pulir",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Marcado = aquí empieza un capítulo. Un clic en el texto muestra el lugar.",
+  "fett":"negrita",
+  "kurze Zeile":"línea corta",
+  "Alle auswählen":"Seleccionar todo",
+  "Alle abwählen":"Deseleccionar todo",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"Para marcar los capítulos tú mismo: haz clic en la línea donde empieza un capítulo y elige «Título 1» en el cuadro de estilo de párrafo de arriba, o escribe «/» al principio de la línea. Luego vuelve a iniciar el asistente.",
+  "Kapitel selbst setzen":"Marcar capítulos yo mismo",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Haz clic en la primera línea de un capítulo y elige «Título 1» arriba.",
   "E-Book vorbereiten":"Preparar e-book",
   "E-Book vorbereiten&hellip;":"Preparar e-book&hellip;",
-  "Noch keine Kapitel?":"¿Aún sin capítulos?",
   "Kapitel":"Capítulos",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Estas líneas parecen inicios de capítulo. Un clic muestra el lugar en el texto.",
   "Keine Kapitelanfänge gefunden.":"No se encontraron inicios de capítulo.",
   "Absatz":"Párrafo",
   "zentriert":"centrado",
@@ -5083,14 +5138,26 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Aplicar cria uma cópia; o original fica inalterado.",
-  "Stattdessen im Original ändern":"Alterar o original em vez disso",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Cópia para o e-book criada; o original fica inalterado.",
+  "Sieht aus wie ein Kapitelanfang":"Parece o início de um capítulo",
+  "Bereits als Überschrift formatiert":"Já formatado como título",
+  "Vielleicht eine Zwischenüberschrift":"Talvez um intertítulo",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Aplicar cria um novo documento, “{neu}”. “{alt}” fica inalterado, no programa e como arquivo.",
+  "Stattdessen „{alt}“ selbst ändern":"Alterar o próprio “{alt}” em vez disso",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"Novo documento “{neu}” criado. “{alt}” fica inalterado.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"Sem capítulos – o e-book será uma única seção longa sem sumário",
+  "Text aufgeräumt":"Texto arrumado",
+  "Text noch roh":"Texto ainda bruto",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Marcado = aqui começa um capítulo. Um clique no texto mostra o lugar.",
+  "fett":"negrito",
+  "kurze Zeile":"linha curta",
+  "Alle auswählen":"Selecionar tudo",
+  "Alle abwählen":"Desmarcar tudo",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"Para definir os capítulos você mesmo: clique na linha onde começa um capítulo e escolha “Título 1” na caixa de estilo de parágrafo no alto – ou digite “/” no início da linha. Depois inicie o assistente de novo.",
+  "Kapitel selbst setzen":"Definir capítulos eu mesmo",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Clique na primeira linha de um capítulo e escolha “Título 1” no alto.",
   "E-Book vorbereiten":"Preparar e-book",
   "E-Book vorbereiten&hellip;":"Preparar e-book&hellip;",
-  "Noch keine Kapitel?":"Ainda sem capítulos?",
   "Kapitel":"Capítulos",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Estas linhas parecem inícios de capítulo. Um clique mostra o lugar no texto.",
   "Keine Kapitelanfänge gefunden.":"Nenhum início de capítulo encontrado.",
   "Absatz":"Parágrafo",
   "zentriert":"centralizado",
@@ -5993,14 +6060,26 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Zastosuj tworzy kopię; oryginał pozostaje bez zmian.",
-  "Stattdessen im Original ändern":"Zamiast tego zmień oryginał",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Utworzono kopię do e-booka; oryginał pozostaje bez zmian.",
+  "Sieht aus wie ein Kapitelanfang":"Wygląda na początek rozdziału",
+  "Bereits als Überschrift formatiert":"Już sformatowane jako nagłówek",
+  "Vielleicht eine Zwischenüberschrift":"Może śródtytuł",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Zastosuj tworzy nowy dokument „{neu}”. „{alt}” pozostaje bez zmian, w programie i jako plik.",
+  "Stattdessen „{alt}“ selbst ändern":"Zamiast tego zmień sam „{alt}”",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"Utworzono nowy dokument „{neu}”. „{alt}” pozostaje bez zmian.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"Brak rozdziałów – e-book będzie jedną długą sekcją bez spisu treści",
+  "Text aufgeräumt":"Tekst uporządkowany",
+  "Text noch roh":"Tekst jeszcze surowy",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Zaznaczone = tu zaczyna się rozdział. Kliknięcie tekstu pokazuje miejsce.",
+  "fett":"pogrubione",
+  "kurze Zeile":"krótki wiersz",
+  "Alle auswählen":"Zaznacz wszystko",
+  "Alle abwählen":"Odznacz wszystko",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"Aby samodzielnie ustawić rozdziały: kliknij w wiersz, od którego zaczyna się rozdział, i wybierz u góry w polu stylu akapitu „Nagłówek 1” – albo wpisz „/” na początku wiersza. Potem uruchom asystenta ponownie.",
+  "Kapitel selbst setzen":"Ustaw rozdziały samodzielnie",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Kliknij w pierwszy wiersz rozdziału i wybierz u góry „Nagłówek 1”.",
   "E-Book vorbereiten":"Przygotuj e-book",
   "E-Book vorbereiten&hellip;":"Przygotuj e-book&hellip;",
-  "Noch keine Kapitel?":"Jeszcze bez rozdziałów?",
   "Kapitel":"Rozdziały",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Te wiersze wyglądają na początki rozdziałów. Kliknięcie pokazuje miejsce w tekście.",
   "Keine Kapitelanfänge gefunden.":"Nie znaleziono początków rozdziałów.",
   "Absatz":"Akapit",
   "zentriert":"wyśrodkowany",
@@ -6903,14 +6982,26 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
-  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Applica crea una copia; l'originale resta invariato.",
-  "Stattdessen im Original ändern":"Modifica invece l'originale",
-  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copia per l'e-book creata; l'originale resta invariato.",
+  "Sieht aus wie ein Kapitelanfang":"Sembra l'inizio di un capitolo",
+  "Bereits als Überschrift formatiert":"Già formattato come titolo",
+  "Vielleicht eine Zwischenüberschrift":"Forse un sottotitolo",
+  "Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei.":"Applica crea un nuovo documento, «{neu}». «{alt}» resta invariato, nel programma e come file.",
+  "Stattdessen „{alt}“ selbst ändern":"Modifica invece «{alt}» stesso",
+  "Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert.":"Nuovo documento «{neu}» creato. «{alt}» resta invariato.",
+  "Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis":"Nessun capitolo – l'e-book sarà un'unica lunga sezione senza indice",
+  "Text aufgeräumt":"Testo in ordine",
+  "Text noch roh":"Testo ancora grezzo",
+  "Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.":"Spuntato = qui inizia un capitolo. Un clic sul testo mostra il punto.",
+  "fett":"grassetto",
+  "kurze Zeile":"riga breve",
+  "Alle auswählen":"Seleziona tutto",
+  "Alle abwählen":"Deseleziona tutto",
+  "So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.":"Per impostare i capitoli da te: fai clic nella riga in cui inizia un capitolo e scegli «Titolo 1» nella casella dello stile di paragrafo in alto, oppure digita «/» all'inizio della riga. Poi riavvia l'assistente.",
+  "Kapitel selbst setzen":"Imposta i capitoli da me",
+  "Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“.":"Fai clic nella prima riga di un capitolo e scegli «Titolo 1» in alto.",
   "E-Book vorbereiten":"Prepara e-book",
   "E-Book vorbereiten&hellip;":"Prepara e-book&hellip;",
-  "Noch keine Kapitel?":"Ancora nessun capitolo?",
   "Kapitel":"Capitoli",
-  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Queste righe sembrano inizi di capitolo. Un clic mostra il punto nel testo.",
   "Keine Kapitelanfänge gefunden.":"Nessun inizio di capitolo trovato.",
   "Absatz":"Paragrafo",
   "zentriert":"centrato",
@@ -13050,6 +13141,28 @@ async function epubBauen(d,opts){
   ];
   return await zipSchreiben(eintraege);
 }
+/* Ampel im EPUB-Dialog (Toms Wunsch statt „Noch keine Kapitel?“): Kapitel
+   da? Text aufgeräumt? Ist etwas rot, bietet sie den Assistenten an. Als
+   roh gilt der Text erst ab 5 Leerzeilen oder Umbrüchen mitten im Satz,
+   damit ein paar Leerabsätze in einem Word-Dokument nicht rot werden. */
+function epubBereit(d){
+  const box=document.createElement("div");box.innerHTML=d.html||"";
+  const kap=box.querySelectorAll(":scope > h1").length;
+  const z=ebAufraeumen(box,{leer:true,umbruch:true},false);
+  const roh=z.leer+z.umbruch>=5;
+  const zf=v=>Number(v).toLocaleString(S.settings.uiLang);
+  const zeile=(gut,txt)=>`<div class="epst ${gut?"gut":"rot"}"><span class="epsym" aria-hidden="true">${gut?"✓":"✕"}</span><span>${txt}</span></div>`;
+  const kapTxt=kap?PL(zf(kap)+" Kapitel, mit Inhaltsverzeichnis",zf(kap)+(kap===1?" chapter":" chapters")+", with table of contents",
+      zf(kap)+(kap===1?" chapitre":" chapitres")+", avec table des matières",zf(kap)+(kap===1?" capítulo":" capítulos")+", con índice",
+      zf(kap)+(kap===1?" capítulo":" capítulos")+", com sumário","Rozdziały: "+zf(kap)+", ze spisem treści",zf(kap)+(kap===1?" capitolo":" capitoli")+", con indice")
+    :tr("Keine Kapitel – das E-Book wird ein einziger langer Abschnitt ohne Inhaltsverzeichnis");
+  const teile=[];
+  if(z.leer)teile.push(PL(zf(z.leer)+" Leerzeilen",zf(z.leer)+" empty lines",zf(z.leer)+" lignes vides",zf(z.leer)+" líneas vacías",zf(z.leer)+" linhas vazias","puste wiersze: "+zf(z.leer),zf(z.leer)+" righe vuote"));
+  if(z.umbruch)teile.push(PL(zf(z.umbruch)+" Umbrüche mitten im Satz",zf(z.umbruch)+" line breaks mid-sentence",zf(z.umbruch)+" retours à la ligne en pleine phrase",
+    zf(z.umbruch)+" saltos de línea a mitad de frase",zf(z.umbruch)+" quebras de linha no meio da frase","podziały wiersza w środku zdania: "+zf(z.umbruch),zf(z.umbruch)+" a capo a metà frase"));
+  const rohTxt=roh?tr("Text noch roh")+": "+teile.join(", "):tr("Text aufgeräumt");
+  return `<div class="epbereit">${zeile(kap>0,kapTxt)}${zeile(!roh,rohTxt)}${kap&&!roh?"":`<button class="btn" id="epVorb">${tr("E-Book vorbereiten&hellip;")}</button>`}</div>`;
+}
 function exportEpub(){
   flush();
   const d=doc();
@@ -13061,7 +13174,7 @@ function exportEpub(){
   overlay(`<div class="modal"><h3>${tr("Als EPUB exportieren")}</h3>
     <div class="pad">
       <p class="iohint">${esc(tr(d.title))} · ${esc(tr(lname))}</p>
-      ${/<h1[\s>]/.test(d.html||"")?"":`<p class="iohint">${tr("Noch keine Kapitel?")} <button class="btn" id="epVorb" style="margin-left:6px">${tr("E-Book vorbereiten&hellip;")}</button></p>`}
+      ${epubBereit(d)}
       ${feld(tr("Titel"),`<input type="text" id="epTitel" autocomplete="off" value="${esc(ep.titel||tr(d.title))}">`)}
       ${feld(tr("Autor"),`<input type="text" id="epAuthor" autocomplete="off" value="${esc(ep.author!=null?ep.author:S.settings.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
       ${feld(tr("Kapitel beginnen bei"),`<select id="epSplit">
@@ -23097,13 +23210,24 @@ const EB_RAHMEN=/^(?:prolog|prologue|pr[oó]logo|epilog|epilogue|ep[ií]logo|vor
 const EB_SZENE=/^\s*(?:\*\s*){3,}$|^\s*(?:#\s*){1,3}$|^\s*(?:~\s*){3,}$|^\s*(?:[◆◇•·]\s*){1,3}$|^\s*⁂\s*$/;
 const ebText=el=>(el.innerText||el.textContent||"").replace(/[\s\u00a0]+/g," ").trim();
 const ebSatzEnde=/[.!?…:;"“”»«’)\]]$/;
+/* Alles, was als Kapitelanfang in Frage kommt, in drei Gruppen (Toms
+   Wunsch: „alle Zwischenüberschriften listen und auswählen“): sicher oder
+   fast sicher Erkanntes, die Überschriften, die das Dokument schon hat
+   (Überschrift 1 vorgehakt), und kurze Zeilen, die Zwischenüberschriften
+   sein könnten (fett, oder kurz vor einem langen Absatz) — nicht vorgehakt. */
+const EB_GRUPPEN={erkannt:"Sieht aus wie ein Kapitelanfang",ueberschrift:"Bereits als Überschrift formatiert",kurz:"Vielleicht eine Zwischenüberschrift"};
 function ebKapitelFinden(ed){
   const bloecke=[...ed.children];
-  const out=[];
+  const out=[],ueber=[],kurz=[];
+  const ganzFett=el=>{let n=0;const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let x;
+    while(x=w.nextNode()){if(!x.nodeValue.trim())continue;if((parseInt(getComputedStyle(x.parentElement).fontWeight,10)||400)<600)return false;n++}
+    return n>0};
   bloecke.forEach((el,i)=>{
-    if(el.tagName!=="P"||el.dataset.fv||el.querySelector("img,figure"))return;
     const t=ebText(el);
-    if(!t||t.length>80)return;
+    if(!t)return;
+    if(/^H[1-4]$/.test(el.tagName)){ueber.push({el,text:t,an:el.tagName==="H1",grund:"absatz",nr:i+1,art:"ueberschrift",stufe:+el.tagName[1]});return}
+    if(el.tagName!=="P"||el.dataset.fv||el.dataset.szene||el.querySelector("img,figure"))return;
+    if(t.length>80)return;
     const naechster=bloecke.slice(i+1).find(b=>ebText(b));
     if(!naechster)return;
     const mitte=(el.style.textAlign==="center");
@@ -23113,10 +23237,12 @@ function ebKapitelFinden(ed){
     else if(/^\d{1,3}\.?$/.test(t)){sicher=mitte;grund=mitte?"zentriert":"unsicher"}
     else if(/^\d{1,2}\.\s*\S+\s+\d{4}$/.test(t)){sicher=false;grund="unsicher"}
     else if(mitte&&t.length<=60&&!ebSatzEnde.test(t)&&!EB_SZENE.test(t)){sicher=false;grund="zentriert"}
-    if(sicher===null)return;
-    out.push({el,text:t,an:sicher,grund:grund||"absatz",nr:i+1});
+    if(sicher!==null){out.push({el,text:t,an:sicher,grund:grund||"absatz",nr:i+1,art:"erkannt"});return}
+    if(t.length>60||ebSatzEnde.test(t)||EB_SZENE.test(t))return;
+    if(ganzFett(el))kurz.push({el,text:t,an:false,grund:"fett",nr:i+1,art:"kurz"});
+    else if(t.length<=40&&ebText(naechster).length>80)kurz.push({el,text:t,an:false,grund:"kurze Zeile",nr:i+1,art:"kurz"});
   });
-  return out;
+  return [...out,...ueber,...kurz];
 }
 /* Zählen und Anwenden laufen über dieselben Funktionen: anwenden=false
    zählt nur */
@@ -23232,17 +23358,38 @@ function ebookAssistent(danach){
   const was={...ALLES};Object.keys(zahl).forEach(k=>{if(!zahl[k])was[k]=false});
   const bs=Object.assign({einzug:true,neueSeite:true,initiale:false},(d.epub&&d.epub.buchsatz)||{});
   let imOriginal=false;
-  let schritt=1;
+  let schritt=1,seite=0;const PRO=10;
   const haken=(id,an,lab,rechts)=>`<label class="ebz"><input type="checkbox" id="${id}" ${an?"checked":""}><span>${lab}</span>${rechts!=null?`<span class="ebn">${rechts}</span>`:""}</label>`;
   const zifr=v=>Number(v).toLocaleString(S.settings.uiLang);
+  /* Original und Kopie beim Namen nennen, damit klar ist, was „das
+     Original“ ist (Toms Hinweis): das Dokument im Programm und seine Datei */
+  const altName=tr(d.title),neuName=altName+" ("+tr("E-Book")+")";
+  const nenne=(t,roh)=>t.replace("{neu}",roh?neuName:esc(neuName)).replace("{alt}",roh?altName:esc(altName));
   const inhalt=()=>{
     if(schritt===1){
-      const vorh=ed.querySelectorAll(":scope > h1").length;
-      return `<b class="ebk">${tr("Kapitel")}</b>`+
-        (kapitel.length?`<p class="ebh">${tr("Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.")}</p>`+
-          kapitel.map((k,i)=>`<label class="ebz"><input type="checkbox" data-kap="${i}" ${k.an?"checked":""}><span class="ebgo" data-go="${i}">${esc(k.text)}</span><span class="ebn">${
-            k.grund==="absatz"?tr("Absatz")+" "+zifr(k.nr):tr(k.grund)}</span></label>`).join("")
-          :`<p class="ebh">${tr("Keine Kapitelanfänge gefunden.")}${vorh?" "+PL(vorh+" Überschriften 1 sind schon da.",vorh+" Heading 1 lines are already there.",vorh+" titres 1 sont déjà présents.",vorh+" títulos 1 ya existen.",vorh+" títulos 1 já existem.","Nagłówków 1 jest już: "+vorh+".",vorh+" titoli 1 ci sono già."):""}</p>`);
+      if(!kapitel.length)return `<b class="ebk">${tr("Kapitel")}</b><p class="ebh">${tr("Keine Kapitelanfänge gefunden.")}</p>`+
+        `<p class="ebh">${tr("So setzt du Kapitel selbst: in die Zeile klicken, mit der ein Kapitel beginnt, und oben im Absatzformat-Feld „Überschrift 1“ wählen – oder „/“ am Zeilenanfang tippen. Danach den Assistenten noch einmal starten.")}</p>`+
+        `<button class="btn" id="ebSelbst">${tr("Kapitel selbst setzen")}</button>`;
+      /* Seitenweise wie Blogseiten statt einer endlosen Liste (Toms Wunsch) */
+      const seiten=Math.ceil(kapitel.length/PRO);seite=Math.max(0,Math.min(seite,seiten-1));
+      let h=`<b class="ebk">${tr("Kapitel")}</b><p class="ebh">${tr("Häkchen = hier beginnt ein Kapitel. Ein Klick auf den Text zeigt die Stelle.")}</p>`;
+      let gruppe=null;
+      kapitel.slice(seite*PRO,(seite+1)*PRO).forEach((k,j)=>{
+        const i=seite*PRO+j;
+        if(k.art!==gruppe){gruppe=k.art;h+=`<div class="ebgr">${tr(EB_GRUPPEN[k.art])}</div>`}
+        h+=`<label class="ebz"><input type="checkbox" data-kap="${i}" ${k.an?"checked":""}>${k.stufe?`<span class="ebtag">H${k.stufe}</span>`:""}`+
+          `<span class="ebgo" data-go="${i}">${esc(k.text)}</span><span class="ebn">${k.grund==="absatz"?tr("Absatz")+" "+zifr(k.nr):tr(k.grund)}</span></label>`;
+      });
+      const alleAn=kapitel.every(k=>k.an);
+      let leiste="";
+      if(seiten>1){
+        const nr=[];for(let p=0;p<seiten;p++)if(p===0||p===seiten-1||Math.abs(p-seite)<=1)nr.push(p);else if(nr[nr.length-1]!=="…")nr.push("…");
+        leiste=`<span class="ebseiten" role="navigation" aria-label="${tr("Seite")}">`+
+          `<button class="ebs" data-seite="${seite-1}" ${seite===0?"disabled":""} aria-label="‹">‹</button>`+
+          nr.map(p=>p==="…"?`<span class="ebpunkte">…</span>`:`<button class="ebs${p===seite?" on":""}" data-seite="${p}">${p+1}</button>`).join("")+
+          `<button class="ebs" data-seite="${seite+1}" ${seite===seiten-1?"disabled":""} aria-label="›">›</button></span>`;
+      }
+      return h+`<div class="ebfuss"><button class="ebll" id="ebAlle">${alleAn?tr("Alle abwählen"):tr("Alle auswählen")}</button>${leiste}</div>`;
     }
     if(schritt===2){
       const zeilen=[["leer","Leerzeilen zwischen Absätzen"],["umbruch","Umbrüche mitten im Satz"],["szene","Szenenwechsel einheitlich (* * *)"],
@@ -23255,8 +23402,8 @@ function ebookAssistent(danach){
       haken("eb_einzug",bs.einzug,tr("Einzug statt Abstand"))+haken("eb_neueSeite",bs.neueSeite,tr("Jedes Kapitel auf neuer Seite"))+
       haken("eb_initiale",bs.initiale,tr("Großer Anfangsbuchstabe"))+
       `<div class="ebvor" id="ebVor"></div>`+
-      `<p class="ebh" style="margin-top:12px">${tr("Übernehmen legt eine Kopie an; das Original bleibt unverändert.")}</p>`+
-      haken("eb_original",imOriginal,tr("Stattdessen im Original ändern"));
+      `<p class="ebh" style="margin-top:12px">${nenne(tr("Beim Übernehmen entsteht ein neues Dokument „{neu}“. „{alt}“ bleibt unverändert, im Programm und als Datei."))}</p>`+
+      haken("eb_original",imOriginal,nenne(tr("Stattdessen „{alt}“ selbst ändern")));
   };
   /* Kleine Vorschau des Buchsatzes aus dem eigenen Text */
   const vorschau=()=>{
@@ -23280,6 +23427,16 @@ function ebookAssistent(danach){
       <div class="rowend"><button class="btn" id="ebZurueck">${schritt===1?tr("Abbrechen"):tr("Zurück")}</button>
         <button class="btn pri" id="ebWeiter">${schritt===3?tr("Übernehmen"):tr("Weiter")}</button></div></div>`);
     if(schritt===3){vorschau();["einzug","initiale"].forEach(k=>{const c=$("#eb_"+k);if(c)c.onchange=()=>{bs[k]=c.checked;vorschau()}})}
+    if(schritt===1){
+      $("#ovl").querySelectorAll("[data-kap]").forEach(c=>c.onchange=()=>{kapitel[+c.dataset.kap].an=c.checked;
+        const a=$("#ebAlle");if(a)a.textContent=kapitel.every(k=>k.an)?tr("Alle abwählen"):tr("Alle auswählen")});
+      $("#ovl").querySelectorAll("[data-seite]").forEach(b=>b.onclick=()=>{seite=+b.dataset.seite;zeichne()});
+      if($("#ebAlle"))$("#ebAlle").onclick=()=>{const an=!kapitel.every(k=>k.an);kapitel.forEach(k=>{k.an=an});zeichne()};
+      if($("#ebSelbst"))$("#ebSelbst").onclick=()=>{closeOvl();
+        const r=document.createRange();r.selectNodeContents(ed);r.collapse(true);const sel=getSelection();sel.removeAllRanges();sel.addRange(r);ed.focus();
+        ed.closest("#pane")&&($("#pane").scrollTop=0);
+        toast(tr("Klick in die erste Zeile eines Kapitels und wähle oben „Überschrift 1“."))};
+    }
     $("#ovl").querySelectorAll("[data-go]").forEach(s=>s.onclick=e=>{
       e.preventDefault();const k=kapitel[+s.dataset.go];if(!k||!k.el.isConnected)return;
       k.el.scrollIntoView({block:"center",behavior:"smooth"});k.el.classList.add("ebblitz");setTimeout(()=>k.el.classList.remove("ebblitz"),1400)});
@@ -23290,7 +23447,12 @@ function ebookAssistent(danach){
     /* Die gewählten Kapitel als Stelle merken (Index und Text), damit sie
        sich auch in der Kopie wiederfinden */
     const alle=[...ed.children];
-    const wahl=kapitel.filter(k=>k.an&&k.el.isConnected).map(k=>({i:alle.indexOf(k.el),text:k.text}));
+    /* Häkchen an einem Absatz → Überschrift 1; eine vorhandene Überschrift 1
+       ohne Häkchen → Überschrift 2 (bleibt Überschrift, beginnt kein Kapitel);
+       Überschrift 2–4 mit Häkchen → Überschrift 1 */
+    const wahl=kapitel.filter(k=>k.el.isConnected).map(k=>{const tag=k.el.tagName;
+      const neu=tag==="P"&&k.an?"h1":tag==="H1"&&!k.an?"h2":/^H[234]$/.test(tag)&&k.an?"h1":null;
+      return neu?{i:alle.indexOf(k.el),text:k.text,tag,neu}:null}).filter(Boolean);
     let ziel=d,ed2=ed;
     closeOvl();
     if(imOriginal)commit();   /* der Stand davor als Zwischenstand */
@@ -23298,10 +23460,11 @@ function ebookAssistent(danach){
     const kinder=[...ed2.children];
     wahl.forEach(w=>{
       let el=kinder[w.i];
-      if(!el||ebText(el)!==w.text)el=kinder.find(x=>x.tagName==="P"&&ebText(x)===w.text);
+      if(!el||el.tagName!==w.tag||ebText(el)!==w.text)el=kinder.find(x=>x.tagName===w.tag&&ebText(x)===w.text);
       if(!el||!el.isConnected)return;
-      const h=document.createElement("h1");
+      const h=document.createElement(w.neu);
       if(el.style.textAlign)h.style.textAlign=el.style.textAlign;
+      if(el.id)h.id=el.id;
       while(el.firstChild)h.appendChild(el.firstChild);
       el.replaceWith(h);
     });
@@ -23310,7 +23473,7 @@ function ebookAssistent(danach){
     flush();dirty=true;commit();
     render();queuePaginate();
     toast(imOriginal?tr("E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.")
-      :tr("Kopie für das E-Book angelegt; das Original bleibt unverändert."));
+      :nenne(tr("Neues Dokument „{neu}“ angelegt. „{alt}“ bleibt unverändert."),true));
     if(danach==="epub")setTimeout(exportEpub,250);
   };
   zeichne();

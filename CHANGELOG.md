@@ -108,6 +108,14 @@ immer genau einen Commit, der sie anfasst.
   mit drei Schritten, Toms OK). 1. Kapitel: Zeilen wie „Kapitel 3“,
   „Prolog“, ein zentriertes „II“ werden als Überschrift 1 vorgeschlagen,
   unsichere (Datum, bloße Zahl) nicht vorgehakt, ein Klick zeigt die Stelle.
+  Ausgebaut (Toms Wünsche): drei Gruppen — Erkanntes, vorhandene
+  Überschriften (Ü1 vorgehakt; ohne Häkchen wird sie Ü2, Ü2–4 mit Häkchen
+  Ü1) und kurze Zeilen, die Zwischenüberschriften sein könnten (fett, oder
+  kurz vor einem langen Absatz; nicht vorgehakt) —, seitenweise je zehn wie
+  Blogseiten statt einer endlosen Liste, „Alle auswählen/abwählen“ über
+  alle Seiten. Findet sich gar nichts, erklärt der Schritt, wie man
+  Kapitel selbst setzt (Absatzformat-Feld oder „/“), mit Knopf „Kapitel
+  selbst setzen“; bewusst ohne neue Tastenkürzel (Tom).
   2. Aufräumen mit Zählung vorab: Leerzeilen als Absätze, Umbrüche mitten
   im Satz (auch über zwei Absätze, Silbentrennung am Zeilenende),
   Szenenwechsel einheitlich als zentriertes „* * *“ (data-szene), gerade
@@ -126,9 +134,17 @@ immer genau einen Commit, der sie anfasst.
   an; dann legt commit() den Stand davor als Zwischenstand ab. Aus dem
   EPUB-Dialog gestartet, geht es danach dorthin zurück. Nebenbei: der
   EPUB-Dialog schrieb d.epub als Ganzes neu und hätte den Buchsatz vor dem
-  Export gelöscht — er ergänzt jetzt nur. Der
-  EPUB-Dialog bietet den Assistenten an, solange es keine Überschrift 1
-  gibt. Hilfe in 7 Sprachen. Geprüft an einer rohen .txt (Kapitel,
+  Export gelöscht — er ergänzt jetzt nur. Oben im EPUB-Dialog zeigt eine
+  Ampel, ob das E-Book passt (Toms Wunsch statt „Noch keine Kapitel?“):
+  grün „12 Kapitel, mit Inhaltsverzeichnis“ / rot „Keine Kapitel – das
+  E-Book wird ein einziger langer Abschnitt …“, dazu „Text aufgeräumt“ oder
+  „Text noch roh: 15 Leerzeilen, 25 Umbrüche mitten im Satz“ (ab 5); ist
+  etwas rot, steht darunter „E-Book vorbereiten…“. Texte verständlicher
+  (Tom): Gruppen „Sieht aus wie ein Kapitelanfang“, „Bereits als
+  Überschrift formatiert“, „Vielleicht eine Zwischenüberschrift“; statt
+  „das Original“ nennt der Assistent beide Dokumente beim Namen („„X“
+  bleibt unverändert, im Programm und als Datei“). Schreibweise bleibt
+  „E-Book“ (Duden) bzw. „e-book“. Hilfe in 7 Sprachen. Geprüft an einer rohen .txt (Kapitel,
   Umbrüche, *** , Anführungszeichen, Striche): Ergebnis und EPUB-CSS wie
   erwartet; Export 302/302.
 - **Word- und OpenDocument-Vorlagen, Word mit Makros, flaches ODT**
