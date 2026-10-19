@@ -280,7 +280,7 @@ immer genau einen Commit, der sie anfasst.
 
 ---
 
-## 1.3.0 — eingereicht 2026-10-17 (Freigabe im Store steht aus)
+## 1.3.0 — 2026-10-19
 
 Gebaut aus `b6696a5` (Versions-Commit `3ce3e9a`). Browser-Fassung, Linux-
 Pakete und Website am 2026-10-17 live.
