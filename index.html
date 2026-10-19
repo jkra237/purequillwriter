@@ -1044,6 +1044,9 @@ body.focus .repside{display:none}
 .status .selcount{color:var(--ink);font-weight:500}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
 .dot.dirty{background:var(--stamp)}
+.fmtchip{white-space:nowrap;font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;border:1px solid var(--rule);border-radius:4px;padding:0 5px;line-height:16px;color:var(--ink-soft)}
+@media (max-width:1100px){.fmtchip .kmlang{display:none}}
+.fmtchip.kompat{font-family:inherit;letter-spacing:0;border-color:color-mix(in srgb,#D9A62B 60%,var(--rule));background:color-mix(in srgb,#D9A62B 16%,transparent);color:color-mix(in srgb,#8A5A00 70%,var(--ink))}
 /* Fehlgeschlagene Sicherung — die einzige Stelle, an der die Statuszeile
    selbst Farbe bekennt. Ein fest verdrahtetes Rot fiel in sieben der dreizehn
    Schemata unter 4,5:1 (in den dunklen bis auf 2,3), deshalb Richtung Tinte
@@ -2372,6 +2375,9 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Opened from “{name}”. The first time you save, the program asks where to put it.",
+  "Kompatibilitätsmodus":"Compatibility mode",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Opened from a .{art} file. PureQuill can read this format but not write it; “Save” creates a Word file (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Looks like a chapter start",
   "Bereits als Überschrift formatiert":"Already formatted as a heading",
   "Vielleicht eine Zwischenüberschrift":"Possibly a subheading",
@@ -3294,6 +3300,9 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Ouvert à partir de « {name} ». Au premier enregistrement, le programme demande où.",
+  "Kompatibilitätsmodus":"Mode de compatibilité",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Ouvert à partir d'un fichier .{art}. PureQuill sait lire ce format mais pas l'écrire ; « Enregistrer » crée un fichier Word (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Ressemble à un début de chapitre",
   "Bereits als Überschrift formatiert":"Déjà mis en forme comme titre",
   "Vielleicht eine Zwischenüberschrift":"Peut-être un intertitre",
@@ -4216,6 +4225,9 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Abierto desde «{name}». La primera vez que guardes, el programa preguntará dónde.",
+  "Kompatibilitätsmodus":"Modo de compatibilidad",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Abierto desde un archivo .{art}. PureQuill puede leer este formato, pero no escribirlo; «Guardar» crea un archivo de Word (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Parece el inicio de un capítulo",
   "Bereits als Überschrift formatiert":"Ya tiene formato de título",
   "Vielleicht eine Zwischenüberschrift":"Quizá un subtítulo",
@@ -5138,6 +5150,9 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Aberto a partir de “{name}”. Ao salvar pela primeira vez, o programa pergunta onde.",
+  "Kompatibilitätsmodus":"Modo de compatibilidade",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Aberto a partir de um arquivo .{art}. O PureQuill lê este formato, mas não o grava; “Salvar” cria um arquivo do Word (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Parece o início de um capítulo",
   "Bereits als Überschrift formatiert":"Já formatado como título",
   "Vielleicht eine Zwischenüberschrift":"Talvez um intertítulo",
@@ -6060,6 +6075,9 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Otwarto z „{name}”. Przy pierwszym zapisie program zapyta, gdzie zapisać.",
+  "Kompatibilitätsmodus":"Tryb zgodności",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Otwarto z pliku .{art}. PureQuill potrafi odczytać ten format, ale nie zapisać; „Zapisz” tworzy plik Worda (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Wygląda na początek rozdziału",
   "Bereits als Überschrift formatiert":"Już sformatowane jako nagłówek",
   "Vielleicht eine Zwischenüberschrift":"Może śródtytuł",
@@ -6982,6 +7000,9 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.":"Aperto da «{name}». Al primo salvataggio il programma chiede dove.",
+  "Kompatibilitätsmodus":"Modalità compatibilità",
+  "Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.":"Aperto da un file .{art}. PureQuill sa leggere questo formato ma non scriverlo; «Salva» crea un file di Word (.docx).",
   "Sieht aus wie ein Kapitelanfang":"Sembra l'inizio di un capitolo",
   "Bereits als Überschrift formatiert":"Già formattato come titolo",
   "Vielleicht eine Zwischenüberschrift":"Forse un sottotitolo",
@@ -8226,7 +8247,14 @@ if(!S.sideWidth)S.sideWidth=388;
 
 const doc=()=>S.docs.find(d=>d.id===S.active)||S.docs[0];
 const defaultGlossId=()=>doc().glossaryId||S.glossaries[0].id;
-let dirty=false,lastSaved=null;
+/* lastSaved: Zeitpunkt (ms) des letzten Sicherns, über den Neustart gemerkt —
+   vorher stand nach jedem Start „Alles gesichert“ ohne Uhrzeit, bis das erste
+   Mal gesichert wurde (Toms Hinweis). Liegt er nicht heute, mit Datum. */
+let dirty=false,lastSaved=(()=>{try{return +localStorage.getItem("pqwGesichertAm")||null}catch(e){return null}})();
+function gesichertUm(t){
+  const d=new Date(t),uhr=d.toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
+  return d.toDateString()===new Date().toDateString()?uhr:d.toLocaleDateString(LOC(),{day:"numeric",month:"numeric"})+", "+uhr;
+}
 
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -10040,12 +10068,12 @@ function drawStatus(){
     <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki",
       "note")}</span>
     <span class="grow"></span>
-    ${d.ziel?`<span id="zielHint" style="cursor:pointer" title="${esc(zielHinweis(d))}"><span class="dot ${zielGeaendert(d)?"dirty":""}"></span>${esc(d.ziel.name)}</span>`:""}
+    ${dateiAnzeige(d)}
     <span class="sicherstand" title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über {pfad}.").replace("{pfad}",mpfad("Datei","Alles sichern")))}"
       ${storageOk?"":'class="savefail"'}>
       <span class="dot ${storageOk?(dirty?"dirty":""):"fail"}"></span>${
       !storageOk?tr("Nicht gesichert")
-      :dirty?tr("Wird gesichert…"):(lastSaved?tr("Gesichert ")+lastSaved:tr("Alles gesichert"))}</span>
+      :dirty?tr("Wird gesichert…"):(lastSaved?tr("Gesichert ")+gesichertUm(lastSaved):tr("Alles gesichert"))}</span>
     ${S.mode==="write"?`<span class="zoomctl" id="zoomctl">
       <button id="zOut" title="${tr("Verkleinern (Alt+⇧+Minus)")}">&minus;</button>
       <button id="zVal" title="${tr("Zoomstufe wählen")}">${Math.round(S.zoom*100)} %</button>
@@ -10057,6 +10085,7 @@ function drawStatus(){
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
   const sh=$("#spHint");if(sh)sh.onclick=spaltenDialog;
   const zh=$("#zielHint");if(zh)zh.onclick=speichern;
+  const kh=$("#kompatHint");if(kh)kh.onclick=speichern;
   const wh=$("#wcHint");if(wh)wh.onclick=()=>{
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")};
   zaehlerAktualisieren();
@@ -10182,7 +10211,7 @@ function merkeGesichert(){
     return;
   }
   dirty=false;
-  lastSaved=new Date().toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
+  lastSaved=Date.now();try{localStorage.setItem("pqwGesichertAm",String(lastSaved))}catch(e){}
   /* Ist eine Datei verbunden, wird sie mitgeschrieben — der Browserspeicher
      ist zu diesem Zeitpunkt schon geschrieben und bleibt die Zusage. */
   queueFileWrite();
@@ -11794,12 +11823,12 @@ async function exportDoc(){
   flush();const d=doc();
   /* Erst der Ort, dann die Arbeit — siehe dateiZiel() */
   let ziel=null;
-  try{ziel=await dateiZiel(zielVorschlag(d))}
+  try{ziel=await dateiZiel(zielVorschlag(d,"docx"))}
   catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
   const blob=await docxBlob(d);
   try{await dateiAblegen(safeName(tr(d.title))+".docx",blob,null,ziel)}
   catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
-  if(ziel)await zielMerken(d,ziel);
+  if(ziel)await zielMerken(d,ziel,null,"docx");
   /* Speichern legt immer auch einen Zwischenstand an — Strg+S tat bis
      Version 1.0 nur das, und wer es gewohnt ist, verliert damit nichts.
      commit() sichert zugleich in den Programmspeicher. */
@@ -12733,27 +12762,30 @@ async function rtfBlob(d){
    die Word-Datei */
 async function exportRtf(){
   flush();const d=doc();
-  const name=safeName(tr(d.title))+".rtf";
+  const name=zielVorschlag(d,"rtf");
   let ziel=null;
   try{ziel=await dateiZiel(name)}
   catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
   const blob=await rtfBlob(d);
   try{await dateiAblegen(name,blob,"application/rtf",ziel)}
   catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
+  if(ziel)await zielMerken(d,ziel,null,"rtf");
   commit();
   return true;
 }
-/* „Speichern als › OpenDocument-Text“ — wie exportDoc, aber ohne die
-   Datei zum Ziel von „Speichern“ zu machen: das bleibt die Word-Datei */
+/* „Speichern als › OpenDocument-Text“ — wie exportDoc: die gewählte Datei
+   wird danach zur Datei des Dokuments, „Speichern“ schreibt wieder .odt
+   (wie in Word und LibreOffice; vorher blieb das Ziel die Word-Datei) */
 async function exportOdt(){
   flush();const d=doc();
-  const name=safeName(tr(d.title))+".odt";
+  const name=zielVorschlag(d,"odt");
   let ziel=null;
   try{ziel=await dateiZiel(name)}
   catch(e){if(e&&e.name==="AbortError")return false;ziel=null}
   const blob=await odtBlob(d);
   try{await dateiAblegen(name,blob,"application/vnd.oasis.opendocument.text",ziel)}
   catch(e){toast(tr("Datei ließ sich nicht schreiben"));return false}
+  if(ziel)await zielMerken(d,ziel,null,"odt");
   commit();
   return true;
 }
@@ -12765,7 +12797,11 @@ async function exportOdt(){
    anderes und bleibt daneben bestehen: eine laufend mitgeschriebene
    Sicherung im eigenen Format.
 
-   d.ziel = {name, pfad?, stand, at}
+   d.ziel = {name, pfad?, stand, at, art}
+   - art: "docx" (fehlt bei älteren Dokumenten), "odt" oder "rtf" — wie in
+     LibreOffice bleibt eine geöffnete .odt/.rtf beim Speichern, was sie ist.
+     Formate, die PureQuill nur lesen kann (.doc, Vorlagen …), bekommen kein
+     Ziel; die Statusleiste zeigt sie als Kompatibilitätsmodus (d.herkunft).
    - pfad: nur in der Desktop-Fassung, dort schreibt main.js über den Pfad.
    - im Browser liegt stattdessen ein Datei-Handle in der IndexedDB unter
      ZIELKEY(d.id) — getrennt vom Handle der .pqw-Verknüpfung (Schlüssel d.id).
@@ -12810,12 +12846,34 @@ function zielHinweis(d){
     ?tr("Änderungen seit dem letzten Speichern. Klick oder Strg+S schreibt sie in die Datei.")
     :tr("Die Datei ist auf dem neuesten Stand.");
 }
-function zielVorschlag(d){
-  return d.ziel?d.ziel.name:safeName(tr(d.title))+".docx";
+/* Statusleiste (Variante B, Toms Wahl): Dateiname ohne Endung plus
+   Formatkennung. Was PureQuill nur lesen kann (.doc, Vorlagen, .docm,
+   .fodt), steht wie in Word als „Kompatibilitätsmodus“ da; „Speichern“
+   legt dort eine .docx an. Ohne Datei bleibt die Stelle leer. */
+const KOMPAT=["doc","dot","docm","dotx","dotm","ott","fodt"];
+function dateiAnzeige(d){
+  if(d.ziel){
+    const art=(d.ziel.art||"docx").toUpperCase();
+    return `<span id="zielHint" style="cursor:pointer" title="${esc(d.ziel.name+" — "+zielHinweis(d))}"><span class="dot ${zielGeaendert(d)?"dirty":""}"></span>${esc(d.ziel.name.replace(/\.[a-z0-9]+$/i,""))}</span>`+
+      `<span class="fmtchip" title="${esc(d.ziel.name)}">${art}</span>`;
+  }
+  if(d.herkunft&&KOMPAT.includes(d.herkunft)){
+    const e=d.herkunft.toUpperCase();
+    return `<span class="fmtchip kompat" id="kompatHint" style="cursor:pointer" title="${esc(tr("Geöffnet aus einer .{art}-Datei. PureQuill kann dieses Format lesen, aber nicht schreiben; „Speichern“ legt eine Word-Datei (.docx) an.").replace("{art}",d.herkunft))}">${e}<span class="kmlang"> · ${tr("Kompatibilitätsmodus")}</span></span>`;
+  }
+  /* Geöffnet, aber ohne Schreibzugriff (Drag & Drop, einfacher Dateidialog,
+     etwa im eingebauten Browser der Claude-App): Format trotzdem zeigen */
+  if(d.herkunft&&["docx","odt","rtf"].includes(d.herkunft))
+    return `<span class="fmtchip" id="kompatHint" style="cursor:pointer" title="${esc(tr("Geöffnet aus „{name}“. Beim ersten Speichern fragt das Programm, wohin.").replace("{name}",tr(d.title)+"."+d.herkunft))}">${d.herkunft.toUpperCase()}</span>`;
+  return "";
+}
+function zielVorschlag(d,art){
+  art=art||"docx";
+  return d.ziel&&(d.ziel.art||"docx")===art?d.ziel.name:safeName(tr(d.title))+"."+art;
 }
 /* Nach einem Schreiben (oder Öffnen) festhalten, wohin das Dokument gehört.
    ziel ist ein Handle (Browser) oder {__pfad} (Desktop). */
-async function zielMerken(d,ziel,name){
+async function zielMerken(d,ziel,name,art){
   flush();
   if(ziel&&ziel.__pfad){
     d.ziel={name:name||ziel.__pfad.split(/[\\/]/).pop(),pfad:ziel.__pfad};
@@ -12823,6 +12881,7 @@ async function zielMerken(d,ziel,name){
     try{await handleSet(ZIELKEY(d.id),ziel)}catch(e){return}
     d.ziel={name:name||ziel.name};
   }else return;
+  d.ziel.art=art||"docx";
   d.ziel.stand=dokStand(d);d.ziel.at=Date.now();
   /* merkeGesichert statt nur drawStatus: es setzt dirty zurück. Sonst stünde
      eine eben geöffnete Datei als „geändert“ da, weil dirty noch vom Tippen
@@ -12833,7 +12892,11 @@ async function speichern(){
   flush();const d=doc();
   const z=d.ziel;
   /* Noch keine Datei: einmal fragen, wohin — danach ist es eine. */
-  if(!z)return await exportDoc();
+  /* Eine .odt/.rtf, die ohne Schreibzugriff geöffnet wurde, fragt im
+     eigenen Format nach dem Ort, nicht nach einer .docx */
+  if(!z)return d.herkunft==="odt"?await exportOdt():d.herkunft==="rtf"?await exportRtf():await exportDoc();
+  const art=z.art||"docx";
+  const nochmal=()=>art==="odt"?exportOdt():art==="rtf"?exportRtf():exportDoc();
   let ziel=null;
   if(z.pfad&&PQWD()&&PQWD().writeFile)ziel={__pfad:z.pfad};
   else if(hatDateien()){
@@ -12844,9 +12907,9 @@ async function speichern(){
   }
   /* Datei nicht mehr erreichbar (anderer Rechner, Zugriff verweigert, Handle
      verloren): wie beim ersten Mal nach dem Ort fragen. */
-  if(!ziel)return await exportDoc();
+  if(!ziel)return await nochmal();
   try{
-    const blob=await docxBlob(d);
+    const blob=art==="odt"?await odtBlob(d):art==="rtf"?await rtfBlob(d):await docxBlob(d);
     if(ziel.__pfad)await PQWD().writeFile(ziel.__pfad,new Uint8Array(await blob.arrayBuffer()));
     else{const w=await ziel.createWritable();await w.write(blob);await w.close()}
   }catch(e){
@@ -12854,7 +12917,7 @@ async function speichern(){
        sie dann. Sagen, woran es liegt, und gleich einen anderen Ort anbieten,
        statt den Text mit einer bloßen Fehlermeldung stehen zu lassen. */
     toast(tr("Die Datei ließ sich nicht schreiben — ist sie noch in einem anderen Programm geöffnet?"));
-    return await exportDoc();
+    return await nochmal();
   }
   z.stand=dokStand(d);z.at=Date.now();
   commit();
@@ -14120,6 +14183,7 @@ async function ladeDokumente(dateien){
         if(/^\s*\{\\rtf/.test(roh)){
           const erg=rtfLesen(roh);
           if(neuesDokumentAus(f.name,erg)){geladen++;docFehlt=erg.fehlt;
+            if(f.pqwPfad||f.pqwHandle)await zielMerken(doc(),f.pqwPfad?{__pfad:f.pqwPfad}:f.pqwHandle,f.name,"rtf");
             if(erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes}}else abgelehnt++;
           continue;
         }
@@ -14127,11 +14191,12 @@ async function ladeDokumente(dateien){
       if(ZIPFORMATE.includes(ext)){
         const erg=await zipDokument(f.name,await f.arrayBuffer());
         if(neuesDokumentAus(f.name,erg)){geladen++;
-          /* Eine geöffnete .docx ist die Datei des Dokuments: „Speichern“
-             schreibt dorthin zurück. Andere Formate kann der Export nicht
-             schreiben — dort fragt das erste Speichern nach einer .docx. */
-          if(ext==="docx"&&(f.pqwPfad||f.pqwHandle))
-            await zielMerken(doc(),f.pqwPfad?{__pfad:f.pqwPfad}:f.pqwHandle,f.name);
+          /* Eine geöffnete .docx oder .odt ist die Datei des Dokuments:
+             „Speichern“ schreibt im selben Format dorthin zurück. Vorlagen
+             und .docm nicht (Makros gingen verloren) — dort fragt das erste
+             Speichern nach einer .docx (Kompatibilitätsmodus). */
+          if((ext==="docx"||ext==="odt")&&(f.pqwPfad||f.pqwHandle))
+            await zielMerken(doc(),f.pqwPfad?{__pfad:f.pqwPfad}:f.pqwHandle,f.name,ext);
           if(erg&&erg.bilder){bildZahl+=erg.bilder.zahl;bildBytes+=erg.bilder.bytes;
             bildFehlend+=erg.bilder.fehlend}
         }else abgelehnt++;
@@ -14233,6 +14298,8 @@ function neuesDokumentAus(name,erg){
   flush();
   const d=blankDoc(String(name).replace(/\.[^.]+$/,"").slice(0,60));
   d.customTitle=true;           /* Dateiname als Titel behalten */
+  /* Aus welchem Format: für den Kompatibilitätsmodus in der Statusleiste */
+  d.herkunft=(String(name).match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase()||undefined;
   d.html=b.html;
   if(b.fmt)d.fmt=b.fmt;
   if(b.hdr)d.hdr=b.hdr;
@@ -26269,7 +26336,8 @@ shown as accepted. Only old WMF/EMF graphics and text boxes stay out, and a note
 <p><b>Nothing from a Word file is lost when you save it again.</b> Comments become notes beside the text they belong to and go back to Word as comments; endnotes and tracked changes come along. What PureQuill Writer cannot show or edit itself — charts, equations, text boxes, shapes, old EMF pictures — stays in the text as a dashed box and goes back to Word unchanged. You can delete such a box, but not edit it. Columns, sections and headers for even pages are kept as well.</p>`},
 
  {t:"Saving as",k:"save;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
-<p><b>File &rsaquo; Save</b> ({kz:speichern}) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx you opened is written back directly. The dot next to the file name in the status bar shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
+<p><b>File &rsaquo; Save</b> ({kz:speichern}) writes the open document to its Word file. The first time, the program asks where to put it; after that it overwrites the same file. A .docx, .odt or .rtf you opened is written back directly, in its own format. The status bar shows the file name and its format; the dot next to it shows whether the file is up to date, and closing a document asks first if it isn’t. Your work is kept continuously anyway — Save creates the file you can pass on or keep in a cloud folder.</p>
+<p>Files PureQuill can read but not write — an old .doc, templates, .docm — show <b>Compatibility mode</b> in the status bar, as in Word. Save then creates a .docx; the original file is left alone.</p>
 <p><b>File &rsaquo; Save as</b> writes the document out as a file. The Word format comes
 first because it is the ordinary case — it can be read anywhere, with or without this
 program.</p>
@@ -26290,13 +26358,54 @@ numbers become Word fields that keep counting there.</p>
 contents for the reader. A short dialog asks for the author and where chapters begin before
 saving — every field is optional. Font, margins and night mode are set by the reading device,
 not the file.</p>
-<p><b>From a raw text file to an e-book:</b> <b>Tools &rsaquo; Prepare e-book</b> goes through three steps. It suggests lines that look like chapter openings (“Chapter 3”, “Prologue”, a centred “II”) and turns the ticked ones into Heading 1. It cleans up what plain text files bring along: blank lines, line breaks in mid-sentence, *** as a scene break, straight quotation marks, -- instead of a dash, double spaces. And it sets book typography for the e-book: indented paragraphs instead of spacing, each chapter on a new page, a drop cap if you like. It works on a copy, “Title (e-book)”, with all page settings and e-book details; the original document and its file stay as they are, and the e-book keeps the original title.</p>
+<p><b>From a raw text file to an e-book:</b> <b>Tools &rsaquo; Prepare e-book</b> sets the chapters, tidies up the text and adds book typography. Step by step: <b>Creating an e-book</b>.</p>
 <p><b>Onto an e-reader:</b> copy the saved <b>.epub</b> to the device's folder over USB, or
 send it through Calibre. For a Kindle: email the file as an attachment to your personal
 <b>@kindle.com</b> address (listed in your Amazon account under “Manage Your Content and
 Devices”), or drop it into the Windows <b>Send to Kindle</b> app.</p>
 <p>An export is for handing on. It cannot be read back in with everything intact — for that,
 use a backup.</p>`},
+
+ {t:"Creating an e-book",k:"e-book;ebook;epub;kindle;kobo;tolino;chapter;table of contents;book typography;cover;isbn;assistant;prepare;novel;publish",b:`
+<p>Any document can become an e-book in the <b>EPUB</b> format, which works on Kindle, Kobo,
+Tolino, Apple Books and most reading apps. This is the way through:</p>
+<ol>
+<li><b>Open or write the text.</b> A Word, OpenOffice, RTF or plain text file opens with
+<b>File &rsaquo; Open</b>.</li>
+<li><b>Prepare it:</b> <b>Tools &rsaquo; Prepare e-book…</b> leads through three steps —
+chapters, tidying up, book typography. Details below.</li>
+<li><b>Export:</b> <b>File &rsaquo; Save as &rsaquo; E-book</b>. Check title and author, add a
+cover if you have one, and press <b>Export</b>.</li>
+<li><b>Read it:</b> copy the .epub onto the device or send it to your Kindle (see
+<b>Saving as</b>). Opening it once in a reading app before you pass it on is worth it.</li>
+</ol>
+<p><b>Chapters.</b> The e-book starts a new chapter at every <b>Heading 1</b> and builds the
+table of contents from them. You can set them yourself — click into the first line of a
+chapter and choose “Heading 1” in the paragraph style box — or let the assistant find them.
+It lists everything that could begin a chapter, in three groups: lines that <i>look like a
+chapter start</i> (“Chapter 3”, “Prologue”, a centred “II”), lines <i>already formatted as a
+heading</i>, and lines that are <i>possibly a subheading</i> (bold or short lines). A tick
+means “a chapter starts here”; a click on the text shows the spot in the document. Long lists
+are split into pages of ten. An existing Heading 1 without a tick becomes Heading 2: it stays
+a heading but no longer starts a chapter.</p>
+<p><b>Tidying up.</b> The assistant counts what plain text files bring along — blank lines,
+line breaks in mid-sentence, *** as a scene break, straight quotation marks, -- instead of a
+dash, double spaces — and fixes it. Untick whatever should stay as it is.</p>
+<p><b>Book typography.</b> Indented paragraphs instead of spacing, each chapter on a new page,
+a large first letter if you like — with a preview from your own text. This only applies to the
+e-book; the view while writing does not change.</p>
+<p><b>Your document stays as it is.</b> <b>Apply</b> creates a new document, “Title (e-book)”,
+with all page settings and e-book details, and makes the changes there. The original stays
+unchanged, both in the program and as a file, and the e-book keeps the original title. If you
+would rather change the document itself, tick that in the last step; the version before is
+then kept in the version history.</p>
+<p><b>The check in the export dialog.</b> At the top, the EPUB dialog shows whether the
+document is ready: green for “12 chapters, with table of contents” and “Text tidied up”, red
+for “No chapters” or “Text still raw”. Below it, <b>Prepare e-book…</b> opens the assistant at
+any time.</p>
+<p><b>Tips.</b> A cover works best as an upright JPEG or PNG, about 1600 × 2560 pixels. For a
+book with parts, choose “Heading 1 and 2” under <i>Start chapters at</i>. Publisher, year and
+ISBN only matter for a publisher’s EPUB; everything else can stay empty.</p>`},
 
  {t:"Version history and snapshots",k:"version;history;snapshot;undo;restore;earlier;revert",b:`
 <p>While you write, the program keeps <b>snapshots</b> of the document you are in — points you
@@ -26407,7 +26516,7 @@ leaves alone</nur-b> keep their usual keys.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>New note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Pin a note to the selection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Look up in the glossary</td></tr>
-<tr><td>{kz:speichern}</td><td>Save (to the Word file)</td></tr>
+<tr><td>{kz:speichern}</td><td>Save (to the document’s file)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Take a snapshot</td></tr>
 </table>
 <p class="hsec">Finding and viewing</p>
@@ -26878,7 +26987,8 @@ draußen, und ein Hinweis sagt das.</p>
 <p><b>Aus einer Word-Datei geht beim erneuten Speichern nichts verloren.</b> Kommentare werden Notizen neben dem Text, zu dem sie gehören, und gehen als Kommentare nach Word zurück; Endnoten und nachverfolgte Änderungen kommen mit. Was PureQuill Writer selbst nicht zeigen oder bearbeiten kann — Diagramme, Formeln, Textfelder, Formen, alte EMF-Bilder —, bleibt als gestricheltes Kästchen im Text und geht unverändert nach Word zurück. So ein Kästchen lässt sich löschen, aber nicht bearbeiten. Spalten, Abschnitte und Kopfzeilen für gerade Seiten bleiben ebenfalls erhalten.</p>`},
 
  {t:"Speichern als",k:"speichern;export;word;docx;epub;ebook;e-book;reader;kindle;pdf;html;markdown;text;csv",b:`
-<p><b>Datei &rsaquo; Speichern</b> ({kz:speichern}) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx wird direkt zurückgeschrieben. Der Punkt neben dem Dateinamen in der Statuszeile zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
+<p><b>Datei &rsaquo; Speichern</b> ({kz:speichern}) schreibt das offene Dokument in seine Word-Datei. Beim ersten Mal fragt das Programm, wohin; danach überschreibt es dieselbe Datei. Eine geöffnete .docx, .odt oder .rtf wird direkt zurückgeschrieben, in ihrem eigenen Format. Die Statuszeile zeigt Dateiname und Format; der Punkt daneben zeigt, ob die Datei auf dem neuesten Stand ist, und beim Schließen eines Dokuments fragt das Programm nach, wenn nicht. Gesichert wird ohnehin laufend — Speichern legt die Datei an, die du weitergeben oder in einem Cloud-Ordner ablegen kannst.</p>
+<p>Dateien, die PureQuill lesen, aber nicht schreiben kann — eine alte .doc, Vorlagen, .docm —, zeigen in der Statuszeile wie in Word <b>Kompatibilitätsmodus</b>. Speichern legt dann eine .docx an; die ursprüngliche Datei bleibt unberührt.</p>
 <p><b>Datei &rsaquo; Speichern als</b> schreibt das Dokument als Datei heraus. Das
 Word-Format steht oben, weil es der Regelfall ist — es liest sich überall, auch ohne dieses
 Programm.</p>
@@ -26899,13 +27009,55 @@ darin werden zu Word-Feldern und zählen dort weiter.</p>
 Inhaltsverzeichnis für den Reader an. Vor dem Speichern fragt ein kurzer Dialog nach Autor und
 Kapitelschnitt — alle Angaben sind freiwillig. Schrift, Rand und Nachtmodus bestimmt das
 Lesegerät, nicht die Datei.</p>
-<p><b>Aus einer rohen Textdatei ein E-Book:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten</b> geht in drei Schritten vor. Es schlägt Zeilen vor, die wie Kapitelanfänge aussehen („Kapitel 3“, „Prolog“, ein zentriertes „II“), und macht die abgehakten zu Überschrift 1. Es räumt auf, was Textdateien mitbringen: Leerzeilen, Umbrüche mitten im Satz, *** als Szenenwechsel, gerade Anführungszeichen, -- statt Gedankenstrich, doppelte Leerzeichen. Und es setzt den Buchsatz fürs E-Book: Einzug statt Abstand, jedes Kapitel auf neuer Seite, auf Wunsch ein großer Anfangsbuchstabe. Es arbeitet an einer Kopie, „Titel (E-Book)“, mit allen Seiten- und E-Book-Angaben; das Original und seine Datei bleiben, wie sie sind, und das E-Book trägt den ursprünglichen Titel.</p>
+<p><b>Aus einer rohen Textdatei ein E-Book:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten</b> setzt die Kapitel, räumt den Text auf und sorgt für den Buchsatz. Schritt für Schritt: <b>E-Book erstellen</b>.</p>
 <p><b>Auf den E-Reader:</b> die gespeicherte <b>.epub</b> per USB in den Ordner des Geräts
 kopieren, oder über Calibre übertragen. Für den Kindle: die Datei als E-Mail-Anhang an deine
 persönliche <b>@kindle.com</b>-Adresse schicken (im Amazon-Konto unter „Meine Geräte
 und Inhalte" zu finden), oder in die Windows-App <b>Send to Kindle</b> ziehen.</p>
 <p>Ein Export ist zum Weitergeben. Vollständig wieder einlesen lässt er sich nicht — dafür
 nimmst du eine Sicherung.</p>`},
+
+ {t:"E-Book erstellen",k:"e-book;ebook;epub;kindle;kobo;tolino;kapitel;inhaltsverzeichnis;buchsatz;cover;isbn;assistent;vorbereiten;roman;veröffentlichen",b:`
+<p>Aus jedem Dokument wird ein E-Book im Format <b>EPUB</b>, das auf Kindle, Kobo, Tolino,
+Apple Books und den meisten Lese-Apps läuft. So gehst du vor:</p>
+<ol>
+<li><b>Text öffnen oder schreiben.</b> Eine Word-, OpenOffice-, RTF- oder Textdatei öffnest du
+mit <b>Datei &rsaquo; Öffnen</b>.</li>
+<li><b>Vorbereiten:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten…</b> führt durch drei
+Schritte — Kapitel, Aufräumen, Buchsatz. Einzelheiten unten.</li>
+<li><b>Exportieren:</b> <b>Datei &rsaquo; Speichern als &rsaquo; E-Book</b>. Titel und Autor
+prüfen, wenn vorhanden ein Cover wählen, <b>Exportieren</b> drücken.</li>
+<li><b>Lesen:</b> die .epub aufs Gerät kopieren oder an den Kindle schicken (siehe
+<b>Speichern als</b>). Es lohnt sich, sie vor dem Weitergeben einmal in einer Lese-App
+anzusehen.</li>
+</ol>
+<p><b>Kapitel.</b> Das E-Book beginnt an jeder <b>Überschrift 1</b> ein neues Kapitel und baut
+daraus das Inhaltsverzeichnis. Du kannst sie selbst setzen — in die erste Zeile eines Kapitels
+klicken und im Absatzformat-Feld „Überschrift 1“ wählen — oder den Assistenten suchen lassen.
+Er listet alles, womit ein Kapitel beginnen könnte, in drei Gruppen: Zeilen, die <i>wie ein
+Kapitelanfang aussehen</i> („Kapitel 3“, „Prolog“, ein zentriertes „II“), Zeilen, die
+<i>bereits als Überschrift formatiert</i> sind, und Zeilen, die <i>vielleicht eine
+Zwischenüberschrift</i> sind (fett oder kurz). Ein Häkchen heißt „hier beginnt ein Kapitel“; ein
+Klick auf den Text zeigt die Stelle im Dokument. Lange Listen sind in Seiten zu je zehn
+aufgeteilt. Eine vorhandene Überschrift 1 ohne Häkchen wird Überschrift 2: Sie bleibt
+Überschrift, beginnt aber kein Kapitel mehr.</p>
+<p><b>Aufräumen.</b> Der Assistent zählt, was Textdateien mitbringen — Leerzeilen, Umbrüche
+mitten im Satz, *** als Szenenwechsel, gerade Anführungszeichen, -- statt Gedankenstrich,
+doppelte Leerzeichen — und bereinigt es. Was bleiben soll, wählst du ab.</p>
+<p><b>Buchsatz.</b> Einzug statt Abstand, jedes Kapitel auf neuer Seite, auf Wunsch ein großer
+Anfangsbuchstabe — mit Vorschau aus deinem eigenen Text. Das gilt nur fürs E-Book; die Ansicht
+beim Schreiben bleibt.</p>
+<p><b>Dein Dokument bleibt, wie es ist.</b> <b>Übernehmen</b> legt ein neues Dokument
+„Titel (E-Book)“ an, mit allen Seiten- und E-Book-Angaben, und ändert nur dieses. Das Original
+bleibt unverändert, im Programm und als Datei, und das E-Book trägt den ursprünglichen Titel.
+Willst du lieber das Dokument selbst ändern, hakst du das im letzten Schritt an; der Stand
+davor liegt dann im Versionsverlauf.</p>
+<p><b>Die Prüfung im Export-Dialog.</b> Oben im EPUB-Dialog steht, ob das Dokument bereit ist:
+grün für „12 Kapitel, mit Inhaltsverzeichnis“ und „Text aufgeräumt“, rot für „Keine Kapitel“
+oder „Text noch roh“. Darunter öffnet <b>E-Book vorbereiten…</b> jederzeit den Assistenten.</p>
+<p><b>Tipps.</b> Ein Cover ist am besten ein hochkantes JPEG oder PNG, etwa 1600 × 2560 Pixel.
+Für ein Buch mit Teilen wählst du bei <i>Kapitel beginnen bei</i> „Überschrift 1 und 2“.
+Verlag, Jahr und ISBN braucht es nur für ein Verlags-EPUB; alles andere darf leer bleiben.</p>`},
 
  {t:"Versionsverlauf und Zwischenstände",k:"version;verlauf;zwischenstand;zurück;wiederherstellen;früher",b:`
 <p>Während du schreibst, legt das Programm <b>Zwischenstände</b> des Dokuments an, in dem du
@@ -27019,7 +27171,7 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd></td><td>Neue Notiz</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd></td><td>Notiz an die Markierung heften</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>G</kbd></td><td>Im Glossar nachschlagen</td></tr>
-<tr><td>{kz:speichern}</td><td>Speichern (in die Word-Datei)</td></tr>
+<tr><td>{kz:speichern}</td><td>Speichern (in die Datei des Dokuments)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>S</kbd></td><td>Zwischenstand anlegen</td></tr>
 </table>
 <p class="hsec">Finden und Ansehen</p>
@@ -27490,7 +27642,8 @@ gráficos WMF/EMF antiguos y los cuadros de texto quedan fuera, y un aviso lo in
 <p><b>Al volver a guardar un archivo de Word no se pierde nada.</b> Los comentarios se convierten en notas junto al texto al que pertenecen y vuelven a Word como comentarios; las notas al final y los cambios controlados se conservan. Lo que PureQuill Writer no puede mostrar ni editar —gráficos, ecuaciones, cuadros de texto, formas, imágenes EMF antiguas— queda en el texto como un recuadro discontinuo y vuelve a Word sin cambios. Ese recuadro se puede borrar, pero no editar. También se conservan las columnas, las secciones y los encabezados de páginas pares.</p>`},
 
  {t:"Guardar como",k:"guardar;exportar;word;docx;epub;libro electrónico;kindle;pdf;html;markdown;texto;csv",b:`
-<p><b>Archivo &rsaquo; Guardar</b> ({kz:speichern}) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx que hayas abierto se vuelve a escribir directamente. El punto junto al nombre del archivo en la barra de estado indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
+<p><b>Archivo &rsaquo; Guardar</b> ({kz:speichern}) escribe el documento abierto en su archivo de Word. La primera vez, el programa pregunta dónde; después sobrescribe el mismo archivo. Un .docx, .odt o .rtf que hayas abierto se vuelve a escribir directamente, en su propio formato. La barra de estado muestra el nombre del archivo y su formato; el punto junto a él indica si el archivo está actualizado, y al cerrar un documento el programa pregunta antes si no lo está. Tu trabajo se conserva de todos modos de forma continua: Guardar crea el archivo que puedes compartir o dejar en una carpeta en la nube.</p>
+<p>Los archivos que PureQuill puede leer pero no escribir — un .doc antiguo, plantillas, .docm — muestran <b>Modo de compatibilidad</b> en la barra de estado, como en Word. Guardar crea entonces un .docx; el archivo original no se toca.</p>
 <p><b>Archivo &rsaquo; Guardar como</b> escribe el documento como archivo. El formato Word va
 primero porque es el caso habitual: se puede leer en cualquier parte, con o sin este
 programa.</p>
@@ -27511,13 +27664,54 @@ notas al pie, y los números de página se vuelven campos de Word que siguen con
 índice para el lector. Antes de guardar, un breve cuadro pregunta por el autor y por dónde
 empiezan los capítulos; todos los campos son opcionales. La tipografía, los márgenes y el modo
 nocturno los define el dispositivo de lectura, no el archivo.</p>
-<p><b>De un archivo de texto en bruto a un e-book:</b> <b>Herramientas &rsaquo; Preparar e-book</b> avanza en tres pasos. Propone las líneas que parecen inicios de capítulo («Capítulo 3», «Prólogo», un «II» centrado) y convierte las marcadas en Título 1. Limpia lo que traen los archivos de texto: líneas vacías, saltos a mitad de frase, *** como cambio de escena, comillas rectas, -- en lugar de raya, espacios dobles. Y aplica la composición de libro al e-book: sangría en lugar de espacio, cada capítulo en una página nueva y, si quieres, letra capital. Trabaja sobre una copia, «Título (e-book)», con todos los ajustes de página y datos del e-book; el original y su archivo quedan como están, y el e-book conserva el título original.</p>
+<p><b>De un archivo de texto en bruto a un e-book:</b> <b>Herramientas &rsaquo; Preparar e-book</b> marca los capítulos, ordena el texto y aplica la composición de libro. Paso a paso: <b>Crear un e-book</b>.</p>
 <p><b>Al lector electrónico:</b> copia el <b>.epub</b> guardado a la carpeta del dispositivo por
 USB, o envíalo a través de Calibre. Para un Kindle: manda el archivo como adjunto a tu dirección
 personal <b>@kindle.com</b> (aparece en tu cuenta de Amazon, en «Administrar contenido y
 dispositivos»), o suéltalo en la aplicación de Windows <b>Enviar a Kindle</b>.</p>
 <p>Una exportación es para entregar. No se puede volver a leer con todo intacto: para eso, usa
 una copia de seguridad.</p>`},
+
+ {t:"Crear un e-book",k:"e-book;ebook;libro electrónico;epub;kindle;kobo;tolino;capítulo;índice;composición;portada;isbn;asistente;preparar;novela;publicar",b:`
+<p>Cualquier documento puede convertirse en un e-book en formato <b>EPUB</b>, que funciona en
+Kindle, Kobo, Tolino, Apple Books y la mayoría de las apps de lectura. Así se hace:</p>
+<ol>
+<li><b>Abre o escribe el texto.</b> Un archivo de Word, OpenOffice, RTF o de texto se abre con
+<b>Archivo &rsaquo; Abrir</b>.</li>
+<li><b>Prepáralo:</b> <b>Herramientas &rsaquo; Preparar e-book…</b> guía en tres pasos:
+capítulos, limpieza y composición de libro. Detalles más abajo.</li>
+<li><b>Exporta:</b> <b>Archivo &rsaquo; Guardar como &rsaquo; Libro electrónico</b>. Revisa el
+título y el autor, añade una portada si la tienes y pulsa <b>Exportar</b>.</li>
+<li><b>Léelo:</b> copia el .epub al dispositivo o envíalo a tu Kindle (ver <b>Guardar
+como</b>). Vale la pena abrirlo una vez en una app de lectura antes de compartirlo.</li>
+</ol>
+<p><b>Capítulos.</b> El e-book empieza un capítulo nuevo en cada <b>Título 1</b> y con ellos crea
+el índice. Puedes marcarlos tú — haz clic en la primera línea de un capítulo y elige «Título 1»
+en el cuadro de estilo de párrafo — o dejar que el asistente los busque. Muestra todo lo que
+podría empezar un capítulo, en tres grupos: líneas que <i>parecen el inicio de un capítulo</i>
+(«Capítulo 3», «Prólogo», un «II» centrado), líneas que <i>ya tienen formato de título</i> y
+líneas que <i>quizá sean un subtítulo</i> (en negrita o cortas). Una marca significa «aquí
+empieza un capítulo»; un clic en el texto muestra el lugar en el documento. Las listas largas
+se dividen en páginas de diez. Un Título 1 existente sin marca pasa a Título 2: sigue siendo
+título, pero ya no empieza un capítulo.</p>
+<p><b>Limpieza.</b> El asistente cuenta lo que traen los archivos de texto — líneas vacías,
+saltos de línea a mitad de frase, *** como cambio de escena, comillas rectas, -- en lugar de
+raya, espacios dobles — y lo corrige. Desmarca lo que deba quedarse como está.</p>
+<p><b>Composición de libro.</b> Sangría en lugar de espacio entre párrafos, cada capítulo en una
+página nueva y, si quieres, una letra capital, con vista previa de tu propio texto. Solo se
+aplica al e-book; la vista mientras escribes no cambia.</p>
+<p><b>Tu documento queda como está.</b> <b>Aplicar</b> crea un documento nuevo, «Título
+(e-book)», con todos los ajustes de página y datos del e-book, y cambia solo ese. El original no
+cambia, ni en el programa ni como archivo, y el e-book conserva el título original. Si prefieres
+cambiar el propio documento, márcalo en el último paso; la versión anterior queda entonces en el
+historial.</p>
+<p><b>La comprobación en el diálogo de exportación.</b> Arriba, el diálogo EPUB indica si el
+documento está listo: verde para «12 capítulos, con índice» y «Texto ordenado», rojo para «Sin
+capítulos» o «Texto aún sin pulir». Debajo, <b>Preparar e-book…</b> abre el asistente en
+cualquier momento.</p>
+<p><b>Consejos.</b> La portada funciona mejor como JPEG o PNG vertical, de unos 1600 × 2560
+píxeles. Para un libro con partes, elige «Título 1 y 2» en <i>Empezar capítulos en</i>.
+Editorial, año e ISBN solo importan para un EPUB editorial; lo demás puede quedar vacío.</p>`},
 
  {t:"Historial de versiones e instantáneas",k:"versión;historial;instantánea;deshacer;restaurar;antes;revertir",b:`
 <p>Mientras escribes, el programa conserva <b>instantáneas</b> del documento en el que estás:
@@ -27636,7 +27830,7 @@ versión que estás usando.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>N</kbd></td><td>Nueva nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>M</kbd></td><td>Fijar una nota a la selección</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>G</kbd></td><td>Consultar en el glosario</td></tr>
-<tr><td>{kz:speichern}</td><td>Guardar (en el archivo de Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Guardar (en el archivo del documento)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>S</kbd></td><td>Crear un punto de restauración</td></tr>
 </table>
 <p class="hsec">Buscar y ver</p>
@@ -28101,7 +28295,8 @@ fora, e um aviso informa isso.</p>
 <p><b>Ao salvar de novo um arquivo do Word, nada se perde.</b> Os comentários viram notas ao lado do texto a que pertencem e voltam ao Word como comentários; notas de fim e alterações controladas são mantidas. O que o PureQuill Writer não consegue mostrar nem editar — gráficos, equações, caixas de texto, formas, imagens EMF antigas — fica no texto como uma caixa tracejada e volta ao Word sem alterações. Essa caixa pode ser apagada, mas não editada. Colunas, seções e cabeçalhos de páginas pares também são mantidos.</p>`},
 
  {t:"Salvar como",k:"salvar;exportar;word;docx;epub;livro eletrônico;e-book;kindle;pdf;html;markdown;texto;csv",b:`
-<p><b>Arquivo &rsaquo; Salvar</b> ({kz:speichern}) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx que você abriu é regravado diretamente. O ponto ao lado do nome do arquivo na barra de status mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
+<p><b>Arquivo &rsaquo; Salvar</b> ({kz:speichern}) grava o documento aberto no seu arquivo do Word. Na primeira vez, o programa pergunta onde; depois, sobrescreve o mesmo arquivo. Um .docx, .odt ou .rtf que você abriu é regravado diretamente, no próprio formato. A barra de status mostra o nome do arquivo e o formato; o ponto ao lado mostra se o arquivo está atualizado, e ao fechar um documento o programa pergunta antes, se não estiver. Seu trabalho é guardado continuamente de qualquer forma — Salvar cria o arquivo que você pode enviar ou deixar em uma pasta na nuvem.</p>
+<p>Arquivos que o PureQuill lê, mas não grava — um .doc antigo, modelos, .docm — mostram <b>Modo de compatibilidade</b> na barra de status, como no Word. Salvar cria então um .docx; o arquivo original não é tocado.</p>
 <p><b>Arquivo &rsaquo; Salvar como</b> grava o documento como arquivo. O formato Word vem
 primeiro porque é o caso comum: pode ser lido em qualquer lugar, com ou sem este programa.</p>
 <table class="hkeys">
@@ -28121,13 +28316,54 @@ de rodapé, e os números de página viram campos do Word que continuam contando
 para o leitor. Antes de salvar, um breve diálogo pergunta pelo autor e por onde os capítulos
 começam; todos os campos são opcionais. A tipografia, as margens e o modo noturno são definidos
 pelo dispositivo de leitura, não pelo arquivo.</p>
-<p><b>De um arquivo de texto bruto a um e-book:</b> <b>Ferramentas &rsaquo; Preparar e-book</b> segue três passos. Sugere as linhas que parecem inícios de capítulo (“Capítulo 3”, “Prólogo”, um “II” centralizado) e transforma as marcadas em Título 1. Limpa o que os arquivos de texto trazem: linhas vazias, quebras no meio da frase, *** como mudança de cena, aspas retas, -- em vez de travessão, espaços duplos. E aplica a composição de livro ao e-book: recuo em vez de espaçamento, cada capítulo em uma nova página e, se quiser, letra capitular. Trabalha em uma cópia, “Título (e-book)”, com todas as configurações de página e dados do e-book; o original e seu arquivo ficam como estão, e o e-book mantém o título original.</p>
+<p><b>De um arquivo de texto bruto a um e-book:</b> <b>Ferramentas &rsaquo; Preparar e-book</b> define os capítulos, arruma o texto e aplica a composição de livro. Passo a passo: <b>Criar um e-book</b>.</p>
 <p><b>Para um leitor de e-books:</b> copie o <b>.epub</b> salvo para a pasta do dispositivo por
 USB, ou envie-o pelo Calibre. Para um Kindle: mande o arquivo como anexo para o seu endereço
 pessoal <b>@kindle.com</b> (que aparece na sua conta da Amazon, em «Gerenciar conteúdo e
 dispositivos»), ou solte-o no aplicativo do Windows <b>Send to Kindle</b>.</p>
 <p>Uma exportação é para entregar. Ela não pode ser lida de volta com tudo intacto: para isso,
 use um backup.</p>`},
+
+ {t:"Criar um e-book",k:"e-book;ebook;livro eletrônico;epub;kindle;kobo;tolino;capítulo;sumário;composição;capa;isbn;assistente;preparar;romance;publicar",b:`
+<p>Qualquer documento pode virar um e-book no formato <b>EPUB</b>, que funciona no Kindle, Kobo,
+Tolino, Apple Books e na maioria dos apps de leitura. O caminho é este:</p>
+<ol>
+<li><b>Abra ou escreva o texto.</b> Um arquivo do Word, OpenOffice, RTF ou de texto abre com
+<b>Arquivo &rsaquo; Abrir</b>.</li>
+<li><b>Prepare:</b> <b>Ferramentas &rsaquo; Preparar e-book…</b> guia por três passos —
+capítulos, arrumação, composição de livro. Detalhes abaixo.</li>
+<li><b>Exporte:</b> <b>Arquivo &rsaquo; Salvar como &rsaquo; Livro eletrônico</b>. Confira
+título e autor, adicione uma capa se tiver e clique em <b>Exportar</b>.</li>
+<li><b>Leia:</b> copie o .epub para o aparelho ou envie para o seu Kindle (veja <b>Salvar
+como</b>). Vale a pena abri-lo uma vez num app de leitura antes de repassá-lo.</li>
+</ol>
+<p><b>Capítulos.</b> O e-book começa um capítulo novo a cada <b>Título 1</b> e monta o sumário a
+partir deles. Você pode defini-los — clique na primeira linha de um capítulo e escolha
+“Título 1” na caixa de estilo de parágrafo — ou deixar o assistente procurá-los. Ele lista tudo
+o que poderia começar um capítulo, em três grupos: linhas que <i>parecem o início de um
+capítulo</i> (“Capítulo 3”, “Prólogo”, um “II” centralizado), linhas <i>já formatadas como
+título</i> e linhas que <i>talvez sejam um intertítulo</i> (em negrito ou curtas). Marcado
+significa “aqui começa um capítulo”; um clique no texto mostra o lugar no documento. Listas
+longas são divididas em páginas de dez. Um Título 1 existente sem marca vira Título 2: continua
+título, mas não começa mais um capítulo.</p>
+<p><b>Arrumação.</b> O assistente conta o que os arquivos de texto trazem — linhas vazias,
+quebras de linha no meio da frase, *** como mudança de cena, aspas retas, -- em vez de
+travessão, espaços duplos — e corrige. Desmarque o que deve ficar como está.</p>
+<p><b>Composição de livro.</b> Recuo em vez de espaço entre parágrafos, cada capítulo numa
+página nova e, se quiser, uma letra capitular — com prévia do seu próprio texto. Vale só para o
+e-book; a visualização ao escrever não muda.</p>
+<p><b>Seu documento fica como está.</b> <b>Aplicar</b> cria um novo documento, “Título
+(e-book)”, com todas as configurações de página e dados do e-book, e altera só ele. O original
+fica inalterado, no programa e como arquivo, e o e-book mantém o título original. Se preferir
+alterar o próprio documento, marque isso no último passo; a versão anterior fica então no
+histórico.</p>
+<p><b>A verificação no diálogo de exportação.</b> No alto, o diálogo EPUB mostra se o documento
+está pronto: verde para “12 capítulos, com sumário” e “Texto arrumado”, vermelho para “Sem
+capítulos” ou “Texto ainda bruto”. Logo abaixo, <b>Preparar e-book…</b> abre o assistente a
+qualquer momento.</p>
+<p><b>Dicas.</b> A capa funciona melhor como JPEG ou PNG vertical, com cerca de 1600 × 2560
+pixels. Para um livro com partes, escolha “Título 1 e 2” em <i>Iniciar capítulos em</i>.
+Editora, ano e ISBN só importam para um EPUB de editora; o resto pode ficar vazio.</p>`},
 
  {t:"Histórico de versões e pontos de restauração",k:"versão;histórico;ponto de restauração;desfazer;restaurar;antes;reverter",b:`
 <p>Enquanto você escreve, o programa mantém <b>pontos de restauração</b> do documento em que
@@ -28247,7 +28483,7 @@ mostram as teclas da versão que você está usando.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Fixar uma nota à seleção</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Consultar no glossário</td></tr>
-<tr><td>{kz:speichern}</td><td>Salvar (no arquivo do Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Salvar (no arquivo do documento)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Criar um ponto de restauração</td></tr>
 </table>
 <p class="hsec">Localizar e ver</p>
@@ -28739,7 +28975,8 @@ message le signale.</p>
 <p><b>Rien ne se perd quand vous réenregistrez un fichier Word.</b> Les commentaires deviennent des notes à côté du texte auquel ils se rapportent et retournent dans Word sous forme de commentaires ; les notes de fin et les modifications suivies sont conservées. Ce que PureQuill Writer ne peut pas afficher ni modifier — graphiques, équations, zones de texte, formes, anciennes images EMF — reste dans le texte sous forme de cadre en pointillés et retourne dans Word tel quel. Ce cadre peut être supprimé, mais pas modifié. Les colonnes, les sections et les en-têtes des pages paires sont également conservés.</p>`},
 
  {t:"Enregistrer sous",k:"enregistrer;exporter;word;docx;epub;livre numérique;liseuse;kindle;pdf;html;markdown;texte;csv",b:`
-<p><b>Fichier &rsaquo; Enregistrer</b> ({kz:speichern}) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx que vous avez ouvert est réécrit directement. Le point à côté du nom du fichier dans la barre d’état indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
+<p><b>Fichier &rsaquo; Enregistrer</b> ({kz:speichern}) écrit le document ouvert dans son fichier Word. La première fois, le programme demande où ; ensuite, il écrase le même fichier. Un .docx, .odt ou .rtf que vous avez ouvert est réécrit directement, dans son propre format. La barre d’état affiche le nom du fichier et son format ; le point à côté indique si le fichier est à jour, et la fermeture d’un document demande confirmation s’il ne l’est pas. Votre travail est de toute façon conservé en continu — Enregistrer crée le fichier que vous pouvez transmettre ou ranger dans un dossier cloud.</p>
+<p>Les fichiers que PureQuill sait lire mais pas écrire — un ancien .doc, des modèles, un .docm — affichent <b>Mode de compatibilité</b> dans la barre d’état, comme dans Word. Enregistrer crée alors un .docx ; le fichier d’origine reste intact.</p>
 <p><b>Fichier &rsaquo; Enregistrer sous</b> écrit le document sous forme de fichier. Le format
 Word vient en premier parce que c'est le cas courant : il se lit partout, avec ou sans ce
 programme.</p>
@@ -28760,13 +28997,57 @@ bas de page, et les numéros de page deviennent des champs Word qui continuent d
 table des matières pour la liseuse. Avant l'enregistrement, une brève boîte de dialogue demande
 l'auteur et où commencent les chapitres — tous les champs sont facultatifs. La police, les
 marges et le mode nuit sont réglés par la liseuse, pas par le fichier.</p>
-<p><b>D'un fichier texte brut à un e-book :</b> <b>Outils &rsaquo; Préparer l'e-book</b> procède en trois étapes. Il propose les lignes qui ressemblent à des débuts de chapitre (« Chapitre 3 », « Prologue », un « II » centré) et transforme celles cochées en Titre 1. Il nettoie ce qu'apportent les fichiers texte : lignes vides, retours à la ligne en pleine phrase, *** comme changement de scène, guillemets droits, -- au lieu du tiret, espaces doubles. Et il applique la typographie de livre à l'e-book : retrait au lieu d'espacement, chaque chapitre sur une nouvelle page, une lettrine si vous voulez. Il travaille sur une copie, « Titre (e-book) », avec tous les réglages de page et les données de l'e-book ; l'original et son fichier restent tels quels, et l'e-book garde le titre d'origine.</p>
+<p><b>D'un fichier texte brut à un e-book :</b> <b>Outils &rsaquo; Préparer l'e-book</b> définit les chapitres, nettoie le texte et applique la mise en page de livre. Pas à pas : <b>Créer un e-book</b>.</p>
 <p><b>Vers une liseuse :</b> copiez le <b>.epub</b> enregistré dans le dossier de l'appareil par
 USB, ou envoyez-le via Calibre. Pour un Kindle : envoyez le fichier en pièce jointe à votre
 adresse personnelle <b>@kindle.com</b> (indiquée dans votre compte Amazon, sous « Gérer votre
 contenu et vos appareils »), ou déposez-le dans l'application Windows <b>Send to Kindle</b>.</p>
 <p>Un export sert à transmettre. Il ne peut pas être relu intégralement — pour cela, prenez une
 sauvegarde.</p>`},
+
+ {t:"Créer un e-book",k:"e-book;ebook;livre numérique;epub;kindle;kobo;tolino;liseuse;chapitre;table des matières;mise en page;couverture;isbn;assistant;préparer;roman;publier",b:`
+<p>Tout document peut devenir un e-book au format <b>EPUB</b>, lisible sur Kindle, Kobo, Tolino,
+Apple Books et la plupart des applications de lecture. Voici la marche à suivre :</p>
+<ol>
+<li><b>Ouvrez ou écrivez le texte.</b> Un fichier Word, OpenOffice, RTF ou texte s'ouvre avec
+<b>Fichier &rsaquo; Ouvrir</b>.</li>
+<li><b>Préparez-le :</b> <b>Outils &rsaquo; Préparer l'e-book…</b> guide en trois étapes —
+chapitres, nettoyage, mise en page de livre. Détails ci-dessous.</li>
+<li><b>Exportez :</b> <b>Fichier &rsaquo; Enregistrer sous &rsaquo; Livre numérique</b>.
+Vérifiez le titre et l'auteur, ajoutez une couverture si vous en avez une, puis cliquez sur
+<b>Exporter</b>.</li>
+<li><b>Lisez-le :</b> copiez le fichier .epub sur la liseuse ou envoyez-le à votre Kindle (voir
+<b>Enregistrer sous</b>). Mieux vaut l'ouvrir une fois dans une application de lecture avant de
+le diffuser.</li>
+</ol>
+<p><b>Chapitres.</b> L'e-book commence un nouveau chapitre à chaque <b>Titre 1</b> et en tire la
+table des matières. Vous pouvez les définir vous-même — cliquez dans la première ligne d'un
+chapitre et choisissez « Titre 1 » dans la zone de style de paragraphe — ou laisser l'assistant
+les chercher. Il liste tout ce qui pourrait ouvrir un chapitre, en trois groupes : les lignes
+qui <i>ressemblent à un début de chapitre</i> (« Chapitre 3 », « Prologue », un « II » centré),
+celles <i>déjà mises en forme comme titre</i>, et celles qui sont <i>peut-être un intertitre</i>
+(en gras ou courtes). Coché signifie « un chapitre commence ici » ; un clic sur le texte montre
+l'endroit dans le document. Les longues listes sont réparties en pages de dix. Un Titre 1
+existant non coché devient Titre 2 : il reste un titre, mais n'ouvre plus de chapitre.</p>
+<p><b>Nettoyage.</b> L'assistant compte ce qu'apportent les fichiers texte — lignes vides, retours
+à la ligne en pleine phrase, *** comme changement de scène, guillemets droits, -- au lieu d'un
+tiret, doubles espaces — et le corrige. Décochez ce qui doit rester tel quel.</p>
+<p><b>Mise en page de livre.</b> Retrait au lieu d'espacement, chaque chapitre sur une nouvelle
+page, une lettrine si vous le souhaitez — avec un aperçu tiré de votre propre texte. Cela ne vaut
+que pour l'e-book ; l'affichage pendant l'écriture ne change pas.</p>
+<p><b>Votre document reste tel quel.</b> <b>Appliquer</b> crée un nouveau document,
+« Titre (e-book) », avec tous les réglages de page et les données de l'e-book, et ne modifie que
+celui-ci. L'original reste inchangé, dans l'application comme dans son fichier, et l'e-book
+garde le titre d'origine. Si vous préférez modifier le document lui-même, cochez-le à la
+dernière étape ; la version précédente est alors conservée dans l'historique.</p>
+<p><b>La vérification dans la boîte d'export.</b> En haut, la boîte EPUB indique si le document
+est prêt : vert pour « 12 chapitres, avec table des matières » et « Texte propre », rouge pour
+« Aucun chapitre » ou « Texte encore brut ». Juste en dessous, <b>Préparer l'e-book…</b> ouvre
+l'assistant à tout moment.</p>
+<p><b>Conseils.</b> Une couverture rend le mieux en JPEG ou PNG vertical, d'environ
+1600 × 2560 pixels. Pour un livre en plusieurs parties, choisissez « Titre 1 et 2 » sous
+<i>Commencer les chapitres à</i>. Éditeur, année et ISBN ne servent que pour un EPUB d'éditeur ;
+le reste peut rester vide.</p>`},
 
  {t:"Historique des versions et points de restauration",k:"version;historique;point de restauration;annuler;restaurer;plus tôt;revenir",b:`
 <p>Pendant que vous écrivez, le programme conserve des <b>points de restauration</b> du document
@@ -28885,7 +29166,7 @@ habituelles.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>N</kbd></td><td>Nouvelle note</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>M</kbd></td><td>Épingler une note à la sélection</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>G</kbd></td><td>Consulter le glossaire</td></tr>
-<tr><td>{kz:speichern}</td><td>Enregistrer (dans le fichier Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Enregistrer (dans le fichier du document)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>S</kbd></td><td>Créer un point de restauration</td></tr>
 </table>
 <p class="hsec">Rechercher et afficher</p>
@@ -29341,7 +29622,8 @@ pola tekstowe, o czym informuje komunikat.</p>
 <p><b>Przy ponownym zapisie pliku Worda nic nie ginie.</b> Komentarze stają się notatkami obok tekstu, do którego należą, i wracają do Worda jako komentarze; przypisy końcowe i śledzone zmiany zostają. To, czego PureQuill Writer nie potrafi pokazać ani edytować — wykresy, równania, pola tekstowe, kształty, stare obrazy EMF — zostaje w tekście jako przerywana ramka i wraca do Worda bez zmian. Taką ramkę można usunąć, ale nie edytować. Kolumny, sekcje i nagłówki stron parzystych także zostają.</p>`},
 
  {t:"Zapisz jako",k:"zapisz;eksportuj;word;docx;epub;e-book;czytnik;kindle;pdf;html;markdown;tekst;csv",b:`
-<p><b>Plik &rsaquo; Zapisz</b> ({kz:speichern}) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx jest zapisywany z powrotem bezpośrednio. Kropka obok nazwy pliku na pasku stanu pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
+<p><b>Plik &rsaquo; Zapisz</b> ({kz:speichern}) zapisuje otwarty dokument w jego pliku Word. Za pierwszym razem program pyta, gdzie go zapisać; potem nadpisuje ten sam plik. Otwarty plik .docx, .odt lub .rtf jest zapisywany z powrotem bezpośrednio, we własnym formacie. Pasek stanu pokazuje nazwę pliku i jego format; kropka obok pokazuje, czy plik jest aktualny, a przy zamykaniu dokumentu program najpierw pyta, jeśli nie jest. Twoja praca i tak jest zachowywana na bieżąco — Zapisz tworzy plik, który możesz przekazać dalej lub trzymać w folderze w chmurze.</p>
+<p>Pliki, które PureQuill potrafi odczytać, ale nie zapisać — stary .doc, szablony, .docm — pokazują na pasku stanu <b>Tryb zgodności</b>, jak w Wordzie. Zapisz tworzy wtedy plik .docx; oryginalny plik pozostaje nietknięty.</p>
 <p><b>Plik &rsaquo; Zapisz jako</b> zapisuje dokument jako plik. Format Word jest pierwszy,
 ponieważ to przypadek zwykły — da się go odczytać wszędzie, z tym programem lub bez niego.</p>
 <table class="hkeys">
@@ -29361,13 +29643,54 @@ stron stają się polami Worda, które nadal tam liczą.</p>
 czytnika. Przed zapisem krótkie okno pyta o autora i o to, gdzie zaczynają się rozdziały —
 wszystkie pola są opcjonalne. Czcionkę, marginesy i tryb nocny ustala urządzenie czytające, a
 nie plik.</p>
-<p><b>Od surowego pliku tekstowego do e-booka:</b> <b>Narzędzia &rsaquo; Przygotuj e-book</b> działa w trzech krokach. Proponuje wiersze wyglądające na początki rozdziałów („Rozdział 3”, „Prolog”, wyśrodkowane „II”) i zamienia zaznaczone w Nagłówek 1. Porządkuje to, co wnoszą pliki tekstowe: puste wiersze, złamania w środku zdania, *** jako zmianę sceny, proste cudzysłowy, -- zamiast myślnika, podwójne spacje. I nadaje e-bookowi skład książkowy: wcięcie zamiast odstępu, każdy rozdział na nowej stronie, na życzenie inicjał. Pracuje na kopii „Tytuł (e-book)” ze wszystkimi ustawieniami strony i danymi e-booka; oryginał i jego plik pozostają bez zmian, a e-book zachowuje pierwotny tytuł.</p>
+<p><b>Od surowego pliku tekstowego do e-booka:</b> <b>Narzędzia &rsaquo; Przygotuj e-book</b> ustawia rozdziały, porządkuje tekst i nadaje skład książkowy. Krok po kroku: <b>Tworzenie e-booka</b>.</p>
 <p><b>Na czytnik e-booków:</b> skopiuj zapisany plik <b>.epub</b> do folderu urządzenia przez
 USB albo wyślij go przez Calibre. Na Kindle: wyślij plik jako załącznik na swój osobisty adres
 <b>@kindle.com</b> (widoczny na koncie Amazon, w sekcji „Zarządzaj treścią i urządzeniami”),
 albo upuść go w aplikacji Windows <b>Send to Kindle</b>.</p>
 <p>Eksport służy do przekazania dalej. Nie da się go wczytać z powrotem w całości — do tego
 służy kopia zapasowa.</p>`},
+
+ {t:"Tworzenie e-booka",k:"e-book;ebook;epub;kindle;kobo;tolino;czytnik;rozdział;spis treści;skład;okładka;isbn;asystent;przygotuj;powieść;publikacja",b:`
+<p>Każdy dokument może stać się e-bookiem w formacie <b>EPUB</b>, który działa na Kindle, Kobo,
+Tolino, w Apple Books i w większości aplikacji do czytania. Tak to wygląda:</p>
+<ol>
+<li><b>Otwórz lub napisz tekst.</b> Plik Worda, OpenOffice, RTF lub tekstowy otwierasz przez
+<b>Plik &rsaquo; Otwórz</b>.</li>
+<li><b>Przygotuj go:</b> <b>Narzędzia &rsaquo; Przygotuj e-book…</b> prowadzi przez trzy
+kroki — rozdziały, porządki, skład książkowy. Szczegóły poniżej.</li>
+<li><b>Eksportuj:</b> <b>Plik &rsaquo; Zapisz jako &rsaquo; E-book</b>. Sprawdź tytuł i autora,
+dodaj okładkę, jeśli ją masz, i kliknij <b>Eksportuj</b>.</li>
+<li><b>Czytaj:</b> skopiuj plik .epub na czytnik albo wyślij go na Kindle (zob. <b>Zapisz
+jako</b>). Warto raz otworzyć go w aplikacji do czytania, zanim go przekażesz dalej.</li>
+</ol>
+<p><b>Rozdziały.</b> E-book zaczyna nowy rozdział przy każdym <b>Nagłówku 1</b> i na ich
+podstawie tworzy spis treści. Możesz ustawić je sam — kliknij w pierwszy wiersz rozdziału i
+wybierz „Nagłówek 1” w polu stylu akapitu — albo pozwolić asystentowi je znaleźć. Pokazuje on
+wszystko, od czego mógłby zaczynać się rozdział, w trzech grupach: wiersze, które <i>wyglądają
+na początek rozdziału</i> („Rozdział 3”, „Prolog”, wyśrodkowane „II”), wiersze <i>już
+sformatowane jako nagłówek</i> oraz wiersze, które <i>mogą być śródtytułem</i> (pogrubione lub
+krótkie). Zaznaczenie oznacza „tu zaczyna się rozdział”; kliknięcie tekstu pokazuje miejsce w
+dokumencie. Długie listy są dzielone na strony po dziesięć pozycji. Istniejący Nagłówek 1 bez
+zaznaczenia staje się Nagłówkiem 2: pozostaje nagłówkiem, ale nie zaczyna już rozdziału.</p>
+<p><b>Porządki.</b> Asystent liczy to, co przynoszą pliki tekstowe — puste wiersze, podziały
+wiersza w środku zdania, *** jako zmianę sceny, proste cudzysłowy, -- zamiast myślnika, podwójne
+spacje — i to poprawia. Odznacz to, co ma zostać bez zmian.</p>
+<p><b>Skład książkowy.</b> Wcięcie zamiast odstępu, każdy rozdział na nowej stronie, na życzenie
+duży inicjał — z podglądem na własnym tekście. Dotyczy to tylko e-booka; widok podczas pisania
+się nie zmienia.</p>
+<p><b>Twój dokument zostaje bez zmian.</b> <b>Zastosuj</b> tworzy nowy dokument „Tytuł
+(e-book)” ze wszystkimi ustawieniami strony i danymi e-booka i zmienia tylko jego. Oryginał
+pozostaje bez zmian, w programie i jako plik, a e-book zachowuje pierwotny tytuł. Jeśli wolisz
+zmienić sam dokument, zaznacz to w ostatnim kroku; poprzednia wersja trafia wtedy do historii.</p>
+<p><b>Sprawdzenie w oknie eksportu.</b> Na górze okna EPUB widać, czy dokument jest gotowy: na
+zielono „Rozdziały: 12, ze spisem treści” i „Tekst uporządkowany”, na czerwono „Brak rozdziałów”
+lub „Tekst jeszcze surowy”. Pod spodem <b>Przygotuj e-book…</b> w każdej chwili otwiera
+asystenta.</p>
+<p><b>Wskazówki.</b> Okładka najlepiej sprawdza się jako pionowy JPEG lub PNG, około
+1600 × 2560 pikseli. Dla książki z częściami wybierz „Nagłówek 1 i 2” w polu <i>Rozpocznij
+rozdziały od</i>. Wydawca, rok i ISBN mają znaczenie tylko dla EPUB-a wydawniczego; resztę można
+zostawić pustą.</p>`},
 
  {t:"Historia wersji i punkty przywracania",k:"wersja;historia;punkt przywracania;cofnij;przywróć;wcześniej;odwróć",b:`
 <p>Podczas pisania program przechowuje <b>punkty przywracania</b> dokumentu, w którym jesteś —
@@ -29481,7 +29804,7 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd></td><td>Nowa notatka</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd></td><td>Przypnij notatkę do zaznaczenia</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>G</kbd></td><td>Wyszukaj w słowniczku</td></tr>
-<tr><td>{kz:speichern}</td><td>Zapisz (do pliku Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Zapisz (do pliku dokumentu)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd></td><td>Utwórz punkt przywracania</td></tr>
 </table>
 <p class="hsec">Wyszukiwanie i podgląd</p>
@@ -29961,7 +30284,8 @@ grafica WMF/EMF e le caselle di testo, e un avviso lo segnala.</p>
 <p><b>Salvando di nuovo un file Word non si perde nulla.</b> I commenti diventano note accanto al testo a cui si riferiscono e tornano in Word come commenti; note di chiusura e revisioni vengono mantenute. Ciò che PureQuill Writer non può mostrare né modificare — grafici, equazioni, caselle di testo, forme, vecchie immagini EMF — resta nel testo come un riquadro tratteggiato e torna in Word invariato. Il riquadro si può eliminare, ma non modificare. Anche colonne, sezioni e intestazioni delle pagine pari vengono mantenute.</p>`},
 
  {t:"Salvare come",k:"salvare;esportare;word;docx;epub;e-book;lettore;kindle;pdf;html;markdown;testo;csv",b:`
-<p><b>File &rsaquo; Salva</b> ({kz:speichern}) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx che hai aperto viene riscritto direttamente. Il punto accanto al nome del file nella barra di stato indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
+<p><b>File &rsaquo; Salva</b> ({kz:speichern}) scrive il documento aperto nel suo file Word. La prima volta il programma chiede dove; poi sovrascrive lo stesso file. Un .docx, .odt o .rtf che hai aperto viene riscritto direttamente, nel suo formato. La barra di stato mostra il nome del file e il formato; il punto accanto indica se il file è aggiornato, e alla chiusura di un documento il programma chiede prima, se non lo è. Il tuo lavoro viene comunque conservato di continuo — Salva crea il file che puoi condividere o tenere in una cartella nel cloud.</p>
+<p>I file che PureQuill sa leggere ma non scrivere — un vecchio .doc, modelli, .docm — mostrano <b>Modalità compatibilità</b> nella barra di stato, come in Word. Salva crea allora un .docx; il file originale resta intatto.</p>
 <p><b>File &rsaquo; Salva come</b> scrive il documento come file. Il formato Word viene per primo
 perché è il caso normale: si legge ovunque, con o senza questo programma.</p>
 <table class="hkeys">
@@ -29982,13 +30306,54 @@ contare lì.</p>
 costruisce un sommario per il dispositivo di lettura. Prima del salvataggio, una breve finestra
 chiede l'autore e dove iniziano i capitoli — tutti i campi sono facoltativi. Il carattere, i
 margini e la modalità notturna li decide il dispositivo di lettura, non il file.</p>
-<p><b>Da un file di testo grezzo a un e-book:</b> <b>Strumenti &rsaquo; Prepara e-book</b> procede in tre passi. Propone le righe che sembrano inizi di capitolo («Capitolo 3», «Prologo», un «II» centrato) e trasforma quelle spuntate in Titolo 1. Pulisce ciò che i file di testo si portano dietro: righe vuote, a capo a metà frase, *** come cambio di scena, virgolette dritte, -- invece della lineetta, spazi doppi. E applica la composizione da libro all'e-book: rientro invece di spaziatura, ogni capitolo su una nuova pagina, se vuoi il capolettera. Lavora su una copia, «Titolo (e-book)», con tutte le impostazioni di pagina e i dati dell'e-book; l'originale e il suo file restano come sono, e l'e-book mantiene il titolo originale.</p>
+<p><b>Da un file di testo grezzo a un e-book:</b> <b>Strumenti &rsaquo; Prepara e-book</b> imposta i capitoli, mette in ordine il testo e applica l'impaginazione da libro. Passo per passo: <b>Creare un e-book</b>.</p>
 <p><b>Su un lettore di e-book:</b> copia il file <b>.epub</b> salvato nella cartella del
 dispositivo via USB, oppure invialo tramite Calibre. Per un Kindle: manda il file come allegato
 al tuo indirizzo personale <b>@kindle.com</b> (indicato nel tuo account Amazon, in «Gestisci
 contenuti e dispositivi»), oppure rilascialo nell'app di Windows <b>Send to Kindle</b>.</p>
 <p>Un'esportazione serve per consegnare. Non può essere riletta con tutto intatto — per questo
 si usa un backup.</p>`},
+
+ {t:"Creare un e-book",k:"e-book;ebook;libro elettronico;epub;kindle;kobo;tolino;lettore;capitolo;indice;impaginazione;copertina;isbn;assistente;preparare;romanzo;pubblicare",b:`
+<p>Ogni documento può diventare un e-book in formato <b>EPUB</b>, che funziona su Kindle, Kobo,
+Tolino, Apple Books e nella maggior parte delle app di lettura. Ecco come:</p>
+<ol>
+<li><b>Apri o scrivi il testo.</b> Un file di Word, OpenOffice, RTF o di testo si apre con
+<b>File &rsaquo; Apri</b>.</li>
+<li><b>Preparalo:</b> <b>Strumenti &rsaquo; Prepara e-book…</b> guida in tre passi —
+capitoli, pulizia, impaginazione da libro. Dettagli più sotto.</li>
+<li><b>Esporta:</b> <b>File &rsaquo; Salva come &rsaquo; E-book</b>. Controlla titolo e autore,
+aggiungi una copertina se ce l'hai e premi <b>Esporta</b>.</li>
+<li><b>Leggilo:</b> copia il file .epub sul lettore o invialo al tuo Kindle (vedi <b>Salvare
+come</b>). Conviene aprirlo una volta in un'app di lettura prima di passarlo ad altri.</li>
+</ol>
+<p><b>Capitoli.</b> L'e-book inizia un nuovo capitolo a ogni <b>Titolo 1</b> e ne ricava
+l'indice. Puoi impostarli da te — fai clic nella prima riga di un capitolo e scegli «Titolo 1»
+nella casella dello stile di paragrafo — oppure lasciare che li cerchi l'assistente. Elenca tutto
+ciò che potrebbe aprire un capitolo, in tre gruppi: righe che <i>sembrano l'inizio di un
+capitolo</i> («Capitolo 3», «Prologo», un «II» centrato), righe <i>già formattate come
+titolo</i> e righe che sono <i>forse un sottotitolo</i> (in grassetto o brevi). Spuntato
+significa «qui inizia un capitolo»; un clic sul testo mostra il punto nel documento. Gli elenchi
+lunghi sono divisi in pagine da dieci. Un Titolo 1 esistente senza spunta diventa Titolo 2:
+resta un titolo, ma non apre più un capitolo.</p>
+<p><b>Pulizia.</b> L'assistente conta ciò che i file di testo si portano dietro — righe vuote, a
+capo a metà frase, *** come cambio di scena, virgolette dritte, -- invece del trattino lungo,
+spazi doppi — e lo corregge. Togli la spunta a ciò che deve restare com'è.</p>
+<p><b>Impaginazione da libro.</b> Rientro invece di spaziatura, ogni capitolo su una nuova
+pagina, se vuoi un capolettera — con anteprima dal tuo testo. Vale solo per l'e-book; la vista
+mentre scrivi non cambia.</p>
+<p><b>Il tuo documento resta com'è.</b> <b>Applica</b> crea un nuovo documento, «Titolo
+(e-book)», con tutte le impostazioni di pagina e i dati dell'e-book, e modifica solo quello.
+L'originale resta invariato, nel programma e come file, e l'e-book mantiene il titolo originale.
+Se preferisci modificare il documento stesso, spuntalo nell'ultimo passo; la versione precedente
+resta allora nella cronologia.</p>
+<p><b>Il controllo nella finestra di esportazione.</b> In alto, la finestra EPUB mostra se il
+documento è pronto: verde per «12 capitoli, con indice» e «Testo in ordine», rosso per «Nessun
+capitolo» o «Testo ancora grezzo». Subito sotto, <b>Prepara e-book…</b> apre l'assistente in
+qualsiasi momento.</p>
+<p><b>Consigli.</b> La copertina rende meglio come JPEG o PNG verticale, di circa
+1600 × 2560 pixel. Per un libro diviso in parti scegli «Titolo 1 e 2» in <i>Inizia i capitoli
+a</i>. Editore, anno e ISBN servono solo per un EPUB editoriale; il resto può restare vuoto.</p>`},
 
  {t:"Cronologia versioni e punti di ripristino",k:"versione;cronologia;punto di ripristino;annulla;ripristina;prima;tornare indietro",b:`
 <p>Mentre scrivi, il programma conserva <b>punti di ripristino</b> del documento in cui ti trovi
@@ -30103,7 +30468,7 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>N</kbd></td><td>Nuova nota</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>M</kbd></td><td>Fissa una nota alla selezione</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>G</kbd></td><td>Consulta il glossario</td></tr>
-<tr><td>{kz:speichern}</td><td>Salva (nel file Word)</td></tr>
+<tr><td>{kz:speichern}</td><td>Salva (nel file del documento)</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>S</kbd></td><td>Crea un punto di ripristino</td></tr>
 </table>
 <p class="hsec">Cercare e visualizzare</p>

@@ -103,6 +103,26 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Dateiformat in der Statusleiste, .odt und .rtf bleiben beim Speichern,
+  was sie sind** (Toms Frage „sollte nicht unten das aktuelle Dateiformat
+  stehen?“, Variante B). Neben dem Dateinamen (jetzt ohne Endung) steht eine
+  Kennung DOCX, ODT oder RTF; die übrigen Angaben bleiben. Dateien, die
+  PureQuill nur lesen kann (.doc, .dot, .docm, .dotx, .dotm, .ott, .fodt),
+  zeigen wie Word „DOC · Kompatibilitätsmodus“ (bei schmalem Fenster nur
+  „DOC“), mit Tooltip; ein Klick speichert als .docx. Neu dazu, wie in
+  LibreOffice: eine geöffnete .odt oder .rtf schreibt „Speichern“ wieder in
+  ihr eigenes Format zurück (d.ziel.art), statt nach einer .docx zu fragen,
+  und „Speichern als › ODT/RTF“ macht die gewählte Datei zur Datei des
+  Dokuments wie bei Word. .docm bewusst nicht (Makros gingen verloren).
+  Hilfe „Speichern als“ in 7 Sprachen ergänzt. Geprüft mit nachgestelltem
+  Desktop-Schreibzugriff: .odt/.rtf/.docx kommen je im richtigen Format an,
+  Öffnen von .odt/.rtf setzt das Ziel, .docm zeigt den Kompatibilitätsmodus.
+  Die Kennung steht auch ohne Schreibzugriff da (Drag & Drop, einfacher
+  Dateidialog wie im eingebauten Browser der Claude-App — dort sah Tom sie
+  zuerst nicht); „Speichern“ fragt dann im Format der Herkunft nach dem Ort.
+  Dazu: die Statusleiste zeigt „Gesichert“ mit Uhrzeit auch nach einem
+  Neustart (Zeitpunkt in localStorage, an einem anderen Tag mit Datum) —
+  vorher stand bis zum ersten Sichern „Alles gesichert“ (Toms Hinweis).
 - **E-Book vorbereiten** (Werkzeuge-Menü; Toms Wunsch nach einem
   „funktionalen Converter, um Textdateien E-Book-fertig zu machen“, Entwurf
   mit drei Schritten, Toms OK). 1. Kapitel: Zeilen wie „Kapitel 3“,
@@ -140,7 +160,11 @@ immer genau einen Commit, der sie anfasst.
   E-Book wird ein einziger langer Abschnitt …“, dazu „Text aufgeräumt“ oder
   „Text noch roh: 15 Leerzeilen, 25 Umbrüche mitten im Satz“ (ab 5);
   darunter immer „E-Book vorbereiten…“, auch bei Grün (Toms Hinweis: sonst
-  kam man vom Dialog nicht mehr in den Assistenten). Texte verständlicher
+  kam man vom Dialog nicht mehr in den Assistenten). Neues Hilfethema „E-Book
+  erstellen“ (nach „Speichern als“, 7 Sprachen): Anleitung in vier Schritten
+  (öffnen, vorbereiten, exportieren, lesen), dann Kapitel und ihre drei
+  Gruppen, Aufräumen, Buchsatz, die Kopie, die Ampel und Tipps (Cover,
+  Teile, Verlagsangaben); „Speichern als“ verweist nur noch darauf. Texte verständlicher
   (Tom): Gruppen „Sieht aus wie ein Kapitelanfang“, „Bereits als
   Überschrift formatiert“, „Vielleicht eine Zwischenüberschrift“; statt
   „das Original“ nennt der Assistent beide Dokumente beim Namen („„X“
