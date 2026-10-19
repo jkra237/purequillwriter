@@ -103,6 +103,34 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **E-Book vorbereiten** (Werkzeuge-Menü; Toms Wunsch nach einem
+  „funktionalen Converter, um Textdateien E-Book-fertig zu machen“, Entwurf
+  mit drei Schritten, Toms OK). 1. Kapitel: Zeilen wie „Kapitel 3“,
+  „Prolog“, ein zentriertes „II“ werden als Überschrift 1 vorgeschlagen,
+  unsichere (Datum, bloße Zahl) nicht vorgehakt, ein Klick zeigt die Stelle.
+  2. Aufräumen mit Zählung vorab: Leerzeilen als Absätze, Umbrüche mitten
+  im Satz (auch über zwei Absätze, Silbentrennung am Zeilenende),
+  Szenenwechsel einheitlich als zentriertes „* * *“ (data-szene), gerade
+  Anführungszeichen nach der Dokumentsprache, -- und „ - “ als
+  Gedankenstrich, doppelte Leerzeichen. 3. Buchsatz nur fürs E-Book
+  (d.epub.buchsatz, epubBuchsatzCss): Einzug statt Abstand, jedes Kapitel
+  auf neuer Seite, großer Anfangsbuchstabe, mit Vorschau aus dem eigenen
+  Text. Ohne Assistent bleibt der EPUB-Export wie bisher. Vor dem
+  Übernehmen legt der Assistent eine **Kopie** an (Toms Frage „was, wenn ich
+  das Ursprungsdokument nicht ändern will?“, Lösung A): „Titel (E-Book)“
+  mit allem vom Original — Format, Schrift, Abstände, Kopf-/Fußzeilen,
+  Fußnoten, EPUB-Angaben —, aber ohne Dateiverknüpfung, sodass „Speichern“
+  nie in die .docx des Originals schreibt. Ins E-Book und in den Dateinamen
+  kommt der ursprüngliche Titel (d.epub.titel; der EPUB-Dialog hat dafür
+  ein Titelfeld). Wer im Original ändern will, hakt es im letzten Schritt
+  an; dann legt commit() den Stand davor als Zwischenstand ab. Aus dem
+  EPUB-Dialog gestartet, geht es danach dorthin zurück. Nebenbei: der
+  EPUB-Dialog schrieb d.epub als Ganzes neu und hätte den Buchsatz vor dem
+  Export gelöscht — er ergänzt jetzt nur. Der
+  EPUB-Dialog bietet den Assistenten an, solange es keine Überschrift 1
+  gibt. Hilfe in 7 Sprachen. Geprüft an einer rohen .txt (Kapitel,
+  Umbrüche, *** , Anführungszeichen, Striche): Ergebnis und EPUB-CSS wie
+  erwartet; Export 302/302.
 - **Word- und OpenDocument-Vorlagen, Word mit Makros, flaches ODT**
   (Toms Wahl „Stufe 1“): .dotx, .dotm, .docm gehen den .docx-Weg, .dot den
   .doc-Weg, .ott den .odt-Weg; .fodt (OpenDocument als eine XML-Datei)

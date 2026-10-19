@@ -1233,6 +1233,29 @@ body.focus .outline{display:none}
 /* Import/Export-Dialog */
 .iohead{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
 .iohint{margin:4px 0 9px;font-size:12px;color:var(--ink-soft);line-height:1.5}
+/* E-Book vorbereiten: drei Schritte, Fortschrittsleiste oben */
+.ebmodal{width:min(460px,calc(100vw - 32px))}
+.ebmodal h3 .ebschritt{float:right;font-weight:400;color:var(--ink-soft);margin-right:28px}
+.ebleiste{display:flex;gap:4px;padding:9px 16px 0}
+.ebleiste i{flex:1;height:3px;border-radius:2px;background:var(--rule)}
+.ebleiste i.on{background:var(--stamp)}
+#ebInhalt{min-height:240px;max-height:60vh;overflow:auto}
+.ebk{display:block;font-size:14px;margin-bottom:2px}
+.ebh{margin:2px 0 8px;font-size:12px;color:var(--ink-soft);line-height:1.45}
+.ebz{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--rule);font-size:13px}
+.ebz:last-of-type{border-bottom:0}
+.ebmodal .ebz input{width:auto;flex:none;margin:0;accent-color:var(--stamp)}
+.ebz>span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ebn{margin-left:auto;font-size:12px;color:var(--ink-soft);white-space:nowrap;padding-left:8px}
+.ebgo{cursor:pointer}
+.ebgo:hover{color:var(--stamp);text-decoration:underline}
+.ebvor{margin-top:12px;padding:12px 16px;border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);font-family:Georgia,serif;font-size:13px;line-height:1.55}
+.ebvor h5{margin:0 0 8px;text-align:center;font-size:15px;font-weight:600}
+.ebvor p{margin:0 0 .6em}
+.ebvor.einzug p{margin:0;text-indent:1.3em}
+.ebvor.einzug h5+p{text-indent:0}
+.ebvor.initiale h5+p::first-letter{float:left;font-size:2.9em;line-height:.85;margin:.06em .08em 0 0}
+#editor .ebblitz{background:color-mix(in srgb,var(--stamp) 22%,transparent);transition:background 1.2s}
 .ioext{color:var(--ink-soft)}
 .iosep{height:1px;background:var(--rule);margin:17px 0 14px}
 .ioradio{display:flex;flex-direction:column;gap:7px;margin-top:2px}
@@ -2330,6 +2353,33 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Apply creates a copy; the original stays unchanged.",
+  "Stattdessen im Original ändern":"Change the original instead",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copy for the e-book created; the original stays unchanged.",
+  "E-Book vorbereiten":"Prepare e-book",
+  "E-Book vorbereiten&hellip;":"Prepare e-book&hellip;",
+  "Noch keine Kapitel?":"No chapters yet?",
+  "Kapitel":"Chapters",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"These lines look like chapter openings. Click one to see it in the text.",
+  "Keine Kapitelanfänge gefunden.":"No chapter openings found.",
+  "Absatz":"Paragraph",
+  "zentriert":"centred",
+  "unsicher":"unsure",
+  "Aufräumen":"Clean up",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Found in the text — untick what should stay.",
+  "Nichts gefunden — der Text ist schon sauber.":"Nothing found — the text is already clean.",
+  "Leerzeilen zwischen Absätzen":"Blank lines between paragraphs",
+  "Umbrüche mitten im Satz":"Line breaks mid-sentence",
+  "Szenenwechsel einheitlich (* * *)":"Scene breaks made uniform (* * *)",
+  "Gerade Anführungszeichen":"Straight quotation marks",
+  "Gedankenstriche statt Bindestriche":"Dashes instead of hyphens",
+  "Doppelte Leerzeichen":"Double spaces",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"Applies to the e-book; the writing view stays as it is.",
+  "Einzug statt Abstand":"Indent instead of spacing",
+  "Jedes Kapitel auf neuer Seite":"Each chapter on a new page",
+  "Großer Anfangsbuchstabe":"Drop cap",
+  "Zurück":"Back",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book prepared. The previous version is in the version history.",
   "Grafiken im alten Format (WMF/EMF)":"graphics in an old format (WMF/EMF)",
   "Textfelder":"text boxes",
   "Das Dokument ist übernommen, bis auf:":"The document was brought in except for:",
@@ -3213,6 +3263,33 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Appliquer crée une copie ; l'original reste inchangé.",
+  "Stattdessen im Original ändern":"Modifier plutôt l'original",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copie pour l'e-book créée ; l'original reste inchangé.",
+  "E-Book vorbereiten":"Préparer l'e-book",
+  "E-Book vorbereiten&hellip;":"Préparer l'e-book&hellip;",
+  "Noch keine Kapitel?":"Pas encore de chapitres ?",
+  "Kapitel":"Chapitres",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Ces lignes ressemblent à des débuts de chapitre. Un clic montre l'endroit dans le texte.",
+  "Keine Kapitelanfänge gefunden.":"Aucun début de chapitre trouvé.",
+  "Absatz":"Paragraphe",
+  "zentriert":"centré",
+  "unsicher":"incertain",
+  "Aufräumen":"Nettoyage",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Trouvé dans le texte — décochez ce qui doit rester.",
+  "Nichts gefunden — der Text ist schon sauber.":"Rien trouvé — le texte est déjà propre.",
+  "Leerzeilen zwischen Absätzen":"Lignes vides entre les paragraphes",
+  "Umbrüche mitten im Satz":"Retours à la ligne en pleine phrase",
+  "Szenenwechsel einheitlich (* * *)":"Changements de scène uniformes (* * *)",
+  "Gerade Anführungszeichen":"Guillemets droits",
+  "Gedankenstriche statt Bindestriche":"Tirets au lieu de traits d'union",
+  "Doppelte Leerzeichen":"Espaces doubles",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"S'applique à l'e-book ; la vue d'écriture reste inchangée.",
+  "Einzug statt Abstand":"Retrait au lieu d'espacement",
+  "Jedes Kapitel auf neuer Seite":"Chaque chapitre sur une nouvelle page",
+  "Großer Anfangsbuchstabe":"Lettrine",
+  "Zurück":"Retour",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book préparé. La version précédente se trouve dans l'historique.",
   "Grafiken im alten Format (WMF/EMF)":"graphiques dans un ancien format (WMF/EMF)",
   "Textfelder":"zones de texte",
   "Das Dokument ist übernommen, bis auf:":"Le document a été repris, sauf :",
@@ -4096,6 +4173,33 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Aplicar crea una copia; el original no cambia.",
+  "Stattdessen im Original ändern":"Cambiar el original en su lugar",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copia para el e-book creada; el original no cambia.",
+  "E-Book vorbereiten":"Preparar e-book",
+  "E-Book vorbereiten&hellip;":"Preparar e-book&hellip;",
+  "Noch keine Kapitel?":"¿Aún sin capítulos?",
+  "Kapitel":"Capítulos",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Estas líneas parecen inicios de capítulo. Un clic muestra el lugar en el texto.",
+  "Keine Kapitelanfänge gefunden.":"No se encontraron inicios de capítulo.",
+  "Absatz":"Párrafo",
+  "zentriert":"centrado",
+  "unsicher":"dudoso",
+  "Aufräumen":"Limpieza",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Encontrado en el texto — desmarca lo que debe quedarse.",
+  "Nichts gefunden — der Text ist schon sauber.":"Nada encontrado: el texto ya está limpio.",
+  "Leerzeilen zwischen Absätzen":"Líneas vacías entre párrafos",
+  "Umbrüche mitten im Satz":"Saltos de línea a mitad de frase",
+  "Szenenwechsel einheitlich (* * *)":"Cambios de escena uniformes (* * *)",
+  "Gerade Anführungszeichen":"Comillas rectas",
+  "Gedankenstriche statt Bindestriche":"Rayas en lugar de guiones",
+  "Doppelte Leerzeichen":"Espacios dobles",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"Se aplica al e-book; la vista de escritura no cambia.",
+  "Einzug statt Abstand":"Sangría en lugar de espacio",
+  "Jedes Kapitel auf neuer Seite":"Cada capítulo en una página nueva",
+  "Großer Anfangsbuchstabe":"Letra capital",
+  "Zurück":"Atrás",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book preparado. La versión anterior está en el historial de versiones.",
   "Grafiken im alten Format (WMF/EMF)":"gráficos en un formato antiguo (WMF/EMF)",
   "Textfelder":"cuadros de texto",
   "Das Dokument ist übernommen, bis auf:":"El documento se ha importado, salvo:",
@@ -4979,6 +5083,33 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Aplicar cria uma cópia; o original fica inalterado.",
+  "Stattdessen im Original ändern":"Alterar o original em vez disso",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Cópia para o e-book criada; o original fica inalterado.",
+  "E-Book vorbereiten":"Preparar e-book",
+  "E-Book vorbereiten&hellip;":"Preparar e-book&hellip;",
+  "Noch keine Kapitel?":"Ainda sem capítulos?",
+  "Kapitel":"Capítulos",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Estas linhas parecem inícios de capítulo. Um clique mostra o lugar no texto.",
+  "Keine Kapitelanfänge gefunden.":"Nenhum início de capítulo encontrado.",
+  "Absatz":"Parágrafo",
+  "zentriert":"centralizado",
+  "unsicher":"incerto",
+  "Aufräumen":"Limpeza",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Encontrado no texto — desmarque o que deve ficar.",
+  "Nichts gefunden — der Text ist schon sauber.":"Nada encontrado — o texto já está limpo.",
+  "Leerzeilen zwischen Absätzen":"Linhas vazias entre parágrafos",
+  "Umbrüche mitten im Satz":"Quebras de linha no meio da frase",
+  "Szenenwechsel einheitlich (* * *)":"Mudanças de cena uniformes (* * *)",
+  "Gerade Anführungszeichen":"Aspas retas",
+  "Gedankenstriche statt Bindestriche":"Travessões em vez de hífens",
+  "Doppelte Leerzeichen":"Espaços duplos",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"Vale para o e-book; a visualização de escrita continua igual.",
+  "Einzug statt Abstand":"Recuo em vez de espaçamento",
+  "Jedes Kapitel auf neuer Seite":"Cada capítulo em uma nova página",
+  "Großer Anfangsbuchstabe":"Letra capitular",
+  "Zurück":"Voltar",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book preparado. A versão anterior está no histórico de versões.",
   "Grafiken im alten Format (WMF/EMF)":"gráficos em formato antigo (WMF/EMF)",
   "Textfelder":"caixas de texto",
   "Das Dokument ist übernommen, bis auf:":"O documento foi importado, exceto:",
@@ -5862,6 +5993,33 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Zastosuj tworzy kopię; oryginał pozostaje bez zmian.",
+  "Stattdessen im Original ändern":"Zamiast tego zmień oryginał",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Utworzono kopię do e-booka; oryginał pozostaje bez zmian.",
+  "E-Book vorbereiten":"Przygotuj e-book",
+  "E-Book vorbereiten&hellip;":"Przygotuj e-book&hellip;",
+  "Noch keine Kapitel?":"Jeszcze bez rozdziałów?",
+  "Kapitel":"Rozdziały",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Te wiersze wyglądają na początki rozdziałów. Kliknięcie pokazuje miejsce w tekście.",
+  "Keine Kapitelanfänge gefunden.":"Nie znaleziono początków rozdziałów.",
+  "Absatz":"Akapit",
+  "zentriert":"wyśrodkowany",
+  "unsicher":"niepewne",
+  "Aufräumen":"Porządki",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Znalezione w tekście — odznacz, co ma zostać.",
+  "Nichts gefunden — der Text ist schon sauber.":"Nic nie znaleziono — tekst jest już czysty.",
+  "Leerzeilen zwischen Absätzen":"Puste wiersze między akapitami",
+  "Umbrüche mitten im Satz":"Złamania wiersza w środku zdania",
+  "Szenenwechsel einheitlich (* * *)":"Zmiany scen ujednolicone (* * *)",
+  "Gerade Anführungszeichen":"Proste cudzysłowy",
+  "Gedankenstriche statt Bindestriche":"Myślniki zamiast dywizów",
+  "Doppelte Leerzeichen":"Podwójne spacje",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"Dotyczy e-booka; widok pisania pozostaje bez zmian.",
+  "Einzug statt Abstand":"Wcięcie zamiast odstępu",
+  "Jedes Kapitel auf neuer Seite":"Każdy rozdział na nowej stronie",
+  "Großer Anfangsbuchstabe":"Inicjał",
+  "Zurück":"Wstecz",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book przygotowany. Poprzednia wersja jest w historii wersji.",
   "Grafiken im alten Format (WMF/EMF)":"grafiki w starym formacie (WMF/EMF)",
   "Textfelder":"pola tekstowe",
   "Das Dokument ist übernommen, bis auf:":"Dokument został przeniesiony, z wyjątkiem:",
@@ -6745,6 +6903,33 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Übernehmen legt eine Kopie an; das Original bleibt unverändert.":"Applica crea una copia; l'originale resta invariato.",
+  "Stattdessen im Original ändern":"Modifica invece l'originale",
+  "Kopie für das E-Book angelegt; das Original bleibt unverändert.":"Copia per l'e-book creata; l'originale resta invariato.",
+  "E-Book vorbereiten":"Prepara e-book",
+  "E-Book vorbereiten&hellip;":"Prepara e-book&hellip;",
+  "Noch keine Kapitel?":"Ancora nessun capitolo?",
+  "Kapitel":"Capitoli",
+  "Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.":"Queste righe sembrano inizi di capitolo. Un clic mostra il punto nel testo.",
+  "Keine Kapitelanfänge gefunden.":"Nessun inizio di capitolo trovato.",
+  "Absatz":"Paragrafo",
+  "zentriert":"centrato",
+  "unsicher":"incerto",
+  "Aufräumen":"Pulizia",
+  "Gefunden im Text — abwählen, was bleiben soll.":"Trovato nel testo — togli la spunta a ciò che deve restare.",
+  "Nichts gefunden — der Text ist schon sauber.":"Nulla trovato: il testo è già pulito.",
+  "Leerzeilen zwischen Absätzen":"Righe vuote tra i paragrafi",
+  "Umbrüche mitten im Satz":"A capo a metà frase",
+  "Szenenwechsel einheitlich (* * *)":"Cambi di scena uniformi (* * *)",
+  "Gerade Anführungszeichen":"Virgolette dritte",
+  "Gedankenstriche statt Bindestriche":"Lineette invece di trattini",
+  "Doppelte Leerzeichen":"Spazi doppi",
+  "Gilt für das E-Book; die Ansicht beim Schreiben bleibt.":"Vale per l'e-book; la vista di scrittura resta com'è.",
+  "Einzug statt Abstand":"Rientro invece di spaziatura",
+  "Jedes Kapitel auf neuer Seite":"Ogni capitolo su una nuova pagina",
+  "Großer Anfangsbuchstabe":"Capolettera",
+  "Zurück":"Indietro",
+  "E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.":"E-book preparato. La versione precedente è nella cronologia delle versioni.",
   "Grafiken im alten Format (WMF/EMF)":"grafica in un formato vecchio (WMF/EMF)",
   "Textfelder":"caselle di testo",
   "Das Dokument ist übernommen, bis auf:":"Il documento è stato importato, tranne:",
@@ -12809,7 +12994,7 @@ ${spine}
 }
 async function epubBauen(d,opts){
   const lang=S.settings.lang||"de";
-  const titel=tr(d.title)||epLbl("chapter",lang);
+  const titel=opts.titel||tr(d.title)||epLbl("chapter",lang);
   const kaps=epubKapitel(d.html,opts.split);
   if(!kaps.length){toast(tr("Dieses Dokument ist noch leer."));return null}
   /* Bilder aus allen Kapiteln einsammeln, Data-URIs durch Dateipfade ersetzen */
@@ -12851,7 +13036,7 @@ async function epubBauen(d,opts){
     {name:"OEBPS/package.opf",bytes:enc.encode(opf)},
     {name:"OEBPS/nav.xhtml",bytes:enc.encode(nav)},
     {name:"OEBPS/toc.ncx",bytes:enc.encode(ncx)},
-    {name:"OEBPS/style.css",bytes:enc.encode(EPUB_CSS)},
+    {name:"OEBPS/style.css",bytes:enc.encode(EPUB_CSS+epubBuchsatzCss(d.epub&&d.epub.buchsatz))},
     ...(coverExt?[
       {name:"OEBPS/cover.xhtml",bytes:enc.encode(epubXhtmlDoc(lang,"Cover",
         `<section epub:type="cover" class="cover"><img src="images/cover.${coverExt}" alt="Cover"/></section>`))},
@@ -12876,6 +13061,8 @@ function exportEpub(){
   overlay(`<div class="modal"><h3>${tr("Als EPUB exportieren")}</h3>
     <div class="pad">
       <p class="iohint">${esc(tr(d.title))} · ${esc(tr(lname))}</p>
+      ${/<h1[\s>]/.test(d.html||"")?"":`<p class="iohint">${tr("Noch keine Kapitel?")} <button class="btn" id="epVorb" style="margin-left:6px">${tr("E-Book vorbereiten&hellip;")}</button></p>`}
+      ${feld(tr("Titel"),`<input type="text" id="epTitel" autocomplete="off" value="${esc(ep.titel||tr(d.title))}">`)}
       ${feld(tr("Autor"),`<input type="text" id="epAuthor" autocomplete="off" value="${esc(ep.author!=null?ep.author:S.settings.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
       ${feld(tr("Kapitel beginnen bei"),`<select id="epSplit">
         <option value="1">${tr("Überschrift 1")}</option>
@@ -12897,9 +13084,14 @@ function exportEpub(){
       <button class="btn pri" id="epGo">${tr("Exportieren")}</button>
     </div></div>`);
   $("#epSplit").value=String(ep.split==null?1:ep.split);
+  if($("#epVorb"))$("#epVorb").onclick=()=>{closeOvl();ebookAssistent("epub")};
   $("#epCancel").onclick=closeOvl;
   $("#epGo").onclick=async()=>{
+    /* Titel des Buchs: ins E-Book und in den Dateinamen. Bei einer Kopie
+       aus „E-Book vorbereiten“ ist das der Titel des Originals. */
+    const titel=$("#epTitel").value.trim()||tr(d.title);
     const opts={
+      titel,
       author:$("#epAuthor").value.trim(),
       split:+$("#epSplit").value||0,
       titlepage:$("#epTitle").checked,
@@ -12907,8 +13099,8 @@ function exportEpub(){
       year:$("#epYear").value.trim(),
       isbn:$("#epIsbn").value.trim()
     };
-    d.epub={author:opts.author,split:opts.split,titlepage:opts.titlepage,
-      publisher:opts.publisher,year:opts.year,isbn:opts.isbn};
+    d.epub=Object.assign({},d.epub||{},{titel:titel!==tr(d.title)?titel:undefined,author:opts.author,split:opts.split,titlepage:opts.titlepage,
+      publisher:opts.publisher,year:opts.year,isbn:opts.isbn});
     save();
     const cf=($("#epCover").files||[])[0];
     if(cf){
@@ -12918,14 +13110,14 @@ function exportEpub(){
     }
     /* Ziel holen, solange der Klick zählt — dann erst bauen (siehe dateiZiel) */
     let ziel=null;
-    try{ziel=await dateiZiel(safeName(tr(d.title))+".epub")}
+    try{ziel=await dateiZiel(safeName(titel)+".epub")}
     catch(e){if(e&&e.name==="AbortError")return;ziel=null}
     closeOvl();
     let blob=null;
     try{blob=await epubBauen(d,opts)}
     catch(e){toast(tr("Die EPUB-Datei ließ sich nicht erzeugen."));return}
     if(!blob)return;
-    await dateiAblegen(safeName(tr(d.title))+".epub",blob,"application/epub+zip",ziel);
+    await dateiAblegen(safeName(titel)+".epub",blob,"application/epub+zip",ziel);
     toast(tr("Als EPUB gespeichert"));
   };
 }
@@ -18251,6 +18443,7 @@ function toolsMenu(){
     <button class="mi" data-t="find"><span class="chk"></span>${tr("Suchen und ersetzen")}<span class="k">${tr("Strg")} H</span></button>
     <button class="mi" data-t="spell"><span class="chk"></span>${tr("Rechtschreibprüfung&hellip;")}<span class="k">${spellLangName(S.settings.lang)}</span></button>
     <button class="mi" data-t="clean"><span class="chk"></span>${tr("Text bereinigen&hellip;")}</button>
+    <button class="mi" data-t="ebook"><span class="chk"></span>${tr("E-Book vorbereiten&hellip;")}</button>
     <button class="mi" data-t="rep"><span class="chk"></span>${tr("Wortwiederholungen")}&hellip;</button>
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
@@ -18274,6 +18467,7 @@ function toolsMenu(){
     if(a==="spell"){spellState="idle";spellDialog()}
     if(a==="rep")toggleRep();
     if(a==="clean")cleanDialog();
+    if(a==="ebook")ebookAssistent();
     if(a==="sig"){if(S.mode!=="write")setMode("write");signatureDialog()}
     if(a==="toc"){if(S.mode!=="write")setMode("write");setTimeout(insertToc,40)}
     if(a==="tof"){if(S.mode!=="write")setMode("write");setTimeout(insertTof,40)}
@@ -22880,6 +23074,247 @@ function spellDialog(startAt){
   else if(SPELL&&SPELL.lang===S.settings.lang&&spellState==="idle")start();
 }
 
+/* ================= E-Book vorbereiten =================
+   Seit 2026-10-19 (Tom: „einen funktionalen Converter, um Textdateien
+   E-Book-fertig zu machen“; Entwurf mit drei Schritten, Toms OK). Ein
+   Dialog in drei Schritten über dem offenen Dokument:
+   1. Kapitel — Zeilen, die wie Kapitelanfänge aussehen, werden zu
+      Überschrift 1 (der EPUB-Export trennt dort). Unsichere Fälle (Datum,
+      bloße Zahl ohne Zentrierung) sind nicht vorgehakt; ein Klick zeigt
+      die Stelle.
+   2. Aufräumen — was rohe Textdateien mitbringen: Leerzeilen als
+      Absätze, harte Umbrüche mitten im Satz (aus .txt und Kopien),
+      uneinheitliche Szenenwechsel, gerade Anführungszeichen, -- statt
+      Gedankenstrich, doppelte Leerzeichen. Gezählt wird vorab.
+   3. Buchsatz — Einzug statt Abstand, Kapitel auf neuer Seite, großer
+      Anfangsbuchstabe. Gilt nur fürs E-Book (d.epub.buchsatz, epubBuchsatzCss),
+      die Ansicht beim Schreiben bleibt.
+   Vor „Übernehmen“ legt commit() einen Zwischenstand an; der Stand davor
+   liegt also im Versionsverlauf. Gearbeitet wird am Editor selbst, danach
+   flush()/commit() wie bei jeder anderen Änderung. */
+const EB_KAPITEL=/^(?:kapitel|chapter|chapitre|cap[ií]tulo|capitolo|rozdzia[lł]|teil|part|partie|parte|buch|book|livre|libro|ksi[eę]ga)\s+(?:\d+|[ivxlcdm]+|[a-zäöüßéèàáíóúñçłśżź]+)\b/i;
+const EB_RAHMEN=/^(?:prolog|prologue|pr[oó]logo|epilog|epilogue|ep[ií]logo|vorwort|nachwort|einleitung|einführung|preface|foreword|afterword|introduction|introducción|introduzione|introdução|wstęp|wst[eę]p|zakończenie|posłowie|danksagung|acknowledgements?|remerciements|agradecimientos|ringraziamenti|agradecimentos|podziękowania)\b/i;
+const EB_SZENE=/^\s*(?:\*\s*){3,}$|^\s*(?:#\s*){1,3}$|^\s*(?:~\s*){3,}$|^\s*(?:[◆◇•·]\s*){1,3}$|^\s*⁂\s*$/;
+const ebText=el=>(el.innerText||el.textContent||"").replace(/[\s\u00a0]+/g," ").trim();
+const ebSatzEnde=/[.!?…:;"“”»«’)\]]$/;
+function ebKapitelFinden(ed){
+  const bloecke=[...ed.children];
+  const out=[];
+  bloecke.forEach((el,i)=>{
+    if(el.tagName!=="P"||el.dataset.fv||el.querySelector("img,figure"))return;
+    const t=ebText(el);
+    if(!t||t.length>80)return;
+    const naechster=bloecke.slice(i+1).find(b=>ebText(b));
+    if(!naechster)return;
+    const mitte=(el.style.textAlign==="center");
+    let sicher=null,grund="";
+    if(EB_KAPITEL.test(t)||EB_RAHMEN.test(t)&&t.split(/\s+/).length<=6){sicher=true}
+    else if(/^[ivxlcdm]+\.?$/i.test(t)&&t.length<=8){sicher=mitte||t===t.toUpperCase();grund=mitte?"zentriert":""}
+    else if(/^\d{1,3}\.?$/.test(t)){sicher=mitte;grund=mitte?"zentriert":"unsicher"}
+    else if(/^\d{1,2}\.\s*\S+\s+\d{4}$/.test(t)){sicher=false;grund="unsicher"}
+    else if(mitte&&t.length<=60&&!ebSatzEnde.test(t)&&!EB_SZENE.test(t)){sicher=false;grund="zentriert"}
+    if(sicher===null)return;
+    out.push({el,text:t,an:sicher,grund:grund||"absatz",nr:i+1});
+  });
+  return out;
+}
+/* Zählen und Anwenden laufen über dieselben Funktionen: anwenden=false
+   zählt nur */
+function ebAufraeumen(ed,was,anwenden){
+  const lang=S.settings.lang;
+  const n={leer:0,umbruch:0,szene:0,zeichen:0,strich:0,leerzeichen:0};
+  if(was.leer)[...ed.children].forEach(el=>{
+    if(el.tagName==="P"&&!ebText(el)&&!el.querySelector("img,figure,br+br")&&!el.dataset.fv){n.leer++;if(anwenden)el.remove()}});
+  if(was.umbruch){
+    /* <br> mitten im Satz: davor kein Satzende */
+    ed.querySelectorAll("p br").forEach(br=>{
+      const p=br.closest("p");if(!p)return;
+      const r=document.createRange();r.selectNodeContents(p);r.setEndBefore(br);
+      const vor=r.toString().replace(/\s+$/,"");
+      const r2=document.createRange();r2.selectNodeContents(p);r2.setStartAfter(br);
+      const nach=r2.toString().replace(/^\s+/,"");
+      if(!vor||!nach||ebSatzEnde.test(vor))return;
+      n.umbruch++;
+      if(anwenden){
+        /* Silbentrennung am Zeilenende („Ver-\nkehr“) wieder zusammenfügen */
+        if(/\p{L}-$/u.test(vor)&&/^\p{Ll}/u.test(nach)){const tn=br.previousSibling;if(tn&&tn.nodeType===3)tn.nodeValue=tn.nodeValue.replace(/-\s*$/,"");br.remove()}
+        else br.replaceWith(document.createTextNode(" "));
+      }
+    });
+    /* Ein Satz über zwei Absätze verteilt: der erste ohne Satzende, der
+       zweite beginnt klein */
+    [...ed.children].forEach(el=>{
+      const vor=el.previousElementSibling;
+      if(!vor||el.tagName!=="P"||vor.tagName!=="P"||el.dataset.fv||vor.dataset.fv)return;
+      const a=ebText(vor),b=ebText(el);
+      if(!a||!b||ebSatzEnde.test(a)||!/^\p{Ll}/u.test(b))return;
+      n.umbruch++;
+      if(anwenden){vor.appendChild(document.createTextNode(" "));while(el.firstChild)vor.appendChild(el.firstChild);el.remove()}
+    });
+  }
+  if(was.szene)[...ed.children].forEach(el=>{
+    if(el.tagName!=="P"||!EB_SZENE.test(ebText(el))||el.dataset.szene)return;
+    n.szene++;
+    if(anwenden){el.textContent="* * *";el.setAttribute("style","text-align:center");el.dataset.szene="1"}
+  });
+  const textKnoten=[];
+  if(was.zeichen||was.strich||was.leerzeichen){
+    const w=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT,{acceptNode:x=>x.parentElement.closest(".wtab,.pgbreak,code,pre")?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT});
+    let x;while(x=w.nextNode())textKnoten.push(x);
+  }
+  if(was.zeichen){
+    /* Wie die Autokorrektur: öffnend nach Leerraum, Klammer oder Strich */
+    const auf=AC_DQOPEN[lang]||AC_DQOPEN.en,zu=AC_DQCLOSE[lang]||AC_DQCLOSE.en,eauf=AC_SQOPEN[lang]||AC_SQOPEN.en;
+    let vorher="";let block=null;
+    textKnoten.forEach(x=>{
+      const b=x.parentElement.closest("p,li,h1,h2,h3,h4,td,th,blockquote");
+      if(b!==block){block=b;vorher=""}
+      let s="";
+      for(const c of x.nodeValue){
+        if(c==='"'||c==="'"){n.zeichen++;
+          const offen=!vorher||/[\s([{¿¡—–]/.test(vorher);
+          s+=c==='"'?(offen?auf:zu):(offen?eauf:AC_SQCLOSE)}
+        else s+=c;
+        vorher=c;
+      }
+      if(anwenden&&s!==x.nodeValue)x.nodeValue=s;
+    });
+  }
+  if(was.strich){
+    const strich=lang==="en"?"—":"–";
+    textKnoten.forEach(x=>{
+      const m=x.nodeValue.match(/ -- | - |--/g);if(!m)return;
+      n.strich+=m.length;
+      if(anwenden)x.nodeValue=x.nodeValue.replace(/ -- | - /g," "+strich+" ").replace(/--/g,strich);
+    });
+  }
+  if(was.leerzeichen)textKnoten.forEach(x=>{
+    const m=x.nodeValue.match(/[  ]{2,}/g);if(!m)return;
+    n.leerzeichen+=m.length;
+    if(anwenden)x.nodeValue=x.nodeValue.replace(/[  ]{2,}/g," ");
+  });
+  return n;
+}
+/* CSS des Buchsatzes für epubBauen */
+function epubBuchsatzCss(b){
+  let c="p[data-szene]{text-indent:0;text-align:center;margin:1em 0}\n";
+  if(!b)return c;
+  if(b.einzug)c+="p{margin:0;text-indent:1.2em}\nh1+p,h2+p,h3+p,h4+p,hr+p,p[data-szene]+p,blockquote+p,figure+p,section>p:first-child,body>p:first-child,p[data-fv]+p{text-indent:0}\np[data-fv]{text-indent:0}\n";
+  if(b.neueSeite)c+="h1{break-before:page;page-break-before:always}\nsection>h1:first-child,body>h1:first-child{break-before:auto;page-break-before:auto}\n";
+  if(b.initiale)c+="h1+p::first-letter{float:left;font-size:3.1em;line-height:.85;margin:.06em .08em 0 0}\n";
+  return c;
+}
+/* Das E-Book entsteht in einer Kopie (Toms Wahl „A“): das Original bleibt
+   unberührt und an seiner Datei. Die Kopie trägt alles mit — Format,
+   Schrift, Kopf-/Fußzeilen, Fußnoten, EPUB-Angaben —, nur keine
+   Dateiverknüpfung (d.file, d.ziel) und keine Zwischenstände. Im Reiter
+   heißt sie „Titel (E-Book)“; ins E-Book und in den Dateinamen kommt der
+   ursprüngliche Titel (d.epub.titel). */
+function ebKopie(d){
+  const k=JSON.parse(JSON.stringify(d));
+  k.id=uid();k.history=[];
+  delete k.file;delete k.ziel;
+  const t=tr(d.title);
+  k.title=t+" ("+tr("E-Book")+")";k.customTitle=true;
+  k.epub=Object.assign({},d.epub||{},{titel:(d.epub&&d.epub.titel)||t});
+  S.docs.splice(S.docs.indexOf(d)+1,0,k);S.active=k.id;
+  save();render();
+  return k;
+}
+function ebookAssistent(danach){
+  if(S.mode!=="write")setMode("write");
+  flush();
+  const ed=$("#editor");if(!ed)return;
+  const d=doc();
+  const kapitel=ebKapitelFinden(ed);
+  const ALLES={leer:true,umbruch:true,szene:true,zeichen:true,strich:true,leerzeichen:true};
+  const zahl=ebAufraeumen(ed,ALLES,false);
+  const was={...ALLES};Object.keys(zahl).forEach(k=>{if(!zahl[k])was[k]=false});
+  const bs=Object.assign({einzug:true,neueSeite:true,initiale:false},(d.epub&&d.epub.buchsatz)||{});
+  let imOriginal=false;
+  let schritt=1;
+  const haken=(id,an,lab,rechts)=>`<label class="ebz"><input type="checkbox" id="${id}" ${an?"checked":""}><span>${lab}</span>${rechts!=null?`<span class="ebn">${rechts}</span>`:""}</label>`;
+  const zifr=v=>Number(v).toLocaleString(S.settings.uiLang);
+  const inhalt=()=>{
+    if(schritt===1){
+      const vorh=ed.querySelectorAll(":scope > h1").length;
+      return `<b class="ebk">${tr("Kapitel")}</b>`+
+        (kapitel.length?`<p class="ebh">${tr("Diese Zeilen sehen aus wie Kapitelanfänge. Ein Klick zeigt die Stelle im Text.")}</p>`+
+          kapitel.map((k,i)=>`<label class="ebz"><input type="checkbox" data-kap="${i}" ${k.an?"checked":""}><span class="ebgo" data-go="${i}">${esc(k.text)}</span><span class="ebn">${
+            k.grund==="absatz"?tr("Absatz")+" "+zifr(k.nr):tr(k.grund)}</span></label>`).join("")
+          :`<p class="ebh">${tr("Keine Kapitelanfänge gefunden.")}${vorh?" "+PL(vorh+" Überschriften 1 sind schon da.",vorh+" Heading 1 lines are already there.",vorh+" titres 1 sont déjà présents.",vorh+" títulos 1 ya existen.",vorh+" títulos 1 já existem.","Nagłówków 1 jest już: "+vorh+".",vorh+" titoli 1 ci sono già."):""}</p>`);
+    }
+    if(schritt===2){
+      const zeilen=[["leer","Leerzeilen zwischen Absätzen"],["umbruch","Umbrüche mitten im Satz"],["szene","Szenenwechsel einheitlich (* * *)"],
+        ["zeichen","Gerade Anführungszeichen"],["strich","Gedankenstriche statt Bindestriche"],["leerzeichen","Doppelte Leerzeichen"]].filter(([k])=>zahl[k]);
+      return `<b class="ebk">${tr("Aufräumen")}</b>`+(zeilen.length
+        ?`<p class="ebh">${tr("Gefunden im Text — abwählen, was bleiben soll.")}</p>`+zeilen.map(([k,lab])=>haken("eb_"+k,was[k],tr(lab),zifr(zahl[k]))).join("")
+        :`<p class="ebh">${tr("Nichts gefunden — der Text ist schon sauber.")}</p>`);
+    }
+    return `<b class="ebk">${tr("Buchsatz")}</b><p class="ebh">${tr("Gilt für das E-Book; die Ansicht beim Schreiben bleibt.")}</p>`+
+      haken("eb_einzug",bs.einzug,tr("Einzug statt Abstand"))+haken("eb_neueSeite",bs.neueSeite,tr("Jedes Kapitel auf neuer Seite"))+
+      haken("eb_initiale",bs.initiale,tr("Großer Anfangsbuchstabe"))+
+      `<div class="ebvor" id="ebVor"></div>`+
+      `<p class="ebh" style="margin-top:12px">${tr("Übernehmen legt eine Kopie an; das Original bleibt unverändert.")}</p>`+
+      haken("eb_original",imOriginal,tr("Stattdessen im Original ändern"));
+  };
+  /* Kleine Vorschau des Buchsatzes aus dem eigenen Text */
+  const vorschau=()=>{
+    const v=$("#ebVor");if(!v)return;
+    const h=(ed.querySelector(":scope > h1")||{}).textContent||(kapitel.find(k=>k.an)||{}).text||tr("Kapitel")+" 1";
+    const abs=[...ed.querySelectorAll(":scope > p")].map(ebText).filter(t=>t.length>40).slice(0,2);
+    const kurz=t=>t.length>140?t.slice(0,140).replace(/\s+\S*$/,"")+" …":t;
+    v.className="ebvor"+(bs.einzug?" einzug":"")+(bs.initiale?" initiale":"");
+    v.innerHTML=`<h5>${esc(h)}</h5>`+(abs.length?abs:["…"]).map(t=>`<p>${esc(kurz(t))}</p>`).join("");
+  };
+  const merken=()=>{
+    if(schritt===1)$("#ovl").querySelectorAll("[data-kap]").forEach(c=>{kapitel[+c.dataset.kap].an=c.checked});
+    if(schritt===2)Object.keys(was).forEach(k=>{const c=$("#eb_"+k);if(c)was[k]=c.checked});
+    if(schritt===3){["einzug","neueSeite","initiale"].forEach(k=>{const c=$("#eb_"+k);if(c)bs[k]=c.checked});
+      const o=$("#eb_original");if(o)imOriginal=o.checked}
+  };
+  const zeichne=()=>{
+    overlay(`<div class="modal ebmodal"><h3>${tr("E-Book vorbereiten")}<span class="ebschritt">${schritt} ${OFWORD()} 3</span></h3>
+      <div class="ebleiste">${[1,2,3].map(i=>`<i class="${i<=schritt?"on":""}"></i>`).join("")}</div>
+      <div class="pad" id="ebInhalt">${inhalt()}</div>
+      <div class="rowend"><button class="btn" id="ebZurueck">${schritt===1?tr("Abbrechen"):tr("Zurück")}</button>
+        <button class="btn pri" id="ebWeiter">${schritt===3?tr("Übernehmen"):tr("Weiter")}</button></div></div>`);
+    if(schritt===3){vorschau();["einzug","initiale"].forEach(k=>{const c=$("#eb_"+k);if(c)c.onchange=()=>{bs[k]=c.checked;vorschau()}})}
+    $("#ovl").querySelectorAll("[data-go]").forEach(s=>s.onclick=e=>{
+      e.preventDefault();const k=kapitel[+s.dataset.go];if(!k||!k.el.isConnected)return;
+      k.el.scrollIntoView({block:"center",behavior:"smooth"});k.el.classList.add("ebblitz");setTimeout(()=>k.el.classList.remove("ebblitz"),1400)});
+    $("#ebZurueck").onclick=()=>{merken();if(schritt===1){closeOvl();return}schritt--;zeichne()};
+    $("#ebWeiter").onclick=()=>{merken();if(schritt<3){schritt++;zeichne();return}uebernehmen()};
+  };
+  const uebernehmen=()=>{
+    /* Die gewählten Kapitel als Stelle merken (Index und Text), damit sie
+       sich auch in der Kopie wiederfinden */
+    const alle=[...ed.children];
+    const wahl=kapitel.filter(k=>k.an&&k.el.isConnected).map(k=>({i:alle.indexOf(k.el),text:k.text}));
+    let ziel=d,ed2=ed;
+    closeOvl();
+    if(imOriginal)commit();   /* der Stand davor als Zwischenstand */
+    else{ziel=ebKopie(d);ed2=$("#editor")}
+    const kinder=[...ed2.children];
+    wahl.forEach(w=>{
+      let el=kinder[w.i];
+      if(!el||ebText(el)!==w.text)el=kinder.find(x=>x.tagName==="P"&&ebText(x)===w.text);
+      if(!el||!el.isConnected)return;
+      const h=document.createElement("h1");
+      if(el.style.textAlign)h.style.textAlign=el.style.textAlign;
+      while(el.firstChild)h.appendChild(el.firstChild);
+      el.replaceWith(h);
+    });
+    ebAufraeumen(ed2,was,true);
+    ziel.epub=Object.assign({},ziel.epub||{},{buchsatz:{...bs}});
+    flush();dirty=true;commit();
+    render();queuePaginate();
+    toast(imOriginal?tr("E-Book vorbereitet. Der Stand davor liegt im Versionsverlauf.")
+      :tr("Kopie für das E-Book angelegt; das Original bleibt unverändert."));
+    if(danach==="epub")setTimeout(exportEpub,250);
+  };
+  zeichne();
+}
 /* ================= Text bereinigen ================= */
 /* Vier stille Übeltäter, die man beim Schreiben kaum sieht: doppelte
    Leerzeichen (im Editor unsichtbar, weil der Browser sie zusammenzieht —
@@ -25691,6 +26126,7 @@ numbers become Word fields that keep counting there.</p>
 contents for the reader. A short dialog asks for the author and where chapters begin before
 saving — every field is optional. Font, margins and night mode are set by the reading device,
 not the file.</p>
+<p><b>From a raw text file to an e-book:</b> <b>Tools &rsaquo; Prepare e-book</b> goes through three steps. It suggests lines that look like chapter openings (“Chapter 3”, “Prologue”, a centred “II”) and turns the ticked ones into Heading 1. It cleans up what plain text files bring along: blank lines, line breaks in mid-sentence, *** as a scene break, straight quotation marks, -- instead of a dash, double spaces. And it sets book typography for the e-book: indented paragraphs instead of spacing, each chapter on a new page, a drop cap if you like. It works on a copy, “Title (e-book)”, with all page settings and e-book details; the original document and its file stay as they are, and the e-book keeps the original title.</p>
 <p><b>Onto an e-reader:</b> copy the saved <b>.epub</b> to the device's folder over USB, or
 send it through Calibre. For a Kindle: email the file as an attachment to your personal
 <b>@kindle.com</b> address (listed in your Amazon account under “Manage Your Content and
@@ -26299,6 +26735,7 @@ darin werden zu Word-Feldern und zählen dort weiter.</p>
 Inhaltsverzeichnis für den Reader an. Vor dem Speichern fragt ein kurzer Dialog nach Autor und
 Kapitelschnitt — alle Angaben sind freiwillig. Schrift, Rand und Nachtmodus bestimmt das
 Lesegerät, nicht die Datei.</p>
+<p><b>Aus einer rohen Textdatei ein E-Book:</b> <b>Werkzeuge &rsaquo; E-Book vorbereiten</b> geht in drei Schritten vor. Es schlägt Zeilen vor, die wie Kapitelanfänge aussehen („Kapitel 3“, „Prolog“, ein zentriertes „II“), und macht die abgehakten zu Überschrift 1. Es räumt auf, was Textdateien mitbringen: Leerzeilen, Umbrüche mitten im Satz, *** als Szenenwechsel, gerade Anführungszeichen, -- statt Gedankenstrich, doppelte Leerzeichen. Und es setzt den Buchsatz fürs E-Book: Einzug statt Abstand, jedes Kapitel auf neuer Seite, auf Wunsch ein großer Anfangsbuchstabe. Es arbeitet an einer Kopie, „Titel (E-Book)“, mit allen Seiten- und E-Book-Angaben; das Original und seine Datei bleiben, wie sie sind, und das E-Book trägt den ursprünglichen Titel.</p>
 <p><b>Auf den E-Reader:</b> die gespeicherte <b>.epub</b> per USB in den Ordner des Geräts
 kopieren, oder über Calibre übertragen. Für den Kindle: die Datei als E-Mail-Anhang an deine
 persönliche <b>@kindle.com</b>-Adresse schicken (im Amazon-Konto unter „Meine Geräte
@@ -26910,6 +27347,7 @@ notas al pie, y los números de página se vuelven campos de Word que siguen con
 índice para el lector. Antes de guardar, un breve cuadro pregunta por el autor y por dónde
 empiezan los capítulos; todos los campos son opcionales. La tipografía, los márgenes y el modo
 nocturno los define el dispositivo de lectura, no el archivo.</p>
+<p><b>De un archivo de texto en bruto a un e-book:</b> <b>Herramientas &rsaquo; Preparar e-book</b> avanza en tres pasos. Propone las líneas que parecen inicios de capítulo («Capítulo 3», «Prólogo», un «II» centrado) y convierte las marcadas en Título 1. Limpia lo que traen los archivos de texto: líneas vacías, saltos a mitad de frase, *** como cambio de escena, comillas rectas, -- en lugar de raya, espacios dobles. Y aplica la composición de libro al e-book: sangría en lugar de espacio, cada capítulo en una página nueva y, si quieres, letra capital. Trabaja sobre una copia, «Título (e-book)», con todos los ajustes de página y datos del e-book; el original y su archivo quedan como están, y el e-book conserva el título original.</p>
 <p><b>Al lector electrónico:</b> copia el <b>.epub</b> guardado a la carpeta del dispositivo por
 USB, o envíalo a través de Calibre. Para un Kindle: manda el archivo como adjunto a tu dirección
 personal <b>@kindle.com</b> (aparece en tu cuenta de Amazon, en «Administrar contenido y
@@ -27519,6 +27957,7 @@ de rodapé, e os números de página viram campos do Word que continuam contando
 para o leitor. Antes de salvar, um breve diálogo pergunta pelo autor e por onde os capítulos
 começam; todos os campos são opcionais. A tipografia, as margens e o modo noturno são definidos
 pelo dispositivo de leitura, não pelo arquivo.</p>
+<p><b>De um arquivo de texto bruto a um e-book:</b> <b>Ferramentas &rsaquo; Preparar e-book</b> segue três passos. Sugere as linhas que parecem inícios de capítulo (“Capítulo 3”, “Prólogo”, um “II” centralizado) e transforma as marcadas em Título 1. Limpa o que os arquivos de texto trazem: linhas vazias, quebras no meio da frase, *** como mudança de cena, aspas retas, -- em vez de travessão, espaços duplos. E aplica a composição de livro ao e-book: recuo em vez de espaçamento, cada capítulo em uma nova página e, se quiser, letra capitular. Trabalha em uma cópia, “Título (e-book)”, com todas as configurações de página e dados do e-book; o original e seu arquivo ficam como estão, e o e-book mantém o título original.</p>
 <p><b>Para um leitor de e-books:</b> copie o <b>.epub</b> salvo para a pasta do dispositivo por
 USB, ou envie-o pelo Calibre. Para um Kindle: mande o arquivo como anexo para o seu endereço
 pessoal <b>@kindle.com</b> (que aparece na sua conta da Amazon, em «Gerenciar conteúdo e
@@ -28157,6 +28596,7 @@ bas de page, et les numéros de page deviennent des champs Word qui continuent d
 table des matières pour la liseuse. Avant l'enregistrement, une brève boîte de dialogue demande
 l'auteur et où commencent les chapitres — tous les champs sont facultatifs. La police, les
 marges et le mode nuit sont réglés par la liseuse, pas par le fichier.</p>
+<p><b>D'un fichier texte brut à un e-book :</b> <b>Outils &rsaquo; Préparer l'e-book</b> procède en trois étapes. Il propose les lignes qui ressemblent à des débuts de chapitre (« Chapitre 3 », « Prologue », un « II » centré) et transforme celles cochées en Titre 1. Il nettoie ce qu'apportent les fichiers texte : lignes vides, retours à la ligne en pleine phrase, *** comme changement de scène, guillemets droits, -- au lieu du tiret, espaces doubles. Et il applique la typographie de livre à l'e-book : retrait au lieu d'espacement, chaque chapitre sur une nouvelle page, une lettrine si vous voulez. Il travaille sur une copie, « Titre (e-book) », avec tous les réglages de page et les données de l'e-book ; l'original et son fichier restent tels quels, et l'e-book garde le titre d'origine.</p>
 <p><b>Vers une liseuse :</b> copiez le <b>.epub</b> enregistré dans le dossier de l'appareil par
 USB, ou envoyez-le via Calibre. Pour un Kindle : envoyez le fichier en pièce jointe à votre
 adresse personnelle <b>@kindle.com</b> (indiquée dans votre compte Amazon, sous « Gérer votre
@@ -28757,6 +29197,7 @@ stron stają się polami Worda, które nadal tam liczą.</p>
 czytnika. Przed zapisem krótkie okno pyta o autora i o to, gdzie zaczynają się rozdziały —
 wszystkie pola są opcjonalne. Czcionkę, marginesy i tryb nocny ustala urządzenie czytające, a
 nie plik.</p>
+<p><b>Od surowego pliku tekstowego do e-booka:</b> <b>Narzędzia &rsaquo; Przygotuj e-book</b> działa w trzech krokach. Proponuje wiersze wyglądające na początki rozdziałów („Rozdział 3”, „Prolog”, wyśrodkowane „II”) i zamienia zaznaczone w Nagłówek 1. Porządkuje to, co wnoszą pliki tekstowe: puste wiersze, złamania w środku zdania, *** jako zmianę sceny, proste cudzysłowy, -- zamiast myślnika, podwójne spacje. I nadaje e-bookowi skład książkowy: wcięcie zamiast odstępu, każdy rozdział na nowej stronie, na życzenie inicjał. Pracuje na kopii „Tytuł (e-book)” ze wszystkimi ustawieniami strony i danymi e-booka; oryginał i jego plik pozostają bez zmian, a e-book zachowuje pierwotny tytuł.</p>
 <p><b>Na czytnik e-booków:</b> skopiuj zapisany plik <b>.epub</b> do folderu urządzenia przez
 USB albo wyślij go przez Calibre. Na Kindle: wyślij plik jako załącznik na swój osobisty adres
 <b>@kindle.com</b> (widoczny na koncie Amazon, w sekcji „Zarządzaj treścią i urządzeniami”),
@@ -29377,6 +29818,7 @@ contare lì.</p>
 costruisce un sommario per il dispositivo di lettura. Prima del salvataggio, una breve finestra
 chiede l'autore e dove iniziano i capitoli — tutti i campi sono facoltativi. Il carattere, i
 margini e la modalità notturna li decide il dispositivo di lettura, non il file.</p>
+<p><b>Da un file di testo grezzo a un e-book:</b> <b>Strumenti &rsaquo; Prepara e-book</b> procede in tre passi. Propone le righe che sembrano inizi di capitolo («Capitolo 3», «Prologo», un «II» centrato) e trasforma quelle spuntate in Titolo 1. Pulisce ciò che i file di testo si portano dietro: righe vuote, a capo a metà frase, *** come cambio di scena, virgolette dritte, -- invece della lineetta, spazi doppi. E applica la composizione da libro all'e-book: rientro invece di spaziatura, ogni capitolo su una nuova pagina, se vuoi il capolettera. Lavora su una copia, «Titolo (e-book)», con tutte le impostazioni di pagina e i dati dell'e-book; l'originale e il suo file restano come sono, e l'e-book mantiene il titolo originale.</p>
 <p><b>Su un lettore di e-book:</b> copia il file <b>.epub</b> salvato nella cartella del
 dispositivo via USB, oppure invialo tramite Calibre. Per un Kindle: manda il file come allegato
 al tuo indirizzo personale <b>@kindle.com</b> (indicato nel tuo account Amazon, in «Gestisci
