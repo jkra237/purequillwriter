@@ -138,8 +138,9 @@ immer genau einen Commit, der sie anfasst.
   Ampel, ob das E-Book passt (Toms Wunsch statt „Noch keine Kapitel?“):
   grün „12 Kapitel, mit Inhaltsverzeichnis“ / rot „Keine Kapitel – das
   E-Book wird ein einziger langer Abschnitt …“, dazu „Text aufgeräumt“ oder
-  „Text noch roh: 15 Leerzeilen, 25 Umbrüche mitten im Satz“ (ab 5); ist
-  etwas rot, steht darunter „E-Book vorbereiten…“. Texte verständlicher
+  „Text noch roh: 15 Leerzeilen, 25 Umbrüche mitten im Satz“ (ab 5);
+  darunter immer „E-Book vorbereiten…“, auch bei Grün (Toms Hinweis: sonst
+  kam man vom Dialog nicht mehr in den Assistenten). Texte verständlicher
   (Tom): Gruppen „Sieht aus wie ein Kapitelanfang“, „Bereits als
   Überschrift formatiert“, „Vielleicht eine Zwischenüberschrift“; statt
   „das Original“ nennt der Assistent beide Dokumente beim Namen („„X“

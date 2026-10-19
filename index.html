@@ -13142,7 +13142,8 @@ async function epubBauen(d,opts){
   return await zipSchreiben(eintraege);
 }
 /* Ampel im EPUB-Dialog (Toms Wunsch statt „Noch keine Kapitel?“): Kapitel
-   da? Text aufgeräumt? Ist etwas rot, bietet sie den Assistenten an. Als
+   da? Text aufgeräumt? Der Knopf zum Assistenten steht immer da, auch bei
+   Grün (sonst kam man von hier nicht mehr hinein, Toms Hinweis). Als
    roh gilt der Text erst ab 5 Leerzeilen oder Umbrüchen mitten im Satz,
    damit ein paar Leerabsätze in einem Word-Dokument nicht rot werden. */
 function epubBereit(d){
@@ -13161,7 +13162,7 @@ function epubBereit(d){
   if(z.umbruch)teile.push(PL(zf(z.umbruch)+" Umbrüche mitten im Satz",zf(z.umbruch)+" line breaks mid-sentence",zf(z.umbruch)+" retours à la ligne en pleine phrase",
     zf(z.umbruch)+" saltos de línea a mitad de frase",zf(z.umbruch)+" quebras de linha no meio da frase","podziały wiersza w środku zdania: "+zf(z.umbruch),zf(z.umbruch)+" a capo a metà frase"));
   const rohTxt=roh?tr("Text noch roh")+": "+teile.join(", "):tr("Text aufgeräumt");
-  return `<div class="epbereit">${zeile(kap>0,kapTxt)}${zeile(!roh,rohTxt)}${kap&&!roh?"":`<button class="btn" id="epVorb">${tr("E-Book vorbereiten&hellip;")}</button>`}</div>`;
+  return `<div class="epbereit">${zeile(kap>0,kapTxt)}${zeile(!roh,rohTxt)}<button class="btn" id="epVorb">${tr("E-Book vorbereiten&hellip;")}</button></div>`;
 }
 function exportEpub(){
   flush();
