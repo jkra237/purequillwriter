@@ -758,20 +758,50 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
    laengsten Beschriftung — auf Deutsch 427px. In einem schmalen Fenster lief
    sie sonst links hinaus (bei 320px Fensterbreite bis -66px), auch schon vor
    den ausfuehrlicheren Beschriftungen. */
+/* Seit 2026-10-17 runde Felder wie in Google Docs (Toms Wahl „B“): Lupe und
+   Zähler im Feld, Pfeile und Schließen als runde Symbolknöpfe, Ersetzen als
+   zweite Zeile mit beschrifteten Knöpfen. Den Fokus zeigt das ganze Feld
+   (:focus-within), deshalb hat das Eingabefeld darin keinen eigenen Ring.
+   Gleitet beim Öffnen kurz herein; „Bewegung reduzieren“ schaltet das ab. */
 .findbar{max-width:calc(100vw - 32px);position:absolute;top:9px;right:16px;z-index:35;background:var(--paper);
-  border:1px solid var(--rule);border-radius:var(--radius);box-shadow:0 5px 18px rgba(0,0,0,.2);
-  padding:7px 9px;display:none;min-width:330px}
-.findbar.on{display:block}
-.findbar .fr{display:flex;align-items:center;gap:5px;margin-bottom:5px}
+  border:1px solid var(--rule);border-radius:var(--radius-lg);box-shadow:0 10px 30px rgba(0,0,0,.14),0 2px 6px rgba(0,0,0,.08);
+  padding:10px;display:none;min-width:360px}
+.findbar.on{display:block;animation:fdEin .18s ease-out}
+@keyframes fdEin{from{opacity:0;transform:translateY(-6px)}}
+.findbar .fr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
 .findbar .fr:last-child{margin-bottom:0}
-.findbar input[type=text]{flex:1;background:var(--paper);border:1px solid var(--rule);
-  border-radius:var(--radius);padding:4px 7px;min-width:0}
-.findbar .cnt{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
-  min-width:62px;text-align:right}
-.findbar .fb{width:24px;height:23px;border:1px solid var(--rule);border-radius:var(--radius);
+.findbar .fdfeld{flex:1;display:flex;align-items:center;gap:7px;min-width:0;height:32px;padding:0 12px;
+  border:1px solid var(--rule);border-radius:999px;background:var(--paper);cursor:text;
+  transition:border-color 140ms,box-shadow 140ms}
+.findbar .fdfeld:focus-within{border-color:var(--stamp);box-shadow:0 0 0 3px color-mix(in srgb,var(--stamp) 22%,transparent)}
+.findbar .fdfeld svg{flex:none;width:16px;height:16px;margin-left:-2px;fill:none;stroke:var(--ink-soft);stroke-width:1.7;stroke-linecap:round}
+.findbar .fdfeld input[type=text]{flex:1;min-width:0;height:100%;border:0;background:none;padding:0;color:var(--ink)}
+.findbar .fdfeld input[type=text]:focus-visible{outline:none}
+.findbar .cnt{font-size:12px;color:var(--ink-soft);white-space:nowrap;flex:none}
+.findbar .fb{width:30px;height:30px;flex:none;border:0;border-radius:50%;background:none;
   display:flex;align-items:center;justify-content:center;color:var(--ink-soft)}
+.findbar .fb svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .findbar .fb:hover{color:var(--ink);background:var(--chrome-2)}
-.findbar .fopt{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:4px}
+.findbar .fdbtn{height:32px;flex:none;padding:0 15px;border:1px solid var(--rule);border-radius:999px;
+  background:var(--paper);color:var(--ink);font-size:13px}
+.findbar .fdbtn:hover{background:var(--chrome-2)}
+/* Schrift in Papierfarbe statt Weiß: im Schema Tinte (heller Akzent auf dunklem Papier) lag Weiß bei 3,6:1, Papier hält in allen 17 Schemata 4,5:1 */
+.findbar .fdbtn.prim{background:var(--stamp);border-color:var(--stamp);color:var(--paper)}
+.findbar .fdbtn.prim:hover{background:color-mix(in srgb,var(--stamp) 85%,var(--ink))}
+.findbar .fopt{font-size:12px;color:var(--ink-soft);display:flex;align-items:center;gap:5px;padding-left:4px}
+.findbar .fopt input{accent-color:var(--stamp)}
+/* Reiter Suchen | Ersetzen wie im Word-Dialog (Toms Wahl „A“): man sieht,
+   dass es beide Betriebsarten gibt und welche aktiv ist. Vorher klappte ein
+   kleiner Textknopf „Ersetzen ▾“ unten rechts die Zeile auf — zu unauffällig. */
+.findbar .fdkopf{margin-bottom:10px}
+.findbar .fdreiter{display:flex;gap:2px;padding:3px;border-radius:999px;background:var(--chrome)}
+.findbar .fdreiter button{border:0;background:none;padding:4px 15px;border-radius:999px;font-size:12.5px;color:var(--ink-soft)}
+.findbar .fdreiter button:hover{color:var(--ink)}
+.findbar .fdreiter button.on{background:var(--paper);color:var(--ink);box-shadow:0 0 0 1px var(--rule),0 1px 2px rgba(0,0,0,.06)}
+/* Treffer-Marken neben dem Rollbalken, wie in Chrome und VS Code */
+#fdMarken{position:absolute;pointer-events:none;z-index:34}
+#fdMarken i{position:absolute;left:1px;right:1px;height:3px;border-radius:1px;background:#E3B400}
+#fdMarken i.cur{height:4px;background:#F59E0B;box-shadow:0 0 0 1px #B45309}
 /* Beispielzeile: Die Beschriftungen sagen jetzt, was die Optionen tun, aber
    drei Woerter koennen nicht zeigen, dass "Nur ganze Woerter" auch Hausberg
    ausschliesst. Die Zeile holt das Beispiel aus dem eigenen Suchbegriff und,
@@ -780,8 +810,14 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
 .findbar .fhint{min-height:15px;margin-top:5px;font-size:11px;color:var(--ink-faint);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .findbar .fhint b{color:var(--ink-soft);font-weight:600}
-#editor .hit{background:rgba(255,214,0,.42);border-radius:2px}
-#editor .hit.cur{background:var(--stamp);color:var(--on-stamp,#fff)}
+/* padding/border/cursor auf null: die allgemeine .hit-Regel der
+   Trefferlisten in Dialogen (Innenabstand, Linie) griff auch hier, und der
+   Text rutschte beim Suchen auseinander. Der aktuelle Treffer kräftig
+   orange mit Rand wie in Chrome; ein Schatten statt eines Randes, damit
+   nichts die Zeile verbreitert. */
+#editor .hit{background:rgba(255,214,0,.42);border-radius:2px;padding:0;border:0;cursor:inherit}
+#editor .hit:hover{background:rgba(255,214,0,.42)}
+#editor .hit.cur{background:#F59E0B;color:#1A1A1A;box-shadow:0 0 0 1.5px #B45309}
 /* Rechtschreibfehler: dieselbe Wellenlinie, die der Browser selbst zeichnet —
    sie ist so eingeführt, dass sie niemand erklären muss. skip-ink bleibt aus,
    sonst reißt die Linie unter Unterlängen (g, p, j) auf. Kein eigener
@@ -1514,7 +1550,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor,#editor *{visibility:visible!important}
   /* Alles neben dem Weg zum Editor muss WEG, nicht nur unsichtbar:
      visibility:hidden lässt Breite und Höhe im Fluss stehen. */
-  .topbar,.rail,#tools,#status,#outline,#side,#findbar,#pageflag,#anchcol,#ruler,
+  .topbar,.rail,#tools,#status,#outline,#side,#findbar,#fdMarken,#pageflag,#anchcol,#ruler,
   #pagelayer,#hfhint,#hfedit,#hfgrip,#figrsz,.figrsz,.figpct,#hinterbox,
   #imgbar,#pastebar,#hfbar,#focusbar,#ovl,#readview,#pvwrap,#toast{display:none!important}
   /* #editor bleibt im normalen Fluss (position:relative, NICHT absolute): nur
@@ -1762,23 +1798,31 @@ body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)
         <aside class="side" id="side"></aside>
         <aside class="repside" id="repside"></aside>
         <div class="findbar" id="findbar">
-          <div class="fr">
-            <input type="text" id="fdQ" placeholder="Suchen">
-            <span class="cnt" id="fdCnt">—</span>
-            <button class="fb" id="fdPrev" title="Vorheriger Treffer">&lsaquo;</button>
-            <button class="fb" id="fdNext" title="Nächster Treffer (Enter)">&rsaquo;</button>
-            <button class="fb" id="fdClose" title="Schließen (Esc)">&times;</button>
+          <div class="fr fdkopf">
+            <div class="fdreiter" role="tablist"><button class="on" id="fdTabS" role="tab" aria-selected="true">Suchen</button><button id="fdTabR" role="tab" aria-selected="false">Ersetzen</button></div>
+            <div style="flex:1"></div>
+            <button class="fb" id="fdClose" title="Schließen (Esc)"><svg viewBox="0 0 24 24"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg></button>
           </div>
-          <div class="fr" id="fdRepRow" style="display:none">
-            <input type="text" id="fdR" placeholder="Ersetzen durch">
-            <button class="btn" id="fdRep">Ersetzen</button>
-            <button class="btn" id="fdRepAll">Alle</button>
+          <div class="fr">
+            <label class="fdfeld"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M7.6 9.2a3.2 3.2 0 0 1 2.4-2.4" stroke="#4A90D9" stroke-width="1.3"/><path d="m15.4 15.4 4.6 4.6"/></svg>
+              <input type="text" id="fdQ" placeholder="Suchen">
+              <span class="cnt" id="fdCnt">—</span></label>
+            <button class="fb" id="fdPrev" title="Vorheriger Treffer"><svg viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
+            <button class="fb" id="fdNext" title="Nächster Treffer (Enter)"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+          </div>
+          <div class="fr fdrep" id="fdRepRow" style="display:none">
+            <label class="fdfeld"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h12m-3-3 3 3-3 3"/><path d="M20 16H8m3-3-3 3 3 3"/></svg>
+              <input type="text" id="fdR" placeholder="Ersetzen durch"></label>
+          </div>
+          <div class="fr fdrep" id="fdRepAkt" style="display:none">
+            <div style="flex:1"></div>
+            <button class="fdbtn" id="fdRep">Einmal ersetzen</button>
+            <button class="fdbtn prim" id="fdRepAll">Alle ersetzen</button>
           </div>
           <div class="fr">
             <label class="fopt" id="fdCsLbl"><input type="checkbox" id="fdCs" style="width:auto"> Groß-/Kleinschreibung beachten</label>
             <label class="fopt" id="fdWwLbl"><input type="checkbox" id="fdWw" style="width:auto"> Nur ganze Wörter</label>
-            <div style="flex:1"></div>
-            <button class="pill" id="fdToggleRep">Ersetzen &#9662;</button>
+
           </div>
           <div class="fhint" id="fdHint"></div>
         </div>
@@ -2296,6 +2340,8 @@ en:{
   "Ersetzen durch":"Replace with",
   "Ersetzen":"Replace",
   "Alle":"All",
+  "Einmal ersetzen":"Replace once",
+  "Alle ersetzen":"Replace all",
   "Groß-/Kleinschreibung beachten":"Match case",
   "findet %1 — nicht %2":"matches %1 — not %2",
   "Nur ganze Wörter":"Whole words only",
@@ -3165,6 +3211,8 @@ fr:{
   "Ersetzen durch":"Remplacer par",
   "Ersetzen":"Remplacer",
   "Alle":"Tout",
+  "Einmal ersetzen":"Remplacer une fois",
+  "Alle ersetzen":"Tout remplacer",
   "Groß-/Kleinschreibung beachten":"Respecter la casse",
   "findet %1 — nicht %2":"trouve %1 — pas %2",
   "Nur ganze Wörter":"Mots entiers uniquement",
@@ -4034,6 +4082,8 @@ es:{
   "Ersetzen durch":"Reemplazar por",
   "Ersetzen":"Reemplazar",
   "Alle":"Todo",
+  "Einmal ersetzen":"Reemplazar una vez",
+  "Alle ersetzen":"Reemplazar todo",
   "Groß-/Kleinschreibung beachten":"Distinguir mayúsculas",
   "findet %1 — nicht %2":"encuentra %1 — no %2",
   "Nur ganze Wörter":"Solo palabras completas",
@@ -4903,6 +4953,8 @@ pt:{
   "Ersetzen durch":"Substituir por",
   "Ersetzen":"Substituir",
   "Alle":"Tudo",
+  "Einmal ersetzen":"Substituir uma vez",
+  "Alle ersetzen":"Substituir tudo",
   "Groß-/Kleinschreibung beachten":"Diferenciar maiúsculas",
   "findet %1 — nicht %2":"encontra %1 — não %2",
   "Nur ganze Wörter":"Somente palavras inteiras",
@@ -5772,6 +5824,8 @@ pl:{
   "Ersetzen durch":"Zamień na",
   "Ersetzen":"Zamień",
   "Alle":"Wszystkie",
+  "Einmal ersetzen":"Zamień raz",
+  "Alle ersetzen":"Zamień wszystkie",
   "Groß-/Kleinschreibung beachten":"Uwzględnij wielkość liter",
   "findet %1 — nicht %2":"znajduje %1 — nie %2",
   "Nur ganze Wörter":"Tylko całe wyrazy",
@@ -6641,6 +6695,8 @@ it:{
   "Ersetzen durch":"Sostituisci con",
   "Ersetzen":"Sostituisci",
   "Alle":"Tutti",
+  "Einmal ersetzen":"Sostituisci una volta",
+  "Alle ersetzen":"Sostituisci tutto",
   "Groß-/Kleinschreibung beachten":"Distingui maiuscole",
   "findet %1 — nicht %2":"trova %1 — non %2",
   "Nur ganze Wörter":"Solo parole intere",
@@ -7529,11 +7585,12 @@ function applyStaticLabels(){
   $("#fdNext").title=tr("Nächster Treffer (Enter)");
   $("#fdClose").title=tr("Schließen (Esc)");
   $("#fdR").placeholder=tr("Ersetzen durch");
-  $("#fdRep").textContent=tr("Ersetzen");
-  $("#fdRepAll").textContent=tr("Alle");
+  $("#fdRep").textContent=tr("Einmal ersetzen");
+  $("#fdRepAll").textContent=tr("Alle ersetzen");
+  $("#fdTabS").textContent=tr("Suchen");
+  $("#fdTabR").textContent=tr("Ersetzen");
   $("#fdCsLbl").lastChild.textContent=" "+tr("Groß-/Kleinschreibung beachten");
   $("#fdWwLbl").lastChild.textContent=" "+tr("Nur ganze Wörter");
-  fdRepPfeil();
   $("#focusLabel").textContent=tr("Fokusmodus");
   $("#focusOut").textContent=tr("verlassen (Esc)");
   document.documentElement.lang=S.settings.uiLang||"de";
@@ -8135,7 +8192,7 @@ function drawTools(){
       <span style="display:flex;gap:7px;margin-left:auto">
         <button class="tb" id="findBtn" title="${tr("Suchen und ersetzen (Strg+F)")}">${ICOTB(/* Glas zart blau getönt mit Lichtreflex (Toms Wahl „C“); der
           Reflex #4A90D9 hält 3:1 auf hellen und rund 5:1 auf dunklen Leisten */
-          '<circle cx="10.5" cy="10.5" r="6.5" fill="#7FA7D6" fill-opacity=".32"/><path d="M7.6 9.2a3.2 3.2 0 0 1 2.4-2.4" stroke="#4A90D9" stroke-width="1.4"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
+          '<circle cx="10.5" cy="10.5" r="6.5"/><path d="M7.6 9.2a3.2 3.2 0 0 1 2.4-2.4" stroke="#4A90D9" stroke-width="1.3"/><path d="m15.4 15.4 4.6 4.6"/>')}</button>
         <div class="sep"></div>
         <!-- Geschwungener Pfeil mit voller Spitze wie in Word (Toms Wahl „A“),
              beide in einem Kasten wie die Felder für Schrift und Größe -->
@@ -21700,8 +21757,28 @@ let fdIdx=0,fdHits=[];
 function fdClear(){
   const ed=$("#editor");if(!ed)return;
   ed.querySelectorAll(".hit").forEach(unwrap);
-  fdHits=[];
+  fdHits=[];fdMarken();
 }
+/* Striche neben dem Rollbalken für jeden Treffer, der aktuelle kräftiger.
+   Nur wenn das Dokument überhaupt rollt — sonst sieht man ohnehin alles.
+   Bei klassischen Rollbalken mit Pfeilknöpfen beginnt die Bahn erst unter
+   dem oberen Pfeil; der ist so hoch, wie der Balken breit ist. */
+function fdMarken(){
+  const pane=$("#pane");if(!pane)return;
+  let box=$("#fdMarken");
+  if(!box){box=document.createElement("div");box.id="fdMarken";pane.parentElement.appendChild(box)}
+  if(!$("#findbar").classList.contains("on")||!fdHits.length||pane.scrollHeight<=pane.clientHeight+1){box.innerHTML="";return}
+  const sb=pane.offsetWidth-pane.clientWidth,breit=sb||8,pfeil=sb>8?sb:0;
+  const h=pane.clientHeight-2*pfeil;
+  box.style.left=(pane.offsetLeft+pane.offsetWidth-breit)+"px";box.style.width=breit+"px";
+  box.style.top=(pane.offsetTop+pfeil)+"px";box.style.height=h+"px";
+  const oben=pane.getBoundingClientRect().top;
+  box.innerHTML=fdHits.map((x,i)=>{
+    const y=x.getBoundingClientRect().top-oben+pane.scrollTop;
+    return `<i${i===fdIdx?' class="cur"':""} style="top:${Math.max(0,Math.min(h-4,Math.round(y/pane.scrollHeight*h)))}px"></i>`;
+  }).join("");
+}
+window.addEventListener("resize",()=>{if(fdHits.length)fdMarken()});
 function fdRun(keepIdx){
   const ed=$("#editor");if(!ed)return;
   fdClear();
@@ -21733,6 +21810,7 @@ function fdMark(scroll){
   fdHits.forEach((h,i)=>h.classList.toggle("cur",i===fdIdx));
   $("#fdCnt").textContent=fdHits.length?`${fdIdx+1} ${OFWORD()} ${fdHits.length}`:tr("kein Treffer");
   if(scroll!==false&&fdHits[fdIdx])fdHits[fdIdx].scrollIntoView({block:"center",behavior:"smooth"});
+  fdMarken();
 }
 function fdStep(d){
   if(!fdHits.length)return;
@@ -21741,8 +21819,7 @@ function fdStep(d){
 function fdOpen(withReplace){
   if(S.mode!=="write")setMode("write");
   const bar=$("#findbar");bar.classList.add("on");
-  $("#fdRepRow").style.display=withReplace?"flex":$("#fdRepRow").style.display;
-  fdRepPfeil();fdHinweis(null);
+  fdModus(!!withReplace);fdHinweis(null);
   const sel=getSelection();
   if(sel.rangeCount&&!sel.isCollapsed){
     const t=sel.toString().trim();if(t&&t.length<60)$("#fdQ").value=t;
@@ -21834,20 +21911,16 @@ function fdHinweis(welche){
   el.addEventListener("mouseenter",an);el.addEventListener("mouseleave",aus);
   el.addEventListener("focusin",an);el.addEventListener("focusout",aus);
 });
-/* Der Pfeil zeigt den Zustand: zugeklappt nach unten, aufgeklappt nach oben.
-   Ohne ihn standen zwei Knoepfe namens "Ersetzen" nebeneinander, von denen
-   der eine ersetzt und der andere nur eine Zeile ein- und ausblendet. */
-function fdRepPfeil(){
-  const b=$("#fdToggleRep"),r=$("#fdRepRow");if(!b||!r)return;
-  b.innerHTML=tr("Ersetzen")+" "+(r.style.display==="none"?"&#9662;":"&#9652;");
+/* Reiter Suchen | Ersetzen: Ersetzen blendet das Feld und die beiden
+   Knöpfe „Einmal ersetzen“/„Alle ersetzen“ ein. Strg+F öffnet Suchen,
+   Strg+H Ersetzen, wie in Word. */
+function fdModus(ersetzen){
+  ["fdRepRow","fdRepAkt"].forEach(id=>{$("#"+id).style.display=ersetzen?"flex":"none"});
+  [["fdTabS",!ersetzen],["fdTabR",ersetzen]].forEach(([id,an])=>{
+    const b=$("#"+id);b.classList.toggle("on",an);b.setAttribute("aria-selected",an?"true":"false")});
 }
-$("#fdToggleRep").onclick=()=>{
-  const r=$("#fdRepRow");
-  const auf=r.style.display==="none";
-  r.style.display=auf?"flex":"none";
-  fdRepPfeil();
-  if(auf)$("#fdR").focus();
-};
+$("#fdTabS").onclick=()=>{fdModus(false);$("#fdQ").focus()};
+$("#fdTabR").onclick=()=>{fdModus(true);($("#fdQ").value?$("#fdR"):$("#fdQ")).focus()};
 
 /* ================= Schrägstrich-Menü ================= */
 const SLASH=[
@@ -23793,8 +23866,8 @@ from the third onwards are they reduced — and then to two, not to one.</p>`},
 <p>A bar appears at the top of the page. It counts the matches and steps through them with
 <kbd>Enter</kbd> or the arrows. Two options narrow the search: <b>match case</b> and
 <b>whole word</b>.</p>
-<p>Replace acts on the current match; <b>All</b> replaces every one of them. <kbd>Esc</kbd>
-closes the bar.</p>`},
+<p>The <b>Replace</b> tab adds a second field: <b>Replace once</b> acts on the current match,
+<b>Replace all</b> on every one of them. <kbd>Esc</kbd> closes the bar.</p>`},
 
  {t:"Reading view and focus mode",k:"reading view;read;distraction free;focus mode",b:`
 <p><b>Reading view</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) hides the whole
@@ -24391,8 +24464,8 @@ unangetastet; erst ab dem dritten wird gekürzt — und dann auf zwei, nicht auf
 oder den Pfeilen durch sie hindurch. Zwei Schalter engen die Suche ein: <b>Groß-/Kleinschreibung
 beachten</b> und <b>Nur ganze Wörter</b>. Wer mit dem Zeiger darauf verweilt, bekommt ein
 Beispiel aus dem eigenen Suchbegriff gezeigt.</p>
-<p>Ersetzen wirkt auf den aktuellen Treffer; <b>Alle</b> ersetzt sämtliche. <kbd>Esc</kbd>
-schließt die Leiste.</p>`},
+<p>Der Reiter <b>Ersetzen</b> blendet ein zweites Feld ein: <b>Einmal ersetzen</b> wirkt auf den
+aktuellen Treffer, <b>Alle ersetzen</b> auf sämtliche. <kbd>Esc</kbd> schließt die Leiste.</p>`},
 
  {t:"Leseansicht und Fokusmodus",k:"leseansicht;lesen;ablenkungsfrei;fokusmodus",b:`
 <p>Die <b>Leseansicht</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>B</kbd>) blendet die ganze
@@ -24997,8 +25070,8 @@ están; solo a partir del tercero se reducen, y entonces a dos, no a uno.</p>`},
 <p>Aparece una barra en la parte superior de la página. Cuenta las coincidencias y las recorre
 con <kbd>Intro</kbd> o las flechas. Dos opciones acotan la búsqueda: <b>distinguir
 mayúsculas</b> y <b>palabra completa</b>.</p>
-<p>Reemplazar actúa sobre la coincidencia actual; <b>Todo</b> las reemplaza todas.
-<kbd>Esc</kbd> cierra la barra.</p>`},
+<p>La pestaña <b>Reemplazar</b> añade un segundo campo: <b>Reemplazar una vez</b> actúa sobre la
+coincidencia actual, <b>Reemplazar todo</b> sobre todas. <kbd>Esc</kbd> cierra la barra.</p>`},
 
  {t:"Vista de lectura y modo concentración",k:"vista de lectura;leer;sin distracciones;modo enfoque",b:`
 <p><b>Vista de lectura</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>B</kbd>) oculta toda la interfaz
@@ -25600,8 +25673,8 @@ paz; só a partir do terceiro é que são reduzidos, e então para dois, não pa
 <p>Aparece uma barra no alto da página. Ela conta as ocorrências e passa por elas com
 <kbd>Enter</kbd> ou as setas. Duas opções restringem a busca: <b>diferenciar
 maiúsculas/minúsculas</b> e <b>palavra inteira</b>.</p>
-<p>Substituir age sobre a ocorrência atual; <b>Tudo</b> substitui todas elas. <kbd>Esc</kbd>
-fecha a barra.</p>`},
+<p>A aba <b>Substituir</b> mostra um segundo campo: <b>Substituir uma vez</b> age sobre a
+ocorrência atual, <b>Substituir tudo</b> sobre todas. <kbd>Esc</kbd> fecha a barra.</p>`},
 
  {t:"Modo de leitura e modo de foco",k:"modo de leitura;ler;sem distrações;modo de foco",b:`
 <p><b>Modo de leitura</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) esconde a interface
@@ -26226,8 +26299,8 @@ un.</p>`},
 <p>Une barre apparaît en haut de la page. Elle compte les correspondances et les parcourt avec
 <kbd>Entrée</kbd> ou les flèches. Deux options restreignent la recherche : <b>respecter la
 casse</b> et <b>mot entier</b>.</p>
-<p>Remplacer agit sur la correspondance courante ; <b>Tout</b> les remplace toutes.
-<kbd>Échap</kbd> ferme la barre.</p>`},
+<p>L'onglet <b>Remplacer</b> ajoute un second champ : <b>Remplacer une fois</b> agit sur la
+correspondance courante, <b>Tout remplacer</b> sur toutes. <kbd>Échap</kbd> ferme la barre.</p>`},
 
  {t:"Vue de lecture et mode focus",k:"vue de lecture;lire;sans distraction;mode focus",b:`
 <p><b>La vue de lecture</b> (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>B</kbd>) masque toute l'interface
@@ -26826,8 +26899,8 @@ spokoju; dopiero od trzeciego są redukowane — i to do dwóch, nie do jednego.
 <p>U góry strony pojawia się pasek. Liczy dopasowania i przechodzi przez nie za pomocą
 <kbd>Enter</kbd> lub strzałek. Dwie opcje zawężają wyszukiwanie: <b>uwzględnij wielkość
 liter</b> i <b>całe słowo</b>.</p>
-<p>Zamiana działa na bieżącym dopasowaniu; <b>Wszystko</b> zamienia je wszystkie. <kbd>Esc</kbd>
-zamyka pasek.</p>`},
+<p>Karta <b>Zamień</b> dodaje drugie pole: <b>Zamień raz</b> działa na bieżącym dopasowaniu,
+<b>Zamień wszystkie</b> na wszystkich. <kbd>Esc</kbd> zamyka pasek.</p>`},
 
  {t:"Widok czytania i tryb skupienia",k:"widok czytania;czytanie;bez rozpraszaczy;tryb skupienia",b:`
 <p><b>Widok czytania</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>) ukrywa cały interfejs i
@@ -27434,8 +27507,8 @@ solo dal terzo in poi vengono ridotti — e allora a due, non a uno.</p>`},
 <p>In cima alla pagina compare una barra. Conta le corrispondenze e le percorre con
 <kbd>Invio</kbd> o le frecce. Due opzioni restringono la ricerca: <b>maiuscole/minuscole</b> e
 <b>parola intera</b>.</p>
-<p>Sostituisci agisce sulla corrispondenza corrente; <b>Tutti</b> le sostituisce tutte.
-<kbd>Esc</kbd> chiude la barra.</p>`},
+<p>La scheda <b>Sostituisci</b> aggiunge un secondo campo: <b>Sostituisci una volta</b> agisce
+sulla corrispondenza corrente, <b>Sostituisci tutto</b> su tutte. <kbd>Esc</kbd> chiude la barra.</p>`},
 
  {t:"Modalità lettura e modalità concentrazione",k:"modalità lettura;leggere;senza distrazioni;modalità concentrazione",b:`
 <p><b>La modalità lettura</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>B</kbd>) nasconde l'intera

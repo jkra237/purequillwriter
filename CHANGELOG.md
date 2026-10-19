@@ -47,6 +47,18 @@ immer genau einen Commit, der sie anfasst.
 
 ### Geändert
 
+- **Suchen und Ersetzen neu gestaltet** (Toms Wahl „B“, wie Google Docs):
+  runde Felder mit Lupe und Zähler im Feld, runde Pfeil-/Schließen-Knöpfe,
+  oben Reiter „Suchen | Ersetzen“ wie im Word-Dialog (Toms Wahl „A“; vorher
+  klappte ein unauffälliger Textknopf „Ersetzen ▾“ die Zeile auf). Der
+  Reiter Ersetzen blendet ein Feld und die Knöpfe „Einmal ersetzen“ und
+  „Alle ersetzen“ ein (Toms Benennung; vorher „Ersetzen“/„Alle“), der zweite
+  hervorgehoben (Schrift in Papierfarbe, hält in allen 17 Schemata 4,5:1).
+  Strg+F öffnet Suchen, Strg+H Ersetzen. Gleitet beim Öffnen herein.
+  Treffer-Marken neben dem Rollbalken (`fdMarken`). Behoben: die
+  allgemeine `.hit`-Regel der Trefferlisten gab auch den Treffern im Text
+  Innenabstand und Linie — der Text rutschte beim Suchen; aktueller Treffer
+  jetzt orange mit Rand wie in Chrome.
 - **Einstellungen-Symbol als Zahnrad, das sich dreht** (Toms Wahl „D“ aus
   vier Entwürfen): echtes Zahnrad mit acht Zähnen wie in Windows und Word
   statt der Sonne mit Strahlen, Nabe gefüllt in der Farbe des Symbols (erst blau wie die Lupe, Tom wollte schwarz). Beim
@@ -58,9 +70,10 @@ immer genau einen Commit, der sie anfasst.
   Koralle `#E07052`, wie der Radierer — das Symbol stand als einziges der
   Einfügen-Gruppe ganz grau neben dem farbigen Bild. Der Ton hält 3:1 auf
   hellen und rund 5:1 auf dunklen Leisten.
-- **Lupe (Suchen und ersetzen) mit Farbakzent** (Toms Wahl „C“): Glas zart
-  blau getönt, dazu ein kleiner Lichtreflex in `#4A90D9` — macht die Lupe
-  als Glas lesbar. Kontrast wie beim Seitenumbruch.
+- **Lupe (Suchen und ersetzen) mit Farbakzent** (Toms Wahl „C“): ein kleiner
+  Lichtreflex in `#4A90D9` macht die Lupe als Glas lesbar. Die blaue
+  Tönung des Glases ist wieder heraus (Tom: sprang zu sehr heraus, Fassung
+  „B · nur Glanz“), auch bei der Lupe im Suchfeld.
 - **Rückgängig/Wiederholen als geschwungene Pfeile mit voller Spitze**, wie
   in Word (Toms Wahl „A“; eine Uhr im Pfeilbogen war im Gespräch), und
   beide in einem gemeinsamen Kasten im Rahmen der Felder für Schrift und
