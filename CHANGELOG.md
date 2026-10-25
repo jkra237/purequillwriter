@@ -124,6 +124,11 @@ immer genau einen Commit, der sie anfasst.
   Angabe gilt in allen Lesern „einfach“ wie in Word. check-umlauf prüft das
   neue Merkmal mit (43/43 in allen vier Wegen, auch mit LibreOffice).
   Hilfe „Absätze und Überschriften“ und Tastenkürzel in 7 Sprachen.
+  Nachgebessert (Toms Fund: über Format › Zeilenabstand tat sich nichts):
+  stand die Schreibmarke nicht in einem Absatz (nach dem Laden, oder
+  gemerkt am Dokument selbst), fand der Befehl keinen und meldete irreführend
+  „Nur im Schreibmodus“. Jetzt gilt wie in Word die zuletzt gemerkte Stelle,
+  sonst der Absatz dort bzw. der erste; sonst „Zuerst in einen Absatz klicken.“
 - **Word-Dateien sehen aus wie in Word: Symbole in der Zeile, eigene
   Tabstopps, Absatzlinien, Laufweite, Listeneinzug, Abstände** (Toms Fund an
   seinem Lebenslauf: „viele Formatoptionen, die Word korrekt anzeigt, werden

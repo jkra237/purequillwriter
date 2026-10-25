@@ -2407,6 +2407,7 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Zuerst in einen Absatz klicken.":"Click into a paragraph first.",
   "Zeilen- und Absatzabstand":"Line and Paragraph Spacing",
   "Zeilenabstandsoptionen…":"Line Spacing Options…",
   "Abstand vor Absatz entfernen":"Remove Space Before Paragraph",
@@ -3366,6 +3367,7 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Zuerst in einen Absatz klicken.":"Cliquez d'abord dans un paragraphe.",
   "Zeilen- und Absatzabstand":"Interligne et espacement de paragraphe",
   "Zeilenabstandsoptionen…":"Options d'interligne…",
   "Abstand vor Absatz entfernen":"Supprimer l'espace avant le paragraphe",
@@ -4325,6 +4327,7 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Zuerst in einen Absatz klicken.":"Haz clic primero en un párrafo.",
   "Zeilen- und Absatzabstand":"Espaciado entre líneas y párrafos",
   "Zeilenabstandsoptionen…":"Opciones de interlineado…",
   "Abstand vor Absatz entfernen":"Quitar espacio antes del párrafo",
@@ -5284,6 +5287,7 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Zuerst in einen Absatz klicken.":"Clique primeiro em um parágrafo.",
   "Zeilen- und Absatzabstand":"Espaçamento de Linha e Parágrafo",
   "Zeilenabstandsoptionen…":"Opções de Espaçamento de Linha…",
   "Abstand vor Absatz entfernen":"Remover Espaço Antes do Parágrafo",
@@ -6243,6 +6247,7 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Zuerst in einen Absatz klicken.":"Najpierw kliknij w akapit.",
   "Zeilen- und Absatzabstand":"Odstępy między wierszami i akapitami",
   "Zeilenabstandsoptionen…":"Opcje interlinii…",
   "Abstand vor Absatz entfernen":"Usuń odstęp przed akapitem",
@@ -7202,6 +7207,7 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Zuerst in einen Absatz klicken.":"Fai prima clic in un paragrafo.",
   "Zeilen- und Absatzabstand":"Interlinea e spaziatura paragrafo",
   "Zeilenabstandsoptionen…":"Opzioni interlinea…",
   "Abstand vor Absatz entfernen":"Rimuovi spazio prima del paragrafo",
@@ -9732,7 +9738,21 @@ function absatzFormatSetzen(el,f,groesse){
    Markierung der mit der Schreibmarke; in Listen die Einträge */
 function absatzZiele(){
   const ed=$("#editor");if(!ed||S.mode!=="write")return[];
-  const sel=getSelection();if(!sel.rangeCount)return[];
+  /* Steht die Schreibmarke gerade nicht im Text (nach dem Laden, nach einem
+     Feld), gilt wie in Word die zuletzt gemerkte Stelle, sonst der Anfang */
+  const sel=getSelection();
+  if(!(sel.rangeCount&&ed.contains(sel.anchorNode))){
+    let r0=letzteEdRange&&ed.contains(letzteEdRange.startContainer)?letzteEdRange.cloneRange():null;
+    if(!r0&&ed.firstElementChild){r0=document.createRange();r0.selectNodeContents(ed.firstElementChild);r0.collapse(true)}
+    if(r0){sel.removeAllRanges();sel.addRange(r0)}
+  }
+  if(!sel.rangeCount)return[];
+  /* Steht die Marke am Dokument selbst statt in einem Absatz (nach dem Laden),
+     gilt der Absatz an dieser Stelle */
+  if(sel.anchorNode===ed&&ed.children.length){
+    const k=ed.children[Math.min(sel.anchorOffset,ed.children.length-1)],r1=document.createRange();
+    r1.selectNodeContents(k);r1.collapse(true);sel.removeAllRanges();sel.addRange(r1);
+  }
   const r=sel.getRangeAt(0);
   let a=sel.anchorNode;a=a&&a.nodeType===1?a:a&&a.parentElement;
   const out=[];
@@ -9788,7 +9808,7 @@ function zabTun(ziele,a){
 function zabMenue(btn){
   if($("#zabmenu")){closeMenu();return}
   closeMenu();
-  const ziele=absatzZiele();if(!ziele.length){toast(tr("Nur im Schreibmodus"));return}
+  const ziele=absatzZiele();if(!ziele.length){toast(tr(S.mode==="write"?"Zuerst in einen Absatz klicken.":"Nur im Schreibmodus"));return}
   const m=document.createElement("div");m.className="menu ctx";m.id="zabmenu";
   m.innerHTML=zabEintraege(ziele).map(it=>it.sep?'<div class="msep"></div>':
     `<button class="mi" data-zab="${it.a}"><span class="chk">${it.cur?"✓":""}</span>${it.label}</button>`).join("");
@@ -9801,7 +9821,7 @@ function zabMenue(btn){
    Maß, Vorschau; „Als Standard festlegen“ macht die Abstände zur Vorgabe
    des Dokuments (wie Words Formatvorlage Standard) */
 function absatzDialog(ziele){
-  ziele=ziele||absatzZiele();if(!ziele.length){toast(tr("Nur im Schreibmodus"));return}
+  ziele=ziele||absatzZiele();if(!ziele.length){toast(tr(S.mode==="write"?"Zuerst in einen Absatz klicken.":"Nur im Schreibmodus"));return}
   closeMenu();
   const w=absatzWirkung(ziele[0]);
   const zoll=unitOf()==="in",eh=zoll?"in":"cm",ptJe=zoll?72:72/2.54;
@@ -19293,7 +19313,7 @@ function formatMenu(){
     });
     /* Wie Words Knopf „Zeilen- und Absatzabstand“; wirkt auf die markierten
        Absätze, nicht mehr aufs ganze Dokument (das geht mit Strg+A) */
-    if(a==="lh"){const ziele=absatzZiele();if(!ziele.length){closeMenu();toast(tr("Nur im Schreibmodus"));return}
+    if(a==="lh"){const ziele=absatzZiele();if(!ziele.length){closeMenu();toast(tr(S.mode==="write"?"Zuerst in einen Absatz klicken.":"Nur im Schreibmodus"));return}
       return openSubMenu(b,zabEintraege(ziele),sub=>zabTun(ziele,sub));}
     if(a==="absatz"){const ziele=absatzZiele();closeMenu();absatzDialog(ziele);return}
     /* Ohne Zitat an der Schreibmarke steht nirgends ein Haken — ein Klick legt
