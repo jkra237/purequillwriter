@@ -110,6 +110,8 @@ try {
      +'<h3>Abschnitt Drei</h3>'
      +'<h4>Abschnitt Vier</h4><p>Text unter vier.</p>'
      +'<p>Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“</p>'
+     /* Absatzformat je Absatz (seit 2026-10-25): Zeilenabstand Mehrfach und Genau, Abstand vor, Einzug rechts */
+     +'<p data-zab="a2" style="line-height:calc(var(--lhn,1.2) * 2);padding-top:calc(12pt * var(--zoom,1));margin-right:2em">Absatzformat doppelt.</p><p data-zab="g18" style="line-height:calc(18pt * var(--zoom,1))">Absatzformat genau.</p>'
      +'<hr><p>Zwischen Linien.</p><hr data-linie="dick"><p>Zwischen Linien.</p><hr data-linie="doppelt"><p>Zwischen Linien.</p><hr data-linie="punkte">'
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
@@ -161,7 +163,7 @@ try {
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
        "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
-       "Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
+       "Absatzformat":[...t.querySelectorAll("[data-zab]")].map(e=>e.dataset.zab+(e.style.paddingTop?" vor":"")+(e.style.marginRight?" re":"")).join("/")||"-","Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",
        "freies Bild":[...t.querySelectorAll("figure.free")].map(f=>"S"+(+f.dataset.fpage+1)+" "+f.dataset.fx+"/"+f.dataset.fy+" "+f.dataset.fw+"x"+f.dataset.fh+" "+(f.dataset.lage||"vor")).join(" ")||"-"}};

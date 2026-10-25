@@ -494,6 +494,33 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 #editor .pgspalt{white-space:nowrap}
 #editor .pgspalt-h{display:inline-block;width:0;vertical-align:baseline;user-select:none}
 .wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
+/* Dialog „Absatz“ wie in Word */
+.abdlg{width:min(560px,94vw)}
+.abreiter{display:flex;gap:2px;padding:0 18px;border-bottom:1px solid var(--rule)}
+.abreiter span{padding:6px 12px;font-size:13px;border:1px solid var(--rule);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;background:var(--paper);margin-bottom:-1px}
+.abgr{font-size:12.5px;font-weight:600;color:var(--ink);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid var(--rule)}
+.abgr:first-child{margin-top:4px}
+.abzeile{display:flex;align-items:center;gap:10px;font-size:13px}
+.abzeile select{width:170px}
+.abraster{display:grid;grid-template-columns:auto 130px auto 1fr;gap:7px 12px;align-items:center;font-size:13px}
+.abraster select{width:100%}
+.abfeld{display:inline-flex;align-items:center;gap:5px}
+.abfeld input{width:78px!important}
+.abfeld i{font-style:normal;color:var(--ink-soft);font-size:12px;min-width:22px}
+.abvor{border:1px solid var(--rule);background:var(--paper);padding:10px 14px;height:118px;overflow:hidden}
+.abv{display:block}
+.abv i{display:block;height:3px;border-radius:1px}
+.abv.grau i{margin-bottom:3px}
+.abfuss{align-items:center}
+.abwahl{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:13px}
+.abwahl input{width:auto}
+/* Eigene Tabstopps aus Word (data-tabs am Absatz): tabsSetzen() gibt dem
+   Tab seine Breite bis zum nächsten Stopp */
+.wtab[style*="width"]{display:inline-block;overflow:visible}
+/* Kleine Bilder in der Zeile (Symbole vor Telefon, Mail …) wie in Word */
+img.inlbild{display:inline;vertical-align:baseline;max-width:none}
+/* Farbe der Aufzählungszeichen aus Word */
+:is(#editor,.pvedit,.rinner) [style*="--marker"]>li::marker{color:var(--marker)}
 /* Fußnotenfläche am unteren Seitenrand, wie in Word/Lotus Word Pro: eine
    kurze Trennlinie, darunter die Fußnoten dieser Seite. Sitzt direkt über
    der ganz normalen Fußzeilen-Reserve (bottom:mb) - dieselbe Höhe, die auch
@@ -2380,6 +2407,38 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Zeilen- und Absatzabstand":"Line and Paragraph Spacing",
+  "Zeilenabstandsoptionen…":"Line Spacing Options…",
+  "Abstand vor Absatz entfernen":"Remove Space Before Paragraph",
+  "Abstand vor Absatz hinzufügen":"Add Space Before Paragraph",
+  "Abstand nach Absatz entfernen":"Remove Space After Paragraph",
+  "Abstand nach Absatz hinzufügen":"Add Space After Paragraph",
+  "Absatz…":"Paragraph…",
+  "Einzüge und Abstände":"Indents and Spacing",
+  "Ausrichtung:":"Alignment:",
+  "Einzug":"Indentation",
+  "Links:":"Left:",
+  "Rechts:":"Right:",
+  "Sondereinzug:":"Special:",
+  "(ohne)":"(none)",
+  "Erste Zeile":"First line",
+  "Hängend":"Hanging",
+  "Um:":"By:",
+  "Vor:":"Before:",
+  "Nach:":"After:",
+  "Zeilenabstand:":"Line spacing:",
+  "Maß:":"At:",
+  "1,5 Zeilen":"1.5 lines",
+  "Doppelt":"Double",
+  "Genau":"Exactly",
+  "Mehrfach":"Multiple",
+  "Pt.":"pt",
+  "Vorschau":"Preview",
+  "Als Standard festlegen":"Set As Default",
+  "OK":"OK",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"Do you want to set the default paragraph settings to:",
+  "Nur dieses Dokument":"This document only",
+  "Alle neuen Dokumente":"All new documents",
   "Duplizieren":"Duplicate",
   "Dokument duplizieren":"Duplicate document",
   "Kopie":"Copy",
@@ -3307,6 +3366,38 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Zeilen- und Absatzabstand":"Interligne et espacement de paragraphe",
+  "Zeilenabstandsoptionen…":"Options d'interligne…",
+  "Abstand vor Absatz entfernen":"Supprimer l'espace avant le paragraphe",
+  "Abstand vor Absatz hinzufügen":"Ajouter un espace avant le paragraphe",
+  "Abstand nach Absatz entfernen":"Supprimer l'espace après le paragraphe",
+  "Abstand nach Absatz hinzufügen":"Ajouter un espace après le paragraphe",
+  "Absatz…":"Paragraphe…",
+  "Einzüge und Abstände":"Retrait et espacement",
+  "Ausrichtung:":"Alignement :",
+  "Einzug":"Retrait",
+  "Links:":"Gauche :",
+  "Rechts:":"Droite :",
+  "Sondereinzug:":"De 1re ligne :",
+  "(ohne)":"(aucun)",
+  "Erste Zeile":"Positif",
+  "Hängend":"Négatif",
+  "Um:":"De :",
+  "Vor:":"Avant :",
+  "Nach:":"Après :",
+  "Zeilenabstand:":"Interligne :",
+  "Maß:":"De :",
+  "1,5 Zeilen":"1,5 ligne",
+  "Doppelt":"Double",
+  "Genau":"Exactement",
+  "Mehrfach":"Multiple",
+  "Pt.":"pt",
+  "Vorschau":"Aperçu",
+  "Als Standard festlegen":"Définir par défaut",
+  "OK":"OK",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"Voulez-vous définir les paramètres de paragraphe par défaut sur :",
+  "Nur dieses Dokument":"Ce document uniquement",
+  "Alle neuen Dokumente":"Tous les nouveaux documents",
   "Duplizieren":"Dupliquer",
   "Dokument duplizieren":"Dupliquer le document",
   "Kopie":"copie",
@@ -4234,6 +4325,38 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Zeilen- und Absatzabstand":"Espaciado entre líneas y párrafos",
+  "Zeilenabstandsoptionen…":"Opciones de interlineado…",
+  "Abstand vor Absatz entfernen":"Quitar espacio antes del párrafo",
+  "Abstand vor Absatz hinzufügen":"Agregar espacio antes del párrafo",
+  "Abstand nach Absatz entfernen":"Quitar espacio después del párrafo",
+  "Abstand nach Absatz hinzufügen":"Agregar espacio después del párrafo",
+  "Absatz…":"Párrafo…",
+  "Einzüge und Abstände":"Sangría y espacio",
+  "Ausrichtung:":"Alineación:",
+  "Einzug":"Sangría",
+  "Links:":"Izquierda:",
+  "Rechts:":"Derecha:",
+  "Sondereinzug:":"Especial:",
+  "(ohne)":"(ninguna)",
+  "Erste Zeile":"Primera línea",
+  "Hängend":"Francesa",
+  "Um:":"En:",
+  "Vor:":"Anterior:",
+  "Nach:":"Posterior:",
+  "Zeilenabstand:":"Interlineado:",
+  "Maß:":"En:",
+  "1,5 Zeilen":"1,5 líneas",
+  "Doppelt":"Doble",
+  "Genau":"Exacto",
+  "Mehrfach":"Múltiple",
+  "Pt.":"pto",
+  "Vorschau":"Vista previa",
+  "Als Standard festlegen":"Establecer como predeterminado",
+  "OK":"Aceptar",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"¿Desea establecer la configuración de párrafo predeterminada en:",
+  "Nur dieses Dokument":"Solo este documento",
+  "Alle neuen Dokumente":"Todos los documentos nuevos",
   "Duplizieren":"Duplicar",
   "Dokument duplizieren":"Duplicar documento",
   "Kopie":"copia",
@@ -5161,6 +5284,38 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Zeilen- und Absatzabstand":"Espaçamento de Linha e Parágrafo",
+  "Zeilenabstandsoptionen…":"Opções de Espaçamento de Linha…",
+  "Abstand vor Absatz entfernen":"Remover Espaço Antes do Parágrafo",
+  "Abstand vor Absatz hinzufügen":"Adicionar Espaço Antes do Parágrafo",
+  "Abstand nach Absatz entfernen":"Remover Espaço Depois do Parágrafo",
+  "Abstand nach Absatz hinzufügen":"Adicionar Espaço Depois do Parágrafo",
+  "Absatz…":"Parágrafo…",
+  "Einzüge und Abstände":"Recuos e espaçamento",
+  "Ausrichtung:":"Alinhamento:",
+  "Einzug":"Recuo",
+  "Links:":"Esquerda:",
+  "Rechts:":"Direita:",
+  "Sondereinzug:":"Especial:",
+  "(ohne)":"(nenhum)",
+  "Erste Zeile":"Primeira linha",
+  "Hängend":"Deslocamento",
+  "Um:":"Por:",
+  "Vor:":"Antes:",
+  "Nach:":"Depois:",
+  "Zeilenabstand:":"Espaçamento entre linhas:",
+  "Maß:":"Em:",
+  "1,5 Zeilen":"1,5 linha",
+  "Doppelt":"Duplo",
+  "Genau":"Exatamente",
+  "Mehrfach":"Múltiplos",
+  "Pt.":"pt",
+  "Vorschau":"Visualização",
+  "Als Standard festlegen":"Definir como Padrão",
+  "OK":"OK",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"Deseja definir as configurações padrão de parágrafo para:",
+  "Nur dieses Dokument":"Somente este documento",
+  "Alle neuen Dokumente":"Todos os documentos novos",
   "Duplizieren":"Duplicar",
   "Dokument duplizieren":"Duplicar documento",
   "Kopie":"cópia",
@@ -6088,6 +6243,38 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Zeilen- und Absatzabstand":"Odstępy między wierszami i akapitami",
+  "Zeilenabstandsoptionen…":"Opcje interlinii…",
+  "Abstand vor Absatz entfernen":"Usuń odstęp przed akapitem",
+  "Abstand vor Absatz hinzufügen":"Dodaj odstęp przed akapitem",
+  "Abstand nach Absatz entfernen":"Usuń odstęp po akapicie",
+  "Abstand nach Absatz hinzufügen":"Dodaj odstęp po akapicie",
+  "Absatz…":"Akapit…",
+  "Einzüge und Abstände":"Wcięcia i odstępy",
+  "Ausrichtung:":"Wyrównanie:",
+  "Einzug":"Wcięcia",
+  "Links:":"Od lewej:",
+  "Rechts:":"Od prawej:",
+  "Sondereinzug:":"Specjalne:",
+  "(ohne)":"(brak)",
+  "Erste Zeile":"Pierwszy wiersz",
+  "Hängend":"Wysunięcie",
+  "Um:":"O:",
+  "Vor:":"Przed:",
+  "Nach:":"Po:",
+  "Zeilenabstand:":"Interlinia:",
+  "Maß:":"Co:",
+  "1,5 Zeilen":"1,5 wiersza",
+  "Doppelt":"Podwójne",
+  "Genau":"Dokładnie",
+  "Mehrfach":"Wielokrotne",
+  "Pt.":"pkt",
+  "Vorschau":"Podgląd",
+  "Als Standard festlegen":"Ustaw jako domyślne",
+  "OK":"OK",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"Czy chcesz ustawić domyślne ustawienia akapitu dla:",
+  "Nur dieses Dokument":"Tylko ten dokument",
+  "Alle neuen Dokumente":"Wszystkie nowe dokumenty",
   "Duplizieren":"Duplikuj",
   "Dokument duplizieren":"Duplikuj dokument",
   "Kopie":"kopia",
@@ -7015,6 +7202,38 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Zeilen- und Absatzabstand":"Interlinea e spaziatura paragrafo",
+  "Zeilenabstandsoptionen…":"Opzioni interlinea…",
+  "Abstand vor Absatz entfernen":"Rimuovi spazio prima del paragrafo",
+  "Abstand vor Absatz hinzufügen":"Aggiungi spazio prima del paragrafo",
+  "Abstand nach Absatz entfernen":"Rimuovi spazio dopo il paragrafo",
+  "Abstand nach Absatz hinzufügen":"Aggiungi spazio dopo il paragrafo",
+  "Absatz…":"Paragrafo…",
+  "Einzüge und Abstände":"Rientri e spaziatura",
+  "Ausrichtung:":"Allineamento:",
+  "Einzug":"Rientro",
+  "Links:":"Sinistro:",
+  "Rechts:":"Destro:",
+  "Sondereinzug:":"Speciale:",
+  "(ohne)":"(nessuno)",
+  "Erste Zeile":"Prima riga",
+  "Hängend":"Sporgente",
+  "Um:":"Rientra di:",
+  "Vor:":"Prima:",
+  "Nach:":"Dopo:",
+  "Zeilenabstand:":"Interlinea:",
+  "Maß:":"Valore:",
+  "1,5 Zeilen":"1,5 righe",
+  "Doppelt":"Doppia",
+  "Genau":"Esatta",
+  "Mehrfach":"Multipla",
+  "Pt.":"pt",
+  "Vorschau":"Anteprima",
+  "Als Standard festlegen":"Imposta come predefinito",
+  "OK":"OK",
+  "Möchten Sie die Standardeinstellungen für Absätze ändern in:":"Impostare le impostazioni predefinite del paragrafo per:",
+  "Nur dieses Dokument":"Solo questo documento",
+  "Alle neuen Dokumente":"Tutti i nuovi documenti",
   "Duplizieren":"Duplica",
   "Dokument duplizieren":"Duplica documento",
   "Kopie":"copia",
@@ -8582,6 +8801,8 @@ function drawTools(){
       <button class="tb" data-cmd="justifyCenter" title="${tr("Zentriert")}">${ICOTB('<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyRight" title="${tr("Rechtsbündig (Alt+⇧+R)")}">${ICOTB('<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>')}</button>
       <button class="tb" data-cmd="justifyFull" title="${tr("Blocksatz")}">${ICOTB('<path d="M4 6h16M4 11h16M4 16h16M4 21h16"/>')}</button>
+      <!-- Zeilen- und Absatzabstand wie in Word: Zeilen mit Doppelpfeil -->
+      <button class="tb" id="zabBtn" title="${tr("Zeilen- und Absatzabstand")}" aria-label="${tr("Zeilen- und Absatzabstand")}" aria-haspopup="menu">${ICOTB('<path d="M11 6h9M11 10.5h9M11 15h9M11 19.5h9"/><path d="M5.5 5v14.5"/><path d="M3 7.5 5.5 5 8 7.5M3 17 5.5 19.5 8 17"/>')}</button>
       <div class="sep"></div>
       <button class="tb" id="imgBtn" title="${tr("Bild einfügen")}"><svg viewBox="0 0 24 24"
         style="width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round">
@@ -8682,6 +8903,8 @@ function drawWrite(){
   ed.style.fontFamily=schriftStapel(d.font||S.settings.font);
   ed.style.setProperty("--fs",(d.size||S.settings.size)+"pt");
   ed.style.setProperty("--lh",lhOf(d)*lhNatur(d.font||S.settings.font));
+  /* Natürliche Zeilenhöhe der Schrift für den Zeilenabstand je Absatz */
+  ed.style.setProperty("--lhn",lhNatur(d.font||S.settings.font));
   ed.style.setProperty("--ps",psOf(d)+"em");
   if(S.fitPage!==false)fitZoom();
   $("#paper").style.setProperty("--zoom",S.zoom);
@@ -8983,6 +9206,7 @@ function flush(){const ed=$("#editor");if(ed&&ed.dataset.docId===S.active){const
   c.querySelectorAll(".fhwrap").forEach(w=>w.remove());
   c.querySelectorAll(":scope > .enliste").forEach(w=>w.remove());
   c.querySelectorAll("tr.pgzeile").forEach(w=>w.remove());
+  c.querySelectorAll(".wtab[style]").forEach(w=>w.removeAttribute("style"));
   pgliWeg(c);
   pgspaltWeg(c);
   c.querySelectorAll(".hit,.glossterm,.spellerr,.cleanerr").forEach(s=>{
@@ -9053,7 +9277,7 @@ function ganzesDokument(art,wert){
   const d=doc(),ed=$("#editor");if(!ed)return;
   const pos=textPos(ed);
   schriftAuszeichnungWeg(ed,art);
-  if(art==="font"){d.font=wert;ed.style.fontFamily=schriftStapel(wert);ed.style.setProperty("--lh",lhOf(d)*lhNatur(wert))}
+  if(art==="font"){d.font=wert;ed.style.fontFamily=schriftStapel(wert);ed.style.setProperty("--lh",lhOf(d)*lhNatur(wert));ed.style.setProperty("--lhn",lhNatur(wert))}
   else{d.size=wert;ed.style.setProperty("--fs",wert+"pt")}
   setzeTextPos(ed,pos);
   flush();dirty=true;commit();drawTools();queuePaginate();drawStatus();
@@ -9456,6 +9680,226 @@ function selectedBlocks(){
   const out=[...ed.children].filter(b=>{try{return r.intersectsNode(b)}catch(e){return false}});
   if(out.length)return out;
   const b=curBlock();return b?[b]:[];
+}
+/* ================= Absatzformat wie in Word =================
+   Je Absatz statt fürs ganze Dokument (Toms Wunsch, „exakt wie Word“):
+   Einzug links/rechts/erste Zeile, Abstand vor/nach, Zeilenabstand als
+   Mehrfach, Genau oder Mindestens. Steht als Inline-CSS am Block, der
+   Zeilenabstand zusätzlich als data-zab („a1.5“ Mehrfach, „g12“ Genau in
+   pt, „m12“ Mindestens in pt), weil CSS das Gemeinte nicht zurückverrät.
+   Einzüge in em zur Grundgröße wie beim Einrücken, Abstände in pt. Abstand
+   vor als padding-top: CSS legt Ränder übereinander, Word zählt sie
+   zusammen (mit Rand oben als margin-top, sonst stünde er im Rahmen).
+   Ohne Angabe gilt, was das Dokument vorgibt (d.lh, d.ps). */
+const ZAB_RE=/^([agm])(-?[\d.]+)$/;
+const zabWert=z=>z.art==="auto"?"calc(var(--lhn,1.2) * "+z.v+")":z.art==="genau"?"calc("+z.v+"pt * var(--zoom,1))":
+  "max(calc(var(--lhn,1.2) * 1em),calc("+z.v+"pt * var(--zoom,1)))";
+const zabAttr=z=>(z.art==="auto"?"a":z.art==="genau"?"g":"m")+(Math.round(z.v*100)/100);
+function zabAus(t){const m=ZAB_RE.exec(String(t||""));return m?{art:m[1]==="a"?"auto":m[1]==="g"?"genau":"mind",v:+m[2]}:null}
+const ptCalc=v=>"calc("+(Math.round(v*100)/100)+"pt * var(--zoom,1))";
+const ptAusCalc=v=>{const m=/calc\(\s*(-?[\d.]+)pt/.exec(v||"");return m?+m[1]:null};
+/* Format eines Blocks in pt; was nicht am Absatz steht, ist null */
+function absatzFormat(el,groesse){
+  const st=el.style||{};
+  const emPt=v=>{const z=parseFloat(v);return !isNaN(z)&&/em$/.test(String(v||""))?Math.round(z*groesse*100)/100:null};
+  const oben=!!st.borderTopStyle&&st.borderTopStyle!=="none";
+  return {links:emPt(st.marginLeft),rechts:emPt(st.marginRight),erste:emPt(st.textIndent),
+    vor:oben?ptAusCalc(st.marginTop):ptAusCalc(st.paddingTop),nach:ptAusCalc(st.marginBottom),
+    zab:zabAus(el.dataset&&el.dataset.zab),ausr:st.textAlign||"",oben};
+}
+/* Setzen: undefined lässt einen Wert stehen, null oder "" entfernt ihn */
+function absatzFormatSetzen(el,f,groesse){
+  const st=el.style,em=v=>Math.round(v/groesse*100)/100+"em",da=v=>v!=null&&v!=="";
+  if(f.links!==undefined)st.marginLeft=da(f.links)&&+f.links?em(+f.links):"";
+  if(f.rechts!==undefined)st.marginRight=da(f.rechts)&&+f.rechts?em(+f.rechts):"";
+  if(f.erste!==undefined)st.textIndent=da(f.erste)&&+f.erste?em(+f.erste):"";
+  const oben=!!st.borderTopStyle&&st.borderTopStyle!=="none";
+  if(f.vor!==undefined){
+    if(oben)st.marginTop=da(f.vor)?ptCalc(+f.vor):"";
+    else{st.paddingTop=da(f.vor)?ptCalc(+f.vor):"";
+      /* Überschriften haben einen eigenen Rand oben; Word kennt nur den Abstand */
+      if(/^H[1-4]$/.test(el.tagName))st.marginTop=da(f.vor)?"0":""}
+  }
+  if(f.nach!==undefined)st.marginBottom=da(f.nach)?ptCalc(+f.nach):"";
+  if(f.zab!==undefined){
+    if(f.zab){el.dataset.zab=zabAttr(f.zab);st.lineHeight=zabWert(f.zab)}
+    else{delete el.dataset.zab;st.lineHeight=""}
+  }
+  if(f.ausr!==undefined)st.textAlign=f.ausr&&f.ausr!=="left"?f.ausr:"";
+  if(!el.getAttribute("style"))el.removeAttribute("style");
+}
+/* Die Absätze, auf die ein Absatzbefehl wirkt: die markierten, ohne
+   Markierung der mit der Schreibmarke; in Listen die Einträge */
+function absatzZiele(){
+  const ed=$("#editor");if(!ed||S.mode!=="write")return[];
+  const sel=getSelection();if(!sel.rangeCount)return[];
+  const r=sel.getRangeAt(0);
+  let a=sel.anchorNode;a=a&&a.nodeType===1?a:a&&a.parentElement;
+  const out=[];
+  selectedBlocks().forEach(b=>{
+    if(/^(UL|OL)$/.test(b.tagName)){
+      if(r.collapsed){const li=a&&a.closest&&a.closest("li");if(li&&b.contains(li))out.push(li);return}
+      b.querySelectorAll("li").forEach(li=>{try{if(r.intersectsNode(li)&&!li.querySelector("li"))out.push(li)}catch(e){}});
+      return;
+    }
+    if(b.tagName==="BLOCKQUOTE"&&b.querySelector(":scope>p")){
+      [...b.children].forEach(p=>{try{if(r.collapsed?p.contains(a):r.intersectsNode(p))out.push(p)}catch(e){}});return;
+    }
+    if(b.matches("hr,figure,table,.pgbreak,.toc,.enliste,.fhwrap"))return;
+    out.push(b);
+  });
+  return out;
+}
+function absatzAnwenden(ziele,f){
+  if(S.mode!=="write")setMode("write");
+  const g=doc().size||S.settings.size;
+  ziele.forEach(el=>{if(el.isConnected)absatzFormatSetzen(el,f,g)});
+  flush();dirty=true;commit();queuePaginate();drawAnchors();drawStatus();
+  const ed=$("#editor");ed&&ed.focus();
+}
+/* Was an einem Absatz tatsächlich gilt: seine Angabe, sonst die des Dokuments */
+function absatzWirkung(el){
+  const d=doc(),g=d.size||S.settings.size,f=absatzFormat(el,g);
+  const cs=getComputedStyle(el);
+  return {links:f.links||0,rechts:f.rechts||0,erste:f.erste||0,
+    vor:f.vor!=null?f.vor:0,nach:f.nach!=null?f.nach:Math.round(psOf(d)*g*10)/10,
+    zab:f.zab||{art:"auto",v:lhOf(d)},ausr:cs.textAlign==="start"?"left":cs.textAlign==="end"?"right":cs.textAlign};
+}
+/* Zeilenabstand wie Words Knopf „Zeilen- und Absatzabstand“: 1,0 bis 3,0,
+   darunter die Optionen und Abstand vor/nach hinzufügen bzw. entfernen.
+   Derselbe Inhalt im Format-Menü. */
+const ZAB_STUFEN=[1,1.15,1.5,2,2.5,3];
+function zabEintraege(ziele){
+  const w=absatzWirkung(ziele[0]);
+  const zahl=v=>{const t=v===1.15?"1.15":v.toFixed(1);return S.settings.uiLang==="en"?t:t.replace(".",",")};
+  const vorDa=w.vor>0,nachDa=w.nach>0;
+  return [...ZAB_STUFEN.map(v=>({a:"z"+v,label:zahl(v),cur:w.zab.art==="auto"&&Math.abs(w.zab.v-v)<0.001})),
+    {sep:true},
+    {a:"dialog",label:tr("Zeilenabstandsoptionen…")},
+    {a:vorDa?"vor0":"vor12",label:tr(vorDa?"Abstand vor Absatz entfernen":"Abstand vor Absatz hinzufügen")},
+    {a:nachDa?"nach0":"nach12",label:tr(nachDa?"Abstand nach Absatz entfernen":"Abstand nach Absatz hinzufügen")}];
+}
+function zabTun(ziele,a){
+  if(a==="dialog")return absatzDialog(ziele);
+  if(a[0]==="z")return absatzAnwenden(ziele,{zab:{art:"auto",v:+a.slice(1)}});
+  if(a.startsWith("vor"))return absatzAnwenden(ziele,{vor:+a.slice(3)});
+  if(a.startsWith("nach"))return absatzAnwenden(ziele,{nach:+a.slice(4)});
+}
+function zabMenue(btn){
+  if($("#zabmenu")){closeMenu();return}
+  closeMenu();
+  const ziele=absatzZiele();if(!ziele.length){toast(tr("Nur im Schreibmodus"));return}
+  const m=document.createElement("div");m.className="menu ctx";m.id="zabmenu";
+  m.innerHTML=zabEintraege(ziele).map(it=>it.sep?'<div class="msep"></div>':
+    `<button class="mi" data-zab="${it.a}"><span class="chk">${it.cur?"✓":""}</span>${it.label}</button>`).join("");
+  document.body.appendChild(m);
+  const r=btn.getBoundingClientRect();menuPlatzieren(m,r.left,r.bottom+4,r);
+  m.onclick=ev=>{const b=ev.target.closest("[data-zab]");if(!b)return;closeMenu();zabTun(ziele,b.dataset.zab)};
+}
+/* Words Dialog „Absatz“, Register „Einzüge und Abstände“: Ausrichtung,
+   Einzug links/rechts/Sondereinzug, Abstand vor/nach, Zeilenabstand mit
+   Maß, Vorschau; „Als Standard festlegen“ macht die Abstände zur Vorgabe
+   des Dokuments (wie Words Formatvorlage Standard) */
+function absatzDialog(ziele){
+  ziele=ziele||absatzZiele();if(!ziele.length){toast(tr("Nur im Schreibmodus"));return}
+  closeMenu();
+  const w=absatzWirkung(ziele[0]);
+  const zoll=unitOf()==="in",eh=zoll?"in":"cm",ptJe=zoll?72:72/2.54;
+  const inE=pt=>Math.round(pt/ptJe*100)/100,ausE=v=>Math.round((+String(v).replace(",",".")||0)*ptJe*100)/100;
+  const zahl=v=>S.settings.uiLang==="en"?String(v):String(v).replace(".",",");
+  const art=w.zab.art==="auto"?(Math.abs(w.zab.v-1)<0.001?"einfach":Math.abs(w.zab.v-1.5)<0.001?"15":Math.abs(w.zab.v-2)<0.001?"doppelt":"mehrfach"):w.zab.art;
+  const sonder=w.erste>0?"erste":w.erste<0?"haengend":"";
+  const opt=(v,lab,cur)=>`<option value="${v}" ${cur?"selected":""}>${lab}</option>`;
+  const feld=(id,wert,schritt,einheit,min)=>`<span class="abfeld"><input type="number" id="${id}" value="${wert}" step="${schritt}" ${min!=null?'min="'+min+'"':""}><i>${einheit}</i></span>`;
+  overlay(`<div class="modal abdlg"><h3>${tr("Absatz")}</h3>
+    <div class="abreiter"><span class="on">${tr("Einzüge und Abstände")}</span></div>
+    <div class="pad">
+      <div class="abgr">${tr("Allgemein")}</div>
+      <div class="abzeile"><label for="abAusr">${tr("Ausrichtung:")}</label><select id="abAusr">
+        ${opt("left",tr("Linksbündig"),w.ausr==="left"||!w.ausr)}${opt("center",tr("Zentriert"),w.ausr==="center")}${opt("right",tr("Rechtsbündig"),w.ausr==="right")}${opt("justify",tr("Blocksatz"),w.ausr==="justify")}</select></div>
+      <div class="abgr">${tr("Einzug")}</div>
+      <div class="abraster">
+        <label for="abLinks">${tr("Links:")}</label>${feld("abLinks",inE(w.links),0.1,eh)}
+        <label for="abSonder">${tr("Sondereinzug:")}</label><select id="abSonder">${opt("",tr("(ohne)"),!sonder)}${opt("erste",tr("Erste Zeile"),sonder==="erste")}${opt("haengend",tr("Hängend"),sonder==="haengend")}</select>
+        <label for="abRechts">${tr("Rechts:")}</label>${feld("abRechts",inE(w.rechts),0.1,eh)}
+        <label for="abUm">${tr("Um:")}</label>${feld("abUm",sonder?inE(Math.abs(w.erste)):"",0.1,eh,0)}
+      </div>
+      <div class="abgr">${tr("Abstand")}</div>
+      <div class="abraster">
+        <label for="abVor">${tr("Vor:")}</label>${feld("abVor",w.vor,6,tr("Pt."),0)}
+        <label for="abZab">${tr("Zeilenabstand:")}</label><select id="abZab">${opt("einfach",tr("Einfach"),art==="einfach")}${opt("15",tr("1,5 Zeilen"),art==="15")}${opt("doppelt",tr("Doppelt"),art==="doppelt")}${opt("mind",tr("Mindestens"),art==="mind")}${opt("genau",tr("Genau"),art==="genau")}${opt("mehrfach",tr("Mehrfach"),art==="mehrfach")}</select>
+        <label for="abNach">${tr("Nach:")}</label>${feld("abNach",w.nach,6,tr("Pt."),0)}
+        <label for="abMass">${tr("Maß:")}</label>${feld("abMass",art==="mind"||art==="genau"?w.zab.v:art==="mehrfach"?w.zab.v:"",art==="mehrfach"?0.25:1,art==="mind"||art==="genau"?tr("Pt."):"",0)}
+      </div>
+      <div class="abgr">${tr("Vorschau")}</div>
+      <div class="abvor" id="abVorschau"></div>
+    </div>
+    <div class="rowend abfuss">
+      <button class="btn" id="abStandard">${tr("Als Standard festlegen")}</button>
+      <span style="flex:1"></span>
+      <button class="btn pri" id="abOk">${tr("OK")}</button>
+      <button class="btn" id="abAb">${tr("Abbrechen")}</button>
+    </div></div>`);
+  const v=id=>$("#"+id).value;
+  const lesen=()=>{
+    const so=v("abSonder"),um=ausE(v("abUm"));
+    const za=v("abZab"),mass=parseFloat(String(v("abMass")).replace(",","."));
+    const zab=za==="einfach"?{art:"auto",v:1}:za==="15"?{art:"auto",v:1.5}:za==="doppelt"?{art:"auto",v:2}:
+      za==="mehrfach"?{art:"auto",v:mass>0?mass:3}:{art:za,v:mass>0?mass:12};
+    return {ausr:v("abAusr"),links:ausE(v("abLinks")),rechts:ausE(v("abRechts")),erste:so==="erste"?um:so==="haengend"?-um:0,
+      vor:Math.max(0,parseFloat(String(v("abVor")).replace(",","."))||0),nach:Math.max(0,parseFloat(String(v("abNach")).replace(",","."))||0),zab};
+  };
+  /* Maß folgt der Art wie in Word: Mehrfach 3, Genau/Mindestens 12 pt */
+  $("#abZab").onchange=()=>{const za=v("abZab"),m=$("#abMass"),einh=m.nextElementSibling;
+    if(za==="mehrfach"){m.value=3;m.step=0.25;einh.textContent=""}
+    else if(za==="mind"||za==="genau"){m.value=12;m.step=1;einh.textContent=tr("Pt.")}
+    else{m.value="";einh.textContent=""}
+    vorschau()};
+  $("#abSonder").onchange=()=>{const m=$("#abUm");if(!v("abSonder"))m.value="";else if(!m.value)m.value=zoll?0.5:1.25;vorschau()};
+  /* Vorschau wie in Word: grauer Absatz davor und danach, der eigene als
+   dunkle Zeilen mit seinen Einzügen und Abständen */
+  const vorschau=()=>{
+    const f=lesen(),px=0.42;
+    /* Zeilen als Blöcke: volle Breite zwischen den Einzügen, die letzte kürzer und nach der Ausrichtung gestellt */
+    const zeilen=(n,farbe,ein,al)=>Array.from({length:n},(_,i)=>{const letzte=i===n-1,l=(ein&&ein.l||0)+(i===0&&ein?ein.e:0),r=ein?ein.r:0;
+      const rand=letzte&&al==="center"?"margin-left:auto;margin-right:auto":letzte&&al==="flex-end"?`margin-left:auto;margin-right:${r}px`:`margin-left:${l}px;margin-right:${r}px`;
+      return `<i style="background:${farbe};${rand};${letzte?"width:55%;":""}margin-bottom:${ein?ein.g:3}px"></i>`}).join("");
+    const lh=f.zab.art==="auto"?f.zab.v:f.zab.v/12;
+    const ein={l:Math.max(0,f.links)*px,r:Math.max(0,f.rechts)*px,e:f.erste*px,g:Math.max(1,Math.round(4*lh))};
+    const al=f.ausr==="center"?"center":f.ausr==="right"?"flex-end":"flex-start";
+    $("#abVorschau").innerHTML=`<div class="abv grau">${zeilen(3,"var(--rule)")}</div>`+
+      `<div class="abv" style="padding-top:${f.vor*px}px;padding-bottom:${f.nach*px}px">${zeilen(4,"var(--ink-soft)",ein,al)}</div>`+
+      `<div class="abv grau">${zeilen(3,"var(--rule)")}</div>`;
+  };
+  $("#ovl").querySelectorAll(".abdlg input,.abdlg select").forEach(e=>e.addEventListener("input",vorschau));
+  vorschau();
+  $("#abAb").onclick=closeOvl;
+  /* Wie Word: nur übernehmen, was im Dialog geändert wurde — sonst würde
+     jeder Absatz die angezeigten Vorgaben fest an sich tragen */
+  const anfang=JSON.stringify(lesen());
+  $("#abOk").onclick=()=>{const f=lesen(),a0=JSON.parse(anfang),neu={};
+    for(const k in f)if(JSON.stringify(f[k])!==JSON.stringify(a0[k]))neu[k]=f[k];
+    closeOvl();if(Object.keys(neu).length)absatzAnwenden(ziele,neu)};
+  $("#abStandard").onclick=()=>{
+    const f=lesen();
+    overlay(`<div class="modal"><h3>${tr("Absatz")}</h3><div class="pad">
+      <p>${tr("Möchten Sie die Standardeinstellungen für Absätze ändern in:")}</p>
+      <label class="abwahl"><input type="radio" name="abWo" value="dok" checked> ${tr("Nur dieses Dokument")}</label>
+      <label class="abwahl"><input type="radio" name="abWo" value="alle"> ${tr("Alle neuen Dokumente")}</label></div>
+      <div class="rowend"><button class="btn pri" id="abWoOk">${tr("OK")}</button><button class="btn" id="abWoAb">${tr("Abbrechen")}</button></div></div>`);
+    $("#abWoAb").onclick=closeOvl;
+    $("#abWoOk").onclick=()=>{
+      const alle=($("#ovl").querySelector("input[name=abWo]:checked")||{}).value==="alle";
+      const d=doc(),g=d.size||S.settings.size;
+      if(f.zab.art==="auto")d.lh=f.zab.v;
+      d.ps=Math.round(f.nach/g*1000)/1000;
+      if(alle){if(f.zab.art==="auto")S.settings.lh=f.zab.v;S.settings.ps=d.ps}
+      closeOvl();
+      /* Die gewählten Absätze folgen nun der Vorgabe */
+      absatzAnwenden(ziele,{zab:f.zab.art==="auto"?null:f.zab,nach:null,vor:f.vor||null,links:f.links,rechts:f.rechts,erste:f.erste,ausr:f.ausr});
+      render();
+    };
+  };
 }
 function indentBlocks(dir){
   const ed=$("#editor");
@@ -11253,24 +11697,38 @@ function docxNumId(el){
    Aufzählungen ohne Nummern brauchen das nicht und bleiben bei ihrer numId. */
 function docxNumInstanz(el,ctx){
   const basis=docxNumId(el);
+  /* Aus Word: eigener Einzug (data-wind „links hängend“ in Twips) oder
+     Zeichenfarbe — dafür eine eigene Listendefinition */
+  const wind=el.dataset&&el.dataset.wind,mfarbe=el.style&&farbHex(el.style.getPropertyValue("--marker").trim()||"");
+  if((wind||mfarbe)&&ctx&&ctx.numExtra){
+    const k=ctx.numExtra.length,numId=900+k;
+    ctx.numExtra.push({numId,abs:DOCXLISTS.length+k,basis:basis-1,wind:wind||"",farbe:mfarbe||"",
+      start:el.tagName.toLowerCase()==="ol"?Math.max(1,parseInt(el.getAttribute("start"),10)||1):0});
+    return numId;
+  }
   if(el.tagName.toLowerCase()!=="ol"||!ctx||!ctx.numInstanzen)return basis;
   const start=Math.max(1,parseInt(el.getAttribute("start"),10)||1);
   const numId=DOCXLISTS.length+1+ctx.numInstanzen.length;
   ctx.numInstanzen.push({numId,abstract:basis-1,start});
   return numId;
 }
-function numberingXml(instanzen){
-  const stufe=(fmt,text)=>[0,1,2,3].map(i=>
-    `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${typeof fmt==="function"?fmt(i):fmt}"/><w:lvlText w:val="${text(i)}"/>`+
+function numberingXml(instanzen,extra){
+  const stufe=(fmt,text,eig)=>[0,1,2,3].map(i=>{
+    const w=eig&&eig.wind&&i===0?eig.wind.split(" ").map(Number):null;
+    return `<w:lvl w:ilvl="${i}"><w:start w:val="1"/><w:numFmt w:val="${typeof fmt==="function"?fmt(i):fmt}"/><w:lvlText w:val="${text(i)}"/>`+
     /* Wie Words eigene Listen und wie der Editor: Text bei 1,27 cm je
        Ebene, Nummer 0,63 cm davor (bis 1.3 halb so weit) */
-    `<w:pPr><w:ind w:left="${(i+1)*720}" w:hanging="360"/></w:pPr></w:lvl>`).join("");
+    `<w:pPr><w:ind w:left="${w?w[0]:(i+1)*720}" w:hanging="${w?w[1]:360}"/></w:pPr>`+
+    (eig&&eig.farbe&&i===0?`<w:rPr><w:color w:val="${eig.farbe}"/></w:rPr>`:"")+"</w:lvl>"}).join("");
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
 ${DOCXLISTS.map((d,i)=>`<w:abstractNum w:abstractNumId="${i}">${stufe(d.fmt,d.text)}</w:abstractNum>`).join("\n")}
+${(extra||[]).map(e=>{const d=DOCXLISTS[e.basis]||DOCXLISTS[0];return `<w:abstractNum w:abstractNumId="${e.abs}">${stufe(d.fmt,d.text,e)}</w:abstractNum>`}).join("\n")}
 ${DOCXLISTS.map((d,i)=>`<w:num w:numId="${i+1}"><w:abstractNumId w:val="${i}"/></w:num>`).join("\n")}
 ${(instanzen||[]).map(n=>`<w:num w:numId="${n.numId}"><w:abstractNumId w:val="${n.abstract}"/>`+
   `<w:lvlOverride w:ilvl="0"><w:startOverride w:val="${n.start}"/></w:lvlOverride></w:num>`).join("\n")}
+${(extra||[]).map(e=>`<w:num w:numId="${e.numId}"><w:abstractNumId w:val="${e.abs}"/>`+
+  (e.start?`<w:lvlOverride w:ilvl="0"><w:startOverride w:val="${e.start}"/></w:lvlOverride>`:"")+"</w:num>").join("\n")}
 </w:numbering>`;
 }
 /* Überschriftgrößen im Verhältnis zur Grundgröße, wie das CSS der Anzeige
@@ -11372,6 +11830,7 @@ function rPrXml(st){
   if(st.caps)x+="<w:caps/>";
   if(st.strike)x+="<w:strike/>";
   if(st.color)x+=`<w:color w:val="${st.color}"/>`;
+  if(st.ls)x+=`<w:spacing w:val="${Math.round(st.ls*20)}"/>`;
   if(st.sz)x+=`<w:sz w:val="${st.sz}"/><w:szCs w:val="${st.sz}"/>`;
   if(st.u)x+='<w:u w:val="single"/>';
   if(st.hi)x+=`<w:shd w:val="clear" w:color="auto" w:fill="${st.hi}"/>`;
@@ -11482,6 +11941,11 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
       return;
     }
     if(tag==="br"){runs.push("<w:r><w:br/></w:r>");ws.vorn=true;return}
+    /* Kleines Bild in der Zeile aus Word: genau der Lauf, der es war */
+    if(tag==="img"&&n.classList.contains("inlbild")){
+      const roh=ctx&&ctx.word&&ctx.word.roh&&ctx.word.roh[n.dataset.roh];
+      if(roh)runs.push(roh);ws.vorn=false;return;
+    }
     if(["img","figure"].includes(tag))return;   /* Bilder laufen als eigener Block, nicht inline */
     const neu={...st};
     if(tag==="b"||tag==="strong"||n.style?.fontWeight>="600")neu.b=true;
@@ -11494,6 +11958,7 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&n.style.backgroundColor){const h=farbHex(n.style.backgroundColor);if(h)neu.hi=h}
     if(n.style&&n.style.textTransform==="uppercase")neu.caps=true;
+    if(n.style&&n.style.letterSpacing){const m=/(-?[\d.]+)pt/.exec(n.style.letterSpacing);if(m)neu.ls=+m[1]}
     /* Größe: em verschachtelt sich (relativ zur umgebenden Größe), darum
        wird die aktuelle Größe in pt mitgeführt. w:sz in Halbpunkten, nur
        wenn sie von der Dokumentgröße abweicht. */
@@ -11503,8 +11968,12 @@ function inlineAblaufen(node,st,runs,links,ctx,ws){
       const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
       const basis=st.pt||ctx.docSize;
       const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
+      /* Verglichen wird mit der Größe, die der Absatz ohnehin hat — in einer
+         Überschrift oder im Titel ist das die Größe der Vorlage, nicht die
+         Grundgröße (sonst fiel eine 9,5-pt-Überschrift auf die 16 pt der
+         Vorlage zurück) */
       if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);
-        if(hp!==Math.round(ctx.docSize*2))neu.sz=hp;else delete neu.sz}
+        if(hp!==(st.refHp||Math.round(ctx.docSize*2)))neu.sz=hp;else delete neu.sz}
     }
     /* Schrift am Text (seit 1.3): erster Name des Stapels, sofern er von
        der Grundschrift des Dokuments abweicht */
@@ -11530,6 +11999,20 @@ function absatzXml(el,pPrExtra,basisStil,ctx){
   if(w&&ds){
     if(ds.wtabs&&w[ds.wtabs])pPrExtra=wTabsEinfuegen(pPrExtra||"",w[ds.wtabs]);
     if(ds.wsect&&w[ds.wsect])pPrExtra=(pPrExtra||"")+w[ds.wsect];
+    if(ds.wbdr&&w[ds.wbdr])pPrExtra=(pPrExtra||"")+w[ds.wbdr];
+  }
+  /* Absatzformat (absatzFormat): Abstand vor/nach, Zeilenabstand und —
+     außer in Listen, die ihren Einzug aus der Nummerierung haben — Einzug */
+  if(el&&el.style&&ctx&&ctx.docSize){
+    const af=absatzFormat(el,ctx.docSize),tw=v=>Math.round(v*20);
+    const sp=[af.vor!=null&&`w:before="${tw(af.vor)}"`,af.nach!=null&&`w:after="${tw(af.nach)}"`,
+      af.zab&&`w:line="${af.zab.art==="auto"?Math.round(af.zab.v*240):tw(af.zab.v)}" w:lineRule="${af.zab.art==="auto"?"auto":af.zab.art==="genau"?"exact":"atLeast"}"`].filter(Boolean);
+    if(sp.length)pPrExtra=(pPrExtra||"")+`<w:spacing ${sp.join(" ")}/>`;
+    if(el.tagName!=="LI"&&!/<w:ind\b/.test(pPrExtra||"")){
+      const ind=[af.links>0&&`w:left="${tw(af.links)}"`,af.rechts>0&&`w:right="${tw(af.rechts)}"`,
+        af.erste>0&&`w:firstLine="${tw(af.erste)}"`,af.erste<0&&`w:hanging="${tw(-af.erste)}"`].filter(Boolean);
+      if(ind.length)pPrExtra=(pPrExtra||"")+`<w:ind ${ind.join(" ")}/>`;
+    }
   }
   const roh=!!(el.closest&&el.closest("pre"))||!!(el.querySelector&&el.querySelector("pre"));
   inlineAblaufen(el,basisStil||{},runs,links,ctx,{vorn:true,roh});
@@ -11608,20 +12091,17 @@ async function walkBlocks(root,ctx){
     }else if(tag==="p"&&el.dataset&&el.dataset.fv){
       /* Titel/Untertitel als Words eingebaute Vorlagen „Title“/„Subtitle“ */
       const jc=jcVon(el),sid=el.dataset.fv==="titel"?"Title":"Subtitle";
-      xml+=absatzZuXml(absatzXml(el,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx),ctx);
+      xml+=absatzZuXml(absatzXml(el,`<w:pStyle w:val="${sid}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,{refHp:Math.round(ctx.docSize*TITEL_FAKTOR[el.dataset.fv==="titel"?"titel":"untertitel"]*2)},ctx),ctx);
     }else if(tag==="p"||tag==="div"){
       const jc=jcVon(el);
       /* Einzug: im Editor margin-left in em (indentBlocks). Ging bis
          2026-10 beim Speichern als Word verloren. */
-      const twip=v=>{const z=parseFloat(v);return z&&/em$/.test(v)?Math.round(z*ctx.docSize*20):0};
-      const ml=el.style?twip(el.style.marginLeft):0,ti=el.style?twip(el.style.textIndent):0;
-      const indA=[ml>0&&`w:left="${ml}"`,ti>0&&`w:firstLine="${ti}"`,ti<0&&`w:hanging="${-ti}"`].filter(Boolean);
-      const ind=indA.length?`<w:ind ${indA.join(" ")}/>`:"";
-      const a=absatzXml(el,ind+(jc?`<w:jc w:val="${jc}"/>`:""),null,ctx);
+      /* Einzüge schreibt absatzXml (absatzFormat), samt rechtem */
+      const a=absatzXml(el,(jc?`<w:jc w:val="${jc}"/>`:""),null,ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(/^h[1-4]$/.test(tag)){
       const jc=jcVon(el);
-      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,null,ctx);
+      const a=absatzXml(el,`<w:pStyle w:val="Heading${tag[1]}"/>${jc?`<w:jc w:val="${jc}"/>`:""}`,{refHp:Math.round(ctx.docSize*UEBERSCHRIFT_FAKTOR[tag[1]]*2)},ctx);
       xml+=absatzZuXml(a,ctx);
     }else if(tag==="ul"||tag==="ol"){
       xml+=listeXml(el,docxNumInstanz(el,ctx),0,ctx);
@@ -11677,8 +12157,34 @@ function absatzZuXml(a,ctx){
     const innen=runs.slice(l.start,l.end).join("");
     runs=[...runs.slice(0,l.start),`<w:hyperlink r:id="${id}">${innen}</w:hyperlink>`,...runs.slice(l.end)];
   });
-  const pPr=a.pPr?`<w:pPr>${a.pPr}</w:pPr>`:"";
+  const pPr=a.pPr?`<w:pPr>${pPrOrdnen(a.pPr)}</w:pPr>`:"";
   return `<w:p>${pPr}${runs.join("")}</w:p>`;
+}
+/* Die Teile von w:pPr in die Reihenfolge des Schemas (CT_PPr) bringen —
+   sie entstehen an verschiedenen Stellen, Word lehnt eine falsche
+   Reihenfolge als beschädigt ab */
+const PPR_FOLGE=["pStyle","keepNext","keepLines","pageBreakBefore","framePr","widowControl","numPr","suppressLineNumbers","pBdr","shd","tabs",
+  "suppressAutoHyphens","kinsoku","wordWrap","overflowPunct","topLinePunct","autoSpaceDE","autoSpaceDN","bidi","adjustRightInd","snapToGrid",
+  "spacing","ind","contextualSpacing","mirrorIndents","suppressOverlap","jc","textDirection","textAlignment","textboxTightWrap","outlineLvl",
+  "divId","cnfStyle","rPr","sectPr","pPrChange"];
+function pPrOrdnen(x){
+  const teile=[];let i=0;
+  while(i<x.length){
+    const m=/^<w:([A-Za-z]+)\b[^>]*?(\/?)>/.exec(x.slice(i));
+    if(!m)return x;
+    let ende=i+m[0].length;
+    if(!m[2]){
+      /* bis zum passenden Ende, gleichnamige Kinder mitgezählt */
+      let tiefe=1;const re=new RegExp("<(/?)w:"+m[1]+"\\b[^>]*?(/?)>","g");re.lastIndex=ende;let t;
+      while(tiefe&&(t=re.exec(x))){if(t[1])tiefe--;else if(!t[2])tiefe++;ende=re.lastIndex}
+      if(tiefe)return x;
+    }
+    teile.push({n:m[1],x:x.slice(i,ende)});i=ende;
+  }
+  const rang=n=>{const k=PPR_FOLGE.indexOf(n);return k<0?PPR_FOLGE.length:k};
+  /* Doppeltes (etwa zweimal spacing) nur einmal, das erste gilt */
+  const gesehen=new Set();
+  return teile.filter(t=>!gesehen.has(t.n)&&gesehen.add(t.n)).sort((p,q)=>rang(p.n)-rang(q.n)).map(t=>t.x).join("");
 }
 function listeXml(list,numId,ilvl,ctx){
   let xml="";
@@ -11985,7 +12491,7 @@ async function docxBlob(d){
     docSize:d.size||S.settings.size,docFont:d.font||S.settings.font,
     tableWidthTwip:mmToTwip(f.w-f.m[1]-f.m[3]),
     contentWidthEmu:mmToEmu(f.w-f.m[1]-f.m[3]),
-    footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],
+    footnoteId:1,footnotes:[],footnoteIds:new Map(),numInstanzen:[],numExtra:[],
     footnoteLookup:new Map((d.footnotes||[]).map(fn=>[fn.id,fn.text])),
     endnoteId:1,endnotes:[],endnoteIds:new Map(),endnoteLookup:new Map((d.endnotes||[]).map(e=>[e.id,e.text])),
     word:d.word||null};
@@ -12062,7 +12568,7 @@ ${relEintraege.join(String.fromCharCode(10))}
     {name:"_rels/.rels",bytes:enc.encode(DOCX_RELS)},
     {name:"word/document.xml",bytes:enc.encode(documentXml)},
     {name:"word/styles.xml",bytes:enc.encode(stylesXml(d))},
-    {name:"word/numbering.xml",bytes:enc.encode(numberingXml(ctx.numInstanzen))},
+    {name:"word/numbering.xml",bytes:enc.encode(numberingXml(ctx.numInstanzen,ctx.numExtra))},
     {name:"word/_rels/document.xml.rels",bytes:enc.encode(docRels)},
     {name:"docProps/core.xml",bytes:enc.encode(coreXml(d.title))},
     ...teile.map(t=>({name:"word/"+t.datei,bytes:enc.encode(t.xml)})),
@@ -12167,6 +12673,11 @@ async function odtBlob(d){
         }
         ws.vorn=false;return;
       }
+      if(n.tagName==="IMG"&&n.classList.contains("inlbild")){
+        const b=inlBilder.get(n);
+        if(b)out.push(rahmen(b,stilName("graphic","fr",'<style:graphic-properties style:vertical-pos="top" style:vertical-rel="baseline"/>',"Graphics"),"as-char",b.wMm,b.hMm));
+        ws.vorn=false;return;
+      }
       if(n.classList.contains("wroh"))return;
       if(n.classList.contains("wtab")){out.push("<text:tab/>");ws.vorn=false;return}
       /* Notiz aus einem Kommentar (n.wort): wieder ein Kommentar */
@@ -12198,7 +12709,7 @@ async function odtBlob(d){
         const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
         const basis=st.pt||groesse;
         const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
-        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==Math.round(groesse*2))neu.sz=hp;else delete neu.sz}
+        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==(st.refHp||Math.round(groesse*2)))neu.sz=hp;else delete neu.sz}
       }
       const fam=(n.style&&n.style.fontFamily)||(tag==="font"&&n.getAttribute("face"))||"";
       if(fam){const erst=fam.split(",")[0].replace(/["']/g,"").trim();
@@ -12223,7 +12734,19 @@ async function odtBlob(d){
   };
   const ausr=j=>j==="center"?'fo:text-align="center"':j==="right"?'fo:text-align="end"':j==="both"?'fo:text-align="justify"':j==="left"?'fo:text-align="start"':"";
   const absatz=(el,pp,eltern,stufe)=>{
-    const out=[];inline(el,{},{vorn:true},out);
+    /* Absatzformat dazu (Einzüge, Abstände, Zeilenabstand); ein Name nur
+       einmal, das Absatzformat zuletzt */
+    if(el&&el.style&&el.tagName!=="LI"){
+      const af=absatzFormat(el,groesse),z=odfZahl,neu=[];
+      if(af.links!=null)neu.push(`fo:margin-left="${z(af.links)}pt"`);
+      if(af.rechts!=null)neu.push(`fo:margin-right="${z(af.rechts)}pt"`);
+      if(af.erste!=null)neu.push(`fo:text-indent="${z(af.erste)}pt"`);
+      if(af.vor!=null)neu.push(`fo:margin-top="${z(af.vor)}pt"`);
+      if(af.nach!=null)neu.push(`fo:margin-bottom="${z(af.nach)}pt"`);
+      if(af.zab)neu.push(af.zab.art==="auto"?`fo:line-height="${Math.round(af.zab.v*100)}%"`:af.zab.art==="genau"?`fo:line-height="${z(af.zab.v)}pt"`:`style:line-height-at-least="${z(af.zab.v)}pt"`);
+      if(neu.length){const m=new Map();[...(pp||[]).filter(Boolean),...neu].forEach(a=>m.set(a.split("=")[0],a));pp=[...m.values()]}
+    }
+    const out=[];inline(el,stufe?{refHp:Math.round(groesse*UEBERSCHRIFT_FAKTOR[stufe]*2)}:{},{vorn:true},out);
     let inhalt=out.join("");
     /* Ein <br> am Ende hält in HTML nur den leeren Absatz offen */
     if(inhalt.endsWith("<text:line-break/>"))inhalt=inhalt.slice(0,-18);
@@ -12240,6 +12763,16 @@ async function odtBlob(d){
     bilder.push({name:datei,bytes:info.bytes,mime:"image/"+info.ext});
     return {info,datei,nr};
   };
+  /* Bilder in der Zeile (img.inlbild) vorab lesen — das Ablaufen ist synchron */
+  const inlBilder=new Map();
+  const mmAus=v=>{const m=/calc\(\s*([\d.]+)mm/.exec(v||"");return m?+m[1]:null};
+  for(const im of container.querySelectorAll("img.inlbild")){
+    const info=await bildInfo(im);if(!info)continue;
+    const wMm=mmAus(im.style.width)||4,hMm=mmAus(im.style.height)||wMm*info.h/info.w;
+    const nr=bilder.length+1,datei=`Pictures/bild${nr}.${info.ext==="jpeg"?"jpg":info.ext}`;
+    bilder.push({name:datei,bytes:info.bytes,mime:"image/"+info.ext});
+    inlBilder.set(im,{info,datei,nr,wMm,hMm});
+  }
   const rahmen=(b,frs,anker,w,h,extra)=>`<draw:frame draw:style-name="${frs}" draw:name="Bild ${b.nr}" text:anchor-type="${anker}"${extra||""} svg:width="${odfZahl(w)}mm" svg:height="${odfZahl(h)}mm" draw:z-index="${b.nr}">`+
     `<draw:image xlink:href="${b.datei}" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad" draw:mime-type="${b.mime||"image/"+b.info.ext}"/></draw:frame>`;
   const figur=async fig=>{
@@ -12561,6 +13094,11 @@ async function rtfBlob(d){
         out.push(`{\\super\\chftn}{\\footnote${end?"\\ftnalt":""}\\pard\\plain\\s${end?22:21}\\f0\\fs20 {\\super\\chftn} ${txt(t)}}`);
         ws.vorn=false;return;
       }
+      if(n.tagName==="IMG"&&n.classList.contains("inlbild")){
+        const b=inlBilder.get(n);
+        if(b)out.push(pict(b.info,tw(b.wMm),tw(b.hMm)));
+        ws.vorn=false;return;
+      }
       if(n.classList.contains("wroh"))return;
       if(n.classList.contains("wtab")){out.push("\\tab ");ws.vorn=false;return}
       if(n.classList.contains("anch")&&(n.dataset.wkStart||n.dataset.wkEnde)){
@@ -12591,7 +13129,7 @@ async function rtfBlob(d){
         const v=parseFloat(n.style.fontSize),u=n.style.fontSize.replace(/[0-9.\s-]/g,"");
         const basis=st.pt||groesse;
         const pt=absolut?+absolut[1]:u==="em"?v*basis:u==="pt"?v:u==="px"?v*0.75:u==="%"?v/100*basis:0;
-        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==Math.round(groesse*2))neu.sz=hp;else delete neu.sz}
+        if(pt>0){neu.pt=pt;const hp=Math.round(pt*2);if(hp!==(st.refHp||Math.round(groesse*2)))neu.sz=hp;else delete neu.sz}
       }
       const fam=(n.style&&n.style.fontFamily)||(tag==="font"&&n.getAttribute("face"))||"";
       if(fam){const erst=fam.split(",")[0].replace(/["']/g,"").trim();
@@ -12606,13 +13144,30 @@ async function rtfBlob(d){
   };
   const absatz=(el,s,extra,o)=>{
     o=o||{};
-    const out=[];inline(el,{},{vorn:true},out);
+    /* Absatzformat ans Ende — spätere Steuerwörter gelten in RTF */
+    if(el&&el.style&&el.tagName!=="LI"){
+      const af=absatzFormat(el,groesse),tw=v=>Math.round(v*20);
+      let e="";
+      if(af.links!=null)e+="\\li"+tw(af.links);if(af.rechts!=null)e+="\\ri"+tw(af.rechts);if(af.erste!=null)e+="\\fi"+tw(af.erste);
+      if(af.vor!=null)e+="\\sb"+tw(af.vor);if(af.nach!=null)e+="\\sa"+tw(af.nach);
+      if(af.zab)e+=af.zab.art==="auto"?"\\sl"+Math.round(af.zab.v*240)+"\\slmult1":af.zab.art==="genau"?"\\sl-"+tw(af.zab.v)+"\\slmult0":"\\sl"+tw(af.zab.v)+"\\slmult0";
+      extra=(extra||"")+e;
+    }
+    const out=[];inline(el,typeof s==="number"&&s>=1&&s<=4?{refHp:Math.round(groesse*UEBERSCHRIFT_FAKTOR[s]*2)}:{},{vorn:true},out);
     let inhalt=out.join("");
     if(inhalt.endsWith("\\line "))inhalt=inhalt.slice(0,-6);
     const a=anker;anker="";
     return kopfVon(s,extra,o.intbl)+a+inhalt+(o.ende||"\\par")+"\n";
   };
   const hexVon=bytes=>{let h="";for(let i=0;i<bytes.length;i++){h+=(bytes[i]<16?"0":"")+bytes[i].toString(16);if(i%64===63)h+="\n"}return h};
+  /* Bilder in der Zeile (img.inlbild) vorab lesen — das Ablaufen ist synchron */
+  const inlBilder=new Map();
+  const mmAus=v=>{const m=/calc\(\s*([\d.]+)mm/.exec(v||"");return m?+m[1]:null};
+  for(const im of container.querySelectorAll("img.inlbild")){
+    const info=await bildInfo(im);if(!info)continue;
+    const wMm=mmAus(im.style.width)||4,hMm=mmAus(im.style.height)||wMm*info.h/info.w;
+    inlBilder.set(im,{info,wMm,hMm});
+  }
   const pict=(info,wTw,hTw)=>`{\\pict\\${info.ext==="png"?"pngblip":"jpegblip"}\\picw${info.w}\\pich${info.h}\\picwgoal${wTw}\\pichgoal${hTw}\n${hexVon(info.bytes)}}`;
   const form=(info,wTw,hTw,w)=>`{\\shp{\\*\\shpinst\\shpleft${w.x}\\shptop${w.y}\\shpright${w.x+wTw}\\shpbottom${w.y+hTw}\\shpfhdr0${w.bx}\\shpbxignore${w.by}\\shpbyignore`+
     `\\shpwr${w.wr}\\shpwrk0\\shpfblwtxt${w.hinter?1:0}\\shpz0{\\sp{\\sn shapeType}{\\sv 75}}`+
@@ -14461,6 +15016,10 @@ function docxRPr(pr){
   if(hl){const v=String(xattr(hl,"val")||"");o.hi=v==="none"?null:(WORD_MARKER[v]||o.hi||null)}
   const sz=KIND(pr,"sz");
   if(sz){const v=parseInt(xattr(sz,"val"),10);if(v>0)o.sz=v/2}
+  /* Zeichenabstand (Laufweite) in Zwanzigstelpunkt — gesperrte Namen und
+     Überschriften in Lebensläufen kamen bis 2026-10 eng an */
+  const lsp=KIND(pr,"spacing");
+  if(lsp){const v=parseInt(xattr(lsp,"val"),10);if(!isNaN(v))o.ls=v/20}
   const rf=KIND(pr,"rFonts");
   if(rf){
     const name=xattr(rf,"ascii")||xattr(rf,"hAnsi");
@@ -14518,8 +15077,12 @@ function docxAbstand(sp){
   const o={};if(!sp)return o;
   const line=parseInt(xattr(sp,"line"),10),regel=String(xattr(sp,"lineRule")||"auto");
   if(line>0&&regel==="auto")o.lh=line/240;
+  /* Zeilenabstand je Absatz, auch Genau und Mindestens (in pt) */
+  if(line>0)o.zab=regel==="exact"?{art:"genau",v:line/20}:regel==="atLeast"?{art:"mind",v:line/20}:{art:"auto",v:Math.round(line/240*100)/100};
   const nach=parseInt(xattr(sp,"after"),10);
   if(nach>=0&&!isNaN(nach))o.nachPt=nach/20;
+  const vor=parseInt(xattr(sp,"before"),10);
+  if(vor>=0&&!isNaN(vor))o.vorPt=vor/20;
   return o;
 }
 function docxAbstandKette(stile,id){
@@ -14540,7 +15103,9 @@ function docxGrundschrift(body,def,stile,thema){
        Gewichtet mit der Textmenge des Absatzes, Leerabsätze zählen nicht. */
     const sp=Object.assign({},def._sp||{},docxAbstandKette(stile,vorlage),docxAbstand(KIND(pPr,"spacing")));
     let laenge=0;for(const t of p.getElementsByTagNameNS("*","t"))laenge+=t.textContent.length;
-    if(laenge){if(sp.lh)plus(zab,Math.round(sp.lh*100)/100,laenge);
+    /* Ohne Angabe gilt in Word „einfach“ — bis 2026-10 zählte so ein
+       Absatz nicht, und das Dokument bekam den eigenen, luftigeren Abstand */
+    if(laenge){plus(zab,sp.lh?Math.round(sp.lh*100)/100:1,laenge);
       if(sp.nachPt!==undefined)plus(nab,sp.nachPt,laenge)}
     for(const r of p.getElementsByTagNameNS("*","r")){
       let n=0;for(const t of r.children)if(t.localName==="t")n+=t.textContent.length;
@@ -14589,6 +15154,7 @@ function docxStile(xml){
       erbt:xattrN(KIND(e,"basedOn"),"val")||"",
       rPr:docxRPr(KIND(e,"rPr")),
       sp:docxAbstand(KIND(pPr,"spacing")),
+      bdr:KIND(pPr,"pBdr")||null,
       gliederung:ol?parseInt(xattr(ol,"val"),10):null,
       jc:KIND(pPr,"jc")?String(xattr(KIND(pPr,"jc"),"val")||""):null,
       standard:xattr(e,"default")==="1"
@@ -14657,6 +15223,18 @@ function docxUeberschrift(stile,id){
   return treffer?Math.min(4,+treffer[1]):0;
 }
 
+/* Eine Listenebene: Format, Zeichen, Start — dazu Einzug (Twips) und Farbe
+   des Zeichens, damit Listen stehen wie in Word (Lebenslauf: Striche
+   bündig unter dem Jobtitel, in der Akzentfarbe) */
+function docxEbene(l){
+  const ind=KIND(KIND(l,"pPr"),"ind"),c=KIND(KIND(l,"rPr"),"color");
+  const cv=c?String(xattr(c,"val")||""):"";
+  return {fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
+    text:String(xattrN(KIND(l,"lvlText"),"val")||""),
+    start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1,
+    ind:ind?{links:parseInt(xattrN(ind,"left")||xattrN(ind,"start"),10)||0,haengend:parseInt(xattrN(ind,"hanging"),10)||0}:null,
+    farbe:/^[0-9a-f]{6}$/i.test(cv)?cv.toUpperCase():null};
+}
 /* numbering.xml: numId → abstractNumId → Ebene → Zahlenformat. */
 function docxNummern(xml){
   const leer={};
@@ -14669,10 +15247,7 @@ function docxNummern(xml){
     const id=xattr(e,"abstractNumId");if(id==null)return;
     const ebenen={};
     [...e.children].filter(c=>c.localName==="lvl").forEach(l=>{
-      ebenen[String(xattrN(l,"ilvl")||"0")]={
-        fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
-        text:String(xattrN(KIND(l,"lvlText"),"val")||""),
-        start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1};
+      ebenen[String(xattrN(l,"ilvl")||"0")]=docxEbene(l);
     });
     abstrakt[String(id)]=ebenen;
   });
@@ -14691,10 +15266,7 @@ function docxNummern(xml){
     [...e.children].filter(c=>c.localName==="lvlOverride").forEach(o=>{
       const l=KIND(o,"lvl"),so=KIND(o,"startOverride");
       const ilvl=String(xattr(o,"ilvl")||(l&&xattrN(l,"ilvl"))||"0");
-      if(l)ebenen[ilvl]={
-        fmt:String(xattrN(KIND(l,"numFmt"),"val")||"bullet"),
-        text:String(xattrN(KIND(l,"lvlText"),"val")||""),
-        start:parseInt(xattrN(KIND(l,"start"),"val"),10)||1};
+      if(l)ebenen[ilvl]=docxEbene(l);
       /* startOverride: diese Liste beginnt bei einer eigenen Nummer */
       if(so&&ebenen[ilvl]){ebenen[ilvl]=Object.assign({},ebenen[ilvl],
         {start:parseInt(xattrN(so,"val"),10)||1});ebenen._neu[ilvl]=true}
@@ -15316,7 +15888,11 @@ function wAbsatzAttr(pr,ktx){
   /* Ein Abschnitt beginnt in Word auf einer neuen Seite, außer er ist
      „fortlaufend“ (w:type fehlt = nextPage) */
   const neu=s&&String(xattrN(KIND(s,"type"),"val")||"nextPage")!=="continuous";
-  return (s?` data-wsect="${wRohMerken(ktx,s)}"`+(neu?` data-wsect-neu="1"`:""):"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"");
+  /* Lesbar für die Anzeige (tabsSetzen): Art und Lage in Twips */
+  const tl=tabs?[...tabs.children].filter(t=>t.localName==="tab").map(t=>{
+    const k={left:"l",start:"l",right:"r",end:"r",center:"c",decimal:"d"}[String(xattrN(t,"val")||"left")];
+    const pos=parseInt(xattrN(t,"pos"),10);return k&&pos>0?k+pos:""}).filter(Boolean).join(" "):"";
+  return (s?` data-wsect="${wRohMerken(ktx,s)}"`+(neu?` data-wsect-neu="1"`:""):"")+(tabs?` data-wtabs="${wRohMerken(ktx,tabs)}"`:"")+(tl?` data-tabs="${tl}"`:"");
 }
 function docxLauf(p,ktx,innen){
   let out="";
@@ -15326,6 +15902,8 @@ function docxLauf(p,ktx,innen){
      in einer Hülle (Link, Formularfeld) gingen sonst die Tags über Kreuz. */
   const kom=!innen&&ktx&&ktx.kom;
   if(kom)out+=kom.offen.map(wAnchAuf).join("");
+  /* Steht Text im Absatz, bleiben kleine Bilder in der Zeile (unten) */
+  if(!innen&&ktx)ktx.mitText=[...p.getElementsByTagName("*")].some(e=>e.localName==="t"&&e.textContent.trim());
   [...p.children].forEach(el=>{
     if((el.localName==="commentRangeStart"||el.localName==="commentRangeEnd")&&ktx&&ktx.kom){
       if(!kom)return;
@@ -15384,7 +15962,19 @@ function docxLauf(p,ktx,innen){
       else if((c.localName==="drawing"||c.localName==="pict")&&ktx&&ktx.bild){
         const rid=docxBildRid(c);
         const quelle=rid&&ktx.bild.karte[rid];
-        if(quelle){
+        /* Ein kleines Bild im Text (wp:inline, höchstens 12 mm hoch, Text im
+           selben Absatz) — etwa die Symbole vor Ort, Telefon und Mail im
+           Lebenslauf — bleibt in der Zeile, in seiner Größe. Bis 2026-10
+           wurde daraus eine große Figur unter dem Absatz. Gespeichert wird
+           es als genau der Lauf, der es war (data-roh). */
+        const inl=[...c.getElementsByTagName("*")].find(e=>e.localName==="inline");
+        const ext=inl&&KIND(inl,"extent");
+        const wMm=ext?parseInt(ext.getAttribute("cx"),10)*EMU_MM:0,hMm=ext?parseInt(ext.getAttribute("cy"),10)*EMU_MM:0;
+        if(quelle&&inl&&ktx.mitText&&ktx.roh&&hMm>0&&hMm<=12&&wMm>0){
+          ktx.bild.zahl++;ktx.bild.bytes+=quelle.bytes;
+          t+=`<img class="inlbild" src="${quelle.uri}" alt="" draggable="false" data-roh="${wRohMerken(ktx,el)}" style="width:calc(${wMm.toFixed(2)}mm * var(--zoom,1));height:calc(${hMm.toFixed(2)}mm * var(--zoom,1))">`;
+        }
+        else if(quelle){
           const br=docxBildBreite(c,ktx.bild.breiteMm);
           ktx.bild.zahl++;ktx.bild.bytes+=quelle.bytes;
           /* Ein in Word umflossenes Bild (Quadrat, Passend, Transparent)
@@ -15447,6 +16037,7 @@ function docxLauf(p,ktx,innen){
     if(wirk.color&&!imLink)stil.push("color:#"+wirk.color);
     if(wirk.hi)stil.push("background-color:#"+wirk.hi);
     if(wirk.caps)stil.push("text-transform:uppercase");
+    if(wirk.ls)stil.push("letter-spacing:calc("+wirk.ls+"pt * var(--zoom,1))");
     /* Seit 1.3 wortgenau wie in Word (Toms Vorgabe: „astrein, so wie es
        war“): Größe absolut in pt, auch in Überschriften, sobald sie von dem
        abweicht, was die Anzeige ohnehin zeigt; Schrift, sobald sie von der
@@ -15511,8 +16102,60 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
      das offene <li> der Elternebene, deshalb wird dieses beim Tieferrücken
      bewusst nicht geschlossen. */
   const stapel=[];
-  const auf=(s,start)=>{out+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(start>1?' start="'+start+'"':"")+">";
-    stapel.push({tag:s.tag,ls:s.ls,offen:false})};
+  const auf=(s,start)=>{out+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(start>1?' start="'+start+'"':"")+
+      (s.css?' style="'+s.css+'"':"")+(s.wind?' data-wind="'+s.wind+'"':"")+">";
+    stapel.push({tag:s.tag,ls:s.ls,css:s.css||"",offen:false})};
+  /* Absatzrand (direkt oder aus der Vorlage, etwa die Linie unter jeder
+     Überschrift im Lebenslauf) und Abstand vor/nach dem Absatz, wo er vom
+     Dokument abweicht. Abstand vor als padding-top: CSS legt Ränder
+     übereinander, Word zählt sie zusammen. */
+  const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
+  const absatzZusatz=(pr,vorlage,ktx,h,art)=>{
+    const css=[];let attr="";
+    let bdr=KIND(pr,"pBdr");
+    if(!bdr)docxKette(stile,vorlage).forEach(st=>{if(st.bdr)bdr=st.bdr});
+    let oben=false;
+    if(bdr){
+      let n=0;
+      ["top","left","bottom","right"].forEach(sd=>{
+        const b=KIND(bdr,sd);if(!b)return;
+        const val=String(xattrN(b,"val")||"");if(!val||val==="none"||val==="nil")return;
+        const w=Math.max(0.25,(parseInt(xattrN(b,"sz"),10)||4)/8);
+        const col=String(xattrN(b,"color")||"");
+        const art=val==="double"?"double":/dot/i.test(val)?"dotted":/dash/i.test(val)?"dashed":"solid";
+        css.push(`border-${sd}:calc(${art==="double"?Math.max(2.25,w*3):w}pt * var(--zoom,1)) ${art} ${/^[0-9a-f]{6}$/i.test(col)?"#"+col.toUpperCase():"currentColor"}`);
+        const abst=parseInt(xattrN(b,"space"),10)||0;
+        if(abst)css.push(`padding-${sd}:calc(${abst}pt * var(--zoom,1))`);
+        if(sd==="top")oben=true;n++;
+      });
+      if(n&&ktx&&ktx.roh)attr+=` data-wbdr="${wRohMerken(ktx,bdr)}"`;
+    }
+    /* Abstände der Vorlage nur, wo sie nicht PureQuills eigene sind: Titel,
+       Untertitel, Zitat und Unterschrift haben hier ihr festes Aussehen,
+       und die Überschriftvorlagen, die PureQuill selbst schreibt (12 pt
+       davor, 4 pt danach), stehen für die Abstände des Editors — sonst
+       sähe ein gespeichertes und wieder geöffnetes Dokument anders aus */
+    const kette=art?{}:docxAbstandKette(stile,vorlage),direkt=docxAbstand(KIND(pr,"spacing"));
+    if(h&&kette.vorPt===12&&kette.nachPt===4){delete kette.vorPt;delete kette.nachPt}
+    const sp=Object.assign({},kette,direkt);
+    const pt=v=>"calc("+(Math.round(v*100)/100)+"pt * var(--zoom,1))";
+    /* Zeilenabstand, wo er von dem des Dokuments abweicht; ohne Angabe gilt
+       die Vorgabe der Datei, ohne diese „einfach“ */
+    const zEff=sp.zab||(art?null:(def._sp&&def._sp.zab)||{art:"auto",v:1});
+    if(zEff&&!art&&(zEff.art!=="auto"||gs.lh==null||Math.abs(zEff.v-gs.lh)>=0.01)){css.push("line-height:"+zabWert(zEff));attr+=` data-zab="${zabAttr(zEff)}"`}
+    /* Einzug rechts */
+    const ind=KIND(pr,"ind"),rechts=ind?parseInt(xattrN(ind,"right")||xattrN(ind,"end"),10)||0:0;
+    if(rechts>0)css.push("margin-right:"+Math.round(rechts/20/grundGroesse*100)/100+"em");
+    if(h){
+      if(sp.vorPt!==undefined)css.push("margin-top:"+(oben?pt(sp.vorPt):"0;padding-top:"+pt(sp.vorPt)));
+      if(sp.nachPt!==undefined)css.push("margin-bottom:"+pt(sp.nachPt));
+    }else{
+      if(sp.vorPt>0)css.push(oben?"margin-top:"+pt(sp.vorPt):"padding-top:"+pt(sp.vorPt));
+      if(sp.nachPt!==undefined&&(nachStd==null||Math.abs(sp.nachPt-nachStd)>=0.5))css.push("margin-bottom:"+pt(sp.nachPt));
+    }
+    return {css:css.join(";"),attr};
+  };
+  const stA=(...t)=>{const v=t.filter(Boolean).join(";");return v?' style="'+v+'"':""};
   /* Nummern zählen je Liste (numId) und Ebene weiter, auch wenn andere
      Absätze dazwischenstehen — so macht es Word. Im Goethe-Formular stehen
      zwischen den fünf nummerierten Abschnitten Aufzählungspunkte; ohne
@@ -15537,6 +16180,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     let inhalt=docxLauf(p,lktx)||"";
     /* Abschnittswechsel und Tabstopps des Absatzes bleiben am Element */
     const wa=wAbsatzAttr(pr,lktx);
+    const zus=absatzZusatz(pr,vorlage,lktx,h,art);
     const numPr=KIND(pr,"numPr");
     /* Leerer Absatz mit nur unterem Rand: Words Linie aus „---“. Ein dort
        verankertes freies oder umflossenes Bild steht davor, die Linie
@@ -15564,6 +16208,18 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         const oben=String((ebenen["0"]||{}).text||"").trim(),z=String((ebenen[String(ilvl)]||{}).text||"").trim();
         if(/^[•]$/.test(oben)&&[/^[•]$/,/^o$/,/^[▪§]$/][ilvl%3].test(z))stil={tag:"ul",ls:""};
       }
+      /* Einzug und Zeichenfarbe der Ebene, wo sie von Words Grundliste
+         (1,27 cm je Ebene, 0,63 cm hängend) abweichen */
+      if(stil&&ebenen&&ebenen[String(ilvl)]){
+        const eb=ebenen[String(ilvl)],vor=ilvl>0?ebenen[String(ilvl-1)]:null;
+        const std=!eb.ind||(eb.ind.links===(ilvl+1)*720&&eb.ind.haengend===360);
+        const css=[];
+        if(!std)css.push("padding-left:calc("+twipMm(eb.ind.links-(vor&&vor.ind?vor.ind.links:0))+"mm * var(--zoom,1))");
+        if(eb.farbe)css.push("--marker:#"+eb.farbe);
+        /* Darunter nur der Absatzabstand wie in Word, nicht der eigene Listenabstand */
+        if(css.length&&ilvl===0)css.push("margin-bottom:var(--ps)");
+        if(css.length)stil=Object.assign({},stil,{css:css.join(";"),wind:std?"":eb.ind.links+" "+eb.ind.haengend});
+      }
       /* numFmt „none“ heißt: sieht aus wie ein Absatz, nicht wie eine Liste */
       if(stil){
         const ebene=ebenen?ebenen[String(ilvl)]:null;
@@ -15586,7 +16242,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         /* Eine andere Liste beginnt eine neue, auch bei gleichem Aussehen —
            sonst verschmolzen zwei direkt aufeinanderfolgende Listen, und eine
            Startnummer ging verloren. Ebenso ein Neubeginn derselben Liste. */
-        if(oben.tag!==stil.tag||oben.ls!==stil.ls||(oben.liste&&oben.liste!==liste)||(neuStart&&schonOffen)){zuBis(stapel.length-1);oeffne()}
+        if(oben.tag!==stil.tag||oben.ls!==stil.ls||(oben.css||"")!==(stil.css||"")||(oben.liste&&oben.liste!==liste)||(neuStart&&schonOffen)){zuBis(stapel.length-1);oeffne()}
         stapel[stapel.length-1].liste=liste;
         const jetzt=stapel[stapel.length-1];
         if(jetzt.offen)out+="</li>";
@@ -15602,13 +16258,13 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const teile=inhalt.split(DOCX_SEITENMARKE);
       teile.forEach((t,i)=>{
         if(i)out+=seitenumbruchHtml();
-        if(t.replace(/<[^>]+>/g,"").trim()||/<(img|figure|br)\b/.test(t))absatzTeil(t,pr,vorlage,h,art,wa);
+        if(t.replace(/<[^>]+>/g,"").trim()||/<(img|figure|br)\b/.test(t))absatzTeil(t,pr,vorlage,h,art,wa+zus.attr,zus.css);
       });
       return;
     }
-    absatzTeil(inhalt,pr,vorlage,h,art,wa);
+    absatzTeil(inhalt,pr,vorlage,h,art,wa+zus.attr,zus.css);
   };
-  const absatzTeil=(inhalt,pr,vorlage,h,art,wa)=>{
+  const absatzTeil=(inhalt,pr,vorlage,h,art,wa,xst)=>{
     const al=docxAusrichtung(stile,pr,vorlage);
     /* Umflossene und freie Bilder hängen nur an diesem Absatz: sie stehen
        davor, und der Absatz bleibt, was er ist — Überschrift, Zitat,
@@ -15639,15 +16295,15 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       /* Umflossene Bilder stehen vor ihrem Absatz, damit er sie umfließt */
       const umfl=figuren.filter(f=>/^<figure class="fig (umfl|free)"/.test(f));
       out+=umfl.join("");
-      if(rest||wa)out+="<p"+wa+">"+(rest||"<br>")+"</p>";
+      if(rest||wa)out+="<p"+stA(xst)+wa+">"+(rest||"<br>")+"</p>";
       /* Ein Bild steht, wie sein Absatz ausgerichtet ist — ohne Angabe links
          wie in Word; bis 1.3 kam jedes zentriert an */
       const bal=al==="right"||al==="center"?al:"left";
       out+=figuren.filter(f=>!umfl.includes(f)).map(f=>f.replace('style="text-align:center"','style="text-align:'+bal+'"')).join("");
       return;
     }
-    if(h)out+="<h"+h+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</h"+h+">";
-    else if(art==="titel"||art==="untertitel")out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+wa+">"+(inhalt||"<br>")+"</p>";
+    if(h)out+="<h"+h+stA(al&&"text-align:"+al,xst)+wa+">"+(inhalt||"<br>")+"</h"+h+">";
+    else if(art==="titel"||art==="untertitel")out+='<p data-fv="'+art+'"'+stA(al&&"text-align:"+al,xst)+wa+">"+(inhalt||"<br>")+"</p>";
     else{
       /* Linker Einzug, in em wie beim Einrücken im Editor (indentBlocks).
          Nur der direkte am Absatz: der einer Vorlage gehört meist zu einer
@@ -15658,7 +16314,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const links=zuEm("left")||zuEm("start");
       /* Erstzeileneinzug (firstLine) bzw. hängender Einzug (hanging) */
       const erste=zuEm("firstLine")||-zuEm("hanging");
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,xst].filter(Boolean).join(";");
       out+=(st?'<p style="'+st+'"'+wa+">":"<p"+wa+">")+(inhalt||"<br>")+"</p>";
     }
   };
@@ -15880,6 +16536,15 @@ function odfAbsatzEig(pp){
   if(a)o.al=a==="center"?"center":a==="end"||a==="right"?"right":a==="justify"?"justify":"";
   const ml=g("fo:margin-left");if(ml!=null){const v=odfPt(ml);if(v!=null)o.ml=v}
   const ti=g("fo:text-indent");if(ti!=null){const v=odfPt(ti);if(v!=null)o.ti=v}
+  /* Einzug rechts, Abstände, Zeilenabstand (Prozent, fest oder mindestens) */
+  const mr=g("fo:margin-right");if(mr!=null){const v=odfPt(mr);if(v!=null)o.mr=v}
+  const mt=g("fo:margin-top");if(mt!=null){const v=odfPt(mt);if(v!=null)o.mt=v}
+  const mb=g("fo:margin-bottom");if(mb!=null){const v=odfPt(mb);if(v!=null)o.mb=v}
+  const lh=g("fo:line-height"),lm=g("style:line-height-at-least");
+  if(lh&&/%$/.test(lh.trim()))o.zab={art:"auto",v:Math.round(parseFloat(lh))/100};
+  else if(lh==="normal")o.zab={art:"auto",v:1};
+  else if(lh){const v=odfPt(lh);if(v>0)o.zab={art:"genau",v}}
+  if(lm){const v=odfPt(lm);if(v>0)o.zab={art:"mind",v}}
   const rb=g("fo:border-bottom"),rt=g("fo:border-top");if(rb!=null&&(!rt||rt==="none"))o.randUnten=rb;
   const bb=g("fo:break-before"),ba=g("fo:break-after");
   if(bb)o.umbVor=bb==="page";
@@ -16226,9 +16891,14 @@ function odtLesen(inhaltXml,stilXml,bilder){
       out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</p>";
     }else{
       const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
-      const links=em(pe.ml),erste=em(pe.ti);
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
-      out+=(st?'<p style="'+st+'">':"<p>")+(inhalt||"<br>")+"</p>";
+      const links=em(pe.ml),erste=em(pe.ti),rechts=em(pe.mr);
+      /* Absatzformat, wo es vom Dokument abweicht */
+      const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
+      const zab=pe.zab&&(pe.zab.art!=="auto"||gs.lh==null||Math.abs(pe.zab.v-gs.lh)>=0.01)?pe.zab:null;
+      const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
+        pe.mt>0&&"padding-top:"+ptCalc(pe.mt),pe.mb!=null&&nachStd!=null&&Math.abs(pe.mb-nachStd)>=0.5&&"margin-bottom:"+ptCalc(pe.mb),
+        zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+      out+=(st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>")+(inhalt||"<br>")+"</p>";
     }
     if(pe.umbNach)out+=seitenumbruchHtml();
   };
@@ -16604,6 +17274,7 @@ function docPap(o,g){
       /* Zeilenabstand (LSPD: Höhe, „mehrfach“-Merker) und Abstand danach */
       case 0x6412:o.zeile={dya:s2,mehrfach:(g[i+2]|(g[i+3]<<8))===1};break;
       case 0xA414:o.nach=v2;break;
+      case 0xA413:o.vor=v2;break;case 0x840E:case 0x845D:o.rechts=s2;break;
       case 0x840F:case 0x845E:o.links=s2;break;case 0x8411:case 0x8460:o.erste=s2;break;
       /* Rahmenlinien oben/unten: Brc80 (4 Bytes) bzw. Brc (Längenbyte + 8) */
       case 0x6424:o.oben=g[i+1]?{art:g[i+1],breite:g[i]}:null;break;
@@ -16721,9 +17392,14 @@ function wortSatz(absaetze,ctx){
         r+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inh||"<br>")+"</blockquote>";return}
       if(art==="titel"||art==="untertitel"){r+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</p>";return}
       const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
-      const links=em(ab.links),erste=em(ab.erste);
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al].filter(Boolean).join(";");
-      r+=(st?'<p style="'+st+'">':"<p>")+(inh||"<br>")+"</p>";
+      const links=em(ab.links),erste=em(ab.erste),rechts=em(ab.rechts);
+      /* Absatzformat, wo es vom Dokument abweicht (Twips, Zeilenabstand als Objekt) */
+      const zEff=ab.zab||{art:"auto",v:1};
+      const zab=zEff.art!=="auto"||ctx.lhStd==null||Math.abs(zEff.v-ctx.lhStd)>=0.01?zEff:null;
+      const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
+        ab.vor>0&&"padding-top:"+ptCalc(ab.vor/20),ab.nach!=null&&ctx.nachStd!=null&&Math.abs(ab.nach-ctx.nachStd)>=10&&"margin-bottom:"+ptCalc(ab.nach/20),
+        zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+      r+=(st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>")+(inh||"<br>")+"</p>";
     });
     return r+figuren;
   };
@@ -17003,7 +17679,8 @@ function docLesen(buf){
   const zab=new Map(),nab=new Map();
   for(const ab of absaetze){
     const n=ab.bis-ab.von;if(!n||stilArt(ab.istd).h||ab.pap.ilfo||ab.pap.inTable)continue;
-    const z=ab.pap.zeile;if(z&&z.mehrfach&&z.dya>0){const k=Math.round(z.dya/240*100)/100;zab.set(k,(zab.get(k)||0)+n)}
+    /* Ohne Angabe „einfach“, wie in Word */
+    const z=ab.pap.zeile;if(z&&z.mehrfach&&z.dya>0){const k=Math.round(z.dya/240*100)/100;zab.set(k,(zab.get(k)||0)+n)}else if(!z)zab.set(1,(zab.get(1)||0)+n);
     if(ab.pap.nach!=null)nab.set(ab.pap.nach,(nab.get(ab.pap.nach)||0)+n);
   }
 
@@ -17233,10 +17910,13 @@ function docLesen(buf){
       liste={ebene:ilvl,stil,nummer};
     }
     if(liste||tief>=1){h=0;art=""}
+    const zl=ab.pap.zeile;
     return {h,art,jc:ausrichtung(ab.pap),links:ab.pap.links,erste:ab.pap.erste,umbruch:ab.pap.umbruch,linie:linieVon(ab.pap),
+      rechts:ab.pap.rechts||0,vor:ab.pap.vor||0,nach:ab.pap.nach,
+      zab:zl&&zl.dya?(zl.mehrfach?{art:"auto",v:Math.round(zl.dya/240*100)/100}:zl.dya<0?{art:"genau",v:-zl.dya/20}:{art:"mind",v:zl.dya/20}):null,
       tief,ttp:ab.pap.ttp,innerTtp:ab.pap.innerTtp,zelle:ab.zelle,tdef:ab.pap.tdef,liste,runs:laeufe(ab,art)};
   });
-  const html=wortSatz(norm,{grundGr,grundF,textBreite});
+  const html=wortSatz(norm,{grundGr,grundF,textBreite,lhStd:(meist(zab)||[])[0],nachStd:(meist(nab)||[])[0]});
 
   /* Kopf- und Fußzeilen: je Abschnitt sechs Teiltexte (gerade/ungerade
      Kopf, gerade/ungerade Fuß, erste Seite Kopf/Fuß), davor sechs für die
@@ -17437,7 +18117,7 @@ function rtfLesen(roh){
   }
   const ctxZ={schriften,farben,defSz,deff};
   const fGrund=()=>({sz:defSz,font:schriften[deff]?schriften[deff].name:undefined});
-  const papGrund=()=>({s:0,jc:"",li:0,fi:0,intbl:false,itap:0,ls:0,ilvl:0,umbruch:false,unten:null,oben:null,sl:null,slmult:false,sa:null,outline:null});
+  const papGrund=()=>({s:0,jc:"",li:0,fi:0,ri:0,sb:null,intbl:false,itap:0,ls:0,ilvl:0,umbruch:false,unten:null,oben:null,sl:null,slmult:false,sa:null,outline:null});
 
   /* Geschichten: Haupttext, Fuß-/Endnoten, Kopf-/Fußzeilen, Kommentare */
   const neu=art=>({art,abs:[],runs:[],zeile:{gr:[0],tc:[],ohneRahmen:true},tcAkt:{}});
@@ -17557,6 +18237,7 @@ function rtfLesen(roh){
         case "ls":setP("ls",p||0);break;case "ilvl":setP("ilvl",p||0);break;
         case "pagebb":setP("umbruch",p!==0);break;
         case "sl":setP("sl",p);break;case "slmult":setP("slmult",p===1);break;case "sa":setP("sa",p);break;
+        case "sb":setP("sb",p);break;case "ri":case "rin":setP("ri",p||0);break;
         case "outlinelevel":setP("outline",p);break;
         case "brdrt":rahmen="oben";setP("oben",{art:"",breite:0});break;
         case "brdrb":rahmen="unten";setP("unten",{art:"",breite:0});break;
@@ -17681,7 +18362,7 @@ function rtfLesen(roh){
     let n=0;
     ab.runs.forEach(r=>{if(r.t==null||!r.f)return;n+=r.t.length;if(r.f.sz)plus(zaehl,r.f.sz,r.t.length);if(r.f.font)plus(zaehlF,r.f.font,r.t.length)});
     if(!n||ab.pap.ls||ab.pap.intbl)continue;
-    if(ab.pap.slmult&&ab.pap.sl>0)plus(zab,Math.round(ab.pap.sl/240*100)/100,n);
+    if(ab.pap.slmult&&ab.pap.sl>0)plus(zab,Math.round(ab.pap.sl/240*100)/100,n);else if(ab.pap.sl==null)plus(zab,1,n);
     if(ab.pap.sa!=null)plus(nab,ab.pap.sa,n);
   }
   const meist=m=>[...m.entries()].sort((x,y)=>y[1]-x[1])[0];
@@ -17712,9 +18393,11 @@ function rtfLesen(roh){
     if(art&&stile[pap.s]){const sf=stile[pap.s].f;
       runs=runs.map(r=>{if(!r.f)return r;const f={...r.f};for(const q in sf)if(q!=="sz"&&q!=="font"&&f[q]===sf[q])delete f[q];return {...r,f}})}
     return {h,art,jc:pap.jc,links:pap.li,erste:pap.fi,umbruch:pap.umbruch,linie:linieVon(pap),
+      rechts:pap.ri||0,vor:pap.sb||0,nach:pap.sa,
+      zab:pap.sl?(pap.slmult?{art:"auto",v:Math.round(pap.sl/240*100)/100}:pap.sl<0?{art:"genau",v:-pap.sl/20}:{art:"mind",v:pap.sl/20}):null,
       tief,ttp:!!ab.ttp,innerTtp:!!ab.innerTtp,zelle:!!ab.zelle,tdef:ab.tdef||null,liste,runs};
   });
-  const html=wortSatz(norm,{grundGr,grundF,textBreite:textBreite()});
+  const html=wortSatz(norm,{grundGr,grundF,textBreite:textBreite(),lhStd:(meist(zab)||[])[0],nachStd:(meist(nab)||[])[0]});
 
   /* Kopf- und Fußzeilen als Text mit Platzhaltern */
   const hfVon=gs=>{
@@ -18410,7 +19093,7 @@ function fileMenu(){
 function openSubMenu(anchor,items,cb=runFileAct){
   const alt=document.getElementById("submenu");if(alt)alt.remove();
   const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
-  m.innerHTML=items.map(it=>
+  m.innerHTML=items.map(it=>it.sep?'<div class="msep"></div>':
     `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk">${it.cur?"&#10003;":""}</span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
   m._opener=anchor;
@@ -18557,8 +19240,8 @@ function formatMenu(){
     <button class="mi" data-f="hilite"><span class="chk"></span>${tr("Texthervorhebung")}&hellip;</button>
     <button class="mi" data-f="block"><span class="chk"></span>${tr("Absatzformat")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="align"><span class="chk"></span>${tr("Ausrichten und einrücken")}<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilenabstand")}<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-f="ps"><span class="chk"></span>${tr("Absatzabstand")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="absatz"><span class="chk"></span>${tr("Absatz…")}</button>
+    <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilen- und Absatzabstand")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="qs"><span class="chk"></span>${tr("Zitat")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="ul"><span class="chk"></span>${tr("Aufzählung")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="ol"><span class="chk"></span>${tr("Nummerierung")}<span class="k">&rsaquo;</span></button>
@@ -18608,12 +19291,11 @@ function formatMenu(){
       if(sub==="outdent")return formatAct(()=>indentBlocks(-1));
       formatAct(()=>document.execCommand(sub));
     });
-    if(a==="lh"){const cl=lhOf(doc());return openSubMenu(b,LINEHEIGHTS.map(([lab,v])=>
-      ({a:String(v),label:tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),cur:Math.abs(cl-v)<0.001})),
-      sub=>formatAct(()=>setLineHeight(parseFloat(sub))));}
-    if(a==="ps"){const cp=psOf(doc());return openSubMenu(b,PARSPACES.map(([lab,v])=>
-      ({a:String(v),label:tr(lab),cur:Math.abs(cp-v)<0.001})),
-      sub=>formatAct(()=>setParSpace(parseFloat(sub))));}
+    /* Wie Words Knopf „Zeilen- und Absatzabstand“; wirkt auf die markierten
+       Absätze, nicht mehr aufs ganze Dokument (das geht mit Strg+A) */
+    if(a==="lh"){const ziele=absatzZiele();if(!ziele.length){closeMenu();toast(tr("Nur im Schreibmodus"));return}
+      return openSubMenu(b,zabEintraege(ziele),sub=>zabTun(ziele,sub));}
+    if(a==="absatz"){const ziele=absatzZiele();closeMenu();absatzDialog(ziele);return}
     /* Ohne Zitat an der Schreibmarke steht nirgends ein Haken — ein Klick legt
        dann eins an. Mit Zitat zeigt der Haken dessen Stil. */
     if(a==="qs"){const bq=curQuote(),cq=bq?quoteStyleOf(bq):null;
@@ -19210,6 +19892,47 @@ function pgliWeg(root){
     if(!li.getAttribute("style"))li.removeAttribute("style");
   });
 }
+/* Eigene Tabstopps (data-tabs, aus Word): jeder Tab bekommt die Breite bis
+   zum nächsten Stopp. Gemessen wird wie in Word vom linken Seitenrand bzw.
+   vom Zellrand, nicht vom Absatzeinzug; ein hängender Einzug ist zugleich
+   ein Stopp. Rechts- und Mittelstopps ziehen den folgenden Text heran.
+   Hinter dem letzten Stopp gelten die Standardstopps alle 1,27 cm. Bis
+   2026-10 galten nur diese — die zweite Spalte im Lebenslauf stand falsch. */
+function tabsSetzen(root){
+  if(!root)return;
+  const bloecke=root.querySelectorAll("[data-tabs]");
+  if(!bloecke.length)return;
+  const zoom=parseFloat(getComputedStyle(root).getPropertyValue("--zoom"))||S.zoom||1;
+  const pxMm=96/25.4*zoom;
+  bloecke.forEach(b=>{
+    const tabs=[...b.querySelectorAll(".wtab")].filter(t=>t.closest("[data-tabs]")===b);
+    if(!tabs.length)return;
+    tabs.forEach(t=>{t.style.width="0px"});
+    const zelle=b.closest("td,th")||root,zs=getComputedStyle(zelle);
+    const ursprung=zelle.getBoundingClientRect().left+parseFloat(zs.borderLeftWidth||0)+parseFloat(zs.paddingLeft||0);
+    const stopps=b.dataset.tabs.split(/\s+/).map(v=>({a:v[0],mm:(parseInt(v.slice(1),10)||0)*TWIP_MM})).filter(v=>v.mm>0);
+    const bs=getComputedStyle(b);
+    if(parseFloat(bs.textIndent)<0){
+      const einzug=(b.getBoundingClientRect().left+parseFloat(bs.borderLeftWidth||0)+parseFloat(bs.paddingLeft||0)-ursprung)/pxMm;
+      if(einzug>0)stopps.push({a:"l",mm:einzug});
+    }
+    stopps.sort((p,q)=>p.mm-q.mm);
+    tabs.forEach((t,i)=>{
+      const x=(t.getBoundingClientRect().left-ursprung)/pxMm;
+      let st=stopps.find(v=>v.mm>x+0.3);
+      if(!st)st={a:"l",mm:(Math.floor(x/12.7)+1)*12.7};
+      let w=st.mm-x;
+      if(st.a!=="l"){
+        /* Breite des Texts bis zum nächsten Tab bzw. Absatzende */
+        const r=document.createRange();r.setStartAfter(t);
+        if(tabs[i+1])r.setEndBefore(tabs[i+1]);else r.setEnd(b,b.childNodes.length);
+        const breite=r.getBoundingClientRect().width/pxMm;
+        w-=st.a==="c"?breite/2:breite;
+      }
+      t.style.width=Math.max(0.5,w)*pxMm+"px";
+    });
+  });
+}
 function paginate(){
   const ed=$("#editor"),paper=$("#paper"),layer=$("#pagelayer");
   if(!ed||!paper||druckLaeuft)return;
@@ -19223,6 +19946,7 @@ function paginate(){
     return;
   }
   renumberFootnotes(ed);
+  tabsSetzen(ed);
   const f=fmtOf(doc()),z=S.zoom;
   const pw=MM(f.w)*z, ph=MM(f.h)*z;
   const mr=MM(f.m[1])*z, ml=MM(f.m[3])*z;
@@ -26098,8 +26822,7 @@ Title and subtitle stay out of both, as in Word.</p>
 </table>
 <p><b>To indent a paragraph</b>, press <kbd>Tab</kbd> at the start of it;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> takes it back. Inside a table these keys move between cells.</p>
-<p><b>Line spacing</b> and <b>paragraph spacing</b> are under Format and apply to the whole
-document rather than to single paragraphs.</p>`},
+<p><b>Line and paragraph spacing</b> work as in Word: they apply to the selected paragraphs, or to the one with the cursor. The button next to the alignment buttons offers 1.0 to 3.0 and adds or removes space before and after a paragraph; <b>Format &rsaquo; Paragraph…</b> opens the full dialog with indents (left, right, first line, hanging), spacing before and after, and line spacing as single, 1.5 lines, double, at least, exactly or multiple. To change the whole document, select everything first ({kz:alles}); <b>Set As Default</b> in the dialog makes the spacing the document's default.<nur-a> Shortcuts as in Word: {kz:zabEins} single, {kz:zabAnderthalb} 1.5 lines, {kz:zabZwei} double, {kz:abstVor} space before on or off.</nur-a></p>`},
 
  {t:"Lists and quotations",k:"list;bullet;numbered;quote;blockquote;markers",b:`
 <p>Start a list from the toolbar, from <b>Format</b>, or simply by typing <code>- </code>
@@ -26572,6 +27295,7 @@ leaves alone</nur-b> keep their usual keys.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Undo / redo</td></tr>
 <tr><td>{kz:alles}</td><td>Select all</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Left / centre<nur-a> / right</nur-a> / justified</td></tr>
+<nur-a><tr><td>Line spacing single / 1.5 / double</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Space before a paragraph on/off</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Left / centre / right</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Indent / outdent (in tables: next cell)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Page break</td></tr>
@@ -26730,8 +27454,7 @@ Untertitel zählen dort nicht mit, wie in Word.</p>
 <p><b>Zum Einrücken</b> drückst du <kbd>Tab</kbd> am Absatzanfang;
 <kbd>⇧</kbd>+<kbd>Tab</kbd> nimmt es zurück. In einer Tabelle wechseln diese Tasten
 stattdessen die Zelle.</p>
-<p><b>Zeilenabstand</b> und <b>Absatzabstand</b> stehen im Format-Menü und gelten für das
-ganze Dokument, nicht für einzelne Absätze.</p>`},
+<p><b>Zeilen- und Absatzabstand</b> funktionieren wie in Word: Sie gelten für die markierten Absätze, ohne Markierung für den Absatz mit der Schreibmarke. Der Knopf neben den Ausrichtungsknöpfen bietet 1,0 bis 3,0 und fügt Abstand vor oder nach dem Absatz hinzu oder entfernt ihn; <b>Format &rsaquo; Absatz…</b> öffnet den vollständigen Dialog mit Einzügen (links, rechts, erste Zeile, hängend), Abstand vor und nach und dem Zeilenabstand als einfach, 1,5 Zeilen, doppelt, mindestens, genau oder mehrfach. Für das ganze Dokument vorher alles markieren ({kz:alles}); <b>Als Standard festlegen</b> im Dialog macht die Abstände zur Vorgabe des Dokuments.<nur-a> Tastenkürzel wie in Word: {kz:zabEins} einfach, {kz:zabAnderthalb} 1,5 Zeilen, {kz:zabZwei} doppelt, {kz:abstVor} Abstand vor ein oder aus.</nur-a></p>`},
 
  {t:"Listen und Zitate",k:"liste;aufzählung;nummerierung;zitat;blockzitat;aufzählungszeichen",b:`
 <p>Eine Liste beginnst du über die Werkzeugleiste, über <b>Format</b> — oder indem du am
@@ -27228,6 +27951,7 @@ lässt,</nur-b> behalten ihre gewohnten Tasten.</p>
 <tr><td><kbd>Strg</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Rückgängig / Wiederholen</td></tr>
 <tr><td>{kz:alles}</td><td>Alles markieren</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Links / zentriert<nur-a> / rechts</nur-a> / Blocksatz</td></tr>
+<nur-a><tr><td>Zeilenabstand einfach / 1,5 / doppelt</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Abstand vor dem Absatz ein/aus</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Links / zentriert / rechts</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>⇧</kbd>+<kbd>Tab</kbd></td><td>Ein- / ausrücken (in Tabellen: nächste Zelle)</td></tr>
 <tr><td><kbd>Strg</kbd>+<kbd>Eingabe</kbd><br><kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>Eingabe</kbd></td><td>Seitenumbruch</td></tr>
@@ -27387,8 +28111,7 @@ negrita. El título de documento y el subtítulo no cuentan en ellos, como en Wo
 <p><b>Para sangrar un párrafo</b>, pulsa <kbd>Tab</kbd> al principio;
 <kbd>Mayús</kbd>+<kbd>Tab</kbd> lo devuelve. Dentro de una tabla, estas teclas se mueven entre
 celdas.</p>
-<p>El <b>interlineado</b> y el <b>espacio entre párrafos</b> están en Formato y se aplican a
-todo el documento, no a párrafos sueltos.</p>`},
+<p>El <b>interlineado y el espaciado entre párrafos</b> funcionan como en Word: se aplican a los párrafos seleccionados o, sin selección, al párrafo del cursor. El botón junto a los de alineación ofrece de 1,0 a 3,0 y agrega o quita espacio antes y después del párrafo; <b>Formato &rsaquo; Párrafo…</b> abre el cuadro completo con sangrías (izquierda, derecha, primera línea, francesa), espaciado anterior y posterior e interlineado sencillo, 1,5 líneas, doble, mínimo, exacto o múltiple. Para todo el documento, selecciona antes todo ({kz:alles}); <b>Establecer como predeterminado</b> convierte el espaciado en el predeterminado del documento.<nur-a> Atajos como en Word: {kz:zabEins} sencillo, {kz:zabAnderthalb} 1,5 líneas, {kz:zabZwei} doble, {kz:abstVor} espacio anterior sí o no.</nur-a></p>`},
 
  {t:"Listas y citas",k:"lista;viñeta;numerada;cita;cita en bloque;marcadores",b:`
 <p>Empieza una lista desde la barra de herramientas, desde <b>Formato</b>, o simplemente
@@ -27888,6 +28611,7 @@ versión que estás usando.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Deshacer / rehacer</td></tr>
 <tr><td>{kz:alles}</td><td>Seleccionar todo</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Izquierda / centro<nur-a> / derecha</nur-a> / justificado</td></tr>
+<nur-a><tr><td>Interlineado sencillo / 1,5 / doble</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Espacio antes del párrafo sí/no</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Izquierda / centro / derecha</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Mayús</kbd>+<kbd>Tab</kbd></td><td>Sangrar / reducir sangría (en tablas: siguiente celda)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Intro</kbd><br><kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>Intro</kbd></td><td>Salto de página</td></tr>
@@ -28046,8 +28770,7 @@ negrito. O título do documento e o subtítulo ficam de fora, como no Word.</p>
 <p><b>Para recuar um parágrafo</b>, pressione <kbd>Tab</kbd> no começo dele;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> volta. Dentro de uma tabela, essas teclas movem entre
 células.</p>
-<p>O <b>espaçamento entre linhas</b> e o <b>espaço entre parágrafos</b> ficam em Formato e se
-aplicam ao documento inteiro, não a parágrafos isolados.</p>`},
+<p>O <b>espaçamento entre linhas e parágrafos</b> funciona como no Word: vale para os parágrafos selecionados ou, sem seleção, para o parágrafo do cursor. O botão ao lado dos de alinhamento oferece de 1,0 a 3,0 e adiciona ou remove espaço antes e depois do parágrafo; <b>Formato &rsaquo; Parágrafo…</b> abre a caixa completa com recuos (esquerda, direita, primeira linha, deslocamento), espaçamento antes e depois e espaçamento entre linhas simples, 1,5 linha, duplo, pelo menos, exatamente ou múltiplos. Para o documento inteiro, selecione tudo antes ({kz:alles}); <b>Definir como Padrão</b> torna o espaçamento o padrão do documento.<nur-a> Atalhos como no Word: {kz:zabEins} simples, {kz:zabAnderthalb} 1,5 linha, {kz:zabZwei} duplo, {kz:abstVor} espaço antes sim ou não.</nur-a></p>`},
 
  {t:"Listas e citações",k:"lista;marcador;numerada;citação;bloco de citação;marcadores",b:`
 <p>Comece uma lista pela barra de ferramentas, por <b>Formato</b>, ou simplesmente digitando
@@ -28542,6 +29265,7 @@ mostram as teclas da versão que você está usando.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Desfazer / refazer</td></tr>
 <tr><td>{kz:alles}</td><td>Selecionar tudo</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Esquerda / centro<nur-a> / direita</nur-a> / justificado</td></tr>
+<nur-a><tr><td>Espaçamento simples / 1,5 / duplo</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Espaço antes do parágrafo sim/não</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Esquerda / centro / direita</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Recuar / reduzir recuo (em tabelas: próxima célula)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Quebra de página</td></tr>
@@ -28711,8 +29435,7 @@ mettre en gras.</p>
 <p><b>Pour mettre un paragraphe en retrait</b>, appuyez sur <kbd>Tab</kbd> au début ;
 <kbd>Maj</kbd>+<kbd>Tab</kbd> le ramène. Dans un tableau, ces touches passent d'une cellule à
 l'autre.</p>
-<p>L'<b>interligne</b> et l'<b>espacement entre paragraphes</b> sont sous Format et s'appliquent
-à tout le document, pas à des paragraphes isolés.</p>`},
+<p>L'<b>interligne et l'espacement des paragraphes</b> fonctionnent comme dans Word : ils s'appliquent aux paragraphes sélectionnés ou, sans sélection, au paragraphe du curseur. Le bouton à côté des boutons d'alignement propose de 1,0 à 3,0 et ajoute ou supprime l'espace avant et après le paragraphe ; <b>Format &rsaquo; Paragraphe…</b> ouvre la boîte complète avec les retraits (gauche, droite, première ligne positive ou négative), l'espacement avant et après et l'interligne simple, 1,5 ligne, double, au moins, exactement ou multiple. Pour tout le document, sélectionnez d'abord tout ({kz:alles}) ; <b>Définir par défaut</b> fait de l'espacement celui du document.<nur-a> Raccourcis comme dans Word : {kz:zabEins} simple, {kz:zabAnderthalb} 1,5 ligne, {kz:zabZwei} double, {kz:abstVor} espace avant oui ou non.</nur-a></p>`},
 
  {t:"Listes et citations",k:"liste;puce;numérotée;citation;bloc de citation;marqueurs",b:`
 <p>Commencez une liste depuis la barre d'outils, depuis <b>Format</b>, ou simplement en tapant
@@ -29226,6 +29949,7 @@ habituelles.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annuler / rétablir</td></tr>
 <tr><td>{kz:alles}</td><td>Tout sélectionner</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Gauche / centre<nur-a> / droite</nur-a> / justifié</td></tr>
+<nur-a><tr><td>Interligne simple / 1,5 / double</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Espace avant le paragraphe oui/non</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Gauche / centre / droite</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maj</kbd>+<kbd>Tab</kbd></td><td>Retrait / retrait négatif (dans les tableaux : cellule suivante)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Entrée</kbd><br><kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>Entrée</kbd></td><td>Saut de page</td></tr>
@@ -29383,8 +30107,7 @@ zamiast po prostu powiększać wiersz i pogrubiać.</p>
 </table>
 <p><b>Aby zrobić wcięcie akapitu</b>, naciśnij <kbd>Tab</kbd> na jego początku;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> je cofa. W tabeli te klawisze przechodzą między komórkami.</p>
-<p><b>Interlinia</b> i <b>odstęp między akapitami</b> są w menu Format i dotyczą całego
-dokumentu, a nie pojedynczych akapitów.</p>`},
+<p><b>Interlinia i odstępy między akapitami</b> działają jak w Wordzie: dotyczą zaznaczonych akapitów, a bez zaznaczenia akapitu z kursorem. Przycisk obok przycisków wyrównania oferuje od 1,0 do 3,0 oraz dodaje lub usuwa odstęp przed akapitem i po nim; <b>Format &rsaquo; Akapit…</b> otwiera pełne okno z wcięciami (od lewej, od prawej, pierwszy wiersz, wysunięcie), odstępem przed i po oraz interlinią pojedynczą, 1,5 wiersza, podwójną, co najmniej, dokładnie lub wielokrotną. Dla całego dokumentu najpierw zaznacz wszystko ({kz:alles}); <b>Ustaw jako domyślne</b> czyni odstępy domyślnymi dla dokumentu.<nur-a> Skróty jak w Wordzie: {kz:zabEins} pojedyncza, {kz:zabAnderthalb} 1,5 wiersza, {kz:zabZwei} podwójna, {kz:abstVor} odstęp przed tak lub nie.</nur-a></p>`},
 
  {t:"Listy i cytaty",k:"lista;punktor;numerowana;cytat;blok cytatu;znaczniki",b:`
 <p>Rozpocznij listę z paska narzędzi, z menu <b>Format</b> albo po prostu wpisując
@@ -29865,6 +30588,7 @@ przeglądarka zostawia w spokoju,</nur-b> zachowują swoje zwykłe klawisze.</p>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Cofnij / ponów</td></tr>
 <tr><td>{kz:alles}</td><td>Zaznacz wszystko</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Lewo / środek<nur-a> / prawo</nur-a> / wyjustowany</td></tr>
+<nur-a><tr><td>Interlinia pojedyncza / 1,5 / podwójna</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Odstęp przed akapitem tak/nie</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Lewo / środek / prawo</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd></td><td>Wcięcie / cofnięcie wcięcia (w tabelach: następna komórka)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd><br><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd></td><td>Podział strony</td></tr>
@@ -30028,8 +30752,7 @@ sommario, quindi usali invece di limitarti a ingrandire una riga e metterla in g
 <p><b>Per rientrare un paragrafo</b>, premi <kbd>Tab</kbd> all'inizio;
 <kbd>Maiusc</kbd>+<kbd>Tab</kbd> lo riporta indietro. Dentro una tabella questi tasti si spostano
 tra le celle.</p>
-<p>L'<b>interlinea</b> e la <b>spaziatura tra paragrafi</b> sono nel menu Formato e si applicano
-all'intero documento, non ai singoli paragrafi.</p>`},
+<p><b>Interlinea e spaziatura dei paragrafi</b> funzionano come in Word: valgono per i paragrafi selezionati o, senza selezione, per il paragrafo del cursore. Il pulsante accanto a quelli di allineamento offre da 1,0 a 3,0 e aggiunge o rimuove lo spazio prima e dopo il paragrafo; <b>Formato &rsaquo; Paragrafo…</b> apre la finestra completa con i rientri (sinistro, destro, prima riga, sporgente), la spaziatura prima e dopo e l'interlinea singola, 1,5 righe, doppia, minima, esatta o multipla. Per l'intero documento seleziona prima tutto ({kz:alles}); <b>Imposta come predefinito</b> rende la spaziatura quella predefinita del documento.<nur-a> Scorciatoie come in Word: {kz:zabEins} singola, {kz:zabAnderthalb} 1,5 righe, {kz:zabZwei} doppia, {kz:abstVor} spazio prima sì o no.</nur-a></p>`},
 
  {t:"Elenchi e citazioni",k:"elenco;punto;numerato;citazione;blocco di citazione;indicatori",b:`
 <p>Avvia un elenco dalla barra degli strumenti, da <b>Formato</b>, o semplicemente digitando
@@ -30530,6 +31253,7 @@ modifica<nur-b> che il browser lascia in pace</nur-b> mantengono i loro tasti ab
 <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> / <kbd>Y</kbd></td><td>Annulla / ripeti</td></tr>
 <tr><td>{kz:alles}</td><td>Seleziona tutto</td></tr>
 <tr><td>{kz:links} / {kz:mitte} /<nur-a> {kz:rechts} /</nur-a> {kz:blocksatz}</td><td>Sinistra / centro<nur-a> / destra</nur-a> / giustificato</td></tr>
+<nur-a><tr><td>Interlinea singola / 1,5 / doppia</td><td>{kz:zabEins} / {kz:zabAnderthalb} / {kz:zabZwei}</td></tr><tr><td>Spazio prima del paragrafo sì/no</td><td>{kz:abstVor}</td></tr></nur-a>
 <tr><td><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>L</kbd> / <kbd>E</kbd> / <kbd>R</kbd></td><td>Sinistra / centro / destra</td></tr>
 <tr><td><kbd>Tab</kbd> / <kbd>Maiusc</kbd>+<kbd>Tab</kbd></td><td>Aumenta / riduci rientro (nelle tabelle: cella successiva)</td></tr>
 <tr><td><kbd>Ctrl</kbd>+<kbd>Invio</kbd><br><kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>Invio</kbd></td><td>Interruzione di pagina</td></tr>
@@ -30892,6 +31616,12 @@ const KUERZEL=[
   {id:"dateiAuf", m:"c",  k:"o", tun:()=>loadDocumentFile()},
   /* Strg+W schliesst im Browser den Reiter und ist dort nicht zu haben. */
   {id:"dokZu",    m:"c",  k:"w", nurApp:true, tun:()=>closeDoc(S.active)},
+  /* Zeilenabstand 1/2/1,5 und Abstand vor dem Absatz wie in Word — nur in
+     der App, im Browser wechselt Strg+Ziffer die Reiter, Strg+0 den Zoom */
+  {id:"zabEins",     m:"c",  k:"1", nurApp:true, tun:()=>{const z=absatzZiele();if(z.length)absatzAnwenden(z,{zab:{art:"auto",v:1}})}},
+  {id:"zabZwei",     m:"c",  k:"2", nurApp:true, tun:()=>{const z=absatzZiele();if(z.length)absatzAnwenden(z,{zab:{art:"auto",v:2}})}},
+  {id:"zabAnderthalb",    m:"c",  k:"5", nurApp:true, tun:()=>{const z=absatzZiele();if(z.length)absatzAnwenden(z,{zab:{art:"auto",v:1.5}})}},
+  {id:"abstVor",  m:"c",  k:"0", nurApp:true, tun:()=>{const z=absatzZiele();if(z.length)absatzAnwenden(z,{vor:absatzWirkung(z[0]).vor>0?0:12})}},
   {id:"ansSchr",  m:"alt",k:"1", tun:()=>setMode("write")},
   {id:"ansNotiz", m:"alt",k:"2", tun:()=>setMode("notes")},
   {id:"ansGloss", m:"alt",k:"3", tun:()=>setMode("gloss")},
@@ -31087,6 +31817,7 @@ $("#tools").addEventListener("click",e=>{
   if(e.target.closest("#lnkBtn")){linkDialog();return}
   if(e.target.closest("#tblBtn")){tablePicker();return}
   if(e.target.closest("#pgbBtn")){insertPageBreak();return}
+  const zb=e.target.closest("#zabBtn");if(zb){zabMenue(zb);return}
   if(e.target.closest("#indentBtn")){indentBlocks(1);return}
   if(e.target.closest("#outdentBtn")){indentBlocks(-1);return}
   if(e.target.closest("#findBtn")){fdOpen(false);return}
@@ -31113,7 +31844,7 @@ $("#tools").addEventListener("contextmenu",e=>{
 /* Die Farbknöpfe dürfen den Fokus nicht aus dem Editor ziehen, sonst
    verliert execCommand die Textauswahl. */
 $("#tools").addEventListener("mousedown",e=>{
-  if(e.target.closest("#foreBtn,#markBtn,#fBlock"))e.preventDefault();
+  if(e.target.closest("#foreBtn,#markBtn,#fBlock,#zabBtn"))e.preventDefault();
 });
 $("#tools").addEventListener("focusin",e=>{
   if(e.target.id==="fFont"){e.target.select();schriftFilter="";schriftMenue()}});

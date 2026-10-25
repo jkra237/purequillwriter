@@ -103,6 +103,56 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Zeilen- und Absatzabstand je Absatz, wie in Word** (Toms Fund: Format ›
+  Zeilenabstand änderte immer das ganze Dokument; „exakt wie Word“). Neuer
+  Knopf „Zeilen- und Absatzabstand“ neben Blocksatz mit Words Liste: 1,0 bis
+  3,0, „Zeilenabstandsoptionen…“, Abstand vor/nach dem Absatz hinzufügen bzw.
+  entfernen; dasselbe im Format-Menü. Neu Format › „Absatz…“ wie Words Dialog
+  (Einzüge und Abstände): Ausrichtung, Einzug links/rechts, Sondereinzug
+  erste Zeile/hängend, Abstand vor/nach in pt, Zeilenabstand einfach, 1,5
+  Zeilen, doppelt, mindestens, genau, mehrfach mit Maß, Vorschau, OK vor
+  Abbrechen, „Als Standard festlegen“ (nur dieses Dokument oder alle neuen).
+  Übernommen wird nur, was im Dialog geändert wurde. Wirkt auf die markierten
+  Absätze, ohne Markierung auf den mit der Schreibmarke, in Listen auf die
+  Einträge; fürs ganze Dokument Strg+A. In der App Words Kürzel Strg+1/5/2
+  und Strg+0 (Abstand vor ein/aus); im Browser gehören sie dem Fenster.
+  Technisch: absatzFormat()/absatzFormatSetzen(), Zeilenabstand als data-zab
+  plus line-height über --lhn (natürliche Zeilenhöhe der Schrift). Word, ODT
+  und RTF schreiben und lesen es je Absatz (w:spacing line/lineRule, w:ind
+  right; fo:line-height, style:line-height-at-least; \sl\slmult \sb \ri),
+  ebenso der .doc-Leser (Abstand vor, Einzug rechts, Genau/Mindestens). Ohne
+  Angabe gilt in allen Lesern „einfach“ wie in Word. check-umlauf prüft das
+  neue Merkmal mit (43/43 in allen vier Wegen, auch mit LibreOffice).
+  Hilfe „Absätze und Überschriften“ und Tastenkürzel in 7 Sprachen.
+- **Word-Dateien sehen aus wie in Word: Symbole in der Zeile, eigene
+  Tabstopps, Absatzlinien, Laufweite, Listeneinzug, Abstände** (Toms Fund an
+  seinem Lebenslauf: „viele Formatoptionen, die Word korrekt anzeigt, werden
+  nicht korrekt angezeigt — ein gravierendes Problem“; alle sechs Punkte, Toms
+  Wahl). Gemessen gegen Words PDF und LibreOffice:
+  1. Kleine Bilder im Text (wp:inline, ≤ 12 mm, Text im Absatz) bleiben in
+     der Zeile in ihrer Größe (img.inlbild) statt als große Figur darunter;
+     nach Word geht genau der alte Lauf zurück (data-roh), nach ODT als
+     Zeichenrahmen, nach RTF als \pict.
+  2. Eigene Tabstopps: data-tabs am Absatz, tabsSetzen() gibt jedem Tab beim
+     Umbruch die Breite bis zum nächsten Stopp (links, rechts, mittig; vom
+     Seiten- bzw. Zellrand gemessen, hängender Einzug zählt als Stopp). Bisher
+     galten nur die Standardstopps alle 1,27 cm.
+  3. Absatzränder (direkt oder aus der Vorlage, etwa die Linie unter jeder
+     Überschrift) als CSS-Rand; nach Word als bewahrtes w:pBdr (data-wbdr).
+  4. Zeichenabstand (w:spacing im rPr) als letter-spacing, hin und zurück.
+  5. Listen mit eigenem Einzug und Zeichenfarbe (Striche bündig unter dem
+     Jobtitel, blau): padding-left/--marker, beim Speichern eine eigene
+     Listendefinition (data-wind).
+  6. Zeilenabstand: ohne Angabe gilt wie in Word „einfach“ (vorher der
+     eigene, luftigere Wert); Abstand vor/nach je Absatz, wo er vom Dokument
+     abweicht (vor als padding-top, weil Word Abstände addiert). PureQuills
+     eigene Vorlagenabstände bleiben außen vor, damit der Umlauf stabil ist.
+  Nebenbei behoben: Überschriften mit eigener Größe (9,5 pt im Lebenslauf)
+  gingen in Word, ODT und RTF in der Größe der Überschriftvorlage hinaus —
+  verglichen wurde mit der Grundgröße. w:pPr wird jetzt in Schema-
+  Reihenfolge geschrieben (pPrOrdnen). Umlauf Word/ODT/RTF/.doc 42/42,
+  Export 302/302. ODT und RTF schreiben Tabstopps, Ränder, Laufweite und
+  Listeneinzug noch nicht mit (Word schon).
 - **Statusleiste im Fokusmodus halb ausgegraut** (Toms Wunsch): 50 %
   Deckkraft, beim Überfahren mit der Maus wieder voll; beim Tippen so blass
   wie außerhalb des Fokusmodus.
