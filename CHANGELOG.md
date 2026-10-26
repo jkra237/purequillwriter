@@ -103,6 +103,14 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Seitenumbruch löschen wie in Word** (Toms Prüfauftrag): Rücktaste am
+  Anfang des Absatzes danach löste bisher diesen Absatz auf (der Text hing lose
+  hinter dem Umbruch), statt den Umbruch zu entfernen. Jetzt entfernen ihn die
+  Rücktaste dort, Entf am Ende des Absatzes davor und ein Klick auf die Linie
+  mit Entf/Rücktaste; über execCommand, damit Strg+Z ihn zurückholt. Die
+  Markierung steht wie bei Word mit eingeblendeten Formatierungszeichen mittig
+  auf der gestrichelten Linie („--- Seitenumbruch ---“), gewählt in der
+  Akzentfarbe; im Druck unsichtbar wie bisher. Hilfe in 7 Sprachen.
 - **Enter auf leerem Listenpunkt verlässt die Liste wieder zuverlässig**
   (Toms Fund im Lebenslauf: man blieb endlos in der Liste). Chrome legte den
   neuen Absatz mit der Schriftfarbe als <font> an; die Aufräumroutine nach
