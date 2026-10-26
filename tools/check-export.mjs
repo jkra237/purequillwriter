@@ -426,7 +426,9 @@ const DRUCKVORBEREITUNG = String.raw`(async()=>{
   /* Bandgrenzen und Zeilenzahl von der App erfragen statt sie nachzurechnen:
      bei umbrechenden Zeilen haengt beides an der Spaltenbreite. Geprueft wird
      dann, ob das PDF sich an die eigene Rechnung haelt. */
-  const zeile=(9*25.4/72)*1.3;
+  /* Zeilenhöhe der Kopfzeile: Schriftgröße der App (seit 2026-10-26 die des
+     Dokuments × 0,85, vorher fest 9 pt) × 1,3 */
+  const zeile=hfGroessePx(d,1)/MM(1)*1.3;
   const zeilenVon=w=>hfOf(d,w).on?Math.round((hfTextHoehe(d,w,1)/MM(1))/zeile):0;
   return JSON.stringify({
     textspalteMm:f.w-f.m[1]-f.m[3], seitenAmBildschirm:pageCount,

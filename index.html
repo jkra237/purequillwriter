@@ -461,7 +461,9 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .sheetpage{position:absolute;left:0;right:0;background:var(--paper);
   border:1px solid var(--pageedge);box-shadow:0 2px 9px rgba(0,0,0,.22)}
 .sheetpage .mg{position:absolute;top:0;bottom:0;border-left:1px dashed var(--rule)}
-.hf{position:absolute;font-family:Georgia,serif;color:var(--ink-soft);
+/* Wie Word: Dokumentschrift in Schwarz (bis 2026-10 Georgia in Grau) —
+   Schrift und Größe setzt hfHtml() je Dokument */
+.hf{position:absolute;font-family:Georgia,serif;color:var(--ink);
   pointer-events:none;white-space:pre-wrap;line-height:1.3}
 .hfbild{position:absolute;pointer-events:none;user-select:none}
 /* Endnoten: Liste am Dokumentende (endnotenListe) */
@@ -737,6 +739,9 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
 :is(#editor,.pvedit) td,:is(#editor,.pvedit) th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
 :is(#editor,.pvedit) td>p:last-child,:is(#editor,.pvedit) th>p:last-child{margin-bottom:0}
+/* Zellen mit eigenem Format (aus Word/Writer): Innenabstand wie dort —
+   oben und unten keiner, seitlich 0,19 cm. Sonst wäre jede Zeile höher. */
+:is(#editor,.pvedit) td[style],:is(#editor,.pvedit) th[style]{padding:0 calc(1.9mm * var(--zoom,1))}
 :is(#editor,.pvedit) th{background:var(--chrome-2);font-weight:600;text-align:left}
 /* Rahmenlose Tabelle (aus Word, data-rahmen="ohne"): im Editor feine Hilfslinien wie
    Words „Rasterlinien anzeigen“, damit man die Zellen sieht; überall sonst ohne. */
@@ -1725,7 +1730,8 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor h1,#editor h2,#editor h3,#editor h4,#editor p[data-fv]{break-after:avoid;page-break-after:avoid}
   #editor .pgbreak{break-after:page;page-break-after:always;border:none!important;
     height:0!important;visibility:hidden!important}
-  #editor td,#editor th{border:1px solid #000!important}
+  #editor td:not([style*="border"]),#editor th:not([style*="border"]){border:1px solid #000!important}
+  #editor td[style*="background"],#editor th[style*="background"]{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #editor table[data-rahmen="ohne"]>*>tr>td,#editor table[data-rahmen="ohne"]>*>tr>th{border:none!important}
   #editor th{background:none!important}
   .glossterm{border-bottom:none!important}
@@ -2336,16 +2342,20 @@ function ensureHfMeasurer(){
   document.body.appendChild(hfMessEl);
   return hfMessEl;
 }
+/* Schrift der Kopf-/Fußzeile wie Words Vorlage „Kopfzeile“: die des
+   Dokuments, Grundgröße 85 % (so rechnen Leser und Exporter, basisPt) */
+const hfGroessePx=(d,z)=>((d.size||S.settings.size||11)*0.85*96/72)*z;
+const hfSchrift=d=>schriftStapel(d.font||S.settings.font).replace(/"/g,"'");
 function hfTextHoehe(d,which,z){
   const v=hfOf(d,which),f=fmtOf(d);
-  const breite=MM(v.tw||f.w-f.m[1]-f.m[3])*z, fs=(9*96/72)*z;
+  const breite=MM(v.tw||f.w-f.m[1]-f.m[3])*z, fs=hfGroessePx(d,z);
   const html=hfInhalt(v,1,Math.max(1,pageCount))||"&nbsp;";
   /* paginate() fragt mehrfach je Durchlauf — ohne den Merker wäre das jedes
      Mal ein erzwungenes Neuberechnen des Layouts. */
-  const key=which+"|"+z+"|"+breite+"|"+html;
+  const key=which+"|"+z+"|"+breite+"|"+fs+"|"+d.font+"|"+html;
   if(hfMessCache.has(key))return hfMessCache.get(key);
   const el=ensureHfMeasurer();
-  el.style.width=breite+"px";el.style.fontSize=fs+"px";
+  el.style.width=breite+"px";el.style.fontSize=fs+"px";el.style.fontFamily=hfSchrift(d);
   el.innerHTML=html;
   const h=el.offsetHeight;
   if(hfMessCache.size>40)hfMessCache.clear();
@@ -9742,6 +9752,18 @@ function zabAus(t){const m=ZAB_RE.exec(String(t||""));return m?{art:m[1]==="a"?"
 const ptCalc=v=>"calc("+(Math.round(v*100)/100)+"pt * var(--zoom,1))";
 const ptAusCalc=v=>{const m=/calc\(\s*(-?[\d.]+)pt/.exec(v||"");return m?+m[1]:null};
 /* Format eines Blocks in pt; was nicht am Absatz steht, ist null */
+/* Für die Exporter: Im Editor hat der letzte Absatz einer Zelle keinen
+   Abstand danach (td>p:last-child). Ohne ausdrückliche 0 nähmen Word und
+   Writer dort den Absatzabstand des Dokuments — die Zeilen wären höher als
+   in PureQuill, und beim Wiederöffnen käme der Abstand als Format zurück. */
+function absatzFormatAus(el,groesse){
+  const f=absatzFormat(el,groesse);
+  if(f.nach==null&&el&&el.matches){
+    const eltern=el.parentElement;
+    if(el.matches("td,th")||(eltern&&eltern.matches("td,th")&&eltern.lastElementChild===el))f.nach=0;
+  }
+  return f;
+}
 function absatzFormat(el,groesse){
   const st=el.style||{};
   const emPt=v=>{const z=parseFloat(v);return !isNaN(z)&&/em$/.test(String(v||""))?Math.round(z*groesse*100)/100:null};
@@ -11900,6 +11922,69 @@ function runeXml(text,st){
   return `<w:r>${rPrXml(st)}<w:t${raum}>${xesc(text)}</w:t></w:r>`;
 }
 const HEX3=n=>n.toString(16).padStart(2,"0");
+/* Zellformat wie Word (2026-10-26, Toms Checkliste aus dem Goethe-Kurs:
+   grüne Kopfzeile mit weißer Schrift — ohne Zellfarbe war sie unsichtbar).
+   Schattierung und Rahmen je Zellseite stehen als Inline-Stil am td, die
+   Tabellenbreite als width in % des Satzspiegels am table. Ein Rand ist
+   {pt,art,farbe} oder "none" (ausdrücklich keiner); fehlt eine Seite, gilt
+   die Vorgabe der Tabelle. Alle Leser bauen den Stil über zelleStil(), alle
+   Exporter lesen ihn über zelleFormat() — so bleibt der Umlauf zeichengleich. */
+const ZELL_SEITEN=["top","left","bottom","right"];
+const zellRandCss=r=>(Math.round(Math.max(0.25,r.pt||0.5)*4)/4)+"pt "+(r.art||"solid")+" #"+String(r.farbe||"000000").toUpperCase();
+function zelleStil(f){
+  if(!f)return "";
+  const st=[];
+  if(f.bg)st.push("background-color:#"+String(f.bg).toUpperCase());
+  if(f.rand){
+    const w=ZELL_SEITEN.map(k=>f.rand[k]==null?null:f.rand[k]==="none"?"none":zellRandCss(f.rand[k]));
+    if(w[0]!=null&&w.every(v=>v===w[0]))st.push("border:"+w[0]);
+    else ZELL_SEITEN.forEach((k,i)=>{if(w[i]!=null)st.push("border-"+k+":"+w[i])});
+  }
+  return st.join(";");
+}
+function cssPt(v){
+  const n=parseFloat(v);if(!(n>0))return 0;
+  return /px$/.test(v)?n*0.75:/mm$/.test(v)?n*72/25.4:/cm$/.test(v)?n*72/2.54:/in$/.test(v)?n*72:n;
+}
+function zelleFormat(td){
+  const s=td.style,f={bg:null,rand:{}};
+  const bg=s.backgroundColor;
+  if(bg&&bg!=="transparent"&&!/rgba\([^)]*,\s*0\)/.test(bg))f.bg=farbHex(bg);
+  ZELL_SEITEN.forEach(k=>{
+    const g=k[0].toUpperCase()+k.slice(1),art=s["border"+g+"Style"];
+    if(!art)return;
+    if(art==="none"||art==="hidden"){f.rand[k]="none";return}
+    f.rand[k]={pt:cssPt(s["border"+g+"Width"])||0.5,art,farbe:farbHex(s["border"+g+"Color"]||"")||"000000"};
+  });
+  return f;
+}
+const zelleHatFormat=f=>!!(f&&(f.bg||Object.keys(f.rand||{}).length));
+/* Breite in % des Satzspiegels; 100, wenn nichts gesetzt ist */
+function tabelleBreiteProz(t){const w=t.style&&t.style.width;return /%$/.test(w||"")?Math.max(5,Math.min(100,parseFloat(w))):100}
+const tabelleKopf=proz=>proz>0&&proz<99.5?' style="width:'+(Math.round(proz*10)/10)+'%"':"";
+/* So schreibt PureQuill eine Tabelle ohne eigenes Format hinaus (dünn,
+   grau) — kommt sie so zurück, bleibt sie ohne Inline-Stil wie vorher */
+const randStandard=r=>!!r&&r!=="none"&&r.art==="solid"&&Math.abs(r.pt-0.5)<0.13&&r.farbe==="999999";
+/* Rand einer Zelle: eigener Wert vor dem der Tabelle (außen am Rand, sonst
+   insideH/insideV) — Words Reihenfolge. lage sagt, an welchen Tabellenrändern
+   die Zelle liegt. */
+function zellRandAufloesen(eigen,tab,lage){
+  eigen=eigen||{};tab=tab||{};
+  const r={top:eigen.top??(lage.oben?tab.top:tab.insideH),bottom:eigen.bottom??(lage.unten?tab.bottom:tab.insideH),
+    left:eigen.left??(lage.links?tab.left:tab.insideV),right:eigen.right??(lage.rechts?tab.right:tab.insideV)};
+  ZELL_SEITEN.forEach(k=>{if(r[k]==null||randStandard(r[k]))delete r[k]});
+  return r;
+}
+/* Ganze Tabelle: zellen = [{bg,rand}] in Lesereihenfolge. Ist nirgends eine
+   Farbe und kein sichtbarer Rand, bleibt es bei data-rahmen="ohne" (mit den
+   Hilfslinien im Editor) statt lauter border:none. */
+function tabelleZellStile(zellen,ohneVorher){
+  const sichtbar=zellen.some(z=>z.bg||ZELL_SEITEN.some(k=>z.rand[k]&&z.rand[k]!=="none"));
+  const keiner=zellen.some(z=>ZELL_SEITEN.some(k=>z.rand[k]==="none"));
+  if(!sichtbar)return {ohne:ohneVorher||keiner,stile:zellen.map(()=>"")};
+  return {ohne:false,stile:zellen.map(zelleStil)};
+}
+const zellStilAttr=st=>st?' style="'+st+'"':"";
 function farbHex(css){
   const m=css.match(/rgba?\(([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/);
   if(m)return(HEX3(+m[1])+HEX3(+m[2])+HEX3(+m[3])).toUpperCase();
@@ -12061,7 +12146,7 @@ function absatzXml(el,pPrExtra,basisStil,ctx){
   /* Absatzformat (absatzFormat): Abstand vor/nach, Zeilenabstand und —
      außer in Listen, die ihren Einzug aus der Nummerierung haben — Einzug */
   if(el&&el.style&&ctx&&ctx.docSize){
-    const af=absatzFormat(el,ctx.docSize),tw=v=>Math.round(v*20);
+    const af=absatzFormatAus(el,ctx.docSize),tw=v=>Math.round(v*20);
     const sp=[af.vor!=null&&`w:before="${tw(af.vor)}"`,af.nach!=null&&`w:after="${tw(af.nach)}"`,
       af.zab&&`w:line="${af.zab.art==="auto"?Math.round(af.zab.v*240):tw(af.zab.v)}" w:lineRule="${af.zab.art==="auto"?"auto":af.zab.art==="genau"?"exact":"atLeast"}"`].filter(Boolean);
     if(sp.length)pPrExtra=(pPrExtra||"")+`<w:spacing ${sp.join(" ")}/>`;
@@ -12263,6 +12348,17 @@ function listeXml(list,numId,ilvl,ctx){
   });
   return xml;
 }
+/* Zellformat (zelleFormat) als Word-tcBorders und -shd; Reihenfolge im
+   tcPr laut Schema: tcW, gridSpan, vMerge, tcBorders, shd */
+function wZellFormat(td){
+  if(!td)return "";
+  const f=zelleFormat(td);
+  const seiten=ZELL_SEITEN.filter(k=>f.rand[k]!=null).map(k=>{const r=f.rand[k];
+    if(r==="none")return `<w:${k} w:val="nil"/>`;
+    const v={double:"double",dotted:"dotted",dashed:"dashed"}[r.art]||"single";
+    return `<w:${k} w:val="${v}" w:sz="${Math.max(2,Math.round(r.pt*8))}" w:space="0" w:color="${r.farbe}"/>`}).join("");
+  return (seiten?`<w:tcBorders>${seiten}</w:tcBorders>`:"")+(f.bg?`<w:shd w:val="clear" w:color="auto" w:fill="${f.bg}"/>`:"");
+}
 async function tabelleXml(table,ctx){
   /* Verbundene Zellen (bis 1.3 getrennt): colspan wird gridSpan, rowspan
      wird vMerge — „restart“ in der ersten Zeile, in jeder weiteren eine
@@ -12270,13 +12366,15 @@ async function tabelleXml(table,ctx){
      Dafür zuerst das Raster belegen. */
   const zeilenListe=[...table.rows].filter(tr=>tr.children.length);
   const belegt=zeilenListe.map(()=>[]);
+  /* Breite der Tabelle (Anteil am Satzspiegel) */
+  const tabTw=Math.round(ctx.tableWidthTwip*tabelleBreiteProz(table)/100);
   let rasterBreite=0;
   zeilenListe.forEach((tr,r)=>{
     let g=0;
     [...tr.children].forEach(td=>{
       while(belegt[r][g])g++;
       const cs=Math.max(1,td.colSpan||1),rs=Math.max(1,Math.min(td.rowSpan||1,zeilenListe.length-r));
-      for(let k=1;k<rs;k++)for(let j=0;j<cs;j++)belegt[r+k][g+j]=j===0?{cs}:{teil:true};
+      for(let k=1;k<rs;k++)for(let j=0;j<cs;j++)belegt[r+k][g+j]=j===0?{cs,td}:{teil:true};
       g+=cs;
     });
     rasterBreite=Math.max(rasterBreite,g,belegt[r].length);
@@ -12284,8 +12382,8 @@ async function tabelleXml(table,ctx){
   const spalten=rasterBreite;
   const cg=table.querySelector(":scope > colgroup");
   const breiten=cg
-    ?[...cg.children].map(c=>ctx.tableWidthTwip*parseFloat(c.style.width)/100)
-    :Array(spalten).fill(ctx.tableWidthTwip/Math.max(1,spalten));
+    ?[...cg.children].map(c=>tabTw*parseFloat(c.style.width)/100)
+    :Array(spalten).fill(tabTw/Math.max(1,spalten));
   const grid=breiten.map(w=>`<w:gridCol w:w="${Math.round(w)}"/>`).join("");
   let zeilen="";
   /* Eine Zeile ohne Zelle ist in Word ungültig (w:tr verlangt mindestens
@@ -12293,7 +12391,7 @@ async function tabelleXml(table,ctx){
      aus einer eingefügten Newsletter-Mail, deren Bildzellen herausgefiltert
      waren. Solche Zeilen fallen weg (zeilenListe); bleibt keine, entfällt
      die Tabelle. */
-  const breiteVon=(g,cs)=>{let s=0;for(let j=g;j<g+cs;j++)s+=breiten[j]||ctx.tableWidthTwip/spalten;return Math.round(s)};
+  const breiteVon=(g,cs)=>{let s=0;for(let j=g;j<g+cs;j++)s+=breiten[j]||tabTw/spalten;return Math.round(s)};
   for(let r=0;r<zeilenListe.length;r++){
     const tr=zeilenListe[r];
     const hEm=parseFloat(tr.style.height);
@@ -12303,7 +12401,7 @@ async function tabelleXml(table,ctx){
     while(tds.length||belegt[r][g]){
       const b=belegt[r][g];
       if(b&&b.cs){
-        zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,b.cs)}" w:type="dxa"/>${b.cs>1?`<w:gridSpan w:val="${b.cs}"/>`:""}<w:vMerge/></w:tcPr><w:p/></w:tc>`;
+        zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,b.cs)}" w:type="dxa"/>${b.cs>1?`<w:gridSpan w:val="${b.cs}"/>`:""}<w:vMerge/>${wZellFormat(b.td)}</w:tcPr><w:p/></w:tc>`;
         g+=b.cs;continue;
       }
       if(b){g++;continue}
@@ -12312,7 +12410,7 @@ async function tabelleXml(table,ctx){
       const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4")
         ?await walkBlocks(td,ctx)
         :absatzZuXml(absatzXml(td,"",null,ctx),ctx);
-      zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
+      zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}${wZellFormat(td)}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
       g+=cs;
     }
     zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
@@ -12323,7 +12421,7 @@ async function tabelleXml(table,ctx){
      anderer Vorgabe wieder welche. */
   const ohne=table.getAttribute("data-rahmen")==="ohne";
   const seite=n=>ohne?`<w:${n} w:val="nil"/>`:`<w:${n} w:val="single" w:sz="4" w:color="999999"/>`;
-  return `<w:tbl><w:tblPr><w:tblW w:w="${ctx.tableWidthTwip}" w:type="dxa"/>`+
+  return `<w:tbl><w:tblPr><w:tblW w:w="${tabTw}" w:type="dxa"/>`+
     `<w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(seite).join("")}</w:tblBorders>`+
     `</w:tblPr><w:tblGrid>${grid}</w:tblGrid>${zeilen}</w:tbl><w:p/>`;
 }
@@ -12794,7 +12892,7 @@ async function odtBlob(d){
     /* Absatzformat dazu (Einzüge, Abstände, Zeilenabstand); ein Name nur
        einmal, das Absatzformat zuletzt */
     if(el&&el.style&&el.tagName!=="LI"){
-      const af=absatzFormat(el,groesse),z=odfZahl,neu=[];
+      const af=absatzFormatAus(el,groesse),z=odfZahl,neu=[];
       if(af.links!=null)neu.push(`fo:margin-left="${z(af.links)}pt"`);
       if(af.rechts!=null)neu.push(`fo:margin-right="${z(af.rechts)}pt"`);
       if(af.erste!=null)neu.push(`fo:text-indent="${z(af.erste)}pt"`);
@@ -12908,15 +13006,24 @@ async function odtBlob(d){
       breite=Math.max(breite,g,belegt[r].length)});
     const cg=t.querySelector(":scope > colgroup");
     const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
-    const tn=stilName("table","Tab",`<style:table-properties style:width="${odfZahl(textbreiteMm)}mm" table:align="margins"${umbruch?' fo:break-before="page"':""}/>`);
+    const tProz=tabelleBreiteProz(t),tBreite=textbreiteMm*tProz/100;
+    const tn=stilName("table","Tab",`<style:table-properties style:width="${odfZahl(tBreite)}mm" table:align="${tProz<99.5?"left":"margins"}"${umbruch?' fo:break-before="page"':""}/>`);
     umbruch=false;
     let x=`<table:table table:name="Tabelle${++zaehl.tabelle}" table:style-name="${tn}">`;
     for(let i=0;i<breite;i++){
-      const w=proz[i]?textbreiteMm*proz[i]/100:textbreiteMm/breite;
+      const w=proz[i]?tBreite*proz[i]/100:tBreite/breite;
       x+=`<table:table-column table:style-name="${stilName("table-column","Tab",`<style:table-column-properties style:column-width="${odfZahl(w)}mm"/>`)}"/>`;
     }
     const ohne=t.getAttribute("data-rahmen")==="ohne";
-    const zs=stilName("table-cell","Tab",`<style:table-cell-properties fo:padding="1mm" fo:border="${ohne?"none":"0.5pt solid #999999"}"/>`);
+    const randStd=ohne?"none":"0.5pt solid #999999";
+    const zs=stilName("table-cell","Tab",`<style:table-cell-properties fo:padding="1mm" fo:border="${randStd}"/>`);
+    /* Eigenes Zellformat: eine Zellvorlage je Kombination */
+    const zsVon=td=>{
+      const f=zelleFormat(td);if(!zelleHatFormat(f))return zs;
+      const seite=k=>{const r=f.rand[k];return r==null?randStd:r==="none"?"none":odfZahl(Math.round(r.pt*100)/100)+"pt "+r.art+" #"+r.farbe.toLowerCase()};
+      return stilName("table-cell","Tab",`<style:table-cell-properties fo:padding-top="0mm" fo:padding-bottom="0mm" fo:padding-left="1.9mm" fo:padding-right="1.9mm"${f.bg?` fo:background-color="#${f.bg.toLowerCase()}"`:""}`+
+        ZELL_SEITEN.map(k=>` fo:border-${k}="${seite(k)}"`).join("")+"/>");
+    };
     for(let r=0;r<zeilen.length;r++){
       const tr=zeilen[r],hEm=parseFloat(tr.style.height);
       x+=hEm?`<table:table-row table:style-name="${stilName("table-row","Tab",`<style:table-row-properties style:min-row-height="${odfZahl(hEm*groesse)}pt"/>`)}">`:"<table:table-row>";
@@ -12929,7 +13036,7 @@ async function odtBlob(d){
         const aussen=anker;anker="";
         const inhalt=td.querySelector("p,ul,ol,table,figure,h1,h2,h3,h4")?await bloecke(td):absatz(td,[],"Standard");
         anker=aussen;
-        x+=`<table:table-cell table:style-name="${zs}"${cs>1?` table:number-columns-spanned="${cs}"`:""}${rs>1?` table:number-rows-spanned="${rs}"`:""} office:value-type="string">`+
+        x+=`<table:table-cell table:style-name="${zsVon(td)}"${cs>1?` table:number-columns-spanned="${cs}"`:""}${rs>1?` table:number-rows-spanned="${rs}"`:""} office:value-type="string">`+
           (inhalt||'<text:p text:style-name="Standard"/>')+"</table:table-cell>";
       }
       x+="</table:table-row>";
@@ -12988,19 +13095,79 @@ async function odtBlob(d){
 
   /* Kopf-/Fußzeile: Zeilen als Absätze, Platzhalter als Felder */
   const an=w=>hfOf(d,w).on&&(!/1$/.test(w)||d.ersteAnders)&&(!/2$/.test(w)||d.geradeAnders);
-  const hfXml=(which,elem)=>{
+  /* Kopf-/Fußzeile mit Format (fett, Farbe, Größe) und Bildern im Text —
+     bis 2026-10 nur der Text: ein Logo ging beim Speichern als .odt
+     verloren. Bilder stehen in einem eigenen Absatz vor oder nach dem Text,
+     ausgerichtet nach ihrer Lage; odfHf liest sie genau so zurück. Die
+     Formate sind automatische Vorlagen in styles.xml (hfAuto). */
+  const hfAuto=new Map();
+  const hfAutoName=(fam,inhalt)=>{let n=hfAuto.get(fam+inhalt);
+    if(!n){n="PQHf"+(hfAuto.size+1);hfAuto.set(fam+inhalt,n)}return n};
+  const hfAutoXml=()=>[...hfAuto.entries()].map(([k,n])=>{const fam=k.startsWith("text")?"text":k.startsWith("graphic")?"graphic":"paragraph";
+    return `<style:style style:name="${n}" style:family="${fam}"${fam==="paragraph"?' style:parent-style-name="Standard"':""}>${k.slice(fam.length)}</style:style>`}).join("");
+  const hfXml=async(which,elem)=>{
     if(!an(which))return "";
-    const v=hfOf(d,which);
+    const v=hfOf(d,which),fussTeil=elem.startsWith("footer");
     let t=String(v.text||"");
+    const zeilenHtml=v.html!=null?String(v.html).split(/<br\s*\/?>/i):null;
     if(v.html!=null){const b=document.createElement("div");b.innerHTML=String(v.html).replace(/<br\s*\/?>/gi,"\n");t=b.textContent}
     const ps=v.align==="left"?"PQ_Zeile_links":v.align==="right"?"PQ_Zeile_rechts":"PQ_Zeile_Mitte";
+    /* Bilder: je Zeile ein Absatz (as-char), vor oder nach dem Text */
+    const cw=f.w-f.m[1]-f.m[3],vor=[],nach=[];
+    for(const b of hfBilder(v)){
+      let uri=b.uri;
+      if(!/^data:image\/(png|jpeg);/.test(uri)){try{uri=await scaleToDataUrl(uri,true)}catch(e){continue}}
+      const info=await bildInfo({src:uri});if(!info)continue;
+      const datei=`Pictures/kopf${bilder.length+1}.${info.ext==="jpeg"?"jpg":info.ext}`;
+      bilder.push({name:datei,bytes:info.bytes,mime:"image/"+info.ext});
+      const vorText=(+b.y||0)<(v.ty||0)+0.1||!String(t).trim();
+      (fussTeil?(vorText?nach:vor):(vorText?vor:nach)).push({...b,datei});
+    }
+    const gs=hfAutoName("graphic",'<style:graphic-properties style:vertical-pos="top" style:vertical-rel="baseline" fo:border="none" fo:padding="0mm"/>');
+    const bildAbsatz=liste=>{
+      if(!liste.length)return "";
+      liste.sort((a,b)=>(+a.x||0)-(+b.x||0));
+      const breit=liste.reduce((s,b)=>s+b.b,0),x0=+liste[0].x||0;
+      const al=x0<0.5?"start":Math.abs(x0+breit-cw)<1?"end":"center";
+      const pn=hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${al}" fo:margin-top="0mm" fo:margin-bottom="0mm" fo:line-height="100%"/>`);
+      return `<text:p text:style-name="${pn}">`+liste.map(b=>`<draw:frame draw:style-name="${gs}" draw:name="${elem}${++zaehl.fr}" text:anchor-type="as-char" svg:width="${odfZahl(b.b)}mm" svg:height="${odfZahl(b.h)}mm" draw:z-index="0">`+
+        `<draw:image xlink:href="${b.datei}" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/></draw:frame>`).join("")+"</text:p>";
+    };
+    /* Formatierte Zeile als Spannen mit automatischen Vorlagen */
+    const basisPt=groesse*0.85;
+    const zeileXml=(html,text)=>{
+      if(html==null)return feld(text);
+      const box=document.createElement("div");box.innerHTML=html;let out="";
+      const lauf=(n,st)=>{
+        if(n.nodeType===3){const x=feld(n.data);if(!x)return;
+          const a=[st.b&&'fo:font-weight="bold"',st.i&&'fo:font-style="italic"',st.u&&'style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"',
+            st.s&&'style:text-line-through-style="solid"',st.color&&`fo:color="#${st.color.toLowerCase()}"`,st.sz&&`fo:font-size="${odfZahl(st.sz)}pt"`].filter(Boolean);
+          out+=a.length?`<text:span text:style-name="${hfAutoName("text",`<style:text-properties ${a.join(" ")}/>`)}">${x}</text:span>`:x;return}
+        if(n.nodeType!==1)return;
+        const tg=n.tagName.toLowerCase(),neu={...st};
+        if(tg==="b"||tg==="strong")neu.b=true;if(tg==="i"||tg==="em")neu.i=true;if(tg==="u")neu.u=true;if(tg==="s")neu.s=true;
+        if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+        if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2)/2;
+        n.childNodes.forEach(k=>lauf(k,neu));
+      };
+      box.childNodes.forEach(k=>lauf(k,{}));
+      return out;
+    };
     const feld=z=>xesc(z).replace(/ {2,}/g,m=>" "+`<text:s text:c="${m.length-1}"/>`).replace(/\t/g,"<text:tab/>")
       .replace(/\{(?:seiten|pages)\}/gi,"<text:page-count>1</text:page-count>")
       .replace(/\{(?:seite|page)\}/gi,'<text:page-number text:select-page="current">1</text:page-number>')
       .replace(/\{(?:titel|title)\}/gi,`<text:title>${xesc(tr(d.title)||"")}</text:title>`)
       .replace(/\{(?:datum|date)\}/gi,`<text:date>${xesc(new Date().toLocaleDateString())}</text:date>`);
-    return `<style:${elem}>`+t.split("\n").map(z=>`<text:p text:style-name="${ps}">${feld(z)}</text:p>`).join("")+`</style:${elem}>`;
+    const zeilen=t.split("\n");
+    /* Steht der Text tiefer als die Bilder davor, hält ein Abstand vor der
+       ersten Zeile den Platz (ty) */
+    const bildH=vor.length?Math.max(...vor.map(b=>b.h)):0;
+    const extra=!fussTeil&&v.ty&&v.ty-bildH>0.2?v.ty-bildH:0;
+    const psErst=extra?hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${v.align==="left"?"start":v.align==="right"?"end":"center"}" fo:margin-top="${odfZahl(extra)}mm" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/>`):ps;
+    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${i?ps:psErst}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
   };
+  const hfFertig={};
+  for(const [w,e] of [["hdr","header"],["hdr2","header-left"],["hdr1","header-first"],["ftr","footer"],["ftr2","footer-left"],["ftr1","footer-first"]])hfFertig[w]=await hfXml(w,e);
   const kopf=an("hdr")||an("hdr1")||an("hdr2"),fuss=an("ftr")||an("ftr1")||an("ftr2");
   const band=(a,b)=>Math.max(1,a-b);
   const lang=String(S.settings.lang||"de").slice(0,2);
@@ -13028,13 +13195,13 @@ ${ueberschrift(1)}${ueberschrift(2)}${ueberschrift(3)}${ueberschrift(4)}
 <text:notes-configuration text:note-class="footnote" style:num-format="1" text:start-value="0" text:footnotes-position="page" text:start-numbering-at="document"/>
 <text:notes-configuration text:note-class="endnote" style:num-format="i" text:start-value="0"/>
 </office:styles><office:automatic-styles>
-${zeile("PQ_Zeile_links","start")}${zeile("PQ_Zeile_Mitte","center")}${zeile("PQ_Zeile_rechts","end")}
+${zeile("PQ_Zeile_links","start")}${zeile("PQ_Zeile_Mitte","center")}${zeile("PQ_Zeile_rechts","end")}${hfAutoXml()}
 <style:page-layout style:name="pm1"><style:page-layout-properties fo:page-width="${odfZahl(f.w)}mm" fo:page-height="${odfZahl(f.h)}mm" style:print-orientation="${f.w>f.h?"landscape":"portrait"}" `+
 `fo:margin-top="${odfZahl(kopf?f.hd:f.m[0])}mm" fo:margin-bottom="${odfZahl(fuss?f.fd:f.m[2])}mm" fo:margin-left="${odfZahl(f.m[3])}mm" fo:margin-right="${odfZahl(f.m[1])}mm"/>`+
 `<style:header-style>${kopf?`<style:header-footer-properties fo:min-height="${odfZahl(band(f.m[0],f.hd))}mm" fo:margin-bottom="${odfZahl(Math.max(0,band(f.m[0],f.hd)-5))}mm"/>`:""}</style:header-style>`+
 `<style:footer-style>${fuss?`<style:header-footer-properties fo:min-height="${odfZahl(band(f.m[2],f.fd))}mm" fo:margin-top="${odfZahl(Math.max(0,band(f.m[2],f.fd)-5))}mm"/>`:""}</style:footer-style></style:page-layout>
 </office:automatic-styles><office:master-styles><style:master-page style:name="Standard" style:page-layout-name="pm1">`+
-hfXml("hdr","header")+hfXml("hdr2","header-left")+hfXml("hdr1","header-first")+hfXml("ftr","footer")+hfXml("ftr2","footer-left")+hfXml("ftr1","footer-first")+
+hfFertig.hdr+hfFertig.hdr2+hfFertig.hdr1+hfFertig.ftr+hfFertig.ftr2+hfFertig.ftr1+
 `</style:master-page></office:master-styles></office:document-styles>`;
   const autor=S.settings.meinName||"";
   const metaXml=`<?xml version="1.0" encoding="UTF-8"?>
@@ -13203,7 +13370,7 @@ async function rtfBlob(d){
     o=o||{};
     /* Absatzformat ans Ende — spätere Steuerwörter gelten in RTF */
     if(el&&el.style&&el.tagName!=="LI"){
-      const af=absatzFormat(el,groesse),tw=v=>Math.round(v*20);
+      const af=absatzFormatAus(el,groesse),tw=v=>Math.round(v*20);
       let e="";
       if(af.links!=null)e+="\\li"+tw(af.links);if(af.rechts!=null)e+="\\ri"+tw(af.rechts);if(af.erste!=null)e+="\\fi"+tw(af.erste);
       if(af.vor!=null)e+="\\sb"+tw(af.vor);if(af.nach!=null)e+="\\sa"+tw(af.nach);
@@ -13300,14 +13467,25 @@ async function rtfBlob(d){
     const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
     const ohne=t.getAttribute("data-rahmen")==="ohne";
     const grenze=[];let x0=0;
-    for(let i=0;i<breite;i++){x0+=Math.round(proz[i]?textbreiteTw*proz[i]/100:textbreiteTw/breite);grenze.push(x0)}
-    const rahmenTw=ohne?"":"\\clbrdrt\\brdrs\\brdrw10\\clbrdrl\\brdrs\\brdrw10\\clbrdrb\\brdrs\\brdrw10\\clbrdrr\\brdrs\\brdrw10";
+    const tabTw=textbreiteTw*tabelleBreiteProz(t)/100;
+    for(let i=0;i<breite;i++){x0+=Math.round(proz[i]?tabTw*proz[i]/100:tabTw/breite);grenze.push(x0)}
+    /* Zellformat: Rahmen je Seite mit Farbe, Schattierung (clcbpat) */
+    const zellRtf=td=>{
+      const f=zelleFormat(td);if(!zelleHatFormat(f))return rahmenTw;
+      const art={double:"\\brdrdb",dotted:"\\brdrdot",dashed:"\\brdrdash"};
+      return ZELL_SEITEN.map((k,j)=>{const r=f.rand[k],kw="\\clbrdr"+"tlbr"[j];
+        if(r==null)return ohne?"":kw+grau;
+        if(r==="none")return kw+"\\brdrnone";
+        return kw+(art[r.art]||"\\brdrs")+"\\brdrw"+Math.max(2,Math.round(r.pt*20))+"\\brdrcf"+cNr(r.farbe)}).join("")+(f.bg?"\\clcbpat"+cNr(f.bg):"");
+    };
+    const grau="\\brdrs\\brdrw10\\brdrcf"+cNr("999999");
+    const rahmenTw=ohne?"":"\\clbrdrt"+grau+"\\clbrdrl"+grau+"\\clbrdrb"+grau+"\\clbrdrr"+grau;
     let x="";
     for(let r=0;r<zeilen.length;r++){
       let def="\\trowd\\trgaph108\\trleft0"+(umbruch?"":"");
       for(let g=0;g<breite;g++){
         const z=raster[r][g]||{};
-        def+=(z.cs>1&&!z.hor?"\\clmgf":"")+(z.hor?"\\clmrg":"")+(z.rs>1&&!z.ver?"\\clvmgf":"")+(z.ver?"\\clvmrg":"")+rahmenTw+"\\cellx"+grenze[g];
+        def+=(z.cs>1&&!z.hor?"\\clmgf":"")+(z.hor?"\\clmrg":"")+(z.rs>1&&!z.ver?"\\clvmgf":"")+(z.ver?"\\clvmrg":"")+(z.td?zellRtf(z.td):rahmenTw)+"\\cellx"+grenze[g];
       }
       x+=def+"\n";
       for(let g=0;g<breite;g++){
@@ -13364,16 +13542,60 @@ async function rtfBlob(d){
   /* Kopf-/Fußzeilen: Zeilen als Absätze, Platzhalter als Felder */
   const an=w=>hfOf(d,w).on&&(!/1$/.test(w)||d.ersteAnders)&&(!/2$/.test(w)||d.geradeAnders);
   const feld=(befehl,erg)=>`{\\field{\\*\\fldinst ${befehl}}{\\fldrslt ${txt(erg)}}}`;
+  /* Kopf-/Fußzeile mit Format und Bildern im Text (eigener Absatz vor
+     oder nach dem Text, wie beim OpenDocument-Export) */
+  const hfBildTeile={};
+  for(const w of ["hdr","hdr1","hdr2","ftr","ftr1","ftr2"]){
+    if(!an(w))continue;const v=hfOf(d,w),vor=[],nach=[],fussT=!istKopf(w);
+    for(const b of hfBilder(v)){
+      let uri=b.uri;
+      if(!/^data:image\/(png|jpeg);/.test(uri)){try{uri=await scaleToDataUrl(uri,true)}catch(e){continue}}
+      const info=await bildInfo({src:uri});if(!info)continue;
+      const vorText=(+b.y||0)<(v.ty||0)+0.1||!String(v.text||"").trim();
+      (fussT?(vorText?nach:vor):(vorText?vor:nach)).push({...b,info});
+    }
+    hfBildTeile[w]={vor,nach};
+  }
   const hfRtf=(which,ziel)=>{
     if(!an(which))return "";
     const v=hfOf(d,which);
     let t=String(v.text||"");
+    const zeilenHtml=v.html!=null?String(v.html).split(/<br\s*\/?>/i):null;
+    const cw=f.w-f.m[1]-f.m[3],tw=x=>Math.round(x*1440/25.4);
+    const bildAbs=liste=>{
+      if(!liste||!liste.length)return "";
+      liste.sort((a,b)=>(+a.x||0)-(+b.x||0));
+      const breit=liste.reduce((s,b)=>s+b.b,0),x0=+liste[0].x||0;
+      const al=x0<0.5?"\\ql":Math.abs(x0+breit-cw)<1?"\\qr":"\\qc";
+      return "\\pard\\plain"+al+"\\sb0\\sa0 "+liste.map(b=>pict(b.info,tw(b.b),tw(b.h))).join("")+"\\par";
+    };
+    const basisPt=groesse*0.85;
+    const zeileFmt=(html,z)=>{
+      if(html==null)return zeile(z);
+      const box=document.createElement("div");box.innerHTML=html;let out="";
+      const lauf=(n,st)=>{
+        if(n.nodeType===3){const x=zeile(n.data);if(!x)return;
+          const a=(st.b?"\\b":"")+(st.i?"\\i":"")+(st.u?"\\ul":"")+(st.s?"\\strike":"")+(st.color?"\\cf"+cNr(st.color):"")+(st.sz?"\\fs"+Math.round(st.sz*2):"");
+          out+=a?"{"+a+" "+x+"}":x;return}
+        if(n.nodeType!==1)return;
+        const tg=n.tagName.toLowerCase(),neu={...st};
+        if(tg==="b"||tg==="strong")neu.b=true;if(tg==="i"||tg==="em")neu.i=true;if(tg==="u")neu.u=true;if(tg==="s")neu.s=true;
+        if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
+        if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2)/2;
+        n.childNodes.forEach(k=>lauf(k,neu));
+      };
+      box.childNodes.forEach(k=>lauf(k,{}));
+      return out;
+    };
+    const teile=hfBildTeile[which]||{};
+    const bildH=teile.vor&&teile.vor.length?Math.max(...teile.vor.map(b=>b.h)):0;
+    const extra=istKopf(which)&&v.ty&&v.ty-bildH>0.2?tw(v.ty-bildH):0;
     if(v.html!=null){const b=document.createElement("div");b.innerHTML=String(v.html).replace(/<br\s*\/?>/gi,"\n");t=b.textContent}
     const q=v.align==="left"?"\\ql":v.align==="right"?"\\qr":"\\qc";
     const zeile=z=>z.split(/(\{(?:seiten|pages|seite|page|titel|title|datum|date)\})/i).map(s=>
       /^\{(seiten|pages)\}$/i.test(s)?feld("NUMPAGES","1"):/^\{(seite|page)\}$/i.test(s)?feld("PAGE","1"):
       /^\{(titel|title)\}$/i.test(s)?feld("TITLE",tr(d.title)||""):/^\{(datum|date)\}$/i.test(s)?feld("DATE",new Date().toLocaleDateString()):txt(s)).join("");
-    return `{\\${ziel}`+t.split("\n").map(z=>`\\pard\\plain${q}\\f0\\fs${fs(groesse*0.85)} ${zeile(z)}\\par`).join("")+"}\n";
+    return `{\\${ziel}`+bildAbs(teile.vor)+(t.trim()?t.split("\n").map((z,i)=>`\\pard\\plain${q}${!i&&extra?"\\sb"+extra:""}\\f0\\fs${fs(groesse*0.85)} ${zeileFmt(zeilenHtml?zeilenHtml[i]:null,z)}\\par`).join(""):"")+bildAbs(teile.nach)+"}\n";
   };
   const kopf=hfRtf("hdr",d.geradeAnders?"headerr":"header")+hfRtf("hdr2","headerl")+hfRtf("hdr1","headerf")+
     hfRtf("ftr",d.geradeAnders?"footerr":"footer")+hfRtf("ftr2","footerl")+hfRtf("ftr1","footerf");
@@ -15641,6 +15863,78 @@ function docxHf(xml,zub){
   }
   return erg;
 }
+/* Kopf- oder Fußzeile aus Absätzen, deren Bilder im Text stehen — für den
+   .doc- und den OpenDocument-Leser (2026-10-26, Toms Goethe-Checkliste: das
+   Logo fehlte, der fette Text stand rechts statt links). Gerechnet wie die
+   Bilder im Text bei docxHf: Lage nach Ausrichtung des Absatzes, Text unter
+   dem Bild (ty). Absatz: {text, html, formatiert, al, vor, nach (mm),
+   bilder:[{uri,b,h}] in mm, anker:[{uri,b,h,x,yBlatt|yAbs,fluss}] frei
+   verankert — x ab dem linken Rand, yBlatt ab der Blattkante, yAbs ab dem
+   Absatz; sie schieben den Text nicht}. */
+function hfAusAbsaetzen(abs,f,fuss){
+  f=f||HF_RAHMEN;
+  const cw=f.w-f.m[1]-f.m[3];
+  const zeilen=[],zeilenH=[],bilder=[],frei=[];
+  let y=0,ty=null,align=null,formatiert=false,bildImText=false;
+  for(const a of abs){
+    y+=a.vor||0;
+    (a.anker||[]).filter(i=>i.b>0&&i.h>0).forEach(i=>frei.push(i.yBlatt!=null?i:{...i,yBand:y+(i.yAbs||0)}));
+    let hoehe=0;
+    const bl=(a.bilder||[]).filter(i=>i.b>0&&i.h>0);
+    if(bl.length){
+      const breit=bl.reduce((s,i)=>s+i.b,0);
+      let x=a.al==="center"?(cw-breit)/2:a.al==="right"?cw-breit:0;
+      const hoch=Math.max(...bl.map(i=>i.h));
+      bl.forEach(i=>{bilder.push({uri:i.uri,b:i.b,h:i.h,x,yBand:y+hoch-i.h});x+=i.b});
+      hoehe=hoch;
+      if(ty!==null&&!a.text.trim())bildImText=true;
+    }
+    if(a.text.trim()||!bl.length){
+      if(ty===null)ty=y+(bl.length?hoehe-HF_ZEILE:0);
+      else if(bildImText){const soll=Math.round((y+(bl.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
+        while(zeilen.length<soll){zeilen.push("");zeilenH.push("")}}
+      bildImText=false;
+      zeilen.push(a.text);zeilenH.push(a.html!=null?a.html:xesc(a.text));
+      if(a.formatiert)formatiert=true;
+      if(a.text.trim()&&align===null)align=a.al||"left";
+      hoehe=Math.max(hoehe,HF_ZEILE);
+    }
+    y+=hoehe+(a.nach||0);
+  }
+  while(zeilen.length&&!zeilen[zeilen.length-1].trim()){zeilen.pop();zeilenH.pop()}
+  /* Leere Zeilen vor dem ersten Text zählen nur, wenn ein Bild da ist —
+     sonst rückte der Text ohne Grund nach unten */
+  if(!bilder.length)while(zeilen.length&&!zeilen[0].trim()){zeilen.shift();zeilenH.shift()}
+  const text=zeilen.join("\n");
+  if(!text.trim()&&!bilder.length&&!frei.length)return null;
+  const erg={on:true,text,align:align==="justify"?"left":(align||"left")};
+  if(formatiert)erg.html=zeilenH.join("<br>");
+  if(bilder.length||frei.length){
+    const gesamt=y;
+    erg.bilder=bilder.map(i=>({uri:i.uri,b:auf1(i.b),h:auf1(i.h),x:auf1(i.x),y:auf1(fuss?gesamt-(i.yBand+i.h):i.yBand),fluss:true}));
+    frei.forEach(i=>{
+      const yy=i.yBlatt!=null?(fuss?(f.h-f.fd)-(i.yBlatt+i.h):i.yBlatt-f.hd):(fuss?gesamt-(i.yBand+i.h):i.yBand);
+      const o={uri:i.uri,b:auf1(i.b),h:auf1(i.h),x:auf1(i.x),y:auf1(yy)};if(i.fluss)o.fluss=true;erg.bilder.push(o)});
+    const tyBand=ty||0,textH=zeilen.length*HF_ZEILE;
+    const tyWert=fuss?Math.max(0,gesamt-(tyBand+textH)):tyBand;
+    if(text.trim()&&tyWert>0.2)erg.ty=auf1(tyWert);
+  }
+  return erg;
+}
+/* Ein Textstück der Kopfzeile als HTML wie bei docxHfAbsatz (Größe in em
+   der Kopfzeilenschrift) */
+function hfLaufHtml(t,w,basisPt,z){
+  if(!t)return "";
+  let x=xesc(t);const st=[];
+  if(w.color&&w.color!=="000000")st.push("color:#"+w.color);
+  if(w.sz&&basisPt&&Math.abs(w.sz-basisPt)>=0.25)st.push("font-size:"+(Math.round(w.sz/basisPt*1000)/1000)+"em");
+  if(st.length){x='<span style="'+st.join(";")+'">'+x+"</span>";z.formatiert=true}
+  if(w.s){x="<s>"+x+"</s>";z.formatiert=true}
+  if(w.u){x="<u>"+x+"</u>";z.formatiert=true}
+  if(w.i){x="<i>"+x+"</i>";z.formatiert=true}
+  if(w.b){x="<b>"+x+"</b>";z.formatiert=true}
+  return x;
+}
 /* Verweis über die Beziehungsdatei auflösen: sectPr nennt nur eine rId. */
 function docxRelZiel(relXml,id){
   if(!relXml||!id)return null;
@@ -15815,9 +16109,89 @@ function docxTabellenRahmen(stilXml){
     if(s.localName!=="style"||xattrN(s,"type")!=="table")continue;
     karte[String(xattrN(s,"styleId")||"")]={
       sicht:docxRahmenSichtbar(KIND(KIND(s,"tblPr"),"tblBorders")),
-      basedOn:xattrN(KIND(s,"basedOn"),"val")};
+      basedOn:xattrN(KIND(s,"basedOn"),"val"),el:s};
   }
   return karte;
+}
+/* Ein Word-Rand (w:top, w:insideH …) als {pt,art,farbe}, "none" oder null */
+function docxRand(el){
+  if(!el)return null;
+  const v=String(xattrN(el,"val")||"").toLowerCase();
+  if(!v)return null;
+  if(v==="nil"||v==="none")return "none";
+  const sz=parseInt(xattrN(el,"sz"),10),c=String(xattrN(el,"color")||"auto");
+  const art=/double|triple|thinthick|thickthin/.test(v)?"double":/dash/.test(v)?"dashed":/dot/.test(v)?"dotted":"solid";
+  return {pt:sz>0?sz/8:0.5,art,farbe:/^[0-9a-f]{6}$/i.test(c)?c.toUpperCase():"000000"};
+}
+function docxRaender(el){
+  const o={};if(!el)return o;
+  for(const c of el.children){
+    const n={start:"left",end:"right"}[c.localName]||c.localName;
+    if(["top","left","bottom","right","insideH","insideV"].includes(n)){const r=docxRand(c);if(r)o[n]=r}
+  }
+  return o;
+}
+/* Füllfarbe aus w:shd: Hex, null (ausdrücklich keine) oder undefined */
+function docxShd(pr){
+  const sh=KIND(pr,"shd");if(!sh)return undefined;
+  const f=String(xattrN(sh,"fill")||"").toUpperCase();
+  return /^[0-9A-F]{6}$/.test(f)?f:f==="AUTO"?null:undefined;
+}
+/* Tabellenvorlage samt bedingter Formate (Kopfzeile, gebänderte Zeilen …),
+   wie Word sie über tblLook einschaltet. Liefert die Ränder der Tabelle und
+   je Zelle Farbe, Ränder und Zeichenformat der Vorlage. */
+function docxTabVorlage(t,karte,zeilenZahl,spaltenZahl){
+  const tp=KIND(t,"tblPr");
+  const kette=[];let id=xattrN(KIND(tp,"tblStyle"),"val"),runde=0;
+  while(id&&karte[id]&&runde++<10){kette.unshift(karte[id].el);id=karte[id].basedOn}
+  const tab={};
+  kette.forEach(el=>Object.assign(tab,docxRaender(KIND(KIND(el,"tblPr"),"tblBorders"))));
+  Object.assign(tab,docxRaender(KIND(tp,"tblBorders")));
+  const look=KIND(tp,"tblLook");
+  const lv=parseInt(xattrN(look,"val")||"0",16)||0;
+  const an=(n,bit,vorgabe)=>{const a=look&&xattrN(look,n);return a!=null?a==="1"||a==="true"||a==="on":look&&xattrN(look,"val")!=null?!!(lv&bit):vorgabe};
+  const L={firstRow:an("firstRow",0x20,true),lastRow:an("lastRow",0x40,false),firstCol:an("firstColumn",0x80,true),
+    lastCol:an("lastColumn",0x100,false),noH:an("noHBand",0x200,false),noV:an("noVBand",0x400,true)};
+  const bed={};let basisTc=null,basisR=null,zb=1,sb=1;
+  kette.forEach(el=>{
+    const tc=KIND(el,"tcPr");if(tc)basisTc=tc;
+    const rp=KIND(el,"rPr");if(rp)basisR=rp;
+    const pr=KIND(el,"tblPr");
+    const z=parseInt(xattrN(KIND(pr,"tblStyleRowBandSize"),"val"),10);if(z>0)zb=z;
+    const sp=parseInt(xattrN(KIND(pr,"tblStyleColBandSize"),"val"),10);if(sp>0)sb=sp;
+    [...el.children].filter(c=>c.localName==="tblStylePr").forEach(c=>{const ty=String(xattrN(c,"type")||"");(bed[ty]=bed[ty]||[]).push(c)});
+  });
+  const zelle=(zi,c0,c1)=>{
+    const erg={bg:undefined,rand:{},rpr:[]};
+    if(basisR)erg.rpr.push(basisR);
+    const sh=docxShd(basisTc);if(sh!==undefined)erg.bg=sh;
+    const kopf=L.firstRow&&zi===0,fuss=L.lastRow&&zi===zeilenZahl-1;
+    const zeilenIdx=zi-(L.firstRow?1:0),spIdx=c0-(L.firstCol?1:0);
+    const typen=[["wholeTable",0,zeilenZahl-1,0,spaltenZahl-1]];
+    if(!L.noV&&!(L.firstCol&&c0===0)&&!(L.lastCol&&c1===spaltenZahl-1)&&spIdx>=0){
+      const b=Math.floor(spIdx/sb)%2?"band2Vert":"band1Vert";typen.push([b,0,zeilenZahl-1,c0,c1])}
+    if(!L.noH&&!kopf&&!fuss&&zeilenIdx>=0){
+      const b=Math.floor(zeilenIdx/zb)%2?"band2Horz":"band1Horz";typen.push([b,zi,zi,0,spaltenZahl-1])}
+    if(L.firstCol&&c0===0)typen.push(["firstCol",0,zeilenZahl-1,0,0]);
+    if(L.lastCol&&c1===spaltenZahl-1)typen.push(["lastCol",0,zeilenZahl-1,spaltenZahl-1,spaltenZahl-1]);
+    if(kopf)typen.push(["firstRow",0,0,0,spaltenZahl-1]);
+    if(fuss)typen.push(["lastRow",zi,zi,0,spaltenZahl-1]);
+    if(kopf&&L.firstCol&&c0===0)typen.push(["nwCell",zi,zi,c0,c1]);
+    if(kopf&&L.lastCol&&c1===spaltenZahl-1)typen.push(["neCell",zi,zi,c0,c1]);
+    if(fuss&&L.firstCol&&c0===0)typen.push(["swCell",zi,zi,c0,c1]);
+    if(fuss&&L.lastCol&&c1===spaltenZahl-1)typen.push(["seCell",zi,zi,c0,c1]);
+    typen.forEach(([ty,r0,r1,s0,s1])=>(bed[ty]||[]).forEach(c=>{
+      const tc=KIND(c,"tcPr");
+      const sh=docxShd(tc);if(sh!==undefined)erg.bg=sh;
+      const r=docxRaender(KIND(tc,"tcBorders"));
+      const setz=(k,a,b)=>{const v=a?r[k]:r[b];if(v)erg.rand[k]=v};
+      setz("top",zi===r0,"insideH");setz("bottom",zi===r1,"insideH");
+      setz("left",c0===s0,"insideV");setz("right",c1===s1,"insideV");
+      const rp=KIND(c,"rPr");if(rp)erg.rpr.push(rp);
+    }));
+    return erg;
+  };
+  return {tab,zelle};
 }
 function docxTabelleMitRahmen(t,karte){
   const tp=KIND(t,"tblPr");
@@ -16167,7 +16541,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
      Dokument abweicht. Abstand vor als padding-top: CSS legt Ränder
      übereinander, Word zählt sie zusammen. */
   const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
-  const absatzZusatz=(pr,vorlage,ktx,h,art)=>{
+  const absatzZusatz=(pr,vorlage,ktx,h,art,letzte)=>{
     const css=[];let attr="";
     let bdr=KIND(pr,"pBdr");
     if(!bdr)docxKette(stile,vorlage).forEach(st=>{if(st.bdr)bdr=st.bdr});
@@ -16208,7 +16582,9 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       if(sp.nachPt!==undefined)css.push("margin-bottom:"+pt(sp.nachPt));
     }else{
       if(sp.vorPt>0)css.push(oben?"margin-top:"+pt(sp.vorPt):"padding-top:"+pt(sp.vorPt));
-      if(sp.nachPt!==undefined&&(nachStd==null||Math.abs(sp.nachPt-nachStd)>=0.5))css.push("margin-bottom:"+pt(sp.nachPt));
+      /* Letzter Absatz einer Zelle: dort ist im Editor 0 die Grundlinie */
+      const nachW=letzte&&sp.nachPt===undefined?nachStd:sp.nachPt;
+      if(letzte?nachW>=0.5:sp.nachPt!==undefined&&(nachStd==null||Math.abs(sp.nachPt-nachStd)>=0.5))css.push("margin-bottom:"+pt(nachW));
     }
     return {css:css.join(";"),attr};
   };
@@ -16376,6 +16752,14 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     }
   };
   const tabelle=t=>{alleZu();out+=tabelleHtml(t)};
+  /* Absatz in einer Zelle: Ausrichtung, Abstände und Zeilenabstand wie im
+     Text — vorher stand Zelltext immer links und ohne Abstand */
+  const zellAuf=(p,letzte)=>{
+    const pr=KIND(p,"pPr"),vorlage=xattrN(KIND(pr,"pStyle"),"val")||"";
+    const al=docxAusrichtung(stile,pr,vorlage),zus=absatzZusatz(pr,vorlage,lautKtx(p),0,"",letzte);
+    const st=[al&&al!=="left"&&"text-align:"+al,zus.css].filter(Boolean).join(";");
+    return st||zus.attr?"<p"+(st?' style="'+st+'"':"")+zus.attr+">":"<p>";
+  };
   const tabelleHtml=t=>{
     /* tblGrid steht in Twips, die colgroup dieses Programms in Prozent —
        ein Verhältnis überlebt Zoom und einen Wechsel des Seitenformats,
@@ -16384,13 +16768,21 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const spalten=grid?[...grid.children].filter(c=>c.localName==="gridCol")
       .map(c=>parseInt(xattrN(c,"w"),10)||0):[];
     const summe=spalten.reduce((a,b)=>a+b,0);
-    let r=docxTabelleMitRahmen(t,rahmenStile)?"<table>":'<table data-rahmen="ohne">';
+    const trs=[...t.children].filter(x=>x.localName==="tr");
+    const vorlage=docxTabVorlage(t,rahmenStile,trs.length,Math.max(1,spalten.length));
+    const zellInfo=[];
+    /* Breite: tblW in Twips (dxa) oder Fünfzigstel-Prozent (pct), sonst
+       die Summe der Spalten — im Verhältnis zum Satzspiegel */
+    const tw=KIND(KIND(t,"tblPr"),"tblW"),twTyp=String(xattrN(tw,"type")||""),twW=parseInt(xattrN(tw,"w"),10)||0;
+    const textBreiteTw=bild.breiteMm?bild.breiteMm*1440/25.4:0;
+    const breiteProz=twTyp==="pct"&&twW>0?twW/50:textBreiteTw?(twTyp==="dxa"&&twW>0?twW:summe)/textBreiteTw*100:100;
+    let r="<table\uE003>";
     /* senkrecht: Spalte → laufende Verbindung; alleSenkrecht hält jede fest */
     const senkrecht={},alleSenkrecht={};let zellNr=0;
     if(spalten.length&&summe>0)
       r+="<colgroup>"+spalten.map(w=>
         `<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
-    [...t.children].filter(x=>x.localName==="tr").forEach(tr=>{
+    trs.forEach((tr,zi)=>{
       const th=KIND(KIND(tr,"trPr"),"trHeight");
       const twip=th?parseInt(xattrN(th,"val"),10)||0:0;
       /* Zeilenhöhen stehen hier in em, damit sie mit der Schriftgröße mitgehen */
@@ -16417,24 +16809,38 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
         if(vmw==="continue"&&senkrecht[hier]){senkrecht[hier].n++;return}
         const nr=++zellNr;
         if(vmw==="restart"){const s={nr,n:1};senkrecht[hier]=s;alleSenkrecht[nr]=s}else delete senkrecht[hier];
-        const spanne=(breit>1?' colspan="'+breit+'"':"")+''+nr+'';
+        const spanne=(breit>1?' colspan="'+breit+'"':"")+''+nr+''+'\uE002'+zellInfo.length+'\uE002';
+        /* Zellformat: Vorlage (mit Kopfzeile/Bändern), dann direkt */
+        const vz=vorlage.zelle(zi,hier,hier+breit-1);
+        const dsh=docxShd(tcPr);if(dsh!==undefined)vz.bg=dsh;
+        Object.assign(vz.rand,docxRaender(KIND(tcPr,"tcBorders")));
+        const lage={oben:zi===0,unten:zi===trs.length-1,links:hier===0,rechts:hier+breit>=Math.max(1,spalten.length)};
+        zellInfo.push({bg:vz.bg||null,rand:zellRandAufloesen(vz.rand,vorlage.tab,lage)});
+        /* Zeichenformat der Vorlage (weiße, fette Kopfzeile) liegt unter dem
+           der Absatzvorlage — wie in Word */
+        const zKtx=b=>{const k=lautKtx(b);if(vz.rpr.length){const v=xattrN(KIND(KIND(b,"pPr"),"pStyle"),"val")||"";
+          k.grund=Object.assign({},def,...vz.rpr.map(docxRPr),docxVorlageWirkung(stile,v))}return k};
         /* Absätze einer Zelle bleiben Absätze — vorher wurden sie mit
            Zeilenumbrüchen zu einem zusammengezogen und verloren ihren
            Abstand. Eine Zelle mit nur einem Absatz bleibt schlicht Text,
            wie bisher. Verschachtelte Tabellen kommen mit. */
-        const teile=docxBloecke(tc).map(b=>b.localName==="tbl"
+        const bloeckeZ=docxBloecke(tc);
+        const teile=bloeckeZ.map(b=>b.localName==="tbl"
           ?{tabelle:tabelleHtml(b)}
-          :{text:docxLauf(b,lautKtx(b))});
+          :{text:docxLauf(b,zKtx(b)),auf:zellAuf(b,b===bloeckeZ[bloeckeZ.length-1])});
         let inner;
-        if(teile.length===1&&teile[0].text!==undefined)inner=teile[0].text;
-        else inner=teile.map(x=>x.tabelle!==undefined?x.tabelle:"<p>"+(x.text||"<br>")+"</p>").join("");
+        if(teile.length===1&&teile[0].text!==undefined&&teile[0].auf==="<p>")inner=teile[0].text;
+        else inner=teile.map(x=>x.tabelle!==undefined?x.tabelle:(x.auf||"<p>")+(x.text||"<br>")+"</p>").join("");
         r+="<td"+spanne+">"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
     /* rowspan erst am Ende bekannt: die Platzhalter je Zelle auflösen */
     const hoehe={};Object.values(alleSenkrecht).forEach(s=>{if(s.n>1)hoehe[s.nr]=s.n});
-    return (r+"</table>").replace(/(\d+)/g,(m,nr)=>hoehe[nr]?' rowspan="'+hoehe[nr]+'"':"");
+    const zs=tabelleZellStile(zellInfo,!docxTabelleMitRahmen(t,rahmenStile));
+    return (r+"</table>").replace(/(\d+)/g,(m,nr)=>hoehe[nr]?' rowspan="'+hoehe[nr]+'"':"")
+      .replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+tabelleKopf(breiteProz));
   };
   let nachTabelle=false;
   docxBloecke(body).forEach(el=>{
@@ -16650,6 +17056,7 @@ function odfStile(dom,k,teil){
       t:odfTextEig(odfKind(el,"text-properties"),k.schriften),
       p:odfAbsatzEig(odfKind(el,"paragraph-properties")),
       zelle:odfKind(el,"table-cell-properties"),
+      tabelle:odfKind(el,"table-properties"),
       spalte:odfKind(el,"table-column-properties"),
       zeile:odfKind(el,"table-row-properties"),
       g:gp?{wrap:gp.getAttribute("style:wrap"),hpos:gp.getAttribute("style:horizontal-pos"),hrel:gp.getAttribute("style:horizontal-rel"),
@@ -16689,10 +17096,51 @@ function odfStufe(k,el){
   return 0;
 }
 /* Kopf-/Fußzeile: Text mit den Platzhaltern dieses Programms */
-function odfHf(el,k){
+function odfHf(el,k,z){
   if(!el||el.getAttribute("style:display")==="false")return null;
   const ps=[...el.children].filter(c=>c.localName==="p"||c.localName==="h");
   if(!ps.length)return null;
+  /* Mit Bildkarte: Absätze samt Format und Bildern im Text */
+  if(z&&z.bilder){
+    const mm=v=>{const p=odfPt(v);return p?p*25.4/72:0};
+    const abs=ps.map(p=>{
+      const name=p.getAttribute("text:style-name"),pe=odfWirkP(k,name);
+      const a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:pe.al==="center"?"center":pe.al==="right"?"right":"left",
+        vor:pe.mt?pe.mt*25.4/72:0,nach:pe.mb?pe.mb*25.4/72:0};
+      const lauf=(n,w)=>[...n.childNodes].forEach(c=>{
+        if(c.nodeType===3){const t=c.nodeValue.replace(/[\t\n\r]+/g," ");a.text+=t;a.html+=hfLaufHtml(t,w,z.basisPt,a);return}
+        if(c.nodeType!==1)return;
+        const l=c.localName;
+        const feld=ph=>{a.text+=ph;a.html+=xesc(ph)};
+        if(l==="page-number")return feld("{seite}");
+        if(l==="page-count")return feld("{seiten}");
+        if(l==="title")return feld("{titel}");
+        if(l==="date"||l==="time")return feld("{datum}");
+        if(l==="s"){const t=" ".repeat(parseInt(c.getAttribute("text:c"),10)||1);a.text+=t;a.html+=t;return}
+        if(l==="tab"){a.text+="\t";a.html+="\t";return}
+        if(l==="line-break")return;
+        if(l==="frame"){
+          const img=odfKind(c,"image"),q=img&&z.bilder[img.getAttribute("xlink:href")||""];
+          if(!q)return;
+          const b=mm(c.getAttribute("svg:width")),h=mm(c.getAttribute("svg:height"));
+          if((c.getAttribute("text:anchor-type")||"paragraph")==="as-char"){a.bilder.push({uri:q.uri,b,h});return}
+          /* Frei verankert: Lage über svg:x/y und den Bezug der Grafikvorlage */
+          const g=odfKette(k,"graphic",c.getAttribute("draw:style-name")).reduce((o,s)=>Object.assign(o,s.g||{}),{});
+          const ff=z.fmt||HF_RAHMEN;
+          let x=mm(c.getAttribute("svg:x"));if(/^(page|page-start-margin|page-end-margin)$/.test(g.hrel||""))x-=ff.m[3];
+          const yv=mm(c.getAttribute("svg:y")),blatt=/^page$/.test(g.vrel||"");
+          a.anker.push({uri:q.uri,b,h,x,...(blatt?{yBlatt:yv}:{yAbs:yv}),fluss:String(c.getAttribute("draw:name")||"").startsWith(HF_FLUSS_NAME)});
+          return;
+        }
+        if(l==="note"||l==="annotation")return;
+        if(l==="span")return lauf(c,Object.assign({},w,odfWirkT(k,"text",c.getAttribute("text:style-name"))));
+        lauf(c,w);
+      });
+      lauf(p,odfWirkT(k,"paragraph",name));
+      return a;
+    });
+    return hfAusAbsaetzen(abs,z.fmt,el.localName.startsWith("footer"));
+  }
   const text=n=>[...n.childNodes].map(c=>{
     if(c.nodeType===3)return c.nodeValue.replace(/[\t\n\r]+/g," ");
     if(c.nodeType!==1)return "";
@@ -16711,6 +17159,25 @@ function odfHf(el,k){
   if(!t.trim())return null;
   const al=odfWirkP(k,ps[0].getAttribute("text:style-name")).al;
   return {on:true,text:t,align:al==="center"?"center":al==="right"?"right":"left"};
+}
+/* ODF-Rand „0.5pt solid #70ad47“ → {pt,art,farbe}; leer oder none = keiner */
+function odfRand(v){
+  v=String(v||"").trim();
+  if(!v||/^none\b/.test(v))return "none";
+  const t=v.split(/\s+/);let pt=0,art="solid",farbe="000000";
+  t.forEach(w=>{if(/^#[0-9a-f]{6}$/i.test(w))farbe=w.slice(1).toUpperCase();
+    else if(/^(solid|double|dotted|dashed|groove|ridge|inset|outset)$/.test(w))art=/^(solid|double|dotted|dashed)$/.test(w)?w:"solid";
+    else if(/^[\d.]+(pt|cm|mm|in|px)$/.test(w))pt=odfPt(w)});
+  if(pt<=0.01&&art!=="double")return "none";
+  return {pt:Math.max(0.25,pt||0.5),art,farbe};
+}
+function odfZellFormat(z){
+  const f={bg:null,rand:{}};if(!z)return f;
+  const bg=z.getAttribute("fo:background-color");
+  if(bg&&/^#[0-9a-f]{6}$/i.test(bg))f.bg=bg.slice(1).toUpperCase();
+  const alle=z.getAttribute("fo:border");
+  ZELL_SEITEN.forEach(k=>{const v=z.getAttribute("fo:border-"+k);f.rand[k]=odfRand(v!=null?v:alle)});
+  return f;
 }
 const ODF_ZELLE_RAHMEN=z=>{if(!z)return false;
   return ["fo:border","fo:border-top","fo:border-bottom","fo:border-left","fo:border-right"].some(a=>{const v=z.getAttribute(a);return v&&!/^none\b|^0(\.0+)?(pt|cm|mm|in)?\s/.test(v)&&v!=="none"})};
@@ -16763,10 +17230,11 @@ function odtLesen(inhaltXml,stilXml,bilder){
         textbreiteMm=Math.max(20,w-m[1]-m[3]);
       }
     }
-    erg.hdr=odfHf(odfKind(mp,"header"),kHf);erg.ftr=odfHf(odfKind(mp,"footer"),kHf);
-    const h1=odfHf(odfKind(mp,"header-first"),kHf),f1=odfHf(odfKind(mp,"footer-first"),kHf);
+    const zHf={bilder:bilder||{},fmt:fmt||HF_RAHMEN,basisPt:grundGroesse*0.85};
+    erg.hdr=odfHf(odfKind(mp,"header"),kHf,zHf);erg.ftr=odfHf(odfKind(mp,"footer"),kHf,zHf);
+    const h1=odfHf(odfKind(mp,"header-first"),kHf,zHf),f1=odfHf(odfKind(mp,"footer-first"),kHf,zHf);
     if(h1||f1){erg.ersteAnders=true;erg.hdr1=h1;erg.ftr1=f1}
-    const h2=odfHf(odfKind(mp,"header-left"),kHf),f2=odfHf(odfKind(mp,"footer-left"),kHf);
+    const h2=odfHf(odfKind(mp,"header-left"),kHf,zHf),f2=odfHf(odfKind(mp,"footer-left"),kHf,zHf);
     if(h2||f2){erg.geradeAnders=true;erg.hdr2=h2;erg.ftr2=f2}
   }
 
@@ -16907,6 +17375,19 @@ function odtLesen(inhaltXml,stilXml,bilder){
   };
 
   let out="";
+  /* Öffnendes <p> mit dem Absatzformat, wo es vom Dokument abweicht —
+     für Absätze im Text und in Tabellenzellen */
+  const pAuf=(pe,letzte)=>{
+    const al=pe.al||"";
+    const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
+    const links=em(pe.ml),erste=em(pe.ti),rechts=em(pe.mr);
+    const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
+    const zab=pe.zab&&(pe.zab.art!=="auto"||gs.lh==null||Math.abs(pe.zab.v-gs.lh)>=0.01)?pe.zab:null;
+    const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
+      pe.mt>0&&"padding-top:"+ptCalc(pe.mt),(letzte?pe.mb>=0.5:pe.mb!=null&&nachStd!=null&&Math.abs(pe.mb-nachStd)>=0.5)&&"margin-bottom:"+ptCalc(pe.mb),
+      zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+    return st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>";
+  };
   /* Bilder stehen wie ihr Absatz — ohne Angabe links, wie in Writer */
   const absatz=p=>{
     const {name,stufe,art,basis}=absatzKtx(p);
@@ -16947,15 +17428,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
     }else if(art==="titel"||art==="untertitel"){
       out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</p>";
     }else{
-      const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
-      const links=em(pe.ml),erste=em(pe.ti),rechts=em(pe.mr);
-      /* Absatzformat, wo es vom Dokument abweicht */
-      const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
-      const zab=pe.zab&&(pe.zab.art!=="auto"||gs.lh==null||Math.abs(pe.zab.v-gs.lh)>=0.01)?pe.zab:null;
-      const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
-        pe.mt>0&&"padding-top:"+ptCalc(pe.mt),pe.mb!=null&&nachStd!=null&&Math.abs(pe.mb-nachStd)>=0.5&&"margin-bottom:"+ptCalc(pe.mb),
-        zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
-      out+=(st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>")+(inhalt||"<br>")+"</p>";
+      out+=pAuf(pe)+(inhalt||"<br>")+"</p>";
     }
     if(pe.umbNach)out+=seitenumbruchHtml();
   };
@@ -17022,7 +17495,14 @@ function odtLesen(inhaltXml,stilXml,bilder){
     sammle(t);
     let rahmen=false;
     zeilen.forEach(z=>[...z.children].forEach(c=>{const s=k.stile["table-cell:"+c.getAttribute("table:style-name")];if(s&&ODF_ZELLE_RAHMEN(s.zelle))rahmen=true}));
-    let r=rahmen?"<table>":'<table data-rahmen="ohne">';
+    /* Breite aus der Tabellenvorlage, außer sie füllt den Satzspiegel */
+    const tst=k.stile["table:"+t.getAttribute("table:style-name")],tp=tst&&tst.tabelle;
+    let proz=100;
+    if(tp&&tp.getAttribute("table:align")!=="margins"){
+      const rw=tp.getAttribute("style:rel-width"),w=odfPt(tp.getAttribute("style:width"));
+      proz=rw&&/%$/.test(rw)?parseFloat(rw):w&&textbreitePt?w/textbreitePt*100:100}
+    const zellInfo=[];
+    let r="<table\uE003>";
     const summe=spalten.reduce((a,b)=>a+b,0);
     if(spalten.length&&summe>0)r+="<colgroup>"+spalten.map(w=>`<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
     zeilen.forEach(z=>{
@@ -17034,16 +17514,24 @@ function odtLesen(inhaltXml,stilXml,bilder){
         if(c.localName!=="table-cell")return;
         const cs=parseInt(c.getAttribute("table:number-columns-spanned"),10)||1,rs=parseInt(c.getAttribute("table:number-rows-spanned"),10)||1;
         const teile=[...c.children].map(x=>{
-          if(x.localName==="p"||x.localName==="h"){const kx=absatzKtx(x);return {text:absatzLauf(x,{basis:kx.basis,stufe:0})}}
+          if(x.localName==="p"||x.localName==="h"){const kx=absatzKtx(x);return {text:absatzLauf(x,{basis:kx.basis,stufe:0}),auf:pAuf(odfWirkP(k,kx.name),x===c.lastElementChild)}}
           if(x.localName==="table")return {block:tabelleHtml(x)};
           if(x.localName==="list")return {block:listeHtml(x,0,null)};
           return null}).filter(Boolean);
-        const inner=teile.length===1&&teile[0].text!==undefined?teile[0].text:teile.map(x=>x.block!==undefined?x.block:"<p>"+(x.text||"<br>")+"</p>").join("");
-        r+="<td"+(cs>1?' colspan="'+cs+'"':"")+(rs>1?' rowspan="'+rs+'"':"")+">"+(inner||"&nbsp;")+"</td>";
+        /* Ein schlichter Absatz bleibt Text; mit Abstand, Ausrichtung oder
+           mehreren Absätzen werden es <p> mit ihrem Format (Zeilenhöhe wie
+           in Writer und Word) */
+        const inner=teile.length===1&&teile[0].text!==undefined&&teile[0].auf==="<p>"?teile[0].text:teile.map(x=>x.block!==undefined?x.block:(x.auf||"<p>")+(x.text||"<br>")+"</p>").join("");
+        const zst=k.stile["table-cell:"+c.getAttribute("table:style-name")];
+        zellInfo.push(odfZellFormat(zst&&zst.zelle));
+        r+="<td"+(cs>1?' colspan="'+cs+'"':"")+(rs>1?' rowspan="'+rs+'"':"")+"\uE002"+(zellInfo.length-1)+"\uE002>"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
-    return r+"</table>";
+    zellInfo.forEach(z=>ZELL_SEITEN.forEach(s=>{if(randStandard(z.rand[s]))delete z.rand[s]}));
+    const zs=tabelleZellStile(zellInfo,!rahmen);
+    return (r+"</table>").replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+tabelleKopf(proz));
   };
 
   const bloecke=el=>[...el.children].forEach(x=>{
@@ -17317,8 +17805,48 @@ function docChp(o,g,stil,schriften){
   });
   return o;
 }
+/* Rahmenlinien der Tabelle: Brc80 (4 Bytes: Breite in Achtelpunkt, Art,
+   Farbindex) und Brc (8 Bytes: Farbe RGB+Merker, Breite, Art). Alles 0xFF
+   heißt „keine Linie“, Art 0 in einer Zelle „wie die Tabelle“. */
+const DOC_BRC_ART=t=>t===3||t===10||(t>=11&&t<=19)?"double":t===6?"dotted":t===7||t===8||t===9||t===22||t===23?"dashed":"solid";
+function docBrc80(g,p,tabelle){
+  if(g[p]===0xFF&&g[p+1]===0xFF&&g[p+2]===0xFF&&g[p+3]===0xFF)return "none";
+  const t=g[p+1];if(!t||t===0xFF)return tabelle?"none":null;
+  return {pt:(g[p]||4)/8,art:DOC_BRC_ART(t),farbe:DOC_ICO[g[p+2]]||"000000"};
+}
+function docBrc(g,p){
+  if(g[p]===0xFF&&g[p+1]===0xFF&&g[p+2]===0xFF&&g[p+3]===0xFF&&g[p+5]===0xFF)return "none";
+  const t=g[p+5];if(!t||t===0xFF)return "none";
+  return {pt:(g[p+4]||4)/8,art:DOC_BRC_ART(t),farbe:g[p+3]===0xFF?"000000":docHex(g[p],g[p+1],g[p+2])};
+}
 /* Absatzformat, soweit es hier eine Entsprechung hat */
 function docPap(o,g){
+  /* Zellformat der Zeile (nur am Zeilenende-Absatz, TTP): Schattierung je
+     Zelle, Tabellenränder, Zellränder und deren Farben */
+  const T={shd:[],shd80:[],tbl:null,tbl80:null,set:[],farbe:{}};let tAn=false;
+  const tabRaender=(n,lies)=>{const r={};["top","left","bottom","right","insideH","insideV"].forEach((k,j)=>{const v=lies(j);if(v)r[k]=v});return r};
+  docSprms(g,(sp,g,i,len)=>{
+    switch(sp){
+      case 0xD612:case 0xD670:case 0xD616:case 0xD60C:{
+        const ab=sp===0xD616?22:sp===0xD60C?44:0,n=Math.floor(g[i]/10);
+        if(sp===0xD670&&T.shd.length)break;
+        for(let k=0;k<n;k++){const p=i+1+k*10+4;T.shd[ab+k]=g[p+3]===0xFF?null:docHex(g[p],g[p+1],g[p+2])}
+        tAn=true;break;
+      }
+      case 0xD609:{const n=Math.floor(g[i]/2);
+        for(let k=0;k<n;k++){const v=g[i+1+k*2]|(g[i+2+k*2]<<8),b=(v>>5)&0x1F;T.shd80[k]=b&&b<DOC_ICO.length?DOC_ICO[b]:null}
+        tAn=true;break}
+      case 0xD613:T.tbl=tabRaender(6,j=>docBrc(g,i+1+j*8));tAn=true;break;
+      case 0xD605:T.tbl80=tabRaender(6,j=>docBrc80(g,i+1+j*4,true));tAn=true;break;
+      case 0xD62F:T.set.push({von:g[i+1],bis:g[i+2],seiten:g[i+3],r:docBrc(g,i+4)});tAn=true;break;
+      case 0xD620:T.set.push({von:g[i+1],bis:g[i+2],seiten:g[i+3],r:docBrc80(g,i+4,true)});tAn=true;break;
+      case 0xD61A:case 0xD61B:case 0xD61C:case 0xD61D:{
+        const k=["top","left","bottom","right"][sp-0xD61A],n=Math.floor(g[i]/4),a=[];
+        for(let c=0;c<n;c++){const p=i+1+c*4;a.push(g[p+3]===0xFF?null:docHex(g[p],g[p+1],g[p+2]))}
+        T.farbe[k]=a;tAn=true;break;
+      }
+    }
+  });
   docSprms(g,(sp,g,i,len)=>{
     const v=g[i],v2=g[i]|(g[i+1]<<8),s2=(v2<<16)>>16;
     switch(sp){
@@ -17343,11 +17871,24 @@ function docPap(o,g){
         const n=g[i+2],gr=[],tc=[];
         for(let k=0;k<=n;k++){const x=g[i+3+k*2]|(g[i+4+k*2]<<8);gr.push((x<<16)>>16)}
         const b=i+3+(n+1)*2;
-        for(let k=0;k<n&&b+k*20+2<=i+len;k++){const f=g[b+k*20]|(g[b+k*20+1]<<8);tc.push({mHor:!!(f&2),erstHor:!!(f&1),mVer:!!(f&0x20),startVer:!!(f&0x40)})}
+        for(let k=0;k<n&&b+k*20+2<=i+len;k++){const f=g[b+k*20]|(g[b+k*20+1]<<8);
+          const rand={};if(b+k*20+20<=i+len)["top","left","bottom","right"].forEach((s,j)=>{const r=docBrc80(g,b+k*20+4+j*4,false);if(r)rand[s]=r});
+          tc.push({mHor:!!(f&2),erstHor:!!(f&1),mVer:!!(f&0x20),startVer:!!(f&0x40),rand})}
         o.tdef={gr,tc};break;
       }
     }
   });
+  if(tAn&&o.tdef){
+    /* Was die Tabelle nicht nennt, hat in Word keine Linie */
+    o.tdef.trand=Object.assign({top:"none",left:"none",bottom:"none",right:"none",insideH:"none",insideV:"none"},T.tbl||T.tbl80||{});
+    T.set.forEach(st=>{for(let c=st.von;c<st.bis&&c<o.tdef.tc.length;c++)
+      ["top","left","bottom","right"].forEach((s,j)=>{if(st.seiten&(1<<j))o.tdef.tc[c].rand[s]=st.r})});
+    o.tdef.tc.forEach((tc,c)=>{
+      const bg=T.shd.length?T.shd[c]:T.shd80[c];if(bg)tc.bg=bg;
+      Object.keys(T.farbe).forEach(s=>{const f=T.farbe[s][c],r=tc.rand[s];if(f&&r&&r!=="none")tc.rand[s]={...r,farbe:f}});
+    });
+    o.tdef.fmt=true;
+  }
   return o;
 }
 /* ================= Gemeinsamer Satzbau für .doc und .rtf =================
@@ -17424,6 +17965,19 @@ function wortSatz(absaetze,ctx){
       `<img src="${b.uri}" alt="" draggable="false" style="width:${br}%"></figure>`;
   };
   let html="",offen=[];
+  /* Öffnendes <p> mit dem Absatzformat, wo es vom Dokument abweicht
+     (Twips, Zeilenabstand als Objekt) — im Text und in Tabellenzellen */
+  const pAuf=(ab,letzte)=>{
+    const al=ab.jc||"";
+    const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
+    const links=em(ab.links),erste=em(ab.erste),rechts=em(ab.rechts);
+    const zEff=ab.zab||{art:"auto",v:1};
+    const zab=zEff.art!=="auto"||ctx.lhStd==null||Math.abs(zEff.v-ctx.lhStd)>=0.01?zEff:null;
+    const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
+      ab.vor>0&&"padding-top:"+ptCalc(ab.vor/20),(letzte?ab.nach>=10:ab.nach!=null&&ctx.nachStd!=null&&Math.abs(ab.nach-ctx.nachStd)>=10)&&"margin-bottom:"+ptCalc(ab.nach/20),
+      zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+    return st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>";
+  };
   /* Ein Absatz außerhalb von Liste und Tabelle */
   const absatzHtml=ab=>{
     const h=ab.h,art=ab.art,al=ab.jc||"";
@@ -17448,15 +18002,7 @@ function wortSatz(absaetze,ctx){
       if(art.startsWith("zitat:")){const qs=art.slice(6),za=zitatAusrichtung(qs,al);
         r+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inh||"<br>")+"</blockquote>";return}
       if(art==="titel"||art==="untertitel"){r+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</p>";return}
-      const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
-      const links=em(ab.links),erste=em(ab.erste),rechts=em(ab.rechts);
-      /* Absatzformat, wo es vom Dokument abweicht (Twips, Zeilenabstand als Objekt) */
-      const zEff=ab.zab||{art:"auto",v:1};
-      const zab=zEff.art!=="auto"||ctx.lhStd==null||Math.abs(zEff.v-ctx.lhStd)>=0.01?zEff:null;
-      const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
-        ab.vor>0&&"padding-top:"+ptCalc(ab.vor/20),ab.nach!=null&&ctx.nachStd!=null&&Math.abs(ab.nach-ctx.nachStd)>=10&&"margin-bottom:"+ptCalc(ab.nach/20),
-        zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
-      r+=(st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>")+(inh||"<br>")+"</p>";
+      r+=pAuf(ab)+(inh||"<br>")+"</p>";
     });
     return r+figuren;
   };
@@ -17487,7 +18033,9 @@ function wortSatz(absaetze,ctx){
     const grenzen=[...new Set(zeilen.flatMap(z=>z.tdef?z.tdef.gr:[]))].sort((a,b)=>a-b);
     const spalte=x=>{let i=grenzen.findIndex(g=>Math.abs(g-x)<=20);return i<0?0:i};
     const raster=[];
-    let r=zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen)&&!zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen===false)?'<table data-rahmen="ohne">':"<table>";
+    const ohneVorher=zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen)&&!zeilen.some(z=>z.tdef&&z.tdef.ohneRahmen===false);
+    const mitFormat=zeilen.some(z=>z.tdef&&z.tdef.fmt),zellInfo=[];
+    let r="<table\uE003>";
     if(grenzen.length>2){const summe=grenzen[grenzen.length-1]-grenzen[0];
       if(summe>0)r+="<colgroup>"+grenzen.slice(1).map((g,i)=>`<col style="width:${Math.round((g-grenzen[i])/summe*1000)/10}%">`).join("")+"</colgroup>"}
     zeilen.forEach((z,zi)=>{
@@ -17504,11 +18052,17 @@ function wortSatz(absaetze,ctx){
           return;
         }
         const zelle={rs:1,i:r.length};raster[zi][von]=zelle;
-        r+="<td"+(breit>1?' colspan="'+breit+'"':"")+"\u0001"+zelle.i+"\u0001>"+(inh||"&nbsp;")+"</td>";
+        if(mitFormat){const lage={oben:zi===0,unten:zi===zeilen.length-1,links:von===0,rechts:von+breit>=grenzen.length-1};
+          zellInfo.push({bg:tc.bg||null,rand:zellRandAufloesen(tc.rand,td&&td.trand,lage)})}
+        r+="<td"+(breit>1?' colspan="'+breit+'"':"")+"\u0001"+zelle.i+"\u0001"+(mitFormat?"\uE002"+(zellInfo.length-1)+"\uE002":"")+">"+(inh||"&nbsp;")+"</td>";
       });
       r+="</tr>";
     });
     r=r.replace(/\u0001(\d+)\u0001/g,(m,i)=>{const z=raster.flat().find(x=>x&&x.i===+i);return z&&z.rs>1?' rowspan="'+z.rs+'"':""});
+    const zs=tabelleZellStile(zellInfo,ohneVorher);
+    const proz=textBreite&&grenzen.length>1?(grenzen[grenzen.length-1]-grenzen[0])*25.4/1440/textBreite*100:100;
+    r=r.replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(mitFormat?tabelleKopf(proz):""));
     html+=r+"</table>";
     zeilen=[];zellen=[];zelleTeile=[];
   };
@@ -17518,9 +18072,9 @@ function wortSatz(absaetze,ctx){
       if(ab.tief===1&&ab.ttp){zeilen.push({zellen,tdef:ab.tdef});zellen=[];zelleTeile=[];continue}
       if(ab.tief>1&&ab.innerTtp)continue;
       const tz=inhalt(ab);
-      zelleTeile.push(tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join(""));
+      zelleTeile.push({h:tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join(""),auf:pAuf(ab,!!ab.zelle)});
       if(ab.zelle&&ab.tief===1){
-        zellen.push(zelleTeile.length===1?zelleTeile[0]:zelleTeile.map(x=>"<p>"+(x||"<br>")+"</p>").join(""));
+        zellen.push(zelleTeile.length===1&&zelleTeile[0].auf==="<p>"?zelleTeile[0].h:zelleTeile.map(x=>x.auf+(x.h||"<br>")+"</p>").join(""));
         zelleTeile=[];
       }
       continue;
@@ -17738,7 +18292,9 @@ function docLesen(buf){
     const n=ab.bis-ab.von;if(!n||stilArt(ab.istd).h||ab.pap.ilfo||ab.pap.inTable)continue;
     /* Ohne Angabe „einfach“, wie in Word */
     const z=ab.pap.zeile;if(z&&z.mehrfach&&z.dya>0){const k=Math.round(z.dya/240*100)/100;zab.set(k,(zab.get(k)||0)+n)}else if(!z)zab.set(1,(zab.get(1)||0)+n);
-    if(ab.pap.nach!=null)nab.set(ab.pap.nach,(nab.get(ab.pap.nach)||0)+n);
+    /* Ohne Angabe 0 pt danach — so zeigt es Word (bis 2026-10 zählte ein
+       solcher Absatz nicht mit, und PureQuills eigener Abstand galt) */
+    const na=ab.pap.nach!=null?ab.pap.nach:0;nab.set(na,(nab.get(na)||0)+n);
   }
 
   /* Grundschrift und -größe: was im Fließtext am meisten vorkommt */
@@ -17793,18 +18349,20 @@ function docLesen(buf){
     const d=new DataView(datenStrom.buffer,datenStrom.byteOffset,datenStrom.byteLength);
     const lcb=d.getUint32(lage,true),cbKopf=d.getUint16(lage+4,true),mm=d.getUint16(lage+6,true);
     const breite=d.getUint16(lage+0x1C,true)*(d.getUint16(lage+0x20,true)||1000)/1000;
+    const hoehe=d.getUint16(lage+0x1E,true)*(d.getUint16(lage+0x22,true)||1000)/1000;
     let p=lage+cbKopf;if(mm===0x66)p+=1+datenStrom[p];
     const b=blipAus(datenStrom,p,Math.min(lage+lcb,datenStrom.length));
     if(!b)return null;if(b.alt)return {alt:true};
-    return {...b,breiteMm:twipMm(breite)};
+    return {...b,breiteMm:twipMm(breite),hoeheMm:twipMm(hoehe)};
   };
   /* Frei schwebende Bilder: FSPA (Lage, Umlauf) je Ankerzeichen, das Bild
      über die Form (spid → pib) aus dem Bildlager der Zeichnungsebene */
-  const spa=new Map();
-  {const [fc,lcb]=fcl(40);if(inTab([fc,lcb])){const n=(lcb-4)/30;
+  /* Haupttext (40) und Kopf-/Fußzeilen (41, Lage im Teiltext gezählt) */
+  const spaLesen=nr=>{const m=new Map();const [fc,lcb]=fcl(nr);if(inTab([fc,lcb])){const n=(lcb-4)/30;
     for(let i=0;i<n;i++){const q=fc+(n+1)*4+i*26,fl=t.getUint16(q+24,true);
-      spa.set(t.getInt32(fc+i*4,true),{spid:t.getInt32(q,true),x0:t.getInt32(q+4,true),y0:t.getInt32(q+8,true),x1:t.getInt32(q+12,true),y1:t.getInt32(q+16,true),
-        bx:(fl>>1)&3,by:(fl>>3)&3,wr:(fl>>5)&0xF,hinter:!!(fl&0x4000)})}}}
+      m.set(t.getInt32(fc+i*4,true),{spid:t.getInt32(q,true),x0:t.getInt32(q+4,true),y0:t.getInt32(q+8,true),x1:t.getInt32(q+12,true),y1:t.getInt32(q+16,true),
+        bx:(fl>>1)&3,by:(fl>>3)&3,wr:(fl>>5)&0xF,hinter:!!(fl&0x4000)})}}return m};
+  const spa=spaLesen(40),spaHdr=spaLesen(41);
   const lager=[],formBild=new Map();
   {const [fc,lcb]=fcl(50);if(inTab([fc,lcb])){
     const geh=(von,bis,f)=>{for(let p=von;p+8<=bis;){const kv=t.getUint16(p,true),typ=t.getUint16(p+2,true),len=t.getUint32(p+4,true);f(typ,kv,p+8,Math.min(p+8+len,bis));p+=8+len}};
@@ -17990,27 +18548,49 @@ function docLesen(buf){
       for(let sek=nSek-1;sek>=0;sek--){const i=6+sek*6+k;if(i+1>=cps.length)continue;
         const a=BASIS_HDD+cps[i],e=BASIS_HDD+cps[i+1];if(e-a>1)return [a,e]}
       return null};
-    const lies=be=>{
+    /* Je Absatz Ausrichtung, Abstände, Zeichenformat und Bilder im Text
+       (Logo) — bis 2026-10 nur der nackte Text, ausgerichtet nach dem
+       ersten Absatz (beim Goethe-Logo rechts, also stand alles rechts) */
+    const basisPt=grundGr*0.85,leer=new Uint8Array(0);
+    const lies=(be,fuss)=>{
       if(!be)return null;
-      let s="",felder=[],al=null;
+      const abs=[],felder=[];let a=null,sc=null,lauf="",lw=null;
+      const zu=()=>{if(lauf&&a){a.html+=hfLaufHtml(lauf,lw||{},basisPt,a)}lauf=""};
+      const text=(t,w)=>{if(lw&&!["b","i","u","s","sz","color"].every(q=>(lw[q]||null)===(w[q]||null)))zu();lw=w;lauf+=t;a.text+=t};
+      const feld=ph=>{zu();a.text+=ph;a.html+=xesc(ph)};
       for(let cp=be[0];cp<be[1]&&cp<zch.length;cp++){
         const c=zch[cp],k=c.charCodeAt(0),fd=felder[felder.length-1];
-        const x=finde(chpx,fcs[cp]);if(x){const chp=docChp({},x.g,{},schriften);if(chp.versteckt||chp.weg)continue}
+        if(!a){const px=finde(papx,fcs[cp]);const pap=docPap({...stilPap(px?px.istd:0),tdef:null},px?px.g:leer);
+          sc=stilChp(px?px.istd:0);
+          a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:ausrichtung(pap)||"left",vor:pap.vor>0?twipMm(pap.vor):0,nach:pap.nach>0?twipMm(pap.nach):0}}
+        const x=finde(chpx,fcs[cp]);const chp=x?docChp({...sc},x.g,sc,schriften):sc;
+        if(chp.versteckt||chp.weg)continue;
         if(k===0x13){felder.push({befehl:"",phase:0});continue}
-        if(k===0x14&&fd){fd.phase=1;const ph=feldPlatzhalter(fd.befehl);if(ph){s+=ph;fd.ersetzt=true}continue}
-        if(k===0x15&&fd){if(fd.phase===0){const ph=feldPlatzhalter(fd.befehl);if(ph)s+=ph}felder.pop();continue}
+        if(k===0x14&&fd){fd.phase=1;const ph=feldPlatzhalter(fd.befehl);if(ph){feld(ph);fd.ersetzt=true}continue}
+        if(k===0x15&&fd){if(fd.phase===0){const ph=feldPlatzhalter(fd.befehl);if(ph)feld(ph)}felder.pop();continue}
         if(fd&&fd.phase===0){fd.befehl+=c;continue}
         if(fd&&fd.ersetzt)continue;
-        if(k===0x0D){if(al===null){const px=finde(papx,fcs[cp]);const pap=docPap({...stilPap(px?px.istd:0)},px?px.g:new Uint8Array(0));al=ausrichtung(pap)||"left"}s+="\n";continue}
-        if(k===0x09){s+=" ";continue}
+        if(k===0x0D){zu();a.text=a.text.replace(/[  ]+$/,"");abs.push(a);a=null;lw=null;continue}
+        if(k===0x09){text("\t",chp);continue}
+        if(k===0x01){const b=chp.bildAn!=null?bildImText(chp.bildAn):null;
+          if(b&&!b.alt&&b.uri){bildStat.zahl++;bildStat.bytes+=b.bytes||0;a.bilder.push({uri:b.uri,b:b.breiteMm,h:b.hoeheMm})}continue}
+        /* Frei schwebend (Logo in Word meist so): Lage aus dem FSPA, Bezug
+           Blatt, Rand oder Absatz */
+        if(k===0x08){const sp=spaHdr.get(cp-BASIS_HDD),pr=sp&&formBild.get(sp.spid),l=pr&&lager[pr.get(0x0104)-1];
+          const b=l&&blipAus(tab,l[0],l[1]);
+          if(b&&!b.alt){bildStat.zahl++;bildStat.bytes+=b.bytes||0;
+            const relH=pr.has(0x0390)?pr.get(0x0390):sp.bx===1?1:0,relV=pr.has(0x0392)?pr.get(0x0392):sp.by===1?1:sp.by===2?2:0;
+            const ff=fmt||HF_RAHMEN,x=twipMm(sp.x0)-(relH===1?ff.m[3]:0),y0=twipMm(sp.y0);
+            a.anker.push({uri:b.uri,b:twipMm(sp.x1-sp.x0),h:twipMm(sp.y1-sp.y0),x,...(relV===1?{yBlatt:y0}:relV>=2?{yAbs:y0}:{yBlatt:ff.m[0]+y0})})}
+          continue}
         if(k<0x20)continue;
-        s+=c;
+        text(c,chp);
       }
-      s=s.replace(/[  ]+\n/g,"\n").replace(/\n+$/,"").replace(/^\n+/,"");
-      return s.trim()?{on:true,text:s,align:al==="justify"?"left":(al||"left")}:null;
+      if(a){zu();if(a.text||a.bilder.length)abs.push(a)}
+      return hfAusAbsaetzen(abs,fmt||HF_RAHMEN,fuss);
     };
-    hf.hdr=lies(geschichte(1));hf.ftr=lies(geschichte(3));
-    if(titelSeite){const h1=lies(geschichte(4)),f1=lies(geschichte(5));
+    hf.hdr=lies(geschichte(1));hf.ftr=lies(geschichte(3),true);
+    if(titelSeite){const h1=lies(geschichte(4)),f1=lies(geschichte(5),true);
       hf.ersteAnders=true;hf.hdr1=h1||{on:false,text:"",align:"center"};hf.ftr1=f1||{on:false,text:"",align:"center"}}
   }}
   if(kopfText&&!hf.hdr&&!hf.ftr)fehlt.kopf=true;
@@ -18188,11 +18768,12 @@ function rtfLesen(roh){
 
   /* Bild aus {\pict …}: PNG/JPEG direkt, DIB als BMP; WMF/EMF/PICT nicht */
   const pictBild=g=>{
-    let typ="",wg=0,sx=100,pw=0;let hex="",bin=null;
+    let typ="",wg=0,sx=100,pw=0,hg=0,sy=100,ph=0;let hex="",bin=null;
     const geh=k=>k.forEach(y=>{
       if(y.k){if(!(y.k[0]&&y.k[0].sym==="*"))geh(y.k);return}
       if(y.w){if(/^(pngblip|jpegblip|emfblip|wmetafile|macpict|dibitmap|wbitmap|pmmetafile)$/.test(y.w))typ=y.w;
-        else if(y.w==="picwgoal")wg=y.p;else if(y.w==="picscalex")sx=y.p;else if(y.w==="picw")pw=y.p;else if(y.w==="bin")bin=y.daten;return}
+        else if(y.w==="picwgoal")wg=y.p;else if(y.w==="picscalex")sx=y.p;else if(y.w==="picw")pw=y.p;else if(y.w==="bin")bin=y.daten;
+        else if(y.w==="pichgoal")hg=y.p;else if(y.w==="picscaley")sy=y.p;else if(y.w==="pich")ph=y.p;return}
       if(y.t)hex+=y.t;
     });
     geh(g.k);
@@ -18203,8 +18784,8 @@ function rtfLesen(roh){
     let mime=typ==="pngblip"?"image/png":typ==="jpegblip"?"image/jpeg":"image/bmp";
     if(typ==="dibitmap"){const dv=new DataView(bytes.buffer),hl=dv.getUint32(0,true),bits=dv.getUint16(14,true),farbenN=dv.getUint32(32,true)||(bits<=8?1<<bits:0);
       const ganz=new Uint8Array(14+bytes.length),kd=new DataView(ganz.buffer);ganz[0]=0x42;ganz[1]=0x4D;kd.setUint32(2,ganz.length,true);kd.setUint32(10,14+hl+farbenN*4,true);ganz.set(bytes,14);bytes=ganz}
-    const breiteTw=(wg||pw*15)*(sx||100)/100;
-    return {uri:"data:"+mime+";base64,"+base64Von(bytes),bytes:bytes.length,breiteMm:twipMm(breiteTw)};
+    const breiteTw=(wg||pw*15)*(sx||100)/100,hoeheTw=(hg||ph*15)*(sy||100)/100;
+    return {uri:"data:"+mime+";base64,"+base64Von(bytes),bytes:bytes.length,breiteMm:twipMm(breiteTw),hoeheMm:twipMm(hoeheTw)};
   };
   const textBreite=()=>twipMm(seite.w-seite.l-seite.r);
   /* Schwebende Form {\shp …}: Bild über die Eigenschaft pib; Lage und
@@ -18249,7 +18830,10 @@ function rtfLesen(roh){
     const fl=()=>{if(bytes.length){text(rtfDekodieren(bytes,cpAkt()));bytes=[]}};
     const setF=(k2,v)=>{st.f={...st.f,[k2]:v}};
     const setP=(k2,v)=>{st.pap={...st.pap,[k2]:v}};
-    const rand=(ziel,a,b)=>{if(ziel==="zelle"){if(a!=="brdrnone")gs.zeile.ohneRahmen=false;return}
+    const rand=(ziel,a,b)=>{if(ziel&&ziel.startsWith("zelle:")){if(a!=="brdrnone")gs.zeile.ohneRahmen=false;
+        const r=(gs.tcAkt.rand=gs.tcAkt.rand||{});
+        r[ziel.slice(6)]=a==="brdrnone"?"none":{pt:0.5,art:a==="brdrdb"||a==="brdrtriple"?"double":a==="brdrdot"?"dotted":/^brdrdash/.test(a)?"dashed":"solid",farbe:"000000"};
+        return}
       if(!ziel)return;const alt=st.pap[ziel]||{};setP(ziel,a==="brdrnone"?null:{art:a||alt.art,breite:b!=null?b:alt.breite||0})};
     for(const x of k){
       if(x.hex!=null){if(skip>0){skip--;continue}bytes.push(x.hex);continue}
@@ -18271,7 +18855,7 @@ function rtfLesen(roh){
         case "par":zuAbs(gs,st,false);break;
         case "cell":zuAbs(gs,st,true);break;
         case "nestcell":zuAbs(gs,st,true);break;
-        case "row":gs.abs.push({runs:[],pap:{...st.pap,intbl:true,itap:1},ttp:true,tdef:{gr:[...gs.zeile.gr],tc:[...gs.zeile.tc],ohneRahmen:gs.zeile.ohneRahmen}});break;
+        case "row":gs.abs.push({runs:[],pap:{...st.pap,intbl:true,itap:1},ttp:true,tdef:{gr:[...gs.zeile.gr],tc:[...gs.zeile.tc],ohneRahmen:gs.zeile.ohneRahmen,fmt:!!gs.zeile.fmt}});break;
         case "nestrow":gs.abs.push({runs:[],pap:{...st.pap},innerTtp:true});break;
         case "line":roh({h:"<br>",t:"\n",f:st.f});break;
         case "tab":roh({h:'<span class="wtab" contenteditable="false">\t</span>',t:"\t",f:st.f});break;
@@ -18299,15 +18883,20 @@ function rtfLesen(roh){
         case "brdrt":rahmen="oben";setP("oben",{art:"",breite:0});break;
         case "brdrb":rahmen="unten";setP("unten",{art:"",breite:0});break;
         case "brdrl":case "brdrr":case "box":rahmen="seitlich";break;
-        case "clbrdrt":case "clbrdrb":case "clbrdrl":case "clbrdrr":rahmen="zelle";break;
-        case "brdrw":if(rahmen==="oben"||rahmen==="unten")rand(rahmen,null,p);break;
+        case "clbrdrt":case "clbrdrb":case "clbrdrl":case "clbrdrr":rahmen="zelle:"+{t:"top",b:"bottom",l:"left",r:"right"}[w.slice(-1)];break;
+        case "brdrw":if(rahmen==="oben"||rahmen==="unten")rand(rahmen,null,p);
+          else if(rahmen&&rahmen.startsWith("zelle:")){const r=gs.tcAkt.rand&&gs.tcAkt.rand[rahmen.slice(6)];if(r&&r!=="none")r.pt=Math.max(0.25,(p||10)/20)}break;
+        case "brdrcf":if(rahmen&&rahmen.startsWith("zelle:")){const r=gs.tcAkt.rand&&gs.tcAkt.rand[rahmen.slice(6)];if(r&&r!=="none"&&farben[p])r.farbe=farben[p]}break;
+        case "clcbpat":if(farben[p])gs.tcAkt.bg=farben[p];break;
         case "trowd":gs.zeile={gr:[0],tc:[],ohneRahmen:true};gs.tcAkt={};rahmen=null;break;
         case "trleft":gs.zeile.gr[0]=p||0;break;
         case "clmgf":gs.tcAkt.mHor=true;gs.tcAkt.erstHor=true;break;
         case "clmrg":gs.tcAkt.mHor=true;gs.tcAkt.erstHor=false;break;
         case "clvmgf":gs.tcAkt.mVer=true;gs.tcAkt.startVer=true;break;
         case "clvmrg":gs.tcAkt.mVer=true;gs.tcAkt.startVer=false;break;
-        case "cellx":gs.zeile.gr.push(p||0);gs.zeile.tc.push(gs.tcAkt);gs.tcAkt={};rahmen=null;break;
+        case "cellx":gs.zeile.gr.push(p||0);
+          if(gs.tcAkt.bg||(gs.tcAkt.rand&&Object.values(gs.tcAkt.rand).some(r=>r!=="none"&&!randStandard(r))))gs.zeile.fmt=true;
+          gs.tcAkt.rand=gs.tcAkt.rand||{};gs.zeile.tc.push(gs.tcAkt);gs.tcAkt={};rahmen=null;break;
         case "paperw":case "pgwsxn":seite.w=p;papier=true;break;case "paperh":case "pghsxn":seite.h=p;papier=true;break;
         case "margl":case "marglsxn":seite.l=p;break;case "margr":case "margrsxn":seite.r=p;break;
         case "margt":case "margtsxn":seite.o=Math.abs(p);break;case "margb":case "margbsxn":seite.u=Math.abs(p);break;
@@ -18457,21 +19046,31 @@ function rtfLesen(roh){
   const html=wortSatz(norm,{grundGr,grundF,textBreite:textBreite(),lhStd:(meist(zab)||[])[0],nachStd:(meist(nab)||[])[0]});
 
   /* Kopf- und Fußzeilen als Text mit Platzhaltern */
-  const hfVon=gs=>{
-    if(!gs)return null;
-    const zeilen=gs.abs.map(a=>a.runs.map(r=>r.t!=null?r.t.replace(/\t/g," "):"").join("").replace(/\s+$/,""));
-    while(zeilen.length&&!zeilen[zeilen.length-1].trim())zeilen.pop();
-    if(!zeilen.join("").trim())return null;
-    const jc=gs.abs[0]&&gs.abs[0].pap.jc;
-    return {on:true,text:zeilen.join("\n"),align:jc==="center"?"center":jc==="right"?"right":"left"};
-  };
-  const hf={hdr:hfVon(kopf.header||kopf.headerr),ftr:hfVon(kopf.footer||kopf.footerr)};
-  if(titelpg&&(kopf.headerf||kopf.footerf)){hf.ersteAnders=true;hf.hdr1=hfVon(kopf.headerf)||{on:false,text:"",align:"center"};hf.ftr1=hfVon(kopf.footerf)||{on:false,text:"",align:"center"}}
-  if(facing&&(kopf.headerl||kopf.footerl)){hf.geradeAnders=true;hf.hdr2=hfVon(kopf.headerl)||{on:false,text:"",align:"center"};hf.ftr2=hfVon(kopf.footerl)||{on:false,text:"",align:"center"}}
-
   /* WordPad schreibt kein Papierformat; dann gilt die eigene Voreinstellung
      statt des US-Letter-Formats, das RTF ohne Angabe annimmt */
   const fmt=papier?formatAusMm(twipMm(seite.w),twipMm(seite.h),[twipMm(seite.o),twipMm(seite.r),twipMm(seite.u),twipMm(seite.l)],twipMm(seite.kh),twipMm(seite.kf)):null;
+  /* Kopf-/Fußzeile je Absatz mit Ausrichtung, Format und Bildern im Text,
+     wie beim .doc-Leser (hfAusAbsaetzen) */
+  const hfVon=(gs,fuss)=>{
+    if(!gs)return null;
+    const basisPt=grundGr*0.85;
+    const abs=gs.abs.map(ab=>{
+      const jc=ab.pap.jc;
+      const a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:jc==="center"?"center":jc==="right"?"right":"left",
+        vor:ab.pap.sb>0?twipMm(ab.pap.sb):0,nach:ab.pap.sa>0?twipMm(ab.pap.sa):0};
+      ab.runs.forEach(r=>{
+        if(r.bild){if(r.bild.uri)a.bilder.push({uri:r.bild.uri,b:r.bild.breiteMm,h:r.bild.hoeheMm});return}
+        if(r.t==null)return;
+        a.text+=r.t;a.html+=hfLaufHtml(r.t,r.f||{},basisPt,a);
+      });
+      a.text=a.text.replace(/\s+$/,"");
+      return a;
+    });
+    return hfAusAbsaetzen(abs,fmt||HF_RAHMEN,fuss);
+  };
+  const hf={hdr:hfVon(kopf.header||kopf.headerr),ftr:hfVon(kopf.footer||kopf.footerr,true)};
+  if(titelpg&&(kopf.headerf||kopf.footerf)){hf.ersteAnders=true;hf.hdr1=hfVon(kopf.headerf)||{on:false,text:"",align:"center"};hf.ftr1=hfVon(kopf.footerf,true)||{on:false,text:"",align:"center"}}
+  if(facing&&(kopf.headerl||kopf.footerl)){hf.geradeAnders=true;hf.hdr2=hfVon(kopf.headerl)||{on:false,text:"",align:"center"};hf.ftr2=hfVon(kopf.footerl,true)||{on:false,text:"",align:"center"}}
   const erg={html:html||"<p><br></p>",fmt,font:grundF,size:Math.min(FS_MAX,Math.max(FS_MIN,Math.round(grundGr*2)/2)),fehlt,
     footnotes:fussnoten,endnotes:endnoten,kommentare,bilder:bildStat,...hf};
   const lh=meist(zab),ps=meist(nab);
@@ -21458,6 +22057,9 @@ function hfTabZeilen(html){
   const zeilen=[[]];
   for(const n of [...box.childNodes]){if(n.nodeName==="BR")zeilen.push([]);else zeilen[zeilen.length-1].push(n)}
   const außen=d=>{const t=document.createElement("div");t.appendChild(d);return t.innerHTML};
+  /* Eine Tab-Zeile ist ein Block: ein <br> davor oder danach ergäbe eine
+     leere Zeile, die es in Word nicht gibt (Goethe-Fußzeile, 2026-10-26) */
+  const blockZ=z=>z.startsWith("<span class=\"hfzeile\">");
   return zeilen.map(knoten=>{
     const z=document.createElement("div");knoten.forEach(k=>z.appendChild(k));
     if(!z.textContent.includes("\t"))return z.innerHTML;
@@ -21469,7 +22071,7 @@ function hfTabZeilen(html){
     for(const [k,i] of stellen){const r=document.createRange();r.setStart(...ab);r.setEnd(k,i);teile.push(außen(r.cloneContents()));ab=[k,i+1]}
     const r=document.createRange();r.setStart(...ab);r.setEnd(z,z.childNodes.length);teile.push(außen(r.cloneContents()));
     return `<span class="hfzeile"><span>${teile[0]}</span><span>${teile[1]||""}</span><span>${teile.slice(2).join(" ")}</span></span>`;
-  }).join("<br>");
+  }).reduce((out,z,i,alle)=>out+(i&&!blockZ(alle[i-1])&&!blockZ(z)?"<br>":"")+z,"");
 }
 /* roh: tpl ist schon HTML (v.html) und wird nicht maskiert */
 function hfText(tpl,page,total,forPrint,roh){
@@ -21501,7 +22103,7 @@ function hfZoneAt(clientY){
 function hfRect(which,page){
   const f=fmtOf(doc()),z=S.zoom,v=hfOf(doc(),which);
   const ph=MM(f.h)*z,stride=ph+GAP;
-  const fs=(9*96/72)*z;
+  const fs=hfGroessePx(doc(),z);
   const h=Math.max(hfTextHoehe(doc(),which,z),16);
   const d=MM((istKopf(which)?f.hd:f.fd)+(v.ty||0))*z;
   return {top:istKopf(which)?page*stride+d:page*stride+ph-d-h,
@@ -21525,7 +22127,7 @@ function hfEditOpen(which,page){
   hfEditing={which,page};
   const v=hfOf(d,which),r=hfRect(which,page);
   box.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;`+
-    `min-height:${r.h}px;font-size:${r.fs}px;text-align:${v.align}`;
+    `min-height:${r.h}px;font-size:${r.fs}px;font-family:${hfSchrift(d)};text-align:${v.align}`;
   /* Formatiert als HTML, sonst wie bisher als Text */
   if(v.html!=null)box.innerHTML=v.html;else box.textContent=v.text||"";
   box.classList.add("on");
@@ -21761,13 +22363,15 @@ $("#hfbar").addEventListener("click",e=>{
 function hfHtml(i,total,ml,mr,z){
   const d=doc(),fm=fmtOf(d);
   let out="";
-  const fs=(9*96/72)*z;
+  /* Grundgröße wie in Lesern und Exportern (85 % der Dokumentgröße, dort
+     basisPt), Schrift die des Dokuments — wie Words Vorlage „Kopfzeile“ */
+  const fs=hfGroessePx(d,z),schrift=esc(hfSchrift(d));
   for(const seite of ["hdr","ftr"]){
     const v=hfOf(d,hfFuerSeite(d,seite,i));if(!v.on)continue;
     const kante=seite==="hdr"?"top":"bottom",ab=MM(seite==="hdr"?fm.hd:fm.fd)*z;
     const spalte=v.tw?`left:${ml+MM(v.tx||0)*z}px;width:${MM(v.tw)*z}px`:`left:${ml}px;right:${mr}px`;
     out+=`<div class="hf" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
-    text-align:${v.align};font-size:${fs}px">${hfInhalt(v,i+1,total)}</div>`;
+    text-align:${v.align};font-size:${fs}px;font-family:${schrift}">${hfInhalt(v,i+1,total)}</div>`;
     out+=hfBilder(v).map(b=>`<img class="hfbild" alt="" src="${hfBildSrc(b.uri)}" style="${kante}:${ab+MM(+b.y||0)*z}px;left:${ml+MM(+b.x||0)*z}px;width:${MM(b.b)*z}px;height:${MM(b.h)*z}px">`).join("");
   }
   return out;
@@ -22220,7 +22824,7 @@ function tableCmd(a,cell){
   const mk=tag=>{const e=document.createElement(tag);e.innerHTML="<br>";return e};
   if(a==="rowAbove"||a==="rowBelow"){
     const nr=document.createElement("tr");
-    [...row.children].forEach(c=>nr.appendChild(mk(c.tagName==="TH"&&a==="rowAbove"?"th":"td")));
+    [...row.children].forEach(c=>{const n=mk(c.tagName==="TH"&&a==="rowAbove"?"th":"td");if(c.getAttribute("style"))n.setAttribute("style",c.getAttribute("style"));nr.appendChild(n)});
     row.parentNode.insertBefore(nr,a==="rowAbove"?row:row.nextSibling);
   }
   if(a==="colLeft"||a==="colRight"||a==="colDel"){
@@ -22233,6 +22837,7 @@ function tableCmd(a,cell){
     [...table.rows].forEach(r=>{
       const ref=r.children[idx];
       const nc=mk(ref&&ref.tagName==="TH"?"th":"td");
+      const vorbild=ref||r.lastElementChild;if(vorbild&&vorbild.getAttribute("style"))nc.setAttribute("style",vorbild.getAttribute("style"));
       r.insertBefore(nc,a==="colLeft"?ref:(ref?ref.nextSibling:null));
     });
   }

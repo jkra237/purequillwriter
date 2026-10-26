@@ -91,7 +91,8 @@ try {
     function jpg(w,h,f){const c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.fillStyle=f;x.fillRect(0,0,w,h);return c.toDataURL("image/jpeg");}
     const d=blankDoc("Pruefung Umlauf");d.customTitle=true;
     d.fmt={n:"Prüfformat",key:"custom",w:210,h:297,m:[30,20,25,25],hd:12,fd:12,d:""};
-    d.hdr={on:true,text:"Kopfzeile Pruefung",align:"center"};
+    /* Kopfzeile mit Logo im Text und Fettdruck (seit 2026-10-26: ging als .odt verloren) */
+    d.hdr={on:true,text:"Kopfzeile Pruefung",align:"left",html:"<b>Kopfzeile Pruefung</b>",bilder:[{uri:jpg(300,130,"#7a3"),b:30,h:13,x:135,y:0,fluss:true}],ty:13};
     d.ftr={on:true,text:"Seite {seite} von {seiten}",align:"right"};
     d.footnotes=[{id:"f1",text:"Text der Fussnote."}];
     d.html='<p data-fv="titel">Der Titel</p><p data-fv="untertitel">Der Untertitel</p><h1>Titel Eins</h1>'
@@ -114,6 +115,9 @@ try {
      +'<p data-zab="a2" style="line-height:calc(var(--lhn,1.2) * 2);padding-top:calc(12pt * var(--zoom,1));margin-right:2em">Absatzformat doppelt.</p><p data-zab="g18" style="line-height:calc(18pt * var(--zoom,1))">Absatzformat genau.</p>'
      +'<hr><p>Zwischen Linien.</p><hr data-linie="dick"><p>Zwischen Linien.</p><hr data-linie="doppelt"><p>Zwischen Linien.</p><hr data-linie="punkte">'
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
+     /* Zellformat wie Word (seit 2026-10-26): Schattierung, Rahmen je Seite mit Farbe, Tabellenbreite */
+     +'<p>Zwischen den Tabellen.</p><table style="width:80%"><tr><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf</td><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf zwei</td></tr>'
+     +'<tr><td style="border:0.5pt solid #A8D08D">Zelle</td><td style="background-color:#E2EFD9;border-top:0.5pt solid #A8D08D;border-left:0.5pt solid #A8D08D;border-bottom:none;border-right:0.5pt dashed #C00000">Zelle zwei</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
      +'<blockquote><p>Ein Zitat.</p></blockquote>'
      +'<blockquote data-qs="toent"><p>Ein intensives Zitat.</p></blockquote>'
@@ -161,10 +165,12 @@ try {
        "Hervorhebung":st("backgroundColor")+q("mark"),"Ausrichtung":st("textAlign"),"Einzug":st("marginLeft")+st("paddingLeft"),
        "ol":q("ol"),"ul":q("ul"),"ol verschachtelt":q("ol ol"),"li":q("li"),"ol start":q("ol[start]"),
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
-       "Tabelle":q("table"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
+       "Tabelle":q("table"),"Zellfarbe":[...t.querySelectorAll("td,th")].map(e=>zelleFormat(e).bg).filter(Boolean).join("/")||"-",
+       "Zellrahmen":[...new Set([...t.querySelectorAll("td,th")].flatMap(e=>{const f=zelleFormat(e);return ZELL_SEITEN.map(k=>f.rand[k]==null?"":f.rand[k]==="none"?"none":zellRandCss(f.rand[k]))}).filter(Boolean))].sort().join("|")||"-",
+       "Tabellenbreite":[...t.querySelectorAll("table")].map(e=>tabelleBreiteProz(e)).join("/"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
        "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Absatzformat":[...t.querySelectorAll("[data-zab]")].map(e=>e.dataset.zab+(e.style.paddingTop?" vor":"")+(e.style.marginRight?" re":"")).join("/")||"-","Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
-       "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
+       "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Kopfzeile fett":r.hdr&&/<b>/.test(r.hdr.html||"")?1:0,"Kopfzeilenbild":(r.hdr&&r.hdr.bilder||[]).map(i=>i.b+"x"+i.h+"@"+i.x+"/"+i.y).join(" ")||"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",
        "freies Bild":[...t.querySelectorAll("figure.free")].map(f=>"S"+(+f.dataset.fpage+1)+" "+f.dataset.fx+"/"+f.dataset.fy+" "+f.dataset.fw+"x"+f.dataset.fh+" "+(f.dataset.lage||"vor")).join(" ")||"-"}};
     /* Fixpunkt: das Ergebnis erneut speichern und öffnen — muss gleich bleiben */

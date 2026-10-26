@@ -78,6 +78,47 @@ immer genau einen Commit, der sie anfasst.
   genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
   (2) „Neuigkeiten" als Aufzählung statt Fließtext.
 
+### Behoben (Tabellen und Kopfzeilen wie in Word)
+
+- **Zellfarben und Zellrahmen wie in Word** (Toms Goethe-Checkliste, ein
+  echtes .doc): Bisher las PureQuill aus keinem Format Schattierung oder
+  Rahmenfarbe. Die Kopfzeile der Tabelle hatte weiße Schrift auf Grün, das
+  Grün fehlte, also war sie unsichtbar. Jetzt kommen Schattierung, Rahmen
+  je Zellseite (Breite, Art, Farbe, „keine Linie“) und die Tabellenbreite
+  aus .doc, .docx (direkt und aus Tabellenvorlagen mit Kopfzeile und
+  gebänderten Zeilen samt deren Schriftfarbe), .odt und .rtf an. Beim
+  Speichern schreiben alle drei Exporter sie zurück. Neue Zeilen und
+  Spalten übernehmen das Format der Nachbarzelle, wie in Word.
+- **Zeilenhöhe in Tabellen wie in Word**: Zellabsätze behalten Abstand vor
+  und nach, Ausrichtung und Zeilenabstand (vorher stand Zelltext immer
+  links und ohne Abstand). Formatierte Zellen haben Words Innenabstand
+  (oben/unten 0, seitlich 0,19 cm). Der letzte Absatz einer Zelle ohne
+  eigenen Abstand geht beim Speichern mit 0 hinaus, so wie PureQuill ihn
+  zeigt.
+- **.doc: ohne Angabe 0 pt nach dem Absatz**, wie Word. Vorher galt dort
+  PureQuills eigener Abstand, und Leerzeilen standen weiter auseinander.
+- **Kopf- und Fußzeile mit Logo und Format aus .doc, .odt und .rtf**:
+  Bisher kam nur der nackte Text an, ausgerichtet nach dem ersten Absatz
+  (beim rechtsbündigen Goethe-Logo stand deshalb aller Text rechts). Jetzt
+  kommen Bilder im Text und frei verankerte Bilder (Blatt-, Rand- oder
+  Absatzbezug) sowie Fett, Kursiv, Farbe und Größe je Zeile an, gerechnet
+  wie beim Word-Leser (`hfAusAbsaetzen`). Beim Speichern als .odt oder .rtf
+  bleiben Logo und Format jetzt erhalten; vorher ging das Logo verloren.
+- **Kopf- und Fußzeile in der Dokumentschrift, schwarz** (Toms Wahl „immer
+  wie in Word“): bisher immer Georgia 9 pt in Grau. Jetzt Schrift des
+  Dokuments in 85 % seiner Größe, so wie Leser und Exporter ohnehin rechnen
+  (`hfGroessePx`, `hfSchrift`) — auch im Bearbeitungsfeld und bei der
+  Bandhöhe.
+- **Keine Leerzeile mehr um Kopf-/Fußzeilen mit Tabulator**: Eine Zeile mit
+  Tab (etwa „Copyright … ⇥ Seitenzahl“) ist ein eigener Block; das <br>
+  davor und danach ergab je eine leere Zeile, die es in Word nicht gibt.
+  Die Unterstrich-Linie der Goethe-Fußzeile lief in Georgia über den
+  rechten Rand hinaus; in der Dokumentschrift endet sie dort wie in Word.
+- Umlauf-Prüfung um Zellfarbe, Zellrahmen, Tabellenbreite, Kopfzeile fett
+  und Kopfzeilenbild erweitert: Word, OpenDocument, RTF und .doc je 48/48.
+  LibreOffice verliert beim RTF-Neuspeichern die Farbe dünner Zellrahmen;
+  unsere eigene RTF hat sie.
+
 ---
 
 ## 1.4.0 — 2026-10-26
