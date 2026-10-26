@@ -438,6 +438,10 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    Rahmen der Felder für Schrift und Größe */
 .tbkasten{display:inline-flex;align-items:center;gap:2px;padding:1px 2px;border:1px solid var(--rule);
   border-radius:var(--radius);background:var(--paper)}
+/* Etwas zurückgenommen (Toms Wahl „B“): Rahmen heller, Symbole kleiner mit
+   schlanken Spitzen — in voller Farbe, damit sie nicht wie gesperrt wirken
+   (ein erster Versuch mit weniger Deckkraft sah genau so aus) */
+.tbkasten{border-color:color-mix(in srgb,var(--rule) 55%,transparent)}
 /* Knöpfe erben über `button{font:inherit}` die Schrift ihrer Umgebung — in
    einer Monospace-Leiste wie der Notizfußzeile oder dem Versionsverlauf sah
    derselbe Knopf darum anders aus als anderswo. Beschriftungen sind Fließtext
@@ -8830,11 +8834,11 @@ function drawTools(){
         <!-- Geschwungener Pfeil mit voller Spitze wie in Word (Toms Wahl „A“),
              beide in einem Kasten wie die Felder für Schrift und Größe -->
         <span class="tbkasten">
-          <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICOTB('<path d="M19 18.5c0-5.2-3.8-8.5-9-8.5H7.5"/><path d="M8.5 5.5 3.5 10l5 4.5z" fill="currentColor"/>')}</button>
-          <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICOTB('<path d="M5 18.5c0-5.2 3.8-8.5 9-8.5h2.5"/><path d="M15.5 5.5 20.5 10l-5 4.5z" fill="currentColor"/>')}</button>
+          <button class="tb" id="undoBtn" title="${tr("Rückgängig (Strg+Z)")}">${ICOSZ('<path d="M19 18.5c0-5.2-3.8-8.5-9-8.5H6"/><path d="M8.5 7 5 10l3.5 3z" fill="currentColor"/>',17,1.4)}</button>
+          <button class="tb" id="redoBtn" title="${tr("Wiederholen (Strg+Y)")}">${ICOSZ('<path d="M5 18.5c0-5.2 3.8-8.5 9-8.5h4"/><path d="M15.5 7 19 10l-3.5 3z" fill="currentColor"/>',17,1.4)}</button>
           <!-- Versionsverlauf: Uhr im Pfeilbogen, Zeiger blau wie der Glanz der
                Lupe (Toms Idee, Fassung „E“) — bisher nur über Datei › Zwischenstände -->
-          <button class="tb" id="histBtn" title="${tr("Versionsverlauf")}" aria-label="${tr("Versionsverlauf")}">${ICOTB('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2 6.6 4.3 10.4 8.1 8.6z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8" stroke="#4A90D9" stroke-width="1.6"/>')}</button>
+          <button class="tb" id="histBtn" title="${tr("Versionsverlauf")}" aria-label="${tr("Versionsverlauf")}">${ICOSZ('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2.6 7.4 4.3 10.3 7.2 9z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8" stroke="#4A90D9" stroke-width="1.7"/>',17,1.4)}</button>
         </span>`;
   } else if(S.mode==="notes"){
     T.innerHTML=`<button class="addg" id="addNote" title="${tr("Neue Notiz")}" aria-label="${tr("Neue Notiz")}">${
@@ -8920,7 +8924,20 @@ function drawWrite(){
        als <font> — in die echte Form bringen; ebenso nach Rückgängig/
        Wiederholen, die execCommands Zwischenform zurückholen können */
     if(schriftTippen||/^history/.test(e.inputType)||ed.querySelector("font")){
-      if(ed.querySelector("font,[style*='xxx-large']")){const pos=textPos(ed);schriftNormalisieren(ed);setzeTextPos(ed,pos)}
+      if(ed.querySelector("font,[style*='xxx-large']")){
+        /* Steht die Marke in einem leeren Absatz (etwa nach Enter auf einem
+           leeren Listenpunkt, der die Liste verlässt), hat sie keine eigene
+           Zeichenposition — über textPos landete sie am Ende des vorigen
+           Absatzes, und jedes Enter legte wieder einen Listenpunkt an (Toms
+           Fund). Dann wird sie im selben Absatz wieder gesetzt. */
+        const sel=getSelection();let leer=null;
+        if(sel.rangeCount){let n=sel.anchorNode;n=n&&n.nodeType===1?n:n&&n.parentElement;
+          const b=n&&n.closest&&n.closest("p,li,h1,h2,h3,h4,blockquote,td,th,div");
+          if(b&&b!==ed&&ed.contains(b)&&!b.textContent.length)leer=b}
+        const pos=textPos(ed);schriftNormalisieren(ed);
+        if(leer&&leer.isConnected){let z=leer;while(z.firstElementChild&&z.firstElementChild.tagName!=="BR")z=z.firstElementChild;
+          const r=document.createRange();r.setStart(z,0);r.collapse(true);sel.removeAllRanges();sel.addRange(r)}
+        else setzeTextPos(ed,pos)}
       if(e.inputType==="insertText"||e.inputType==="insertParagraph")schriftTippen=false;
     }
     dirty=true;queueSave();setTyping();markEmpty();
@@ -19407,6 +19424,9 @@ function contextMenu(e){
     <button class="mi" data-c="paste"><span class="chk"></span>${tr("Einfügen")}<span class="k">${K} V</span></button>
     <button class="mi" data-c="selall"><span class="chk"></span>${tr("Alles auswählen")}<span class="k">${K} A</span></button>
     <div class="msep"></div>
+    <!-- Wie in Word: „Absatz…“ im Rechtsklick-Menü (Toms Wunsch) -->
+    <button class="mi" data-c="absatz"><span class="chk"></span>${tr("Absatz…")}</button>
+    <div class="msep"></div>
     <button class="mi" data-c="insmore"><span class="chk"></span>${tr("Element einfügen")}<span class="k">&rsaquo;</span></button>
     ${onHeading?`<button class="mi" data-c="tocvis"><span class="chk"></span>${headingHidden
       ?tr("Im Inhaltsverzeichnis einblenden"):tr("Im Inhaltsverzeichnis ausblenden")}</button>`:""}
@@ -19436,6 +19456,12 @@ function contextMenu(e){
   m.onclick=ev=>{
     const b=ev.target.closest("[data-c]");if(!b)return;
     const a=b.dataset.c;
+    /* Absatz…: mit Markierung die markierten Absätze, sonst der angeklickte
+       — wie in Word, auch wenn die Schreibmarke woanders steht */
+    if(a==="absatz"){closeMenu();
+      const blk=e.target.closest("li,h1,h2,h3,h4,p,div");
+      const ziele=hasSel?absatzZiele():(blk&&ed.contains(blk)&&blk!==ed&&!blk.matches(".pgbreak,.toc,.fhwrap")?[blk]:absatzZiele());
+      absatzDialog(ziele);return}
     if(a==="insmore"){
       const items=[
         {a:"link2",label:e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen"),k:"Alt ⇧ K"},
@@ -26842,7 +26868,7 @@ Title and subtitle stay out of both, as in Word.</p>
 </table>
 <p><b>To indent a paragraph</b>, press <kbd>Tab</kbd> at the start of it;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> takes it back. Inside a table these keys move between cells.</p>
-<p><b>Line and paragraph spacing</b> work as in Word: they apply to the selected paragraphs, or to the one with the cursor. The button next to the alignment buttons offers 1.0 to 3.0 and adds or removes space before and after a paragraph; <b>Format &rsaquo; Paragraph…</b> opens the full dialog with indents (left, right, first line, hanging), spacing before and after, and line spacing as single, 1.5 lines, double, at least, exactly or multiple. To change the whole document, select everything first ({kz:alles}); <b>Set As Default</b> in the dialog makes the spacing the document's default.<nur-a> Shortcuts as in Word: {kz:zabEins} single, {kz:zabAnderthalb} 1.5 lines, {kz:zabZwei} double, {kz:abstVor} space before on or off.</nur-a></p>`},
+<p><b>Line and paragraph spacing</b> work as in Word: they apply to the selected paragraphs, or to the one with the cursor. The button next to the alignment buttons offers 1.0 to 3.0 and adds or removes space before and after a paragraph; <b>Format &rsaquo; Paragraph…</b> (also in the right-click menu) opens the full dialog with indents (left, right, first line, hanging), spacing before and after, and line spacing as single, 1.5 lines, double, at least, exactly or multiple. To change the whole document, select everything first ({kz:alles}); <b>Set As Default</b> in the dialog makes the spacing the document's default.<nur-a> Shortcuts as in Word: {kz:zabEins} single, {kz:zabAnderthalb} 1.5 lines, {kz:zabZwei} double, {kz:abstVor} space before on or off.</nur-a></p>`},
 
  {t:"Lists and quotations",k:"list;bullet;numbered;quote;blockquote;markers",b:`
 <p>Start a list from the toolbar, from <b>Format</b>, or simply by typing <code>- </code>
@@ -27474,7 +27500,7 @@ Untertitel zählen dort nicht mit, wie in Word.</p>
 <p><b>Zum Einrücken</b> drückst du <kbd>Tab</kbd> am Absatzanfang;
 <kbd>⇧</kbd>+<kbd>Tab</kbd> nimmt es zurück. In einer Tabelle wechseln diese Tasten
 stattdessen die Zelle.</p>
-<p><b>Zeilen- und Absatzabstand</b> funktionieren wie in Word: Sie gelten für die markierten Absätze, ohne Markierung für den Absatz mit der Schreibmarke. Der Knopf neben den Ausrichtungsknöpfen bietet 1,0 bis 3,0 und fügt Abstand vor oder nach dem Absatz hinzu oder entfernt ihn; <b>Format &rsaquo; Absatz…</b> öffnet den vollständigen Dialog mit Einzügen (links, rechts, erste Zeile, hängend), Abstand vor und nach und dem Zeilenabstand als einfach, 1,5 Zeilen, doppelt, mindestens, genau oder mehrfach. Für das ganze Dokument vorher alles markieren ({kz:alles}); <b>Als Standard festlegen</b> im Dialog macht die Abstände zur Vorgabe des Dokuments.<nur-a> Tastenkürzel wie in Word: {kz:zabEins} einfach, {kz:zabAnderthalb} 1,5 Zeilen, {kz:zabZwei} doppelt, {kz:abstVor} Abstand vor ein oder aus.</nur-a></p>`},
+<p><b>Zeilen- und Absatzabstand</b> funktionieren wie in Word: Sie gelten für die markierten Absätze, ohne Markierung für den Absatz mit der Schreibmarke. Der Knopf neben den Ausrichtungsknöpfen bietet 1,0 bis 3,0 und fügt Abstand vor oder nach dem Absatz hinzu oder entfernt ihn; <b>Format &rsaquo; Absatz…</b> (auch im Rechtsklick-Menü) öffnet den vollständigen Dialog mit Einzügen (links, rechts, erste Zeile, hängend), Abstand vor und nach und dem Zeilenabstand als einfach, 1,5 Zeilen, doppelt, mindestens, genau oder mehrfach. Für das ganze Dokument vorher alles markieren ({kz:alles}); <b>Als Standard festlegen</b> im Dialog macht die Abstände zur Vorgabe des Dokuments.<nur-a> Tastenkürzel wie in Word: {kz:zabEins} einfach, {kz:zabAnderthalb} 1,5 Zeilen, {kz:zabZwei} doppelt, {kz:abstVor} Abstand vor ein oder aus.</nur-a></p>`},
 
  {t:"Listen und Zitate",k:"liste;aufzählung;nummerierung;zitat;blockzitat;aufzählungszeichen",b:`
 <p>Eine Liste beginnst du über die Werkzeugleiste, über <b>Format</b> — oder indem du am
@@ -28131,7 +28157,7 @@ negrita. El título de documento y el subtítulo no cuentan en ellos, como en Wo
 <p><b>Para sangrar un párrafo</b>, pulsa <kbd>Tab</kbd> al principio;
 <kbd>Mayús</kbd>+<kbd>Tab</kbd> lo devuelve. Dentro de una tabla, estas teclas se mueven entre
 celdas.</p>
-<p>El <b>interlineado y el espaciado entre párrafos</b> funcionan como en Word: se aplican a los párrafos seleccionados o, sin selección, al párrafo del cursor. El botón junto a los de alineación ofrece de 1,0 a 3,0 y agrega o quita espacio antes y después del párrafo; <b>Formato &rsaquo; Párrafo…</b> abre el cuadro completo con sangrías (izquierda, derecha, primera línea, francesa), espaciado anterior y posterior e interlineado sencillo, 1,5 líneas, doble, mínimo, exacto o múltiple. Para todo el documento, selecciona antes todo ({kz:alles}); <b>Establecer como predeterminado</b> convierte el espaciado en el predeterminado del documento.<nur-a> Atajos como en Word: {kz:zabEins} sencillo, {kz:zabAnderthalb} 1,5 líneas, {kz:zabZwei} doble, {kz:abstVor} espacio anterior sí o no.</nur-a></p>`},
+<p>El <b>interlineado y el espaciado entre párrafos</b> funcionan como en Word: se aplican a los párrafos seleccionados o, sin selección, al párrafo del cursor. El botón junto a los de alineación ofrece de 1,0 a 3,0 y agrega o quita espacio antes y después del párrafo; <b>Formato &rsaquo; Párrafo…</b> (también en el menú del clic derecho) abre el cuadro completo con sangrías (izquierda, derecha, primera línea, francesa), espaciado anterior y posterior e interlineado sencillo, 1,5 líneas, doble, mínimo, exacto o múltiple. Para todo el documento, selecciona antes todo ({kz:alles}); <b>Establecer como predeterminado</b> convierte el espaciado en el predeterminado del documento.<nur-a> Atajos como en Word: {kz:zabEins} sencillo, {kz:zabAnderthalb} 1,5 líneas, {kz:zabZwei} doble, {kz:abstVor} espacio anterior sí o no.</nur-a></p>`},
 
  {t:"Listas y citas",k:"lista;viñeta;numerada;cita;cita en bloque;marcadores",b:`
 <p>Empieza una lista desde la barra de herramientas, desde <b>Formato</b>, o simplemente
@@ -28790,7 +28816,7 @@ negrito. O título do documento e o subtítulo ficam de fora, como no Word.</p>
 <p><b>Para recuar um parágrafo</b>, pressione <kbd>Tab</kbd> no começo dele;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> volta. Dentro de uma tabela, essas teclas movem entre
 células.</p>
-<p>O <b>espaçamento entre linhas e parágrafos</b> funciona como no Word: vale para os parágrafos selecionados ou, sem seleção, para o parágrafo do cursor. O botão ao lado dos de alinhamento oferece de 1,0 a 3,0 e adiciona ou remove espaço antes e depois do parágrafo; <b>Formato &rsaquo; Parágrafo…</b> abre a caixa completa com recuos (esquerda, direita, primeira linha, deslocamento), espaçamento antes e depois e espaçamento entre linhas simples, 1,5 linha, duplo, pelo menos, exatamente ou múltiplos. Para o documento inteiro, selecione tudo antes ({kz:alles}); <b>Definir como Padrão</b> torna o espaçamento o padrão do documento.<nur-a> Atalhos como no Word: {kz:zabEins} simples, {kz:zabAnderthalb} 1,5 linha, {kz:zabZwei} duplo, {kz:abstVor} espaço antes sim ou não.</nur-a></p>`},
+<p>O <b>espaçamento entre linhas e parágrafos</b> funciona como no Word: vale para os parágrafos selecionados ou, sem seleção, para o parágrafo do cursor. O botão ao lado dos de alinhamento oferece de 1,0 a 3,0 e adiciona ou remove espaço antes e depois do parágrafo; <b>Formato &rsaquo; Parágrafo…</b> (também no menu do botão direito) abre a caixa completa com recuos (esquerda, direita, primeira linha, deslocamento), espaçamento antes e depois e espaçamento entre linhas simples, 1,5 linha, duplo, pelo menos, exatamente ou múltiplos. Para o documento inteiro, selecione tudo antes ({kz:alles}); <b>Definir como Padrão</b> torna o espaçamento o padrão do documento.<nur-a> Atalhos como no Word: {kz:zabEins} simples, {kz:zabAnderthalb} 1,5 linha, {kz:zabZwei} duplo, {kz:abstVor} espaço antes sim ou não.</nur-a></p>`},
 
  {t:"Listas e citações",k:"lista;marcador;numerada;citação;bloco de citação;marcadores",b:`
 <p>Comece uma lista pela barra de ferramentas, por <b>Formato</b>, ou simplesmente digitando
@@ -29455,7 +29481,7 @@ mettre en gras.</p>
 <p><b>Pour mettre un paragraphe en retrait</b>, appuyez sur <kbd>Tab</kbd> au début ;
 <kbd>Maj</kbd>+<kbd>Tab</kbd> le ramène. Dans un tableau, ces touches passent d'une cellule à
 l'autre.</p>
-<p>L'<b>interligne et l'espacement des paragraphes</b> fonctionnent comme dans Word : ils s'appliquent aux paragraphes sélectionnés ou, sans sélection, au paragraphe du curseur. Le bouton à côté des boutons d'alignement propose de 1,0 à 3,0 et ajoute ou supprime l'espace avant et après le paragraphe ; <b>Format &rsaquo; Paragraphe…</b> ouvre la boîte complète avec les retraits (gauche, droite, première ligne positive ou négative), l'espacement avant et après et l'interligne simple, 1,5 ligne, double, au moins, exactement ou multiple. Pour tout le document, sélectionnez d'abord tout ({kz:alles}) ; <b>Définir par défaut</b> fait de l'espacement celui du document.<nur-a> Raccourcis comme dans Word : {kz:zabEins} simple, {kz:zabAnderthalb} 1,5 ligne, {kz:zabZwei} double, {kz:abstVor} espace avant oui ou non.</nur-a></p>`},
+<p>L'<b>interligne et l'espacement des paragraphes</b> fonctionnent comme dans Word : ils s'appliquent aux paragraphes sélectionnés ou, sans sélection, au paragraphe du curseur. Le bouton à côté des boutons d'alignement propose de 1,0 à 3,0 et ajoute ou supprime l'espace avant et après le paragraphe ; <b>Format &rsaquo; Paragraphe…</b> (aussi dans le menu du clic droit) ouvre la boîte complète avec les retraits (gauche, droite, première ligne positive ou négative), l'espacement avant et après et l'interligne simple, 1,5 ligne, double, au moins, exactement ou multiple. Pour tout le document, sélectionnez d'abord tout ({kz:alles}) ; <b>Définir par défaut</b> fait de l'espacement celui du document.<nur-a> Raccourcis comme dans Word : {kz:zabEins} simple, {kz:zabAnderthalb} 1,5 ligne, {kz:zabZwei} double, {kz:abstVor} espace avant oui ou non.</nur-a></p>`},
 
  {t:"Listes et citations",k:"liste;puce;numérotée;citation;bloc de citation;marqueurs",b:`
 <p>Commencez une liste depuis la barre d'outils, depuis <b>Format</b>, ou simplement en tapant
@@ -30127,7 +30153,7 @@ zamiast po prostu powiększać wiersz i pogrubiać.</p>
 </table>
 <p><b>Aby zrobić wcięcie akapitu</b>, naciśnij <kbd>Tab</kbd> na jego początku;
 <kbd>Shift</kbd>+<kbd>Tab</kbd> je cofa. W tabeli te klawisze przechodzą między komórkami.</p>
-<p><b>Interlinia i odstępy między akapitami</b> działają jak w Wordzie: dotyczą zaznaczonych akapitów, a bez zaznaczenia akapitu z kursorem. Przycisk obok przycisków wyrównania oferuje od 1,0 do 3,0 oraz dodaje lub usuwa odstęp przed akapitem i po nim; <b>Format &rsaquo; Akapit…</b> otwiera pełne okno z wcięciami (od lewej, od prawej, pierwszy wiersz, wysunięcie), odstępem przed i po oraz interlinią pojedynczą, 1,5 wiersza, podwójną, co najmniej, dokładnie lub wielokrotną. Dla całego dokumentu najpierw zaznacz wszystko ({kz:alles}); <b>Ustaw jako domyślne</b> czyni odstępy domyślnymi dla dokumentu.<nur-a> Skróty jak w Wordzie: {kz:zabEins} pojedyncza, {kz:zabAnderthalb} 1,5 wiersza, {kz:zabZwei} podwójna, {kz:abstVor} odstęp przed tak lub nie.</nur-a></p>`},
+<p><b>Interlinia i odstępy między akapitami</b> działają jak w Wordzie: dotyczą zaznaczonych akapitów, a bez zaznaczenia akapitu z kursorem. Przycisk obok przycisków wyrównania oferuje od 1,0 do 3,0 oraz dodaje lub usuwa odstęp przed akapitem i po nim; <b>Format &rsaquo; Akapit…</b> (także w menu prawego przycisku) otwiera pełne okno z wcięciami (od lewej, od prawej, pierwszy wiersz, wysunięcie), odstępem przed i po oraz interlinią pojedynczą, 1,5 wiersza, podwójną, co najmniej, dokładnie lub wielokrotną. Dla całego dokumentu najpierw zaznacz wszystko ({kz:alles}); <b>Ustaw jako domyślne</b> czyni odstępy domyślnymi dla dokumentu.<nur-a> Skróty jak w Wordzie: {kz:zabEins} pojedyncza, {kz:zabAnderthalb} 1,5 wiersza, {kz:zabZwei} podwójna, {kz:abstVor} odstęp przed tak lub nie.</nur-a></p>`},
 
  {t:"Listy i cytaty",k:"lista;punktor;numerowana;cytat;blok cytatu;znaczniki",b:`
 <p>Rozpocznij listę z paska narzędzi, z menu <b>Format</b> albo po prostu wpisując
@@ -30772,7 +30798,7 @@ sommario, quindi usali invece di limitarti a ingrandire una riga e metterla in g
 <p><b>Per rientrare un paragrafo</b>, premi <kbd>Tab</kbd> all'inizio;
 <kbd>Maiusc</kbd>+<kbd>Tab</kbd> lo riporta indietro. Dentro una tabella questi tasti si spostano
 tra le celle.</p>
-<p><b>Interlinea e spaziatura dei paragrafi</b> funzionano come in Word: valgono per i paragrafi selezionati o, senza selezione, per il paragrafo del cursore. Il pulsante accanto a quelli di allineamento offre da 1,0 a 3,0 e aggiunge o rimuove lo spazio prima e dopo il paragrafo; <b>Formato &rsaquo; Paragrafo…</b> apre la finestra completa con i rientri (sinistro, destro, prima riga, sporgente), la spaziatura prima e dopo e l'interlinea singola, 1,5 righe, doppia, minima, esatta o multipla. Per l'intero documento seleziona prima tutto ({kz:alles}); <b>Imposta come predefinito</b> rende la spaziatura quella predefinita del documento.<nur-a> Scorciatoie come in Word: {kz:zabEins} singola, {kz:zabAnderthalb} 1,5 righe, {kz:zabZwei} doppia, {kz:abstVor} spazio prima sì o no.</nur-a></p>`},
+<p><b>Interlinea e spaziatura dei paragrafi</b> funzionano come in Word: valgono per i paragrafi selezionati o, senza selezione, per il paragrafo del cursore. Il pulsante accanto a quelli di allineamento offre da 1,0 a 3,0 e aggiunge o rimuove lo spazio prima e dopo il paragrafo; <b>Formato &rsaquo; Paragrafo…</b> (anche nel menu del clic destro) apre la finestra completa con i rientri (sinistro, destro, prima riga, sporgente), la spaziatura prima e dopo e l'interlinea singola, 1,5 righe, doppia, minima, esatta o multipla. Per l'intero documento seleziona prima tutto ({kz:alles}); <b>Imposta come predefinito</b> rende la spaziatura quella predefinita del documento.<nur-a> Scorciatoie come in Word: {kz:zabEins} singola, {kz:zabAnderthalb} 1,5 righe, {kz:zabZwei} doppia, {kz:abstVor} spazio prima sì o no.</nur-a></p>`},
 
  {t:"Elenchi e citazioni",k:"elenco;punto;numerato;citazione;blocco di citazione;indicatori",b:`
 <p>Avvia un elenco dalla barra degli strumenti, da <b>Formato</b>, o semplicemente digitando

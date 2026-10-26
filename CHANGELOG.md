@@ -103,6 +103,19 @@ immer genau einen Commit, der sie anfasst.
 
 ### Neu
 
+- **Enter auf leerem Listenpunkt verlässt die Liste wieder zuverlässig**
+  (Toms Fund im Lebenslauf: man blieb endlos in der Liste). Chrome legte den
+  neuen Absatz mit der Schriftfarbe als <font> an; die Aufräumroutine nach
+  der Eingabe setzte die Marke danach über die Zeichenposition zurück — ein
+  leerer Absatz hat keine, die Marke landete am Ende des letzten Punkts und
+  das nächste Enter legte wieder einen an. Jetzt bleibt sie im leeren Absatz.
+  Betraf jede farbig formatierte Liste, nicht nur aus Word.
+- **Rückgängig, Wiederholen und Verlauf dezenter** (Toms Wahl „B“): Symbole
+  17 statt 20 px mit schlankeren Pfeilspitzen, Rahmen heller, Farbe voll. Ein
+  Versuch mit weniger Deckkraft wirkte wie gesperrt und ist verworfen.
+- **„Absatz…“ im Rechtsklick-Menü**, wie in Word (Toms Wunsch): mit
+  Markierung für die markierten Absätze, sonst für den angeklickten. Hilfe in
+  7 Sprachen erwähnt es.
 - **Zeilen- und Absatzabstand je Absatz, wie in Word** (Toms Fund: Format ›
   Zeilenabstand änderte immer das ganze Dokument; „exakt wie Word“). Neuer
   Knopf „Zeilen- und Absatzabstand“ neben Blocksatz mit Words Liste: 1,0 bis
