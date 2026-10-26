@@ -148,6 +148,50 @@ immer genau einen Commit, der sie anfasst.
   u. a. — über die Variable `--mono`, die jetzt die Oberflächenschrift
   trägt. Zahlen in gleicher Breite (tabular-nums), wo sie hochzählen; echte
   Festbreite (`--code`) nur noch für Code in der Hilfe.
+- **Kopf- und Fußzeile bearbeiten wie in Word** (Tom: „fummelig“): Man
+  schreibt direkt auf der Seite statt in einem gerahmten Kasten, der Text
+  tritt grau zurück, eine gestrichelte Linie mit Schildchen „Kopfzeile“/
+  „Fußzeile“ zeigt die Grenze. Eine feste Leiste unter der Symbolleiste
+  ersetzt die schwebende: Seitenzahl (auch „Seite X von Y“), Datum, Titel,
+  Bild, Erste Seite anders, Gerade Seiten anders, Abstand von oben/unten,
+  Zur Fußzeile/Kopfzeile, Weitere Einstellungen und „Kopf- und Fußzeile
+  schließen“. Die zwei Ziehkanten sind weg. Fett, Kursiv, Unter-/Durch-
+  gestrichen und Ausrichtung gehen über die normale Symbolleiste, der Rest
+  ist ausgegraut. Enter = neue Zeile, Umschalt+Enter = Umbruch, Tab =
+  Tabulator; beenden mit Esc, Doppelklick in den Text oder Schließen — ein
+  einfacher Klick in den Text beendet nicht mehr versehentlich.
+- **Felder in der Kopf-/Fußzeile zeigen beim Schreiben ihren Wert** (Tom:
+  „wieso wird das nicht ausgefüllt?“): Seitenzahl, Gesamtseiten, Titel und
+  Datum erscheinen wie Felder in Word mit dem Wert der Seite statt als
+  `{page}` — wie gedruckt, grau nur beim Zeigen oder Markieren; Felder
+  nehmen Fett, Farbe usw. an wie Text (auch gespeichert), Getipptes davor
+  oder dahinter bleibt außerhalb, ein überschriebener Wert wird Text; gespeichert bleibt der Platzhalter. Die
+  Symbolleiste zeigt in der Kopfzeile Fett, Ausrichtung usw. der Stelle an
+  (vorher blieb „Linksbündig“ markiert).
+- **Doppelklick auf die Kopf-/Fußzeile trifft immer** (Tom): Der Bereich
+  zählte nur bis zum Seitenrand aus dem Seitenformat; reichte die Kopfzeile
+  (etwa mit Logo) tiefer, traf ein Doppelklick auf ihren Text daneben. Jetzt
+  gilt ihre tatsächliche Höhe (hfRandPx), und der Doppelklick wird am ganzen
+  Blatt statt nur am Textkörper abgefangen.
+- **Fußzeile springt beim Öffnen nicht mehr** (Tom): Das Bearbeitungsfeld
+  war durch Innenabstand und Chromes Wortumbruch in bearbeitbaren Feldern
+  schmaler als die gezeichnete Zeile — die Unterstrichlinie brach um, alles
+  rutschte eine Zeile tiefer. Jetzt deckt es die Zeile genau ab und richtet
+  sich an ihr aus (hfFeldAnZeile); Zeilen mit Tabulator stehen auf einer
+  Grundlinie wie in Word (vorher oben bündig, beim Bearbeiten wirkte der
+  Zeilenabstand dadurch größer).
+- **Schriftart, Schriftgröße, Schriftfarbe und „Formatierung entfernen“ in
+  Kopf- und Fußzeile** (Tom): über die normale Symbolleiste, die Felder
+  zeigen die Werte der Stelle; Größe in em der Kopfzeilenschrift. Lesen
+  (.docx/.doc/.odt/.rtf) und Schreiben (alle drei) mit Schriftart.
+  Felder bleiben bei „Formatierung entfernen“ Felder.
+- **Leere Zeilen am Ende der Kopf-/Fußzeile halten Abstand wie in Word**
+  (Tom: „ja, wie in Word“); bisher wurden sie beim Lesen und Bearbeiten
+  entfernt, die Tabelle auf Seite 2 klebte an der Kopfzeile. Das
+  Abschluss-Absatzzeichen jedes .doc-Teiltextes zählt nicht mit.
+- **Ausrichtung je Zeile in Kopf- und Fußzeile** (wie Word, `v.za`):
+  lesen aus .docx/.doc/.odt/.rtf, schreiben in alle drei Formate, Umlauf
+  geprüft.
 - Umlauf-Prüfung um Zellfarbe, Zellrahmen, Tabellenbreite, Kopfzeile fett
   und Kopfzeilenbild erweitert: Word, OpenDocument, RTF und .doc je 48/48.
   LibreOffice verliert beim RTF-Neuspeichern die Farbe dünner Zellrahmen;

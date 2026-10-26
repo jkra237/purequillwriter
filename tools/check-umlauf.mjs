@@ -92,7 +92,7 @@ try {
     const d=blankDoc("Pruefung Umlauf");d.customTitle=true;
     d.fmt={n:"Prüfformat",key:"custom",w:210,h:297,m:[30,20,25,25],hd:12,fd:12,d:""};
     /* Kopfzeile mit Logo im Text und Fettdruck (seit 2026-10-26: ging als .odt verloren) */
-    d.hdr={on:true,text:"Kopfzeile Pruefung",align:"left",html:"<b>Kopfzeile Pruefung</b>",bilder:[{uri:jpg(300,130,"#7a3"),b:30,h:13,x:135,y:0,fluss:true}],ty:13};
+    d.hdr={on:true,text:"Kopfzeile Pruefung\\nZweite Zeile",align:"left",za:["left","center"],html:"<b>Kopfzeile Pruefung</b><br>Zweite Zeile",bilder:[{uri:jpg(300,130,"#7a3"),b:30,h:13,x:135,y:0,fluss:true}],ty:13};
     d.ftr={on:true,text:"Seite {seite} von {seiten}",align:"right"};
     d.footnotes=[{id:"f1",text:"Text der Fussnote."}];
     d.html='<p data-fv="titel">Der Titel</p><p data-fv="untertitel">Der Untertitel</p><h1>Titel Eins</h1>'
@@ -170,7 +170,7 @@ try {
        "Tabellenbreite":[...t.querySelectorAll("table")].map(e=>tabelleBreiteProz(e)).join("/"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
        "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Absatzformat":[...t.querySelectorAll("[data-zab]")].map(e=>e.dataset.zab+(e.style.paddingTop?" vor":"")+(e.style.marginRight?" re":"")).join("/")||"-","Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
-       "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Kopfzeile fett":r.hdr&&/<b>/.test(r.hdr.html||"")?1:0,"Kopfzeilenbild":(r.hdr&&r.hdr.bilder||[]).map(i=>i.b+"x"+i.h+"@"+i.x+"/"+i.y).join(" ")||"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
+       "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Kopfzeile je Zeile":r.hdr?(r.hdr.za||[r.hdr.align]).join("/"):"-","Kopfzeile fett":r.hdr&&/<b>/.test(r.hdr.html||"")?1:0,"Kopfzeilenbild":(r.hdr&&r.hdr.bilder||[]).map(i=>i.b+"x"+i.h+"@"+i.x+"/"+i.y).join(" ")||"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",
        "Seitenformat":r.fmt?[r.fmt.w,r.fmt.h,(r.fmt.m||[]).join("/")].join(" "):"-",
        "freies Bild":[...t.querySelectorAll("figure.free")].map(f=>"S"+(+f.dataset.fpage+1)+" "+f.dataset.fx+"/"+f.dataset.fy+" "+f.dataset.fw+"x"+f.dataset.fh+" "+(f.dataset.lage||"vor")).join(" ")||"-"}};
     /* Fixpunkt: das Ergebnis erneut speichern und öffnen — muss gleich bleiben */

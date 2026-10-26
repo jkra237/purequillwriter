@@ -477,7 +477,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
 .enliste p{margin:0 0 .35em}
 sup.en{cursor:pointer;color:var(--stamp)}
 /* Kopf-/Fußzeile mit Tabulatoren: links | Mitte | rechts (hfTabZeilen) */
-.hfzeile{display:grid;grid-template-columns:1fr auto 1fr;column-gap:.5em}
+.hfzeile{display:grid;grid-template-columns:1fr auto 1fr;column-gap:.5em;align-items:baseline}
 .hfzeile>span:nth-child(1){text-align:left}.hfzeile>span:nth-child(2){text-align:center}.hfzeile>span:nth-child(3){text-align:right}
 /* Aus Word bewahrte Inhalte (wRohHtml): erkennbar als Fremdkörper, nicht
    bearbeitbar, als Ganzes löschbar. Marken (Lesezeichen, Kommentarbereiche)
@@ -556,9 +556,39 @@ img.inlbild{display:inline;vertical-align:baseline;max-width:none}
   align-items:center;justify-content:center;border:1px dashed var(--stamp);border-radius:2px;
   font-family:var(--ui);font-size:11px;color:var(--stamp);opacity:.65}
 .hfhint.on{display:flex}
-.hfedit{position:absolute;z-index:6;display:none;outline:none;padding:1px 3px;
-  background:var(--paper);box-shadow:0 0 0 1px var(--stamp);border-radius:2px;
-  font-family:Georgia,serif;color:var(--ink);line-height:1.3;white-space:pre-wrap}
+/* Kopf-/Fußzeile wie in Word (2026-10-26): man schreibt auf der Seite, ohne
+   Kasten — das Feld deckt nur die gezeichnete Zeile darunter ab */
+/* Genau wie die gezeichnete Zeile (.hf): ohne Innenabstand und ohne
+   Wortumbruch, den Chrome bearbeitbaren Feldern sonst gibt — sonst brach
+   die Unterstrichlinie der Goethe-Fußzeile um und alles rutschte eine Zeile
+   tiefer (Tom) */
+.hfedit{position:absolute;z-index:6;display:none;outline:none;padding:0;
+  background:var(--paper);font-family:Georgia,serif;color:var(--ink);line-height:1.3;white-space:pre-wrap;caret-color:var(--ink);
+  overflow-wrap:normal;word-wrap:normal;line-break:auto}
+/* Wie Words Vorgabe „Feldschattierung: bei Auswahl“: ein Feld sieht aus
+   wie gedruckt; grau erst beim Zeigen oder wenn es ausgewählt ist */
+.hffeld{border-radius:2px}
+.hffeld:hover{background:color-mix(in srgb,var(--ink) 12%,transparent)}
+.hffeld::selection{background:color-mix(in srgb,var(--ink) 22%,transparent)}
+/* Grenze zwischen Kopf-/Fußzeile und Text: gestrichelt, mit Schildchen */
+.hfgrip.linie{height:0;border-top:1px dashed var(--stamp);cursor:default;pointer-events:none}
+.hfgrip.linie::after{display:none}
+.hfgrip.linie::before{content:attr(data-label);left:0;top:0;margin:0;width:auto;height:auto;opacity:1;
+  background:var(--stamp);color:var(--paper);font:500 11px/1.5 var(--ui);padding:0 8px;border-radius:0 0 4px 4px}
+.hfgrip.linie.fuss::before{top:auto;bottom:0;border-radius:4px 4px 0 0}
+/* Die feste Leiste unter der Symbolleiste */
+#hfbar.hfleiste{position:fixed;transform:none;border-radius:0;border-left:0;border-right:0;
+  box-shadow:none;justify-content:flex-start;gap:6px;padding:5px 12px;max-width:none;z-index:40}
+#hfbar.hfleiste .hfname{font:600 12px var(--ui);color:var(--ink);margin-right:2px}
+#hfbar.hfleiste label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);white-space:nowrap}
+#hfbar.hfleiste input[type=number]{width:58px;padding:2px 4px}
+#hfbar.hfleiste .hfzu{margin-left:auto}
+/* In der Kopfzeile gilt nur, was dort wirkt: Fett, Kursiv, Unter-/Durch-
+   gestrichen, Ausrichtung — der Rest der Symbolleiste tritt zurück */
+body.hfmode #tools :is(button,input,select,.tb){opacity:.35;pointer-events:none}
+body.hfmode #tools :is([data-cmd=bold],[data-cmd=italic],[data-cmd=underline],[data-cmd=strikeThrough],
+  [data-cmd=justifyLeft],[data-cmd=justifyCenter],[data-cmd=justifyRight],[data-cmd=removeFormat],#undoBtn,#redoBtn,
+  #fFont,#fFontList,#fSize,#fSizeList,#foreBtn){opacity:1;pointer-events:auto}
 /* Ziehkante über die volle Feldbreite, damit man sie überall fassen kann */
 .hfgrip{position:absolute;z-index:7;display:none;height:13px;cursor:ns-resize}
 .hfgrip.on{display:block}
@@ -2387,7 +2417,9 @@ function hfTextHoehe(d,which,z){
   const el=ensureHfMeasurer();
   el.style.width=breite+"px";el.style.fontSize=fs+"px";el.style.fontFamily=hfSchrift(d);
   el.innerHTML=html;
-  const h=el.offsetHeight;
+  /* ungerundet: sonst stand das Bearbeitungsfeld der Fußzeile bis zu 1 px
+     neben der gezeichneten Zeile */
+  const h=el.getBoundingClientRect().height;
   if(hfMessCache.size>40)hfMessCache.clear();
   hfMessCache.set(key,h);
   return h;
@@ -2465,6 +2497,13 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Von oben":"From top",
+  "Von unten":"From bottom",
+  "Zur Fußzeile":"Go to footer",
+  "Zur Kopfzeile":"Go to header",
+  "Kopf- und Fußzeile schließen":"Close header and footer",
+  "„Seite X von Y“ einfügen":"Insert “Page X of Y”",
+  "von":"of",
   "Markierungen immer zeigen":"Always show highlights",
   "Notiz einfügen":"Insert note",
   "Notiz schreiben …":"Write a note…",
@@ -3435,6 +3474,13 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Von oben":"Depuis le haut",
+  "Von unten":"Depuis le bas",
+  "Zur Fußzeile":"Aller au pied de page",
+  "Zur Kopfzeile":"Aller à l'en-tête",
+  "Kopf- und Fußzeile schließen":"Fermer l'en-tête et le pied de page",
+  "„Seite X von Y“ einfügen":"Insérer « Page X sur Y »",
+  "von":"sur",
   "Markierungen immer zeigen":"Toujours afficher les surlignages",
   "Notiz einfügen":"Insérer une note",
   "Notiz schreiben …":"Écrire une note…",
@@ -4405,6 +4451,13 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Von oben":"Desde arriba",
+  "Von unten":"Desde abajo",
+  "Zur Fußzeile":"Ir al pie de página",
+  "Zur Kopfzeile":"Ir al encabezado",
+  "Kopf- und Fußzeile schließen":"Cerrar encabezado y pie de página",
+  "„Seite X von Y“ einfügen":"Insertar «Página X de Y»",
+  "von":"de",
   "Markierungen immer zeigen":"Mostrar siempre los resaltados",
   "Notiz einfügen":"Insertar nota",
   "Notiz schreiben …":"Escribe una nota…",
@@ -5375,6 +5428,13 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Von oben":"Do topo",
+  "Von unten":"De baixo",
+  "Zur Fußzeile":"Ir para o rodapé",
+  "Zur Kopfzeile":"Ir para o cabeçalho",
+  "Kopf- und Fußzeile schließen":"Fechar cabeçalho e rodapé",
+  "„Seite X von Y“ einfügen":"Inserir “Página X de Y”",
+  "von":"de",
   "Markierungen immer zeigen":"Sempre mostrar destaques",
   "Notiz einfügen":"Inserir nota",
   "Notiz schreiben …":"Escreva uma nota…",
@@ -6345,6 +6405,13 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Von oben":"Od góry",
+  "Von unten":"Od dołu",
+  "Zur Fußzeile":"Do stopki",
+  "Zur Kopfzeile":"Do nagłówka",
+  "Kopf- und Fußzeile schließen":"Zamknij nagłówek i stopkę",
+  "„Seite X von Y“ einfügen":"Wstaw „Strona X z Y”",
+  "von":"z",
   "Markierungen immer zeigen":"Zawsze pokazuj zaznaczenia",
   "Notiz einfügen":"Wstaw notatkę",
   "Notiz schreiben …":"Napisz notatkę…",
@@ -7315,6 +7382,13 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Von oben":"Dall'alto",
+  "Von unten":"Dal basso",
+  "Zur Fußzeile":"Vai al piè di pagina",
+  "Zur Kopfzeile":"Vai all'intestazione",
+  "Kopf- und Fußzeile schließen":"Chiudi intestazione e piè di pagina",
+  "„Seite X von Y“ einfügen":"Inserisci «Pagina X di Y»",
+  "von":"di",
   "Markierungen immer zeigen":"Mostra sempre le evidenziazioni",
   "Notiz einfügen":"Inserisci nota",
   "Notiz schreiben …":"Scrivi una nota…",
@@ -9219,13 +9293,18 @@ function drawWrite(){
   /* Kopf-/Fußzeile: Hinweis beim Überfahren, Doppelklick öffnet sie */
   $("#sheet").addEventListener("mousemove",e=>hfHintAt(e.clientY));
   $("#sheet").addEventListener("mouseleave",()=>{const h=$("#hfhint");if(h)h.classList.remove("on")});
-  ed.addEventListener("dblclick",e=>{
+  /* Am ganzen Blatt, nicht nur am Textkörper: die gezeichnete Kopfzeile
+     liegt außerhalb von #editor, ein Doppelklick darauf kam nie an */
+  $("#sheet").addEventListener("dblclick",e=>{
+    if(!e.target.closest("#paper"))return;
+    if(e.target.closest("#hfedit"))return;
     const zone=hfZoneAt(e.clientY);
-    if(!zone)return;
-    e.preventDefault();hfEditOpen(zone.which,zone.page);
+    if(!zone){if(hfEditing){hfEditCommit();hfEditClose()}return}
+    e.preventDefault();
+    if(hfEditing){hfEditCommit();hfEditClose()}
+    hfEditOpen(zone.which,zone.page);
   });
-  $("#hfgrip").addEventListener("mousedown",e=>hfGripDrag(e,"rand"));
-  $("#hfgrip2").addEventListener("mousedown",e=>hfGripDrag(e,"abstand"));
+  ed.addEventListener("mousedown",e=>{if(hfEditing&&!hfZoneAt(e.clientY))e.preventDefault()},true);
   document.querySelectorAll(".figrsz").forEach(h=>h.addEventListener("mousedown",figResizeDrag));
   $("#hinterbox").addEventListener("mousedown",freeFigMouseDown);
   const hb=$("#hfedit");
@@ -9235,13 +9314,15 @@ function drawWrite(){
        Taste. Verlassen geht über Esc, Tab oder einen Klick daneben; alle drei
        übernehmen den Text (er steht durch hfLive() ohnehin schon im
        Dokument, nur der Zwischenstand fehlt noch). */
+    /* Enter beginnt eine neue Zeile mit derselben Ausrichtung (Chrome legt
+       dafür einen neuen Block an); Umschalt+Enter bricht nur um */
     if(e.key==="Enter"){
-      e.preventDefault();document.execCommand("insertLineBreak");
+      if(e.shiftKey){e.preventDefault();document.execCommand("insertLineBreak")}
       setTimeout(()=>{placeHfGrip();drawHfBar()},0);hfLive();return}
     if(e.key==="Escape"){e.preventDefault();hfEditCommit();hfEditClose();ed.focus();return}
-    if(e.key==="Tab"){e.preventDefault();
-      const pg=hfEditing?hfEditing.page:0,other=hfFuerSeite(doc(),hfEditing&&istKopf(hfEditing.which)?"ftr":"hdr",pg);
-      hfEditCommit();hfEditClose();hfEditOpen(other,pg)}
+    /* Tab wie in Word: Tabulator (Mitte/rechts, siehe hfTabZeilen); zur
+       anderen Zeile geht es über die Leiste */
+    if(e.key==="Tab"){e.preventDefault();document.execCommand("insertText",false,"\t");hfLive()}
   });
   hb.addEventListener("input",hfLive);
   hb.addEventListener("blur",()=>{
@@ -9253,7 +9334,7 @@ function drawWrite(){
     setTimeout(()=>{
       if(!hfEditing)return;
       const a=document.activeElement;
-      if(a===hb||(a&&a.closest&&a.closest("#hfbar,.hfgrip,#submenu")))return;
+      if(a===hb||(a&&a.closest&&a.closest("#hfbar,.hfgrip,#submenu,#tools")))return;
       hfEditCommit();hfEditClose();
     },0);
   });
@@ -9442,6 +9523,7 @@ function schriftNormalisieren(ed){
   ed.querySelectorAll("span").forEach(s=>{if(!s.attributes.length)unwrap(s)});
 }
 function schriftAnwenden(name){
+  if(hfEditing){hfStil("font",name);return}
   const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
   if(ganzMarkiert(ed,sel)){ganzesDokument("font",name);return}
   const leer=sel.getRangeAt(0).collapsed,pos=textPos(ed);
@@ -9452,6 +9534,7 @@ function schriftAnwenden(name){
   dirty=true;queuePaginate();drawStatus();schriftFelderSetzen();
 }
 function groesseAnwenden(pt){
+  if(hfEditing){hfStil("size",pt);return}
   const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
   if(ganzMarkiert(ed,sel)){ganzesDokument("size",pt);return}
   wartendeGroesse=pt;
@@ -9480,7 +9563,8 @@ function groesseStufe(richtung){
 /* Die Felder zeigen, was an der Schreibmarke bzw. in der Markierung gilt;
    ist es gemischt, bleiben sie leer — wie in Word. */
 function schriftFelderSetzen(){
-  const ed=$("#editor"),ff=$("#fFont"),fs=$("#fSize");if(!ed||!ff||!fs)return;
+  const hb=hfEditing&&$("#hfedit");
+  const ed=hb||$("#editor"),ff=$("#fFont"),fs=$("#fSize");if(!ed||!ff||!fs)return;
   if(document.activeElement===fs||document.activeElement===ff)return;
   const sel=getSelection();if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
   const r=sel.getRangeAt(0),z=zoomIst(),el=[];
@@ -9665,7 +9749,10 @@ function sizeMenu(e){
   m.onclick=ev=>{const b=ev.target.closest("[data-fs]");if(!b)return;
     closeMenu();setFontSize(b.dataset.fs);const ed=$("#editor");ed&&ed.focus()};
 }
-function cmd(c){if(c==="removeFormat"){formatierungEntfernen();return}
+function cmd(c){
+  if(hfEditing&&c==="removeFormat"){formatierungEntfernen();return}
+  if(hfEditing){const hb=$("#hfedit");document.execCommand(c,false,null);hb&&hb.focus();hfLive();syncToolbarState();return}
+  if(c==="removeFormat"){formatierungEntfernen();return}
   if(c==="insertOrderedList"||c==="insertUnorderedList"){listeUmschalten(c);return}
   document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
 /* Die Werkzeugleiste zeigte nie, was an der Schreibmarke gerade gilt - der
@@ -9681,7 +9768,9 @@ function syncToolbarState(){
   if(S.mode!=="write")return;
   const ed=$("#editor");if(!ed)return;
   const sel=getSelection();
-  if(!sel.rangeCount||!ed.contains(sel.anchorNode))return;
+  /* In der Kopf-/Fußzeile zeigen Fett, Ausrichtung usw. deren Zustand */
+  const hb=hfEditing&&$("#hfedit"),imHf=!!(hb&&sel.rangeCount&&hb.contains(sel.anchorNode));
+  if(!sel.rangeCount||(!imHf&&!ed.contains(sel.anchorNode)))return;
   TOOLBAR_STATE_CMDS.forEach(c=>{
     const btn=document.querySelector(`.tools [data-cmd="${c}"]`);
     if(!btn)return;
@@ -9689,6 +9778,7 @@ function syncToolbarState(){
     try{aktiv=document.queryCommandState(c)}catch(e){}
     btn.classList.toggle("on",aktiv);
   });
+  if(imHf){schriftFelderSetzen();return}
   if($("#fBlock")){
     let n=sel.anchorNode;n=n.nodeType===1?n:n.parentElement;
     const block=n&&n.closest("h1,h2,h3,h4,blockquote,p[data-fv]");
@@ -9720,6 +9810,7 @@ function bestInk(hex){
   return kontrast(1)>kontrast(0)?"#FFFFFF":MARKINK;
 }
 function farbeAnwenden(art,c){
+  if(hfEditing){if(art==="fore"){hfStil("fore",c);S.settings.foreColor=c;drawTools()}return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   document.execCommand("styleWithCSS",false,true);
@@ -9732,6 +9823,7 @@ function farbeAnwenden(art,c){
    aufräumen, die sie tragen. Ohne den Umweg gäbe es keinen verlässlichen
    Weg, execCommand eine gesetzte Farbe wieder wegnehmen zu lassen. */
 function farbeEntfernen(art){
+  if(hfEditing){if(art==="fore")hfStil("foreWeg");return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   document.execCommand("styleWithCSS",false,true);
@@ -11727,6 +11819,7 @@ function hfHtmlLaeufe(html,basisPt){
     if(t==="b")neu.b=true;if(t==="i")neu.i=true;if(t==="u")neu.u=true;if(t==="s")neu.strike=true;
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
     if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2);
+    if(n.style&&n.style.fontFamily)neu.font=n.style.fontFamily.split(",")[0].replace(/["']/g,"").trim();
     n.childNodes.forEach(k=>lauf(k,neu));
   };
   box.childNodes.forEach(k=>lauf(k,{}));
@@ -11786,7 +11879,8 @@ async function hfTeil(d,which,groesse){
     const nach=(hf.ty&&fuss&&i===zeilen.length-1?hf.ty:0)+(!fuss&&i===zeilen.length-1?zusatz:0);
     const abst=vor||nach?`<w:spacing${vor?` w:before="${mmToTwip(vor)}"`:""}${nach?` w:after="${mmToTwip(nach)}"`:""}/>`:"";
     const laeufe=zeilenH?hfHtmlLaeufe(zeilenH[i]||"",groesse*0.85):hfLaufXml(zeile);
-    return `<w:p><w:pPr>${zeile.includes("\t")?tabs:""}${abst}${ind}<w:jc w:val="${jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${laeufe}</w:p>`;
+    const za=hfZeilenAlign(hf,i),jcZ=za==="left"?"left":za==="right"?"right":"center";
+    return `<w:p><w:pPr>${zeile.includes("\t")?tabs:""}${abst}${ind}<w:jc w:val="${hf.za?jcZ:jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${laeufe}</w:p>`;
   }).join("");
   const ns=anker?` xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"`:"";
   const xml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -13207,13 +13301,15 @@ async function odtBlob(d){
       const lauf=(n,st)=>{
         if(n.nodeType===3){const x=feld(n.data);if(!x)return;
           const a=[st.b&&'fo:font-weight="bold"',st.i&&'fo:font-style="italic"',st.u&&'style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"',
-            st.s&&'style:text-line-through-style="solid"',st.color&&`fo:color="#${st.color.toLowerCase()}"`,st.sz&&`fo:font-size="${odfZahl(st.sz)}pt"`].filter(Boolean);
+            st.s&&'style:text-line-through-style="solid"',st.color&&`fo:color="#${st.color.toLowerCase()}"`,st.sz&&`fo:font-size="${odfZahl(st.sz)}pt"`,
+            st.font&&`fo:font-family="${xesc("'"+st.font+"'")}"`].filter(Boolean);
           out+=a.length?`<text:span text:style-name="${hfAutoName("text",`<style:text-properties ${a.join(" ")}/>`)}">${x}</text:span>`:x;return}
         if(n.nodeType!==1)return;
         const tg=n.tagName.toLowerCase(),neu={...st};
         if(tg==="b"||tg==="strong")neu.b=true;if(tg==="i"||tg==="em")neu.i=true;if(tg==="u")neu.u=true;if(tg==="s")neu.s=true;
         if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
         if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2)/2;
+        if(n.style&&n.style.fontFamily)neu.font=n.style.fontFamily.split(",")[0].replace(/["']/g,"").trim();
         n.childNodes.forEach(k=>lauf(k,neu));
       };
       box.childNodes.forEach(k=>lauf(k,{}));
@@ -13229,8 +13325,10 @@ async function odtBlob(d){
        ersten Zeile den Platz (ty) */
     const bildH=vor.length?Math.max(...vor.map(b=>b.h)):0;
     const extra=!fussTeil&&v.ty&&v.ty-bildH>0.2?v.ty-bildH:0;
-    const psErst=extra?hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${v.align==="left"?"start":v.align==="right"?"end":"center"}" fo:margin-top="${odfZahl(extra)}mm" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/>`):ps;
-    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${i?ps:psErst}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
+    const psZ=i=>{const a=hfZeilenAlign(v,i);return a==="left"?"PQ_Zeile_links":a==="right"?"PQ_Zeile_rechts":"PQ_Zeile_Mitte"};
+    const a0=hfZeilenAlign(v,0);
+    const psErst=extra?hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${a0==="left"?"start":a0==="right"?"end":"center"}" fo:margin-top="${odfZahl(extra)}mm" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/>`):psZ(0);
+    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${i?psZ(i):psErst}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
   };
   const hfFertig={};
   for(const [w,e] of [["hdr","header"],["hdr2","header-left"],["hdr1","header-first"],["ftr","footer"],["ftr2","footer-left"],["ftr1","footer-first"]])hfFertig[w]=await hfXml(w,e);
@@ -13641,13 +13739,14 @@ async function rtfBlob(d){
       const box=document.createElement("div");box.innerHTML=html;let out="";
       const lauf=(n,st)=>{
         if(n.nodeType===3){const x=zeile(n.data);if(!x)return;
-          const a=(st.b?"\\b":"")+(st.i?"\\i":"")+(st.u?"\\ul":"")+(st.s?"\\strike":"")+(st.color?"\\cf"+cNr(st.color):"")+(st.sz?"\\fs"+Math.round(st.sz*2):"");
+          const a=(st.b?"\\b":"")+(st.i?"\\i":"")+(st.u?"\\ul":"")+(st.s?"\\strike":"")+(st.color?"\\cf"+cNr(st.color):"")+(st.sz?"\\fs"+Math.round(st.sz*2):"")+(st.font?"\\f"+fNr(st.font):"");
           out+=a?"{"+a+" "+x+"}":x;return}
         if(n.nodeType!==1)return;
         const tg=n.tagName.toLowerCase(),neu={...st};
         if(tg==="b"||tg==="strong")neu.b=true;if(tg==="i"||tg==="em")neu.i=true;if(tg==="u")neu.u=true;if(tg==="s")neu.s=true;
         if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)neu.color=h}
         if(n.style&&/em$/.test(n.style.fontSize))neu.sz=Math.round(parseFloat(n.style.fontSize)*basisPt*2)/2;
+        if(n.style&&n.style.fontFamily)neu.font=n.style.fontFamily.split(",")[0].replace(/["']/g,"").trim();
         n.childNodes.forEach(k=>lauf(k,neu));
       };
       box.childNodes.forEach(k=>lauf(k,{}));
@@ -13661,7 +13760,7 @@ async function rtfBlob(d){
     const zeile=z=>z.split(/(\{(?:seiten|pages|seite|page|titel|title|datum|date)\})/i).map(s=>
       /^\{(seiten|pages)\}$/i.test(s)?feld("NUMPAGES","1"):/^\{(seite|page)\}$/i.test(s)?feld("PAGE","1"):
       /^\{(titel|title)\}$/i.test(s)?feld("TITLE",tr(d.title)||""):/^\{(datum|date)\}$/i.test(s)?feld("DATE",new Date().toLocaleDateString()):txt(s)).join("");
-    return `{\\${ziel}`+bildAbs(teile.vor)+(t.trim()?t.split("\n").map((z,i)=>`\\pard\\plain${q}${!i&&extra?"\\sb"+extra:""}\\f0\\fs${fs(groesse*0.85)} ${zeileFmt(zeilenHtml?zeilenHtml[i]:null,z)}\\par`).join(""):"")+bildAbs(teile.nach)+"}\n";
+    return `{\\${ziel}`+bildAbs(teile.vor)+(t.trim()?t.split("\n").map((z,i)=>`\\pard\\plain${v.za?{left:"\\ql",right:"\\qr"}[hfZeilenAlign(v,i)]||"\\qc":q}${!i&&extra?"\\sb"+extra:""}\\f0\\fs${fs(groesse*0.85)} ${zeileFmt(zeilenHtml?zeilenHtml[i]:null,z)}\\par`).join(""):"")+bildAbs(teile.nach)+"}\n";
   };
   const kopf=hfRtf("hdr",d.geradeAnders?"headerr":"header")+hfRtf("hdr2","headerl")+hfRtf("hdr1","headerf")+
     hfRtf("ftr",d.geradeAnders?"footerr":"footer")+hfRtf("ftr2","footerl")+hfRtf("ftr1","footerf");
@@ -15734,6 +15833,8 @@ function docxHfAbsatz(p,html){
       let x=xesc(t);
       if(w.color)st.push("color:#"+w.color);
       if(w.sz&&html.basisPt&&Math.abs(w.sz-html.basisPt)>=0.25)st.push("font-size:"+(Math.round(w.sz/html.basisPt*1000)/1000)+"em");
+      const rf=KIND(KIND(el,"rPr"),"rFonts"),fn=rf&&(xattrN(rf,"ascii")||xattrN(rf,"hAnsi"));
+      if(fn&&html.grundF&&String(fn).toLowerCase()!==String(html.grundF).toLowerCase())st.push("font-family:'"+String(fn).replace(/['"]/g,"")+"'");
       if(st.length){x=`<span style="${st.join(";")}">${x}</span>`;html.formatiert=true}
       if(w.strike){x="<s>"+x+"</s>";html.formatiert=true}
       if(w.u){x="<u>"+x+"</u>";html.formatiert=true}
@@ -15816,14 +15917,14 @@ function docxHf(xml,zub){
   zub=zub||{};
   const f=zub.fmt||HF_RAHMEN,karte=zub.bilder||{},fuss=dom.documentElement.localName==="ftr";
   const cw=f.w-f.m[1]-f.m[3];
-  const zeilen=[],zeilenH=[],bilder=[],offen=[];
+  const zeilen=[],zeilenH=[],zeilenA=[],bilder=[],offen=[];
   /* Text kann aus mehreren Zellen kommen; dann zählt die ganze Breite. */
   let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false,formatiert=false;
   const absatz=(p,x0,w0,zelle)=>{
     const pPr=KIND(p,"pPr"),sp=KIND(pPr,"spacing"),ind=KIND(pPr,"ind");
     y+=mmVonTwip(xattrN(sp,"before"));
     const il=mmVonTwip(xattrN(ind,"left")??xattrN(ind,"start")),ir=mmVonTwip(xattrN(ind,"right")??xattrN(ind,"end"));
-    const hz={out:"",basisPt:zub.basisPt,formatiert:false};
+    const hz={out:"",basisPt:zub.basisPt,grundF:zub.grundF,formatiert:false};
     const t=docxHfAbsatz(p,hz),al=docxHfAusrichtung(p);
     if(hz.formatiert)formatiert=true;
     const imText=[];
@@ -15865,9 +15966,9 @@ function docxHf(xml,zub){
          Bild in seiner Mitte nicht anders ausweichen. */
       if(ty===null)ty=y+(imText.length?hoehe-HF_ZEILE:0);
       else if(bildImText){const soll=Math.round((y+(imText.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
-        while(zeilen.length<soll){zeilen.push("");zeilenH.push("")}}
+        while(zeilen.length<soll){zeilen.push("");zeilenH.push("");zeilenA.push(null)}}
       bildImText=false;
-      zeilen.push(t);zeilenH.push(hz.out);
+      zeilen.push(t);zeilenH.push(hz.out);zeilenA.push(al);
       if(t.trim()){if(align===null)align=al;if(zelle)textZellen.add(zelle);
         if(spalte===null)spalte={x:x0+il,w:w0-il-ir}}
       hoehe=Math.max(hoehe,HF_ZEILE);
@@ -15903,10 +16004,11 @@ function docxHf(xml,zub){
     bilder.push({uri:a.uri,b:a.b,h:a.h,x:a.x-f.m[3],yBlatt,fluss:!!a.fluss});
   }
   /* Zeilenende-Leerzeilen weg wie bisher. */
-  while(zeilen.length&&!zeilen[zeilen.length-1].trim()){zeilen.pop();zeilenH.pop()}
+  /* Leere Zeilen am Ende bleiben: in Word halten sie Abstand zum Text (Tom) */
   const text=zeilen.join("\n");
   if(!text.trim()&&!bilder.length)return null;
   const erg={on:true,text,align:align||"center"};
+  const za=hfZaPacken(zeilenA,erg.align);if(za)erg.za=za;
   if(formatiert)erg.html=zeilenH.join("<br>");
   if(bilder.length){
     erg.bilder=bilder.map(i=>{
@@ -15940,7 +16042,7 @@ function docxHf(xml,zub){
 function hfAusAbsaetzen(abs,f,fuss){
   f=f||HF_RAHMEN;
   const cw=f.w-f.m[1]-f.m[3];
-  const zeilen=[],zeilenH=[],bilder=[],frei=[];
+  const zeilen=[],zeilenH=[],zeilenA=[],bilder=[],frei=[];
   let y=0,ty=null,align=null,formatiert=false,bildImText=false;
   for(const a of abs){
     y+=a.vor||0;
@@ -15958,22 +16060,23 @@ function hfAusAbsaetzen(abs,f,fuss){
     if(a.text.trim()||!bl.length){
       if(ty===null)ty=y+(bl.length?hoehe-HF_ZEILE:0);
       else if(bildImText){const soll=Math.round((y+(bl.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
-        while(zeilen.length<soll){zeilen.push("");zeilenH.push("")}}
+        while(zeilen.length<soll){zeilen.push("");zeilenH.push("");zeilenA.push(null)}}
       bildImText=false;
-      zeilen.push(a.text);zeilenH.push(a.html!=null?a.html:xesc(a.text));
+      zeilen.push(a.text);zeilenH.push(a.html!=null?a.html:xesc(a.text));zeilenA.push(a.text.trim()?(a.al==="justify"?"left":a.al||"left"):null);
       if(a.formatiert)formatiert=true;
       if(a.text.trim()&&align===null)align=a.al||"left";
       hoehe=Math.max(hoehe,HF_ZEILE);
     }
     y+=hoehe+(a.nach||0);
   }
-  while(zeilen.length&&!zeilen[zeilen.length-1].trim()){zeilen.pop();zeilenH.pop()}
-  /* Leere Zeilen vor dem ersten Text zählen nur, wenn ein Bild da ist —
+  /* Leere Zeilen am Ende bleiben stehen wie in Word (Abstand zum Text).
+     Leere Zeilen vor dem ersten Text zählen nur, wenn ein Bild da ist —
      sonst rückte der Text ohne Grund nach unten */
-  if(!bilder.length)while(zeilen.length&&!zeilen[0].trim()){zeilen.shift();zeilenH.shift()}
+  if(!bilder.length)while(zeilen.length&&!zeilen[0].trim()){zeilen.shift();zeilenH.shift();zeilenA.shift()}
   const text=zeilen.join("\n");
   if(!text.trim()&&!bilder.length&&!frei.length)return null;
   const erg={on:true,text,align:align==="justify"?"left":(align||"left")};
+  const za=hfZaPacken(zeilenA,erg.align);if(za)erg.za=za;
   if(formatiert)erg.html=zeilenH.join("<br>");
   if(bilder.length||frei.length){
     const gesamt=y;
@@ -15989,10 +16092,11 @@ function hfAusAbsaetzen(abs,f,fuss){
 }
 /* Ein Textstück der Kopfzeile als HTML wie bei docxHfAbsatz (Größe in em
    der Kopfzeilenschrift) */
-function hfLaufHtml(t,w,basisPt,z){
+function hfLaufHtml(t,w,basisPt,z,grundF){
   if(!t)return "";
   let x=xesc(t);const st=[];
   if(w.color&&w.color!=="000000")st.push("color:#"+w.color);
+  if(w.font&&grundF&&String(w.font).toLowerCase()!==String(grundF).toLowerCase())st.push("font-family:'"+String(w.font).replace(/['"]/g,"")+"'");
   if(w.sz&&basisPt&&Math.abs(w.sz-basisPt)>=0.25)st.push("font-size:"+(Math.round(w.sz/basisPt*1000)/1000)+"em");
   if(st.length){x='<span style="'+st.join(";")+'">'+x+"</span>";z.formatiert=true}
   if(w.s){x="<s>"+x+"</s>";z.formatiert=true}
@@ -17174,7 +17278,7 @@ function odfHf(el,k,z){
       const a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:pe.al==="center"?"center":pe.al==="right"?"right":"left",
         vor:pe.mt?pe.mt*25.4/72:0,nach:pe.mb?pe.mb*25.4/72:0};
       const lauf=(n,w)=>[...n.childNodes].forEach(c=>{
-        if(c.nodeType===3){const t=c.nodeValue.replace(/[\t\n\r]+/g," ");a.text+=t;a.html+=hfLaufHtml(t,w,z.basisPt,a);return}
+        if(c.nodeType===3){const t=c.nodeValue.replace(/[\t\n\r]+/g," ");a.text+=t;a.html+=hfLaufHtml(t,w,z.basisPt,a,z.grundF);return}
         if(c.nodeType!==1)return;
         const l=c.localName;
         const feld=ph=>{a.text+=ph;a.html+=xesc(ph)};
@@ -17296,7 +17400,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
         textbreiteMm=Math.max(20,w-m[1]-m[3]);
       }
     }
-    const zHf={bilder:bilder||{},fmt:fmt||HF_RAHMEN,basisPt:grundGroesse*0.85};
+    const zHf={bilder:bilder||{},fmt:fmt||HF_RAHMEN,basisPt:grundGroesse*0.85,grundF:gs.font||""};
     erg.hdr=odfHf(odfKind(mp,"header"),kHf,zHf);erg.ftr=odfHf(odfKind(mp,"footer"),kHf,zHf);
     const h1=odfHf(odfKind(mp,"header-first"),kHf,zHf),f1=odfHf(odfKind(mp,"footer-first"),kHf,zHf);
     if(h1||f1){erg.ersteAnders=true;erg.hdr1=h1;erg.ftr1=f1}
@@ -18621,8 +18725,8 @@ function docLesen(buf){
     const lies=(be,fuss)=>{
       if(!be)return null;
       const abs=[],felder=[];let a=null,sc=null,lauf="",lw=null;
-      const zu=()=>{if(lauf&&a){a.html+=hfLaufHtml(lauf,lw||{},basisPt,a)}lauf=""};
-      const text=(t,w)=>{if(lw&&!["b","i","u","s","sz","color"].every(q=>(lw[q]||null)===(w[q]||null)))zu();lw=w;lauf+=t;a.text+=t};
+      const zu=()=>{if(lauf&&a){a.html+=hfLaufHtml(lauf,lw||{},basisPt,a,grundF)}lauf=""};
+      const text=(t,w)=>{if(lw&&!["b","i","u","s","sz","color","font"].every(q=>(lw[q]||null)===(w[q]||null)))zu();lw=w;lauf+=t;a.text+=t};
       const feld=ph=>{zu();a.text+=ph;a.html+=xesc(ph)};
       for(let cp=be[0];cp<be[1]&&cp<zch.length;cp++){
         const c=zch[cp],k=c.charCodeAt(0),fd=felder[felder.length-1];
@@ -18653,6 +18757,9 @@ function docLesen(buf){
         text(c,chp);
       }
       if(a){zu();if(a.text||a.bilder.length)abs.push(a)}
+      /* Jeder Teiltext endet mit einem Absatzzeichen, das Word nur als
+         Abschluss führt und nicht zeigt — das fällt weg, echte Leerzeilen bleiben */
+      const l=abs[abs.length-1];if(l&&!l.text&&!l.bilder.length&&!l.anker.length)abs.pop();
       return hfAusAbsaetzen(abs,fmt||HF_RAHMEN,fuss);
     };
     hf.hdr=lies(geschichte(1));hf.ftr=lies(geschichte(3),true);
@@ -19127,7 +19234,7 @@ function rtfLesen(roh){
       ab.runs.forEach(r=>{
         if(r.bild){if(r.bild.uri)a.bilder.push({uri:r.bild.uri,b:r.bild.breiteMm,h:r.bild.hoeheMm});return}
         if(r.t==null)return;
-        a.text+=r.t;a.html+=hfLaufHtml(r.t,r.f||{},basisPt,a);
+        a.text+=r.t;a.html+=hfLaufHtml(r.t,r.f||{},basisPt,a,grundF);
       });
       a.text=a.text.replace(/\s+$/,"");
       return a;
@@ -19218,7 +19325,7 @@ async function zipDokument(name,buf){
            (word/_rels/header2.xml.rels), nicht an der des Dokuments. */
         const teilRel=await hol(ziel.replace(/([^/]+)$/,"_rels/$1.rels"));
         const bilderHf=await docxBildKarte(buf,teilRel);
-        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt,basisPt:(erg.size||S.settings.size||11)*0.85});
+        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt,basisPt:(erg.size||S.settings.size||11)*0.85,grundF:erg.font||""});
         if(erg[feld])hfRoh.push({feld,ziel,stand:wStand(erg[feld])});
       }
       erg.word=await wPaketBewahren(buf,xml,roh,erg,hfRoh);
@@ -21388,6 +21495,7 @@ function fliesstext(){
    über removeFormat, dazu das Absatzformat — Überschrift und Zitat werden
    Fließtext, Ausrichtung und Einrückung gehen zurück. Listen bleiben. */
 function formatierungEntfernen(){
+  if(hfEditing){hfStil("weg");return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   /* Ohne Auswahl, die Schreibmarke mitten in einem Wort: wie Word das
@@ -22169,6 +22277,15 @@ const HF_DEF={hdr:{on:false,text:"{title}",align:"center"},
               ftr2:{on:false,text:"",align:"left"}};
 function hfOf(d,which){return {...HF_DEF[which],...(d[which]||{})}}
 function istKopf(w){return /^hdr/.test(w)}
+/* Ausrichtung je Zeile wie in Word (2026-10-26, Toms Wahl): v.za trägt sie
+   je Zeile von v.text/v.html, wo sie von v.align abweicht; ohne za gilt
+   v.align für alle Zeilen wie bisher. */
+const hfZeilenAlign=(v,i)=>(v&&v.za&&v.za[i])||(v&&v.align)||"left";
+/* za nur behalten, wenn eine Zeile von der Grundausrichtung abweicht */
+function hfZaPacken(zal,grund){
+  const za=zal.map(a=>a||grund);
+  return za.some(a=>a!==grund)?za:undefined;
+}
 const hfName=w=>tr(istKopf(w)?"Kopfzeile":"Fußzeile")+(/1$/.test(w)?" · "+tr("Erste Seite"):/2$/.test(w)?" · "+tr("Gerade Seiten"):"");
 /* Welche Zeile auf Seite page (ab 0) gilt: seite ist "hdr" oder "ftr". */
 /* „Gerade Seiten anders“ wie in Word (evenAndOddHeaders): Seite 2, 4, …
@@ -22184,8 +22301,18 @@ function hfFuerSeite(d,seite,page){
    Vorlage „Kopfzeile“: der erste springt zur Mitte, der zweite an den
    rechten Rand — „Firma⇥Titel⇥Seite 3“. */
 function hfInhalt(v,page,total,forPrint){
-  const html=v.html!=null?hfText(v.html,page,total,forPrint,true)
+  if(v.za&&v.za.length){
+    /* Je Zeile ein Block mit eigener Ausrichtung */
+    const zeilen=v.html!=null?String(v.html).split("<br>"):String(v.text||"").split("\n");
+    return zeilen.map((z,i)=>{
+      let h=v.html!=null?hfText(z,page,total,forPrint,true):hfText(z,page,total,forPrint);
+      if(h.includes("\t"))h=hfTabZeilen(h);
+      return `<div style="text-align:${hfZeilenAlign(v,i)}">${h||"<br>"}</div>`;
+    }).join("");
+  }
+  let html=v.html!=null?hfText(v.html,page,total,forPrint,true)
     :hfText(v.text,page,total,forPrint).replace(/\n/g,"<br>");
+  if(/<br>$/.test(html))html+="<br>";
   return html.includes("\t")?hfTabZeilen(html):html;
 }
 function hfTabZeilen(html){
@@ -22224,12 +22351,17 @@ function hfText(tpl,page,total,forPrint,roh){
 let hfEditing=null;
 function hfZoneAt(clientY){
   const paper=$("#paper");if(!paper||S.mode!=="write")return null;
-  const f=fmtOf(doc()),z=S.zoom;
-  const ph=MM(f.h)*z,mt=MM(f.m[0])*z,mb=MM(f.m[2])*z,stride=ph+GAP;
+  const d=doc(),f=fmtOf(d),z=S.zoom;
+  const ph=MM(f.h)*z,stride=ph+GAP;
   const y=clientY-paper.getBoundingClientRect().top;
   if(y<0)return null;
   const page=Math.floor(y/stride);
   if(page<0||page>=pageCount)return null;
+  /* Der Bereich reicht so weit, wie die Kopf-/Fußzeile tatsächlich ist —
+     mit Logo weit über den Seitenrand hinaus. Vorher zählte nur der Rand
+     aus dem Seitenformat, ein Doppelklick auf den Kopfzeilentext traf
+     daneben (Toms Goethe-Checkliste). */
+  const mt=hfRandPx(d,"hdr",page,z),mb=hfRandPx(d,"ftr",page,z);
   const yp=y-page*stride;
   if(yp<0||yp>ph)return null;
   /* Die Zeile, die auf dieser Seite gilt — auf Seite 1 ggf. die eigene. */
@@ -22265,19 +22397,32 @@ function hfEditOpen(which,page){
   const v=hfOf(d,which),r=hfRect(which,page);
   box.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;`+
     `min-height:${r.h}px;font-size:${r.fs}px;font-family:${hfSchrift(d)};text-align:${v.align}`;
-  /* Formatiert als HTML, sonst wie bisher als Text */
-  if(v.html!=null)box.innerHTML=v.html;else box.textContent=v.text||"";
+  /* Je Zeile ein Block mit ihrer Ausrichtung — so wirken die Ausrichtungs-
+     knöpfe der Symbolleiste auf die Zeile wie in Word */
+  const zeilen=v.html!=null?String(v.html).split("<br>"):String(v.text||"").split("\n").map(xesc);
+  box.innerHTML=zeilen.map((z,i)=>`<div style="text-align:${hfZeilenAlign(v,i)}">${hfFelderEin(z)||"<br>"}</div>`).join("");
   box.classList.add("on");
   document.body.classList.add("hfmode");
   $("#hfhint").classList.remove("on");
   box.focus();
-  const rg=document.createRange();rg.selectNodeContents(box);
+  /* Schreibmarke ans Ende wie in Word, statt alles zu markieren */
+  const rg=document.createRange();rg.selectNodeContents(box);rg.collapse(false);
   const s=getSelection();s.removeAllRanges();s.addRange(rg);
+  hfFeldAnZeile();
   placeHfGrip();
   drawHfBar();
 }
 /* Der Griff liegt auf der Grenze zwischen Kopf-/Fußzeilenband und Textkörper —
    also dort, wo der Text beginnt. Ihn zu ziehen ändert die Höhe des Bandes. */
+/* Das Feld genau auf die gezeichnete Zeile legen: ihre Lage ist die
+   Wahrheit, die Rechnung in hfRect kann um Rundungen abweichen */
+function hfFeldAnZeile(){
+  if(!hfEditing)return;
+  const box=$("#hfedit"),g=document.querySelector(`.hf[data-pg="${hfEditing.page}"][data-seite="${istKopf(hfEditing.which)?"hdr":"ftr"}"]`);
+  if(!box||!g)return;
+  const dy=g.getBoundingClientRect().top-box.getBoundingClientRect().top;
+  if(Math.abs(dy)>0.2&&Math.abs(dy)<6)box.style.top=(parseFloat(box.style.top)+dy)+"px";
+}
 function placeHfGrip(){
   const grip=$("#hfgrip"),grip2=$("#hfgrip2");
   if(!hfEditing||!grip){if(grip)grip.classList.remove("on");if(grip2)grip2.classList.remove("on");return}
@@ -22285,19 +22430,16 @@ function placeHfGrip(){
   const ph=MM(f.h)*z,stride=ph+GAP,pg=hfEditing.page,hdr=istKopf(hfEditing.which);
   const mt=hfRandPx(d,"hdr",pg,z), mb=hfRandPx(d,"ftr",pg,z);
   const links=MM(f.m[3])*z, breit=(MM(f.w)-MM(f.m[3])-MM(f.m[1]))*z;
-  /* Kante 1: wo der Textkörper beginnt (= Seitenrand). */
+  /* Wie Word: eine gestrichelte Linie, wo der Text beginnt, mit Schildchen
+     „Kopfzeile“/„Fußzeile“. Bis 2026-10 zwei Ziehkanten (Höhe und Abstand
+     zum Blattrand) — fummelig; den Abstand gibt es jetzt als Zahl in der
+     Leiste, die Höhe ergibt sich wie in Word aus dem Inhalt. */
   const y=hdr?pg*stride+mt:pg*stride+ph-mb;
   grip.style.left=links+"px";grip.style.width=breit+"px";
-  grip.style.top=(y-6)+"px";
-  grip.classList.add("on");
-  /* Kante 2: Abstand der Zeile selbst zum Blattrand (hd bzw. fd). */
-  if(grip2){
-    const ab=MM(hdr?f.hd:f.fd)*z;
-    const y2=hdr?pg*stride+ab:pg*stride+ph-ab;
-    grip2.style.left=links+"px";grip2.style.width=breit+"px";
-    grip2.style.top=(y2-6)+"px";
-    grip2.classList.add("on");
-  }
+  grip.style.top=y+"px";
+  grip.classList.add("on","linie");grip.classList.toggle("fuss",!hdr);
+  grip.dataset.label=hfName(hfEditing.which);
+  if(grip2)grip2.classList.remove("on");
 }
 /* Während des Tippens mitrechnen, wie in Google Docs: wächst die Kopfzeile
    über den Seitenrand hinaus, rückt der Textkörper sofort nach — nicht erst
@@ -22306,6 +22448,7 @@ function placeHfGrip(){
 let hfLiveTimer=null;
 function hfLive(){
   if(!hfEditing)return;
+  const hb=$("#hfedit");if(hb)hfFelderPruefen(hb);
   clearTimeout(hfLiveTimer);
   hfLiveTimer=setTimeout(()=>{
     const box=$("#hfedit");
@@ -22316,23 +22459,133 @@ function hfLive(){
     /* Die Fußzeile wächst nach oben — ihr Eingabefeld muss mitwandern. */
     const r=hfRect(hfEditing.which,hfEditing.page);
     box.style.top=r.top+"px";box.style.minHeight=r.h+"px";
-    placeHfGrip();drawHfBar();
+    hfFeldAnZeile();placeHfGrip();drawHfBar();
   },160);
 }
 /* Inhalt des Eingabefelds: reiner Text wie bis 1.1 (dann bleibt die Zeile
    Zeichen für Zeichen, wie sie war) oder, sobald etwas ausgezeichnet ist,
    zusätzlich als bereinigtes HTML — nur b/i/u/s, span mit Farbe und Größe,
    <br> als Zeilenwechsel. html:undefined fällt in JSON weg. */
+/* Platzhalter erscheinen beim Schreiben wie Felder in Word: der Wert
+   (Seitenzahl, Datum …) grau hinterlegt, als ein Zeichen, gespeichert
+   bleibt der Platzhalter. Bis 2026-10 stand dort „{page}“ — Tom: „wieso
+   wird das nicht ausgefüllt?“ */
+const HF_FELD_RE=/\{(seiten|pages|seite|page|titel|title|datum|date)\}/gi;
+function hfFeldWert(ph){
+  const k=ph.slice(1,-1).toLowerCase();
+  if(k==="seite"||k==="page")return String(hfEditing?hfEditing.page+1:1);
+  if(k==="seiten"||k==="pages")return String(Math.max(1,pageCount));
+  if(k==="titel"||k==="title")return tr(doc().title)||"";
+  return new Date().toLocaleDateString(LOC());
+}
+/* Ein normales, formatierbares Stück Text mit Markierung — wie in Word
+   nimmt das Feld Fett, Farbe usw. an. Wird sein Wert überschrieben, ist es
+   kein Feld mehr (hfFelderPruefen). */
+const hfFeldHtml=ph=>`<span class="hffeld" data-ph="${esc(ph)}">${esc(hfFeldWert(ph))}</span>`;
+function hfFelderPruefen(box){
+  const sel=getSelection();
+  box.querySelectorAll(".hffeld").forEach(f=>{
+    const wert=hfFeldWert(f.dataset.ph||""),txt=f.textContent;
+    if(txt===wert)return;
+    /* Direkt davor oder dahinter Getipptes landet bei Chrome im Feld: es
+       wandert hinaus, die Schreibmarke mit */
+    const texte=[];const w=document.createTreeWalker(f,NodeFilter.SHOW_TEXT);let t;while((t=w.nextNode()))texte.push(t);
+    if(texte.length===1&&wert&&(txt.startsWith(wert)||txt.endsWith(wert))){
+      const t0=texte[0],hinten=txt.startsWith(wert);
+      const rest=hinten?t0.data.slice(wert.length):t0.data.slice(0,t0.data.length-wert.length);
+      t0.data=wert;
+      const neu=document.createTextNode(rest);
+      f.parentNode.insertBefore(neu,hinten?f.nextSibling:f);
+      const r=document.createRange();r.setStart(neu,hinten?rest.length:rest.length);r.collapse(true);
+      if(box.contains(sel.anchorNode)){sel.removeAllRanges();sel.addRange(r)}
+      return;
+    }
+    /* Wert selbst überschrieben: kein Feld mehr, wie in Word */
+    while(f.firstChild)f.parentNode.insertBefore(f.firstChild,f);f.remove()});
+}
+/* Ein Feld mitsamt seinem Format als Platzhalter ausgeben: der Text des
+   Feldes wird zum Platzhalter, Auszeichnung darin bleibt */
+function hfFeldKlon(f){
+  const k=f.cloneNode(true);k.classList.remove("hffeld");k.removeAttribute("data-ph");
+  const w=document.createTreeWalker(k,NodeFilter.SHOW_TEXT);let t,erst=true;const weg=[];
+  while((t=w.nextNode())){if(erst){t.data=f.dataset.ph||"";erst=false}else weg.push(t)}
+  weg.forEach(x=>x.remove());
+  return k;
+}
+/* In fertigem Zeilen-HTML (Text ist maskiert) die Platzhalter durch Felder ersetzen */
+const hfFelderEin=html=>String(html).replace(HF_FELD_RE,m=>hfFeldHtml(m));
+/* Schrift, Größe und Farbe in der Kopf-/Fußzeile (2026-10-26, Tom): über
+   execCommand mit CSS, die Größe in em der Kopfzeilenschrift (85 % der
+   Dokumentgröße) — so lesen und schreiben es alle Formate. Die Auswahl im
+   Feld wird gemerkt, weil Schrift- und Größenfeld den Fokus nehmen. */
+let hfLetzteRange=null;
+document.addEventListener("selectionchange",()=>{const hb=hfEditing&&$("#hfedit"),s=getSelection();
+  if(hb&&s.rangeCount&&hb.contains(s.anchorNode))hfLetzteRange=s.getRangeAt(0).cloneRange()});
+function hfAuswahl(){
+  const hb=$("#hfedit");hb.focus();const s=getSelection();
+  if(!(s.rangeCount&&hb.contains(s.anchorNode))&&hfLetzteRange&&hb.contains(hfLetzteRange.startContainer)){
+    s.removeAllRanges();s.addRange(hfLetzteRange.cloneRange())}
+  return s;
+}
+function hfStil(art,wert){
+  const hb=$("#hfedit");if(!hb)return;
+  hfAuswahl();
+  document.execCommand("styleWithCSS",false,true);
+  if(art==="font")document.execCommand("fontName",false,wert);
+  else if(art==="fore")document.execCommand("foreColor",false,wert);
+  else if(art==="size"){
+    document.execCommand("fontSize",false,"7");
+    const em=Math.round(wert/((doc().size||S.settings.size||11)*0.85)*1000)/1000;
+    hb.querySelectorAll("[style]").forEach(el=>{if(/xxx-large/.test(el.style.fontSize))el.style.fontSize=em+"em"});
+    hb.querySelectorAll('font[size="7"]').forEach(el=>{const sp=document.createElement("span");sp.style.fontSize=em+"em";
+      while(el.firstChild)sp.appendChild(el.firstChild);el.replaceWith(sp)});
+  }else if(art==="foreWeg"){
+    const kenn="#010203";document.execCommand("foreColor",false,kenn);
+    hb.querySelectorAll("[style]").forEach(el=>{if(/rgb\(1,\s*2,\s*3\)|#010203/i.test(el.style.color))el.style.color=""})}
+  else if(art==="weg"){
+    /* Felder bleiben Felder: removeFormat würde ihre Spanne auflösen */
+    const felder=[...hb.querySelectorAll(".hffeld")];felder.forEach(f=>f.contentEditable="false");
+    document.execCommand("removeFormat");
+    felder.forEach(f=>f.removeAttribute("contenteditable"));
+  }
+  hfLive();syncToolbarState();
+}
 function hfAusFeld(box){
-  const text=(box.innerText||"").replace(/\n+$/,"");
-  const html=hfSaeubern(box);
-  return /<(b|i|u|s|span)\b/i.test(html)?{text,html}:{text,html:undefined};
+  hfFelderPruefen(box);
+  const grund=["center","right"].includes(box.style.textAlign)?box.style.textAlign:"left";
+  const zl=hfZeilenAusFeld(box,grund);
+  const text=zl.map(z=>z.text).join("\n");
+  const html=zl.map(z=>z.html).join("<br>");
+  const erst=zl.find(z=>z.text.trim());
+  const align=erst?erst.al:grund;
+  return {text,html:/<(b|i|u|s|span)\b/i.test(html)?html:undefined,align,za:hfZaPacken(zl.map(z=>z.al),align)};
+}
+/* Das Feld in Zeilen zerlegen: jeder Block und jedes <br> beendet eine
+   Zeile; die Ausrichtung kommt vom Block (Ausrichtungsknöpfe). */
+function hfZeilenAusFeld(box,grund){
+  const zeilen=[];let cur=null;
+  const norm=a=>a==="center"||a==="right"?a:"left";
+  const neu=al=>{if(!cur)cur={html:"",al:norm(al)}};
+  const zu=()=>{if(cur){const t=document.createElement("div");t.innerHTML=cur.html;cur.text=t.textContent;zeilen.push(cur);cur=null}};
+  const inline=n=>{const t=document.createElement("div");t.appendChild(n.cloneNode(true));return hfSaeubern(t).replace(/<br>/g," ")};
+  const lauf=(el,al)=>{
+    for(const n of [...el.childNodes]){
+      if(n.nodeType===1&&n.tagName==="BR"){neu(al);zu();continue}
+      if(n.nodeType===1&&n.classList.contains("hffeld")){neu(al);cur.html+=inline(n);continue}
+      if(n.nodeType===1&&/^(DIV|P|LI|H[1-6])$/.test(n.tagName)){zu();lauf(n,(n.style&&n.style.textAlign)||al);zu();continue}
+      if(n.nodeType===3){if(!n.data)continue;neu(al);cur.html+=xesc(n.data);continue}
+      if(n.nodeType===1){neu(al);cur.html+=inline(n)}
+    }
+  };
+  lauf(box,grund);zu();
+  return zeilen;
 }
 function hfSaeubern(wurzel){
   let out="";
   const lauf=n=>{
     if(n.nodeType===3){out+=xesc(n.data);return}
     if(n.nodeType!==1)return;
+    if(n.classList.contains("hffeld")){const k=hfFeldKlon(n);if(k.tagName==="SPAN"&&!k.getAttribute("style"))k.childNodes.forEach(lauf);else lauf(k);return}
     const tag=n.tagName.toLowerCase();
     if(tag==="br"){out+="<br>";return}
     const block=/^(div|p|li|h\d)$/.test(tag);
@@ -22341,6 +22594,8 @@ function hfSaeubern(wurzel){
     if(n.style&&n.style.color){const h=farbHex(n.style.color);if(h)st.push("color:#"+h)}
     if(tag==="font"&&n.getAttribute("color"))st.push("color:"+n.getAttribute("color"));
     if(n.style&&/em$/.test(n.style.fontSize))st.push("font-size:"+n.style.fontSize);
+    if(n.style&&n.style.fontFamily)st.push("font-family:'"+n.style.fontFamily.split(",")[0].replace(/["']/g,"").trim()+"'");
+    if(tag==="font"&&n.getAttribute("face"))st.push("font-family:'"+n.getAttribute("face").split(",")[0].replace(/["']/g,"").trim()+"'");
     const fett=tag==="b"||tag==="strong"||(n.style&&+n.style.fontWeight>=600);
     const kur=tag==="i"||tag==="em",unt=tag==="u",dur=tag==="s"||tag==="strike";
     out+=(fett?"<b>":"")+(kur?"<i>":"")+(unt?"<u>":"")+(dur?"<s>":"")+(st.length?`<span style="${st.join(";")}">`:"");
@@ -22357,6 +22612,7 @@ function hfEditCommit(){
   d[hfEditing.which]={...hfOf(d,hfEditing.which),...hfAusFeld(box)};
   commit();paginate();setPrintHF();
 }
+addEventListener("resize",()=>{if(hfEditing)drawHfBar()});
 function hfEditClose(){
   document.body.classList.remove("hfmode");
   const box=$("#hfedit");if(box){box.classList.remove("on");box.textContent=""}
@@ -22365,137 +22621,73 @@ function hfEditClose(){
      Zeile zum Blattrand und sitzt damit oberhalb der Kopfzeile. Er wurde hier
      vergessen und blieb nach dem Verlassen des Feldes als Balken über der
      Kopfzeile stehen — ohne Feld daneben, an dem er etwas verstellt hätte. */
-  [$("#hfgrip"),$("#hfgrip2")].forEach(g=>{if(g)g.classList.remove("on","drag")});
+  [$("#hfgrip"),$("#hfgrip2")].forEach(g=>{if(g)g.classList.remove("on","drag","linie","fuss")});
   hfEditing=null;
 }
 function drawHfBar(){
   const bar=$("#hfbar"),box=$("#hfedit");
-  if(!hfEditing||!bar||!box){if(bar)bar.classList.remove("on");return}
-  const v=hfOf(doc(),hfEditing.which);
-  const ic={left:'<path d="M4 6h16M4 11h10M4 16h14M4 21h8"/>',
-    center:'<path d="M4 6h16M7 11h10M5 16h14M8 21h8"/>',
-    right:'<path d="M4 6h16M10 11h10M6 16h14M12 21h8"/>'};
+  if(!hfEditing||!bar||!box){if(bar)bar.classList.remove("on","hfleiste");return}
+  /* Wie Words Registerkarte „Kopf- und Fußzeile“: eine feste Leiste unter
+     der Symbolleiste mit allem, was man dort braucht, und einem deutlichen
+     Ausgang. Bis 2026-10 schwebte sie je nach Platz über oder unter der
+     Zeile, Bild und Seiteneinstellungen standen nur im Dialog. */
+  const d=doc(),k=hfEditing.which,kopf=istKopf(k),f=fmtOf(d);
+  const ico=p=>ICO(p);
   bar.innerHTML=
-    `<span style="font-family:var(--mono);font-size:11px;letter-spacing:.06em;
-      text-transform:uppercase;color:var(--ink-soft)">${hfName(hfEditing.which)}</span>
+    `<span class="hfname">${hfName(k)}</span>
     <div class="sep"></div>
-    ${["left","center","right"].map(a=>`<button class="tb ${v.align===a?"on":""}" data-hfa="${a}"
-      title="${a==="left"?tr("Links"):a==="center"?tr("Mitte"):tr("Rechts")}">${ICO(ic[a])}</button>`).join("")}
+    <button class="pill" id="hfSeite">${tr("Seitenzahl")} &rsaquo;</button>
+    <button class="pill" data-hfph="{date}">${tr("Datum")}</button>
+    <button class="pill" data-hfph="{title}">${tr("Titel")}</button>
+    <button class="tb" id="hfImg" title="${esc(tr("Bild einfügen"))}">${ico('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.4" cy="9.4" r="1.7"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
     <div class="sep"></div>
-    <button class="pill" id="hfIns">${tr("Platzhalter")} &rsaquo;</button>
-    <button class="tb" id="hfImg" title="${esc(tr("Bild einfügen"))}">${ICO('<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.4" cy="9.4" r="1.7"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6"/>')}</button>
-    <button class="tb" id="hfMore" title="${esc(tr("Kopf- und Fußzeile"))}"
-      style="font-size:16px;line-height:1">&#8943;</button>`;
-  bar.classList.add("on");
-  /* Erst an den linken Rand setzen, damit Umbruch und Höhe korrekt gemessen werden */
-  bar.style.left="8px";bar.style.top="0px";
-  const bw=bar.offsetWidth,bh=bar.offsetHeight;
-  const r=box.getBoundingClientRect();
-  /* Waagerecht auf die Verdickung der Ziehkante zentrieren (deren Griff sitzt
-     mittig über der Textspalte) — so stehen Leiste und Anfasser in einer
-     Achse, statt dass die Leiste linksbündig daneben klebt. */
-  const gm=$("#hfgrip"),gr=gm&&gm.classList.contains("on")?gm.getBoundingClientRect():r;
-  const mitte=gr.left+gr.width/2;
-  bar.style.left=Math.max(8,Math.min(mitte-bw/2,innerWidth-bw-10))+"px";
-  /* Die Leiste darf nicht auf den Ziehkanten liegen — sonst verdeckt sie
-     genau das Bedienelement, das man als Nächstes braucht. Sie stand bisher
-     direkt unter dem Eingabefeld, und dort sitzt bei der Kopfzeile die
-     Textgrenze. Also: bei der Kopfzeile unter beide Kanten, bei der Fußzeile
-     über beide; die alten Plätze bleiben als Rückfall. */
-  const kanten=[$("#hfgrip"),$("#hfgrip2")]
-    .filter(g=>g&&g.classList.contains("on")).map(g=>g.getBoundingClientRect());
-  const unten=kanten.length?Math.max(...kanten.map(k=>k.bottom)):r.bottom;
-  const oben =kanten.length?Math.min(...kanten.map(k=>k.top)):r.top;
-  const passt=y=>y>=8&&y+bh<=innerHeight-8&&kanten.every(k=>y+bh<k.top-6||y>k.bottom+6);
-  const wahl=(istKopf(hfEditing.which)
-    ? [unten+10, oben-bh-10, r.bottom+8, r.top-bh-8]
-    : [oben-bh-10, unten+10, r.top-bh-8, r.bottom+8]).find(passt);
-  bar.style.top=(wahl!==undefined?wahl
-    :Math.max(8,Math.min(innerHeight-bh-8,r.bottom+8)))+"px";
-}
-/* Höhe des Kopf-/Fußzeilenbandes ziehen. Das verschiebt die Grenze, ab der
-   Text steht — also den Seitenrand dieses Dokuments. Vorher verschob der Griff
-   nur die Zeile selbst, was aussah, als ließe sich nichts vergrößern.
-   Wird in drawWrite() gebunden, da #hfgrip bei jedem Render neu entsteht. */
-/* Beide Kanten laufen über dieselbe Mechanik. rolle="rand" verschiebt den
-   Seitenrand (wo der Text beginnt), rolle="abstand" den Abstand der Zeile zum
-   Blattrand — in Google Docs sind das die beiden Werte unter „Kopfzeile“. */
-function hfGripDrag(e,rolle){
-  if(!hfEditing)return;
-  e.preventDefault();
-  const grip=$(rolle==="abstand"?"#hfgrip2":"#hfgrip");grip.classList.add("drag");
-  const bar=$("#hfbar");if(bar)bar.classList.add("leise");
-  const k=hfEditing.which,pg=hfEditing.page,d=doc();
-  const fm=ownFmt(d),idx=istKopf(k)?0:2;
-  const z=S.zoom,ph=MM(fm.h)*z,stride=ph+GAP;
-  const paper=$("#paper");
-  const move=ev=>{
-    const y=ev.clientY-paper.getBoundingClientRect().top-pg*stride;
-    let mm=Math.round((istKopf(k)?y:ph-y)/(MM(1)*z));
-    if(rolle==="abstand"){
-      /* Nicht über die Blattkante hinaus und nicht so tief, dass für den Text
-         nichts bleibt; der Seitenrand weicht ohnehin über max(Rand, Band). */
-      mm=Math.min(Math.round(fm.h/3),Math.max(0,mm));
-      if(mm===(istKopf(k)?fm.hd:fm.fd))return;
-      if(istKopf(k))fm.hd=mm;else fm.fd=mm;
-    }else{
-      /* Nicht in die Zeile hinein und nicht so weit, dass kein Text mehr passt */
-      const minMm=Math.ceil(hfBand(d,k,z)/(MM(1)*z));
-      const maxMm=Math.max(minMm,fm.h-fm.m[istKopf(k)?2:0]-30);
-      mm=Math.min(maxMm,Math.max(minMm,mm));
-      if(mm===fm.m[idx])return;
-      fm.m[idx]=mm;
-    }
-    paginate();placeHfGrip();
-    /* Der Wert steht jetzt an der Linie statt in einem Zahlenfeld der Leiste —
-       dasselbe Muster wie beim Lineal (.rulertip). */
-    const tip=$("#hftip");
-    if(tip){
-      const gr=grip.getBoundingClientRect(),pa=paper.getBoundingClientRect();
-      tip.textContent=mm+" mm";
-      tip.style.left=(gr.left-pa.left+gr.width/2)+"px";
-      tip.style.top=(gr.top-pa.top-20)+"px";
-      tip.style.display="block";
-    }
-    const box=$("#hfedit");if(box){const r=hfRect(k,pg);box.style.top=r.top+"px";box.style.minHeight=r.h+"px"}
-  };
-  const up=()=>{
-    document.removeEventListener("mousemove",move);
-    document.removeEventListener("mouseup",up);
-    grip.classList.remove("drag");
-    if(bar)bar.classList.remove("leise");
-    const tip2=document.getElementById("hftip");if(tip2)tip2.style.display="none";
-    commit();setPrintHF();drawHfBar();
-  };
-  document.addEventListener("mousemove",move);
-  document.addEventListener("mouseup",up);
+    <label><input type="checkbox" id="hfErsteCb" ${d.ersteAnders?"checked":""} style="width:auto">${tr("Erste Seite anders")}</label>
+    <label><input type="checkbox" id="hfGeradeCb" ${d.geradeAnders?"checked":""} style="width:auto">${tr("Gerade Seiten anders")}</label>
+    <div class="sep"></div>
+    <label>${tr(kopf?"Von oben":"Von unten")}<input type="number" id="hfAbst" step="${unitOf()==="in"?"0.01":"1"}" value="${toUnit(kopf?f.hd:f.fd)}">${unitAbbr()}</label>
+    <div class="sep"></div>
+    <button class="pill" id="hfWechsel">${tr(kopf?"Zur Fußzeile":"Zur Kopfzeile")}</button>
+    <button class="tb" id="hfMore" title="${esc(tr("Weitere Einstellungen"))}" style="font-size:16px;line-height:1">&#8943;</button>
+    <button class="btn pri hfzu" id="hfZu">${tr("Kopf- und Fußzeile schließen")}</button>`;
+  bar.classList.add("on","hfleiste");
+  const t=$("#tools").getBoundingClientRect();
+  bar.style.left=t.left+"px";bar.style.width=t.width+"px";bar.style.top=t.bottom+"px";
+  const ab=$("#hfAbst");
+  ab.onchange=()=>{
+    const fm=ownFmt(d),v=Math.max(0,Math.min(fm.h/3,fromUnit(ab.value)));
+    fm[kopf?"hd":"fd"]=v;commit();paginate();setPrintHF();
+    const r=hfRect(k,hfEditing.page);box.style.top=r.top+"px";box.style.minHeight=r.h+"px";placeHfGrip()};
+  ab.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();ab.onchange();box.focus()}};
+  const flag=(f2,cb)=>{cb.onchange=()=>{
+    hfEditCommit();const pg=hfEditing.page;
+    d[f2]=cb.checked;if(!d[f2])delete d[f2];commit();paginate();setPrintHF();
+    hfEditClose();hfEditOpen(hfFuerSeite(d,kopf?"hdr":"ftr",pg),pg)}};
+  flag("ersteAnders",$("#hfErsteCb"));flag("geradeAnders",$("#hfGeradeCb"));
 }
 $("#hfbar").addEventListener("mousedown",e=>{if(e.target.closest("button"))e.preventDefault()});
 $("#hfbar").addEventListener("click",e=>{
   if(!hfEditing)return;
-  const d=doc(),k=hfEditing.which;
-  const al=e.target.closest("[data-hfa]");
-  if(al){hfEditCommit();d[k]={...hfOf(d,k),align:al.dataset.hfa};
-    $("#hfedit").style.textAlign=al.dataset.hfa;commit();paginate();drawHfBar();return}
-  /* Die vier Platzhalter lagen als Pillen nebeneinander in der Leiste — in
-     einer wortreichen Sprache wie Deutsch wurde sie dadurch so breit, dass
-     sie umbrach und die Ziehkanten verdeckte. Jetzt ein Flyout über
-     openSubMenu(), den einen Menümechanismus des Programms. */
-  if(e.target.closest("#hfIns")){
-    openSubMenu(e.target.closest("#hfIns"),
-      [["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],
-       ["{title}","Titel einfügen"],["{date}","Datum einfügen"]]
-        .map(([p,n])=>({a:p,label:tr(n),k:p})),
-      a=>{$("#hfedit").focus();document.execCommand("insertText",false,a)});
+  const k=hfEditing.which,box=$("#hfedit");
+  const ph=e.target.closest("[data-hfph]");
+  if(ph){box.focus();document.execCommand("insertHTML",false,hfFeldHtml(ph.dataset.hfph));hfLive();return}
+  if(e.target.closest("#hfSeite")){
+    openSubMenu(e.target.closest("#hfSeite"),
+      [["{page}","Seitenzahl einfügen"],["{pages}","Gesamtseiten einfügen"],["Seite {page} von {pages}","„Seite X von Y“ einfügen"]]
+        .map(([p,n])=>({a:p,label:tr(n),k:p.length<10?p:""})),
+      a=>{box.focus();document.execCommand("insertHTML",false,a==="Seite {page} von {pages}"
+        ?esc(tr("Seite"))+" "+hfFeldHtml("{page}")+" "+esc(tr("von"))+" "+hfFeldHtml("{pages}"):hfFeldHtml(a));hfLive()});
     return;
   }
-  /* Alles Seltene — Ränder, Abstände, Entfernen — steht im Dialog, der das
-     ohnehin alles kann. Die Leiste trägt nur noch, was man beim Schreiben
-     der Zeile braucht. */
+  if(e.target.closest("#hfWechsel")){
+    const pg=hfEditing.page,ziel=hfFuerSeite(doc(),istKopf(k)?"ftr":"hdr",pg);
+    hfEditCommit();hfEditClose();hfEditOpen(ziel,pg);
+    const r=$("#hfedit").getBoundingClientRect();if(r.top<0||r.bottom>innerHeight)$("#hfedit").scrollIntoView({block:"center"});
+    return;
+  }
+  if(e.target.closest("#hfZu")){hfEditCommit();hfEditClose();const ed=$("#editor");ed&&ed.focus();return}
+  /* Selteneres (Höhe, Entfernen, Bildgrößen) steht im Dialog */
   if(e.target.closest("#hfMore")){hfEditCommit();hfEditClose();hfDialog();return}
-  /* Danach in den Dialog: dort stehen Seite, Höhe und Entfernen. */
-  if(e.target.closest("#hfImg")){hfEditCommit();const k=hfEditing.which;hfEditClose();
-    hfBildEinfuegen(k,hfDialog);return}
+  if(e.target.closest("#hfImg")){hfEditCommit();hfEditClose();hfBildEinfuegen(k,hfDialog);return}
 });
 function hfHtml(i,total,ml,mr,z){
   const d=doc(),fm=fmtOf(d);
@@ -22507,7 +22699,7 @@ function hfHtml(i,total,ml,mr,z){
     const v=hfOf(d,hfFuerSeite(d,seite,i));if(!v.on)continue;
     const kante=seite==="hdr"?"top":"bottom",ab=MM(seite==="hdr"?fm.hd:fm.fd)*z;
     const spalte=v.tw?`left:${ml+MM(v.tx||0)*z}px;width:${MM(v.tw)*z}px`:`left:${ml}px;right:${mr}px`;
-    out+=`<div class="hf" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
+    out+=`<div class="hf" data-pg="${i}" data-seite="${seite}" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
     text-align:${v.align};font-size:${fs}px;font-family:${schrift}">${hfInhalt(v,i+1,total)}</div>`;
     out+=hfBilder(v).map(b=>`<img class="hfbild" alt="" src="${hfBildSrc(b.uri)}" style="${kante}:${ab+MM(+b.y||0)*z}px;left:${ml+MM(+b.x||0)*z}px;width:${MM(b.b)*z}px;height:${MM(b.h)*z}px">`).join("");
   }
@@ -22852,7 +23044,7 @@ function hfDialog(){
     b.querySelectorAll("[data-on]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.on;d[k]={...hfOf(d,k),on:el.checked};repaint()});
     b.querySelectorAll("[data-tx]").forEach(el=>el.oninput=()=>{
-      const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value,html:undefined};apply()});
+      const k=el.dataset.tx;d[k]={...hfOf(d,k),text:el.value,html:undefined,za:undefined};apply()});
     b.querySelectorAll("[data-di]").forEach(el=>el.onchange=()=>{
       const k=el.dataset.di,fm=ownFmt(d);
       fm[istKopf(k)?"hd":"fd"]=Math.max(0,Math.min(fm.h/3,fromUnit(el.value)));repaint()});
@@ -22862,7 +23054,7 @@ function hfDialog(){
       fm.m[idx]=Math.max(minMm,Math.min(fm.h-fm.m[idx===0?2:0]-30,fromUnit(el.value)));
       repaint()});
     b.querySelectorAll("[data-al]").forEach(el=>el.onclick=()=>{
-      const [k,a]=el.dataset.al.split(":");d[k]={...hfOf(d,k),align:a};repaint()});
+      const [k,a]=el.dataset.al.split(":");d[k]={...hfOf(d,k),align:a,za:undefined};repaint()});
     b.querySelectorAll("[data-ph]").forEach(el=>el.onclick=()=>{
       const [k,p]=el.dataset.ph.split(":");
       const inp=b.querySelector(`[data-tx="${k}"]`);
@@ -27752,8 +27944,7 @@ page, A5, paperback and US Letter — and you can enter your own dimensions.</p>
 are there to write against and are never printed.</p>`},
 
  {t:"Headers and footers",k:"header;footer;running head;placeholders;from edge",b:`
-<p><b>Double-click the top or bottom margin of the page</b> to edit the header or footer
-where it sits. A small bar appears with alignment, placeholders and the height.</p>
+<p><b>Double-click the top or bottom margin of the page</b> to open the header or footer as in Word: you type right on the page, the rest of the text fades to grey, and a dashed line labelled <b>Header</b> or <b>Footer</b> shows where the text begins. Below the toolbar a bar offers page number, date, title, picture, <b>Different first page</b>, <b>Different odd and even pages</b>, the distance from the paper edge and <b>Go to footer</b>.</p>
 <p>Four placeholders are replaced on every page:</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>the page number</td></tr>
@@ -27761,9 +27952,7 @@ where it sits. A small bar appears with alignment, placeholders and the height.<
 <tr><td><code>{title}</code></td><td>the document title</td></tr>
 <tr><td><code>{date}</code></td><td>today's date</td></tr>
 </table>
-<p><b>The height of the header area</b> is the boundary between it and the body text. Drag
-the handle along that boundary, or type a value in the bar. Making the header taller pushes
-the text down; it never runs underneath it.</p>
+<p><b>Alignment per line:</b> each line can be left, centred or right — with the alignment buttons of the toolbar, as in Word. Bold, italic, underline and strikethrough work too; the other buttons are greyed out here. <b>The area grows with its content</b> and pushes the text down; it never runs underneath it. Enter the distance from the paper edge in the bar (<b>From top</b> or <b>From bottom</b>).</p>
 <p><b>The distance from the paper edge</b> — where the line itself sits — belongs to the
 page format and is set under <b>File &rsaquo; Page format</b>, beside the margins.</p>
 <p><b>Pictures</b> such as a logo go in with the picture button in the bar, or with
@@ -27775,8 +27964,7 @@ header and footer, as in Word — for a letterhead with the logo only on the fir
 cover page without a header. They start out empty; the distances from the edge are shared.</p>
 <p>Inside the line, <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> and <kbd>U</kbd> work as in the text. Formatting and tabs from Word come along: the first tab jumps to the centre, the second to the right edge, as in Word's header style.</p>
 <p><b>Different odd and even pages</b> works the same way: pages 2, 4, 6 … get their own header and footer, for instance with the page number on the outside edge. A different first page takes precedence.</p>
-<p><kbd>Enter</kbd> adds a line. <kbd>Tab</kbd> jumps between header
-and footer. <kbd>Esc</kbd> finishes and keeps the text.</p>`},
+<p><kbd>Enter</kbd> starts a new line, <kbd>Shift</kbd>+<kbd>Enter</kbd> only breaks the line, <kbd>Tab</kbd> inserts a tab. To finish: <b>Close header and footer</b>, <kbd>Esc</kbd> or a double-click in the text.</p>`},
 
  {t:"Page numbers",k:"page numbers;numbering;pagination",b:`
 <p><b>Format &rsaquo; Page numbers</b> switches a plain page number at the foot of each page
@@ -28390,9 +28578,7 @@ beginnen.</p>
 Sie sind nur zur Orientierung beim Schreiben da und werden nicht gedruckt.</p>`},
 
  {t:"Kopf- und Fußzeile",k:"kopfzeile;fußzeile;platzhalter;von rand;höhe",b:`
-<p><b>Ein Doppelklick auf den oberen oder unteren Seitenrand</b> öffnet die Kopf- oder Fußzeile
-genau dort, wo sie steht. Eine kleine Leiste erscheint mit Ausrichtung, Platzhaltern und der
-Höhe.</p>
+<p><b>Ein Doppelklick auf den oberen oder unteren Seitenrand</b> öffnet die Kopf- oder Fußzeile wie in Word: Du schreibst direkt auf der Seite, der übrige Text tritt grau zurück, und eine gestrichelte Linie mit dem Schildchen <b>Kopfzeile</b> bzw. <b>Fußzeile</b> zeigt, wo der Text beginnt. Unter der Symbolleiste steht die Leiste mit Seitenzahl, Datum, Titel, Bild, <b>Erste Seite anders</b>, <b>Gerade Seiten anders</b>, dem Abstand zur Blattkante und <b>Zur Fußzeile</b>.</p>
 <p>Vier Platzhalter werden auf jeder Seite ersetzt:</p>
 <table class="hkeys">
 <tr><td><code>{seite}</code></td><td>die Seitenzahl</td></tr>
@@ -28400,9 +28586,7 @@ Höhe.</p>
 <tr><td><code>{titel}</code></td><td>der Dokumenttitel</td></tr>
 <tr><td><code>{datum}</code></td><td>das heutige Datum</td></tr>
 </table>
-<p><b>Die Höhe des Kopfzeilenbereichs</b> ist die Grenze zwischen ihm und dem Textkörper. Zieh
-den Griff auf dieser Grenze, oder trag einen Wert in der Leiste ein. Eine höhere Kopfzeile
-schiebt den Text nach unten; sie läuft nie darunter hindurch.</p>
+<p><b>Ausrichtung je Zeile:</b> Jede Zeile kann links, zentriert oder rechts stehen — über die Ausrichtungsknöpfe der Symbolleiste, wie in Word. Fett, Kursiv, Unter- und Durchgestrichen wirken ebenso; die übrigen Knöpfe sind hier ausgegraut. <b>Der Bereich wächst mit dem Inhalt</b> und schiebt den Text nach unten; er läuft nie darunter hindurch. Den Abstand der Zeile zur Blattkante trägst du in der Leiste ein (<b>Von oben</b> bzw. <b>Von unten</b>).</p>
 <p><b>Der Abstand zur Papierkante</b> — wo die Zeile selbst sitzt — gehört zum Seitenformat und
 wird unter <b>Datei &rsaquo; Seitenformat</b> neben den Rändern eingestellt.</p>
 <p><b>Bilder</b> wie ein Logo kommen über das Bildsymbol in der Leiste hinein oder über
@@ -28414,8 +28598,7 @@ Fußzeilen, wie in Word — für einen Briefbogen mit Logo nur auf dem ersten Bl
 Deckblatt ohne Kopfzeile. Sie beginnen leer; die Abstände zum Rand gelten für beide.</p>
 <p>In der Zeile wirken Fett, Kursiv und Unterstrichen mit denselben Tasten wie im Text. Formatierung und Tabulatoren aus Word kommen mit: der erste Tab springt zur Mitte, der zweite an den rechten Rand, wie in Words Kopfzeilen-Vorlage.</p>
 <p><b>Gerade Seiten anders</b> arbeitet genauso: Seite 2, 4, 6 … bekommen eigene Kopf- und Fußzeilen, etwa mit der Seitenzahl jeweils außen. Eine eigene erste Seite geht vor.</p>
-<p><kbd>Eingabe</kbd> fügt eine Zeile hinzu. <kbd>Tab</kbd> springt
-zwischen Kopf und Fuß. <kbd>Esc</kbd> beendet und übernimmt.</p>`},
+<p><kbd>Eingabe</kbd> beginnt eine neue Zeile, <kbd>⇧</kbd>+<kbd>Eingabe</kbd> bricht nur um, <kbd>Tab</kbd> setzt einen Tabulator. Beenden: <b>Kopf- und Fußzeile schließen</b>, <kbd>Esc</kbd> oder ein Doppelklick in den Text.</p>`},
 
  {t:"Seitenzahlen",k:"seitenzahlen;nummerierung;paginierung",b:`
 <p><b>Format &rsaquo; Seitenzahlen</b> schaltet eine schlichte Seitenzahl am Fuß jeder Seite
@@ -29052,8 +29235,7 @@ formato.</p>
 página. Están solo para orientarte al escribir y nunca se imprimen.</p>`},
 
  {t:"Encabezados y pies de página",k:"encabezado;pie de página;titulillo;marcadores;distancia al borde",b:`
-<p><b>Haz doble clic en el margen superior o inferior de la página</b> para editar el encabezado
-o el pie donde está. Aparece una pequeña barra con alineación, marcadores y la altura.</p>
+<p><b>Un doble clic en el margen superior o inferior</b> abre el encabezado o el pie de página como en Word: escribes directamente en la página, el resto del texto queda en gris y una línea discontinua con la etiqueta <b>Encabezado</b> o <b>Pie de página</b> muestra dónde empieza el texto. Bajo la barra de herramientas aparece una barra con número de página, fecha, título, imagen, <b>Primera página diferente</b>, <b>Páginas pares e impares diferentes</b>, la distancia al borde del papel e <b>Ir al pie de página</b>.</p>
 <p>Cuatro marcadores se sustituyen en cada página:</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>el número de página</td></tr>
@@ -29061,9 +29243,7 @@ o el pie donde está. Aparece una pequeña barra con alineación, marcadores y l
 <tr><td><code>{title}</code></td><td>el título del documento</td></tr>
 <tr><td><code>{date}</code></td><td>la fecha de hoy</td></tr>
 </table>
-<p><b>La altura del área de encabezado</b> es el límite entre esta y el cuerpo del texto.
-Arrastra el tirador a lo largo de ese límite, o escribe un valor en la barra. Hacer el
-encabezado más alto empuja el texto hacia abajo; nunca queda por debajo.</p>
+<p><b>Alineación por línea:</b> cada línea puede ir a la izquierda, centrada o a la derecha, con los botones de alineación de la barra de herramientas, como en Word. Negrita, cursiva, subrayado y tachado también funcionan; los demás botones aparecen en gris aquí. <b>La zona crece con su contenido</b> y empuja el texto hacia abajo; nunca pasa por debajo. La distancia al borde del papel se escribe en la barra (<b>Desde arriba</b> o <b>Desde abajo</b>).</p>
 <p><b>La distancia al borde del papel</b> —donde se sitúa la propia línea— pertenece al formato
 de página y se ajusta en <b>Archivo &rsaquo; Formato de página</b>, junto a los márgenes.</p>
 <p><b>Las imágenes</b>, como un logotipo, se añaden con el botón de imagen de la barra o
@@ -29076,8 +29256,7 @@ la primera hoja o una portada sin encabezado. Empiezan vacíos; las distancias a
 comunes.</p>
 <p>Dentro de la línea, negrita, cursiva y subrayado funcionan con las mismas teclas que en el texto. El formato y las tabulaciones de Word se conservan: la primera tabulación salta al centro y la segunda al margen derecho, como en el estilo de encabezado de Word.</p>
 <p><b>Páginas pares e impares diferentes</b> funciona igual: las páginas 2, 4, 6… tienen su propio encabezado y pie, por ejemplo con el número de página en el borde exterior. Una primera página diferente tiene prioridad.</p>
-<p><kbd>Intro</kbd> añade una línea. <kbd>Tab</kbd> salta entre
-encabezado y pie. <kbd>Esc</kbd> termina.</p>`},
+<p><kbd>Intro</kbd> empieza una línea nueva, <kbd>Mayús</kbd>+<kbd>Intro</kbd> solo salta de línea, <kbd>Tab</kbd> inserta una tabulación. Para terminar: <b>Cerrar encabezado y pie de página</b>, <kbd>Esc</kbd> o un doble clic en el texto.</p>`},
 
  {t:"Números de página",k:"números de página;numeración;paginación",b:`
 <p><b>Formato &rsaquo; Números de página</b> activa y desactiva un número de página simple al
@@ -29709,8 +29888,7 @@ formato.</p>
 Elas servem apenas de orientação ao escrever e nunca são impressas.</p>`},
 
  {t:"Cabeçalhos e rodapés",k:"cabeçalho;rodapé;título corrente;marcadores;distância da borda",b:`
-<p><b>Dê um duplo clique na margem superior ou inferior da página</b> para editar o cabeçalho ou
-o rodapé onde ele está. Aparece uma pequena barra com alinhamento, marcadores e a altura.</p>
+<p><b>Um clique duplo na margem superior ou inferior</b> abre o cabeçalho ou o rodapé como no Word: você escreve direto na página, o resto do texto fica cinza e uma linha tracejada com a etiqueta <b>Cabeçalho</b> ou <b>Rodapé</b> mostra onde o texto começa. Abaixo da barra de ferramentas aparece uma barra com número de página, data, título, imagem, <b>Primeira página diferente</b>, <b>Páginas pares e impares diferentes</b>, a distância da borda do papel e <b>Ir para o rodapé</b>.</p>
 <p>Quatro marcadores são substituídos em cada página:</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>o número da página</td></tr>
@@ -29718,9 +29896,7 @@ o rodapé onde ele está. Aparece uma pequena barra com alinhamento, marcadores 
 <tr><td><code>{title}</code></td><td>o título do documento</td></tr>
 <tr><td><code>{date}</code></td><td>a data de hoje</td></tr>
 </table>
-<p><b>A altura da área do cabeçalho</b> é o limite entre ela e o corpo do texto. Arraste a alça
-ao longo desse limite, ou digite um valor na barra. Deixar o cabeçalho mais alto empurra o
-texto para baixo; ele nunca fica por baixo.</p>
+<p><b>Alinhamento por linha:</b> cada linha pode ficar à esquerda, centralizada ou à direita, com os botões de alinhamento da barra de ferramentas, como no Word. Negrito, itálico, sublinhado e tachado também funcionam; os outros botões ficam cinza aqui. <b>A área cresce com o conteúdo</b> e empurra o texto para baixo; nunca passa por baixo dele. A distância da borda do papel é digitada na barra (<b>Do topo</b> ou <b>De baixo</b>).</p>
 <p><b>A distância da borda do papel</b> —onde a própria linha fica— pertence ao formato de
 página e é definida em <b>Arquivo &rsaquo; Formato de página</b>, ao lado das margens.</p>
 <p><b>Imagens</b> como um logotipo entram pelo botão de imagem da barra ou por
@@ -29732,8 +29908,7 @@ próprio cabeçalho e rodapé, como no Word — para um papel timbrado com o log
 folha ou uma capa sem cabeçalho. Eles começam vazios; as distâncias da borda são as mesmas.</p>
 <p>Na linha, negrito, itálico e sublinhado funcionam com as mesmas teclas que no texto. A formatação e as tabulações do Word são mantidas: a primeira tabulação vai para o centro e a segunda para a margem direita, como no estilo de cabeçalho do Word.</p>
 <p><b>Páginas pares e ímpares diferentes</b> funciona do mesmo jeito: as páginas 2, 4, 6… têm cabeçalho e rodapé próprios, por exemplo com o número da página na borda externa. Uma primeira página diferente tem prioridade.</p>
-<p><kbd>Enter</kbd> adiciona uma linha. <kbd>Tab</kbd> pula entre
-cabeçalho e rodapé. <kbd>Esc</kbd> conclui.</p>`},
+<p><kbd>Enter</kbd> começa uma nova linha, <kbd>Shift</kbd>+<kbd>Enter</kbd> só quebra a linha, <kbd>Tab</kbd> insere uma tabulação. Para terminar: <b>Fechar cabeçalho e rodapé</b>, <kbd>Esc</kbd> ou um clique duplo no texto.</p>`},
 
  {t:"Números de página",k:"números de página;numeração;paginação",b:`
 <p><b>Formato &rsaquo; Números de página</b> liga e desliga um número de página simples no pé de
@@ -30378,9 +30553,7 @@ avec ce format.</p>
 sur la page. Elles ne servent qu'à s'orienter en écrivant et ne sont jamais imprimées.</p>`},
 
  {t:"En-têtes et pieds de page",k:"en-tête;pied de page;titre courant;marqueurs;distance au bord",b:`
-<p><b>Double-cliquez sur la marge supérieure ou inférieure de la page</b> pour modifier
-l'en-tête ou le pied de page là où il se trouve. Une petite barre apparaît avec l'alignement,
-les marqueurs et la hauteur.</p>
+<p><b>Un double-clic sur la marge du haut ou du bas</b> ouvre l'en-tête ou le pied de page comme dans Word : vous écrivez directement sur la page, le reste du texte passe en gris, et une ligne pointillée marquée <b>En-tête</b> ou <b>Pied de page</b> indique où commence le texte. Sous la barre d'outils, une barre propose numéro de page, date, titre, image, <b>Première page différente</b>, <b>Pages paires et impaires différentes</b>, la distance au bord du papier et <b>Aller au pied de page</b>.</p>
 <p>Quatre marqueurs sont remplacés sur chaque page :</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>le numéro de page</td></tr>
@@ -30388,9 +30561,7 @@ les marqueurs et la hauteur.</p>
 <tr><td><code>{title}</code></td><td>le titre du document</td></tr>
 <tr><td><code>{date}</code></td><td>la date du jour</td></tr>
 </table>
-<p><b>La hauteur de la zone d'en-tête</b> est la limite entre celle-ci et le corps du texte.
-Faites glisser la poignée le long de cette limite, ou tapez une valeur dans la barre. Agrandir
-l'en-tête pousse le texte vers le bas ; il ne passe jamais en dessous.</p>
+<p><b>Alignement par ligne :</b> chaque ligne peut être à gauche, centrée ou à droite — avec les boutons d'alignement de la barre d'outils, comme dans Word. Gras, italique, souligné et barré fonctionnent aussi ; les autres boutons sont grisés ici. <b>La zone grandit avec son contenu</b> et repousse le texte vers le bas ; elle ne passe jamais dessous. La distance au bord du papier se saisit dans la barre (<b>Depuis le haut</b> ou <b>Depuis le bas</b>).</p>
 <p><b>La distance au bord du papier</b> — là où la ligne elle-même se place — appartient au
 format de page et se règle dans <b>Fichier &rsaquo; Format de page</b>, à côté des marges.</p>
 <p><b>Les images</b>, comme un logo, s'ajoutent avec le bouton image de la barre ou avec
@@ -30403,8 +30574,7 @@ logo sur la première feuille seulement, ou une page de garde sans en-tête. Ils
 départ ; les distances au bord sont communes.</p>
 <p>Dans la ligne, gras, italique et souligné s'appliquent avec les mêmes touches que dans le texte. La mise en forme et les tabulations de Word sont conservées : la première tabulation va au centre, la seconde à la marge droite, comme dans le style d'en-tête de Word.</p>
 <p><b>Pages paires et impaires différentes</b> fonctionne de la même façon : les pages 2, 4, 6… ont leurs propres en-tête et pied de page, par exemple avec le numéro de page côté extérieur. Une première page différente a la priorité.</p>
-<p><kbd>Entrée</kbd> ajoute une ligne. <kbd>Tab</kbd> passe de l'en-tête
-au pied de page. <kbd>Échap</kbd> termine.</p>`},
+<p><kbd>Entrée</kbd> commence une nouvelle ligne, <kbd>Maj</kbd>+<kbd>Entrée</kbd> ne fait qu'un saut de ligne, <kbd>Tab</kbd> insère une tabulation. Pour terminer : <b>Fermer l'en-tête et le pied de page</b>, <kbd>Échap</kbd> ou un double-clic dans le texte.</p>`},
 
  {t:"Numéros de page",k:"numéros de page;numérotation;pagination",b:`
 <p><b>Format &rsaquo; Numéros de page</b> active et désactive un simple numéro de page au bas de
@@ -31042,8 +31212,7 @@ formatem.</p>
 stronie. Służą tylko do orientacji podczas pisania i nigdy nie są drukowane.</p>`},
 
  {t:"Nagłówki i stopki",k:"nagłówek;stopka;żywa pagina;znaczniki;odległość od krawędzi",b:`
-<p><b>Kliknij dwukrotnie górny lub dolny margines strony</b>, aby edytować nagłówek lub stopkę
-tam, gdzie się znajduje. Pojawia się mały pasek z wyrównaniem, znacznikami i wysokością.</p>
+<p><b>Dwukrotne kliknięcie górnego lub dolnego marginesu</b> otwiera nagłówek lub stopkę jak w Wordzie: piszesz bezpośrednio na stronie, reszta tekstu szarzeje, a przerywana linia z etykietą <b>Nagłówek</b> lub <b>Stopka</b> pokazuje, gdzie zaczyna się tekst. Pod paskiem narzędzi pojawia się pasek z numerem strony, datą, tytułem, obrazem, <b>Inna pierwsza strona</b>, <b>Inne strony parzyste i nieparzyste</b>, odległością od krawędzi papieru i <b>Do stopki</b>.</p>
 <p>Cztery znaczniki są zastępowane na każdej stronie:</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>numer strony</td></tr>
@@ -31051,9 +31220,7 @@ tam, gdzie się znajduje. Pojawia się mały pasek z wyrównaniem, znacznikami i
 <tr><td><code>{title}</code></td><td>tytuł dokumentu</td></tr>
 <tr><td><code>{date}</code></td><td>dzisiejsza data</td></tr>
 </table>
-<p><b>Wysokość obszaru nagłówka</b> to granica między nim a treścią tekstu. Przeciągnij uchwyt
-wzdłuż tej granicy albo wpisz wartość w pasku. Zwiększenie nagłówka przesuwa tekst w dół; nigdy
-nie wchodzi pod niego.</p>
+<p><b>Wyrównanie każdej linii:</b> każda linia może stać po lewej, na środku lub po prawej — za pomocą przycisków wyrównania na pasku narzędzi, jak w Wordzie. Pogrubienie, kursywa, podkreślenie i przekreślenie też działają; pozostałe przyciski są tu wyszarzone. <b>Obszar rośnie wraz z treścią</b> i przesuwa tekst w dół; nigdy nie wchodzi pod niego. Odległość od krawędzi papieru wpisujesz na pasku (<b>Od góry</b> lub <b>Od dołu</b>).</p>
 <p><b>Odległość od krawędzi papieru</b> — gdzie leży sama linia — należy do formatu strony i
 ustawia się w <b>Plik &rsaquo; Format strony</b>, obok marginesów.</p>
 <p><b>Obrazy</b>, np. logo, wstawia przycisk obrazu na pasku albo <b>Wstaw obraz</b> w oknie
@@ -31065,8 +31232,7 @@ i stopkę, jak w Wordzie — dla papieru firmowego z logo tylko na pierwszym ark
 tytułowej bez nagłówka. Na początku są puste; odległości od krawędzi są wspólne.</p>
 <p>W wierszu pogrubienie, kursywa i podkreślenie działają tymi samymi klawiszami co w tekście. Formatowanie i tabulatory z Worda zostają: pierwszy tabulator przeskakuje na środek, drugi do prawej krawędzi, jak w stylu nagłówka Worda.</p>
 <p><b>Inne strony parzyste i nieparzyste</b> działa tak samo: strony 2, 4, 6… mają własny nagłówek i stopkę, np. z numerem strony przy zewnętrznej krawędzi. Inna pierwsza strona ma pierwszeństwo.</p>
-<p><kbd>Enter</kbd> dodaje wiersz. <kbd>Tab</kbd> przeskakuje między
-nagłówkiem a stopką. <kbd>Esc</kbd> kończy.</p>`},
+<p><kbd>Enter</kbd> zaczyna nową linię, <kbd>Shift</kbd>+<kbd>Enter</kbd> tylko łamie wiersz, <kbd>Tab</kbd> wstawia tabulator. Zakończenie: <b>Zamknij nagłówek i stopkę</b>, <kbd>Esc</kbd> albo dwukrotne kliknięcie w tekst.</p>`},
 
  {t:"Numery stron",k:"numery stron;numeracja;paginacja",b:`
 <p><b>Format &rsaquo; Numery stron</b> włącza i wyłącza zwykły numer strony u dołu każdej
@@ -31694,9 +31860,7 @@ questo formato.</p>
 pagina. Servono solo per orientarsi mentre si scrive e non vengono mai stampati.</p>`},
 
  {t:"Intestazioni e piè di pagina",k:"intestazione;piè di pagina;testatina;segnaposto;distanza dal bordo",b:`
-<p><b>Fai doppio clic sul margine superiore o inferiore della pagina</b> per modificare
-l'intestazione o il piè di pagina dove si trova. Compare una piccola barra con allineamento,
-segnaposto e l'altezza.</p>
+<p><b>Un doppio clic sul margine superiore o inferiore</b> apre l'intestazione o il piè di pagina come in Word: scrivi direttamente sulla pagina, il resto del testo diventa grigio e una linea tratteggiata con l'etichetta <b>Intestazione</b> o <b>Piè di pagina</b> mostra dove inizia il testo. Sotto la barra degli strumenti compare una barra con numero di pagina, data, titolo, immagine, <b>Prima pagina diversa</b>, <b>Pagine pari e dispari diverse</b>, la distanza dal bordo del foglio e <b>Vai al piè di pagina</b>.</p>
 <p>Su ogni pagina vengono sostituiti quattro segnaposto:</p>
 <table class="hkeys">
 <tr><td><code>{page}</code></td><td>il numero di pagina</td></tr>
@@ -31704,9 +31868,7 @@ segnaposto e l'altezza.</p>
 <tr><td><code>{title}</code></td><td>il titolo del documento</td></tr>
 <tr><td><code>{date}</code></td><td>la data di oggi</td></tr>
 </table>
-<p><b>L'altezza dell'area di intestazione</b> è il confine tra essa e il corpo del testo.
-Trascina la maniglia lungo quel confine, o digita un valore nella barra. Alzare l'intestazione
-spinge il testo verso il basso; non passa mai al di sotto.</p>
+<p><b>Allineamento per riga:</b> ogni riga può stare a sinistra, al centro o a destra, con i pulsanti di allineamento della barra degli strumenti, come in Word. Grassetto, corsivo, sottolineato e barrato funzionano allo stesso modo; gli altri pulsanti qui sono in grigio. <b>L'area cresce con il contenuto</b> e spinge il testo verso il basso; non ci passa mai sotto. La distanza dal bordo del foglio si inserisce nella barra (<b>Dall'alto</b> o <b>Dal basso</b>).</p>
 <p><b>La distanza dal bordo della carta</b> — dove si trova la riga stessa — appartiene al
 formato pagina e si imposta in <b>File &rsaquo; Formato pagina</b>, accanto ai margini.</p>
 <p><b>Le immagini</b>, come un logo, si inseriscono con il pulsante immagine della barra o
@@ -31720,8 +31882,7 @@ solo sul primo foglio o una copertina senza intestazione. All'inizio sono vuoti;
 bordo sono comuni.</p>
 <p>Nella riga, grassetto, corsivo e sottolineato funzionano con gli stessi tasti del testo. Formattazione e tabulazioni di Word vengono mantenute: la prima tabulazione va al centro, la seconda al margine destro, come nello stile intestazione di Word.</p>
 <p><b>Pagine pari e dispari diverse</b> funziona allo stesso modo: le pagine 2, 4, 6… hanno intestazione e piè di pagina propri, per esempio con il numero di pagina sul bordo esterno. Una prima pagina diversa ha la precedenza.</p>
-<p><kbd>Invio</kbd> aggiunge una riga. <kbd>Tab</kbd> passa tra
-intestazione e piè di pagina. <kbd>Esc</kbd> conclude.</p>`},
+<p><kbd>Invio</kbd> inizia una nuova riga, <kbd>Maiusc</kbd>+<kbd>Invio</kbd> va solo a capo, <kbd>Tab</kbd> inserisce una tabulazione. Per finire: <b>Chiudi intestazione e piè di pagina</b>, <kbd>Esc</kbd> o un doppio clic nel testo.</p>`},
 
  {t:"Numeri di pagina",k:"numeri di pagina;numerazione;impaginazione",b:`
 <p><b>Formato &rsaquo; Numeri di pagina</b> attiva e disattiva un semplice numero di pagina in
@@ -32700,6 +32861,7 @@ $("#tools").addEventListener("contextmenu",e=>{
    verliert execCommand die Textauswahl. */
 $("#tools").addEventListener("mousedown",e=>{
   if(e.target.closest("#foreBtn,#markBtn,#fBlock,#zabBtn"))e.preventDefault();
+  if(hfEditing&&e.target.closest("[data-cmd]"))e.preventDefault();
 });
 $("#tools").addEventListener("focusin",e=>{
   if(e.target.id==="fFont"){e.target.select();schriftFilter="";schriftMenue()}});
