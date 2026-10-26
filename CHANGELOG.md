@@ -114,6 +114,11 @@ immer genau einen Commit, der sie anfasst.
   davor und danach ergab je eine leere Zeile, die es in Word nicht gibt.
   Die Unterstrich-Linie der Goethe-Fußzeile lief in Georgia über den
   rechten Rand hinaus; in der Dokumentschrift endet sie dort wie in Word.
+- **Formatierung entfernen ohne Auswahl wie in Word** (Toms Frage): steht
+  die Schreibmarke mitten in einem Wort, verliert das ganze Wort seine
+  Zeichenformatierung, die Marke bleibt an ihrer Stelle. Eine Meldung
+  „kein Text ausgewählt“ gibt es bewusst nicht — der Befehl wirkt ohne
+  Auswahl auch auf den Absatz, wie in Word. Hilfe in 7 Sprachen.
 - Umlauf-Prüfung um Zellfarbe, Zellrahmen, Tabellenbreite, Kopfzeile fett
   und Kopfzeilenbild erweitert: Word, OpenDocument, RTF und .doc je 48/48.
   LibreOffice verliert beim RTF-Neuspeichern die Farbe dünner Zellrahmen;

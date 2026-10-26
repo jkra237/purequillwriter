@@ -21273,7 +21273,27 @@ function fliesstext(){
 function formatierungEntfernen(){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
+  /* Ohne Auswahl, die Schreibmarke mitten in einem Wort: wie Word das
+     ganze Wort, danach steht die Marke wieder an derselben Stelle */
+  const sel=getSelection();let zurueck=null;
+  if(sel.rangeCount&&sel.isCollapsed){
+    const r=sel.getRangeAt(0),n=r.startContainer,o=r.startOffset;
+    const wz=/[\p{L}\p{N}_'’-]/u;
+    if(n.nodeType===3&&o>0&&o<n.data.length&&wz.test(n.data[o-1])&&wz.test(n.data[o])){
+      zurueck={n,o,text:n.data};
+      sel.modify("move","backward","word");sel.modify("extend","forward","word");
+      /* „extend word“ nimmt unter Windows das Leerzeichen danach mit */
+      const s=sel.toString(),weg=s.length-s.trimEnd().length;
+      for(let i=0;i<weg;i++)sel.modify("extend","backward","character");
+    }
+  }
   document.execCommand("removeFormat");
+  if(zurueck){
+    /* removeFormat teilt Textknoten neu: die Marke ans Wortende der Auswahl
+       setzen und um den Rest des Wortes zurück */
+    const rest=(zurueck.text.slice(zurueck.o).match(/^[\p{L}\p{N}_'’-]*/u)||[""])[0].length;
+    sel.collapseToEnd();for(let i=0;i<rest;i++)sel.modify("move","backward","character");
+  }
   alsFliesstext(true);
   dirty=true;drawStatus();syncToolbarState();
 }
@@ -27523,7 +27543,7 @@ picker for anything else. The stripe under the button shows what will be used.</
 colour schemes. Apply the highlight first and the text colour afterwards if you want both.</p>
 <p><b>Superscript and subscript</b> sit in the Format menu under <b>Character</b> — for units,
 formulas and for figures you want to set by hand.</p>
-<p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words. Headings and quotes become normal text, and alignment and indentation are reset; lists stay lists.</p>`},
+<p><b>Format &rsaquo; Clear formatting</b> strips character formatting and leaves the words. Headings and quotes become normal text, and alignment and indentation are reset; lists stay lists. Without a selection it works on the word the cursor is in, as in Word.</p>`},
 
  {t:"Paragraphs and headings",k:"heading;paragraph;alignment;indent;line spacing;paragraph spacing",b:`
 <p>The <b>paragraph style</b> box turns the current paragraph into body text, a title, a
@@ -28155,7 +28175,7 @@ dunklen Farbschemata lesbar bleibt. Wer beides will, hebt zuerst hervor und fär
 <p><b>Hochgestellt und tiefgestellt</b> stehen im Format-Menü unter <b>Zeichen</b> — für
 Maßeinheiten, Formeln und für Ziffern, die du von Hand setzen willst.</p>
 <p><b>Format &rsaquo; Formatierung entfernen</b> nimmt die Zeichenauszeichnung weg und lässt
-die Wörter stehen. Überschriften und Zitate werden zu normalem Text, Ausrichtung und Einrückung gehen zurück; Listen bleiben Listen.</p>`},
+die Wörter stehen. Überschriften und Zitate werden zu normalem Text, Ausrichtung und Einrückung gehen zurück; Listen bleiben Listen. Ohne Auswahl gilt es für das Wort, in dem die Schreibmarke steht – wie in Word.</p>`},
 
  {t:"Absätze und Überschriften",k:"überschrift;absatz;ausrichtung;einrücken;zeilenabstand;absatzabstand",b:`
 <p>Das Feld <b>Absatzformat</b> macht aus dem Absatz Fließtext, einen Titel, einen Untertitel
@@ -28813,7 +28833,7 @@ los esquemas de color oscuros. Aplica primero el resaltado y después el color d
 quieres ambos.</p>
 <p><b>Superíndice y subíndice</b> están en el menú Formato, en <b>Carácter</b>: para unidades,
 fórmulas y figuras que quieras componer a mano.</p>
-<p><b>Formato &rsaquo; Borrar formato</b> quita el formato de carácter y deja las palabras. Los títulos y las citas pasan a ser texto normal, y la alineación y la sangría vuelven a su estado inicial; las listas siguen siendo listas.</p>`},
+<p><b>Formato &rsaquo; Borrar formato</b> quita el formato de carácter y deja las palabras. Los títulos y las citas pasan a ser texto normal, y la alineación y la sangría vuelven a su estado inicial; las listas siguen siendo listas. Sin selección, se aplica a la palabra donde está el cursor, como en Word.</p>`},
 
  {t:"Párrafos y títulos",k:"título;párrafo;alineación;sangría;interlineado;espacio entre párrafos",b:`
 <p>El cuadro de <b>estilo de párrafo</b> convierte el párrafo actual en texto normal, un título
@@ -29473,7 +29493,7 @@ de cores escuros. Aplique o realce primeiro e a cor do texto depois, se quiser o
 <p><b>Sobrescrito e subscrito</b> ficam no menu Formato, em <b>Caractere</b>: para unidades,
 fórmulas e figuras que você queira compor à mão.</p>
 <p><b>Formato &rsaquo; Limpar formatação</b> tira a formatação de caractere e deixa as
-palavras. Títulos e citações viram texto normal, e o alinhamento e o recuo voltam ao padrão; as listas continuam sendo listas.</p>`},
+palavras. Títulos e citações viram texto normal, e o alinhamento e o recuo voltam ao padrão; as listas continuam sendo listas. Sem seleção, vale para a palavra em que está o cursor, como no Word.</p>`},
 
  {t:"Parágrafos e títulos",k:"título;parágrafo;alinhamento;recuo;espaçamento entre linhas;espaço entre parágrafos",b:`
 <p>A caixa de <b>estilo de parágrafo</b> transforma o parágrafo atual em texto normal, um título
@@ -30138,7 +30158,7 @@ vous voulez les deux.</p>
 <p><b>Exposant et indice</b> se trouvent dans le menu Format, sous <b>Caractère</b> : pour les
 unités, les formules et les figures que vous voulez composer à la main.</p>
 <p><b>Format &rsaquo; Effacer la mise en forme</b> retire la mise en forme de caractère et
-laisse les mots. Les titres et les citations redeviennent du texte normal, l’alignement et le retrait sont réinitialisés ; les listes restent des listes.</p>`},
+laisse les mots. Les titres et les citations redeviennent du texte normal, l’alignement et le retrait sont réinitialisés ; les listes restent des listes. Sans sélection, elle s’applique au mot où se trouve le curseur, comme dans Word.</p>`},
 
  {t:"Paragraphes et titres",k:"titre;paragraphe;alignement;retrait;interligne;espacement entre paragraphes",b:`
 <p>Le champ <b>style de paragraphe</b> transforme le paragraphe courant en corps de texte, en
@@ -30813,7 +30833,7 @@ dla dowolnego innego. Pasek pod przyciskiem pokazuje, co zostanie użyte.</p>
 schematach kolorów. Zastosuj najpierw wyróżnienie, a potem kolor tekstu, jeśli chcesz obu.</p>
 <p><b>Indeks górny i dolny</b> znajdują się w menu Format, w <b>Znak</b> — do jednostek, wzorów
 i rysunków, które chcesz złożyć ręcznie.</p>
-<p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa. Nagłówki i cytaty stają się zwykłym tekstem, a wyrównanie i wcięcie wracają do domyślnych; listy pozostają listami.</p>`},
+<p><b>Format &rsaquo; Usuń formatowanie</b> zdejmuje formatowanie znaku i zostawia słowa. Nagłówki i cytaty stają się zwykłym tekstem, a wyrównanie i wcięcie wracają do domyślnych; listy pozostają listami. Bez zaznaczenia działa na słowo, w którym stoi kursor – jak w Wordzie.</p>`},
 
  {t:"Akapity i tytuły",k:"tytuł;akapit;wyrównanie;wcięcie;interlinia;odstęp między akapitami",b:`
 <p>Pole <b>styl akapitu</b> zamienia bieżący akapit w tekst podstawowy, tytuł dokumentu,
@@ -31458,7 +31478,7 @@ entrambi.</p>
 <p><b>Apice e pedice</b> si trovano nel menu Formato, sotto <b>Carattere</b>: per unità, formule
 e figure che vuoi comporre a mano.</p>
 <p><b>Formato &rsaquo; Cancella formattazione</b> toglie la formattazione del carattere e lascia
-le parole. Titoli e citazioni tornano testo normale, e allineamento e rientro vengono azzerati; gli elenchi restano elenchi.</p>`},
+le parole. Titoli e citazioni tornano testo normale, e allineamento e rientro vengono azzerati; gli elenchi restano elenchi. Senza selezione vale per la parola in cui si trova il cursore, come in Word.</p>`},
 
  {t:"Paragrafi e titoli",k:"titolo;paragrafo;allineamento;rientro;interlinea;spaziatura tra paragrafi",b:`
 <p>Il campo <b>stile paragrafo</b> trasforma il paragrafo corrente in corpo del testo, titolo
