@@ -500,6 +500,13 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 .wtab{white-space:pre;tab-size:calc(12.7mm * var(--zoom,1))}
 /* Dialog „Absatz“ wie in Word */
 .abdlg{width:min(560px,94vw)}
+/* Schließen-Dialog wie Word: Frage als Überschrift, Symbol links */
+.cddlg{width:min(460px,94vw)}
+.cdkopf{display:flex;gap:14px;align-items:flex-start}
+.cdico{flex:none;color:var(--ink-soft);margin-top:2px}
+.cddlg h3.cdfrage{margin:0 0 6px;padding:0;border:0;font-size:16px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink);font-family:var(--ui)}
+.cdfolge{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+.cdnotiz{margin:8px 0 0;font-size:12.5px;line-height:1.5;color:var(--ink-soft)}
 .abreiter{display:flex;gap:2px;padding:0 18px;border-bottom:1px solid var(--rule)}
 .abreiter span{padding:6px 12px;font-size:13px;border:1px solid var(--rule);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;background:var(--paper);margin-bottom:-1px}
 .abgr{font-size:12.5px;font-weight:600;color:var(--ink);margin:14px 0 6px;padding-bottom:3px;border-bottom:1px solid var(--rule)}
@@ -2416,6 +2423,10 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Änderungen an „{t}“ speichern?":"Save changes to “{t}”?",
+  "„{t}“ vor dem Schließen speichern?":"Save “{t}” before closing?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"If you don't save, the changes since {zeit} will be lost.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"The document isn't a file yet. If you don't save, it will be removed from PureQuill.",
   "Zuerst in einen Absatz klicken.":"Click into a paragraph first.",
   "Zeilen- und Absatzabstand":"Line and Paragraph Spacing",
   "Zeilenabstandsoptionen…":"Line Spacing Options…",
@@ -3376,6 +3387,10 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Änderungen an „{t}“ speichern?":"Enregistrer les modifications de « {t} » ?",
+  "„{t}“ vor dem Schließen speichern?":"Enregistrer « {t} » avant de fermer ?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Sans enregistrement, les modifications depuis {zeit} seront perdues.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"Le document n'est pas encore un fichier. Sans enregistrement, il sera retiré de PureQuill.",
   "Zuerst in einen Absatz klicken.":"Cliquez d'abord dans un paragraphe.",
   "Zeilen- und Absatzabstand":"Interligne et espacement de paragraphe",
   "Zeilenabstandsoptionen…":"Options d'interligne…",
@@ -4336,6 +4351,10 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Änderungen an „{t}“ speichern?":"¿Guardar los cambios de «{t}»?",
+  "„{t}“ vor dem Schließen speichern?":"¿Guardar «{t}» antes de cerrar?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Si no guardas, se perderán los cambios desde las {zeit}.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"El documento aún no es un archivo. Si no lo guardas, se quitará de PureQuill.",
   "Zuerst in einen Absatz klicken.":"Haz clic primero en un párrafo.",
   "Zeilen- und Absatzabstand":"Espaciado entre líneas y párrafos",
   "Zeilenabstandsoptionen…":"Opciones de interlineado…",
@@ -5296,6 +5315,10 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Änderungen an „{t}“ speichern?":"Salvar as alterações em “{t}”?",
+  "„{t}“ vor dem Schließen speichern?":"Salvar “{t}” antes de fechar?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Sem salvar, as alterações desde {zeit} serão perdidas.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"O documento ainda não é um arquivo. Sem salvar, ele será removido do PureQuill.",
   "Zuerst in einen Absatz klicken.":"Clique primeiro em um parágrafo.",
   "Zeilen- und Absatzabstand":"Espaçamento de Linha e Parágrafo",
   "Zeilenabstandsoptionen…":"Opções de Espaçamento de Linha…",
@@ -6256,6 +6279,10 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Änderungen an „{t}“ speichern?":"Zapisać zmiany w „{t}”?",
+  "„{t}“ vor dem Schließen speichern?":"Zapisać „{t}” przed zamknięciem?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Bez zapisania zmiany od {zeit} zostaną utracone.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"Dokument nie jest jeszcze plikiem. Bez zapisania zostanie usunięty z PureQuill.",
   "Zuerst in einen Absatz klicken.":"Najpierw kliknij w akapit.",
   "Zeilen- und Absatzabstand":"Odstępy między wierszami i akapitami",
   "Zeilenabstandsoptionen…":"Opcje interlinii…",
@@ -7216,6 +7243,10 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Änderungen an „{t}“ speichern?":"Salvare le modifiche a «{t}»?",
+  "„{t}“ vor dem Schließen speichern?":"Salvare «{t}» prima di chiudere?",
+  "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Senza salvare, le modifiche dalle {zeit} andranno perse.",
+  "Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.":"Il documento non è ancora un file. Senza salvare, verrà rimosso da PureQuill.",
   "Zuerst in einen Absatz klicken.":"Fai prima clic in un paragrafo.",
   "Zeilen- und Absatzabstand":"Interlinea e spaziatura paragrafo",
   "Zeilenabstandsoptionen…":"Opzioni interlinea…",
@@ -8565,36 +8596,18 @@ function closeDoc(id){
   const speichernFuer=async()=>{const keep=S.active;S.active=id;
     let ok=false;try{ok=await speichern()}finally{if(S.docs.some(x=>x.id===keep))S.active=keep}
     return ok};
-  if(offen){
-    overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
-      <p style="margin:0;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-        ${PL(`Die Änderungen an „${esc(d.title)}“ sind noch nicht in ${esc(d.ziel.name)} gespeichert.`,
-          `The changes to "${esc(d.title)}" have not been saved to ${esc(d.ziel.name)} yet.`,
-          `Les modifications de « ${esc(d.title)} » ne sont pas encore enregistrées dans ${esc(d.ziel.name)}.`,
-          `Los cambios de "${esc(d.title)}" aún no se han guardado en ${esc(d.ziel.name)}.`,
-          `As alterações em "${esc(d.title)}" ainda não foram salvas em ${esc(d.ziel.name)}.`,
-          `Zmiany w „${esc(d.title)}” nie zostały jeszcze zapisane w ${esc(d.ziel.name)}.`,
-          `Le modifiche a « ${esc(d.title)} » non sono ancora salvate in ${esc(d.ziel.name)}.`)}</p>
-      </div>
-      <div class="rowend">
-        <button class="btn" style="margin-right:auto" id="cdNo">${tr("Nicht speichern")}</button>
-        <button class="btn" id="cdCancel">${tr("Abbrechen")}</button>
-        <button class="btn pri" id="cdSave">${SPEICHERN()}</button></div></div>`);
-    $("#cdCancel").onclick=closeOvl;
-    $("#cdNo").onclick=()=>{closeOvl();kill()};
-    $("#cdSave").onclick=async()=>{if(await speichernFuer()){closeOvl();kill()}};
-    return;
-  }
-  overlay(`<div class="modal"><h3>${tr("Dokument schließen")}</h3><div class="pad">
-    <p style="margin:0 0 9px;font-family:Georgia,serif;font-size:14px;line-height:1.55">
-      ${PL(`„${esc(d.title)}" ist nicht leer. Beim Schließen wird das Dokument entfernt.`,
-        `"${esc(d.title)}" is not empty. Closing removes the document.`,
-        `« ${esc(d.title)} » n'est pas vide. La fermeture supprime le document.`,
-        `"${esc(d.title)}" no está vacío. Al cerrarlo se elimina el documento.`,
-        `"${esc(d.title)}" não está vazio. Ao fechar, o documento é removido.`,
-        `„${esc(d.title)}" nie jest pusty. Zamknięcie usuwa dokument.`,
-        `« ${esc(d.title)} » non è vuoto. Chiudendolo, il documento viene rimosso.`)}</p>
-    ${anker?`<p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">
+  /* Wie Word (Toms Wahl): eine Form für beide Fälle — die Frage als
+     Überschrift, ein Satz zur Folge, Knöpfe in Words Reihenfolge Speichern ·
+     Nicht speichern · Abbrechen; Speichern ist der Standard (Enter), nie
+     mehr das Schließen. Ohne Datei fragt Speichern danach nach dem Ort. */
+  const titel=esc(tr(d.title)),mitDatei=!!(offen&&d.ziel);
+  const frage=(mitDatei?tr("Änderungen an „{t}“ speichern?"):tr("„{t}“ vor dem Schließen speichern?")).replace("{t}",titel);
+  const folge=mitDatei?tr("Ohne Speichern gehen die Änderungen seit {zeit} verloren.").replace("{zeit}",esc(gesichertUm(d.ziel.at||Date.now()))):
+    tr("Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.");
+  overlay(`<div class="modal cddlg"><div class="pad"><div class="cdkopf">
+    <span class="cdico" aria-hidden="true">${ICOSZ('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15.5h6"/>',26,1.4)}</span>
+    <div><h3 class="cdfrage">${frage}</h3><p class="cdfolge">${folge}</p>
+    ${anker?`<p class="cdnotiz">
       ${PL(`${anker}&nbsp;Notiz${anker>1?"en sind":" ist"} mit Stellen darin verknüpft.
       ${anker>1?"Sie bleiben":"Sie bleibt"} auf der Pinnwand erhalten und ${anker>1?"verlieren":"verliert"} nur die Verknüpfung.`,
         `${anker} note${anker>1?"s are":" is"} linked to spots in this document.
@@ -8608,17 +8621,15 @@ function closeDoc(id){
         `${anker}&nbsp;notatk${anker>1?"i są":"a jest"} powiązan${anker>1?"e":"a"} z miejscami w tym dokumencie.
         ${anker>1?"Pozostają":"Pozostaje"} na tablicy i ${anker>1?"tracą":"traci"} tylko powiązanie.`,
         `${anker}&nbsp;${anker>1?"note sono collegate":"nota è collegata"} a punti di questo documento.
-        ${anker>1?"Restano":"Resta"} nella bacheca e ${anker>1?"perdono":"perde"} solo il collegamento.`)}</p>`:""}
-    </div>
+        ${anker>1?"Restano":"Resta"} nella bacheca e ${anker>1?"perdono":"perde"} solo il collegamento.`)}</p>`:""}</div></div></div>
     <div class="rowend">
-      <button class="btn" style="margin-right:auto" id="cdSave">${tr("Vorher speichern")}</button>
-      <button class="btn" id="cdCancel">${tr("Abbrechen")}</button>
-      <button class="btn pri" id="cdOk">${tr("Schließen")}</button></div></div>`);
+      <button class="btn pri" id="cdSave">${SPEICHERN()}</button>
+      <button class="btn" id="cdNo">${tr("Nicht speichern")}</button>
+      <button class="btn" id="cdCancel">${tr("Abbrechen")}</button></div></div>`);
   $("#cdCancel").onclick=closeOvl;
-  /* Speichert und schließt dann — vorher legte „Vorher speichern“ nur eine
-     Datei an und ließ den Dialog offen. */
+  $("#cdNo").onclick=()=>{closeOvl();kill()};
   $("#cdSave").onclick=async()=>{if(await speichernFuer()){closeOvl();kill()}};
-  $("#cdOk").onclick=()=>{closeOvl();kill()};
+  $("#cdSave").focus();
 }
 $("#tabbar").onclick=e=>{
   const c=e.target.closest("[data-close]");
