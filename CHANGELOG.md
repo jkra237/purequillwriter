@@ -119,6 +119,35 @@ immer genau einen Commit, der sie anfasst.
   Zeichenformatierung, die Marke bleibt an ihrer Stelle. Eine Meldung
   „kein Text ausgewählt“ gibt es bewusst nicht — der Befehl wirkt ohne
   Auswahl auch auf den Absatz, wie in Word. Hilfe in 7 Sprachen.
+- **„Notiz einfügen“ neu gestaltet** (Toms Wahl „A“, bisher Rechtsklick ›
+  „Notiz anheften“): Das Fenster hatte ein einziges Feld „Notiz suchen oder
+  neue anlegen“ — man wusste nicht, ob man sucht oder schreibt, der Text
+  wurde nur der Titel, Knöpfe fehlten. Jetzt wie „Kommentar einfügen“ in
+  Word: oben die markierte Stelle, darunter ein Schreibfeld, Farbwahl,
+  Abbrechen/Notiz einfügen (auch Strg+Enter); eine vorhandene Notiz wählt
+  man über den aufklappbaren Teil „Vorhandene Notiz mit dieser Stelle verknüpfen“. „1 Stelle“
+  statt „1 Stellen“. Hilfe in 7 Sprachen.
+- **Notiz anheften zerstörte Tabellen** (Toms Goethe-Checkliste): Ließ sich
+  die Markierung nicht in einem Stück umschließen (etwa bis in die nächste
+  Zelle, wie nach einem Dreifachklick), schnitt der Rückfall den Inhalt
+  heraus und setzte ihn samt Zellen in die Markierung. Jetzt bekommt jedes
+  Textstück im Bereich seine eigene Markierung, der Text bleibt, wie er war;
+  Fortsetzungsstücke (data-forts) zählen nicht als eigene Stelle.
+- **Angeheftete Stellen nur beim Zeigen farbig** (Toms Wunsch: viele
+  Notizen machten den Text unübersichtlich): Mit Notizen am Seitenrand ist
+  eine Stelle nur farbig, solange die Maus auf ihrer Notiz steht oder die
+  Notiz gewählt ist. „Ansicht › Markierungen immer zeigen“ (`S.anchImmer`)
+  färbt sie dauerhaft; ohne Randspalte sind sie wie bisher immer zu sehen.
+  Ersetzt „Markierungen im Text“. Hilfe in 7 Sprachen.
+- **Randnotizen: „Lösen“ und „Löschen“ in der Oberflächenschrift** statt
+  Schreibmaschinenschrift (wirkte alt), mit Großbuchstaben und dezenter
+  Hover-Fläche.
+- **Schreibmaschinenschrift überall durch die Oberflächenschrift ersetzt**
+  (Tom: „durchgehend“): Tastenkürzel in Menüs, Zähler, Abschnittstitel in
+  Einstellungen und Menüs, Seitenzahlen im Inhaltsverzeichnis, Notizangaben
+  u. a. — über die Variable `--mono`, die jetzt die Oberflächenschrift
+  trägt. Zahlen in gleicher Breite (tabular-nums), wo sie hochzählen; echte
+  Festbreite (`--code`) nur noch für Code in der Hilfe.
 - Umlauf-Prüfung um Zellfarbe, Zellrahmen, Tabellenbreite, Kopfzeile fett
   und Kopfzeilenbild erweitert: Word, OpenDocument, RTF und .doc je 48/48.
   LibreOffice verliert beim RTF-Neuspeichern die Farbe dünner Zellrahmen;

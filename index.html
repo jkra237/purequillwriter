@@ -15,8 +15,13 @@
      ein sattes Rot verschwindet dort sonst im Untergrund — und brauchen dann
      dunkle statt weißer Schrift auf der hervorgehobenen Stelle. */
   --err:#C0392B; --on-err:#FFFFFF;
+  /* Kleine Bedienbeschriftungen (Kürzel, Zähler, Abschnittstitel) standen bis
+     2026-10 in Schreibmaschinenschrift — wirkte alt (Tom). Jetzt dieselbe
+     Oberflächenschrift wie alles andere; --mono bleibt als Name, damit die
+     Stellen nicht einzeln umziehen. Echte Festbreite nur noch für Code. */
+  --mono:"Segoe UI",system-ui,sans-serif;
   /* Cascadia unter Windows 11, SF Mono auf dem Mac; Consolas bleibt Rückfall */
-  --mono:ui-monospace,"Cascadia Mono","Segoe UI Mono","SF Mono",Menlo,Consolas,monospace;
+  --code:ui-monospace,"Cascadia Mono","Segoe UI Mono","SF Mono",Menlo,Consolas,monospace;
   --ui:"Segoe UI",system-ui,sans-serif;
   --radius:6px;      /* Bedienelemente */
   --radius-lg:12px;  /* Dialoge */
@@ -591,6 +596,8 @@ body.hfmode #editor{opacity:.45;transition:opacity .18s}
 .zoomctl input{width:48px;text-align:center;border:none;background:none;outline:none;
   font-family:var(--mono);font-size:11px;color:var(--ink);padding:2px 0}
 .zoomctl input:focus{background:var(--chrome-2);border-radius:2px}
+/* Zahlen in gleicher Breite, damit Zähler beim Hochzählen nicht wackeln */
+.zoomctl span,.toc-num,.toc-pg,.repn,.spellcount,.storecount,.imgbar .pct,.sheetpage .pn,.hist div span{font-variant-numeric:tabular-nums}
 .zoomctl span{font-family:var(--mono);font-size:11px;color:var(--ink-soft);min-width:40px;text-align:center}
 .fmtgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:11px}
 .fmtopt{border:1px solid var(--rule);border-radius:var(--radius);padding:8px 10px;text-align:left;background:var(--paper)}
@@ -1400,7 +1407,7 @@ body.focus .outline{display:none}
 .helpbody ul,.helpbody ol{margin:0 0 11px;padding-left:20px;font-size:13.5px;line-height:1.62}
 .helpbody li{margin-bottom:4px}
 .helpbody a{color:var(--stamp);cursor:pointer;text-decoration:underline}
-.helpbody code{font-family:var(--mono);font-size:12px;background:var(--chrome-2);
+.helpbody code{font-family:var(--code);font-size:12px;background:var(--chrome-2);
   padding:1px 4px;border-radius:3px}
 .helpbody kbd{font-family:var(--ui);font-size:11px;border:1px solid var(--rule);
   border-bottom-width:2px;border-radius:4px;padding:1px 5px;background:var(--chrome-2);
@@ -1603,6 +1610,12 @@ body.focus .outline{display:none}
 .anch{background:var(--ab,rgba(140,59,46,.22));border-bottom:2px solid var(--ac,#8C3B2E);cursor:pointer;
   border-radius:2px;padding:0 1px}
 .anch.hot{outline:2px solid var(--ac,#8C3B2E);outline-offset:1px}
+/* Mit Notizen am Seitenrand ist die Stelle nur farbig, solange die Maus auf
+   ihrer Notiz steht oder die Notiz gewählt ist (Toms Wunsch: bei vielen
+   Notizen wurde der Text unübersichtlich). Rand und Innenabstand bleiben
+   als durchsichtige Fläche — so springt beim Zeigen nichts. */
+#editor.anchleise .anch:not(.hot):not(.zeig){background:transparent;border-bottom-color:transparent}
+#editor .anch.zeig{background:var(--ab,rgba(140,59,46,.22));border-bottom-color:var(--ac,#8C3B2E)}
 /* Überlappende Word-Kommentare teilen eine Markierung in aneinanderstoßende
    oder verschachtelte Stücke; ohne das riss der Innenabstand Wörter
    sichtbar auseinander („Drit ter“). */
@@ -1621,10 +1634,13 @@ body.focus .outline{display:none}
 .acard.hot{box-shadow:0 0 0 2px var(--stamp),0 4px 14px rgba(0,0,0,.28)}
 .acard .ab ul,.acard .ab ol{padding-left:1.2em;margin:0 0 .4em}
 .acard .ab p{margin:0 0 .4em}
-.acard .af{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--mono);
-  font-size:11px;opacity:.65}
-.acard .af button{color:inherit;padding:0 3px}
-.acard .af button:hover{color:#8C3B2E;opacity:1}
+/* Fußzeile der Randnotiz in der Oberflächenschrift wie die übrige
+   Bedienung (bis 2026-10 Schreibmaschinenschrift — wirkte alt, Tom) */
+.acard .af{display:flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--ui);
+  font-size:12px;color:rgba(34,36,42,.72)}
+.acard .af button{color:inherit;padding:2px 6px;border-radius:4px;font:inherit}
+.acard .af button::first-letter{text-transform:uppercase}
+.acard .af button:hover{color:#22242A;background:rgba(0,0,0,.08)}
 .acard .nav{display:flex;align-items:center;gap:3px}
 .anchbadge{position:absolute;left:12px;top:-1px;font-family:var(--mono);font-size:11px;
   background:rgba(0,0,0,.14);border-radius:0 0 3px 3px;padding:1px 6px}
@@ -1795,6 +1811,20 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   --ink:#000;--ink-soft:#333;--ink-faint:#767676;
   --rule:#999;--stamp:#1A4E8A;--on-stamp:#fff;--err:#B00;color:#000}
 .cmdlist{max-height:340px;overflow:auto}
+/* Notiz einfügen (linkSelection) */
+.nzdlg{width:min(440px,94vw)}
+.nzstelle{border-left:3px solid;padding:2px 0 2px 10px;margin:0 0 10px;color:var(--ink-soft);font-style:italic;
+  font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.nzdlg textarea{width:100%;resize:vertical;min-height:84px}
+.nzfarben{display:flex;gap:7px;margin:10px 0 2px}
+.nzf{width:20px;height:20px;border-radius:50%;border:1px solid rgba(0,0,0,.2);padding:0;cursor:pointer}
+.nzf.on{outline:2px solid var(--ink);outline-offset:2px}
+.nzvorh{background:none;border:0;padding:8px 0 0;color:var(--stamp);cursor:pointer;font:inherit;font-size:13px}
+.nzvorh span{display:inline-block;transition:transform .15s}.nzvorh.auf span{transform:rotate(90deg)}
+#nzListe{margin-top:8px;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+#nzListe input{border:0;border-bottom:1px solid var(--rule);border-radius:0;width:100%}
+#nzListe .cmdlist{max-height:180px}
+.nzleer{padding:10px 13px;color:var(--ink-soft);font-size:13px}
 .cmd{display:flex;align-items:center;gap:11px;padding:8px 13px;cursor:pointer;border-bottom:1px solid var(--rule)}
 .cmd:last-child{border-bottom:none}
 .cmd.on{background:var(--chrome)}
@@ -2435,6 +2465,12 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Markierungen immer zeigen":"Always show highlights",
+  "Notiz einfügen":"Insert note",
+  "Notiz schreiben …":"Write a note…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Link an existing note to this passage",
+  "Notiz eingefügt":"Note inserted",
+  "Keine passende Notiz.":"No matching note.",
   "Änderungen an „{t}“ speichern?":"Save changes to “{t}”?",
   "„{t}“ vor dem Schließen speichern?":"Save “{t}” before closing?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"If you don't save, the changes since {zeit} will be lost.",
@@ -3399,6 +3435,12 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Markierungen immer zeigen":"Toujours afficher les surlignages",
+  "Notiz einfügen":"Insérer une note",
+  "Notiz schreiben …":"Écrire une note…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Lier une note existante à ce passage",
+  "Notiz eingefügt":"Note insérée",
+  "Keine passende Notiz.":"Aucune note correspondante.",
   "Änderungen an „{t}“ speichern?":"Enregistrer les modifications de « {t} » ?",
   "„{t}“ vor dem Schließen speichern?":"Enregistrer « {t} » avant de fermer ?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Sans enregistrement, les modifications depuis {zeit} seront perdues.",
@@ -4363,6 +4405,12 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Markierungen immer zeigen":"Mostrar siempre los resaltados",
+  "Notiz einfügen":"Insertar nota",
+  "Notiz schreiben …":"Escribe una nota…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Vincular una nota existente a este pasaje",
+  "Notiz eingefügt":"Nota insertada",
+  "Keine passende Notiz.":"Ninguna nota coincide.",
   "Änderungen an „{t}“ speichern?":"¿Guardar los cambios de «{t}»?",
   "„{t}“ vor dem Schließen speichern?":"¿Guardar «{t}» antes de cerrar?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Si no guardas, se perderán los cambios desde las {zeit}.",
@@ -5327,6 +5375,12 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Markierungen immer zeigen":"Sempre mostrar destaques",
+  "Notiz einfügen":"Inserir nota",
+  "Notiz schreiben …":"Escreva uma nota…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Vincular uma nota existente a este trecho",
+  "Notiz eingefügt":"Nota inserida",
+  "Keine passende Notiz.":"Nenhuma nota corresponde.",
   "Änderungen an „{t}“ speichern?":"Salvar as alterações em “{t}”?",
   "„{t}“ vor dem Schließen speichern?":"Salvar “{t}” antes de fechar?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Sem salvar, as alterações desde {zeit} serão perdidas.",
@@ -6291,6 +6345,12 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Markierungen immer zeigen":"Zawsze pokazuj zaznaczenia",
+  "Notiz einfügen":"Wstaw notatkę",
+  "Notiz schreiben …":"Napisz notatkę…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Powiąż istniejącą notatkę z tym fragmentem",
+  "Notiz eingefügt":"Notatka wstawiona",
+  "Keine passende Notiz.":"Brak pasującej notatki.",
   "Änderungen an „{t}“ speichern?":"Zapisać zmiany w „{t}”?",
   "„{t}“ vor dem Schließen speichern?":"Zapisać „{t}” przed zamknięciem?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Bez zapisania zmiany od {zeit} zostaną utracone.",
@@ -7255,6 +7315,12 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Markierungen immer zeigen":"Mostra sempre le evidenziazioni",
+  "Notiz einfügen":"Inserisci nota",
+  "Notiz schreiben …":"Scrivi una nota…",
+  "Vorhandene Notiz mit dieser Stelle verknüpfen":"Collega una nota esistente a questo passaggio",
+  "Notiz eingefügt":"Nota inserita",
+  "Keine passende Notiz.":"Nessuna nota corrispondente.",
   "Änderungen an „{t}“ speichern?":"Salvare le modifiche a «{t}»?",
   "„{t}“ vor dem Schließen speichern?":"Salvare «{t}» prima di chiudere?",
   "Ohne Speichern gehen die Änderungen seit {zeit} verloren.":"Senza salvare, le modifiche dalle {zeit} andranno perse.",
@@ -10089,7 +10155,7 @@ function drawNotes(){
 }
 function findNote(id){return S.notes.find(x=>x.id===id)||null}
 function anchorsInDoc(id,d){const t=document.createElement("div");t.innerHTML=(d||doc()).html||"";
-  return t.querySelectorAll('.anch[data-n="'+id+'"]').length}
+  return t.querySelectorAll('.anch[data-n="'+id+'"]:not([data-forts])').length}
 /* Platz für eine neue Notiz: das erste freie Rasterfeld von oben links.
    Vorher wurde nach Array-Index gerechnet, wodurch die zwanzigste Notiz
    zwangsläufig ganz unten landete — auch wenn oben längst alles frei war,
@@ -11482,7 +11548,7 @@ function commandList(){
   add("Notiz","Markierte Stelle mit Notiz verknüpfen",kz("notizHeft"),linkSelection);
   add("Notiz","Notizen am Seitenrand umschalten","",()=>{S.showCol=!S.showCol;save();
     if(S.mode==="write")drawAnchors()});
-  add("Notiz","Markierungen im Text umschalten","",()=>{S.showAnchMarks=S.showAnchMarks===false;save();
+  add("Notiz","Markierungen immer zeigen","",()=>{S.anchImmer=!S.anchImmer;save();
     if(S.mode==="write")drawAnchors()});
   [["all","Alle"],["doc","Im ausgewählten Dokument"],["free","Ohne Verknüpfung"]].forEach(([k,n])=>
     add("Notiz",tr("Pinnwand filtern: ")+tr(n),"",()=>{S.noteFilter=k;save();setMode("notes")}));
@@ -19240,7 +19306,7 @@ async function alleDatenWeg(){
    damit die Migrationen die fehlenden Einstellungen wie beim ersten Start
    ergänzen. */
 const WERK_ANSICHT={zoom:1,fitPage:false,guides:true,showCol:true,marks:false,gsort:"alpha",mode:"write"};
-const WERK_WEG=["noteFilter","noteView","showAnchMarks","sideWidth","sideMax","outlineWidth","outlineOpen","memoOpen","zoomVorFit"];
+const WERK_WEG=["noteFilter","noteView","showAnchMarks","anchImmer","sideWidth","sideMax","outlineWidth","outlineOpen","memoOpen","zoomVorFit"];
 function werkszustand(){
   flush();
   S.settings=standardEinstellungen();
@@ -19845,7 +19911,7 @@ function viewMenu(){
     <div class="msep"></div>
     <div class="mlabel">${tr("Notizen")}</div>
     <button class="mi" data-v="col"><span class="chk">${c(S.showCol)}</span>${tr("Notizen am Seitenrand")}</button>
-    <button class="mi" data-v="amark"><span class="chk">${c(S.showAnchMarks!==false)}</span>${tr("Markierungen im Text")}</button>
+    <button class="mi" data-v="amark"><span class="chk">${c(!!S.anchImmer)}</span>${tr("Markierungen immer zeigen")}</button>
     <div class="msep"></div>
     <div class="mlabel">${tr("Darstellung")}</div>
     <button class="mi" data-v="focus"><span class="chk"></span>${tr("Fokusmodus")}<span class="k">${kz("fokus")}</span></button>
@@ -19872,7 +19938,7 @@ function viewMenu(){
     if(a==="guides"){S.guides=!S.guides;save();if(S.mode==="write")paginate()}
     if(a==="outline")toggleOutline();
     if(a==="col"){S.showCol=!S.showCol;save();if(S.mode==="write")drawAnchors()}
-    if(a==="amark"){S.showAnchMarks=S.showAnchMarks===false;save();if(S.mode==="write")drawAnchors()}
+    if(a==="amark"){S.anchImmer=!S.anchImmer;save();if(S.mode==="write")drawAnchors()}
     if(a==="dim"){S.settings.dimUi=!S.settings.dimUi;save();
       if(!S.settings.dimUi)document.body.classList.remove("typing")}
     if(a==="marks"){S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark()}}
@@ -20050,7 +20116,7 @@ function contextMenu(e){
     ${onHeading?`<button class="mi" data-c="tocvis"><span class="chk"></span>${headingHidden
       ?tr("Im Inhaltsverzeichnis einblenden"):tr("Im Inhaltsverzeichnis ausblenden")}</button>`:""}
     <div class="msep"></div>
-    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz anheften")}<span class="k">${kz("notizHeft")}</span></button>
+    <button class="mi" data-c="link" ${hasSel?"":"disabled"}><span class="chk"></span>${tr("Notiz einfügen")}&hellip;<span class="k">${kz("notizHeft")}</span></button>
     ${onAnch?`<button class="mi" data-c="goto"><span class="chk"></span>${tr("Notiz hervorheben")}</button>
       <button class="mi" data-c="unlink"><span class="chk"></span>${tr("Verknüpfung lösen")}</button>`:""}
     <div class="msep"></div>
@@ -20192,13 +20258,13 @@ document.addEventListener("mousedown",e=>{
 let hotNote=null,curOcc={},anchTimer=null;
 const hex2rgba=(h,a)=>{const n=parseInt(h.slice(1),16);
   return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
-function spansOf(id){const ed=$("#editor");return ed?[...ed.querySelectorAll('.anch[data-n="'+id+'"]')]:[]}
+function spansOf(id){const ed=$("#editor");return ed?[...ed.querySelectorAll('.anch[data-n="'+id+'"]:not([data-forts])')]:[]}
 function anchoredIds(){const ed=$("#editor");if(!ed)return[];
   const out=[];ed.querySelectorAll(".anch").forEach(s=>{if(!out.includes(s.dataset.n))out.push(s.dataset.n)});
   return out.filter(id=>findNote(id))}
 function anchorCount(id){let c=0;S.docs.forEach(d=>{
   const t=document.createElement("div");t.innerHTML=d.html||"";
-  c+=t.querySelectorAll('.anch[data-n="'+id+'"]').length});return c}
+  c+=t.querySelectorAll('.anch[data-n="'+id+'"]:not([data-forts])').length});return c}
 function queueAnchors(){clearTimeout(anchTimer);anchTimer=setTimeout(drawAnchors,260)}
 
 function linkSelection(){
@@ -20208,51 +20274,91 @@ function linkSelection(){
   if(!sel.rangeCount||sel.isCollapsed){toast(tr("Erst eine Textstelle markieren"));return}
   const range=sel.getRangeAt(0).cloneRange();
   const notes=S.notes;
-  overlay(`<div class="modal"><h3>${tr("Notiz mit dieser Stelle verknüpfen")}</h3>
-    <div class="pad" style="padding-bottom:9px"><input id="lq" placeholder="${tr("Notiz suchen oder neue anlegen")}" autocomplete="off"></div>
-    <div class="cmdlist" id="ll"></div></div>`);
-  const q=$("#lq"),l=$("#ll");let hits=[],idx=0;
-  const paint=()=>{
-    const v=q.value.trim().toLowerCase();
-    const found=notes.filter(n=>!v||noteText(n).toLowerCase().includes(v));
-    hits=[{neu:true,label:v
-        ?PL(`Neue Notiz „${v.slice(0,30)}" an dieser Stelle`,`New note "${v.slice(0,30)}" at this spot`,
-            `Nouvelle note « ${v.slice(0,30)} » à cet endroit`,`Nueva nota "${v.slice(0,30)}" en este punto`,
-            `Nova nota "${v.slice(0,30)}" neste trecho`,`Nowa notatka „${v.slice(0,30)}" w tym miejscu`,
-          `Nuova nota « ${v.slice(0,30)} » in questo punto`)
-        :PL("Neue Notiz an dieser Stelle","New note at this spot",
-            "Nouvelle note à cet endroit","Nueva nota en este punto","Nova nota neste trecho","Nowa notatka w tym miejscu",
-          "Nuova nota in questo punto")},
-      ...found.map(n=>({n,label:((n.title||noteText(n).trim())||tr("Leere Notiz")).slice(0,52)}))];
-    idx=Math.min(idx,hits.length-1);
-    l.innerHTML=hits.map((h,i)=>`<div class="pickitem ${i===idx?"on":""}" data-i="${i}">
-      <span class="dotc" style="background:${h.neu?"transparent":(h.n.color||NOTECOLORS[0].c)};${h.neu?"border-style:dashed":""}"></span>
-      <span style="flex:1">${esc(h.label)}</span>
-      ${h.neu?`<span class="kbd">${tr("neu")}</span>`:(anchorCount(h.n.id)?`<span class="kbd">${anchorCount(h.n.id)} ${
-        PL("Stellen","spots","passages","lugares","trechos","miejsc",
-          "punti")}</span>`:"")}</div>`).join("");
-    const on=l.querySelector(".pickitem.on");if(on)on.scrollIntoView({block:"nearest"})};
-  const go=()=>{const h=hits[idx];if(!h)return;
-    const title=q.value.trim();closeOvl();
-    let id;
-    if(h.neu){const n=addNote("");if(title)n.title=title.slice(0,60);id=n.id}
-    else id=h.n.id;
-    wrapRange(range,id);hotNote=id;curOcc[id]=spansOf(id).length-1;
-    flush();commit();drawAnchors();toast(tr("Verknüpft"))};
-  q.oninput=()=>{idx=0;paint()};
-  q.onkeydown=e=>{
-    if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,hits.length-1);paint()}
-    else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);paint()}
-    else if(e.key==="Enter"){e.preventDefault();go()}};
-  l.onclick=e=>{const r=e.target.closest(".pickitem");if(!r)return;idx=+r.dataset.i;go()};
-  paint();q.focus();
+  /* Wie „Kommentar einfügen“ in Word (Toms Wahl „A“, 2026-10-26): oben die
+     markierte Stelle, darunter ein Feld nur zum Schreiben, Farbe, Knöpfe.
+     Bis dahin ein einziges Feld „Notiz suchen oder neue anlegen“ — man
+     wusste nicht, ob man sucht oder schreibt, und der Text wurde nur der
+     Titel. Eine vorhandene Notiz wählt man über den aufklappbaren Teil. */
+  const stelle=sel.toString().replace(/\s+/g," ").trim();
+  const kurz=stelle.length>90?stelle.slice(0,88)+"…":stelle;
+  let farbe=NOTECOLORS[0].c;
+  overlay(`<div class="modal nzdlg"><h3>${tr("Notiz einfügen")}</h3>
+    <div class="pad">
+      <div class="nzstelle" style="border-left-color:${farbe}">„${esc(kurz)}“</div>
+      <textarea id="nzText" rows="4" placeholder="${tr("Notiz schreiben …")}"></textarea>
+      <div class="nzfarben" role="radiogroup" aria-label="${tr("Farbe")}">${NOTECOLORS.map((c,i)=>
+        `<button class="nzf${i?"":" on"}" data-c="${c.c}" title="${tr(c.n)}" aria-label="${tr(c.n)}" style="background:${c.c}"></button>`).join("")}</div>
+      ${notes.length?`<button class="nzvorh" id="nzVorh" aria-expanded="false">${tr("Vorhandene Notiz mit dieser Stelle verknüpfen")} <span>›</span></button>
+      <div id="nzListe" hidden><input id="lq" placeholder="${tr("Notizen durchsuchen")}" autocomplete="off"><div class="cmdlist" id="ll"></div></div>`:""}
+    </div>
+    <div class="rowend"><button class="btn" id="nzAb">${tr("Abbrechen")}</button><button class="btn pri" id="nzOk">${tr("Notiz einfügen")}</button></div></div>`);
+  const t=$("#nzText");
+  const anheften=id=>{const kopf=wrapRange(range,id);hotNote=id;curOcc[id]=Math.max(0,spansOf(id).indexOf(kopf));flush();commit();drawAnchors()};
+  const einfuegen=()=>{const v=t.value.trim();closeOvl();
+    const n=addNote(v);n.color=farbe;anheften(n.id);toast(tr("Notiz eingefügt"))};
+  $("#nzOk").onclick=einfuegen;$("#nzAb").onclick=closeOvl;
+  t.onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();einfuegen()}};
+  $("#ovl").querySelectorAll(".nzf").forEach(b=>b.onclick=()=>{
+    farbe=b.dataset.c;$("#ovl").querySelectorAll(".nzf").forEach(x=>x.classList.toggle("on",x===b));
+    $("#ovl").querySelector(".nzstelle").style.borderLeftColor=farbe;t.focus()});
+  const vorh=$("#nzVorh");
+  if(vorh){
+    const q=$("#lq"),l=$("#ll"),box=$("#nzListe");let hits=[],idx=0;
+    const paint=()=>{
+      const v=q.value.trim().toLowerCase();
+      hits=notes.filter(n=>!v||noteText(n).toLowerCase().includes(v));
+      idx=Math.max(0,Math.min(idx,hits.length-1));
+      l.innerHTML=hits.length?hits.map((n,i)=>`<div class="pickitem ${i===idx?"on":""}" data-i="${i}">
+        <span class="dotc" style="background:${n.color||NOTECOLORS[0].c}"></span>
+        <span style="flex:1">${esc(((n.title||noteText(n).trim())||tr("Leere Notiz")).slice(0,52))}</span>
+        ${anchorCount(n.id)?`<span class="kbd">${anchorCount(n.id)} ${anchorCount(n.id)===1
+          ?PL("Stelle","spot","passage","lugar","trecho","miejsce","punto")
+          :PL("Stellen","spots","passages","lugares","trechos","miejsc","punti")}</span>`:""}</div>`).join("")
+        :`<div class="nzleer">${tr("Keine passende Notiz.")}</div>`;
+      const on=l.querySelector(".pickitem.on");if(on)on.scrollIntoView({block:"nearest"})};
+    const waehle=()=>{const n=hits[idx];if(!n)return;closeOvl();anheften(n.id);toast(tr("Verknüpft"))};
+    vorh.onclick=()=>{const auf=box.hidden;box.hidden=!auf;vorh.setAttribute("aria-expanded",String(auf));
+      vorh.classList.toggle("auf",auf);if(auf){paint();q.focus()}else t.focus()};
+    q.oninput=()=>{idx=0;paint()};
+    q.onkeydown=e=>{
+      if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,hits.length-1);paint()}
+      else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);paint()}
+      else if(e.key==="Enter"){e.preventDefault();waehle()}};
+    l.onclick=e=>{const r=e.target.closest(".pickitem");if(!r)return;idx=+r.dataset.i;waehle()};
+  }
+  t.focus();
 }
+/* Eine Notiz an eine Stelle heften, ohne den Text umzubauen: jedes
+   Textstück im Bereich bekommt seinen eigenen span. Bis 2026-10 schnitt der
+   Rückfall (extractContents) bei einer Markierung über Zellgrenzen die
+   Zellen heraus und setzte sie in den span — die Tabelle war zerstört
+   (Toms Goethe-Checkliste). Fortsetzungsstücke tragen data-forts und
+   zählen nicht als eigene Stelle. Liefert das erste Stück oder null. */
 function wrapRange(r,id){
   const n=findNote(id),col=(n&&n.color)||NOTECOLORS[0].c;
-  const sp=document.createElement("span");
-  sp.className="anch";sp.dataset.n=id;
-  sp.style.setProperty("--ac",col);sp.style.setProperty("--ab",hex2rgba(col,.5));
-  try{r.surroundContents(sp)}catch(e){sp.appendChild(r.extractContents());r.insertNode(sp)}
+  const mk=forts=>{const sp=document.createElement("span");
+    sp.className="anch";sp.dataset.n=id;if(forts)sp.dataset.forts="1";
+    sp.style.setProperty("--ac",col);sp.style.setProperty("--ab",hex2rgba(col,.5));return sp};
+  let root=r.commonAncestorContainer;if(root.nodeType!==1)root=root.parentNode;
+  const teile=[],w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let t;
+  while((t=w.nextNode())){
+    if(!r.intersectsNode(t))continue;
+    const a=t===r.startContainer?r.startOffset:0,e=t===r.endContainer?r.endOffset:t.length;
+    if(e<=a)continue;
+    const el=t.parentElement;
+    if(!el||el.closest('[contenteditable="false"]'))continue;
+    /* Leerraum zwischen Zeilen, Zellen und Listenpunkten gehört zum Gerüst */
+    if(!t.data.slice(a,e).trim()&&el.matches("table,tbody,thead,tfoot,tr,colgroup,ul,ol,#editor"))continue;
+    teile.push([t,a,e]);
+  }
+  let erst=null;
+  teile.forEach(([t,a,e],i)=>{
+    if(e<t.length)t.splitText(e);
+    const mitte=a>0?t.splitText(a):t;
+    const sp=mk(i>0);mitte.parentNode.insertBefore(sp,mitte);sp.appendChild(mitte);
+    if(!i)erst=sp;
+  });
+  return erst;
 }
 function unwrap(el){const p=el.parentNode;while(el.firstChild)p.insertBefore(el.firstChild,el);p.removeChild(el);p.normalize()}
 function dropAnchorsFor(id){
@@ -20267,16 +20373,27 @@ function jumpTo(id,i){
   const k=((i%l.length)+l.length)%l.length;curOcc[id]=k;hotNote=id;
   l[k].scrollIntoView({block:"center",behavior:"smooth"});drawAnchors();
 }
+function anchZeigen(id,an){const ed=$("#editor");if(!ed)return;
+  ed.querySelectorAll('.anch[data-n="'+id+'"]').forEach(s=>s.classList.toggle("zeig",an))}
+document.addEventListener("mouseover",e=>{const c=e.target.closest&&e.target.closest(".acard");
+  if(c&&!c.contains(e.relatedTarget))anchZeigen(c.dataset.n,true)});
+document.addEventListener("mouseout",e=>{const c=e.target.closest&&e.target.closest(".acard");
+  if(c&&!c.contains(e.relatedTarget))anchZeigen(c.dataset.n,false)});
 function drawAnchors(){
   const col=$("#anchcol"),ed=$("#editor"),wrap=$(".pagewrap");
   if(!col||!ed)return;
-  ed.classList.toggle("nomark",S.showAnchMarks===false);
+  ed.classList.remove("nomark");
+  /* Nur mit sichtbarer Randspalte leise — ohne sie wären die Stellen gar nicht zu finden */
+  ed.classList.toggle("anchleise",!S.anchImmer&&!!S.showCol);
+  const kopfHot={};
   ed.querySelectorAll(".anch").forEach(s=>{
     const n=findNote(s.dataset.n);
     if(!n){unwrap(s);return}
     const c=n.color||NOTECOLORS[0].c;
     s.style.setProperty("--ac",c);s.style.setProperty("--ab",hex2rgba(c,.5));
-    s.classList.toggle("hot",s.dataset.n===hotNote&&spansOf(s.dataset.n)[curOcc[s.dataset.n]||0]===s)});
+    const hot=s.dataset.forts?!!kopfHot[s.dataset.n]:s.dataset.n===hotNote&&spansOf(s.dataset.n)[curOcc[s.dataset.n]||0]===s;
+    if(!s.dataset.forts)kopfHot[s.dataset.n]=hot;
+    s.classList.toggle("hot",hot)});
   const ids=anchoredIds();
   if(!ids.length||!S.showCol){col.innerHTML="";col.style.width=S.showCol?"0":"0";col.style.flexBasis="0";return}
   col.style.width="252px";col.style.flexBasis="252px";
@@ -25857,7 +25974,7 @@ const SLASH=[
   {n:"Horizontale Linie",k:"linie trennlinie strich horizontal line rule ligne línea linha linia linea",f:()=>linieEinfuegen("")},
   {n:"Bild",k:"bild foto grafik image picture imagen imagem obraz immagine",f:pickImage},
   {n:"Link",k:"link url verweis",f:()=>setTimeout(linkDialog,20)},
-  {n:"Notiz anheften",k:"notiz kommentar anker note pin",f:()=>setTimeout(linkSelection,20)},
+  {n:"Notiz einfügen",k:"notiz kommentar anker note pin anheften",f:()=>setTimeout(linkSelection,20)},
   {n:"Fußnote",k:"fussnote fußnote footnote referenz reference",f:insertFootnote},
   {n:"Inhaltsverzeichnis",k:"inhaltsverzeichnis toc gliederung index",f:insertToc},
   {n:"Abbildungsverzeichnis",k:"abbildungsverzeichnis bilder figures tof",f:insertTof},
@@ -27700,15 +27817,14 @@ take the first free space at the top left. The board scrolls as you drag past it
 
  {t:"Pinning a note to a passage",k:"pin;anchor;link note;margin notes;comment",b:`
 <p>A note can be tied to one or more places in the text, the way a comment is.</p>
+<p>The window shows the selected passage at the top. Write the note in the field below, pick a color and click <b>Insert note</b> (or <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). To attach a note you already have, open <b>Link an existing note to this passage</b>.</p>
 <p><b>Select the passage</b> and press <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, or
 right-click and choose to pin a note. The passage is marked, and the note shows how many
 places it is tied to.</p>
 <p>With <b>View &rsaquo; Notes in the margin</b> switched on, pinned notes appear beside the
 page as you write. Clicking one jumps to its place; if a note is tied to several places,
 arrows step between them.</p>
-<p><b>View &rsaquo; Highlights in text</b> turns the colouring of pinned passages off and on
-again. The connections stay either way — they are simply out of sight, which helps when you
-want to judge the text rather than the work on it. The other way round, right-clicking a
+<p>Pinned passages are coloured only while the pointer rests on their note in the margin or the note is selected, so the text stays clear even with many notes. <b>View &rsaquo; Always show highlights</b> keeps them coloured; without notes in the margin they are always shown. The other way round, right-clicking a
 pinned passage offers <b>Highlight note</b>, which picks out the matching note in the
 sidebar.</p>
 <p>Deleting the marked text does not delete the note — it only loses that connection.</p>`},
@@ -28347,14 +28463,15 @@ Rand hinausziehst.</p>
  {t:"Eine Notiz an eine Textstelle heften",k:"anheften;anker;verknüpfen;randnotizen;kommentar",b:`
 <p>Eine Notiz kann an eine oder mehrere Stellen im Text gebunden werden, wie ein Kommentar.</p>
 <p><b>Markiere die Stelle</b> und drücke <kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>M</kbd>, oder wähle
-es im Rechtsklickmenü. Die Stelle wird markiert, und die Notiz zeigt, an wie vielen Stellen sie
+<b>Notiz einfügen</b> im Rechtsklickmenü. Im Fenster steht oben die markierte Stelle; schreib
+die Notiz ins Feld darunter, wähle eine Farbe und klicke <b>Notiz einfügen</b> (oder
+<kbd>Strg</kbd>+<kbd>Enter</kbd>). Soll eine schon vorhandene Notiz an die Stelle, öffne
+<b>Vorhandene Notiz mit dieser Stelle verknüpfen</b>. Die Stelle wird markiert, und die Notiz zeigt, an wie vielen Stellen sie
 hängt.</p>
 <p>Ist <b>Ansicht &rsaquo; Notizen am Seitenrand</b> eingeschaltet, erscheinen angeheftete
 Notizen beim Schreiben neben der Seite. Ein Klick springt zur Stelle; hängt eine Notiz an
 mehreren, schalten Pfeile zwischen ihnen um.</p>
-<p><b>Ansicht &rsaquo; Markierungen im Text</b> schaltet die farbige Unterlegung der
-angehefteten Stellen aus und wieder ein. Die Verknüpfungen bleiben dabei bestehen — nur zu
-sehen sind sie nicht mehr, was beim Beurteilen des Textes hilft. Umgekehrt zeigt ein
+<p>Angeheftete Stellen sind nur farbig, solange der Mauszeiger auf ihrer Notiz am Seitenrand steht oder die Notiz gewählt ist — so bleibt der Text auch bei vielen Notizen übersichtlich. <b>Ansicht &rsaquo; Markierungen immer zeigen</b> färbt sie dauerhaft; ohne Notizen am Seitenrand sind sie immer zu sehen. Umgekehrt zeigt ein
 Rechtsklick auf eine angeheftete Stelle <b>Notiz hervorheben</b> und hebt die zugehörige Notiz
 in der Seitenleiste hervor.</p>
 <p>Wird der markierte Text gelöscht, verschwindet die Notiz nicht — sie verliert nur diese
@@ -29005,15 +29122,14 @@ cuando arrastras más allá de su borde.</p>
 
  {t:"Fijar una nota a un pasaje",k:"fijar;ancla;vincular nota;notas al margen;comentario",b:`
 <p>Una nota se puede atar a uno o más lugares del texto, igual que un comentario.</p>
+<p>La ventana muestra arriba el pasaje marcado. Escribe la nota en el campo de abajo, elige un color y haz clic en <b>Insertar nota</b> (o <kbd>Ctrl</kbd>+<kbd>Intro</kbd>). Para usar una nota que ya existe, abre <b>Vincular una nota existente a este pasaje</b>.</p>
 <p><b>Selecciona el pasaje</b> y pulsa <kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>M</kbd>, o haz clic
 derecho y elige fijar una nota. El pasaje queda marcado, y la nota indica a cuántos lugares está
 atada.</p>
 <p>Con <b>Vista &rsaquo; Notas al margen</b> activado, las notas fijadas aparecen junto a la
 página mientras escribes. Al hacer clic en una, saltas a su lugar; si una nota está atada a
 varios lugares, unas flechas pasan de uno a otro.</p>
-<p><b>Vista &rsaquo; Resaltados en el texto</b> apaga y vuelve a encender el coloreado de los
-pasajes fijados. Las conexiones se mantienen igual: simplemente quedan fuera de la vista, lo que
-ayuda cuando quieres juzgar el texto en sí y no el trabajo sobre él. A la inversa, hacer clic
+<p>Los pasajes fijados solo se colorean mientras el puntero está sobre su nota en el margen o la nota está seleccionada, así el texto sigue claro aunque haya muchas notas. <b>Vista &rsaquo; Mostrar siempre los resaltados</b> los deja coloreados; sin notas en el margen se ven siempre. A la inversa, hacer clic
 derecho en un pasaje fijado ofrece <b>Destacar nota</b>, que resalta la nota correspondiente en
 el panel lateral.</p>
 <p>Borrar el texto marcado no borra la nota: solo pierde esa conexión.</p>`},
@@ -29661,15 +29777,14 @@ você arrasta além da borda dele.</p>
 
  {t:"Fixar uma nota a um trecho",k:"fixar;âncora;vincular nota;notas na margem;comentário",b:`
 <p>Uma nota pode ser presa a um ou mais lugares do texto, do jeito que um comentário é.</p>
+<p>A janela mostra no topo o trecho selecionado. Escreva a nota no campo abaixo, escolha uma cor e clique em <b>Inserir nota</b> (ou <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Para usar uma nota que já existe, abra <b>Vincular uma nota existente a este trecho</b>.</p>
 <p><b>Selecione o trecho</b> e pressione <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, ou clique
 com o botão direito e escolha fixar uma nota. O trecho fica marcado, e a nota mostra a quantos
 lugares está presa.</p>
 <p>Com <b>Exibir &rsaquo; Notas na margem</b> ligado, as notas fixadas aparecem ao lado da
 página enquanto você escreve. Clicar numa pula para o lugar dela; se uma nota está presa a
 vários lugares, setas passam de um para outro.</p>
-<p><b>Exibir &rsaquo; Destaques no texto</b> desliga e volta a ligar a coloração dos trechos
-fixados. As conexões continuam do mesmo jeito: só ficam fora de vista, o que ajuda quando você
-quer julgar o texto em si e não o trabalho sobre ele. No sentido inverso, clicar com o botão
+<p>Os trechos fixados só ficam coloridos enquanto o ponteiro está sobre a nota na margem ou a nota está selecionada, assim o texto fica claro mesmo com muitas notas. <b>Exibir &rsaquo; Sempre mostrar destaques</b> os mantém coloridos; sem notas na margem, eles aparecem sempre. No sentido inverso, clicar com o botão
 direito num trecho fixado oferece <b>Destacar nota</b>, que realça a nota correspondente na
 barra lateral.</p>
 <p>Excluir o texto marcado não exclui a nota: ela só perde essa conexão.</p>`},
@@ -30335,15 +30450,14 @@ tableau défile quand vous glissez au-delà de son bord.</p>
 
  {t:"Épingler une note à un passage",k:"épingler;ancre;lier une note;notes en marge;commentaire",b:`
 <p>Une note peut être attachée à un ou plusieurs endroits du texte, comme un commentaire.</p>
+<p>La fenêtre affiche en haut le passage sélectionné. Écrivez la note dans le champ en dessous, choisissez une couleur et cliquez sur <b>Insérer une note</b> (ou <kbd>Ctrl</kbd>+<kbd>Entrée</kbd>). Pour rattacher une note existante, ouvrez <b>Lier une note existante à ce passage</b>.</p>
 <p><b>Sélectionnez le passage</b> et appuyez sur <kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>M</kbd>, ou
 faites un clic droit et choisissez d'épingler une note. Le passage est marqué, et la note
 indique à combien d'endroits elle est attachée.</p>
 <p>Avec <b>Affichage &rsaquo; Notes en marge</b> activé, les notes épinglées apparaissent à côté
 de la page pendant que vous écrivez. Cliquer sur l'une saute à son endroit ; si une note est
 attachée à plusieurs endroits, des flèches passent de l'un à l'autre.</p>
-<p><b>Affichage &rsaquo; Surlignages dans le texte</b> désactive puis réactive la coloration des
-passages épinglés. Les liens sont conservés dans les deux cas : ils sont simplement hors de vue,
-ce qui aide quand vous voulez juger le texte plutôt que le travail dessus. Dans l'autre sens, un
+<p>Les passages épinglés ne sont colorés que tant que le pointeur est sur leur note dans la marge ou que la note est sélectionnée : le texte reste lisible même avec beaucoup de notes. <b>Affichage &rsaquo; Toujours afficher les surlignages</b> les garde colorés ; sans notes en marge, ils sont toujours visibles. Dans l'autre sens, un
 clic droit sur un passage épinglé propose <b>Mettre la note en évidence</b>, qui repère la note
 correspondante dans le panneau latéral.</p>
 <p>Supprimer le texte marqué ne supprime pas la note — elle perd seulement ce lien.</p>`},
@@ -30996,15 +31110,14 @@ się, gdy przeciągasz poza jej krawędź.</p>
 
  {t:"Przypinanie notatki do fragmentu",k:"przypnij;kotwica;powiąż notatkę;notatki na marginesie;komentarz",b:`
 <p>Notatkę można powiązać z jednym lub wieloma miejscami w tekście, tak jak komentarz.</p>
+<p>Okno pokazuje u góry zaznaczony fragment. Wpisz notatkę w polu poniżej, wybierz kolor i kliknij <b>Wstaw notatkę</b> (albo <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Aby przypiąć istniejącą notatkę, otwórz <b>Powiąż istniejącą notatkę z tym fragmentem</b>.</p>
 <p><b>Zaznacz fragment</b> i naciśnij <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>, albo kliknij
 prawym przyciskiem i wybierz przypięcie notatki. Fragment zostaje oznaczony, a notatka pokazuje,
 z iloma miejscami jest powiązana.</p>
 <p>Przy włączonym <b>Widok &rsaquo; Notatki na marginesie</b> przypięte notatki pojawiają się
 obok strony podczas pisania. Kliknięcie jednej przeskakuje do jej miejsca; jeśli notatka jest
 powiązana z wieloma miejscami, strzałki przechodzą między nimi.</p>
-<p><b>Widok &rsaquo; Zaznaczenia w tekście</b> wyłącza i ponownie włącza kolorowanie przypiętych
-fragmentów. Powiązania pozostają w obu przypadkach — są po prostu poza wzrokiem, co pomaga, gdy
-chcesz ocenić sam tekst, a nie pracę nad nim. W drugą stronę, kliknięcie prawym przyciskiem
+<p>Przypięte fragmenty są kolorowe tylko wtedy, gdy wskaźnik stoi na ich notatce na marginesie albo notatka jest wybrana — tekst pozostaje czytelny nawet przy wielu notatkach. <b>Widok &rsaquo; Zawsze pokazuj zaznaczenia</b> zostawia je kolorowe; bez notatek na marginesie są widoczne zawsze. W drugą stronę, kliknięcie prawym przyciskiem
 przypiętego fragmentu oferuje <b>Wyróżnij notatkę</b>, co wskazuje odpowiednią notatkę w panelu
 bocznym.</p>
 <p>Usunięcie oznaczonego tekstu nie usuwa notatki — traci ona tylko to powiązanie.</p>`},
@@ -31651,15 +31764,14 @@ quando trascini oltre il suo bordo.</p>
 
  {t:"Fissare una nota a un passaggio",k:"fissare;ancora;collegare una nota;note a margine;commento",b:`
 <p>Una nota può essere legata a uno o più punti del testo, come un commento.</p>
+<p>La finestra mostra in alto il passaggio selezionato. Scrivi la nota nel campo sotto, scegli un colore e fai clic su <b>Inserisci nota</b> (oppure <kbd>Ctrl</kbd>+<kbd>Invio</kbd>). Per collegare una nota già esistente, apri <b>Collega una nota esistente a questo passaggio</b>.</p>
 <p><b>Seleziona il passaggio</b> e premi <kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>M</kbd>, oppure
 fai clic destro e scegli di fissare una nota. Il passaggio viene contrassegnato, e la nota
 mostra a quanti punti è legata.</p>
 <p>Con <b>Vista &rsaquo; Note a margine</b> attivo, le note fissate compaiono accanto alla
 pagina mentre scrivi. Fare clic su una salta al suo punto; se una nota è legata a più punti,
 delle frecce passano dall'uno all'altro.</p>
-<p><b>Vista &rsaquo; Evidenziazioni nel testo</b> disattiva e riattiva la colorazione dei
-passaggi fissati. I collegamenti restano in entrambi i casi: sono solo fuori dalla vista, il che
-aiuta quando vuoi giudicare il testo e non il lavoro su di esso. Al contrario, il clic destro su
+<p>I passaggi fissati sono colorati solo mentre il puntatore è sulla loro nota a margine o la nota è selezionata, così il testo resta chiaro anche con molte note. <b>Vista &rsaquo; Mostra sempre le evidenziazioni</b> li lascia colorati; senza note a margine si vedono sempre. Al contrario, il clic destro su
 un passaggio fissato propone <b>Metti in evidenza la nota</b>, che individua la nota
 corrispondente nella barra laterale.</p>
 <p>Eliminare il testo contrassegnato non elimina la nota: perde solo quel collegamento.</p>`},
