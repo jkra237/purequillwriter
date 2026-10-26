@@ -45,6 +45,46 @@ immer genau einen Commit, der sie anfasst.
 
 ## Unveröffentlicht
 
+### Nebenbei gefunden, noch nicht behoben
+
+- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
+  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
+  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
+  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
+  Einmal geschlossen durchsehen.
+
+- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
+  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
+  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
+  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
+  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
+  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
+  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
+  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
+  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
+  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
+  unter „Behoben“.
+- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
+  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
+  Haken samt Hinweis — ehrlich, aber kein Werbebild.
+
+### Offen, noch nicht entschieden
+
+
+- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
+  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
+  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
+  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
+  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
+  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
+
+---
+
+## 1.4.0 — 2026-10-26
+
+Gebaut aus `de869ec` (Versions-Commit). Browser-Fassung, Linux-Pakete und
+Website am 2026-10-26 live, am selben Tag im Store freigegeben.
+
 ### Geändert
 
 - **Suchen und Ersetzen neu gestaltet** (Toms Wahl „B“, wie Google Docs):
@@ -442,39 +482,6 @@ immer genau einen Commit, der sie anfasst.
   Rückgängig/Wiederholen (Toms Idee, Fassung „E“ aus fünf Entwürfen):
   Pfeilbogen um ein Zifferblatt, Zeiger blau wie der Glanz der Lupe. Bisher war der Versionsverlauf nur über
   Datei › Zwischenstände erreichbar.
-
-### Nebenbei gefunden, noch nicht behoben
-
-- **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
-  („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
-  europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
-  criar o ficheiro EPUB.“, „Escolher ficheiro de cópia“, „Não guardado“.
-  Einmal geschlossen durchsehen.
-
-- **Wortformen-Gruppierung fasst Fremdes zusammen** — Kandidat für 1.2.
-  `stem()` nimmt bei mehrdeutigen Wörtern *eine* Herleitung, nicht
-  unbedingt die gemeinte (gemessen 2026-10-03): Französisch
-  `abord`/`d’abord` → `bord` (Vorsilbe, nicht die Elision); Portugiesisch
-  `pela`, `pelo`, `pele`, `peles` → alle `pelar` („schälen“).
-  Idee: bei mehreren Herleitungen das Wort selbst bevorzugen, wenn es ein
-  eigener Wörterbucheintrag ist. **Nicht ohne Vergleichslauf** über längere
-  Texte in allen sieben Sprachen — dieselbe Regel könnte Zusammengehöriges
-  trennen (im deutschen Bild stehen „Bögen“ und „Bogen“ schon heute getrennt).
-  Den sichtbaren Folgefehler (Füllwörter rutschen durch) behebt der Eintrag
-  unter „Behoben“.
-- **Italienisch kann Wortformen nicht zusammenfassen** (das Wörterbuch kennt
-  sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
-  Haken samt Hinweis — ehrlich, aber kein Werbebild.
-
-### Offen, noch nicht entschieden
-
-
-- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
-  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
-  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
-  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
-  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
-  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
 
 ---
 
