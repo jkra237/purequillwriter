@@ -110,6 +110,7 @@ immer genau einen Commit, der sie anfasst.
   speichern · Abbrechen. Speichern ist der Standard (Enter) — vorher war es im
   Fall ohne Datei „Schließen“, ein schnelles Enter entfernte das Dokument.
   Nebenbei: das gerade schließende Anführungszeichen ist weg (es stand „X").
+  Oben rechts ein Kreuz wie in Word (wirkt wie Abbrechen).
 - **Seitenumbruch löschen wie in Word** (Toms Prüfauftrag): Rücktaste am
   Anfang des Absatzes danach löste bisher diesen Absatz auf (der Text hing lose
   hinter dem Umbruch), statt den Umbruch zu entfernen. Jetzt entfernen ihn die

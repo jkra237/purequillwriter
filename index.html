@@ -501,7 +501,9 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 /* Dialog „Absatz“ wie in Word */
 .abdlg{width:min(560px,94vw)}
 /* Schließen-Dialog wie Word: Frage als Überschrift, Symbol links */
-.cddlg{width:min(460px,94vw)}
+.cddlg{width:min(460px,94vw);position:relative}
+.cddlg .cdx{position:absolute;top:8px;right:8px;transform:none}
+.cddlg .cdkopf{padding-right:22px}
 .cdkopf{display:flex;gap:14px;align-items:flex-start}
 .cdico{flex:none;color:var(--ink-soft);margin-top:2px}
 .cddlg h3.cdfrage{margin:0 0 6px;padding:0;border:0;font-size:16px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--ink);font-family:var(--ui)}
@@ -8604,7 +8606,7 @@ function closeDoc(id){
   const frage=(mitDatei?tr("Änderungen an „{t}“ speichern?"):tr("„{t}“ vor dem Schließen speichern?")).replace("{t}",titel);
   const folge=mitDatei?tr("Ohne Speichern gehen die Änderungen seit {zeit} verloren.").replace("{zeit}",esc(gesichertUm(d.ziel.at||Date.now()))):
     tr("Das Dokument ist noch keine Datei. Ohne Speichern ist es danach aus PureQuill entfernt.");
-  overlay(`<div class="modal cddlg"><div class="pad"><div class="cdkopf">
+  overlay(`<div class="modal cddlg"><button type="button" class="modalx cdx" id="cdX" title="${tr("Schließen")}" aria-label="${tr("Schließen")}">&times;</button><div class="pad"><div class="cdkopf">
     <span class="cdico" aria-hidden="true">${ICOSZ('<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 15.5h6"/>',26,1.4)}</span>
     <div><h3 class="cdfrage">${frage}</h3><p class="cdfolge">${folge}</p>
     ${anker?`<p class="cdnotiz">
@@ -8626,7 +8628,7 @@ function closeDoc(id){
       <button class="btn pri" id="cdSave">${SPEICHERN()}</button>
       <button class="btn" id="cdNo">${tr("Nicht speichern")}</button>
       <button class="btn" id="cdCancel">${tr("Abbrechen")}</button></div></div>`);
-  $("#cdCancel").onclick=closeOvl;
+  $("#cdCancel").onclick=closeOvl;$("#cdX").onclick=closeOvl;
   $("#cdNo").onclick=()=>{closeOvl();kill()};
   $("#cdSave").onclick=async()=>{if(await speichernFuer()){closeOvl();kill()}};
   $("#cdSave").focus();
@@ -12827,7 +12829,7 @@ async function odtBlob(d){
     const nr=bilder.length+1,datei=`Pictures/bild${nr}.${info.ext==="jpeg"?"jpg":info.ext}`;
     bilder.push({name:datei,bytes:info.bytes,mime:"image/"+info.ext});
     inlBilder.set(im,{info,datei,nr,wMm,hMm});
-  }
+  }
   const rahmen=(b,frs,anker,w,h,extra)=>`<draw:frame draw:style-name="${frs}" draw:name="Bild ${b.nr}" text:anchor-type="${anker}"${extra||""} svg:width="${odfZahl(w)}mm" svg:height="${odfZahl(h)}mm" draw:z-index="${b.nr}">`+
     `<draw:image xlink:href="${b.datei}" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad" draw:mime-type="${b.mime||"image/"+b.info.ext}"/></draw:frame>`;
   const figur=async fig=>{
@@ -13222,7 +13224,7 @@ async function rtfBlob(d){
     const info=await bildInfo(im);if(!info)continue;
     const wMm=mmAus(im.style.width)||4,hMm=mmAus(im.style.height)||wMm*info.h/info.w;
     inlBilder.set(im,{info,wMm,hMm});
-  }
+  }
   const pict=(info,wTw,hTw)=>`{\\pict\\${info.ext==="png"?"pngblip":"jpegblip"}\\picw${info.w}\\pich${info.h}\\picwgoal${wTw}\\pichgoal${hTw}\n${hexVon(info.bytes)}}`;
   const form=(info,wTw,hTw,w)=>`{\\shp{\\*\\shpinst\\shpleft${w.x}\\shptop${w.y}\\shpright${w.x+wTw}\\shpbottom${w.y+hTw}\\shpfhdr0${w.bx}\\shpbxignore${w.by}\\shpbyignore`+
     `\\shpwr${w.wr}\\shpwrk0\\shpfblwtxt${w.hinter?1:0}\\shpz0{\\sp{\\sn shapeType}{\\sv 75}}`+
