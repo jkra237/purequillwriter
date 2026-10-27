@@ -1771,6 +1771,11 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
      Fußabdeckung der ersten Seite darüber hinausragte und Chromium sie
      verschob (gemessen 3,5 mm) und ein Stück davon auf Seite 2 druckte. */
   .body{border:0!important}
+  /* Eine Tabellenzeile nicht zerteilen, wie der Bildschirmumbruch und wie
+     Word bei einzeiligen Zellen: Chromium schnitt sonst eine Zeile am
+     Seitenende mitten durch (Goethe-Dokument: 15 statt 14 Zeilen auf Seite 1,
+     am Bildschirm 14). Höher als eine Seite bricht sie trotzdem. */
+  #editor tr{break-inside:avoid}
   .printframe{width:100%!important;border-collapse:collapse!important;
     table-layout:fixed!important;margin:0!important}
   .printframe>thead>tr>td,.printframe>tfoot>tr>td,.printframe>tbody>tr>td{
@@ -21329,12 +21334,14 @@ function paginate(){
         zeilen.forEach((r,i)=>{
           const rr=r.getBoundingClientRect(),rt=rr.top-edTop,rh=rr.height;
           const pp=Math.max(0,Math.floor(rt/stride));
-          /* 6 px Spielraum: bricht Chromium eine Tabelle im Druck, zeichnet es
-             an jedem Bruch die Rahmen dazu — gemessen passte eine randvolle
-             Seite im Druck eine Zeile weniger, und es blieb eine Seite mit
-             einer einzigen Zeile. Die Zeilen selbst sind in beiden Medien
-             gleich hoch (nachgemessen). */
-          if(rt+rh<=pp*stride+oben(pp)+contentHOf(pp)-6*S.zoom||rh>contentHOf(pp+1))return;
+          /* Ohne Spielraum, genau an der Grenze wie Word. Bis 2026-10-27 standen
+             hier 6 px, weil Chromium im Druck eine Zeile am Seitenende
+             zerteilte; seit dem Druck-CSS (tr: break-inside:avoid) und dem
+             Rahmenausgleich (randAusgleich) trifft der Druck die Grenze genau
+             so — gemessen an 24 Tabellen, davon 12 knapp an der Grenze: mit
+             0 px alle gleich, mit 6 px zeigte der Bildschirm dort eine Zeile
+             weniger als der Druck. */
+          if(rt+rh<=pp*stride+oben(pp)+contentHOf(pp)||rh>contentHOf(pp+1))return;
           const ziel=(pp+1)*stride+mt;
           if(i===0){
             const base=parseFloat(getComputedStyle(b).marginTop)||0;

@@ -203,6 +203,17 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Druck bricht Tabellen wie Bildschirm und Word um**: Den echten Druckweg
+  der Desktop-Fassung nachgebildet (paginate, stripScreenPagination,
+  printFrame, setPrintPage, printToPDF mit den Optionen aus main.js) und
+  mit Words PDF verglichen. Chromium zerteilte eine Tabellenzeile am
+  Seitenende (Goethe-Dokument: Seite 1 mit 15 statt 14 Zeilen, die letzte
+  halb abgeschnitten), der Bildschirm nicht — jetzt `tr{break-inside:avoid}`
+  im Druck, wie Word bei einzeiligen Zellen. Damit entfällt auch der 6-px-
+  Spielraum des Tabellenumbruchs: an 24 Tabellen gemessen, 12 davon knapp an
+  der Grenze — ohne Spielraum Bildschirm und Druck überall gleich, mit ihm
+  zeigte der Bildschirm dort eine Zeile weniger als der Druck. Goethe .doc
+  und .odt: Bildschirm, Druck und Word je 14/17/3.
 - **Tabellen: Überschriften wiederholen wie in Word** (Tom am Goethe-
   Dokument: Word und LibreOffice zeigen die Kopfzeile der Tabelle auf jeder
   Seite wieder, PureQuill fing Seite 2 mit „Aufgabe 49“ an). Gelesen und
