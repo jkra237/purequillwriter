@@ -203,6 +203,25 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Kopf-/Fußzeile: Tab springt beim Bearbeiten nicht mehr** (Tom: „vor
+  dem Klick ist die Seitenzahl zentriert, nach dem Klick linksbündig“):
+  Das Bearbeitungsfeld zeigte einen Tab als rohes Zeichen. Jetzt wird er
+  dort wie im Fließtext ein Platzhalter (.wtab) mit der Breite bis zum
+  Stopp (hfTabsImFeld, tabsSetzen) — dieselben Stopps wie in der Anzeige,
+  eigene aus Word oder sonst Mitte und rechter Rand. Ein neu getippter Tab
+  wird sofort umgewandelt, die Schreibmarke steht danach hinter ihm (im
+  nicht bearbeitbaren Platzhalter ging das Getippte sonst verloren).
+  Gespeichert wird weiter der schlichte Tab. Gemessen: Seitenzahl vor und
+  im Feld an derselben Stelle (±1 px), auch zentriert ohne Tab.
+- **Einstellungen: Zurücksetzen an seinem Platz und klar benannt** (Tom):
+  „Auf Werkszustand zurücksetzen“ stand in der Fußleiste jeder Seite und
+  war leicht mit „Standardwerte wiederherstellen“ unter Neue Dokumente zu
+  verwechseln. Jetzt am Ende von Allgemein als „Alle Einstellungen
+  zurücksetzen“ mit Erklärung (die Sätze des Bestätigungsfensters) und
+  rotem Knopf; das Bestätigungsfenster heißt ebenso. Unter Neue Dokumente
+  „Vorgaben für neue Dokumente zurücksetzen“ mit den Werten darunter.
+  Die Fußleiste trägt nur noch „Schließen“. Zwei Namen neu in 6 Sprachen,
+  die alten Einträge ersetzt.
 - **Einstellungen: Ein/Aus-Zeilen wie in Words Optionen** (Tom: „sieht
   etwas komisch und nach links gestaucht aus“, Wahl „A“): Kästchen vorn,
   Titel fett, Erklärung darunter über die ganze Breite, die ganze Zeile

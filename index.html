@@ -1567,6 +1567,12 @@ body.focus .outline{display:none}
 .setsub .pills{display:flex;flex-wrap:wrap;gap:5px}
 /* Ist die Einstellung aus, wirkt das Zugehörige nicht — es tritt zurück */
 .setgrp:has(>.setopt input:not(:checked))>.setsub{opacity:.55}
+/* Eine Handlung mit Erklärung (Zurücksetzen): Text links über die Breite,
+   Knopf rechts */
+.setakt{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:10px 2px;border-bottom:1px solid var(--rule)}
+.setakt .btn{flex:none;white-space:nowrap}
+.btn.gefahr{color:color-mix(in srgb,var(--err) 80%,var(--ink));border-color:color-mix(in srgb,var(--err) 45%,var(--rule))}
+.btn.gefahr:hover{background:color-mix(in srgb,var(--err) 8%,transparent)}
 .setstd{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .setstd span{font-size:12px;color:var(--ink-soft)}
 .setstd .btn{white-space:nowrap}
@@ -3068,7 +3074,7 @@ en:{
   "Millimeter":"Millimetres",
   "im Menü Einfügen anbieten":"offer in the Insert menu",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Defaults for new documents you create from now on. The format of existing documents stays as it is.",
-  "Standardwerte wiederherstellen":"Restore defaults",
+  "Vorgaben für neue Dokumente zurücksetzen":"Reset defaults for new documents",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"Straight \" and ' become typographic quotation marks",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Two hyphens (--) become a dash (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"After . ! ? the next sentence starts with a capital",
@@ -3078,7 +3084,7 @@ en:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Snapshots of your text that you can return to in the version history. Your text itself is saved continuously regardless.",
   "Versionsverlauf öffnen":"Open version history",
   "Werkszustand":"Factory settings",
-  "Auf Werkszustand zurücksetzen":"Reset to factory settings",
+  "Alle Einstellungen zurücksetzen":"Reset all settings",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"All settings return to how PureQuill Writer was shipped: colour scheme, language, font and page format for new documents, autocorrect and view.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Your documents, notes, glossaries, custom formats and dictionary are kept.",
   "Das lässt sich nicht rückgängig machen.":"This cannot be undone.",
@@ -4074,7 +4080,7 @@ fr:{
   "Millimeter":"Millimètres",
   "im Menü Einfügen anbieten":"proposer dans le menu Insertion",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Réglages par défaut des nouveaux documents que vous créez désormais. Le format des documents existants reste inchangé.",
-  "Standardwerte wiederherstellen":"Rétablir les valeurs par défaut",
+  "Vorgaben für neue Dokumente zurücksetzen":"Réinitialiser les réglages des nouveaux documents",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"Les \" et ' droits deviennent des guillemets typographiques",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Deux traits d’union (--) deviennent un tiret (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Après . ! ? la phrase suivante commence par une majuscule",
@@ -4084,7 +4090,7 @@ fr:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Des instantanés de votre texte auxquels vous pouvez revenir dans l’historique des versions. Votre texte lui-même est enregistré en continu, indépendamment.",
   "Versionsverlauf öffnen":"Ouvrir l’historique des versions",
   "Werkszustand":"Réglages d’usine",
-  "Auf Werkszustand zurücksetzen":"Rétablir les réglages d’usine",
+  "Alle Einstellungen zurücksetzen":"Réinitialiser tous les réglages",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tous les réglages reviennent à leur état d’origine : jeu de couleurs, langue, police et format de page des nouveaux documents, correction automatique et affichage.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Vos documents, notes, glossaires, formats personnalisés et votre dictionnaire sont conservés.",
   "Das lässt sich nicht rückgängig machen.":"Cette action est irréversible.",
@@ -5080,7 +5086,7 @@ es:{
   "Millimeter":"Milímetros",
   "im Menü Einfügen anbieten":"ofrecer en el menú Insertar",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Valores predeterminados para los documentos nuevos que crees a partir de ahora. El formato de los documentos existentes no cambia.",
-  "Standardwerte wiederherstellen":"Restablecer valores predeterminados",
+  "Vorgaben für neue Dokumente zurücksetzen":"Restablecer los ajustes de los documentos nuevos",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"Las \" y ' rectas se convierten en comillas tipográficas",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dos guiones (--) se convierten en raya (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Tras . ! ? la siguiente oración empieza en mayúscula",
@@ -5090,7 +5096,7 @@ es:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Instantáneas de tu texto a las que puedes volver en el historial de versiones. Tu texto se guarda de forma continua, independientemente de esto.",
   "Versionsverlauf öffnen":"Abrir historial de versiones",
   "Werkszustand":"Configuración de fábrica",
-  "Auf Werkszustand zurücksetzen":"Restablecer la configuración de fábrica",
+  "Alle Einstellungen zurücksetzen":"Restablecer todos los ajustes",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todos los ajustes vuelven a su estado original: combinación de colores, idioma, fuente y formato de página para documentos nuevos, autocorrección y vista.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Tus documentos, notas, glosarios, formatos propios y tu diccionario se conservan.",
   "Das lässt sich nicht rückgängig machen.":"Esto no se puede deshacer.",
@@ -6086,7 +6092,7 @@ pt:{
   "Millimeter":"Milímetros",
   "im Menü Einfügen anbieten":"oferecer no menu Inserir",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Padrões para novos documentos que você criar a partir de agora. O formato dos documentos existentes permanece.",
-  "Standardwerte wiederherstellen":"Restaurar valores padrão",
+  "Vorgaben für neue Dokumente zurücksetzen":"Redefinir os padrões para novos documentos",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"As \" e ' retas passam a aspas tipográficas",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dois hífenes (--) passam a travessão (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Depois de . ! ? a frase seguinte começa com maiúscula",
@@ -6096,7 +6102,7 @@ pt:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Registros do seu texto aos quais você pode voltar no histórico de versões. O texto em si é salvo continuamente, independentemente disso.",
   "Versionsverlauf öffnen":"Abrir histórico de versões",
   "Werkszustand":"Configurações de fábrica",
-  "Auf Werkszustand zurücksetzen":"Restaurar configurações de fábrica",
+  "Alle Einstellungen zurücksetzen":"Redefinir todas as configurações",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Todas as configurações voltam ao estado original: esquema de cores, idioma, fonte e formato de página para novos documentos, correção automática e exibição.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Seus documentos, notas, glossários, formatos próprios e seu dicionário são mantidos.",
   "Das lässt sich nicht rückgängig machen.":"Isto não pode ser desfeito.",
@@ -7092,7 +7098,7 @@ pl:{
   "Millimeter":"Milimetry",
   "im Menü Einfügen anbieten":"pokazuj w menu Wstaw",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Ustawienia domyślne dla nowych dokumentów tworzonych od teraz. Format istniejących dokumentów pozostaje bez zmian.",
-  "Standardwerte wiederherstellen":"Przywróć wartości domyślne",
+  "Vorgaben für neue Dokumente zurücksetzen":"Przywróć ustawienia nowych dokumentów",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"Proste \" i ' zmieniają się w cudzysłowy typograficzne",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Dwa łączniki (--) zmieniają się w pauzę (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Po . ! ? kolejne zdanie zaczyna się wielką literą",
@@ -7102,7 +7108,7 @@ pl:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Migawki tekstu, do których możesz wrócić w historii wersji. Sam tekst jest niezależnie od tego zapisywany na bieżąco.",
   "Versionsverlauf öffnen":"Otwórz historię wersji",
   "Werkszustand":"Ustawienia fabryczne",
-  "Auf Werkszustand zurücksetzen":"Przywróć ustawienia fabryczne",
+  "Alle Einstellungen zurücksetzen":"Przywróć wszystkie ustawienia",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Wszystkie ustawienia wracają do stanu początkowego: schemat kolorów, język, czcionka i format strony nowych dokumentów, autokorekta i widok.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"Twoje dokumenty, notatki, glosariusze, własne formaty i słownik pozostają bez zmian.",
   "Das lässt sich nicht rückgängig machen.":"Tego nie można cofnąć.",
@@ -8105,7 +8111,7 @@ it:{
   "Millimeter":"Millimetri",
   "im Menü Einfügen anbieten":"proponi nel menu Inserisci",
   "Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.":"Impostazioni predefinite per i nuovi documenti che crei da ora in poi. Il formato dei documenti esistenti resta invariato.",
-  "Standardwerte wiederherstellen":"Ripristina valori predefiniti",
+  "Vorgaben für neue Dokumente zurücksetzen":"Ripristina le impostazioni dei nuovi documenti",
   "Gerade \" und ' werden zu typografischen Anführungszeichen":"Le \" e ' dritte diventano virgolette tipografiche",
   "Zwei Bindestriche (--) werden zum Gedankenstrich (–)":"Due trattini (--) diventano una lineetta (–)",
   "Nach . ! ? beginnt der nächste Satz groß":"Dopo . ! ? la frase successiva inizia con la maiuscola",
@@ -8115,7 +8121,7 @@ it:{
   "Momentaufnahmen deines Textes, zu denen du im Versionsverlauf zurückkehren kannst. Dein Text selbst wird unabhängig davon laufend gesichert.":"Istantanee del tuo testo a cui puoi tornare nella cronologia delle versioni. Il testo in sé viene comunque salvato di continuo.",
   "Versionsverlauf öffnen":"Apri cronologia versioni",
   "Werkszustand":"Impostazioni di fabbrica",
-  "Auf Werkszustand zurücksetzen":"Ripristina le impostazioni di fabbrica",
+  "Alle Einstellungen zurücksetzen":"Ripristina tutte le impostazioni",
   "Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.":"Tutte le impostazioni tornano allo stato originale: combinazione di colori, lingua, carattere e formato pagina dei nuovi documenti, correzione automatica e visualizzazione.",
   "Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.":"I tuoi documenti, note, glossari, formati personalizzati e il tuo dizionario restano invariati.",
   "Das lässt sich nicht rückgängig machen.":"L’operazione non può essere annullata.",
@@ -19815,7 +19821,9 @@ async function alleDatenWeg(){
     });
   }catch(e){}
 }
-/* Auf Werkszustand zurücksetzen: nur die Einstellungen und die Ansicht,
+/* Alle Einstellungen zurücksetzen (bis 2026-10-27 „Auf Werkszustand
+   zurücksetzen“ in der Fußleiste jeder Seite, jetzt am Ende von
+   Allgemein): nur die Einstellungen und die Ansicht,
    nicht die Arbeit. Dokumente, Notizen, Glossare, eigene Formate, das
    eigene Wörterbuch, verknüpfte Dateien und die automatische Sicherung
    bleiben — wer alles loswerden will, hat „Alle Daten löschen“. Bewusst
@@ -19835,7 +19843,7 @@ function werkszustand(){
   return save();
 }
 function werkszustandDialog(){
-  overlay(`<div class="modal"><h3>${tr("Auf Werkszustand zurücksetzen")}</h3><div class="pad">
+  overlay(`<div class="modal"><h3>${tr("Alle Einstellungen zurücksetzen")}</h3><div class="pad">
     <p style="margin:0 0 10px;font-size:13px;line-height:1.5">${tr("Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.")}</p>
     <p style="margin:0;color:var(--ink-soft);font-size:13px;line-height:1.5">${tr("Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.")}</p>
     </div>
@@ -22951,6 +22959,35 @@ function hfHintAt(clientY){
   hint.textContent=on?"":tr(istKopf(zone.which)?"Doppelklick: Kopfzeile":"Doppelklick: Fußzeile");
   hint.classList.add("on");
 }
+/* Tabs im Bearbeitungsfeld an denselben Stopps wie in der Anzeige
+   (2026-10-27, Tom: „vor dem Klick ist die Seitenzahl zentriert, nach dem
+   Klick linksbündig“). Das Feld zeigte den Tab als rohes Zeichen. Jetzt wird
+   jeder Tab ein Platzhalter wie im Text (.wtab), und tabsSetzen gibt ihm
+   die Breite bis zum Stopp — Mitte und rechts ziehen den Text heran.
+   hfSaeubern liest den Platzhalter wieder als schlichtes \t. */
+function hfTabsImFeld(box,v){
+  if(!box||!v)return;
+  const f=fmtOf(doc()),cw=v.tw||(f.w-f.m[1]-f.m[3]);
+  const stopps=hfStopps(v,cw).map(st=>st.a+Math.round(st.mm/TWIP_MM)).join(" ");
+  const roh=[],w=document.createTreeWalker(box,NodeFilter.SHOW_TEXT);let t;
+  while((t=w.nextNode()))if(t.data.includes("\t")&&!(t.parentElement&&t.parentElement.classList.contains("wtab")))roh.push(t);
+  if(roh.length){
+    const sel=getSelection(),pos=sel.rangeCount&&box.contains(sel.anchorNode)?textPos(box):null;
+    roh.forEach(t=>{const frag=document.createDocumentFragment();
+      t.data.split("\t").forEach((x,i)=>{
+        if(i){const sp=document.createElement("span");sp.className="wtab";sp.contentEditable="false";sp.textContent="\t";frag.appendChild(sp)}
+        if(x)frag.appendChild(document.createTextNode(x))});
+      t.replaceWith(frag)});
+    if(pos){setzeTextPos(box,pos);
+      /* Landet die Marke im Platzhalter (er ist nicht bearbeitbar), gehört sie
+         dahinter — sonst ging das nach dem Tab Getippte verloren */
+      const sl=getSelection(),an=sl.anchorNode,wt=an&&(an.nodeType===1?an:an.parentElement).closest(".wtab");
+      if(wt){let n=wt.nextSibling;if(!n||n.nodeType!==3){n=document.createTextNode("");wt.after(n)}
+        const r=document.createRange();r.setStart(n,0);r.collapse(true);sl.removeAllRanges();sl.addRange(r)}}
+  }
+  [...box.children].forEach(z=>{if(z.querySelector(".wtab"))z.dataset.tabs=stopps;else delete z.dataset.tabs});
+  tabsSetzen(box);
+}
 function hfEditOpen(which,page){
   const d=doc();
   if(!hfOf(d,which).on){d[which]={...hfOf(d,which),on:true};commit();paginate();setPrintHF()}
@@ -22965,6 +23002,7 @@ function hfEditOpen(which,page){
   box.innerHTML=zeilen.map((z,i)=>{const g=v.html!=null?hfZeileHeben(z):{em:null,html:z};
     return hfZeileDiv(hfZeilenAlign(v,i),hfFelderEin(g.html),g.em)}).join("");
   box.classList.add("on");
+  hfTabsImFeld(box,v);
   document.body.classList.add("hfmode");
   $("#hfhint").classList.remove("on");
   box.focus();
@@ -23011,7 +23049,7 @@ function placeHfGrip(){
 let hfLiveTimer=null;
 function hfLive(){
   if(!hfEditing)return;
-  const hb=$("#hfedit");if(hb)hfFelderPruefen(hb);
+  const hb=$("#hfedit");if(hb){hfFelderPruefen(hb);hfTabsImFeld(hb,hfOf(doc(),hfEditing.which))}
   clearTimeout(hfLiveTimer);
   hfLiveTimer=setTimeout(()=>{
     const box=$("#hfedit");
@@ -28373,7 +28411,12 @@ function settings(){
     ${option("sTof",s.tofEnabled,tr("Abbildungsverzeichnis"),tr("im Menü Einfügen anbieten"))}
     <div class="setsec">${tr("Autor")}</div>
     ${zeile(tr("Dein Name"),`<input type="text" id="sName" autocomplete="off" value="${esc(s.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
-    <p class="setnote">${tr("Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.")}</p>`;
+    <p class="setnote">${tr("Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.")}</p>
+    <div class="setsec">${tr("Zurücksetzen")}</div>
+    <div class="setakt"><span class="setopt-t"><b>${tr("Alle Einstellungen zurücksetzen")}</b>
+      <span class="setopt-d">${tr("Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.")}
+        ${tr("Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.")}</span></span>
+      <button class="btn gefahr" id="sWerk">${tr("Zurücksetzen")}&hellip;</button></div>`;
   const neu=`
     <div class="setsec">${tr("Neue Dokumente")}</div>
     <p class="setnote">${tr("Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.")}</p>
@@ -28389,8 +28432,9 @@ function settings(){
       return zeile(tr("Seitenformat"),`<select id="sFmt">${Object.entries(FORMATS).map(([k,o])=>
         `<option value="${k}" ${key===k?"selected":""}>${tr(o.n)}</option>`).join("")}${key?"":
         `<option value="eigen" selected>${esc(tr(f.n||"Eigene Maße"))}</option>`}</select>`)})()}
-    ${zeile("",`<div class="setstd"><button class="btn" id="sStdReset">${tr("Standardwerte wiederherstellen")}</button>
-      <span>${WORD_VORGABE.font} ${zahlText(WORD_VORGABE.size)} · ${tr("Zeilenabstand")} ${zahlText(WORD_VORGABE.lh)} · ${tr(FORMATS[WORD_VORGABE.fmt].n)}</span></div>`)}`;
+    <div class="setakt" style="margin-top:6px"><span class="setopt-t"><b>${tr("Vorgaben für neue Dokumente zurücksetzen")}</b>
+      <span class="setopt-d">${WORD_VORGABE.font} ${zahlText(WORD_VORGABE.size)} · ${tr("Zeilenabstand")} ${zahlText(WORD_VORGABE.lh)} · ${tr(FORMATS[WORD_VORGABE.fmt].n)}</span></span>
+      <button class="btn" id="sStdReset">${tr("Zurücksetzen")}</button></div>`;
   const autoc=`
     <div class="setsec">${tr("Beim Tippen")}</div>
     ${option("acQuotes",a.quotes,tr("Anführungszeichen"),tr("Gerade \" und ' werden zu typografischen Anführungszeichen"))}
@@ -28478,8 +28522,7 @@ function settings(){
         `<button class="setnavi ${setTab===k?"on":""}" data-tab="${k}" role="tab" aria-selected="${setTab===k}">${ICO(ico)}<span>${tr(n)}</span></button>`).join("")}</nav>
       <div class="pad setbody" role="tabpanel">${setTab==="save"?spei:setTab==="zwi"?zwi:setTab==="auto"?autoc:setTab==="neu"?neu:allg}</div>
     </div>
-    <div class="rowend"><button class="btn" id="sWerk" style="margin-right:auto">${tr("Auf Werkszustand zurücksetzen")}&hellip;</button>
-      <button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
+    <div class="rowend"><button class="btn" id="setClose">${tr("Schließen")}</button></div></div>`);
   /* Je Reiter ist nur ein Teil der Felder im Dokument — deshalb überall erst
      nachsehen, ob es das Feld gerade gibt, statt es vorauszusetzen. */
   const v=(id,rueck)=>{const e=$("#"+id);
