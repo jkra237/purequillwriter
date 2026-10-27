@@ -407,11 +407,22 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
    würden zehn Kreise das Menü unnötig aufblähen. */
 .swatches.grid{grid-template-columns:repeat(10,18px);gap:4px;padding:6px 9px}
 .swatches.grid .csw{height:18px;border-radius:50%}
+/* Tabellenvorlagen: Vorschau auf Papierweiß, auch im dunklen Schema —
+   die Farben sind die, die gedruckt werden */
+.tvgal{display:grid;grid-template-columns:repeat(3,86px);gap:8px 10px;padding:6px 10px 8px}
+.tvk{display:flex;flex-direction:column;gap:4px;align-items:stretch;padding:0;background:none;border:0;cursor:pointer;font:inherit;font-size:11.5px;color:var(--ink-soft)}
+.tvk .tvb{background:#fff;border:1px solid var(--rule);border-radius:5px;padding:5px}
+.tvk:hover .tvb{border-color:var(--ink-faint)}
+.tvk.on .tvb{outline:2px solid var(--stamp);outline-offset:1px}
+.tvk.on{color:var(--ink)}
+.tvk table{border-collapse:collapse;width:100%;table-layout:fixed}
+.tvk td{height:9px;padding:0;border:0}
 #colmenu{min-width:186px}
 #colmenu:has(.swatches.grid){min-width:auto}
 #colPick{margin-left:auto;width:30px;height:21px;padding:0;border:1px solid var(--rule);
   border-radius:var(--radius);background:none;cursor:pointer}
 .tb svg{pointer-events:none}
+.mi .tico{display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;color:var(--ink-soft)}
 /* Gruppen trennt Abstand statt einer Linie: 7px Lücke innerhalb einer Gruppe,
    gut das Dreifache dazwischen. Das Element bleibt, nur unsichtbar. */
 .sep{width:12px;height:17px;background:none;flex:none}
@@ -498,7 +509,8 @@ ins.wins{text-decoration:underline;text-decoration-color:var(--stamp);text-decor
 #editor [data-wsect]{border-bottom:1px dashed var(--rule)}
 @media print{#editor [data-wsect]{border-bottom:none!important}}
 /* Abstandszeile einer umbrochenen Tabelle (paginate) */
-#editor tr.pgzeile>td{padding:0!important;border:none!important;background:none!important}
+#editor tr.pgzeile:not(.pgkopf)>td{padding:0!important;border:none!important;background:none!important}
+#editor tr.pgkopf{user-select:none}
 /* Platzhalter, der eine Zeile eines geteilten Absatzes auf die nächste
    Seite schiebt (siehe absatzTeilen). Breite 0, an der Grundlinie: er macht
    nur die Zeile höher, in der er steht, und ändert den Umbruch nicht. */
@@ -776,6 +788,9 @@ ol ol ol ol:not([data-ls]){list-style-type:decimal}
 :is(#editor,.pvedit) td,:is(#editor,.pvedit) th{border:1px solid var(--ink-faint);padding:.3em .45em;vertical-align:top;
   word-wrap:break-word;min-width:1.5em}
 :is(#editor,.pvedit) td>p:last-child,:is(#editor,.pvedit) th>p:last-child{margin-bottom:0}
+/* Ausgleich zu dick gezeichneter Zellrahmen (randAusgleich): ein leerer Block
+   am Zellende mit negativem Rand, der mit dem Abstand davor verschmilzt */
+#editor td[data-rk]::after,#editor th[data-rk]::after{content:"";display:block}
 /* Zellen mit eigenem Format (aus Word/Writer): Innenabstand wie dort —
    oben und unten keiner, seitlich 0,19 cm. Sonst wäre jede Zeile höher. */
 :is(#editor,.pvedit) table[data-wz]>*>tr>td,:is(#editor,.pvedit) table[data-wz]>*>tr>th{padding:0 calc(1.9mm * var(--zoom,1))}
@@ -1779,7 +1794,7 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
   #editor td:not([style*="border"]),#editor th:not([style*="border"]){border:1px solid #000!important}
   #editor td[style*="background"],#editor th[style*="background"]{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   #editor table[data-rahmen="ohne"]>*>tr>td,#editor table[data-rahmen="ohne"]>*>tr>th{border:none!important}
-  #editor th{background:none!important}
+  #editor th:not([style*="background"]){background:none!important}
   .glossterm{border-bottom:none!important}
   .toc-refresh,.toc-settings{display:none!important}
   .pageflag,.menu,.veil,.toast,.ruler,.focusbar,.readview,.pvwrap{display:none!important}
@@ -2093,7 +2108,11 @@ const LH_STD=1.15;
 const lhOf=d=>d.lh||S.settings.lh||LH_STD;
 /* Natürliche Zeilenhöhe einer Schrift (Vielfaches der Größe), gemessen statt
    tabelliert: Chromium setzt line-height:normal aus denselben Metriken, die
-   Word für „einfach“ nimmt. Calibri ≈ 1,22, Georgia ≈ 1,14, Arial ≈ 1,15. */
+   Word für „einfach“ nimmt. Calibri ≈ 1,22, Georgia ≈ 1,14, Arial ≈ 1,15.
+   Gemessen bei 1000 px, nicht 100: Chromium rundet Ober- und Unterlänge
+   je auf ganze Pixel, bei 100 px ergab Verdana 1,22 statt 1,2153 — jede
+   Tabellenzeile im Goethe-Dokument war dadurch 0,07 px höher als in Word
+   (2026-10-27, nachgerechnet aus Verdanas Metriken 2489/2048). */
 function lhNatur(font){
   const c=lhNatur.c||(lhNatur.c={});
   if(c[font])return c[font];
@@ -2101,10 +2120,10 @@ function lhNatur(font){
   try{
     const m=document.createElement("div");
     m.style.cssText="position:absolute;left:-9999px;top:0;visibility:hidden;white-space:nowrap;"+
-      "font-size:100px;line-height:normal;padding:0;border:0;font-family:"+schriftStapel(font);
+      "font-size:1000px;line-height:normal;padding:0;border:0;font-family:"+schriftStapel(font);
     m.textContent="Hg";document.body.appendChild(m);
-    const h=m.getBoundingClientRect().height/100;m.remove();
-    if(h>0.8&&h<2)v=Math.round(h*1000)/1000;
+    const h=m.getBoundingClientRect().height/1000;m.remove();
+    if(h>0.8&&h<2)v=Math.round(h*10000)/10000;
   }catch(e){}
   return c[font]=v;
 }
@@ -2513,6 +2532,15 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Überschriften wiederholen":"Repeat Header Rows",
+  "Zeile oder Spalte einfügen":"Insert row or column",
+  "Tabellenvorlage":"Table style",
+  "Kopfzeile hervorheben":"Header row",
+  "Gebänderte Zeilen":"Banded rows",
+  "Keine Vorlage":"No style",
+  "Gitternetz":"Grid",
+  "Schlicht":"Simple",
+  "Zellausrichtung":"Cell alignment",
   "Zellen verbinden":"Merge cells",
   "Zellen teilen":"Split cells",
   "Schattierung":"Shading",
@@ -3510,6 +3538,15 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Überschriften wiederholen":"Répéter les lignes d’en-tête",
+  "Zeile oder Spalte einfügen":"Insérer une ligne ou colonne",
+  "Tabellenvorlage":"Style de tableau",
+  "Kopfzeile hervorheben":"Ligne d'en-tête",
+  "Gebänderte Zeilen":"Lignes à bandes",
+  "Keine Vorlage":"Aucun style",
+  "Gitternetz":"Grille",
+  "Schlicht":"Sobre",
+  "Zellausrichtung":"Alignement de cellule",
   "Zellen verbinden":"Fusionner les cellules",
   "Zellen teilen":"Fractionner les cellules",
   "Schattierung":"Trame de fond",
@@ -4507,6 +4544,15 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Überschriften wiederholen":"Repetir filas de título",
+  "Zeile oder Spalte einfügen":"Insertar fila o columna",
+  "Tabellenvorlage":"Estilo de tabla",
+  "Kopfzeile hervorheben":"Fila de encabezado",
+  "Gebänderte Zeilen":"Filas con bandas",
+  "Keine Vorlage":"Sin estilo",
+  "Gitternetz":"Cuadrícula",
+  "Schlicht":"Sencillo",
+  "Zellausrichtung":"Alineación de celda",
   "Zellen verbinden":"Combinar celdas",
   "Zellen teilen":"Dividir celdas",
   "Schattierung":"Sombreado",
@@ -5504,6 +5550,15 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Überschriften wiederholen":"Repetir linhas de cabeçalho",
+  "Zeile oder Spalte einfügen":"Inserir linha ou coluna",
+  "Tabellenvorlage":"Estilo de tabela",
+  "Kopfzeile hervorheben":"Linha de cabeçalho",
+  "Gebänderte Zeilen":"Linhas em tiras",
+  "Keine Vorlage":"Sem estilo",
+  "Gitternetz":"Grade",
+  "Schlicht":"Simples",
+  "Zellausrichtung":"Alinhamento da célula",
   "Zellen verbinden":"Mesclar células",
   "Zellen teilen":"Dividir células",
   "Schattierung":"Sombreamento",
@@ -6501,6 +6556,15 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Überschriften wiederholen":"Powtarzaj wiersze nagłówka",
+  "Zeile oder Spalte einfügen":"Wstaw wiersz lub kolumnę",
+  "Tabellenvorlage":"Styl tabeli",
+  "Kopfzeile hervorheben":"Wiersz nagłówka",
+  "Gebänderte Zeilen":"Wiersze naprzemienne",
+  "Keine Vorlage":"Bez stylu",
+  "Gitternetz":"Siatka",
+  "Schlicht":"Prosty",
+  "Zellausrichtung":"Wyrównanie komórki",
   "Zellen verbinden":"Scal komórki",
   "Zellen teilen":"Podziel komórki",
   "Schattierung":"Cieniowanie",
@@ -7498,6 +7562,15 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Überschriften wiederholen":"Ripeti righe di intestazione",
+  "Zeile oder Spalte einfügen":"Inserisci riga o colonna",
+  "Tabellenvorlage":"Stile tabella",
+  "Kopfzeile hervorheben":"Riga di intestazione",
+  "Gebänderte Zeilen":"Righe alternate",
+  "Keine Vorlage":"Nessuno stile",
+  "Gitternetz":"Griglia",
+  "Schlicht":"Semplice",
+  "Zellausrichtung":"Allineamento cella",
   "Zellen verbinden":"Unisci celle",
   "Zellen teilen":"Dividi celle",
   "Schattierung":"Sfondo",
@@ -9682,6 +9755,7 @@ function schriftNormalisieren(ed){
   ed.querySelectorAll("span").forEach(s=>{if(!s.attributes.length)unwrap(s)});
 }
 function schriftAnwenden(name){
+  if(einSchritt(()=>schriftAnwenden(name)))return;
   if(hfEditing){hfStil("font",name);return}
   const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
   if(ganzMarkiert(ed,sel)){ganzesDokument("font",name);return}
@@ -9693,6 +9767,7 @@ function schriftAnwenden(name){
   dirty=true;queuePaginate();drawStatus();schriftFelderSetzen();
 }
 function groesseAnwenden(pt){
+  if(einSchritt(()=>groesseAnwenden(pt)))return;
   if(hfEditing){hfStil("size",pt);return}
   const sel=edAuswahlHolen(),ed=$("#editor");if(!sel||!ed)return;
   if(ganzMarkiert(ed,sel)){ganzesDokument("size",pt);return}
@@ -9849,6 +9924,7 @@ function blockFeldSetzen(wert){
   fb.firstElementChild.textContent=f?f[1]:tr("Fließtext");
 }
 function blockAnwenden(wert){
+  if(einSchritt(()=>blockAnwenden(wert)))return;
   const [tag,qs]=String(wert).split(":");
   if(tag==="blockquote"){applyQuote(qs||"");return}
   if(S.mode!=="write"){setMode("write");setTimeout(()=>blockAnwenden(wert),60);return}
@@ -9969,6 +10045,7 @@ function bestInk(hex){
   return kontrast(1)>kontrast(0)?"#FFFFFF":MARKINK;
 }
 function farbeAnwenden(art,c){
+  if(einSchritt(()=>farbeAnwenden(art,c)))return;
   if(hfEditing){if(art==="fore"){hfStil("fore",c);S.settings.foreColor=c;drawTools()}return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
@@ -9982,6 +10059,7 @@ function farbeAnwenden(art,c){
    aufräumen, die sie tragen. Ohne den Umweg gäbe es keinen verlässlichen
    Weg, execCommand eine gesetzte Farbe wieder wegnehmen zu lassen. */
 function farbeEntfernen(art){
+  if(einSchritt(()=>farbeEntfernen(art)))return;
   if(hfEditing){if(art==="fore")hfStil("foreWeg");return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
@@ -10157,6 +10235,7 @@ function absatzZiele(){
   return out;
 }
 function absatzAnwenden(ziele,f){
+  if(einSchritt(()=>absatzAnwenden(ziele,f)))return;
   if(S.mode!=="write")setMode("write");
   const g=doc().size||S.settings.size;
   ziele.forEach(el=>{if(el.isConnected)absatzFormatSetzen(el,f,g)});
@@ -10308,6 +10387,7 @@ function absatzDialog(ziele){
   };
 }
 function indentBlocks(dir){
+  if(einSchritt(()=>indentBlocks(dir)))return;
   const ed=$("#editor");
   if(S.mode!=="write"||!ed){toast(tr("Nur im Schreibmodus"));return}
   ed.focus();
@@ -12730,6 +12810,7 @@ async function tabelleXml(table,ctx){
      waren. Solche Zeilen fallen weg (zeilenListe); bleibt keine, entfällt
      die Tabelle. */
   const breiteVon=(g,cs)=>{let s=0;for(let j=g;j<g+cs;j++)s+=breiten[j]||tabTw/spalten;return Math.round(s)};
+  const nKopf=kopfZeilenZahl(zeilenListe);
   for(let r=0;r<zeilenListe.length;r++){
     const tr=zeilenListe[r];
     const hEm=parseFloat(tr.style.height);
@@ -12751,7 +12832,8 @@ async function tabelleXml(table,ctx){
       zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}${wZellFormat(td)}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
       g+=cs;
     }
-    zeilen+=`<w:tr>${trHeight?`<w:trPr>${trHeight}</w:trPr>`:""}${zellen}</w:tr>`;
+    const trPr=trHeight+(r<nKopf?"<w:tblHeader/>":"");
+    zeilen+=`<w:tr>${trPr?`<w:trPr>${trPr}</w:trPr>`:""}${zellen}</w:tr>`;
   }
   if(!zeilen)return "";
   /* Eine rahmenlose Tabelle (aus Word eingelesen, data-rahmen="ohne") geht
@@ -13363,8 +13445,10 @@ async function odtBlob(d){
       return stilName("table-cell","Tab",`<style:table-cell-properties fo:padding-top="0mm" fo:padding-bottom="0mm" fo:padding-left="1.9mm" fo:padding-right="1.9mm"${f.bg?` fo:background-color="#${f.bg.toLowerCase()}"`:""}${f.va?` style:vertical-align="${f.va}"`:""}`+
         ZELL_SEITEN.map(k=>` fo:border-${k}="${seite(k)}"`).join("")+"/>");
     };
+    const nKopf=kopfZeilenZahl(zeilen);
     for(let r=0;r<zeilen.length;r++){
       const tr=zeilen[r],hEm=parseFloat(tr.style.height);
+      if(r===0&&nKopf)x+="<table:table-header-rows>";
       x+=hEm?`<table:table-row table:style-name="${stilName("table-row","Tab",`<style:table-row-properties style:min-row-height="${odfZahl(hEm*groesse)}pt"/>`)}">`:"<table:table-row>";
       const tds=[...tr.children];
       for(let g=0;g<breite;g++){
@@ -13379,6 +13463,7 @@ async function odtBlob(d){
           (inhalt||'<text:p text:style-name="Standard"/>')+"</table:table-cell>";
       }
       x+="</table:table-row>";
+      if(nKopf&&r===nKopf-1)x+="</table:table-header-rows>";
     }
     return x+"</table:table>";
   };
@@ -13831,7 +13916,7 @@ async function rtfBlob(d){
     const rahmenTw=ohne?"":"\\clbrdrt"+grau+"\\clbrdrl"+grau+"\\clbrdrb"+grau+"\\clbrdrr"+grau;
     let x="";
     for(let r=0;r<zeilen.length;r++){
-      let def="\\trowd\\trgaph108\\trleft0"+(umbruch?"":"");
+      let def="\\trowd\\trgaph108\\trleft0"+(umbruch?"":"")+(r<kopfZeilenZahl(zeilen)?"\\trhdr":"");
       for(let g=0;g<breite;g++){
         const z=raster[r][g]||{};
         def+=(z.cs>1&&!z.hor?"\\clmgf":"")+(z.hor?"\\clmrg":"")+(z.rs>1&&!z.ver?"\\clvmgf":"")+(z.ver?"\\clvmrg":"")+(z.td?zellRtf(z.td):rahmenTw)+"\\cellx"+grenze[g];
@@ -15989,44 +16074,50 @@ const feldPlatzhalter=instr=>{
    Unterstrichen, Durchgestrichen, Farbe, Größe in em zur Zeilenschrift).
    Tabulatoren als „\t“ — bis 1.2 fielen sie ganz weg („FirmaMitteRechts“). */
 function docxHfAbsatz(p,html){
-  let out="",imFeld=0,instr="",ergebnis=false;
-  const h=t=>{if(html)html.out+=t};
-  const feld=ph=>{out+=ph;h(xesc(ph))};
-  [...p.children].forEach(el=>{
-    if(el.localName==="fldSimple"){
-      feld(feldPlatzhalter(String(xattrN(el,"instr")||"")));return;
-    }
-    if(el.localName!=="r")return;
-    const fc=KIND(el,"fldChar");
-    if(fc){
-      const typ=String(xattrN(fc,"fldCharType")||"");
-      if(typ==="begin"){imFeld++;instr="";ergebnis=false}
-      else if(typ==="separate"){ergebnis=true;feld(feldPlatzhalter(instr))}
-      else if(typ==="end"){if(!ergebnis)feld(feldPlatzhalter(instr));imFeld=Math.max(0,imFeld-1);ergebnis=false}
-      return;
-    }
-    const it=KIND(el,"instrText");
-    if(it){instr+=it.textContent;return}
-    /* Zwischen „separate“ und „end“ steht das gespeicherte Ergebnis — das ist
-       schon durch den Platzhalter ersetzt und darf nicht doppelt erscheinen. */
-    if(imFeld&&ergebnis)return;
-    let t="";
-    [...el.children].forEach(c=>{if(c.localName==="t")t+=c.textContent;else if(c.localName==="tab")t+="\t"});
-    out+=t;
-    if(html&&t){
-      const w=docxRPr(KIND(el,"rPr")),st=[];
+  let out="",imFeld=0,instr="",ergebnis=false,offen="";
+  /* Ein Feld trägt das Format seines Ergebnisses — die Seitenzahl in einer
+     7-pt-Fußzeile ist 7 pt groß. Bis 2026-10-27 stand der Platzhalter ohne
+     Format da, die Zeile galt als gemischt und wurde in der Grundgröße der
+     Fußzeile gesetzt: im Goethe-Dokument 2,9 pt höher als in Word, eine
+     Tabellenzeile weniger auf der Seite. */
+  const feld=(ph,rPr)=>{if(!ph)return;out+=ph;if(html)html.out+=lauf(ph,rPr)};
+  const lauf=(t,rPr)=>{
+      const w=docxRPr(rPr),st=[];
       let x=xesc(t);
       if(w.color)st.push("color:#"+w.color);
       if(w.sz&&html.basisPt&&Math.abs(w.sz-html.basisPt)>=0.25)st.push("font-size:"+(Math.round(w.sz/html.basisPt*1000)/1000)+"em");
-      const rf=KIND(KIND(el,"rPr"),"rFonts"),fn=rf&&(xattrN(rf,"ascii")||xattrN(rf,"hAnsi"));
+      const rf=KIND(rPr,"rFonts"),fn=rf&&(xattrN(rf,"ascii")||xattrN(rf,"hAnsi"));
       if(fn&&html.grundF&&String(fn).toLowerCase()!==String(html.grundF).toLowerCase())st.push("font-family:'"+String(fn).replace(/['"]/g,"")+"'");
       if(st.length){x=`<span style="${st.join(";")}">${x}</span>`;html.formatiert=true}
       if(w.strike){x="<s>"+x+"</s>";html.formatiert=true}
       if(w.u){x="<u>"+x+"</u>";html.formatiert=true}
       if(w.i){x="<i>"+x+"</i>";html.formatiert=true}
       if(w.b){x="<b>"+x+"</b>";html.formatiert=true}
-      html.out+=x;
+      return x};
+  [...p.children].forEach(el=>{
+    if(el.localName==="fldSimple"){
+      const r=[...el.children].find(c=>c.localName==="r");
+      feld(feldPlatzhalter(String(xattrN(el,"instr")||"")),r?KIND(r,"rPr"):null);return;
     }
+    if(el.localName!=="r")return;
+    const fc=KIND(el,"fldChar");
+    if(fc){
+      const typ=String(xattrN(fc,"fldCharType")||"");
+      if(typ==="begin"){imFeld++;instr="";ergebnis=false}
+      else if(typ==="separate"){ergebnis=true;offen=feldPlatzhalter(instr)}
+      else if(typ==="end"){if(!ergebnis)feld(feldPlatzhalter(instr),KIND(el,"rPr"));else if(offen)feld(offen,KIND(el,"rPr"));
+        offen="";imFeld=Math.max(0,imFeld-1);ergebnis=false}
+      return;
+    }
+    const it=KIND(el,"instrText");
+    if(it){instr+=it.textContent;return}
+    /* Zwischen „separate“ und „end“ steht das gespeicherte Ergebnis — das ist
+       schon durch den Platzhalter ersetzt und darf nicht doppelt erscheinen. */
+    if(imFeld&&ergebnis){if(offen){feld(offen,KIND(el,"rPr"));offen=""}return}
+    let t="";
+    [...el.children].forEach(c=>{if(c.localName==="t")t+=c.textContent;else if(c.localName==="tab")t+="\t"});
+    out+=t;
+    if(html&&t)html.out+=lauf(t,KIND(el,"rPr"));
   });
   return out;
 }
@@ -17146,12 +17237,15 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     if(spalten.length&&summe>0)
       r+="<colgroup>"+spalten.map(w=>
         `<col style="width:${Math.round(w/summe*1000)/10}%">`).join("")+"</colgroup>";
+    let kopfLauf=true;
     trs.forEach((tr,zi)=>{
       const th=KIND(KIND(tr,"trPr"),"trHeight");
+      const tbh=KIND(KIND(tr,"trPr"),"tblHeader"),kw=kopfLauf&&!!tbh&&!/^(0|false|off)$/.test(String(xattrN(tbh,"val")||""));
+      if(!kw)kopfLauf=false;
       const twip=th?parseInt(xattrN(th,"val"),10)||0:0;
       /* Zeilenhöhen stehen hier in em, damit sie mit der Schriftgröße mitgehen */
       const em=twip&&grundGroesse?Math.round(twip/20/grundGroesse*100)/100:0;
-      r+=em>0?`<tr style="height:${em}em">`:"<tr>";
+      r+="<tr"+(kw?' data-kopfw="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
       /* Zeilen können selbst in Formularfeldern stecken (wiederholbare
          Abschnitte); Zellen ebenso. */
       const zellen=[];
@@ -17301,6 +17395,10 @@ function odtGrundschrift(inhaltXml,stilXml){
   const plus=(m,k,n)=>m.set(k,(m.get(k)||0)+n);
   for(const p of inhalt.getElementsByTagName("*")){
     if(p.localName!=="p")continue;          /* text:h sind Überschriften */
+    /* Absätze in Tabellenzellen zählen nicht, wie beim .doc-Leser: im
+       Goethe-Dokument gaben die 12 pt der Zellen sonst allen Absätzen
+       davor 12 pt Abstand, den LibreOffice dort nicht zeigt */
+    {let e=p.parentNode,inZelle=false;while(e&&e.nodeType===1){if(e.localName==="table-cell"){inZelle=true;break}e=e.parentNode}if(inZelle)continue}
     const absatz=Object.assign({},vorgabe,wirkung("paragraph",p.getAttribute("text:style-name")));
     const walk=(el,stil)=>{
       for(const k of el.childNodes){
@@ -17317,8 +17415,12 @@ function odtGrundschrift(inhaltXml,stilXml){
     walk(p,absatz);
     const laenge=[...gr.values()].reduce((a,b)=>a+b,0)-vorher||p.textContent.length;
     if(laenge){
-      if(absatz.lh)plus(zab,Math.round(absatz.lh*100)/100,laenge);
-      if(absatz.nachPt!=null)plus(nab,Math.round(absatz.nachPt*10)/10,laenge);
+      /* Ohne fo:line-height gilt in ODF „einfach“ — wie bei Word, .doc und
+         RTF oben. Bis 2026-10-27 fiel das auf PureQuills 1,15 zurück: jede
+         Zeile der Goethe-.odt 2 pt höher als in LibreOffice. */
+      plus(zab,absatz.lh?Math.round(absatz.lh*100)/100:1,laenge);
+      /* Ohne Angabe 0 pt danach, die Vorgabe von ODF */
+      plus(nab,absatz.nachPt!=null?Math.round(absatz.nachPt*10)/10:0,laenge);
     }
   }
   return grundAusZaehlung(gr,sch,zab,nab);
@@ -17476,7 +17578,8 @@ function odfHf(el,k,z){
         if(c.nodeType===3){const t=c.nodeValue.replace(/[\t\n\r]+/g," ");a.text+=t;a.html+=hfLaufHtml(t,w,z.basisPt,a,z.grundF);return}
         if(c.nodeType!==1)return;
         const l=c.localName;
-        const feld=ph=>{a.text+=ph;a.html+=xesc(ph)};
+        /* Feld im Format des umgebenden Laufs, siehe docxHfAbsatz */
+        const feld=ph=>{a.text+=ph;a.html+=hfLaufHtml(ph,w,z.basisPt,a,z.grundF)};
         if(l==="page-number")return feld("{seite}");
         if(l==="page-count")return feld("{seiten}");
         if(l==="title")return feld("{titel}");
@@ -17752,7 +17855,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
     const nachStd=gs.ps!=null?gs.ps*grundGroesse:null;
     const zab=pe.zab&&(pe.zab.art!=="auto"||gs.lh==null||Math.abs(pe.zab.v-gs.lh)>=0.01)?pe.zab:null;
     const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
-      pe.mt>0&&"padding-top:"+ptCalc(pe.mt),(letzte?pe.mb>=0.5:pe.mb!=null&&nachStd!=null&&Math.abs(pe.mb-nachStd)>=0.5)&&"margin-bottom:"+ptCalc(pe.mb),
+      pe.mt>0&&"padding-top:"+ptCalc(pe.mt),(letzte?pe.mb>=0.5:nachStd!=null&&Math.abs((pe.mb||0)-nachStd)>=0.5)&&"margin-bottom:"+ptCalc(pe.mb||0),
       zab&&"line-height:"+zabWert(zab),leerPt&&Math.abs(leerPt-grundGroesse)>=0.25&&"font-size:"+ptCalc(leerPt)].filter(Boolean).join(";");
     return st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>";
   };
@@ -17852,14 +17955,14 @@ function odtLesen(inhaltXml,stilXml,bilder){
      verbundene Zellen, verdeckte Zellen fallen weg, rahmenlos bleibt
      rahmenlos */
   const tabelleHtml=t=>{
-    const spalten=[],zeilen=[];
-    const sammle=el=>[...el.children].forEach(x=>{
+    const spalten=[],zeilen=[],kopfZ=new Set();
+    const sammle=(el,kopf)=>[...el.children].forEach(x=>{
       if(x.localName==="table-column"){
         const s=k.stile["table-column:"+x.getAttribute("table:style-name")];
         const w=s&&s.spalte?odfPt(s.spalte.getAttribute("style:column-width"))||parseFloat(s.spalte.getAttribute("style:rel-column-width"))||0:0;
         for(let i=0;i<(parseInt(x.getAttribute("table:number-columns-repeated"),10)||1);i++)spalten.push(w);
-      }else if(x.localName==="table-row")zeilen.push(x);
-      else if(/^table-(columns|header-columns|column-group|rows|header-rows|row-group)$/.test(x.localName))sammle(x);
+      }else if(x.localName==="table-row"){zeilen.push(x);if(kopf)kopfZ.add(x)}
+      else if(/^table-(columns|header-columns|column-group|rows|header-rows|row-group)$/.test(x.localName))sammle(x,kopf||x.localName==="table-header-rows");
     });
     sammle(t);
     let rahmen=false;
@@ -17878,7 +17981,8 @@ function odtLesen(inhaltXml,stilXml,bilder){
       const zs=k.stile["table-row:"+z.getAttribute("table:style-name")];
       const hp=zs&&zs.zeile?odfPt(zs.zeile.getAttribute("style:row-height")||zs.zeile.getAttribute("style:min-row-height")):0;
       const em=hp?Math.round(hp/grundGroesse*100)/100:0;
-      r+=em>0?`<tr style="height:${em}em">`:"<tr>";
+      if(!kopfZ.has(z))kopfZ.clear();
+      r+="<tr"+(kopfZ.has(z)?' data-kopfw="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
       [...z.children].forEach(c=>{
         if(c.localName!=="table-cell")return;
         const cs=parseInt(c.getAttribute("table:number-columns-spanned"),10)||1,rs=parseInt(c.getAttribute("table:number-rows-spanned"),10)||1;
@@ -18225,6 +18329,7 @@ function docPap(o,g){
       case 0x6649:o.itap=g[i]|(g[i+1]<<8)|(g[i+2]<<16)|(g[i+3]<<24);break;
       case 0x260A:o.ilvl=v;break;case 0x460B:o.ilfo=v2;break;case 0x2640:o.outLvl=v;break;
       case 0x2407:o.umbruch=!!v;break;
+      case 0x3404:o.kopf=!!v;break;   /* sprmTTableHeader */
       /* Zeilenabstand (LSPD: Höhe, „mehrfach“-Merker) und Abstand danach */
       case 0x6412:o.zeile={dya:s2,mehrfach:(g[i+2]|(g[i+3]<<8))===1};break;
       case 0xA414:o.nach=v2;break;
@@ -18248,6 +18353,7 @@ function docPap(o,g){
       }
     }
   });
+  if(o.tdef&&o.kopf)o.tdef.kopf=true;
   if(tAn&&o.tdef){
     /* Was die Tabelle nicht nennt, hat in Word keine Linie */
     o.tdef.trand=Object.assign({top:"none",left:"none",bottom:"none",right:"none",insideH:"none",insideV:"none"},T.tbl||T.tbl80||{});
@@ -18408,8 +18514,10 @@ function wortSatz(absaetze,ctx){
     let r="<table\uE003>";
     if(grenzen.length>2){const summe=grenzen[grenzen.length-1]-grenzen[0];
       if(summe>0)r+="<colgroup>"+grenzen.slice(1).map((g,i)=>`<col style="width:${Math.round((g-grenzen[i])/summe*1000)/10}%">`).join("")+"</colgroup>"}
+    let kopfLauf=true;
     zeilen.forEach((z,zi)=>{
-      r+="<tr>";raster[zi]=[];
+      const kw=kopfLauf&&!!(z.tdef&&z.tdef.kopf);if(!kw)kopfLauf=false;
+      r+=kw?'<tr data-kopfw="1">':"<tr>";raster[zi]=[];
       z.zellen.forEach((inh,ci)=>{
         const td=z.tdef,tc=td&&td.tc[ci]||{};
         if(tc.mHor&&!tc.erstHor)return;
@@ -18929,7 +19037,8 @@ function docLesen(buf){
       const abs=[],felder=[];let a=null,sc=null,lauf="",lw=null;
       const zu=()=>{if(lauf&&a){a.html+=hfLaufHtml(lauf,lw||{},basisPt,a,grundF)}lauf=""};
       const text=(t,w)=>{if(lw&&!["b","i","u","s","sz","color","font"].every(q=>(lw[q]||null)===(w[q]||null)))zu();lw=w;lauf+=t;a.text+=t};
-      const feld=ph=>{zu();a.text+=ph;a.html+=xesc(ph)};
+      /* Feld im Format seines Ergebnisses, siehe docxHfAbsatz */
+      const feld=(ph,w)=>{zu();a.text+=ph;a.html+=hfLaufHtml(ph,w||{},basisPt,a,grundF)};
       for(let cp=be[0];cp<be[1]&&cp<zch.length;cp++){
         const c=zch[cp],k=c.charCodeAt(0),fd=felder[felder.length-1];
         if(!a){const px=finde(papx,fcs[cp]);const pap=docPap({...stilPap(px?px.istd:0),tdef:null},px?px.g:leer);
@@ -18938,10 +19047,12 @@ function docLesen(buf){
         const x=finde(chpx,fcs[cp]);const chp=x?docChp({...sc},x.g,sc,schriften):sc;
         if(chp.versteckt||chp.weg)continue;
         if(k===0x13){felder.push({befehl:"",phase:0});continue}
-        if(k===0x14&&fd){fd.phase=1;const ph=feldPlatzhalter(fd.befehl);if(ph){feld(ph);fd.ersetzt=true}continue}
-        if(k===0x15&&fd){if(fd.phase===0){const ph=feldPlatzhalter(fd.befehl);if(ph)feld(ph)}felder.pop();continue}
+        if(k===0x14&&fd){fd.phase=1;fd.ph=feldPlatzhalter(fd.befehl);if(fd.ph)fd.ersetzt=true;continue}
+        if(k===0x15&&fd){if(fd.phase===0){const ph=feldPlatzhalter(fd.befehl);if(ph)feld(ph,chp)}
+          else if(fd.ph)feld(fd.ph,chp);felder.pop();continue}
         if(fd&&fd.phase===0){fd.befehl+=c;continue}
-        if(fd&&fd.ersetzt)continue;
+        /* erstes Zeichen des Ergebnisses: Platzhalter in dessen Format */
+        if(fd&&fd.ersetzt){if(fd.ph){feld(fd.ph,chp);fd.ph=""}continue}
         if(k===0x0D){zu();a.text=a.text.replace(/[  ]+$/,"");a.markSz=chp.sz;a.basisPt=basisPt;abs.push(a);a=null;lw=null;continue}
         if(k===0x09){text("\t",chp);continue}
         if(k===0x01){const b=chp.bildAn!=null?bildImText(chp.bildAn):null;
@@ -19230,7 +19341,8 @@ function rtfLesen(roh){
         case "par":zuAbs(gs,st,false);break;
         case "cell":zuAbs(gs,st,true);break;
         case "nestcell":zuAbs(gs,st,true);break;
-        case "row":gs.abs.push({runs:[],pap:{...st.pap,intbl:true,itap:1},ttp:true,tdef:{gr:[...gs.zeile.gr],tc:[...gs.zeile.tc],ohneRahmen:gs.zeile.ohneRahmen,fmt:!!gs.zeile.fmt}});break;
+        case "row":gs.abs.push({runs:[],pap:{...st.pap,intbl:true,itap:1},ttp:true,tdef:{gr:[...gs.zeile.gr],tc:[...gs.zeile.tc],ohneRahmen:gs.zeile.ohneRahmen,fmt:!!gs.zeile.fmt,kopf:!!gs.zeile.kopf}});break;
+        case "trhdr":gs.zeile.kopf=true;break;
         case "nestrow":gs.abs.push({runs:[],pap:{...st.pap},innerTtp:true});break;
         case "line":roh({h:"<br>",t:"\n",f:st.f});break;
         case "tab":roh({h:'<span class="wtab" contenteditable="false">\t</span>',t:"\t",f:st.f});break;
@@ -20442,6 +20554,21 @@ function toolsMenu(){
 }
 
 /* ---- Kontextmenü im Text ---- */
+/* Tabellenteil des Kontextmenüs, mit denselben Farbsymbolen wie die Leiste */
+function tabKontext(cell,bereich){
+  const ic=a=>`<span class="chk tico">${ICOSZ(TAB_ICO[a],16,1.4)}</span>`;
+  const eintrag=(a,ico,text,pfeil)=>`<button class="mi" data-c="tbl:${a}">${ic(ico)}${text}<span class="k">${pfeil?"&rsaquo;":""}</span></button>`;
+  const mehr=bereich&&bereich.rect&&bereich.zellen.length>1,verb=cell.colSpan>1||cell.rowSpan>1;
+  const tz=[...cell.closest("table").rows],kopfAn=tz.indexOf(cell.parentElement)<kopfZeilenZahl(tz);
+  return eintrag("ins","rowBelow",tr("Zeile oder Spalte einfügen"),1)+eintrag("del","del",tr("Löschen"),1)+
+    (mehr?eintrag("merge","merge",tr("Zellen verbinden")):"")+(verb?eintrag("split","split",tr("Zellen teilen")):"")+
+    `<div class="msep"></div>`+
+    eintrag("vorlage","vorlage",tr("Tabellenvorlage")+"…")+eintrag("borders","borders",tr("Rahmen"),1)+
+    eintrag("shade","shade",tr("Schattierung")+"…")+eintrag("valign","valign",tr("Zellausrichtung"),1)+
+    eintrag("size","size",tr("Spaltenbreite"),1)+eintrag("headToggle","headToggle",tr("Kopfzeile umschalten"))+
+    `<button class="mi" data-c="tbl:kopfw">${ic("kopfw")}${tr("Überschriften wiederholen")}<span class="k">${kopfAn?"&#10003;":""}</span></button>`+
+    `<div class="msep"></div>`;
+}
 function contextMenu(e){
   const ed=$("#editor");
   if(S.mode!=="write"||!ed||!ed.contains(e.target))return;
@@ -20449,6 +20576,7 @@ function contextMenu(e){
   const sel=getSelection(),hasSel=sel.rangeCount&&!sel.isCollapsed;
   const onAnch=e.target.closest(".anch");
   const cell=e.target.closest("td,th");
+  const tbB=cell?zellBereich():null;
   const onHeading=e.target.closest("#editor h1,#editor h2,#editor h3,#editor h4");
   if(onHeading&&!onHeading.id)onHeading.id="h_"+uid();
   const headingHidden=onHeading&&(doc().tocHidden||[]).includes(onHeading.id);
@@ -20463,6 +20591,7 @@ function contextMenu(e){
     <button class="mi" data-c="paste"><span class="chk"></span>${tr("Einfügen")}<span class="k">${K} V</span></button>
     <button class="mi" data-c="selall"><span class="chk"></span>${tr("Alles auswählen")}<span class="k">${K} A</span></button>
     <div class="msep"></div>
+    ${cell?tabKontext(cell,tbB):""}
     <!-- Wie in Word: „Absatz…“ im Rechtsklick-Menü (Toms Wunsch) -->
     <button class="mi" data-c="absatz"><span class="chk"></span>${tr("Absatz…")}</button>
     <div class="msep"></div>
@@ -20484,9 +20613,6 @@ function contextMenu(e){
       ?`<button class="mi" data-c="glomore"><span class="chk"></span>${tr("Glossar")}<span class="k">&rsaquo;</span></button>`
       :`<button class="mi" data-c="glolook"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">${kz("glossSuch")}</span></button>`}
     <div class="msep"></div>
-    ${cell?`<button class="mi" data-c="tblmore"><span class="chk"></span>${tr("Tabelle")}<span class="k">&rsaquo;</span></button>
-    <div class="msep"></div>`
-    :""}
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen…")}</button>`;
   document.body.appendChild(m);armHoverSubs(m);
   menuPlatzieren(m,e.clientX,e.clientY);
@@ -20514,27 +20640,17 @@ function contextMenu(e){
       openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
       return;
     }
-    /* Acht Tabelleneintraege standen bisher flach im Menue — in einer Zelle
-       waren das 18 Eintraege auf 636px, gut neun Zehntel der Fensterhoehe.
-       Seit es die Tabellenleiste gibt, sind sie ausserdem der zweite Weg zu
-       denselben Befehlen; ein Untermenue behaelt ihn, ohne die volle Hoehe
-       dafuer zu bezahlen. Ein zusaetzlicher Klick entsteht nicht:
-       armHoverSubs() klappt Pfeil-Eintraege schon beim Ueberfahren auf. */
-    if(a==="tblmore"){
-      openSubMenu(b,[
-        {a:"rowAbove",label:tr("Zeile darüber einfügen")},
-        {a:"rowBelow",label:tr("Zeile darunter einfügen")},
-        {a:"colLeft",label:tr("Spalte links einfügen")},
-        {a:"colRight",label:tr("Spalte rechts einfügen")},
-        {a:"rowDel",label:tr("Zeile löschen")},
-        {a:"colDel",label:tr("Spalte löschen")},
-        {a:"tblDel",label:tr("Tabelle löschen")},
-        {a:"headToggle",label:tr("Kopfzeile umschalten")}
-      ],sub=>{
-        ed.focus();
-        if(cell&&ed.contains(cell))tableCmdMitMarke(sub,cell);
-        drawTblBar();setTimeout(drawTblBar,260);
-      });
+    /* Tabellenbefehle wie in Word (2026-10-27): direkt im Menü statt
+       hinter „Tabelle ›“ — Einfügen und Löschen als Untermenü, Verbinden
+       bzw. Teilen nur, wenn es etwas zu verbinden oder zu teilen gibt.
+       Vorlage und Schattierung öffnen ein Farbfeld und tragen deshalb
+       „…“ statt „›“: ein Pfeil-Eintrag klappt schon beim Überfahren auf
+       und schlösse dabei das Menü. */
+    if(a.startsWith("tbl:")){
+      const w=a.slice(4);
+      if(!cell||!ed.contains(cell))return closeMenu();
+      if(["merge","split","headToggle","kopfw"].includes(w)){closeMenu();ed.focus()}
+      tabAktion(w,b,cell,tbB);
       return;
     }
     if(a==="glomore"){
@@ -20647,7 +20763,8 @@ function linkSelection(){
     </div>
     <div class="rowend"><button class="btn" id="nzAb">${tr("Abbrechen")}</button><button class="btn pri" id="nzOk">${tr("Notiz einfügen")}</button></div></div>`);
   const t=$("#nzText");
-  const anheften=id=>{const kopf=wrapRange(range,id);hotNote=id;curOcc[id]=Math.max(0,spansOf(id).indexOf(kopf));flush();commit();drawAnchors()};
+  const anheften=id=>{let i=0;alsSchritt(()=>{const kopf=wrapRange(range,id);i=Math.max(0,spansOf(id).indexOf(kopf))});
+    hotNote=id;curOcc[id]=i;flush();commit();drawAnchors()};
   const einfuegen=()=>{const v=t.value.trim();closeOvl();
     const n=addNote(v);n.color=farbe;anheften(n.id);toast(tr("Notiz eingefügt"))};
   $("#nzOk").onclick=einfuegen;$("#nzAb").onclick=closeOvl;
@@ -21021,7 +21138,33 @@ function istZwischentitel(b){
   return zeilenVon(b,0).length===1;
 }
 /* Die Bildschirm-Umbrüche zwischen Listeneinträgen (siehe reflow) */
+/* Zellrahmen dünner als ein Bildschirmpixel zeichnet Chromium als ganzen
+   Pixel: ein 0,5-pt-Rahmen (0,67 px) wird 1 px, und jede Tabellenzeile war
+   um die Differenz höher als in Word — im Goethe-Dokument 0,33 px je Zeile,
+   nach 16 Zeilen rutschte die letzte auf die nächste Seite (2026-10-27,
+   Tom: „wie können zeilenhöhen anders sein“). Die Linie bleibt sichtbar;
+   die Zelle nimmt den Überschuss (data-rk, in px) an ihrem Ende über einen
+   leeren Block mit negativem Rand wieder zurück. Ein eigenes Merkmal statt
+   einer CSS-Variablen im style: deren Setzen schrieb den ganzen style neu
+   (#E2EFD9 → rgb(…)). Je vorkommendem Wert eine Regel in #rkstil. Nur
+   Anzeige: pgliWeg() streift data-rk mit ab, gespeichert wird es nie. */
+function randAusgleich(root){
+  root.querySelectorAll("td,th").forEach(td=>{
+    const m=/^([\d.]+)(pt|px)$/.exec(td.style.borderBottomWidth||"");
+    const px=m?(m[2]==="pt"?+m[1]*4/3:+m[1]):NaN;
+    const ist=parseFloat(getComputedStyle(td).borderBottomWidth);
+    const rk=px>=0&&ist>px?Math.round((ist-px)*1000)/1000:0;
+    if(rk>0.01){if(td.getAttribute("data-rk")!==String(rk))td.setAttribute("data-rk",rk)}
+    else if(td.hasAttribute("data-rk"))td.removeAttribute("data-rk");
+  });
+  const werte=[...new Set([...root.querySelectorAll("[data-rk]")].map(e=>e.getAttribute("data-rk")))];
+  let st=document.getElementById("rkstil");
+  if(!st){st=document.createElement("style");st.id="rkstil";document.head.appendChild(st)}
+  const css=werte.map(w=>'#editor [data-rk="'+w+'"]::after{margin-top:-'+w+'px}').join("");
+  if(werte.length&&st.textContent!==css)st.textContent=css;
+}
 function pgliWeg(root){
+  root.querySelectorAll("[data-rk]").forEach(e=>e.removeAttribute("data-rk"));
   root.querySelectorAll("li.pgli").forEach(li=>{
     li.style.removeProperty("margin-top");li.classList.remove("pgli");
     if(!li.getAttribute("class"))li.removeAttribute("class");
@@ -21113,6 +21256,7 @@ function paginate(){
     ed.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
     pgliWeg(ed);
     pgspaltWeg(ed);
+    randAusgleich(ed);
     const edTop=ed.getBoundingClientRect().top;
     const fnByPage=[];
     let nachAbschnitt=false;
@@ -21180,7 +21324,7 @@ function paginate(){
          Abstandszeilen sind reine Anzeige wie margin-top: flush() und der
          Druck nehmen sie heraus, Tabellenbefehle räumen sie vorher ab. */
       if(b.tagName==="TABLE"&&!zwang&&h>contentH&&top+h>limit+1){
-        const zeilen=[...b.rows];
+        const zeilen=[...b.rows],nKopf=kopfZeilenZahl(zeilen);
         const spalten=Math.max(1,...zeilen.map(r=>[...r.cells].reduce((n,c)=>n+(c.colSpan||1),0)));
         zeilen.forEach((r,i)=>{
           const rr=r.getBoundingClientRect(),rt=rr.top-edTop,rh=rr.height;
@@ -21200,8 +21344,12 @@ function paginate(){
           sp.className="pgzeile";sp.contentEditable="false";
           sp.innerHTML=`<td colspan="${spalten}"></td>`;
           r.parentNode.insertBefore(sp,r);
+          /* Wiederholte Überschrift: Anzeige-Kopie oben auf der neuen Seite */
+          const kopf=nKopf&&i>=nKopf?zeilen.slice(0,nKopf).map(k=>{const c=k.cloneNode(true);
+            c.removeAttribute("data-kopfw");c.classList.add("pgzeile","pgkopf");c.contentEditable="false";
+            r.parentNode.insertBefore(c,r);return c}):[];
           sp.firstChild.style.height=(ziel-rt)+"px";
-          const rest=ziel-(r.getBoundingClientRect().top-edTop);
+          const rest=ziel-((kopf[0]||r).getBoundingClientRect().top-edTop);
           if(Math.abs(rest)>0.5)sp.firstChild.style.height=(ziel-rt+rest)+"px";
         });
       }
@@ -21624,6 +21772,7 @@ function curQuote(){
    render(): das würde die Schreibfläche aus d.html neu aufbauen und die
    Schreibmarke verlieren, obwohl sich nur ein Attribut geändert hat. */
 function applyQuote(k){
+  if(einSchritt(()=>applyQuote(k)))return;
   if(S.mode!=="write"){setMode("write");setTimeout(()=>applyQuote(k),60);return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
@@ -21842,6 +21991,7 @@ function nachListe(){dirty=true;commit();queuePaginate();drawAnchors();drawStatu
    stehen. Deshalb die Grenzen vorher auf Textknoten legen (ftGrenze) und
    danach zurücksetzen. */
 function listeUmschalten(befehl,still){
+  if(einSchritt(()=>listeUmschalten(befehl,still)))return;
   const ed=$("#editor");if(!ed)return;
   if(S.mode!=="write"){setMode("write");setTimeout(()=>listeUmschalten(befehl,still),60);return}
   ed.focus();
@@ -22036,6 +22186,7 @@ function listenPunktWeg(){
    anderen Art, wandelt execCommand sie um (ul <-> ol). Kein render(), sonst
    ginge die Schreibmarke verloren — es ändert sich nur ein Attribut. */
 function applyList(tag,k){
+  if(einSchritt(()=>applyList(tag,k)))return;
   if(S.mode!=="write"){setMode("write");setTimeout(()=>applyList(tag,k),60);return}
   const ed=$("#editor");if(!ed)return;
   ed.focus();
@@ -22564,8 +22715,13 @@ function hfZeileHeben(html){
     const sp=[...box.querySelectorAll("[style]")].find(e=>hfEmVon(e)!=null);
     return sp?{em:hfEmVon(sp),html:""}:{em:null,html};
   }
-  const traeger=texte.map(groesseVon);
-  if(traeger.some(x=>!x))return {em:null,html};
+  /* Ein bloßer Platzhalter ({seite} …) ohne eigene Größe nimmt die der
+     Zeile — in älteren Dokumenten stand er ohne Format neben dem 7-pt-Text */
+  const nurFeld=n=>/^\s*(\{[^{}\s]+\}\s*)+$/.test(n.data);
+  let traeger=texte.map(groesseVon);
+  if(traeger.some((x,i)=>!x&&!nurFeld(texte[i])))return {em:null,html};
+  traeger=traeger.filter(Boolean);
+  if(!traeger.length)return {em:null,html};
   const ems=[...new Set(traeger.map(hfEmVon))];
   if(ems.length!==1)return {em:null,html};
   em=ems[0];
@@ -23465,6 +23621,25 @@ function curCell(){
   n=n.nodeType===1?n:n.parentElement;
   return n?n.closest("td,th"):null;
 }
+/* Wiederholte Überschrift (2026-10-27, Tom am Goethe-Dokument: Word und
+   LibreOffice zeigen die Kopfzeile der Tabelle auf jeder Seite wieder,
+   PureQuill nicht). Words „Überschriften wiederholen“ (w:tblHeader), in ODF
+   table:table-header-rows, in .doc sprmTTableHeader, in RTF \trhdr. Im
+   Editor tragen die führenden Zeilen data-kopfw; nur ein ununterbrochener
+   Lauf ab der ersten Zeile zählt, wie in Word. Am Bildschirm setzt
+   paginate() nach jedem Seitenwechsel in der Tabelle eine Anzeige-Kopie
+   (tr.pgzeile.pgkopf), im Druck wandern die Zeilen in ein <thead>, das
+   Chromium auf jeder Seite wiederholt. */
+function kopfZeilenZahl(rows){let n=0;while(n<rows.length&&rows[n].hasAttribute("data-kopfw"))n++;return n}
+function kopfZeilenUmschalten(zelle){
+  const t=zelle.closest("table");t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+  const zeilen=[...t.rows],i=zeilen.indexOf(zelle.parentElement),n=kopfZeilenZahl(zeilen);
+  if(i<0)return;
+  /* In der Überschrift: ab dieser Zeile keine mehr; sonst bis hierher */
+  if(i<n)zeilen.slice(i).forEach(r=>r.removeAttribute("data-kopfw"));
+  else zeilen.slice(0,i+1).forEach(r=>r.setAttribute("data-kopfw","1"));
+  flush();dirty=true;commit();queuePaginate();
+}
 function tableCmd(a,cell){
   if(!cell)return;
   const row=cell.parentElement,table=cell.closest("table");
@@ -23474,6 +23649,7 @@ function tableCmd(a,cell){
   if(a==="rowAbove"||a==="rowBelow"){
     const nr=document.createElement("tr");
     [...row.children].forEach(c=>{const n=mk(c.tagName==="TH"&&a==="rowAbove"?"th":"td");if(c.getAttribute("style"))n.setAttribute("style",c.getAttribute("style"));nr.appendChild(n)});
+    if(row.hasAttribute("data-kopfw")&&(a==="rowAbove"||row.nextElementSibling&&row.nextElementSibling.hasAttribute("data-kopfw")))nr.setAttribute("data-kopfw","1");
     row.parentNode.insertBefore(nr,a==="rowAbove"?row:row.nextSibling);
   }
   if(a==="colLeft"||a==="colRight"||a==="colDel"){
@@ -23515,6 +23691,29 @@ function tableCmd(a,cell){
    Leiste in jeder Sprache schmal (Deutsch ist die laengste) und legt vor die
    nicht umkehrbaren Befehle einen Schritt. */
 let tblBarFuer=null,tblBarKopf=null;
+/* Tabellensymbole (2026-10-27, Tom: „sehr nichtaussagend … ruhig etwas
+   eindeutiger mit mehr farbakzenten“). Das Gitter bleibt in der
+   Schriftfarbe der Leiste, nur der Teil, um den es geht, trägt Farbe:
+   Plus grün, Verbinden blau, Teilen orange, Schattierung gelb, Rahmen
+   violett, Ausrichtung türkis, Breite rosa, Löschen rot. Mitteltöne, die
+   auf hellem wie dunklem Schema lesbar bleiben. Leiste und Kontextmenü
+   nehmen dieselben Zeichen. */
+const TAB_ICO={
+  vorlage:'<path d="M3.6 4.6h16.8V9H3.6z" fill="#4E9A2A" stroke="none"/><path d="M3.6 13h16.8v3.4H3.6z" fill="#4E9A2A" opacity=".35" stroke="none"/><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M3 13h18M3 16.4h18M9 9v11M15 9v11"/>',
+  rowAbove:'<path d="M3.5 10.5h17v5h-17z" fill="#3E9B4F" opacity=".22" stroke="none"/><path d="M12 2.2v5.6M9.2 5h5.6" stroke="#3E9B4F" stroke-width="1.9"/><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 15.5h18M9.5 10v11M14.5 10v11"/>',
+  rowBelow:'<path d="M3.5 8.5h17v5h-17z" fill="#3E9B4F" opacity=".22" stroke="none"/><rect x="3" y="3" width="18" height="11" rx="1.5"/><path d="M3 8.5h18M9.5 3v11M14.5 3v11"/><path d="M12 16.2v5.6M9.2 19h5.6" stroke="#3E9B4F" stroke-width="1.9"/>',
+  colLeft:'<path d="M10.5 3.5h5v17h-5z" fill="#3E9B4F" opacity=".22" stroke="none"/><path d="M2.2 12h5.6M5 9.2v5.6" stroke="#3E9B4F" stroke-width="1.9"/><rect x="10" y="3" width="11" height="18" rx="1.5"/><path d="M15.5 3v18M10 9.5h11M10 14.5h11"/>',
+  colRight:'<path d="M8.5 3.5h5v17h-5z" fill="#3E9B4F" opacity=".22" stroke="none"/><rect x="3" y="3" width="11" height="18" rx="1.5"/><path d="M8.5 3v18M3 9.5h11M3 14.5h11"/><path d="M16.2 12h5.6M19 9.2v5.6" stroke="#3E9B4F" stroke-width="1.9"/>',
+  merge:'<path d="M4 6h16v12H4z" fill="#2F7BD8" opacity=".18" stroke="none"/><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v2.5M12 16.5V19"/><path d="M6 12h4.5M8.8 9.8l2.2 2.2-2.2 2.2M18 12h-4.5M15.2 9.8 13 12l2.2 2.2" stroke="#2F7BD8" stroke-width="1.7"/>',
+  split:'<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v14" stroke="#E0663A" stroke-width="1.7" stroke-dasharray="2.2 1.8"/><path d="M9.5 12H5.5M7.5 10 5.5 12l2 2M14.5 12h4M16.5 10l2 2-2 2" stroke="#E0663A" stroke-width="1.6"/>',
+  shade:'<path d="M5 11 11 5l7 7-6 6z" fill="#E3A21A" opacity=".45"/><path d="M5 11 11 5l7 7-6 6zM5 11h13"/><path d="M19.5 14.8s1.7 2 1.7 3.1a1.7 1.7 0 0 1-3.4 0c0-1.1 1.7-3.1 1.7-3.1z" fill="#E3A21A" stroke="#C4860C"/>',
+  borders:'<path d="M12 4v16M4 12h16" stroke="#7A5AD8" opacity=".55" stroke-dasharray="1.5 2"/><rect x="3.5" y="3.5" width="17" height="17" rx="1" stroke="#7A5AD8" stroke-width="2.1"/>',
+  valign:'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M7.5 12h9" stroke="#159A80" stroke-width="2.4"/><path d="M12 5.8v3.6M10.2 7.6 12 9.4l1.8-1.8M12 18.2v-3.6M10.2 16.4 12 14.6l1.8 1.8" stroke="#159A80" stroke-width="1.5"/>',
+  size:'<rect x="3.5" y="6" width="17" height="14" rx="1"/><path d="M9.2 6v14M14.8 6v14"/><path d="M4 2.8h16M4 2.8l2-1.6M4 2.8l2 1.6M20 2.8l-2-1.6M20 2.8l-2 1.6" stroke="#D0508A" stroke-width="1.5"/>',
+  del:'<g stroke="#D64545"><path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/></g><path d="M17.6 18.6 19.8 21.4 22 18.6"/>',
+  kopfw:'<path d="M3.6 4.6h16.8v2.9H3.6zM3.6 13.6h16.8v2.9H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/>',
+  headToggle:'<path d="M3.6 5.2h16.8v4H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>'
+};
 function drawTblBar(){
   const bar=$("#tblbar");if(!bar)return;
   const ed=$("#editor");
@@ -23530,44 +23729,17 @@ function drawTblBar(){
   const neueTab=t!==tblBarFuer;
   if(t!==tblBarFuer||kopf!==tblBarKopf){
     tblBarFuer=t;tblBarKopf=kopf;
-    const kn=(a,titel,d)=>`<button class="tb" data-tb="${a}" title="${esc(tr(titel))}">${ICOTB(d)}</button>`;
+    const kn=(a,titel)=>`<button class="tb${a==="headToggle"&&kopf?" on":""}" data-tb="${a}" title="${esc(tr(titel))}">${ICOTB(TAB_ICO[a])}</button>`;
+    /* Vorlage zuerst: das ist der Schritt, mit dem man eine Tabelle
+       einkleidet. Danach Einfügen, Verbinden/Teilen, Zellformat, Löschen,
+       Kopfzeile — Reihenfolge nach Sachnähe wie bisher. */
     bar.innerHTML=leisteName(tr("Tabelle"))+
-      kn("rowAbove","Zeile darüber einfügen",
-        '<path d="M12 2.5v5M9.5 5h5"/><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 15.5h18M9.5 10v11M14.5 10v11"/>')+
-      kn("rowBelow","Zeile darunter einfügen",
-        '<rect x="3" y="3" width="18" height="11" rx="1.5"/><path d="M3 8.5h18M9.5 3v11M14.5 3v11"/><path d="M12 16.5v5M9.5 19h5"/>')+
-      `<div class="sep"></div>`+
-      kn("colLeft","Spalte links einfügen",
-        '<path d="M2.5 12h5M5 9.5v5"/><rect x="10" y="3" width="11" height="18" rx="1.5"/><path d="M15.5 3v18M10 9.5h11M10 14.5h11"/>')+
-      kn("colRight","Spalte rechts einfügen",
-        '<rect x="3" y="3" width="11" height="18" rx="1.5"/><path d="M8.5 3v18M3 9.5h11M3 14.5h11"/><path d="M16.5 12h5M19 9.5v5"/>')+
-      /* Auch diese beiden als Symbol: eine Leiste aus vier Symbolen, einem
-         Wortschalter und einem Wortmenue liest sich als drei verschiedene
-         Bedienarten nebeneinander. Gleiche Form fuer gleiche Sache — und
-         nebenbei haengt die Breite damit nicht mehr an der Sprache.
-         Reihenfolge nach Sachnaehe: erst die vier Einfuegebefehle, dann das
-         Loeschen — beides betrifft Zeilen und Spalten und gehoert zusammen.
-         Das Umschalten der Kopfzeile aendert nichts am Zuschnitt der Tabelle
-         und steht deshalb abgesetzt am Ende.
-         Die Kopfreihe ist gefuellt gezeichnet: das unterscheidet den
-         Umschalter von den vier Einfuege-Symbolen, die dieselbe Gitterform
-         tragen, und die vorhandene .on-Darstellung zeigt seinen Zustand. */
-      `<div class="sep"></div>`+
-      kn("merge","Zellen verbinden",'<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v3M12 16v3M7 12h3.5M9 10l2 2-2 2M17 12h-3.5M15 10l-2 2 2 2"/>')+
-      kn("split","Zellen teilen",'<rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="M12 5v14M5.5 12h3.5M7.5 10l-2 2 2 2M18.5 12H15M16.5 10l2 2-2 2"/>')+
-      `<div class="sep"></div>`+
-      kn("shade","Schattierung",'<path d="M5 11 11 5l7 7-6 6z"/><path d="M5 11h13"/><path d="M19.5 15.5s1.5 1.8 1.5 2.8a1.5 1.5 0 0 1-3 0c0-1 1.5-2.8 1.5-2.8z"/>')+
-      kn("borders","Rahmen",'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M12 3.5v17M3.5 12h17" stroke-dasharray="1.5 2"/>')+
-      kn("valign","Ausrichtung in der Zelle",'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M8 12h8M12 7v10M10 9l2-2 2 2M10 15l2 2 2-2"/>')+
-      kn("size","Spaltenbreite",'<rect x="3.5" y="5" width="17" height="14" rx="1"/><path d="M9.2 5v14M14.8 5v14M5.5 12h2M16.5 12h2"/>')+
-      `<div class="sep"></div>
-      <button class="tb" data-tb="del" title="${esc(tr("Löschen"))}">`+
-        ICOTB('<path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/><path d="M17.6 18.6 19.8 21.4 22 18.6"/>')+
-      `</button>
-      <div class="sep"></div>
-      <button class="tb ${kopf?"on":""}" data-tb="headToggle" title="${esc(tr("Kopfzeile umschalten"))}">`+
-        ICOTB('<rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3.6 5.2h16.8v4H3.6z" fill="currentColor" stroke="none" opacity=".5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>')+
-      `</button>`;
+      kn("vorlage","Tabellenvorlage")+`<div class="sep"></div>`+
+      kn("rowAbove","Zeile darüber einfügen")+kn("rowBelow","Zeile darunter einfügen")+`<div class="sep"></div>`+
+      kn("colLeft","Spalte links einfügen")+kn("colRight","Spalte rechts einfügen")+`<div class="sep"></div>`+
+      kn("merge","Zellen verbinden")+kn("split","Zellen teilen")+`<div class="sep"></div>`+
+      kn("shade","Schattierung")+kn("borders","Rahmen")+kn("valign","Ausrichtung in der Zelle")+kn("size","Spaltenbreite")+`<div class="sep"></div>`+
+      kn("del","Löschen")+`<div class="sep"></div>`+kn("headToggle","Kopfzeile umschalten");
   }
   leisteAndocken(bar,curCell(),neueTab);
 }
@@ -23611,6 +23783,282 @@ function zellBereich(){
       rect.r0=Math.min(rect.r0,z.r0);rect.r1=Math.max(rect.r1,z.r1);rect.c0=Math.min(rect.c0,z.c0);rect.c1=Math.max(rect.c1,z.c1);wieder=true}})}
   const zellen=raster.zellen.filter(z=>z.r0>=rect.r0&&z.r1<=rect.r1&&z.c0>=rect.c0&&z.c1<=rect.c1).map(z=>z.td);
   return {t,raster,zellen,rect};
+}
+/* ================= Ein Befehl = ein Rückgängig-Schritt =================
+   (2026-10-27, Tom: „vor und zurück sollte bei allen Änderungen greifen“.)
+   Rückgängig ist der Verlauf des Browsers. Viele Befehle bauen den Text
+   aber direkt im DOM um — Absatzformat, Listen, Fußnoten, Linie, Bildlage,
+   Ersetzen —, und davon weiß der Verlauf nichts: Strg+Z übersprang sie und
+   nahm das davor Getippte zurück. Andere mischen Browserbefehl und eigenes
+   Aufräumen (Schriftart, Hervorhebung) und ergaben zwei Schritte oder einen,
+   der nicht mehr passte (gemessen: 18 von 30 Befehlen).
+   Deshalb wird alles mitgeschrieben, was ein Befehl ändert, und rückwärts
+   zurückgespielt: eigene Änderungen über das Protokoll, Browserbefehle mit
+   dessen eigenem Rückgängig. Danach steht der neue Stand der betroffenen
+   Blöcke per insertHTML an ihrer Stelle — genau ein Schritt im selben
+   Verlauf wie jeder Tastendruck. Die Originalknoten kommen dabei zurück,
+   so bleibt auch das davor Getippte rücknehmbar (wie bei tabUndo).
+   Vorübergehende Markierungen (Suchtreffer, Rechtschreibung, Bereinigen,
+   Glossar) lagen nie im Verlauf: sie kommen nicht mit in den Schritt und
+   werden danach wieder aufgetragen, sonst brächte Rückgängig sie später als
+   Reste zurück. Ebenso bleibt draußen, was der Seitenumbruch einfügt.
+   einSchritt am Anfang eines Befehls (verschachtelt läuft er einfach),
+   alsSchritt für ein Stück Code, schrittStart/schrittEnde fürs Ziehen. */
+const SCHRITT_MARKEN=".hit,.glossterm,.spellerr,.cleanerr",SCHRITT_KLASSEN=["cleanp","cur","sel"];
+let schrittOffen=null;
+function schrittStart(){
+  const ed=$("#editor");
+  if(schrittOffen&&(schrittOffen.ed!==ed||Date.now()-schrittOffen.t>120000))schrittAbbrechen();
+  if(!ed||schrittOffen||hfEditing||S.mode!=="write")return null;
+  const st={ed,t:Date.now(),segs:[],vorher:[...ed.children].map(k=>k.cloneNode(true)),
+    mo:new MutationObserver(()=>{}),orig:Document.prototype.execCommand,imNativ:false,nativDa:false};
+  st.mo.observe(ed,{subtree:true,childList:true,attributes:true,attributeOldValue:true,characterData:true,characterDataOldValue:true});
+  /* Browserbefehle gesondert merken: sie liegen schon im Verlauf und werden
+     mit dessen Rückgängig zurückgenommen, nicht über das Protokoll. Was
+     PureQuill im input-Ereignis des Befehls selbst nachbessert (etwa die
+     <p><ul>-Schachtelung von Chromes Listenbefehl), gehört nicht dazu: das
+     Ereignis kommt, wenn Chrome fertig ist, und schneidet dort ab. */
+  st.beiInput=()=>{if(st.imNativ){st.nativDa=st.mo.takeRecords().length>0;st.imNativ=false}};
+  window.addEventListener("input",st.beiInput,true);
+  document.execCommand=function(c,...r){
+    const vor=st.mo.takeRecords();if(vor.length)st.segs.push({dom:vor});
+    st.imNativ=true;st.nativDa=false;
+    const erg=st.orig.call(document,c,...r);
+    if(st.imNativ){st.nativDa=st.mo.takeRecords().length>0;st.imNativ=false}
+    if(st.nativDa)st.segs.push({nativ:c});
+    else if(!/^(styleWithCSS|useCSS|defaultParagraphSeparator|enableObjectResizing|enableInlineTableEditing|insertBrOnReturn|copy|cut|paste|undo|redo|selectAll)$/i.test(c)){
+      /* Ohne Änderung legt Chrome manchmal trotzdem einen leeren Schritt an
+         (formatBlock auf einem Absatz, gemessen) — dann brauchte das davor
+         Getippte einen Strg+Z mehr. Probehalber zurücknehmen; ändert das
+         etwas, war es ein echter Schritt davor und kommt wieder. */
+      const ed=st.ed,vorP=ed.innerHTML;st.orig.call(document,"undo");
+      if(ed.innerHTML!==vorP)st.orig.call(document,"redo");
+      st.mo.takeRecords();
+    }
+    const nach=st.mo.takeRecords();if(nach.length)st.segs.push({dom:nach});
+    return erg};
+  schrittOffen=st;return st;
+}
+function schrittAbbrechen(){const st=schrittOffen;if(!st)return;schrittOffen=null;delete document.execCommand;
+  window.removeEventListener("input",st.beiInput,true);st.mo.disconnect()}
+function schrittProtokollZurueck(log,ed){
+  for(let i=log.length-1;i>=0;i--){const m=log[i];
+    if(m.type==="attributes"){if(m.target===ed)continue;
+      if(m.oldValue==null)m.target.removeAttribute(m.attributeName);else m.target.setAttribute(m.attributeName,m.oldValue)}
+    else if(m.type==="characterData")m.target.data=m.oldValue;
+    else{m.addedNodes.forEach(n=>{if(n.parentNode===m.target)n.remove()});
+      const weg=[...m.removedNodes];
+      if(m.nextSibling&&m.nextSibling.parentNode===m.target)weg.forEach(n=>m.target.insertBefore(n,m.nextSibling));
+      else if(m.previousSibling&&m.previousSibling.parentNode===m.target)weg.reverse().forEach(n=>m.previousSibling.after(n));
+      else weg.forEach(n=>m.target.appendChild(n))}
+  }
+}
+/* Was der Seitenumbruch und die Anzeige einfügen, wie in flush() */
+function schrittPutzen(box){
+  box.querySelectorAll("tr.pgzeile,.fhwrap").forEach(x=>x.remove());
+  [...box.children].forEach(k=>{if(k.classList.contains("enliste"))k.remove()});
+  box.querySelectorAll(".wtab[style]").forEach(w=>w.removeAttribute("style"));
+  pgliWeg(box);pgspaltWeg(box);
+}
+function schrittTextBereich(knoten,von,bis){
+  let pos=0,a=null,b=null;
+  for(const k of knoten){const w=document.createTreeWalker(k,NodeFilter.SHOW_TEXT);let t;
+    while(t=w.nextNode()){const l=t.length;
+      if(!a&&von<pos+l||!a&&von===pos+l&&von===bis)a=[t,von-pos];
+      if(a&&bis<=pos+l){b=[t,bis-pos];break}
+      pos+=l}
+    if(b)break}
+  if(!a||!b)return null;
+  const r=document.createRange();r.setStart(a[0],a[1]);r.setEnd(b[0],b[1]);return r;
+}
+/* Markierungen als Zeichenpositionen merken und abnehmen */
+function schrittDekoNehmen(box){
+  const marken=[...box.querySelectorAll(SCHRITT_MARKEN)].map(m=>{
+    const r=document.createRange();r.setStart(box,0);r.setEndBefore(m);
+    return {at:r.toString().length,len:m.textContent.length,el:m.cloneNode(false)}});
+  box.querySelectorAll(SCHRITT_MARKEN).forEach(m=>m.replaceWith(...m.childNodes));
+  const klassen=[...box.children].map(k=>{const c=SCHRITT_KLASSEN.filter(x=>k.classList.contains(x));
+    c.forEach(x=>k.classList.remove(x));if(k.getAttribute("class")==="")k.removeAttribute("class");return c});
+  box.normalize();
+  return {marken,klassen};
+}
+function schrittDekoSetzen(knoten,deko){
+  deko.klassen.forEach((c,i)=>{if(knoten[i])c.forEach(x=>knoten[i].classList.add(x))});
+  deko.marken.forEach(m=>{const r=schrittTextBereich(knoten,m.at,m.at+m.len);
+    if(r&&m.len)try{r.surroundContents(m.el)}catch(e){}});
+}
+/* Eingesetzten Block an den gewollten angleichen, wo Chrome beim Einsetzen
+   etwas weggelassen hat (Ausrichtung eines Bildes, Text der Bildunterschrift).
+   Die Knoten sind dieselben, die Wiederholen später wieder einsetzt. */
+const schrittSoll=new WeakMap();
+/* Wiederholen spielt Chromes Einsetzen samt dem Weglassen noch einmal ab:
+   danach dieselben Blöcke wieder angleichen */
+document.addEventListener("input",e=>{
+  if(e.inputType!=="historyRedo")return;
+  const ed=$("#editor");if(!ed||!ed.contains(e.target)&&e.target!==ed)return;
+  [...ed.children].forEach(k=>{const soll=schrittSoll.get(k);if(soll)schrittAngleichen(k,soll)});
+},true);
+function schrittAngleichen(ist,soll){
+  if(ist.nodeType!==soll.nodeType||ist.nodeName!==soll.nodeName)return false;
+  if(ist.nodeType===3){if(ist.data!==soll.data)ist.data=soll.data;return true}
+  if(ist.nodeType!==1)return true;
+  [...ist.attributes].forEach(x=>{if(!soll.hasAttribute(x.name))ist.removeAttribute(x.name)});
+  [...soll.attributes].forEach(x=>{if(ist.getAttribute(x.name)!==x.value)ist.setAttribute(x.name,x.value)});
+  const k=[...ist.childNodes],l=[...soll.childNodes];
+  if(!(k.length===l.length&&k.every((x,i)=>schrittAngleichen(x,l[i]))))ist.replaceChildren(...l.map(x=>x.cloneNode(true)));
+  return true;
+}
+function schrittEnde(st){
+  if(!st||schrittOffen!==st)return;
+  const rest=st.mo.takeRecords();if(rest.length)st.segs.push({dom:rest});
+  schrittAbbrechen();
+  const ed=st.ed;if(ed!==$("#editor")||!ed.isConnected)return;
+  const nativ=st.segs.filter(g=>g.nativ).length;
+  /* Ein einzelner Browserbefehl ohne eigenes Zutun ist schon ein Schritt */
+  if(!st.segs.some(g=>g.dom)&&nativ<=1)return;
+  const vorher=st.vorher,nachK=[...ed.children],gl=(x,y)=>!!x&&!!y&&x.isEqualNode(y);
+  let a=0;while(a<vorher.length&&a<nachK.length&&gl(vorher[a],nachK[a]))a++;
+  let e=0;while(e<vorher.length-a&&e<nachK.length-a&&gl(vorher[vorher.length-1-e],nachK[nachK.length-1-e]))e++;
+  const sel=getSelection(),pos=sel.rangeCount&&ed.contains(sel.anchorNode)?textPos(ed):null;
+  const figI=selFig&&ed.contains(selFig)?[...ed.querySelectorAll("figure")].indexOf(selFig):-1;
+  const fertig=()=>{
+    if(pos)setzeTextPos(ed,pos);
+    if(figI>=0){const f=ed.querySelectorAll("figure")[figI];if(f)selectFig(f)}
+    if(fdHits.length){fdHits=[...ed.querySelectorAll(".hit")];fdMark(false)}
+    if(spellHits.length)spellHits=[...ed.querySelectorAll(".spellerr")];
+    if(cleanHits.length){
+      const gr=cleanFindEmptyParaRuns(ed).filter(g=>g[2]&&g[2].classList.contains("cleanp"));
+      cleanHits=[...[...ed.querySelectorAll(".cleanerr")].map(el=>({kind:el.dataset.kind,el})),...gr.map(g=>({kind:"para",el:g[2],group:g}))];
+      cleanHits.sort((x,y)=>{const p=x.el.compareDocumentPosition(y.el);return(p&Node.DOCUMENT_POSITION_FOLLOWING)?-1:(p&Node.DOCUMENT_POSITION_PRECEDING)?1:0})}
+    flush();dirty=true;commit();queuePaginate();drawAnchors();drawStatus();
+    if(typeof drawTblBar==="function")drawTblBar();
+  };
+  const gleich=a===vorher.length&&a===nachK.length;
+  /* Ersetzt wird der Inhalt der Blöcke, nicht die Blöcke selbst: markiert
+     man ganze Blöcke, hängt Chrome den letzten eingesetzten Absatz an den
+     folgenden an. Ausprobiert, welche Ränder Chrome dabei nicht verbiegt:
+     ein normaler Absatz, ein Block ohne Bearbeitung (Bild, Verzeichnis,
+     Seitenumbruch), eine Tabelle oder Linie — vorher wie nachher dieselbe
+     Art — oder ein einzelner Block, der vorher wie nachher dieselbe
+     Überschrift ist. Listen und Zitate am Rand schachtelte es ineinander.
+     Also Nachbarn dazunehmen, bis die Ränder passen. */
+  const fest=k=>k.getAttribute("contenteditable")==="false"||/^(TABLE|HR)$/.test(k.tagName);
+  /* Hinten kein fester Block mit eigenem Text (Bildunterschrift, Zelle):
+     den hängte Chrome sonst zusätzlich an den folgenden Absatz */
+  const eigenText=k=>!!k.querySelector("figcaption,td,th,[contenteditable=true]");
+  const randOk=(v,n,hinten)=>!!v&&!!n&&v.tagName===n.tagName&&(v.tagName==="P"||fest(v)&&fest(n)&&!(hinten&&(eigenText(v)||eigenText(n))));
+  const passt=()=>{const lv=vorher.length-a-e,ln=nachK.length-a-e;if(lv<1||ln<1)return [false,false];
+    const v0=vorher[a],n0=nachK[a],v1=vorher[vorher.length-1-e],n1=nachK[nachK.length-1-e];
+    if(lv===1&&ln===1&&v0.tagName===n0.tagName&&/^H[1-6]$/.test(v0.tagName))return [true,true];
+    return [randOk(v0,n0,false),randOk(v1,n1,true)]};
+  if(!gleich)for(;;){const [an,en]=passt();if(an&&en)break;
+    if(!an&&a>0)a--;else if(!en&&e>0)e--;else break}
+  if(!gleich&&!passt().every(Boolean)){
+    /* Am Dokumentanfang oder -ende ohne passenden Rand: so lassen wie bisher */
+    console.info("Schritt: kein passender Rand, ohne Rückgängig");return fertig();
+  }
+  const box=document.createElement("div");
+  nachK.slice(a,nachK.length-e).forEach(k=>box.appendChild(k.cloneNode(true)));
+  schrittPutzen(box);
+  const deko=schrittDekoNehmen(box),html=box.innerHTML,ganz=ed.innerHTML;
+  for(let i=st.segs.length-1;i>=0;i--){const g=st.segs[i];
+    if(g.nativ)document.execCommand("undo");else schrittProtokollZurueck(g.dom,ed)}
+  const jetzt=[...ed.children];
+  if(jetzt.length!==vorher.length||jetzt.some((k,i)=>!gl(k,vorher[i]))){
+    /* Sollte nicht vorkommen; dann wenigstens der richtige Inhalt */
+    {const i=jetzt.findIndex((k,i)=>!gl(k,vorher[i]));console.warn("Schritt: Zurückspielen wich ab",st.segs.map(g=>g.nativ||("dom"+g.dom.length)).join(","),jetzt.length,vorher.length,"JETZT",(jetzt[i]&&jetzt[i].outerHTML||"").slice(0,300),"VORHER",(vorher[i]&&vorher[i].outerHTML||"").slice(0,300))}
+    ed.innerHTML=ganz;return fertig();
+  }
+  if(gleich)return fertig();
+  const alt=jetzt.slice(a,vorher.length-e);
+  /* Markierungen auch vom alten Stand nehmen, den Rückgängig zurückbringt */
+  alt.forEach(k=>{k.querySelectorAll(SCHRITT_MARKEN).forEach(m=>{const p=m.parentNode;m.replaceWith(...m.childNodes);p.normalize()});
+    SCHRITT_KLASSEN.forEach(x=>k.classList.remove(x));if(k.getAttribute("class")==="")k.removeAttribute("class")});
+  ed.focus();
+  const k0=alt[0],k1=alt[alt.length-1],r=document.createRange();
+  if(fest(k0))r.setStartBefore(k0);else r.setStart(k0,0);
+  if(fest(k1))r.setEndAfter(k1);else r.setEnd(k1,k1.childNodes.length);
+  sel.removeAllRanges();sel.addRange(r);
+  const anzahl=ed.children.length,soll=[...box.children];
+  if(html)document.execCommand("insertHTML",false,html);else document.execCommand("delete");
+  const neuK=[...ed.children].slice(a,ed.children.length-e);
+  /* Auch die Nachbarn müssen unberührt sein */
+  const stimmt=()=>{const k=ed.children;
+    return (a===0||gl(k[a-1],vorher[a-1]))&&(e===0||gl(k[k.length-e],vorher[vorher.length-e]))&&
+      neuK.length===soll.length&&neuK.every((x,i)=>gl(x,soll[i]))};
+  if(!stimmt()&&ed.children.length-anzahl===soll.length-alt.length&&neuK.every((k,i)=>k.tagName===soll[i].tagName))
+    neuK.forEach((k,i)=>{schrittAngleichen(k,soll[i]);schrittSoll.set(k,soll[i].cloneNode(true))});
+  if(!stimmt()){
+    /* insertHTML hat den Aufbau verändert: zurück und wie früher direkt
+       einsetzen (dann ohne Rückgängig, aber mit dem richtigen Inhalt) */
+    console.warn("Schritt: insertHTML wich ab",ed.children.length-anzahl,soll.length-alt.length,"IST",neuK.map(k=>k.outerHTML).join("").slice(0,400),"SOLL",html.slice(0,400));
+    document.execCommand("undo");
+    const alt2=[...ed.children].slice(a,vorher.length-e);
+    if(alt2.length){alt2[0].before(...box.childNodes);alt2.forEach(k=>k.remove())}else ed.innerHTML=ganz;
+    schrittDekoSetzen([...ed.children].slice(a,ed.children.length-e),deko);
+    return fertig();
+  }
+  schrittDekoSetzen(neuK,deko);
+  fertig();
+}
+function alsSchritt(fn){const st=schrittStart();try{return fn()}finally{schrittEnde(st)}}
+function einSchritt(fn){if(schrittOffen||hfEditing||S.mode!=="write"||!$("#editor"))return false;alsSchritt(fn);return true}
+/* Eine eben angelegte, leer gebliebene Fußnote: das Einfügen zurücknehmen
+   statt einen zweiten Schritt „gelöscht“ anzuhängen — sonst brächte
+   Rückgängig danach eine leere Fußnote zurück. */
+function noteVerwerfen(art,id){
+  const ed=$("#editor"),q=art==="fn"?`.fn[data-fn="${id}"]`:`.en[data-en="${id}"]`;
+  if(ed&&ed.querySelector(q)){undoRedo("undo");
+    if(!ed.querySelector(q)){const d=doc(),k=art==="fn"?"footnotes":"endnotes";
+      d[k]=(d[k]||[]).filter(f=>f.id!==id);flush();dirty=true;commit();queuePaginate();return}
+    undoRedo("redo")}
+  if(art==="fn")deleteFootnote(id);else deleteEndnote(id);
+}
+/* Tabellenbefehle als Rückgängig-Schritt (2026-10-27, Tom: nach dem
+   Ändern der Tabellenvorlage „ging der zurück button nicht“).
+   Rückgängig ist hier der Verlauf des Browsers (execCommand undo). Die
+   Tabellenbefehle bauen die Tabelle aber direkt im DOM um, und davon weiß
+   der Verlauf nichts: Strg+Z übersprang den Befehl und nahm stattdessen
+   das davor Getippte zurück. Deshalb: Befehl wie bisher ausführen, den
+   alten Stand wieder hinstellen und den neuen per insertHTML an seine
+   Stelle setzen — so liegt er im selben Verlauf wie jeder Tastendruck.
+   Die Abstandszeilen des Seitenumbruchs (tr.pgzeile) gehören nicht dazu.
+   Gibt die neue Tabelle zurück (null, wenn sie gelöscht wurde). */
+function tabUndo(t,fn){
+  const ed=$("#editor");if(!ed||!ed.contains(t)){fn();return t}
+  const ohnePg=el=>{const c=el.cloneNode(true);c.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());return c};
+  const vorher=ohnePg(t).outerHTML;
+  /* Jede Änderung mitschreiben, um sie danach rückwärts zurückzuspielen.
+     Eine Kopie der alten Tabelle reichte nicht: der Verlauf des Browsers
+     zeigt auf die Originalknoten, und das davor Getippte ließe sich dann
+     nicht mehr zurücknehmen. */
+  const mo=new MutationObserver(()=>{});
+  mo.observe(ed,{subtree:true,childList:true,attributes:true,attributeOldValue:true,characterData:true,characterDataOldValue:true});
+  fn();
+  const log=mo.takeRecords();mo.disconnect();
+  const lebt=ed.contains(t),nachher=lebt?ohnePg(t).outerHTML:"";
+  if(lebt&&nachher===vorher)return t;
+  const z=lebt&&curCell(),zeilen=[...t.rows].filter(r=>!r.classList.contains("pgzeile"));
+  const zr=z&&t.contains(z)?zeilen.indexOf(z.parentElement):-1,zs=zr>=0?[...z.parentElement.children].indexOf(z):-1;
+  for(let i=log.length-1;i>=0;i--){const m=log[i];
+    if(m.type==="attributes"){if(m.oldValue==null)m.target.removeAttribute(m.attributeName);else m.target.setAttribute(m.attributeName,m.oldValue)}
+    else if(m.type==="characterData")m.target.data=m.oldValue;
+    else{m.addedNodes.forEach(n=>{if(n.parentNode===m.target)n.remove()});
+      const weg=[...m.removedNodes];
+      if(m.nextSibling&&m.nextSibling.parentNode===m.target)weg.forEach(n=>m.target.insertBefore(n,m.nextSibling));
+      else if(m.previousSibling&&m.previousSibling.parentNode===m.target)weg.reverse().forEach(n=>m.previousSibling.after(n));
+      else weg.forEach(n=>m.target.appendChild(n))}
+  }
+  ed.focus();
+  const r=document.createRange();r.selectNode(t);
+  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
+  if(nachher)document.execCommand("insertHTML",false,nachher.replace(/^<table/,'<table data-tabneu="1"'));
+  else document.execCommand("delete");
+  const neu=ed.querySelector("table[data-tabneu]");
+  if(neu){neu.removeAttribute("data-tabneu");
+    const zeile=neu.rows[zr],zelle=zeile&&zeile.children[zs];if(zelle)putCaret(zelle)}
+  flush();dirty=true;commit();queuePaginate();drawAnchors();drawTblBar();setTimeout(drawTblBar,260);
+  return neu;
 }
 function tabFertig(t,marke){
   if(marke&&$("#editor").contains(marke))putCaret(marke);
@@ -23700,16 +24148,108 @@ function spaltenVerteilen(t){
   cg.innerHTML=Array.from({length:n},()=>`<col style="width:${Math.round(1000/n)/10}%">`).join("");
   tabFertig(t);
 }
+/* ---- Tabellenvorlagen (2026-10-27, Tom: „die tabelle ist ja grün in den
+   zellen. so was sollten wir auch hinbekommen“) ----
+   Wie Words Tabellenformatvorlagen, aber als direkte Zellformatierung
+   geschrieben: Hintergrund und Rahmen stehen danach in jeder Zelle, genau
+   wie bei einer Tabelle aus Word. Dadurch braucht keiner der Exporter etwas
+   Neues, und die Tabelle sieht in Word, Writer und im Druck gleich aus.
+   Die Farben sind Words „Gitternetztabelle 4“ in den Akzentfarben.
+   Die Kopfzeilenschrift (fett, weiß auf Farbe) steht in einem span mit
+   data-tv, damit ein Wechsel der Vorlage sie wiederfindet und ersetzt. */
+const TAB_VORLAGEN=[
+  {id:"gitter",name:"Gitternetz",kopf:null,band:"F2F2F2",rand:"000000"},
+  {id:"gruen",name:"Grün",kopf:"70AD47",band:"E2EFD9",rand:"A8D08D"},
+  {id:"blau",name:"Blau",kopf:"4472C4",band:"D9E2F3",rand:"8EAADB"},
+  {id:"orange",name:"Orange",kopf:"ED7D31",band:"FBE4D5",rand:"F4B083"},
+  {id:"grau",name:"Grau",kopf:"7F7F7F",band:"EDEDED",rand:"BFBFBF"},
+  {id:"schlicht",name:"Schlicht",kopf:null,band:"F2F2F2",rand:"BFBFBF",waagrecht:true}
+];
+/* Zellformat einer Vorlage für eine Zelle in Zeile r0..r1 von n Zeilen */
+function vorlageZellFormat(v,z,n,kopf,band,f){
+  const linie={pt:0.5,art:"solid",farbe:v.rand},kraeftig={pt:1,art:"solid",farbe:"000000"};
+  const istKopf=kopf&&z.r0===0,daten=z.r0-(kopf?1:0);
+  f.bg=istKopf?v.kopf:(band&&daten>=0&&daten%2===0?v.band:null);
+  if(v.waagrecht){
+    f.rand={left:"none",right:"none",
+      top:z.r0===0?kraeftig:linie,
+      bottom:z.r1===n-1||(istKopf&&z.r1===0)?kraeftig:linie};
+  }else f.rand={top:linie,bottom:linie,left:linie,right:linie};
+  return {istKopf,weiss:istKopf&&!!v.kopf};
+}
+function vorlageAnwenden(t,id){
+  t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+  t.querySelectorAll("span[data-tv]").forEach(sp=>sp.replaceWith(...sp.childNodes));
+  const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0";
+  const raster=tabRaster(t),n=raster.zeilen.length,v=TAB_VORLAGEN.find(x=>x.id===id);
+  if(!v){
+    raster.zellen.forEach(z=>zellFormatSetzen(z.td,f=>{f.bg=null;f.rand={}}));
+    ["tv","tvk","tvb"].forEach(k=>delete t.dataset[k]);
+    if(![...t.querySelectorAll("td,th")].some(td=>/background|border/.test(td.getAttribute("style")||"")))t.removeAttribute("data-wz");
+    return tabFertig(t);
+  }
+  raster.zellen.forEach(z=>{
+    let art;zellFormatSetzen(z.td,f=>{art=vorlageZellFormat(v,z,n,kopf,band,f)});
+    if(!art.istKopf)return;
+    /* Kopfzeile: fett, auf Farbe weiß — je Textstück ein span, damit
+       Absätze und Zeilenumbrüche in der Zelle bleiben, wie sie sind */
+    const w=document.createTreeWalker(z.td,NodeFilter.SHOW_TEXT),stuecke=[];
+    let x;while(x=w.nextNode())if(x.nodeValue.trim())stuecke.push(x);
+    stuecke.forEach(tn=>{const sp=document.createElement("span");sp.dataset.tv="1";
+      sp.style.fontWeight="700";if(art.weiss)sp.style.color="#FFFFFF";
+      tn.replaceWith(sp);sp.appendChild(tn)});
+  });
+  t.dataset.tv=id;t.dataset.tvk=kopf?"1":"0";t.dataset.tvb=band?"1":"0";
+  t.removeAttribute("data-rahmen");t.setAttribute("data-wz","1");
+  tabFertig(t);
+}
+/* Vorschau einer Vorlage: dieselbe Rechnung auf einer 4×3-Tabelle */
+function vorlageVorschau(v,kopf,band){
+  const n=4;let h="<table>";
+  for(let r=0;r<n;r++){h+="<tr>";
+    for(let c=0;c<3;c++){const f={bg:null,rand:{}};vorlageZellFormat(v,{r0:r,r1:r},n,kopf,band,f);
+      h+=`<td style="${zelleStil(f).replace(/([\d.]+)pt/g,(m,p)=>(+p>=1?2:1)+"px")}"></td>`}
+    h+="</tr>"}
+  return h+"</table>";
+}
+function tabVorlageMenu(ar,t){
+  closeMenu();
+  const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
+  const zeichnen=()=>{
+    const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0",akt=t.dataset.tv||"";
+    m.innerHTML=`<div class="mlabel">${tr("Tabellenvorlage")}</div>
+      <div class="tvgal">${TAB_VORLAGEN.map(v=>`<button class="tvk${akt===v.id?" on":""}" data-v="${v.id}" title="${esc(tr(v.name))}">
+        <span class="tvb">${vorlageVorschau(v,kopf,band)}</span>${esc(tr(v.name))}</button>`).join("")}</div>
+      <div class="msep"></div>
+      <button class="mi" data-o="tvk"><span class="chk">${kopf?"&#10003;":""}</span>${tr("Kopfzeile hervorheben")}</button>
+      <button class="mi" data-o="tvb"><span class="chk">${band?"&#10003;":""}</span>${tr("Gebänderte Zeilen")}</button>
+      <div class="msep"></div>
+      <button class="mi" data-v=""${akt?"":" disabled"}><span class="chk"></span>${tr("Keine Vorlage")}</button>`};
+  zeichnen();document.body.appendChild(m);
+  menuPlatzieren(m,ar.left,ar.bottom+4,ar);
+  m.addEventListener("mousedown",ev=>ev.preventDefault());
+  m.onclick=ev=>{
+    const o=ev.target.closest("[data-o]");
+    /* Die Häkchen lassen das Menü offen und wirken sofort auf eine Tabelle,
+       die schon eine Vorlage hat — wie die Kontrollkästchen in Word */
+    if(o){t.dataset[o.dataset.o]=t.dataset[o.dataset.o]==="0"?"1":"0";
+      if(t.dataset.tv&&$("#editor").contains(t)){const tv=t.dataset.tv;t=tabUndo(t,()=>vorlageAnwenden(t,tv))||t}
+      zeichnen();return}
+    const b=ev.target.closest("[data-v]");if(!b||b.disabled)return;
+    closeMenu();if($("#editor").contains(t))tabUndo(t,()=>vorlageAnwenden(t,b.dataset.v));
+  };
+}
 function tabelleVolleBreite(t){t.style.width="";if(!t.getAttribute("style"))t.removeAttribute("style");tabFertig(t)}
 /* Farbwahl für die Schattierung bzw. Rahmenlinie */
 function tabFarbMenu(btn,titel,keine,cb){
+  const r=btn.getBoundingClientRect?btn.getBoundingClientRect():btn;
   closeMenu();
   const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
   m.innerHTML=`<div class="mlabel">${titel}</div><div class="swatches grid">${TEXTGRID.map(row=>row.map(c=>
       `<button class="csw" data-col="${c}" title="${c}" aria-label="${c}" style="background:${c}"></button>`).join("")).join("")}</div>
     ${keine?`<div class="msep"></div><button class="mi" data-col="none"><span class="chk"></span>${keine}</button>`:""}`;
   document.body.appendChild(m);
-  const r=btn.getBoundingClientRect();menuPlatzieren(m,r.left,r.bottom+4,r);
+  menuPlatzieren(m,r.left,r.bottom+4,r);
   m.addEventListener("mousedown",ev=>ev.preventDefault());
   m.onclick=ev=>{const b=ev.target.closest("[data-col]");if(!b)return;closeMenu();cb(b.dataset.col==="none"?null:b.dataset.col)};
 }
@@ -23732,24 +24272,38 @@ $("#tblbar").addEventListener("mousedown",e=>{if(e.target.closest("button"))e.pr
 $("#tblbar").addEventListener("click",e=>{
   const b=e.target.closest("[data-tb]");if(!b)return;
   const zelle=curCell();if(!zelle)return;
-  const nach=()=>{drawTblBar();setTimeout(drawTblBar,260)};
   /* Bereich jetzt festhalten: ein Untermenü nimmt die Auswahl mit */
-  const bereich=zellBereich(),t=zelle.closest("table"),a0=b.dataset.tb;
-  if(a0==="merge")return zellenVerbinden(bereich);
-  if(a0==="split")return zelleTeilen(zelle);
-  if(a0==="shade")return tabFarbMenu(b,tr("Schattierung"),tr("Keine Farbe"),c=>zellenSchattieren(bereich,c));
+  tabAktion(b.dataset.tb,b,zelle,zellBereich());
+});
+/* Ein Tabellenbefehl aus Leiste oder Kontextmenü. anker ist der Knopf bzw.
+   Menüeintrag, an dem Untermenüs aufklappen; seine Lage wird gleich
+   festgehalten, weil ein Klick im Kontextmenü den Eintrag mitschließt. */
+function tabAktion(a0,anker,zelle,bereich){
+  const b=anker,ar=anker.getBoundingClientRect();
+  const nach=()=>{drawTblBar();setTimeout(drawTblBar,260)};
+  const t=zelle.closest("table");
+  if(!bereich||!bereich.zellen.includes(zelle)&&!(bereich.rect&&bereich.t===t))bereich={t,raster:tabRaster(t),zellen:[zelle],rect:null};
+  const U=fn=>tabUndo(t,fn);
+  if(a0==="vorlage")return tabVorlageMenu(ar,t);
+  if(a0==="ins")return openSubMenu(b,[{a:"rowAbove",label:tr("Zeile darüber einfügen")},{a:"rowBelow",label:tr("Zeile darunter einfügen")},
+      {a:"colLeft",label:tr("Spalte links einfügen")},{a:"colRight",label:tr("Spalte rechts einfügen")}],
+    a=>{const ed=$("#editor");if(ed&&ed.contains(zelle))U(()=>tableCmdMitMarke(a,zelle));if(ed)ed.focus();nach()});
+  if(a0==="kopfw"){U(()=>kopfZeilenUmschalten(zelle));return nach()}
+  if(a0==="merge")return U(()=>zellenVerbinden(bereich));
+  if(a0==="split")return U(()=>zelleTeilen(zelle));
+  if(a0==="shade")return tabFarbMenu(ar,tr("Schattierung"),tr("Keine Farbe"),c=>U(()=>zellenSchattieren(bereich,c)));
   if(a0==="valign"){const va=zelleFormat(zelle).va||"top";
-    return openSubMenu(b,[["top","Oben"],["middle","Mitte"],["bottom","Unten"]].map(([w,l])=>({a:w,label:tr(l),cur:va===w})),w=>zellenAusrichten(bereich,w))}
+    return openSubMenu(b,[["top","Oben"],["middle","Mitte"],["bottom","Unten"]].map(([w,l])=>({a:w,label:tr(l),cur:va===w})),w=>U(()=>zellenAusrichten(bereich,w)))}
   if(a0==="size")return openSubMenu(b,[{a:"verteilen",label:tr("Spalten gleichmäßig verteilen")},{a:"voll",label:tr("An Seitenbreite anpassen")}],
-    w=>w==="verteilen"?spaltenVerteilen(t):tabelleVolleBreite(t));
+    w=>U(()=>w==="verteilen"?spaltenVerteilen(t):tabelleVolleBreite(t)));
   if(a0==="borders"){const st=S.settings.tabStift||{pt:0.5,farbe:"000000"};
     return openSubMenu(b,[{a:"alle",label:tr("Alle Rahmen")},{a:"aussen",label:tr("Außenrahmen")},{a:"innen",label:tr("Innenrahmen")},{a:"kein",label:tr("Kein Rahmen")},
       {sep:true},...[0.5,1,1.5,2.25,3].map(p=>({a:"pt"+p,label:zahlText(p)+" pt",cur:Math.abs(st.pt-p)<0.01})),
       {sep:true},{a:"farbe",label:tr("Linienfarbe")+"…"}],w=>{
         if(w.startsWith("pt")){S.settings.tabStift={...st,pt:parseFloat(w.slice(2))};save();return}
-        if(w==="farbe")return tabFarbMenu(b,tr("Linienfarbe"),null,c=>{S.settings.tabStift={...st,farbe:String(c).replace("#","").toUpperCase()};save()});
-        zellenRahmen(bereich,w)})}
-  if(b.dataset.tb==="del"){
+        if(w==="farbe")return tabFarbMenu(ar,tr("Linienfarbe"),null,c=>{S.settings.tabStift={...st,farbe:String(c).replace("#","").toUpperCase()};save()});
+        U(()=>zellenRahmen(bereich,w))})}
+  if(a0==="del"){
     /* Die Zelle jetzt festhalten, nicht erst im Rueckruf: das Untermenue
        haengt am <body>, ein Klick darauf nimmt den Fokus aus dem Editor, und
        curCell() liefert danach nichts mehr — der Loeschbefehl liefe ins
@@ -23760,17 +24314,17 @@ $("#tblbar").addEventListener("click",e=>{
                    {a:"tblDel",label:tr("Tabelle löschen")}],
       a=>{
         const ed=$("#editor");
-        if(ed&&ed.contains(zelleFest))tableCmdMitMarke(a,zelleFest);
+        if(ed&&ed.contains(zelleFest))U(()=>tableCmdMitMarke(a,zelleFest));
         if(ed)ed.focus();
         nach();
       });
     return;
   }
-  tableCmdMitMarke(b.dataset.tb,zelle);
+  U(()=>tableCmdMitMarke(a0,zelle));
   /* Sofort neu setzen und nach dem verzoegerten Umbruch noch einmal: die
      Tabelle ist gerade hoeher oder schmaler geworden. */
   nach();
-});
+}
 document.addEventListener("selectionchange",drawTblBar);
 
 /* ---- Spalten und Zeilen durch Ziehen anpassen ---- */
@@ -23815,13 +24369,14 @@ function ensureColgroup(table){
 function startTableDrag(e,edge){
   e.preventDefault();
   tableDragActive=true;
+  const schritt=schrittStart();
   const ed=$("#editor");
   ed.style.cursor=edge.type==="col"?"col-resize":"row-resize";
   if(edge.type==="col"){
     const cg=ensureColgroup(edge.table);
     const cols=[...cg.children];
     const a=cols[edge.i],b=cols[edge.i+1];
-    if(!a||!b){tableDragActive=false;ed.style.cursor="";return}
+    if(!a||!b){tableDragActive=false;ed.style.cursor="";schrittEnde(schritt);return}
     const tw=edge.table.getBoundingClientRect().width;
     const startX=e.clientX,wa=parseFloat(a.style.width),wb=parseFloat(b.style.width);
     const minPct=Math.min(wa+wb-1,Math.max(3,TCOL_MIN_PX/tw*100));
@@ -23832,7 +24387,7 @@ function startTableDrag(e,edge){
     };
     const up=()=>{document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up);
       tableDragActive=false;ed.style.cursor="";
-      flush();dirty=true;commit();queuePaginate()};
+      flush();dirty=true;commit();queuePaginate();schrittEnde(schritt)};
     document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
   }else{
     const row=edge.row;
@@ -23844,7 +24399,7 @@ function startTableDrag(e,edge){
     };
     const up=()=>{document.removeEventListener("mousemove",move);document.removeEventListener("mouseup",up);
       tableDragActive=false;ed.style.cursor="";
-      flush();dirty=true;commit();queuePaginate()};
+      flush();dirty=true;commit();queuePaginate();schrittEnde(schritt)};
     document.addEventListener("mousemove",move);document.addEventListener("mouseup",up);
   }
 }
@@ -23876,15 +24431,15 @@ function linkDialog(){
   $("#lkUrl").focus();
   const finish=()=>{flush();dirty=true;commit();queuePaginate()};
   $("#lkCancel").onclick=closeOvl;
-  if(a)$("#lkDel").onclick=()=>{closeOvl();unwrap(a);finish()};
+  if(a)$("#lkDel").onclick=()=>{closeOvl();alsSchritt(()=>unwrap(a));finish()};
   $("#lkOk").onclick=()=>{
     let url=$("#lkUrl").value.trim();
     const txt=$("#lkTxt").value.trim();
     if(!url){closeOvl();return}
     if(!/^(https?:|mailto:|#)/i.test(url))url=(url.includes("@")?"mailto:":"https://")+url;
     closeOvl();ed.focus();
-    if(a){a.setAttribute("href",url);a.setAttribute("target","_blank");
-      if(txt&&txt!==a.textContent)a.textContent=txt;finish();return}
+    if(a){alsSchritt(()=>{a.setAttribute("href",url);a.setAttribute("target","_blank");
+      if(txt&&txt!==a.textContent)a.textContent=txt});finish();return}
     if(range){const s2=getSelection();s2.removeAllRanges();s2.addRange(range)}
     const label=txt||url;
     document.execCommand("insertHTML",false,
@@ -23896,6 +24451,7 @@ function linkDialog(){
    leerer Absatz wird selbst zur Linie; danach steht die Marke in einem
    Absatz unter der Linie. */
 function linieEinfuegen(k){
+  if(einSchritt(()=>linieEinfuegen(k)))return;
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   ed.focus();
   const sel=getSelection();
@@ -24003,6 +24559,7 @@ function updateFootnoteTitles(){
   });
 }
 function insertFootnote(){
+  if(einSchritt(()=>insertFootnote()))return;
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   ed.focus();
   const id=uid();
@@ -24028,6 +24585,7 @@ function insertFootnote(){
   setTimeout(()=>editFootnote(id,true),30);
 }
 function deleteFootnote(id){
+  if(einSchritt(()=>deleteFootnote(id)))return;
   const ed=$("#editor");if(!ed)return;
   ed.querySelectorAll(`.fn[data-fn="${id}"]`).forEach(s=>s.remove());
   const d=doc();d.footnotes=(d.footnotes||[]).filter(f=>f.id!==id);
@@ -24058,7 +24616,7 @@ function fnAbbruch(){
   const id=fnFrisch;fnFrisch=null;fnOffen=null;
   if(!id)return false;
   const f=(doc().footnotes||[]).find(x=>x.id===id);
-  if(f&&!(f.text||"").trim())deleteFootnote(id);
+  if(f&&!(f.text||"").trim())noteVerwerfen("fn",id);
   return false;
 }
 /* Bewusst gesperrt: die Frage hat zwei Antworten und keine dritte. Waere sie
@@ -24082,7 +24640,7 @@ function fnFrage(id,frisch,entwurf){
     const weg=frisch&&f&&!(f.text||"").trim();
     fnFrisch=null;fnOffen=null;
     lockedOvl=false;closeOvl();
-    if(weg)deleteFootnote(id);
+    if(weg)noteVerwerfen("fn",id);
     const ed=$("#editor");ed&&ed.focus();
   };
 }
@@ -24140,7 +24698,15 @@ function stripScreenPagination(ed){
   pgliWeg(ed);
   pgspaltWeg(ed);
   ed.style.minHeight="";
-  return ()=>{ed.style.minHeight=mh;if(S.mode==="write")paginate()};
+  randAusgleich(ed);
+  /* Wiederholte Überschrift: ein <thead> wiederholt Chromium im Druck selbst */
+  const koepfe=[];
+  ed.querySelectorAll("table").forEach(t=>{const tb=t.tBodies[0];if(!tb||t.tHead)return;
+    const rows=[...tb.rows],n=kopfZeilenZahl(rows);if(!n||n>=rows.length)return;
+    const th=document.createElement("thead");rows.slice(0,n).forEach(r=>th.appendChild(r));t.insertBefore(th,tb);koepfe.push(th)});
+  return ()=>{
+    koepfe.forEach(th=>{const t=th.parentNode,tb=t&&t.tBodies[0];if(tb)[...th.rows].reverse().forEach(r=>tb.insertBefore(r,tb.firstChild));th.remove()});
+    ed.style.minHeight=mh;if(S.mode==="write")paginate()};
 }
 function withPrintFootnotes(fn){
   const d=doc(),ed=$("#editor");
@@ -24193,6 +24759,7 @@ function endnotenListe(ed){
   ed.appendChild(el);
 }
 function insertEndnote(){
+  if(einSchritt(()=>insertEndnote()))return;
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   ed.focus();
   const id=uid();
@@ -24211,6 +24778,7 @@ function insertEndnote(){
   setTimeout(()=>editEndnote(id,true),30);
 }
 function deleteEndnote(id){
+  if(einSchritt(()=>deleteEndnote(id)))return;
   const ed=$("#editor");if(!ed)return;
   ed.querySelectorAll(`.en[data-en="${id}"]`).forEach(s=>s.remove());
   const d=doc();d.endnotes=(d.endnotes||[]).filter(f=>f.id!==id);
@@ -24234,7 +24802,7 @@ function editEndnote(id,frisch){
   $("#enDel").onclick=()=>{deleteEndnote(id);finish()};
   /* Eine gerade angelegte Endnote ohne Text, die man wieder schließt, war
      nicht gewollt — wie bei den Fußnoten. */
-  $("#enClose").onclick=()=>{finish();if(frisch&&!(en.text||"").trim()&&!ta.value.trim())deleteEndnote(id)};
+  $("#enClose").onclick=()=>{finish();if(frisch&&!(en.text||"").trim()&&!ta.value.trim())noteVerwerfen("en",id)};
   ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();$("#enOk").click()}});
 }
 /* ================= Inhaltsverzeichnis =================
@@ -24325,6 +24893,10 @@ function tocBlockHtml(ed,cfg){
     <div class="toc-list">${tocEntriesHtml(ed,cfg)}</div></div>`;
 }
 function insertToc(){
+  /* Die Kennungen der Überschriften vorher vergeben: unsichtbar, sie zögen
+     den Rückgängig-Schritt sonst über das ganze Dokument */
+  {const e0=$("#editor");if(e0&&!schrittOffen&&S.mode==="write")ensureHeadingIds(e0)}
+  if(einSchritt(()=>insertToc()))return;
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   if(ed.querySelector("[data-toc]")){toast(tr("Im Dokument gibt es bereits ein Inhaltsverzeichnis."));return}
   ed.focus();paginate();
@@ -24346,6 +24918,7 @@ function tocUpdatePageNumbers(ed,block){
   });
 }
 function refreshToc(block){
+  if(einSchritt(()=>refreshToc(block)))return;
   if(!block)return;
   const ed=$("#editor"),list=block.querySelector(".toc-list");
   paginate();
@@ -24434,7 +25007,7 @@ function tocSettingsDialog(block){
   $("#tocFull").onclick=()=>{apply(true);repaint()};
   $("#tocDone").onclick=()=>{closeOvl();ed&&ed.focus()};
   $("#tocDel").onclick=()=>{
-    block.remove();flush();dirty=true;commit();queuePaginate();
+    alsSchritt(()=>block.remove());flush();dirty=true;commit();queuePaginate();
     closeOvl();ed&&ed.focus();
   };
 }
@@ -24478,6 +25051,8 @@ function tofBlockHtml(ed){
     <div class="toc-list">${tofEntriesHtml(ed)}</div></div>`;
 }
 function insertTof(){
+  {const e0=$("#editor");if(e0&&!schrittOffen&&S.mode==="write")ensureFigureIds(e0)}
+  if(einSchritt(()=>insertTof()))return;
   if(!S.settings.tofEnabled)return;
   const ed=$("#editor");if(S.mode!=="write"||!ed)return;
   if(ed.querySelector(".tof")){toast(tr("Im Dokument gibt es bereits ein Abbildungsverzeichnis."));return}
@@ -24592,6 +25167,7 @@ function updateOutlineActive(){
    (Überschrift + Inhalt bis zur nächsten Überschrift) - nicht nur die
    Überschriftzeile selbst, sonst würde der Text darunter zurückbleiben. */
 function moveOutlineSection(ed,draggedId,targetId,after){
+  if(einSchritt(()=>moveOutlineSection(ed,draggedId,targetId,after)))return;
   const secs=outlineSections(ed);
   const dragged=secs.find(s=>s.id===draggedId),target=secs.find(s=>s.id===targetId);
   if(!dragged||!target||dragged.run.includes(target.h))return;
@@ -25443,10 +26019,10 @@ function spellDialog(startAt){
     const cur=spellHits[spellIdx];if(!cur)return;
     const word=cur.textContent;
     const targets=all?spellHits.filter(h=>h.textContent===word):[cur];
-    targets.forEach(t=>{
+    alsSchritt(()=>targets.forEach(t=>{
       const i=spellHits.indexOf(t);if(i>=0)spellHits.splice(i,1);
       t.replaceWith(document.createTextNode(txt));
-    });
+    }));
     after();
   };
   const bind=()=>{
@@ -26062,10 +26638,10 @@ function cleanDialog(){
     const cl=$("#clClose");if(cl)cl.onclick=()=>closeOvl();   /* räumt über cleanDone auf */
     const fix=$("#clFix");if(fix)fix.onclick=()=>{
       const h=cleanHits[cleanIdx];if(!h)return;
-      cleanApply(h);cleanHits.splice(cleanIdx,1);after();
+      alsSchritt(()=>{cleanApply(h);cleanHits.splice(cleanIdx,1)});after();
     };
     const fixAll=$("#clFixAll");if(fixAll)fixAll.onclick=()=>{
-      cleanHits.slice().forEach(cleanApply);cleanHits=[];after();
+      alsSchritt(()=>{cleanHits.slice().forEach(cleanApply);cleanHits=[]});after();
     };
     const sk=$("#clSkip");if(sk)sk.onclick=()=>{
       if(!cleanHits.length)return;
@@ -26536,6 +27112,7 @@ function fdClose(){
   const ed=$("#editor");if(ed)ed.focus();
 }
 function fdReplaceOne(){
+  if(einSchritt(()=>fdReplaceOne()))return;
   if(!fdHits.length)return;
   const h=fdHits[fdIdx];if(!h)return;
   const txt=$("#fdR").value;
@@ -26544,6 +27121,7 @@ function fdReplaceOne(){
   fdRun(true);queuePaginate();
 }
 function fdReplaceAll(){
+  if(einSchritt(()=>fdReplaceAll()))return;
   if(!fdHits.length)return;
   const txt=$("#fdR").value,n=fdHits.length;
   fdHits.forEach(h=>h.replaceWith(document.createTextNode(txt)));
@@ -26690,6 +27268,7 @@ function currentSlashQuery(){
 }
 function slashClose(){const m=$("#smenu");if(m)m.remove();slashOn=false;slashIdx=0}
 function slashRun(i){
+  if(einSchritt(()=>slashRun(i)))return;
   const x=slashHits[i];if(!x)return;
   const b=slashBlock;slashClose();
   const ed=$("#editor");if(!ed||!b)return;
@@ -27088,6 +27667,7 @@ function freeFigMouseDown(e){
   e.preventDefault();
   if(selFig!==fig)selectFig(fig);
   freiZiehen=fig;
+  const schritt=schrittStart();
   const bar=$("#imgbar");bar.classList.add("leise");
   const ed=$("#editor"),g=freeGeom(),modus=griff?griff.dataset.fdir:"move";
   const fr=fig.getBoundingClientRect();
@@ -27133,8 +27713,8 @@ function freeFigMouseDown(e){
     bar.classList.remove("leise");
     /* Losgelassen: an den Block an der neuen Stelle hängen */
     freiZiehen=null;placeFreeFigs();
-    flush();dirty=true;commit();drawStatus();
-    if(selFig===fig)drawImgBar();
+    flush();dirty=true;commit();drawStatus();schrittEnde(schritt);
+    if(selFig)drawImgBar();
   };
   document.addEventListener("mousemove",move);
   document.addEventListener("mouseup",up);
@@ -27225,6 +27805,7 @@ function sigInit(){
    data-sig: placeFreeFigs hebt Signaturen mit dieser Marke aus alten
    Dokumenten aus dem Text heraus. */
 function insertSignaturZeile(data,wmm){
+  if(einSchritt(()=>insertSignaturZeile(data,wmm)))return;
   const ed=$("#editor");if(!ed)return;
   ed.focus();
   const sel=getSelection();
@@ -27247,6 +27828,7 @@ let selFig=null;
    blieb das leere Gerüst stehen. Über execCommand, damit Strg+Z es
    zurücknimmt; geht das nicht, wird das Element direkt entfernt. */
 function blockLoeschen(el){
+  if(einSchritt(()=>blockLoeschen(el)))return;
   const ed=$("#editor");if(!ed||!ed.contains(el))return;
   const nach=el.nextElementSibling,vor=el.previousElementSibling;
   ed.focus();
@@ -27347,6 +27929,7 @@ function figResizeDrag(e){
   if(!im)return;
   e.preventDefault();
   const ecke=(e.currentTarget&&e.currentTarget.dataset.ecke)||"se";
+  const schritt=schrittStart();
   const bar=$("#imgbar");bar.classList.add("leise");
   const pct=$("#figpct"),paper=$("#paper");
   const zeigePct=w=>{if(!pct||!paper)return;const pr=paper.getBoundingClientRect(),ir=im.getBoundingClientRect();
@@ -27374,7 +27957,7 @@ function figResizeDrag(e){
     document.removeEventListener("mousemove",move);
     document.removeEventListener("mouseup",up);
     bar.classList.remove("leise");if(pct)pct.classList.remove("on");
-    flush();dirty=true;commit();queuePaginate();drawStatus();
+    flush();dirty=true;commit();queuePaginate();drawStatus();schrittEnde(schritt);
     setTimeout(()=>{drawImgBar();placeFigHandle()},0);
   };
   document.addEventListener("mousemove",move);
@@ -27434,6 +28017,7 @@ function umflWeg(fig){
   if(im)im.style.width=(+fig.dataset.w||70)+"%";
 }
 function bildLage(fig,lage){
+  if(einSchritt(()=>bildLage(fig,lage)))return;
   const ed=$("#editor");if(!ed||!fig)return;
   const g=freeGeom(),frei=fig.classList.contains("free");
   const im=fig.querySelector("img");
@@ -27492,7 +28076,7 @@ function bildLage(fig,lage){
    dem Bild wandert). Erst ab 4 px Bewegung, sonst ist es ein Klick. */
 function umflZiehen(e,fig){
   e.preventDefault();
-  const ed=$("#editor"),sx=e.clientX,sy=e.clientY;
+  const ed=$("#editor"),sx=e.clientX,sy=e.clientY,schritt=schrittStart();
   let aktiv=false,letzt=null;
   const bar=$("#imgbar");
   const move=ev=>{
@@ -27515,6 +28099,7 @@ function umflZiehen(e,fig){
     document.removeEventListener("mouseup",up);
     bar.classList.remove("leise");
     if(aktiv){flush();dirty=true;commit();queuePaginate();drawStatus();selectFig(fig)}
+    schrittEnde(schritt);
   };
   document.addEventListener("mousemove",move);
   document.addEventListener("mouseup",up);
@@ -27536,12 +28121,13 @@ function bildErsetzen(fig){
   i.onchange=()=>{const file=i.files[0];i.remove();if(!file)return;
     if(!file.type.startsWith("image/")){toast(tr("Keine Bilddatei"));return}
     blobToDataUrl(file).then(roh=>scaleToDataUrl(roh,magPng(file.type))).then(data=>{
-      im.src=data;
-      /* Frei liegend: Breite bleibt, die Höhe folgt dem neuen Bild */
+      /* Frei liegend: Breite bleibt, die Höhe folgt dem neuen Bild. Beides
+         ein Rückgängig-Schritt, darum erst nach dem Laden. */
       const neu=new Image();neu.onload=()=>{
-        if(fig.classList.contains("free")&&neu.naturalWidth){
-          fig.dataset.fh=Math.max(FREE_MIN_MM,Math.round((+fig.dataset.fw||40)*neu.naturalHeight/neu.naturalWidth));
-          placeFreeFigs()}
+        if(fig.isConnected)alsSchritt(()=>{im.src=data;
+          if(fig.classList.contains("free")&&neu.naturalWidth){
+            fig.dataset.fh=Math.max(FREE_MIN_MM,Math.round((+fig.dataset.fw||40)*neu.naturalHeight/neu.naturalWidth));
+            placeFreeFigs()}});
         flush();dirty=true;commit();queuePaginate();drawImgBar()};
       neu.src=data;
     }).catch(()=>toast(tr("Bild konnte nicht gelesen werden")));
@@ -27564,17 +28150,17 @@ $("#imgbar").addEventListener("click",e=>{
     });
     return}
   const al=e.target.closest("[data-ia]");
-  if(al&&selFig.classList.contains("umfl")){umflSetzen(selFig,al.dataset.ia==="right"?"rechts":"links",+selFig.dataset.w||40);imgApply();return}
-  if(al){selFig.style.textAlign=al.dataset.ia;imgApply();return}
+  if(al&&selFig.classList.contains("umfl")){alsSchritt(()=>umflSetzen(selFig,al.dataset.ia==="right"?"rechts":"links",+selFig.dataset.w||40));imgApply();return}
+  if(al){alsSchritt(()=>{selFig.style.textAlign=al.dataset.ia});imgApply();return}
   const c=e.target.closest("[data-ic]");if(!c)return;
-  if(c.dataset.ic==="del"){const f=selFig;selectFig(null);f.remove();
+  if(c.dataset.ic==="del"){const f=selFig;selectFig(null);alsSchritt(()=>f.remove());
     flush();dirty=true;commit();queuePaginate();drawStatus();return}
-  if(c.dataset.ic==="cap"){
+  if(c.dataset.ic==="cap"){alsSchritt(()=>{
     const cap=selFig.querySelector("figcaption");
     if(cap)cap.remove();
     else{const fc=document.createElement("figcaption");
       fc.setAttribute("contenteditable","true");fc.textContent=tr("Bildunterschrift");
-      selFig.appendChild(fc);putCaret(fc)}
+      selFig.appendChild(fc);putCaret(fc)}});
     imgApply();return}
   if(c.dataset.ic==="alt"){bildAltDialog(selFig);return}
 });
@@ -27588,7 +28174,7 @@ function bildAltDialog(fig){
       <button class="btn pri" id="altO">${tr("Übernehmen")}</button></div></div>`);
     $("#altT").focus();
     $("#altC").onclick=closeOvl;
-    $("#altO").onclick=()=>{im.setAttribute("alt",$("#altT").value);closeOvl();imgApply()};
+    $("#altO").onclick=()=>{const v=$("#altT").value;closeOvl();alsSchritt(()=>im.setAttribute("alt",v));imgApply()};
 }
 function glossSearch(){
   const gid=doc().glossaryId;
@@ -28368,7 +28954,9 @@ below, insert left or right, delete row, delete column, delete table, and turn t
 row into a header row.</p>
 <p><b>To change column widths or row heights</b>, drag the border between two cells. Widths
 are kept as percentages, so they survive zooming and a change of page format.</p>
-<p><b>The table bar</b> below the toolbar also offers what Word has: <b>Merge cells</b> (select several cells first) and <b>Split cells</b>, <b>Shading</b>, <b>Borders</b> (all, outside, inside, none; line weight and colour), <b>Alignment in cell</b> (top, middle, bottom) and <b>Column width</b> (distribute evenly, fit to page width). With only the cursor in the table, borders apply to the whole table.</p>`},
+<p><b>The table bar</b> below the toolbar also offers what Word has: <b>Merge cells</b> (select several cells first) and <b>Split cells</b>, <b>Shading</b>, <b>Borders</b> (all, outside, inside, none; line weight and colour), <b>Alignment in cell</b> (top, middle, bottom) and <b>Column width</b> (distribute evenly, fit to page width). With only the cursor in the table, borders apply to the whole table.</p>
+<p><b>Table style</b> (first button in the table bar, or right-click › Table style…) dresses a table in one step like Word: grid, green, blue, orange, grey or simple — header row coloured, rows banded. Both can be switched off; the formatting is kept in .docx, .odt and .doc.</p>
+<p><b>Repeat Header Rows</b> (right-click in a row › Repeat Header Rows): the first rows up to this one appear again at the top of every page the table runs onto — on screen and in print, as in Word. Click again in a header row to switch it off from there. Documents from Word, LibreOffice and RTF keep the setting.</p>`},
 
  {t:"Pictures",k:"image;picture;photo;caption;alt text;resize",b:`
 <p>Insert a picture from the toolbar, or type <code>/image</code>. The file is embedded in
@@ -28999,7 +29587,9 @@ löschen, und die erste Zeile zur Kopfzeile machen.</p>
 <p><b>Spaltenbreiten und Zeilenhöhen</b> änderst du, indem du die Grenze zwischen zwei Zellen
 ziehst. Breiten werden als Prozentwerte gehalten und überstehen deshalb Zoom und einen Wechsel
 des Seitenformats.</p>
-<p><b>Die Tabellenleiste</b> unter der Symbolleiste bietet dazu, was Word hat: <b>Zellen verbinden</b> (vorher mehrere Zellen markieren) und <b>Zellen teilen</b>, <b>Schattierung</b>, <b>Rahmen</b> (alle, außen, innen, keine; Linienstärke und -farbe), <b>Ausrichtung in der Zelle</b> (oben, Mitte, unten) und <b>Spaltenbreite</b> (gleichmäßig verteilen, an Seitenbreite anpassen). Steht nur die Schreibmarke in der Tabelle, gilt der Rahmen für die ganze Tabelle.</p>`},
+<p><b>Die Tabellenleiste</b> unter der Symbolleiste bietet dazu, was Word hat: <b>Zellen verbinden</b> (vorher mehrere Zellen markieren) und <b>Zellen teilen</b>, <b>Schattierung</b>, <b>Rahmen</b> (alle, außen, innen, keine; Linienstärke und -farbe), <b>Ausrichtung in der Zelle</b> (oben, Mitte, unten) und <b>Spaltenbreite</b> (gleichmäßig verteilen, an Seitenbreite anpassen). Steht nur die Schreibmarke in der Tabelle, gilt der Rahmen für die ganze Tabelle.</p>
+<p><b>Tabellenvorlage</b> (erster Knopf der Tabellenleiste oder Rechtsklick › Tabellenvorlage…) kleidet eine Tabelle wie in Word in einem Schritt ein: Gitternetz, Grün, Blau, Orange, Grau oder Schlicht — Kopfzeile farbig, Zeilen gebändert. Beides lässt sich abschalten; die Formatierung bleibt in .docx, .odt und .doc erhalten.</p>
+<p><b>Überschriften wiederholen</b> (Rechtsklick in eine Zeile › Überschriften wiederholen): die ersten Zeilen bis zu dieser stehen auf jeder Seite, auf die die Tabelle läuft, oben noch einmal — am Bildschirm und im Druck, wie in Word. Ein erneuter Klick in einer Überschriftszeile schaltet ab dort wieder aus. Dokumente aus Word, LibreOffice und RTF behalten die Einstellung.</p>`},
 
  {t:"Bilder",k:"bild;foto;grafik;bildunterschrift;alternativtext;größe ändern",b:`
 <p>Ein Bild fügst du über die Werkzeugleiste ein oder mit <code>/bild</code>. Die Datei wird im
@@ -29655,7 +30245,9 @@ eliminar tabla y convertir la primera fila en fila de encabezado.</p>
 <p><b>Para cambiar el ancho de las columnas o el alto de las filas</b>, arrastra el borde entre
 dos celdas. Los anchos se guardan como porcentajes, así que sobreviven al zoom y a un cambio de
 formato de página.</p>
-<p><b>La barra de tabla</b> bajo la barra de herramientas ofrece además lo que tiene Word: <b>Combinar celdas</b> (selecciona antes varias celdas) y <b>Dividir celdas</b>, <b>Sombreado</b>, <b>Bordes</b> (todos, externos, internos, ninguno; grosor y color), <b>Alineación en la celda</b> (arriba, centro, abajo) y <b>Ancho de columna</b> (distribuir uniformemente, ajustar al ancho de página). Con solo el cursor en la tabla, los bordes se aplican a toda la tabla.</p>`},
+<p><b>La barra de tabla</b> bajo la barra de herramientas ofrece además lo que tiene Word: <b>Combinar celdas</b> (selecciona antes varias celdas) y <b>Dividir celdas</b>, <b>Sombreado</b>, <b>Bordes</b> (todos, externos, internos, ninguno; grosor y color), <b>Alineación en la celda</b> (arriba, centro, abajo) y <b>Ancho de columna</b> (distribuir uniformemente, ajustar al ancho de página). Con solo el cursor en la tabla, los bordes se aplican a toda la tabla.</p>
+<p><b>Estilo de tabla</b> (primer botón de la barra de tabla, o clic derecho › Estilo de tabla…) viste una tabla en un paso como en Word: cuadrícula, verde, azul, naranja, gris o sencillo — fila de encabezado en color, filas con bandas. Ambas cosas se pueden desactivar; el formato se conserva en .docx, .odt y .doc.</p>
+<p><b>Repetir filas de título</b> (clic derecho en una fila › Repetir filas de título): las primeras filas hasta esta vuelven a aparecer arriba en cada página por la que continúa la tabla — en pantalla y al imprimir, como en Word. Otro clic en una fila de título lo desactiva desde ahí. Los documentos de Word, LibreOffice y RTF conservan el ajuste.</p>`},
 
  {t:"Imágenes",k:"imagen;foto;pie de imagen;texto alternativo;redimensionar",b:`
 <p>Inserta una imagen desde la barra de herramientas o escribe <code>/imagen</code>. El archivo
@@ -30311,7 +30903,9 @@ excluir tabela e transformar a primeira linha em linha de cabeçalho.</p>
 <p><b>Para mudar a largura das colunas ou a altura das linhas</b>, arraste a borda entre duas
 células. As larguras são guardadas em porcentagem, então sobrevivem ao zoom e a uma mudança de
 formato de página.</p>
-<p><b>A barra de tabela</b> abaixo da barra de ferramentas oferece também o que o Word tem: <b>Mesclar células</b> (selecione antes várias células) e <b>Dividir células</b>, <b>Sombreamento</b>, <b>Bordas</b> (todas, externas, internas, nenhuma; espessura e cor), <b>Alinhamento na célula</b> (em cima, meio, embaixo) e <b>Largura da coluna</b> (distribuir uniformemente, ajustar à largura da página). Com só o cursor na tabela, as bordas valem para a tabela inteira.</p>`},
+<p><b>A barra de tabela</b> abaixo da barra de ferramentas oferece também o que o Word tem: <b>Mesclar células</b> (selecione antes várias células) e <b>Dividir células</b>, <b>Sombreamento</b>, <b>Bordas</b> (todas, externas, internas, nenhuma; espessura e cor), <b>Alinhamento na célula</b> (em cima, meio, embaixo) e <b>Largura da coluna</b> (distribuir uniformemente, ajustar à largura da página). Com só o cursor na tabela, as bordas valem para a tabela inteira.</p>
+<p><b>Estilo de tabela</b> (primeiro botão da barra de tabela, ou clique direito › Estilo de tabela…) formata uma tabela num passo como no Word: grade, verde, azul, laranja, cinza ou simples — linha de cabeçalho colorida, linhas em tiras. Ambos podem ser desligados; a formatação mantém-se em .docx, .odt e .doc.</p>
+<p><b>Repetir linhas de cabeçalho</b> (clique direito numa linha › Repetir linhas de cabeçalho): as primeiras linhas até esta aparecem de novo no topo de cada página por onde a tabela continua — na tela e na impressão, como no Word. Outro clique numa linha de cabeçalho desativa a partir dali. Documentos do Word, LibreOffice e RTF mantêm a configuração.</p>`},
 
  {t:"Imagens",k:"imagem;foto;legenda;texto alternativo;redimensionar",b:`
 <p>Insira uma imagem pela barra de ferramentas ou digite <code>/imagem</code>. O arquivo fica
@@ -30974,7 +31568,9 @@ colonne, supprimer le tableau, et transformer la première ligne en ligne d'en-t
 <p><b>Pour changer la largeur des colonnes ou la hauteur des lignes</b>, faites glisser la
 bordure entre deux cellules. Les largeurs sont conservées en pourcentages, elles survivent donc
 au zoom et à un changement de format de page.</p>
-<p><b>La barre de tableau</b> sous la barre d'outils propose aussi ce que Word offre : <b>Fusionner les cellules</b> (sélectionnez d'abord plusieurs cellules) et <b>Fractionner les cellules</b>, <b>Trame de fond</b>, <b>Bordures</b> (toutes, extérieures, intérieures, aucune ; épaisseur et couleur), <b>Alignement dans la cellule</b> (haut, milieu, bas) et <b>Largeur des colonnes</b> (répartir uniformément, ajuster à la largeur de la page). Avec seulement le curseur dans le tableau, les bordures s'appliquent à tout le tableau.</p>`},
+<p><b>La barre de tableau</b> sous la barre d'outils propose aussi ce que Word offre : <b>Fusionner les cellules</b> (sélectionnez d'abord plusieurs cellules) et <b>Fractionner les cellules</b>, <b>Trame de fond</b>, <b>Bordures</b> (toutes, extérieures, intérieures, aucune ; épaisseur et couleur), <b>Alignement dans la cellule</b> (haut, milieu, bas) et <b>Largeur des colonnes</b> (répartir uniformément, ajuster à la largeur de la page). Avec seulement le curseur dans le tableau, les bordures s'appliquent à tout le tableau.</p>
+<p><b>Style de tableau</b> (premier bouton de la barre de tableau, ou clic droit › Style de tableau…) habille un tableau en une étape comme dans Word : grille, vert, bleu, orange, gris ou sobre — ligne d'en-tête en couleur, lignes à bandes. Les deux se désactivent ; la mise en forme est conservée en .docx, .odt et .doc.</p>
+<p><b>Répéter les lignes d’en-tête</b> (clic droit dans une ligne › Répéter les lignes d’en-tête) : les premières lignes jusqu’à celle-ci réapparaissent en haut de chaque page sur laquelle le tableau se poursuit — à l’écran et à l’impression, comme dans Word. Un nouveau clic dans une ligne d’en-tête le désactive à partir de là. Les documents Word, LibreOffice et RTF conservent le réglage.</p>`},
 
  {t:"Images",k:"image;photo;légende;texte alternatif;redimensionner",b:`
 <p>Insérez une image depuis la barre d'outils, ou tapez <code>/image</code>. Le fichier est
@@ -31639,7 +32235,9 @@ oraz zamień pierwszy wiersz w wiersz nagłówka.</p>
 <p><b>Aby zmienić szerokość kolumn lub wysokość wierszy</b>, przeciągnij krawędź między dwiema
 komórkami. Szerokości są przechowywane w procentach, więc przetrwają powiększenie i zmianę
 formatu strony.</p>
-<p><b>Pasek tabeli</b> pod paskiem narzędzi oferuje też to, co ma Word: <b>Scal komórki</b> (najpierw zaznacz kilka komórek) i <b>Podziel komórki</b>, <b>Cieniowanie</b>, <b>Obramowanie</b> (wszystkie, zewnętrzne, wewnętrzne, brak; grubość i kolor linii), <b>Wyrównanie w komórce</b> (do góry, środek, do dołu) oraz <b>Szerokość kolumn</b> (rozłóż równomiernie, dopasuj do szerokości strony). Gdy w tabeli stoi tylko kursor, obramowanie dotyczy całej tabeli.</p>`},
+<p><b>Pasek tabeli</b> pod paskiem narzędzi oferuje też to, co ma Word: <b>Scal komórki</b> (najpierw zaznacz kilka komórek) i <b>Podziel komórki</b>, <b>Cieniowanie</b>, <b>Obramowanie</b> (wszystkie, zewnętrzne, wewnętrzne, brak; grubość i kolor linii), <b>Wyrównanie w komórce</b> (do góry, środek, do dołu) oraz <b>Szerokość kolumn</b> (rozłóż równomiernie, dopasuj do szerokości strony). Gdy w tabeli stoi tylko kursor, obramowanie dotyczy całej tabeli.</p>
+<p><b>Styl tabeli</b> (pierwszy przycisk paska tabeli lub prawy przycisk › Styl tabeli…) formatuje tabelę jednym krokiem jak w Wordzie: siatka, zielony, niebieski, pomarańczowy, szary lub prosty — kolorowy wiersz nagłówka, wiersze naprzemienne. Oba można wyłączyć; formatowanie zostaje zachowane w .docx, .odt i .doc.</p>
+<p><b>Powtarzaj wiersze nagłówka</b> (prawy przycisk w wierszu › Powtarzaj wiersze nagłówka): pierwsze wiersze aż do tego pojawiają się ponownie u góry każdej strony, na którą przechodzi tabela — na ekranie i w druku, jak w Wordzie. Ponowne kliknięcie w wierszu nagłówka wyłącza to od tego miejsca. Dokumenty z Worda, LibreOffice i RTF zachowują to ustawienie.</p>`},
 
  {t:"Obrazy",k:"obraz;zdjęcie;podpis;tekst alternatywny;zmiana rozmiaru",b:`
 <p>Wstaw obraz z paska narzędzi albo wpisz <code>/obraz</code>. Plik jest osadzony w dokumencie,
@@ -32284,7 +32882,9 @@ trasforma la prima riga in riga di intestazione.</p>
 <p><b>Per cambiare la larghezza delle colonne o l'altezza delle righe</b>, trascina il bordo tra
 due celle. Le larghezze sono conservate in percentuale, quindi sopravvivono allo zoom e a un
 cambio di formato pagina.</p>
-<p><b>La barra della tabella</b> sotto la barra degli strumenti offre anche ciò che ha Word: <b>Unisci celle</b> (seleziona prima più celle) e <b>Dividi celle</b>, <b>Sfondo</b>, <b>Bordi</b> (tutti, esterni, interni, nessuno; spessore e colore), <b>Allineamento nella cella</b> (in alto, centro, in basso) e <b>Larghezza colonne</b> (distribuisci uniformemente, adatta alla larghezza della pagina). Con solo il cursore nella tabella, i bordi valgono per tutta la tabella.</p>`},
+<p><b>La barra della tabella</b> sotto la barra degli strumenti offre anche ciò che ha Word: <b>Unisci celle</b> (seleziona prima più celle) e <b>Dividi celle</b>, <b>Sfondo</b>, <b>Bordi</b> (tutti, esterni, interni, nessuno; spessore e colore), <b>Allineamento nella cella</b> (in alto, centro, in basso) e <b>Larghezza colonne</b> (distribuisci uniformemente, adatta alla larghezza della pagina). Con solo il cursore nella tabella, i bordi valgono per tutta la tabella.</p>
+<p><b>Stile tabella</b> (primo pulsante della barra della tabella, o clic destro › Stile tabella…) veste una tabella in un passo come in Word: griglia, verde, blu, arancione, grigio o semplice — riga di intestazione colorata, righe alternate. Entrambe si possono disattivare; la formattazione resta in .docx, .odt e .doc.</p>
+<p><b>Ripeti righe di intestazione</b> (clic destro in una riga › Ripeti righe di intestazione): le prime righe fino a questa ricompaiono in cima a ogni pagina su cui prosegue la tabella — a schermo e in stampa, come in Word. Un nuovo clic in una riga di intestazione la disattiva da lì in poi. I documenti di Word, LibreOffice e RTF mantengono l’impostazione.</p>`},
 
  {t:"Immagini",k:"immagine;foto;didascalia;testo alternativo;ridimensionare",b:`
 <p>Inserisci un'immagine dalla barra degli strumenti, oppure digita <code>/immagine</code>. Il

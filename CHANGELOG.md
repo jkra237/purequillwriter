@@ -203,6 +203,66 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Tabellen: Überschriften wiederholen wie in Word** (Tom am Goethe-
+  Dokument: Word und LibreOffice zeigen die Kopfzeile der Tabelle auf jeder
+  Seite wieder, PureQuill fing Seite 2 mit „Aufgabe 49“ an). Gelesen und
+  geschrieben in .docx (w:tblHeader), .odt (table:table-header-rows), .doc
+  (sprmTTableHeader, nur lesen) und .rtf (\trhdr); am Bildschirm eine
+  Anzeige-Kopie nach jedem Seitenwechsel in der Tabelle (tr.pgzeile.pgkopf,
+  wird nie gespeichert), im Druck über ein <thead>, das Chromium selbst
+  wiederholt. Schalter: Rechtsklick › „Überschriften wiederholen“ (mit
+  Häkchen, ein Rückgängig-Schritt); eingefügte Zeilen innerhalb der
+  Überschrift gehören dazu. Gegen Word gemessen: Überschrift auf Seite 2
+  bei 137 pt wie dort. Umlauf je 51/51 (neues Merkmal im Prüfdokument);
+  LibreOffices eigener RTF-Export lässt die Markierung weg (LO-RTF 48/51),
+  gelesen wird sie von LibreOffice aus unserer RTF richtig.
+- **Seitenumbruch wie Word: Zeilenhöhe, Fußzeile, ODT-Abstände** (Tom: „wie
+  können zeilenhöhen anders sein, wenn wir überall dieselben werte setzen“).
+  Goethe-Dokument jetzt 14/17/3 Tabellenzeilen je Seite wie Word und
+  LibreOffice (vorher 14/16/4, die .odt 12/16/6). Gefunden, gegen Words
+  eigene Angaben (COM) und Verdanas Metriken nachgerechnet:
+  (1) natürliche Zeilenhöhe bei 100 px gemessen — Chromium rundet Ober- und
+  Unterlänge auf ganze Pixel, Verdana ergab 1,22 statt 1,2153; jetzt bei
+  1000 px. (2) Ein 0,5-pt-Zellrahmen (0,67 px) wird bei 100 % Skalierung als
+  ganzer Pixel gezeichnet; `randAusgleich()` nimmt den Überschuss in der Zelle
+  wieder zurück (data-rk, nur Anzeige, nie gespeichert). Zeile jetzt
+  37,863 pt, Word 37,86. (3) Das Seitenzahlfeld der Fußzeile stand ohne
+  Format neben dem 7-pt-Text; die Zeile galt als gemischt und wurde in der
+  Grundgröße gesetzt — Fußzeile 2,9 pt höher als in Word. Die Leser für
+  Word, .doc und ODT geben dem Feld jetzt das Format seines Ergebnisses,
+  und ein bloßer Platzhalter ohne eigene Größe nimmt die der Zeile (hilft
+  auch schon geöffneten Dokumenten). (4) ODT: ohne fo:line-height gilt
+  „einfach“ (war 1,15), ohne Abstand danach 0 pt, und Absätze in
+  Tabellenzellen zählen nicht für den Abstand des Dokuments (wie beim
+  .doc-Leser) — jede Zeile war 2 pt zu hoch, die Leerabsätze vor der
+  Tabelle hatten je 12 pt zu viel.
+- **Rückgängig und Wiederholen greifen bei jeder Änderung** (Tom: „vor und
+  zurück sollte bei allen änderungen greifen“): gemessen fielen 18 von 30
+  Befehlen durch — Strg+Z übersprang sie und nahm das davor Getippte
+  zurück: Absatzformat, Zeilenabstand, Abstand vor/nach, Einrücken,
+  Aufzählung/Nummerierung, Titel, Linie, Fußnote, Endnote, Inhalts- und
+  Abbildungsverzeichnis, Bildlage, Bildunterschrift, Bild löschen,
+  Ersetzen; Schriftart und -größe ließen sich weder sauber zurücknehmen
+  noch wiederholen, Hervorhebung brauchte zwei Strg+Z. Jetzt ist jeder
+  Befehl genau ein Schritt, auch Link bearbeiten/entfernen, Notiz anheften,
+  Listenstil, Rechtschreibung und Bereinigen (Ersetzen), Block löschen,
+  „/“-Befehle sowie Ziehen mit der Maus (Spaltenbreite, Zeilenhöhe,
+  Bildgröße, freies und umflossenes Bild). Eine eben angelegte und leer
+  verworfene Fußnote/Endnote hinterlässt keinen Schritt. Prüfung: 36 Fälle
+  je Rückgängig, Wiederholen und das davor Getippte.
+- **Tabellenvorlagen, farbige Tabellensymbole, Rechtsklick wie Word** (Tom:
+  „die tabelle ist ja grün in den zellen. so was sollten wir auch
+  hinbekommen“): neue Galerie „Tabellenvorlage“ (Gitternetz, Grün, Blau,
+  Orange, Grau, Schlicht — Farben aus Words Gitternetztabelle 4) mit den
+  Häkchen „Kopfzeile hervorheben“ und „Gebänderte Zeilen“. Geschrieben als
+  direkte Zellformatierung, bleibt also in .docx/.odt/.doc erhalten. Die
+  Tabellensymbole tragen jetzt Farbakzente (Plus grün, Verbinden blau,
+  Löschen rot …). Im Kontextmenü stehen die Tabellenbefehle wie in Word
+  direkt da statt hinter „Tabelle ›“; Verbinden/Teilen nur, wenn möglich.
+  Druck: eine Kopfzelle mit eigener Farbe behält sie.
+  Alle Tabellenbefehle (Vorlage, Einfügen, Löschen, Verbinden, Teilen,
+  Schattierung, Rahmen, Ausrichtung, Spaltenbreite, Kopfzeile) sind jetzt
+  ein normaler Rückgängig-Schritt — vorher übersprang „Zurück“ sie (Tom).
 - **Tabellen wie Word** (Tom: „was fehlt, was Word hat“): Zellen verbinden
   und teilen, Schattierung, Rahmen (alle/außen/innen/keine, Stärke, Farbe;
   ohne Markierung für die ganze Tabelle), Ausrichtung in der Zelle (oben/
