@@ -203,6 +203,14 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Tabellenvorlage: „Erste Spalte hervorheben“ wie in Word** (Tom fragte,
+  ob die Kopfzeile fetter oder größer sein sollte): Word setzt die Kopfzeile
+  seiner Vorlagen fett (auf Farbe weiß), aber nicht größer — so war es hier
+  schon. Gefehlt hat Words Häkchen „Erste Spalte“, dort standardmäßig an:
+  jetzt im Vorlagenmenü zwischen Kopfzeile und Bänderung, standardmäßig an,
+  erste Spalte fett ohne eigene Farbe (data-tvs, als direkte Formatierung,
+  bleibt in .docx/.odt/.doc). Bestehende Tabellen ändern sich erst beim
+  erneuten Wählen einer Vorlage. Hilfe in 7 Sprachen.
 - **Kopf-/Fußzeile: Tab springt beim Bearbeiten nicht mehr** (Tom: „vor
   dem Klick ist die Seitenzahl zentriert, nach dem Klick linksbündig“):
   Das Bearbeitungsfeld zeigte einen Tab als rohes Zeichen. Jetzt wird er

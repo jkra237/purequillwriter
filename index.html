@@ -2569,6 +2569,7 @@ en:{
   "Zeile oder Spalte einfügen":"Insert row or column",
   "Tabellenvorlage":"Table style",
   "Kopfzeile hervorheben":"Header row",
+  "Erste Spalte hervorheben":"First column",
   "Gebänderte Zeilen":"Banded rows",
   "Keine Vorlage":"No style",
   "Gitternetz":"Grid",
@@ -3575,6 +3576,7 @@ fr:{
   "Zeile oder Spalte einfügen":"Insérer une ligne ou colonne",
   "Tabellenvorlage":"Style de tableau",
   "Kopfzeile hervorheben":"Ligne d'en-tête",
+  "Erste Spalte hervorheben":"Première colonne",
   "Gebänderte Zeilen":"Lignes à bandes",
   "Keine Vorlage":"Aucun style",
   "Gitternetz":"Grille",
@@ -4581,6 +4583,7 @@ es:{
   "Zeile oder Spalte einfügen":"Insertar fila o columna",
   "Tabellenvorlage":"Estilo de tabla",
   "Kopfzeile hervorheben":"Fila de encabezado",
+  "Erste Spalte hervorheben":"Primera columna",
   "Gebänderte Zeilen":"Filas con bandas",
   "Keine Vorlage":"Sin estilo",
   "Gitternetz":"Cuadrícula",
@@ -5587,6 +5590,7 @@ pt:{
   "Zeile oder Spalte einfügen":"Inserir linha ou coluna",
   "Tabellenvorlage":"Estilo de tabela",
   "Kopfzeile hervorheben":"Linha de cabeçalho",
+  "Erste Spalte hervorheben":"Primeira coluna",
   "Gebänderte Zeilen":"Linhas em tiras",
   "Keine Vorlage":"Sem estilo",
   "Gitternetz":"Grade",
@@ -6593,6 +6597,7 @@ pl:{
   "Zeile oder Spalte einfügen":"Wstaw wiersz lub kolumnę",
   "Tabellenvorlage":"Styl tabeli",
   "Kopfzeile hervorheben":"Wiersz nagłówka",
+  "Erste Spalte hervorheben":"Pierwsza kolumna",
   "Gebänderte Zeilen":"Wiersze naprzemienne",
   "Keine Vorlage":"Bez stylu",
   "Gitternetz":"Siatka",
@@ -7599,6 +7604,7 @@ it:{
   "Zeile oder Spalte einfügen":"Inserisci riga o colonna",
   "Tabellenvorlage":"Stile tabella",
   "Kopfzeile hervorheben":"Riga di intestazione",
+  "Erste Spalte hervorheben":"Prima colonna",
   "Gebänderte Zeilen":"Righe alternate",
   "Keine Vorlage":"Nessuno stile",
   "Gitternetz":"Griglia",
@@ -24341,17 +24347,20 @@ function vorlageZellFormat(v,z,n,kopf,band,f){
 function vorlageAnwenden(t,id){
   t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
   t.querySelectorAll("span[data-tv]").forEach(sp=>sp.replaceWith(...sp.childNodes));
-  const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0";
+  const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0",spalte=t.dataset.tvs!=="0";
   const raster=tabRaster(t),n=raster.zeilen.length,v=TAB_VORLAGEN.find(x=>x.id===id);
   if(!v){
     raster.zellen.forEach(z=>zellFormatSetzen(z.td,f=>{f.bg=null;f.rand={}}));
-    ["tv","tvk","tvb"].forEach(k=>delete t.dataset[k]);
+    ["tv","tvk","tvb","tvs"].forEach(k=>delete t.dataset[k]);
     if(![...t.querySelectorAll("td,th")].some(td=>/background|border/.test(td.getAttribute("style")||"")))t.removeAttribute("data-wz");
     return tabFertig(t);
   }
   raster.zellen.forEach(z=>{
     let art;zellFormatSetzen(z.td,f=>{art=vorlageZellFormat(v,z,n,kopf,band,f)});
-    if(!art.istKopf)return;
+    /* Erste Spalte (2026-10-27, wie Words Häkchen „Erste Spalte“, dort
+       standardmäßig an): fett, ohne eigene Farbe */
+    const ersteSp=spalte&&z.c0===0&&!art.istKopf;
+    if(!art.istKopf&&!ersteSp)return;
     /* Kopfzeile: fett, auf Farbe weiß — je Textstück ein span, damit
        Absätze und Zeilenumbrüche in der Zelle bleiben, wie sie sind */
     const w=document.createTreeWalker(z.td,NodeFilter.SHOW_TEXT),stuecke=[];
@@ -24360,7 +24369,7 @@ function vorlageAnwenden(t,id){
       sp.style.fontWeight="700";if(art.weiss)sp.style.color="#FFFFFF";
       tn.replaceWith(sp);sp.appendChild(tn)});
   });
-  t.dataset.tv=id;t.dataset.tvk=kopf?"1":"0";t.dataset.tvb=band?"1":"0";
+  t.dataset.tv=id;t.dataset.tvk=kopf?"1":"0";t.dataset.tvb=band?"1":"0";t.dataset.tvs=spalte?"1":"0";
   t.removeAttribute("data-rahmen");t.setAttribute("data-wz","1");
   tabFertig(t);
 }
@@ -24377,12 +24386,13 @@ function tabVorlageMenu(ar,t){
   closeMenu();
   const m=document.createElement("div");m.className="menu ctx";m.id="colmenu";
   const zeichnen=()=>{
-    const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0",akt=t.dataset.tv||"";
+    const kopf=t.dataset.tvk!=="0",band=t.dataset.tvb!=="0",spalte=t.dataset.tvs!=="0",akt=t.dataset.tv||"";
     m.innerHTML=`<div class="mlabel">${tr("Tabellenvorlage")}</div>
       <div class="tvgal">${TAB_VORLAGEN.map(v=>`<button class="tvk${akt===v.id?" on":""}" data-v="${v.id}" title="${esc(tr(v.name))}">
         <span class="tvb">${vorlageVorschau(v,kopf,band)}</span>${esc(tr(v.name))}</button>`).join("")}</div>
       <div class="msep"></div>
       <button class="mi" data-o="tvk"><span class="chk">${kopf?"&#10003;":""}</span>${tr("Kopfzeile hervorheben")}</button>
+      <button class="mi" data-o="tvs"><span class="chk">${spalte?"&#10003;":""}</span>${tr("Erste Spalte hervorheben")}</button>
       <button class="mi" data-o="tvb"><span class="chk">${band?"&#10003;":""}</span>${tr("Gebänderte Zeilen")}</button>
       <div class="msep"></div>
       <button class="mi" data-v=""${akt?"":" disabled"}><span class="chk"></span>${tr("Keine Vorlage")}</button>`};
@@ -29122,7 +29132,7 @@ row into a header row.</p>
 <p><b>To change column widths or row heights</b>, drag the border between two cells. Widths
 are kept as percentages, so they survive zooming and a change of page format.</p>
 <p><b>The table bar</b> below the toolbar also offers what Word has: <b>Merge cells</b> (select several cells first) and <b>Split cells</b>, <b>Shading</b>, <b>Borders</b> (all, outside, inside, none; line weight and colour), <b>Alignment in cell</b> (top, middle, bottom) and <b>Column width</b> (distribute evenly, fit to page width). With only the cursor in the table, borders apply to the whole table.</p>
-<p><b>Table style</b> (first button in the table bar, or right-click › Table style…) dresses a table in one step like Word: grid, green, blue, orange, grey or simple — header row coloured, rows banded. Both can be switched off; the formatting is kept in .docx, .odt and .doc.</p>
+<p><b>Table style</b> (first button in the table bar, or right-click › Table style…) dresses a table in one step like Word: grid, green, blue, orange, grey or simple — header row coloured, first column bold, rows banded. Each can be switched off; the formatting is kept in .docx, .odt and .doc.</p>
 <p><b>Repeat Header Rows</b> (right-click in a row › Repeat Header Rows): the first rows up to this one appear again at the top of every page the table runs onto — on screen and in print, as in Word. Click again in a header row to switch it off from there. Documents from Word, LibreOffice and RTF keep the setting.</p>`},
 
  {t:"Pictures",k:"image;picture;photo;caption;alt text;resize",b:`
@@ -29755,7 +29765,7 @@ löschen, und die erste Zeile zur Kopfzeile machen.</p>
 ziehst. Breiten werden als Prozentwerte gehalten und überstehen deshalb Zoom und einen Wechsel
 des Seitenformats.</p>
 <p><b>Die Tabellenleiste</b> unter der Symbolleiste bietet dazu, was Word hat: <b>Zellen verbinden</b> (vorher mehrere Zellen markieren) und <b>Zellen teilen</b>, <b>Schattierung</b>, <b>Rahmen</b> (alle, außen, innen, keine; Linienstärke und -farbe), <b>Ausrichtung in der Zelle</b> (oben, Mitte, unten) und <b>Spaltenbreite</b> (gleichmäßig verteilen, an Seitenbreite anpassen). Steht nur die Schreibmarke in der Tabelle, gilt der Rahmen für die ganze Tabelle.</p>
-<p><b>Tabellenvorlage</b> (erster Knopf der Tabellenleiste oder Rechtsklick › Tabellenvorlage…) kleidet eine Tabelle wie in Word in einem Schritt ein: Gitternetz, Grün, Blau, Orange, Grau oder Schlicht — Kopfzeile farbig, Zeilen gebändert. Beides lässt sich abschalten; die Formatierung bleibt in .docx, .odt und .doc erhalten.</p>
+<p><b>Tabellenvorlage</b> (erster Knopf der Tabellenleiste oder Rechtsklick › Tabellenvorlage…) kleidet eine Tabelle wie in Word in einem Schritt ein: Gitternetz, Grün, Blau, Orange, Grau oder Schlicht — Kopfzeile farbig, erste Spalte fett, Zeilen gebändert. Alles lässt sich einzeln abschalten; die Formatierung bleibt in .docx, .odt und .doc erhalten.</p>
 <p><b>Überschriften wiederholen</b> (Rechtsklick in eine Zeile › Überschriften wiederholen): die ersten Zeilen bis zu dieser stehen auf jeder Seite, auf die die Tabelle läuft, oben noch einmal — am Bildschirm und im Druck, wie in Word. Ein erneuter Klick in einer Überschriftszeile schaltet ab dort wieder aus. Dokumente aus Word, LibreOffice und RTF behalten die Einstellung.</p>`},
 
  {t:"Bilder",k:"bild;foto;grafik;bildunterschrift;alternativtext;größe ändern",b:`
@@ -30413,7 +30423,7 @@ eliminar tabla y convertir la primera fila en fila de encabezado.</p>
 dos celdas. Los anchos se guardan como porcentajes, así que sobreviven al zoom y a un cambio de
 formato de página.</p>
 <p><b>La barra de tabla</b> bajo la barra de herramientas ofrece además lo que tiene Word: <b>Combinar celdas</b> (selecciona antes varias celdas) y <b>Dividir celdas</b>, <b>Sombreado</b>, <b>Bordes</b> (todos, externos, internos, ninguno; grosor y color), <b>Alineación en la celda</b> (arriba, centro, abajo) y <b>Ancho de columna</b> (distribuir uniformemente, ajustar al ancho de página). Con solo el cursor en la tabla, los bordes se aplican a toda la tabla.</p>
-<p><b>Estilo de tabla</b> (primer botón de la barra de tabla, o clic derecho › Estilo de tabla…) viste una tabla en un paso como en Word: cuadrícula, verde, azul, naranja, gris o sencillo — fila de encabezado en color, filas con bandas. Ambas cosas se pueden desactivar; el formato se conserva en .docx, .odt y .doc.</p>
+<p><b>Estilo de tabla</b> (primer botón de la barra de tabla, o clic derecho › Estilo de tabla…) viste una tabla en un paso como en Word: cuadrícula, verde, azul, naranja, gris o sencillo — fila de encabezado en color, primera columna en negrita, filas con bandas. Cada cosa se puede desactivar; el formato se conserva en .docx, .odt y .doc.</p>
 <p><b>Repetir filas de título</b> (clic derecho en una fila › Repetir filas de título): las primeras filas hasta esta vuelven a aparecer arriba en cada página por la que continúa la tabla — en pantalla y al imprimir, como en Word. Otro clic en una fila de título lo desactiva desde ahí. Los documentos de Word, LibreOffice y RTF conservan el ajuste.</p>`},
 
  {t:"Imágenes",k:"imagen;foto;pie de imagen;texto alternativo;redimensionar",b:`
@@ -31071,7 +31081,7 @@ excluir tabela e transformar a primeira linha em linha de cabeçalho.</p>
 células. As larguras são guardadas em porcentagem, então sobrevivem ao zoom e a uma mudança de
 formato de página.</p>
 <p><b>A barra de tabela</b> abaixo da barra de ferramentas oferece também o que o Word tem: <b>Mesclar células</b> (selecione antes várias células) e <b>Dividir células</b>, <b>Sombreamento</b>, <b>Bordas</b> (todas, externas, internas, nenhuma; espessura e cor), <b>Alinhamento na célula</b> (em cima, meio, embaixo) e <b>Largura da coluna</b> (distribuir uniformemente, ajustar à largura da página). Com só o cursor na tabela, as bordas valem para a tabela inteira.</p>
-<p><b>Estilo de tabela</b> (primeiro botão da barra de tabela, ou clique direito › Estilo de tabela…) formata uma tabela num passo como no Word: grade, verde, azul, laranja, cinza ou simples — linha de cabeçalho colorida, linhas em tiras. Ambos podem ser desligados; a formatação mantém-se em .docx, .odt e .doc.</p>
+<p><b>Estilo de tabela</b> (primeiro botão da barra de tabela, ou clique direito › Estilo de tabela…) formata uma tabela num passo como no Word: grade, verde, azul, laranja, cinza ou simples — linha de cabeçalho colorida, primeira coluna em negrito, linhas em tiras. Cada um pode ser desligado; a formatação mantém-se em .docx, .odt e .doc.</p>
 <p><b>Repetir linhas de cabeçalho</b> (clique direito numa linha › Repetir linhas de cabeçalho): as primeiras linhas até esta aparecem de novo no topo de cada página por onde a tabela continua — na tela e na impressão, como no Word. Outro clique numa linha de cabeçalho desativa a partir dali. Documentos do Word, LibreOffice e RTF mantêm a configuração.</p>`},
 
  {t:"Imagens",k:"imagem;foto;legenda;texto alternativo;redimensionar",b:`
@@ -31736,7 +31746,7 @@ colonne, supprimer le tableau, et transformer la première ligne en ligne d'en-t
 bordure entre deux cellules. Les largeurs sont conservées en pourcentages, elles survivent donc
 au zoom et à un changement de format de page.</p>
 <p><b>La barre de tableau</b> sous la barre d'outils propose aussi ce que Word offre : <b>Fusionner les cellules</b> (sélectionnez d'abord plusieurs cellules) et <b>Fractionner les cellules</b>, <b>Trame de fond</b>, <b>Bordures</b> (toutes, extérieures, intérieures, aucune ; épaisseur et couleur), <b>Alignement dans la cellule</b> (haut, milieu, bas) et <b>Largeur des colonnes</b> (répartir uniformément, ajuster à la largeur de la page). Avec seulement le curseur dans le tableau, les bordures s'appliquent à tout le tableau.</p>
-<p><b>Style de tableau</b> (premier bouton de la barre de tableau, ou clic droit › Style de tableau…) habille un tableau en une étape comme dans Word : grille, vert, bleu, orange, gris ou sobre — ligne d'en-tête en couleur, lignes à bandes. Les deux se désactivent ; la mise en forme est conservée en .docx, .odt et .doc.</p>
+<p><b>Style de tableau</b> (premier bouton de la barre de tableau, ou clic droit › Style de tableau…) habille un tableau en une étape comme dans Word : grille, vert, bleu, orange, gris ou sobre — ligne d'en-tête en couleur, première colonne en gras, lignes à bandes. Chacun se désactive ; la mise en forme est conservée en .docx, .odt et .doc.</p>
 <p><b>Répéter les lignes d’en-tête</b> (clic droit dans une ligne › Répéter les lignes d’en-tête) : les premières lignes jusqu’à celle-ci réapparaissent en haut de chaque page sur laquelle le tableau se poursuit — à l’écran et à l’impression, comme dans Word. Un nouveau clic dans une ligne d’en-tête le désactive à partir de là. Les documents Word, LibreOffice et RTF conservent le réglage.</p>`},
 
  {t:"Images",k:"image;photo;légende;texte alternatif;redimensionner",b:`
@@ -32403,7 +32413,7 @@ oraz zamień pierwszy wiersz w wiersz nagłówka.</p>
 komórkami. Szerokości są przechowywane w procentach, więc przetrwają powiększenie i zmianę
 formatu strony.</p>
 <p><b>Pasek tabeli</b> pod paskiem narzędzi oferuje też to, co ma Word: <b>Scal komórki</b> (najpierw zaznacz kilka komórek) i <b>Podziel komórki</b>, <b>Cieniowanie</b>, <b>Obramowanie</b> (wszystkie, zewnętrzne, wewnętrzne, brak; grubość i kolor linii), <b>Wyrównanie w komórce</b> (do góry, środek, do dołu) oraz <b>Szerokość kolumn</b> (rozłóż równomiernie, dopasuj do szerokości strony). Gdy w tabeli stoi tylko kursor, obramowanie dotyczy całej tabeli.</p>
-<p><b>Styl tabeli</b> (pierwszy przycisk paska tabeli lub prawy przycisk › Styl tabeli…) formatuje tabelę jednym krokiem jak w Wordzie: siatka, zielony, niebieski, pomarańczowy, szary lub prosty — kolorowy wiersz nagłówka, wiersze naprzemienne. Oba można wyłączyć; formatowanie zostaje zachowane w .docx, .odt i .doc.</p>
+<p><b>Styl tabeli</b> (pierwszy przycisk paska tabeli lub prawy przycisk › Styl tabeli…) formatuje tabelę jednym krokiem jak w Wordzie: siatka, zielony, niebieski, pomarańczowy, szary lub prosty — kolorowy wiersz nagłówka, pogrubiona pierwsza kolumna, wiersze naprzemienne. Każde można wyłączyć; formatowanie zostaje zachowane w .docx, .odt i .doc.</p>
 <p><b>Powtarzaj wiersze nagłówka</b> (prawy przycisk w wierszu › Powtarzaj wiersze nagłówka): pierwsze wiersze aż do tego pojawiają się ponownie u góry każdej strony, na którą przechodzi tabela — na ekranie i w druku, jak w Wordzie. Ponowne kliknięcie w wierszu nagłówka wyłącza to od tego miejsca. Dokumenty z Worda, LibreOffice i RTF zachowują to ustawienie.</p>`},
 
  {t:"Obrazy",k:"obraz;zdjęcie;podpis;tekst alternatywny;zmiana rozmiaru",b:`
@@ -33050,7 +33060,7 @@ trasforma la prima riga in riga di intestazione.</p>
 due celle. Le larghezze sono conservate in percentuale, quindi sopravvivono allo zoom e a un
 cambio di formato pagina.</p>
 <p><b>La barra della tabella</b> sotto la barra degli strumenti offre anche ciò che ha Word: <b>Unisci celle</b> (seleziona prima più celle) e <b>Dividi celle</b>, <b>Sfondo</b>, <b>Bordi</b> (tutti, esterni, interni, nessuno; spessore e colore), <b>Allineamento nella cella</b> (in alto, centro, in basso) e <b>Larghezza colonne</b> (distribuisci uniformemente, adatta alla larghezza della pagina). Con solo il cursore nella tabella, i bordi valgono per tutta la tabella.</p>
-<p><b>Stile tabella</b> (primo pulsante della barra della tabella, o clic destro › Stile tabella…) veste una tabella in un passo come in Word: griglia, verde, blu, arancione, grigio o semplice — riga di intestazione colorata, righe alternate. Entrambe si possono disattivare; la formattazione resta in .docx, .odt e .doc.</p>
+<p><b>Stile tabella</b> (primo pulsante della barra della tabella, o clic destro › Stile tabella…) veste una tabella in un passo come in Word: griglia, verde, blu, arancione, grigio o semplice — riga di intestazione colorata, prima colonna in grassetto, righe alternate. Ognuna si può disattivare; la formattazione resta in .docx, .odt e .doc.</p>
 <p><b>Ripeti righe di intestazione</b> (clic destro in una riga › Ripeti righe di intestazione): le prime righe fino a questa ricompaiono in cima a ogni pagina su cui prosegue la tabella — a schermo e in stampa, come in Word. Un nuovo clic in una riga di intestazione la disattiva da lì in poi. I documenti di Word, LibreOffice e RTF mantengono l’impostazione.</p>`},
 
  {t:"Immagini",k:"immagine;foto;didascalia;testo alternativo;ridimensionare",b:`
