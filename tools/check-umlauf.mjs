@@ -117,7 +117,7 @@ try {
      +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
      /* Zellformat wie Word (seit 2026-10-26): Schattierung, Rahmen je Seite mit Farbe, Tabellenbreite */
      +'<p>Zwischen den Tabellen.</p><table style="width:80%"><tr><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf</td><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf zwei</td></tr>'
-     +'<tr><td style="border:0.5pt solid #A8D08D">Zelle</td><td style="background-color:#E2EFD9;border-top:0.5pt solid #A8D08D;border-left:0.5pt solid #A8D08D;border-bottom:none;border-right:0.5pt dashed #C00000">Zelle zwei</td></tr></table>'
+     +'<tr><td style="vertical-align:middle;border:0.5pt solid #A8D08D">Zelle</td><td style="background-color:#E2EFD9;border-top:0.5pt solid #A8D08D;border-left:0.5pt solid #A8D08D;border-bottom:none;border-right:0.5pt dashed #C00000">Zelle zwei</td></tr></table>'
      +'<figure class="fig" contenteditable="false" data-w="50" style="text-align:center"><img src="'+jpg(800,400,"#c33")+'" style="width:100%"><figcaption>Bildunterschrift</figcaption></figure>'
      +'<blockquote><p>Ein Zitat.</p></blockquote>'
      +'<blockquote data-qs="toent"><p>Ein intensives Zitat.</p></blockquote>'
@@ -170,7 +170,7 @@ try {
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"Zellfarbe":[...t.querySelectorAll("td,th")].map(e=>zelleFormat(e).bg).filter(Boolean).join("/")||"-",
        "Zellrahmen":[...new Set([...t.querySelectorAll("td,th")].flatMap(e=>{const f=zelleFormat(e);return ZELL_SEITEN.map(k=>f.rand[k]==null?"":f.rand[k]==="none"?"none":zellRandCss(f.rand[k]))}).filter(Boolean))].sort().join("|")||"-",
-       "Tabellenbreite":[...t.querySelectorAll("table")].map(e=>tabelleBreiteProz(e)).join("/"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
+       "Zellausrichtung":[...t.querySelectorAll("td,th")].map(e=>zelleFormat(e).va).filter(Boolean).join("/")||"-","Tabellenbreite":[...t.querySelectorAll("table")].map(e=>tabelleBreiteProz(e)).join("/"),"verbundene Zelle":q("[colspan]")+"/"+q("[rowspan]"),"Bild":q("img"),"Bild umflossen":q("figure.umfl"),"Bildunterschrift":q("figcaption"),
        "Zitat":q("blockquote"),"Linie":[...t.querySelectorAll("hr")].map(e=>e.getAttribute("data-linie")||"duenn").join("/")||"-","Zitatart":[...t.querySelectorAll("blockquote")].map(e=>(e.getAttribute("data-qs")||"zitat")+(e.style.textAlign?":"+e.style.textAlign:"")).join("/"),"Seitenumbruch":q(".pgbreak"),"Link":q("a[href]"),"Fussnotenzeichen":q("sup.fn"),
        "Absatzformat":[...t.querySelectorAll("[data-zab]")].map(e=>e.dataset.zab+(e.style.paddingTop?" vor":"")+(e.style.marginRight?" re":"")).join("/")||"-","Tab im Text":q(".wtab"),"Sonderzeichen":(t.textContent.includes("Zeichen: Größe, Łódź, Ελληνικά, 5 € und „Anführung“")?1:0),"3 Leerzeichen":/drei(\\s|&nbsp;|\\u00a0){3}Leer/.test(r.html.replace(/<[^>]+>/g,""))?1:0,
        "Fussnoten":(r.footnotes||[]).length,"Kopfzeile":r.hdr&&r.hdr.text?r.hdr.text:"-","Kopfzeile je Zeile":r.hdr?(r.hdr.za||[r.hdr.align]).join("/"):"-","Kopfzeile fett":r.hdr&&/<b>/.test(r.hdr.html||"")?1:0,"Kopfzeilenbild":(r.hdr&&r.hdr.bilder||[]).map(i=>i.b+"x"+i.h+"@"+i.x+"/"+i.y).join(" ")||"-","Fusszeile":r.ftr&&r.ftr.text?r.ftr.text:"-",

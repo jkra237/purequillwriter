@@ -203,6 +203,20 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Tabellen wie Word** (Tom: „was fehlt, was Word hat“): Zellen verbinden
+  und teilen, Schattierung, Rahmen (alle/außen/innen/keine, Stärke, Farbe;
+  ohne Markierung für die ganze Tabelle), Ausrichtung in der Zelle (oben/
+  Mitte/unten — neu im Datenmodell, gelesen und geschrieben in .docx/.doc/
+  .odt/.rtf), Spalten gleichmäßig verteilen, an Seitenbreite anpassen.
+  Word-Innenabstand nur noch für Tabellen aus Dateien (data-wz), damit eine
+  selbst schattierte Zelle nicht springt. Umlauf je 50/50, Hilfe in 7
+  Sprachen.
+- **Bild-, Unterschrift- und Tabellenleiste im festen Streifen** (Tom, wie
+  die Kopfzeile und Words Registerkarten): unter der Symbolleiste mit Namen
+  links, statt über bzw. unter dem Objekt zu schweben und Text zu verdecken.
+  Erscheint bei Auswahl, verschwindet beim Klick daneben; die Anfasser am
+  Objekt bleiben. Liegt das Ausgewählte unter dem Streifen, rollt die Seite
+  es hervor. Immer nur eine Kontextleiste zugleich.
 - **Neues Menü „Einfügen“, Format gruppiert** (Tom, 2026-10-27; wie Word
   und LibreOffice): Bild, Tabelle, Link, Seitenumbruch, Fußnote, Endnote,
   Inhalts-/Abbildungsverzeichnis, Kopf- und Fußzeile (öffnet sie auf der
