@@ -153,8 +153,11 @@ try {
        Seite und Höhe freier Bilder fest (placeFreeFigs) */
     const ed0=document.getElementById("editor"),d0=doc();
     const umbrechen=()=>{paginate();paginate();flush()};
-    const gerendert=r=>{if(!r||!r.html)return r;const alt=d0.html;ed0.innerHTML=r.html;umbrechen();const h=d0.html;
-      d0.html=alt;ed0.innerHTML=alt;flush();return {...r,html:h}};
+    /* Mit den eigenen Fußnoten des Gelesenen umbrechen — mit denen des
+       Originals (andere Kennungen) fehlte ihr Platz unten auf der Seite, und
+       ein frei platziertes Bild landete nach dem Umbruch woanders */
+    const gerendert=r=>{if(!r||!r.html)return r;const alt=d0.html,altFn=d0.footnotes;d0.footnotes=r.footnotes||[];ed0.innerHTML=r.html;umbrechen();const h=d0.html;
+      d0.html=alt;d0.footnotes=altFn;ed0.innerHTML=alt;flush();return {...r,html:h}};
     const oeffne=(name,buf)=>name.endsWith(".rtf")?rtfLesen(new TextDecoder("latin1").decode(buf)):zipDokument(name,buf);
     const A=gerendert(${MODUS === "nativ" ? "null" : `await oeffne("p.${ENDUNG}",b(${JSON.stringify(datei64)}))`});
     const B=gerendert(${fremd64 ? (MODUS === "doc" ? `docLesen(b(${JSON.stringify(fremd64)}))` : MODUS === "rtf" ? `await oeffne("p.rtf",b(${JSON.stringify(fremd64)}))` : `await zipDokument("p.odt",b(${JSON.stringify(fremd64)}))`) : "null"});

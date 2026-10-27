@@ -1917,6 +1917,15 @@ body.handy .rail{display:none}
 @media (max-width:600px){.status{overflow-x:auto;scrollbar-width:none}}
 body.handy .tools{flex-wrap:nowrap;overflow-x:auto;overflow-y:hidden;padding:6px 8px;scrollbar-width:thin}
 body.handy .tools>*{flex:0 0 auto}
+.tpfeil{display:none}
+body.handy .tools{position:relative}
+body.handy .tpfeil{display:flex;align-items:center;position:sticky;z-index:3;align-self:stretch;width:34px;margin:-6px 0;border:0;padding:0;
+  font:400 22px/1 var(--ui);color:var(--ink-soft);cursor:pointer;visibility:hidden}
+body.handy .tpfeil.r{right:-8px;margin-left:-34px;margin-right:-8px;justify-content:flex-end;padding-right:6px;
+  background:linear-gradient(to right,transparent,var(--chrome) 55%)}
+body.handy .tpfeil.l{left:-8px;margin-right:-34px;margin-left:-8px;justify-content:flex-start;padding-left:6px;
+  background:linear-gradient(to left,transparent,var(--chrome) 55%)}
+body.handy .tools.mehrrechts .tpfeil.r,body.handy .tools.mehrlinks .tpfeil.l{visibility:visible}
 body.handy .status>*:not(#wcHint):not(.grow):not(.sicherstand){display:none}
 body.handy .sheet{padding:0;background:var(--paper)}
 body.handy .ruler,body.handy #pagelayer,body.handy .side,body.handy .outline,body.handy .repside{display:none!important}
@@ -2406,16 +2415,20 @@ function ensureHfMeasurer(){
    Dokuments, Grundgröße 85 % (so rechnen Leser und Exporter, basisPt) */
 const hfGroessePx=(d,z)=>((d.size||S.settings.size||11)*0.85*96/72)*z;
 const hfSchrift=d=>schriftStapel(d.font||S.settings.font).replace(/"/g,"'");
+/* Zeilenhöhe der Kopf-/Fußzeile: die natürliche der Schrift wie in Word
+   („einfach“), nicht fest 1,3 — sonst stand jede Kopfzeilenzeile 0,3 mm
+   höher und der Text begann tiefer als in Word */
+const hfZeilenhoehe=d=>lhNatur(d.font||S.settings.font);
 function hfTextHoehe(d,which,z){
   const v=hfOf(d,which),f=fmtOf(d);
   const breite=MM(v.tw||f.w-f.m[1]-f.m[3])*z, fs=hfGroessePx(d,z);
   const html=hfInhalt(v,1,Math.max(1,pageCount))||"&nbsp;";
   /* paginate() fragt mehrfach je Durchlauf — ohne den Merker wäre das jedes
      Mal ein erzwungenes Neuberechnen des Layouts. */
-  const key=which+"|"+z+"|"+breite+"|"+fs+"|"+d.font+"|"+html;
+  const key=which+"|"+z+"|"+breite+"|"+fs+"|"+d.font+"|"+hfZeilenhoehe(d)+"|"+html;
   if(hfMessCache.has(key))return hfMessCache.get(key);
   const el=ensureHfMeasurer();
-  el.style.width=breite+"px";el.style.fontSize=fs+"px";el.style.fontFamily=hfSchrift(d);
+  el.style.width=breite+"px";el.style.fontSize=fs+"px";el.style.fontFamily=hfSchrift(d);el.style.lineHeight=hfZeilenhoehe(d);
   el.innerHTML=html;
   /* ungerundet: sonst stand das Bearbeitungsfeld der Fußzeile bis zu 1 px
      neben der gezeichneten Zeile */
@@ -2428,8 +2441,10 @@ function hfBand(d,which,z){
   const v=hfOf(d,which);
   if(!v.on)return 0;
   const f=fmtOf(d);
+  /* Ohne Zuschlag: ragt die Zeile über den Seitenrand, beginnt der Text in
+     Word direkt darunter (bis 2026-10 hier 2 mm mehr) */
   return MM(istKopf(which)?f.hd:f.fd)*z
-    + Math.max(MM(v.ty||0)*z+hfTextHoehe(d,which,z), MM(hfFlussMm(v))*z) + MM(2)*z;
+    + Math.max(MM(v.ty||0)*z+hfTextHoehe(d,which,z), MM(hfFlussMm(v))*z);
 }
 /* Bilder der Kopf-/Fußzeile, siehe docxHf() für das Maßsystem. */
 const hfBilder=v=>Array.isArray(v&&v.bilder)?v.bilder.filter(b=>b&&b.uri&&b.b>0&&b.h>0):[];
@@ -9043,8 +9058,30 @@ function drawTools(){
       <div style="flex:1"></div>
       <button class="pill" id="glossIO">${tr("Importieren / Exportieren")}</button>`;
   }
+  toolsPfeile();
   syncToolbarState();
 }
+/* Handy: die Symbolleiste wischt seitlich — ein verblassender Rand mit
+   Pfeil zeigt, dass es weitergeht (Toms Wahl „A“, wie Google Docs).
+   Antippen schiebt um eine Bildschirmbreite weiter. Die Pfeile kleben am
+   Rand (sticky) und erscheinen nur, wo noch etwas verborgen ist. */
+function toolsPfeile(){
+  const T=$("#tools");if(!T)return;
+  T.querySelectorAll(".tpfeil").forEach(p=>p.remove());
+  const mk=(seite,zeichen)=>{const b=document.createElement("button");b.className="tpfeil "+seite;b.type="button";
+    b.setAttribute("aria-label",tr(seite==="l"?"Zurück":"Weiter"));b.textContent=zeichen;
+    b.onmousedown=e=>e.preventDefault();
+    b.onclick=()=>T.scrollBy({left:(seite==="l"?-1:1)*Math.max(80,T.clientWidth*0.7),behavior:"smooth"});return b};
+  T.insertBefore(mk("l","‹"),T.firstChild);T.appendChild(mk("r","›"));
+  toolsRaender();
+}
+function toolsRaender(){
+  const T=$("#tools");if(!T)return;
+  T.classList.toggle("mehrlinks",T.scrollLeft>4);
+  T.classList.toggle("mehrrechts",T.scrollLeft+T.clientWidth<T.scrollWidth-4);
+}
+document.addEventListener("scroll",e=>{if(e.target&&e.target.id==="tools")toolsRaender()},true);
+addEventListener("resize",()=>toolsRaender());
 
 /* ================= Schreiben ================= */
 function drawWrite(){
@@ -9914,6 +9951,16 @@ const ptAusCalc=v=>{const m=/calc\(\s*(-?[\d.]+)pt/.exec(v||"");return m?+m[1]:n
    Abstand danach (td>p:last-child). Ohne ausdrückliche 0 nähmen Word und
    Writer dort den Absatzabstand des Dokuments — die Zeilen wären höher als
    in PureQuill, und beim Wiederöffnen käme der Abstand als Format zurück. */
+/* Leerer Absatz mit eigener Größe (Words Absatzmarke, 2026-10-26): die
+   Leser setzen font-size am <p>, wenn die Marke von der Dokumentgröße
+   abweicht — eine Leerzeile in 9 pt ist niedriger als eine in 11 pt, und
+   bis dahin standen Tabellen und Überschriften dadurch tiefer als in Word.
+   Liefert die Größe in pt oder null. */
+function leerAbsatzPt(el){
+  if(!el||!el.style||!el.style.fontSize)return null;
+  if(el.textContent.replace(/\u200b/g,"").trim()||el.querySelector("img,figure,.wtab"))return null;
+  const m=/([\d.]+)pt/.exec(el.style.fontSize);return m?parseFloat(m[1]):null;
+}
 function absatzFormatAus(el,groesse){
   const f=absatzFormat(el,groesse);
   if(f.nach==null&&el&&el.matches){
@@ -11880,7 +11927,8 @@ async function hfTeil(d,which,groesse){
     const abst=vor||nach?`<w:spacing${vor?` w:before="${mmToTwip(vor)}"`:""}${nach?` w:after="${mmToTwip(nach)}"`:""}/>`:"";
     const laeufe=zeilenH?hfHtmlLaeufe(zeilenH[i]||"",groesse*0.85):hfLaufXml(zeile);
     const za=hfZeilenAlign(hf,i),jcZ=za==="left"?"left":za==="right"?"right":"center";
-    return `<w:p><w:pPr>${zeile.includes("\t")?tabs:""}${abst}${ind}<w:jc w:val="${hf.za?jcZ:jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85)}"/></w:rPr></w:pPr>${i===0?anker:""}${laeufe}</w:p>`;
+    const leerEm=!zeile&&zeilenH?hfLeerEm(zeilenH[i]):null;
+    return `<w:p><w:pPr>${zeile.includes("\t")?tabs:""}${abst}${ind}<w:jc w:val="${hf.za?jcZ:jc}"/><w:rPr><w:sz w:val="${Math.round(groesse*2*0.85*(leerEm||1))}"/></w:rPr></w:pPr>${i===0?anker:""}${laeufe}</w:p>`;
   }).join("");
   const ns=anker?` xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"`:"";
   const xml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -11889,6 +11937,8 @@ async function hfTeil(d,which,groesse){
 <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join("")}</Relationships>`:null};
 }
 const HF_FLUSS_NAME="PureQuill im Text ";
+/* Größe einer leeren Zeile aus ihrer Marke (<span style="font-size:Xem"></span>) */
+function hfLeerEm(html){const m=/^<span style="font-size:([\d.]+)em"><\/span>$/.exec(String(html||""));return m?parseFloat(m[1]):null}
 const coreXml=titel=>`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties"
  xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xesc(titel||"")}</dc:title></cp:coreProperties>`;
@@ -12329,6 +12379,10 @@ function absatzXml(el,pPrExtra,basisStil,ctx){
   /* Links brauchen eine Relationship-ID vom Aufrufer - hier nur die Spanne
      merken, damit walkBlocks() sie nachträglich in <w:hyperlink> einwickeln
      und der Gesamtliste der Beziehungen hinzufügen kann. */
+  /* Leerer Absatz mit eigener Größe: die Absatzmarke trägt sie (pPrOrdnen
+     sortiert w:rPr an seinen Platz) */
+  const leerPt=!runs.length?leerAbsatzPt(el):null;
+  if(leerPt)pPrExtra=(pPrExtra||"")+`<w:rPr><w:sz w:val="${Math.round(leerPt*2)}"/><w:szCs w:val="${Math.round(leerPt*2)}"/></w:rPr>`;
   return {runs,links,pPr:pPrExtra||""};
 }
 function jcVon(el){
@@ -13041,11 +13095,12 @@ async function odtBlob(d){
      „Umbruch davor“ — so liest odtLesen ihn zurück, und so schreibt
      LibreOffice ihn selbst */
   let umbruch=false,anker="";
-  const absatzStil=(pp,eltern)=>{
+  const absatzStil=(pp,eltern,leerPt)=>{
     pp=pp.filter(Boolean);
     if(umbruch){pp.push('fo:break-before="page"');umbruch=false}
-    if(!pp.length)return eltern||"Standard";
-    return stilName("paragraph","P",`<style:paragraph-properties ${pp.join(" ")}/>`,eltern||"Standard");
+    if(!pp.length&&!leerPt)return eltern||"Standard";
+    return stilName("paragraph","P",(pp.length?`<style:paragraph-properties ${pp.join(" ")}/>`:"")+
+      (leerPt?`<style:text-properties fo:font-size="${odfZahl(leerPt)}pt"/>`:""),eltern||"Standard");
   };
   const ausr=j=>j==="center"?'fo:text-align="center"':j==="right"?'fo:text-align="end"':j==="both"?'fo:text-align="justify"':j==="left"?'fo:text-align="start"':"";
   const absatz=(el,pp,eltern,stufe)=>{
@@ -13065,7 +13120,7 @@ async function odtBlob(d){
     let inhalt=out.join("");
     /* Ein <br> am Ende hält in HTML nur den leeren Absatz offen */
     if(inhalt.endsWith("<text:line-break/>"))inhalt=inhalt.slice(0,-18);
-    const name=absatzStil(pp,eltern);
+    const name=absatzStil(pp,eltern,!inhalt?leerAbsatzPt(el):null);
     const a=anker;anker="";
     return stufe?`<text:h text:style-name="${name}" text:outline-level="${stufe}">${a}${inhalt}</text:h>`
       :`<text:p text:style-name="${name}">${a}${inhalt}</text:p>`;
@@ -13328,7 +13383,10 @@ async function odtBlob(d){
     const psZ=i=>{const a=hfZeilenAlign(v,i);return a==="left"?"PQ_Zeile_links":a==="right"?"PQ_Zeile_rechts":"PQ_Zeile_Mitte"};
     const a0=hfZeilenAlign(v,0);
     const psErst=extra?hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${a0==="left"?"start":a0==="right"?"end":"center"}" fo:margin-top="${odfZahl(extra)}mm" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/>`):psZ(0);
-    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${i?psZ(i):psErst}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
+    const psLeer=(i,grund)=>{const em=!zeilen[i]&&zeilenHtml?hfLeerEm(zeilenHtml[i]):null;if(!em)return grund;
+      const a=hfZeilenAlign(v,i);
+      return hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${a==="left"?"start":a==="right"?"end":"center"}" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(Math.round(groesse*0.85*em*2)/2)}pt"/>`)};
+    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${psLeer(i,i?psZ(i):psErst)}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
   };
   const hfFertig={};
   for(const [w,e] of [["hdr","header"],["hdr2","header-left"],["hdr1","header-first"],["ftr","footer"],["ftr2","footer-left"],["ftr1","footer-first"]])hfFertig[w]=await hfXml(w,e);
@@ -13545,7 +13603,9 @@ async function rtfBlob(d){
     let inhalt=out.join("");
     if(inhalt.endsWith("\\line "))inhalt=inhalt.slice(0,-6);
     const a=anker;anker="";
-    return kopfVon(s,extra,o.intbl)+a+inhalt+(o.ende||"\\par")+"\n";
+    /* Leerer Absatz mit eigener Größe: sie gilt für seine Absatzmarke */
+    const leerPt=!inhalt.trim()?leerAbsatzPt(el):null;
+    return kopfVon(s,extra,o.intbl)+a+(leerPt?"\\fs"+Math.round(leerPt*2)+" ":"")+inhalt+(o.ende||"\\par")+"\n";
   };
   const hexVon=bytes=>{let h="";for(let i=0;i<bytes.length;i++){h+=(bytes[i]<16?"0":"")+bytes[i].toString(16);if(i%64===63)h+="\n"}return h};
   /* Bilder in der Zeile (img.inlbild) vorab lesen — das Ablaufen ist synchron */
@@ -15968,7 +16028,10 @@ function docxHf(xml,zub){
       else if(bildImText){const soll=Math.round((y+(imText.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
         while(zeilen.length<soll){zeilen.push("");zeilenH.push("");zeilenA.push(null)}}
       bildImText=false;
-      zeilen.push(t);zeilenH.push(hz.out);zeilenA.push(al);
+      const ms=!t.trim()?docxRPr(KIND(pPr,"rPr")).sz:null;
+      const marke=ms&&zub.basisPt&&Math.abs(ms-zub.basisPt)>=0.25?`<span style="font-size:${Math.round(ms/zub.basisPt*1000)/1000}em"></span>`:null;
+      if(marke)formatiert=true;
+      zeilen.push(t);zeilenH.push(marke||hz.out);zeilenA.push(al);
       if(t.trim()){if(align===null)align=al;if(zelle)textZellen.add(zelle);
         if(spalte===null)spalte={x:x0+il,w:w0-il-ir}}
       hoehe=Math.max(hoehe,HF_ZEILE);
@@ -16062,7 +16125,9 @@ function hfAusAbsaetzen(abs,f,fuss){
       else if(bildImText){const soll=Math.round((y+(bl.length?hoehe-HF_ZEILE:0)-ty)/HF_ZEILE);
         while(zeilen.length<soll){zeilen.push("");zeilenH.push("");zeilenA.push(null)}}
       bildImText=false;
-      zeilen.push(a.text);zeilenH.push(a.html!=null?a.html:xesc(a.text));zeilenA.push(a.text.trim()?(a.al==="justify"?"left":a.al||"left"):null);
+      const marke=!a.text&&a.markSz&&a.basisPt&&Math.abs(a.markSz-a.basisPt)>=0.25?`<span style="font-size:${Math.round(a.markSz/a.basisPt*1000)/1000}em"></span>`:null;
+      if(marke)formatiert=true;
+      zeilen.push(a.text);zeilenH.push(marke||(a.html!=null?a.html:xesc(a.text)));zeilenA.push(a.text.trim()?(a.al==="justify"?"left":a.al||"left"):null);
       if(a.formatiert)formatiert=true;
       if(a.text.trim()&&align===null)align=a.al||"left";
       hoehe=Math.max(hoehe,HF_ZEILE);
@@ -16917,7 +16982,11 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const links=zuEm("left")||zuEm("start");
       /* Erstzeileneinzug (firstLine) bzw. hängender Einzug (hanging) */
       const erste=zuEm("firstLine")||-zuEm("hanging");
-      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,xst].filter(Boolean).join(";");
+      /* Leerer Absatz: Größe seiner Absatzmarke, wie Word ihn zeigt */
+      const leer=!String(inhalt||"").replace(/<br\s*\/?>/g,"").trim();
+      const mark=leer?docxRPr(KIND(pr,"rPr")).sz:null;
+      const st=[links>0&&"margin-left:"+links+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,xst,
+        mark&&Math.abs(mark-grundGroesse)>=0.25&&"font-size:"+ptCalc(mark)].filter(Boolean).join(";");
       out+=(st?'<p style="'+st+'"'+wa+">":"<p"+wa+">")+(inhalt||"<br>")+"</p>";
     }
   };
@@ -17306,7 +17375,9 @@ function odfHf(el,k,z){
         if(l==="span")return lauf(c,Object.assign({},w,odfWirkT(k,"text",c.getAttribute("text:style-name"))));
         lauf(c,w);
       });
-      lauf(p,odfWirkT(k,"paragraph",name));
+      const wp=odfWirkT(k,"paragraph",name);
+      lauf(p,wp);
+      a.markSz=wp.sz;a.basisPt=z.basisPt;
       return a;
     });
     return hfAusAbsaetzen(abs,z.fmt,el.localName.startsWith("footer"));
@@ -17547,7 +17618,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
   let out="";
   /* Öffnendes <p> mit dem Absatzformat, wo es vom Dokument abweicht —
      für Absätze im Text und in Tabellenzellen */
-  const pAuf=(pe,letzte)=>{
+  const pAuf=(pe,letzte,leerPt)=>{
     const al=pe.al||"";
     const em=v=>v?Math.round(v/grundGroesse*100)/100:0;
     const links=em(pe.ml),erste=em(pe.ti),rechts=em(pe.mr);
@@ -17555,7 +17626,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
     const zab=pe.zab&&(pe.zab.art!=="auto"||gs.lh==null||Math.abs(pe.zab.v-gs.lh)>=0.01)?pe.zab:null;
     const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
       pe.mt>0&&"padding-top:"+ptCalc(pe.mt),(letzte?pe.mb>=0.5:pe.mb!=null&&nachStd!=null&&Math.abs(pe.mb-nachStd)>=0.5)&&"margin-bottom:"+ptCalc(pe.mb),
-      zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+      zab&&"line-height:"+zabWert(zab),leerPt&&Math.abs(leerPt-grundGroesse)>=0.25&&"font-size:"+ptCalc(leerPt)].filter(Boolean).join(";");
     return st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>";
   };
   /* Bilder stehen wie ihr Absatz — ohne Angabe links, wie in Writer */
@@ -17598,7 +17669,8 @@ function odtLesen(inhaltXml,stilXml,bilder){
     }else if(art==="titel"||art==="untertitel"){
       out+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inhalt||"<br>")+"</p>";
     }else{
-      out+=pAuf(pe)+(inhalt||"<br>")+"</p>";
+      const leer=!String(inhalt||"").replace(/<br\s*\/?>/g,"").trim();
+      out+=pAuf(pe,false,leer?basis.sz:null)+(inhalt||"<br>")+"</p>";
     }
     if(pe.umbNach)out+=seitenumbruchHtml();
   };
@@ -18137,7 +18209,7 @@ function wortSatz(absaetze,ctx){
   let html="",offen=[];
   /* Öffnendes <p> mit dem Absatzformat, wo es vom Dokument abweicht
      (Twips, Zeilenabstand als Objekt) — im Text und in Tabellenzellen */
-  const pAuf=(ab,letzte)=>{
+  const pAuf=(ab,letzte,leer)=>{
     const al=ab.jc||"";
     const em=v=>v?Math.round(v/20/grundGr*100)/100:0;
     const links=em(ab.links),erste=em(ab.erste),rechts=em(ab.rechts);
@@ -18145,7 +18217,7 @@ function wortSatz(absaetze,ctx){
     const zab=zEff.art!=="auto"||ctx.lhStd==null||Math.abs(zEff.v-ctx.lhStd)>=0.01?zEff:null;
     const st=[links>0&&"margin-left:"+links+"em",rechts>0&&"margin-right:"+rechts+"em",erste&&"text-indent:"+erste+"em",al&&"text-align:"+al,
       ab.vor>0&&"padding-top:"+ptCalc(ab.vor/20),(letzte?ab.nach>=10:ab.nach!=null&&ctx.nachStd!=null&&Math.abs(ab.nach-ctx.nachStd)>=10)&&"margin-bottom:"+ptCalc(ab.nach/20),
-      zab&&"line-height:"+zabWert(zab)].filter(Boolean).join(";");
+      zab&&"line-height:"+zabWert(zab),leer&&ab.markSz&&Math.abs(ab.markSz-grundGr)>=0.25&&"font-size:"+ptCalc(ab.markSz)].filter(Boolean).join(";");
     return st?'<p style="'+st+'"'+(zab?' data-zab="'+zabAttr(zab)+'"':"")+'>':"<p>";
   };
   /* Ein Absatz außerhalb von Liste und Tabelle */
@@ -18172,7 +18244,7 @@ function wortSatz(absaetze,ctx){
       if(art.startsWith("zitat:")){const qs=art.slice(6),za=zitatAusrichtung(qs,al);
         r+="<blockquote"+(qs?' data-qs="'+qs+'"':"")+(za?' style="text-align:'+za+'"':"")+">"+(inh||"<br>")+"</blockquote>";return}
       if(art==="titel"||art==="untertitel"){r+='<p data-fv="'+art+'"'+(al?' style="text-align:'+al+'"':"")+">"+(inh||"<br>")+"</p>";return}
-      r+=pAuf(ab)+(inh||"<br>")+"</p>";
+      r+=pAuf(ab,false,leer)+(inh||"<br>")+"</p>";
     });
     return r+figuren;
   };
@@ -18242,7 +18314,8 @@ function wortSatz(absaetze,ctx){
       if(ab.tief===1&&ab.ttp){zeilen.push({zellen,tdef:ab.tdef});zellen=[];zelleTeile=[];continue}
       if(ab.tief>1&&ab.innerTtp)continue;
       const tz=inhalt(ab);
-      zelleTeile.push({h:tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join(""),auf:pAuf(ab,!!ab.zelle)});
+      const zh=tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join("");
+      zelleTeile.push({h:zh,auf:pAuf(ab,!!ab.zelle,!zh.replace(/<br>/g,"").trim())});
       if(ab.zelle&&ab.tief===1){
         zellen.push(zelleTeile.length===1&&zelleTeile[0].auf==="<p>"?zelleTeile[0].h:zelleTeile.map(x=>x.auf+(x.h||"<br>")+"</p>").join(""));
         zelleTeile=[];
@@ -18699,7 +18772,8 @@ function docLesen(buf){
     return {h,art,jc:ausrichtung(ab.pap),links:ab.pap.links,erste:ab.pap.erste,umbruch:ab.pap.umbruch,linie:linieVon(ab.pap),
       rechts:ab.pap.rechts||0,vor:ab.pap.vor||0,nach:ab.pap.nach,
       zab:zl&&zl.dya?(zl.mehrfach?{art:"auto",v:Math.round(zl.dya/240*100)/100}:zl.dya<0?{art:"genau",v:-zl.dya/20}:{art:"mind",v:zl.dya/20}):null,
-      tief,ttp:ab.pap.ttp,innerTtp:ab.pap.innerTtp,zelle:ab.zelle,tdef:ab.pap.tdef,liste,runs:laeufe(ab,art)};
+      tief,ttp:ab.pap.ttp,innerTtp:ab.pap.innerTtp,zelle:ab.zelle,tdef:ab.pap.tdef,liste,runs:laeufe(ab,art),
+      markSz:(()=>{if(ab.bis>=fcs.length)return null;const sc=stilChp(ab.istd),x=finde(chpx,fcs[ab.bis]);return (x?docChp({...sc},x.g,sc,schriften):sc).sz||null})()};
   });
   const html=wortSatz(norm,{grundGr,grundF,textBreite,lhStd:(meist(zab)||[])[0],nachStd:(meist(nab)||[])[0]});
 
@@ -18740,7 +18814,7 @@ function docLesen(buf){
         if(k===0x15&&fd){if(fd.phase===0){const ph=feldPlatzhalter(fd.befehl);if(ph)feld(ph)}felder.pop();continue}
         if(fd&&fd.phase===0){fd.befehl+=c;continue}
         if(fd&&fd.ersetzt)continue;
-        if(k===0x0D){zu();a.text=a.text.replace(/[  ]+$/,"");abs.push(a);a=null;lw=null;continue}
+        if(k===0x0D){zu();a.text=a.text.replace(/[  ]+$/,"");a.markSz=chp.sz;a.basisPt=basisPt;abs.push(a);a=null;lw=null;continue}
         if(k===0x09){text("\t",chp);continue}
         if(k===0x01){const b=chp.bildAn!=null?bildImText(chp.bildAn):null;
           if(b&&!b.alt&&b.uri){bildStat.zahl++;bildStat.bytes+=b.bytes||0;a.bilder.push({uri:b.uri,b:b.breiteMm,h:b.hoeheMm})}continue}
@@ -18935,7 +19009,7 @@ function rtfLesen(roh){
   const fussnoten=[],endnoten=[],kommentare=[],kopf={};
   const komIds=new Map(),komId=n=>{if(!komIds.has(n))komIds.set(n,uid());return komIds.get(n)};
   let autor="",initialen="";
-  const zuAbs=(gs,st,zelle)=>{gs.abs.push({runs:gs.runs,pap:st.pap,zelle,listtext:gs.listtext});gs.runs=[];gs.listtext=null};
+  const zuAbs=(gs,st,zelle)=>{gs.abs.push({runs:gs.runs,pap:st.pap,zelle,listtext:gs.listtext,markSz:st.f&&st.f.sz});gs.runs=[];gs.listtext=null};
   const plain=gs=>gs.abs.map(a=>a.runs.map(r=>r.t!=null?r.t:"").join("")).join(" ").replace(/\s+/g," ").trim();
   const absHtml=gs=>gs.abs.map(a=>"<p>"+(a.runs.map(r=>r.t!=null?esc(r.t):"").join("").trim()||"<br>")+"</p>").join("");
 
@@ -21858,7 +21932,7 @@ function hfBandMm(d,which){
   /* Dieselbe Messung wie am Bildschirm, nur bei Zoom 1 und in Millimetern —
      sonst rechnete der Druck mit einem anderen Band als die Ansicht. */
   return (istKopf(which)?f.hd:f.fd)
-    + Math.max((v.ty||0)+hfTextHoehe(d,which,1)/MM(1), hfFlussMm(v)) + 2;
+    + Math.max((v.ty||0)+hfTextHoehe(d,which,1)/MM(1), hfFlussMm(v));
 }
 /* Ragt ein Bild über die Linie der Zeile zur Blattkante hin (ein Logo bei
    8 mm, die Kopfzeile bei 12,5 mm), muss die fixierte Druckzeile dort schon
@@ -22300,7 +22374,43 @@ function hfFuerSeite(d,seite,page){
    oder als reiner Text (v.text, wie bis 1.1). Tabulatoren wie in Words
    Vorlage „Kopfzeile“: der erste springt zur Mitte, der zweite an den
    rechten Rand — „Firma⇥Titel⇥Seite 3“. */
+/* Zeilenhöhe wie Word: eine Zeile, deren Text ganz in einer Größe steht
+   (Fußzeile in 7 pt), ist so hoch wie diese Schrift — nicht wie die
+   Grundschrift der Kopfzeile, die CSS sonst als Mindesthöhe jeder Zeile
+   ansetzt. Die Größe rückt dazu auf den Zeilenblock (hfZeileHeben); ein
+   leerer Absatz trägt seine Größe als leere Spanne (wie Words Absatzmarke). */
+const hfEmVon=el=>{const m=/^([\d.]+)em$/.exec(el.style&&el.style.fontSize||"");return m?parseFloat(m[1]):null};
+function hfZeileHeben(html){
+  const box=document.createElement("div");box.innerHTML=html;
+  const texte=[];const w=document.createTreeWalker(box,NodeFilter.SHOW_TEXT);let t;
+  while((t=w.nextNode()))if(t.data.length)texte.push(t);
+  const groesseVon=n=>{for(let e=n.parentElement;e&&e!==box;e=e.parentElement){const g=hfEmVon(e);if(g!=null)return e}return null};
+  let em=null;
+  if(!texte.length){
+    /* leere Zeile mit Größenmarke */
+    const sp=[...box.querySelectorAll("[style]")].find(e=>hfEmVon(e)!=null);
+    return sp?{em:hfEmVon(sp),html:""}:{em:null,html};
+  }
+  const traeger=texte.map(groesseVon);
+  if(traeger.some(x=>!x))return {em:null,html};
+  const ems=[...new Set(traeger.map(hfEmVon))];
+  if(ems.length!==1)return {em:null,html};
+  em=ems[0];
+  new Set(traeger).forEach(e=>{e.style.fontSize="";if(!e.getAttribute("style"))e.removeAttribute("style");
+    if(e.tagName==="SPAN"&&!e.attributes.length){while(e.firstChild)e.parentNode.insertBefore(e.firstChild,e);e.remove()}});
+  return {em,html:box.innerHTML};
+}
+const hfZeileDiv=(al,h,em)=>`<div style="text-align:${al}${em?";font-size:"+em+"em":""}">${h||"<br>"}</div>`;
 function hfInhalt(v,page,total,forPrint){
+  if(v.html!=null){
+    /* Je Zeile ein Block mit Ausrichtung und, wo sie einheitlich ist, Größe */
+    return String(v.html).split("<br>").map((z,i)=>{
+      const g=hfZeileHeben(z);
+      let h=hfText(g.html,page,total,forPrint,true);
+      if(h.includes("\t"))h=hfTabZeilen(h);
+      return hfZeileDiv(hfZeilenAlign(v,i),h,g.em);
+    }).join("");
+  }
   if(v.za&&v.za.length){
     /* Je Zeile ein Block mit eigener Ausrichtung */
     const zeilen=v.html!=null?String(v.html).split("<br>"):String(v.text||"").split("\n");
@@ -22396,11 +22506,12 @@ function hfEditOpen(which,page){
   hfEditing={which,page};
   const v=hfOf(d,which),r=hfRect(which,page);
   box.style.cssText=`top:${r.top}px;left:${r.left}px;right:${r.right}px;`+
-    `min-height:${r.h}px;font-size:${r.fs}px;font-family:${hfSchrift(d)};text-align:${v.align}`;
+    `min-height:${r.h}px;font-size:${r.fs}px;font-family:${hfSchrift(d)};line-height:${hfZeilenhoehe(d)};text-align:${v.align}`;
   /* Je Zeile ein Block mit ihrer Ausrichtung — so wirken die Ausrichtungs-
      knöpfe der Symbolleiste auf die Zeile wie in Word */
   const zeilen=v.html!=null?String(v.html).split("<br>"):String(v.text||"").split("\n").map(xesc);
-  box.innerHTML=zeilen.map((z,i)=>`<div style="text-align:${hfZeilenAlign(v,i)}">${hfFelderEin(z)||"<br>"}</div>`).join("");
+  box.innerHTML=zeilen.map((z,i)=>{const g=v.html!=null?hfZeileHeben(z):{em:null,html:z};
+    return hfZeileDiv(hfZeilenAlign(v,i),hfFelderEin(g.html),g.em)}).join("");
   box.classList.add("on");
   document.body.classList.add("hfmode");
   $("#hfhint").classList.remove("on");
@@ -22535,8 +22646,11 @@ function hfStil(art,wert){
   else if(art==="fore")document.execCommand("foreColor",false,wert);
   else if(art==="size"){
     document.execCommand("fontSize",false,"7");
-    const em=Math.round(wert/((doc().size||S.settings.size||11)*0.85)*1000)/1000;
-    hb.querySelectorAll("[style]").forEach(el=>{if(/xxx-large/.test(el.style.fontSize))el.style.fontSize=em+"em"});
+    const em0=wert/((doc().size||S.settings.size||11)*0.85);
+    hb.querySelectorAll("[style]").forEach(el=>{if(!/xxx-large/.test(el.style.fontSize))return;
+      const zeile=el.closest(".hfedit>div"),zem=zeile&&hfEmVon(zeile)||1;
+      el.style.fontSize=(Math.round(em0/zem*1000)/1000)+"em"});
+    const em=Math.round(em0*1000)/1000;
     hb.querySelectorAll('font[size="7"]').forEach(el=>{const sp=document.createElement("span");sp.style.fontSize=em+"em";
       while(el.firstChild)sp.appendChild(el.firstChild);el.replaceWith(sp)});
   }else if(art==="foreWeg"){
@@ -22565,19 +22679,37 @@ function hfAusFeld(box){
 function hfZeilenAusFeld(box,grund){
   const zeilen=[];let cur=null;
   const norm=a=>a==="center"||a==="right"?a:"left";
-  const neu=al=>{if(!cur)cur={html:"",al:norm(al)}};
-  const zu=()=>{if(cur){const t=document.createElement("div");t.innerHTML=cur.html;cur.text=t.textContent;zeilen.push(cur);cur=null}};
+  const neu=(al,em)=>{if(!cur)cur={html:"",al:norm(al),em}};
+  /* Größe des Zeilenblocks zurück auf den Text: freier Text bekommt eine
+     Spanne, Größen darin werden mit ihr multipliziert (em zur Grundschrift) */
+  const senken=(html,em)=>{
+    if(!em||Math.abs(em-1)<0.001)return html;
+    if(!html)return `<span style="font-size:${em}em"></span>`;
+    const b=document.createElement("div");b.innerHTML=html;
+    b.querySelectorAll("[style]").forEach(e=>{const g=hfEmVon(e);if(g!=null)e.style.fontSize=(Math.round(g*em*1000)/1000)+"em"});
+    const sp=document.createElement("span");sp.style.fontSize=em+"em";
+    /* nur was nicht schon eine eigene Größe trägt */
+    const roh=[...b.childNodes];let out="";
+    roh.forEach(n=>{
+      if(n.nodeType===1&&hfEmVon(n)!=null){out+=n.outerHTML;return}
+      const t=document.createElement("div");t.appendChild(n.cloneNode(true));
+      out+=`<span style="font-size:${em}em">${t.innerHTML}</span>`;
+    });
+    return out;
+  };
+  const zu=()=>{if(cur){const t=document.createElement("div");t.innerHTML=cur.html;cur.text=t.textContent;
+    cur.html=senken(cur.html,cur.em);zeilen.push(cur);cur=null}};
   const inline=n=>{const t=document.createElement("div");t.appendChild(n.cloneNode(true));return hfSaeubern(t).replace(/<br>/g," ")};
-  const lauf=(el,al)=>{
+  const lauf=(el,al,em)=>{
     for(const n of [...el.childNodes]){
-      if(n.nodeType===1&&n.tagName==="BR"){neu(al);zu();continue}
-      if(n.nodeType===1&&n.classList.contains("hffeld")){neu(al);cur.html+=inline(n);continue}
-      if(n.nodeType===1&&/^(DIV|P|LI|H[1-6])$/.test(n.tagName)){zu();lauf(n,(n.style&&n.style.textAlign)||al);zu();continue}
-      if(n.nodeType===3){if(!n.data)continue;neu(al);cur.html+=xesc(n.data);continue}
-      if(n.nodeType===1){neu(al);cur.html+=inline(n)}
+      if(n.nodeType===1&&n.tagName==="BR"){neu(al,em);zu();continue}
+      if(n.nodeType===1&&n.classList.contains("hffeld")){neu(al,em);cur.html+=inline(n);continue}
+      if(n.nodeType===1&&/^(DIV|P|LI|H[1-6])$/.test(n.tagName)){zu();lauf(n,(n.style&&n.style.textAlign)||al,hfEmVon(n)||em);zu();continue}
+      if(n.nodeType===3){if(!n.data)continue;neu(al,em);cur.html+=xesc(n.data);continue}
+      if(n.nodeType===1){neu(al,em);cur.html+=inline(n)}
     }
   };
-  lauf(box,grund);zu();
+  lauf(box,grund,null);zu();
   return zeilen;
 }
 function hfSaeubern(wurzel){
@@ -22700,7 +22832,7 @@ function hfHtml(i,total,ml,mr,z){
     const kante=seite==="hdr"?"top":"bottom",ab=MM(seite==="hdr"?fm.hd:fm.fd)*z;
     const spalte=v.tw?`left:${ml+MM(v.tx||0)*z}px;width:${MM(v.tw)*z}px`:`left:${ml}px;right:${mr}px`;
     out+=`<div class="hf" data-pg="${i}" data-seite="${seite}" style="${kante}:${ab+MM(v.ty||0)*z}px;${spalte};
-    text-align:${v.align};font-size:${fs}px;font-family:${schrift}">${hfInhalt(v,i+1,total)}</div>`;
+    text-align:${v.align};font-size:${fs}px;font-family:${schrift};line-height:${hfZeilenhoehe(d)}">${hfInhalt(v,i+1,total)}</div>`;
     out+=hfBilder(v).map(b=>`<img class="hfbild" alt="" src="${hfBildSrc(b.uri)}" style="${kante}:${ab+MM(+b.y||0)*z}px;left:${ml+MM(+b.x||0)*z}px;width:${MM(b.b)*z}px;height:${MM(b.h)*z}px">`).join("");
   }
   return out;
@@ -22803,7 +22935,7 @@ function setPrintHF(){
     `.printframe>thead>tr>td{height:${kopf.toFixed(2)}mm!important}`+
     `.printframe>tfoot>tr>td{height:${fuss.toFixed(2)}mm!important}`+
     `.printframe{width:${m.f.w-m.f.m[1]-m.f.m[3]}mm!important;margin-left:${m.f.m[3]}mm!important}`+
-    `.printhf{left:${m.f.m[3]}mm!important;right:${m.f.m[1]}mm!important}`+
+    `.printhf{left:${m.f.m[3]}mm!important;right:${m.f.m[1]}mm!important;font-family:${hfSchrift(d)}!important;font-size:${((d.size||S.settings.size||11)*0.85).toFixed(2)}pt!important;line-height:${hfZeilenhoehe(d)}!important}`+
     `.hfdruck,.hfdruck *{visibility:visible!important}`+
     `body.hfseiten .printhf{display:none!important}`+
     `}`;
@@ -22893,7 +23025,8 @@ function hfDruckSeiten(tbl,ed){
   tbl.style.position="relative";
   const anker=document.createElement("div");
   anker.className="hfdruck";
-  anker.style.cssText="position:absolute;top:0;left:0;width:0;height:0;font-family:Georgia,serif;font-size:9pt;color:#000;white-space:pre-wrap";
+  /* Dieselbe Schrift, Größe und Zeilenhöhe wie am Bildschirm (hfHtml) */
+  anker.style.cssText=`position:absolute;top:0;left:0;width:0;height:0;font-family:${hfSchrift(d)};font-size:${((d.size||S.settings.size||11)*0.85).toFixed(2)}pt;line-height:${hfZeilenhoehe(d)};color:#000;white-space:pre-wrap`;
   let gesamt=pageCount;
   anker.innerHTML=bau(gesamt);
   hfDruckNeubau=n=>{if(n===gesamt)return false;gesamt=n;anker.innerHTML=bau(n);return true};

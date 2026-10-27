@@ -189,6 +189,20 @@ immer genau einen Commit, der sie anfasst.
   (Tom: „ja, wie in Word“); bisher wurden sie beim Lesen und Bearbeiten
   entfernt, die Tabelle auf Seite 2 klebte an der Kopfzeile. Das
   Abschluss-Absatzzeichen jedes .doc-Teiltextes zählt nicht mit.
+- **Seitenaufteilung wie Word** (Toms Checkliste: eine Tabellenzeile fehlte
+  auf Seite 1): leere Absätze haben die Größe ihrer Absatzmarke (alle Leser,
+  alle Exporter); Kopf-/Fußzeile mit natürlicher Zeilenhöhe der Schrift
+  statt 1,3, Zeilen in einheitlicher Größe so hoch wie diese Schrift, leere
+  Zeilen in ihrer Größe; ohne 2-mm-Zuschlag unter einer tiefen Kopfzeile;
+  Druck/PDF in Dokumentschrift statt Georgia 9 pt. Gemessen gegen
+  LibreOffice: Titel 47,9 (48,7) mm, Tabelle 71,1 (70,8) mm, letzte Zeile
+  auf Seite 1 gleich.
+  Umlauf-Prüfung: das Gelesene wird jetzt mit seinen eigenen Fußnoten
+  umbrochen (vorher mit denen des Originals, deren Kennung nicht passte —
+  der Fußnotenplatz fehlte, ein freies Bild landete 11 mm daneben).
+- **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
+  Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
+  Pfeile erscheinen nur, wo noch Symbole verborgen sind.
 - **Ausrichtung je Zeile in Kopf- und Fußzeile** (wie Word, `v.za`):
   lesen aus .docx/.doc/.odt/.rtf, schreiben in alle drei Formate, Umlauf
   geprüft.
