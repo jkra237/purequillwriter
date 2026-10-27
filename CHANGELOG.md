@@ -203,6 +203,13 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Neues Menü „Einfügen“, Format gruppiert** (Tom, 2026-10-27; wie Word
+  und LibreOffice): Bild, Tabelle, Link, Seitenumbruch, Fußnote, Endnote,
+  Inhalts-/Abbildungsverzeichnis, Kopf- und Fußzeile (öffnet sie auf der
+  Seite), Seitenzahlen. Format nur noch Formatierung, in Gruppen Zeichen ·
+  Absatz · Listen und Zitat · Seite; Tools nur Werkzeuge, „Unterschrift
+  hinzufügen“ bleibt dort (Toms Wunsch). Auch im ☰-Menü am Handy, Hilfe in
+  7 Sprachen.
 - **Ausrichtung je Zeile in Kopf- und Fußzeile** (wie Word, `v.za`):
   lesen aus .docx/.doc/.odt/.rtf, schreiben in alle drei Formate, Umlauf
   geprüft.

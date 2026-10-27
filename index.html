@@ -1956,6 +1956,7 @@ body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)
     <button class="filebtn handyonly" id="menuBtn" aria-label="Menü"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <button class="filebtn" id="fileBtn">Datei</button>
     <button class="filebtn" id="viewBtn">Ansicht</button>
+    <button class="filebtn" id="insBtn">Einfügen</button>
     <button class="filebtn" id="formatBtn">Format</button>
     <button class="filebtn" id="toolsBtn">Tools</button>
     <div class="tabbar" id="tabbar"></div>
@@ -2512,6 +2513,9 @@ const I18N={
 en:{
   "Leere Notiz — anklicken zum Öffnen":"Empty note — click to open",
   "Seitenumbruch":"Page break",
+  "Listen und Zitat":"Lists and quote",
+  "Endnote":"Endnote",
+  "Link":"Link",
   "Von oben":"From top",
   "Von unten":"From bottom",
   "Zur Fußzeile":"Go to footer",
@@ -3489,6 +3493,9 @@ en:{
 fr:{
   "Leere Notiz — anklicken zum Öffnen":"Note vide — cliquer pour ouvrir",
   "Seitenumbruch":"Saut de page",
+  "Listen und Zitat":"Listes et citation",
+  "Endnote":"Note de fin",
+  "Link":"Lien",
   "Von oben":"Depuis le haut",
   "Von unten":"Depuis le bas",
   "Zur Fußzeile":"Aller au pied de page",
@@ -4466,6 +4473,9 @@ fr:{
 es:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vacía — clic para abrir",
   "Seitenumbruch":"Salto de página",
+  "Listen und Zitat":"Listas y cita",
+  "Endnote":"Nota al final",
+  "Link":"Enlace",
   "Von oben":"Desde arriba",
   "Von unten":"Desde abajo",
   "Zur Fußzeile":"Ir al pie de página",
@@ -5443,6 +5453,9 @@ es:{
 pt:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vazia — clique para abrir",
   "Seitenumbruch":"Quebra de página",
+  "Listen und Zitat":"Listas e citação",
+  "Endnote":"Nota de fim",
+  "Link":"Link",
   "Von oben":"Do topo",
   "Von unten":"De baixo",
   "Zur Fußzeile":"Ir para o rodapé",
@@ -6420,6 +6433,9 @@ pt:{
 pl:{
   "Leere Notiz — anklicken zum Öffnen":"Pusta notatka — kliknij, aby otworzyć",
   "Seitenumbruch":"Podział strony",
+  "Listen und Zitat":"Listy i cytat",
+  "Endnote":"Przypis końcowy",
+  "Link":"Link",
   "Von oben":"Od góry",
   "Von unten":"Od dołu",
   "Zur Fußzeile":"Do stopki",
@@ -7397,6 +7413,9 @@ pl:{
 it:{
   "Leere Notiz — anklicken zum Öffnen":"Nota vuota — clicca per aprire",
   "Seitenumbruch":"Interruzione di pagina",
+  "Listen und Zitat":"Elenchi e citazione",
+  "Endnote":"Nota di chiusura",
+  "Link":"Link",
   "Von oben":"Dall'alto",
   "Von unten":"Dal basso",
   "Zur Fußzeile":"Vai al piè di pagina",
@@ -8400,6 +8419,7 @@ const OFWORD=()=>PL("von","of","sur","de","de","z",
 function applyStaticLabels(){
   $("#fileBtn").textContent=tr("Datei");
   $("#viewBtn").textContent=tr("Ansicht");
+  $("#insBtn").textContent=EINFUEGEN_MENU();
   $("#formatBtn").textContent=tr("Format");
   $("#toolsBtn").textContent=tr("Tools");
   const rw=document.querySelector('.rb[data-mode="write"]');if(rw)rw.title=tr("Schreiben (Alt+1)");
@@ -20063,6 +20083,7 @@ function handyMenue(){
   m.innerHTML=`
     <button class="mi" data-h="datei"><span class="chk"></span>${tr("Datei")}${pf}</button>
     <button class="mi" data-h="ansicht"><span class="chk"></span>${tr("Ansicht")}${pf}</button>
+    <button class="mi" data-h="einf"><span class="chk"></span>${EINFUEGEN_MENU()}${pf}</button>
     <button class="mi" data-h="format"><span class="chk"></span>${tr("Format")}${pf}</button>
     <button class="mi" data-h="tools"><span class="chk"></span>${tr("Tools")}${pf}</button>
     <div class="msep"></div>
@@ -20074,7 +20095,7 @@ function handyMenue(){
   $(".topbar").appendChild(m);$("#menuBtn").classList.add("on");
   menuUnterKnopf(m,$("#menuBtn"));
   m.onclick=e=>{const b=e.target.closest("[data-h]");if(!b)return;const a=b.dataset.h;closeMenu();
-    if(a==="datei")fileMenu();else if(a==="ansicht")viewMenu();else if(a==="format")formatMenu();else if(a==="tools")toolsMenu();
+    if(a==="datei")fileMenu();else if(a==="ansicht")viewMenu();else if(a==="einf")einfuegenMenu();else if(a==="format")formatMenu();else if(a==="tools")toolsMenu();
     else if(a==="set")settings();else setMode(a)};
 }
 function viewMenu(){
@@ -20137,20 +20158,23 @@ function formatMenu(){
   if($("#fmtmenu")){closeMenu();return}
   closeMenu();
   const m=document.createElement("div");m.className="menu";m.id="fmtmenu";
+  /* Gruppiert wie Words Registerkarte „Start“: Zeichen, Absatz, Listen und
+     Zitat, Seite (Tom, 2026-10-27). Was man einfügt, steht unter Einfügen. */
   m.innerHTML=`
+    <div class="mlabel">${PL("Zeichen","Font","Police","Fuente","Fonte","Czcionka","Carattere")}</div>
     <button class="mi" data-f="text"><span class="chk"></span>${tr("Text")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="fore"><span class="chk"></span>${tr("Schriftfarbe")}&hellip;</button>
     <button class="mi" data-f="hilite"><span class="chk"></span>${tr("Texthervorhebung")}&hellip;</button>
+    <div class="mlabel">${tr("Absatz")}</div>
     <button class="mi" data-f="block"><span class="chk"></span>${tr("Absatzformat")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="align"><span class="chk"></span>${tr("Ausrichten und einrücken")}<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-f="absatz"><span class="chk"></span>${tr("Absatz…")}</button>
     <button class="mi" data-f="lh"><span class="chk"></span>${tr("Zeilen- und Absatzabstand")}<span class="k">&rsaquo;</span></button>
-    <button class="mi" data-f="qs"><span class="chk"></span>${tr("Zitat")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-f="absatz"><span class="chk"></span>${tr("Absatz…")}</button>
+    <div class="mlabel">${tr("Listen und Zitat")}</div>
     <button class="mi" data-f="ul"><span class="chk"></span>${tr("Aufzählung")}<span class="k">&rsaquo;</span></button>
     <button class="mi" data-f="ol"><span class="chk"></span>${tr("Nummerierung")}<span class="k">&rsaquo;</span></button>
-    <div class="msep"></div>
-    <button class="mi" data-f="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}&hellip;</button>
-    <button class="mi" data-f="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>
+    <button class="mi" data-f="qs"><span class="chk"></span>${tr("Zitat")}<span class="k">&rsaquo;</span></button>
+    <div class="mlabel">${tr("Seite")}</div>
     <button class="mi" data-f="spalten"><span class="chk"></span>${tr("Spalten")}&hellip;</button>
     <div class="msep"></div>
     <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
@@ -20228,6 +20252,50 @@ function formatMenu(){
     if(a==="clear")formatAct(formatierungEntfernen);
   };
 }
+/* „Einfügen“ ist im Wörterbuch schon das Einfügen aus der Zwischenablage */
+const EINFUEGEN_MENU=()=>PL("Einfügen","Insert","Insertion","Insertar","Inserir","Wstaw","Inserisci");
+/* Wie Words und LibreOffices Menü „Einfügen“ (Tom, 2026-10-27): was man in
+   den Text setzt, statt verteilt auf Tools und Format */
+function einfuegenMenu(){
+  if($("#insmenu")){closeMenu();return}
+  closeMenu();
+  const m=document.createElement("div");m.className="menu";m.id="insmenu";
+  m.innerHTML=`
+    <button class="mi" data-i="bild"><span class="chk"></span>${tr("Bild")}&hellip;</button>
+    <button class="mi" data-i="tabelle"><span class="chk"></span>${tr("Tabelle")}<span class="k">&rsaquo;</span></button>
+    <button class="mi" data-i="link"><span class="chk"></span>${tr("Link")}&hellip;</button>
+    <button class="mi" data-i="umbruch"><span class="chk"></span>${tr("Seitenumbruch")}</button>
+    <div class="msep"></div>
+    <button class="mi" data-i="fn"><span class="chk"></span>${tr("Fußnote")}</button>
+    <button class="mi" data-i="en"><span class="chk"></span>${tr("Endnote")}</button>
+    <div class="msep"></div>
+    <button class="mi" data-i="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis")}<span class="k">${kz("toc")}</span></button>
+    ${S.settings.tofEnabled?`<button class="mi" data-i="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis")}</button>`:""}
+    <button class="mi" data-i="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}</button>
+    <button class="mi" data-i="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>`;
+  $(".topbar").appendChild(m);$("#insBtn").classList.add("on");
+  menuUnterKnopf(m,$("#insBtn"));
+  m.onclick=e=>{
+    const b=e.target.closest("[data-i]");if(!b)return;
+    const a=b.dataset.i,r=b.getBoundingClientRect();
+    closeMenu();
+    if(S.mode!=="write")setMode("write");
+    setTimeout(()=>{
+      const ed=$("#editor");
+      if(a==="bild")pickImage();
+      if(a==="tabelle"){ed&&ed.focus();tablePicker({left:r.right,bottom:r.top,top:r.top,right:r.right,width:0,height:r.height})}
+      if(a==="link")linkDialog();
+      if(a==="umbruch")insertPageBreak();
+      if(a==="fn")insertFootnote();
+      if(a==="en")insertEndnote();
+      if(a==="toc")insertToc();
+      if(a==="tof")insertTof();
+      /* wie Word: öffnet die Kopfzeile auf der Seite (mit der Leiste dort) */
+      if(a==="hf"){const d=doc();hfEditOpen(hfFuerSeite(d,"hdr",0),0)}
+      if(a==="pnum")pageNumDialog();
+    },40);
+  };
+}
 function toolsMenu(){
   if($("#toolsmenu")){closeMenu();return}
   closeMenu();
@@ -20241,10 +20309,6 @@ function toolsMenu(){
     <button class="mi" data-t="goal"><span class="chk">${c(S.goal&&S.goal.on)}</span>${tr("Schreibziel festlegen")}${
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
-    <button class="mi" data-t="fn"><span class="chk"></span>${tr("Fußnote einfügen")}</button>
-    <button class="mi" data-t="en"><span class="chk"></span>${tr("Endnote einfügen")}</button>
-    <button class="mi" data-t="toc"><span class="chk"></span>${tr("Inhaltsverzeichnis einfügen")}<span class="k">${kz("toc")}</span></button>
-    ${S.settings.tofEnabled?`<button class="mi" data-t="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis einfügen")}</button>`:""}
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
   $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
   menuUnterKnopf(m,$("#toolsBtn"));
@@ -23219,7 +23283,7 @@ function hfDialog(){
 
 /* ================= Tabellen ================= */
 const TG_COLS=8,TG_ROWS=6;
-function tablePicker(){
+function tablePicker(anker){
   if($("#tmenu")){closeMenu();return}
   closeMenu();
   const m=document.createElement("div");m.className="menu ctx";m.id="tmenu";
@@ -23231,7 +23295,7 @@ function tablePicker(){
     <div class="msep"></div>
     <button class="mi" data-t="head"><span class="chk"></span>${tr("Erste Zeile als Kopfzeile")}</button>`;
   document.body.appendChild(m);
-  const r0=$("#tblBtn").getBoundingClientRect();
+  const r0=anker||$("#tblBtn").getBoundingClientRect();
   menuPlatzieren(m,r0.left,r0.bottom+5,r0);
   let head=false;
   const g=$("#tgrid"),lab=$("#tlabel");
@@ -28100,7 +28164,7 @@ cover page without a header. They start out empty; the distances from the edge a
 <p><kbd>Enter</kbd> starts a new line, <kbd>Shift</kbd>+<kbd>Enter</kbd> only breaks the line, <kbd>Tab</kbd> inserts a tab. To finish: <b>Close header and footer</b>, <kbd>Esc</kbd> or a double-click in the text.</p>`},
 
  {t:"Page numbers",k:"page numbers;numbering;pagination",b:`
-<p><b>Format &rsaquo; Page numbers</b> switches a plain page number at the foot of each page
+<p><b>Insert &rsaquo; Page numbers</b> switches a plain page number at the foot of each page
 on and off.</p>
 <p>If you set up a footer of your own containing <code>{page}</code>, that replaces the
 plain number — the two never appear together.</p>`},
@@ -28178,14 +28242,14 @@ glossary you are viewing, or as a new one named after the file. Terms already pr
 skipped rather than duplicated.</p>`},
 
  {t:"Footnotes",k:"footnote;reference;notes at foot",b:`
-<p><b>Tools &rsaquo; Insert footnote</b> places a numbered reference at the cursor and puts
+<p><b>Insert &rsaquo; Footnote</b> places a numbered reference at the cursor and puts
 the note at the foot of the page it falls on.</p>
 <p>Footnotes renumber themselves as you write and move with the text they belong to.
 Deleting the reference removes the note as well.</p>
-<p><b>Tools &rsaquo; Insert endnote</b> works the same way, but collects the notes at the end of the document, numbered i, ii, iii as in Word. Click a mark to edit its note.</p>`},
+<p><b>Insert &rsaquo; Endnote</b> works the same way, but collects the notes at the end of the document, numbered i, ii, iii as in Word. Click a mark to edit its note.</p>`},
 
  {t:"Table of contents and figures",k:"table of contents;toc;contents;figures",b:`
-<p><b>Tools &rsaquo; Insert table of contents</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+<p><b>Insert &rsaquo; Table of contents</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
 builds a list from the headings in the document. It offers a choice of style, how many
 heading levels to include, whether to show page numbers, and which leader to use between
 entry and number.</p>
@@ -28734,7 +28798,7 @@ Deckblatt ohne Kopfzeile. Sie beginnen leer; die Abstände zum Rand gelten für 
 <p><kbd>Eingabe</kbd> beginnt eine neue Zeile, <kbd>⇧</kbd>+<kbd>Eingabe</kbd> bricht nur um, <kbd>Tab</kbd> setzt einen Tabulator. Beenden: <b>Kopf- und Fußzeile schließen</b>, <kbd>Esc</kbd> oder ein Doppelklick in den Text.</p>`},
 
  {t:"Seitenzahlen",k:"seitenzahlen;nummerierung;paginierung",b:`
-<p><b>Format &rsaquo; Seitenzahlen</b> schaltet eine schlichte Seitenzahl am Fuß jeder Seite
+<p><b>Einfügen &rsaquo; Seitenzahlen</b> schaltet eine schlichte Seitenzahl am Fuß jeder Seite
 ein und aus.</p>
 <p>Richtest du eine eigene Fußzeile mit <code>{seite}</code> ein, tritt diese an die Stelle der
 schlichten Zahl — beide erscheinen nie zugleich.</p>`},
@@ -28820,14 +28884,14 @@ das angesehene Glossar oder als neues, benannt nach der Datei. Schon vorhandene 
 übersprungen statt gedoppelt.</p>`},
 
  {t:"Fußnoten",k:"fußnote;referenz;anmerkung",b:`
-<p><b>Werkzeuge &rsaquo; Fußnote einfügen</b> setzt eine nummerierte Marke an die Schreibmarke
+<p><b>Einfügen &rsaquo; Fußnote</b> setzt eine nummerierte Marke an die Schreibmarke
 und stellt die Anmerkung an den Fuß der Seite, auf die sie fällt.</p>
 <p>Fußnoten nummerieren sich beim Schreiben selbst neu und wandern mit dem Text, zu dem sie
 gehören. Wird die Marke im Text gelöscht, verschwindet auch die Anmerkung.</p>
-<p><b>Werkzeuge &rsaquo; Endnote einfügen</b> arbeitet genauso, sammelt die Anmerkungen aber am Ende des Dokuments, gezählt i, ii, iii wie in Word. Ein Klick auf die Marke bearbeitet ihren Text.</p>`},
+<p><b>Einfügen &rsaquo; Endnote</b> arbeitet genauso, sammelt die Anmerkungen aber am Ende des Dokuments, gezählt i, ii, iii wie in Word. Ein Klick auf die Marke bearbeitet ihren Text.</p>`},
 
  {t:"Inhalts- und Abbildungsverzeichnis",k:"inhaltsverzeichnis;verzeichnis;abbildungen",b:`
-<p><b>Werkzeuge &rsaquo; Inhaltsverzeichnis einfügen</b>
+<p><b>Einfügen &rsaquo; Inhaltsverzeichnis</b>
 (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>I</kbd>) baut ein Verzeichnis aus den Überschriften des
 Dokuments. Zur Wahl stehen der Stil, wie viele Überschriftsebenen aufgenommen werden, ob
 Seitenzahlen erscheinen und welche Füllzeichen zwischen Eintrag und Zahl stehen.</p>
@@ -29392,7 +29456,7 @@ comunes.</p>
 <p><kbd>Intro</kbd> empieza una línea nueva, <kbd>Mayús</kbd>+<kbd>Intro</kbd> solo salta de línea, <kbd>Tab</kbd> inserta una tabulación. Para terminar: <b>Cerrar encabezado y pie de página</b>, <kbd>Esc</kbd> o un doble clic en el texto.</p>`},
 
  {t:"Números de página",k:"números de página;numeración;paginación",b:`
-<p><b>Formato &rsaquo; Números de página</b> activa y desactiva un número de página simple al
+<p><b>Insertar &rsaquo; Números de página</b> activa y desactiva un número de página simple al
 pie de cada página.</p>
 <p>Si configuras un pie propio que contenga <code>{page}</code>, este sustituye al número
 simple: los dos nunca aparecen juntos.</p>`},
@@ -29476,14 +29540,14 @@ los dos: al glosario que estás viendo, o como uno nuevo con el nombre del archi
 que ya existen se omiten en lugar de duplicarse.</p>`},
 
  {t:"Notas al pie",k:"nota al pie;referencia;notas a pie de página",b:`
-<p><b>Herramientas &rsaquo; Insertar nota al pie</b> coloca una referencia numerada en el cursor
+<p><b>Insertar &rsaquo; Nota al pie</b> coloca una referencia numerada en el cursor
 y pone la nota al pie de la página en la que cae.</p>
 <p>Las notas al pie se renumeran solas mientras escribes y se mueven con el texto al que
 pertenecen. Borrar la referencia elimina también la nota.</p>
-<p><b>Herramientas &rsaquo; Insertar nota al final</b> funciona igual, pero reúne las notas al final del documento, numeradas i, ii, iii como en Word. Un clic en la marca edita su texto.</p>`},
+<p><b>Insertar &rsaquo; Nota al final</b> funciona igual, pero reúne las notas al final del documento, numeradas i, ii, iii como en Word. Un clic en la marca edita su texto.</p>`},
 
  {t:"Índice y lista de figuras",k:"índice;contenido;tabla de contenido;figuras",b:`
-<p><b>Herramientas &rsaquo; Insertar índice</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd>)
+<p><b>Insertar &rsaquo; Índice</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>I</kbd>)
 construye una lista a partir de los títulos del documento. Ofrece elegir el estilo, cuántos
 niveles de título incluir, si mostrar números de página y qué relleno usar entre la entrada y el
 número.</p>
@@ -30044,7 +30108,7 @@ folha ou uma capa sem cabeçalho. Eles começam vazios; as distâncias da borda 
 <p><kbd>Enter</kbd> começa uma nova linha, <kbd>Shift</kbd>+<kbd>Enter</kbd> só quebra a linha, <kbd>Tab</kbd> insere uma tabulação. Para terminar: <b>Fechar cabeçalho e rodapé</b>, <kbd>Esc</kbd> ou um clique duplo no texto.</p>`},
 
  {t:"Números de página",k:"números de página;numeração;paginação",b:`
-<p><b>Formato &rsaquo; Números de página</b> liga e desliga um número de página simples no pé de
+<p><b>Inserir &rsaquo; Números de página</b> liga e desliga um número de página simples no pé de
 cada página.</p>
 <p>Se você configurar um rodapé próprio contendo <code>{page}</code>, ele substitui o número
 simples: os dois nunca aparecem juntos.</p>`},
@@ -30125,14 +30189,14 @@ o glossário que você está vendo, ou como um novo com o nome do arquivo. Os te
 são pulados em vez de duplicados.</p>`},
 
  {t:"Notas de rodapé",k:"nota de rodapé;referência;notas no pé da página",b:`
-<p><b>Ferramentas &rsaquo; Inserir nota de rodapé</b> coloca uma referência numerada no cursor e
+<p><b>Inserir &rsaquo; Nota de rodapé</b> coloca uma referência numerada no cursor e
 põe a nota no pé da página em que ela cai.</p>
 <p>As notas de rodapé se renumeram sozinhas enquanto você escreve e se movem com o texto ao qual
 pertencem. Excluir a referência remove a nota também.</p>
-<p><b>Ferramentas &rsaquo; Inserir nota de fim</b> funciona do mesmo jeito, mas reúne as notas no fim do documento, numeradas i, ii, iii como no Word. Um clique na marca edita o texto.</p>`},
+<p><b>Inserir &rsaquo; Nota de fim</b> funciona do mesmo jeito, mas reúne as notas no fim do documento, numeradas i, ii, iii como no Word. Um clique na marca edita o texto.</p>`},
 
  {t:"Sumário e índice de figuras",k:"sumário;índice;conteúdo;figuras",b:`
-<p><b>Ferramentas &rsaquo; Inserir sumário</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+<p><b>Inserir &rsaquo; Sumário</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
 monta uma lista a partir dos títulos do documento. Ele oferece a escolha de estilo, quantos
 níveis de título incluir, se mostra números de página e qual preenchimento usar entre a entrada
 e o número.</p>
@@ -30710,7 +30774,7 @@ départ ; les distances au bord sont communes.</p>
 <p><kbd>Entrée</kbd> commence une nouvelle ligne, <kbd>Maj</kbd>+<kbd>Entrée</kbd> ne fait qu'un saut de ligne, <kbd>Tab</kbd> insère une tabulation. Pour terminer : <b>Fermer l'en-tête et le pied de page</b>, <kbd>Échap</kbd> ou un double-clic dans le texte.</p>`},
 
  {t:"Numéros de page",k:"numéros de page;numérotation;pagination",b:`
-<p><b>Format &rsaquo; Numéros de page</b> active et désactive un simple numéro de page au bas de
+<p><b>Insertion &rsaquo; Numéros de page</b> active et désactive un simple numéro de page au bas de
 chaque page.</p>
 <p>Si vous configurez un pied de page à vous contenant <code>{page}</code>, celui-ci remplace le
 numéro simple : les deux n'apparaissent jamais ensemble.</p>`},
@@ -30795,14 +30859,14 @@ peut être écrit comme tableau (.csv) ou comme sauvegarde (.json) et relu depui
 déjà présents sont ignorés au lieu d'être dupliqués.</p>`},
 
  {t:"Notes de bas de page",k:"note de bas de page;référence;notes en pied",b:`
-<p><b>Outils &rsaquo; Insérer une note de bas de page</b> place un appel de note numéroté au
+<p><b>Insertion &rsaquo; Note de bas de page</b> place un appel de note numéroté au
 curseur et met la note au bas de la page où elle tombe.</p>
 <p>Les notes de bas de page se renumérotent d'elles-mêmes pendant que vous écrivez et suivent le
 texte auquel elles appartiennent. Supprimer l'appel de note retire aussi la note.</p>
-<p><b>Outils &rsaquo; Insérer une note de fin</b> fonctionne de la même façon, mais regroupe les notes à la fin du document, numérotées i, ii, iii comme dans Word. Un clic sur l'appel modifie son texte.</p>`},
+<p><b>Insertion &rsaquo; Note de fin</b> fonctionne de la même façon, mais regroupe les notes à la fin du document, numérotées i, ii, iii comme dans Word. Un clic sur l'appel modifie son texte.</p>`},
 
  {t:"Table des matières et des illustrations",k:"table des matières;sommaire;contenu;illustrations",b:`
-<p><b>Outils &rsaquo; Insérer une table des matières</b>
+<p><b>Insertion &rsaquo; Table des matières</b>
 (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>I</kbd>) construit une liste à partir des titres du document.
 Elle propose de choisir le style, combien de niveaux de titre inclure, s'il faut afficher les
 numéros de page, et quel remplissage utiliser entre l'entrée et le numéro.</p>
@@ -31368,7 +31432,7 @@ tytułowej bez nagłówka. Na początku są puste; odległości od krawędzi są
 <p><kbd>Enter</kbd> zaczyna nową linię, <kbd>Shift</kbd>+<kbd>Enter</kbd> tylko łamie wiersz, <kbd>Tab</kbd> wstawia tabulator. Zakończenie: <b>Zamknij nagłówek i stopkę</b>, <kbd>Esc</kbd> albo dwukrotne kliknięcie w tekst.</p>`},
 
  {t:"Numery stron",k:"numery stron;numeracja;paginacja",b:`
-<p><b>Format &rsaquo; Numery stron</b> włącza i wyłącza zwykły numer strony u dołu każdej
+<p><b>Wstaw &rsaquo; Numery stron</b> włącza i wyłącza zwykły numer strony u dołu każdej
 strony.</p>
 <p>Jeśli utworzysz własną stopkę zawierającą <code>{page}</code>, zastępuje ona zwykły numer —
 te dwa nigdy nie pojawiają się razem.</p>`},
@@ -31449,14 +31513,14 @@ z nich — do oglądanego słowniczka albo jako nowy o nazwie pliku. Pojęcia ju
 a nie powielane.</p>`},
 
  {t:"Przypisy",k:"przypis;odwołanie;notki u dołu",b:`
-<p><b>Narzędzia &rsaquo; Wstaw przypis</b> umieszcza numerowane odwołanie w miejscu kursora i
+<p><b>Wstaw &rsaquo; Przypis</b> umieszcza numerowane odwołanie w miejscu kursora i
 umieszcza notkę u dołu strony, na którą przypada.</p>
 <p>Przypisy same się przenumerowują podczas pisania i przemieszczają się z tekstem, do którego
 należą. Usunięcie odwołania usuwa też notkę.</p>
-<p><b>Narzędzia &rsaquo; Wstaw przypis końcowy</b> działa tak samo, ale zbiera przypisy na końcu dokumentu, numerowane i, ii, iii jak w Wordzie. Kliknięcie znacznika otwiera jego tekst.</p>`},
+<p><b>Wstaw &rsaquo; Przypis końcowy</b> działa tak samo, ale zbiera przypisy na końcu dokumentu, numerowane i, ii, iii jak w Wordzie. Kliknięcie znacznika otwiera jego tekst.</p>`},
 
  {t:"Spis treści i spis ilustracji",k:"spis treści;spis;zawartość;ilustracje",b:`
-<p><b>Narzędzia &rsaquo; Wstaw spis treści</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
+<p><b>Wstaw &rsaquo; Spis treści</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>I</kbd>)
 buduje listę z tytułów w dokumencie. Oferuje wybór stylu, ile poziomów tytułów uwzględnić, czy
 pokazywać numery stron oraz jakiego wypełnienia użyć między wpisem a numerem.</p>
 <p>Spis aktualizuje się podczas pisania, a pojedyncze tytuły można z niego wykluczyć.</p>
@@ -32018,7 +32082,7 @@ bordo sono comuni.</p>
 <p><kbd>Invio</kbd> inizia una nuova riga, <kbd>Maiusc</kbd>+<kbd>Invio</kbd> va solo a capo, <kbd>Tab</kbd> inserisce una tabulazione. Per finire: <b>Chiudi intestazione e piè di pagina</b>, <kbd>Esc</kbd> o un doppio clic nel testo.</p>`},
 
  {t:"Numeri di pagina",k:"numeri di pagina;numerazione;impaginazione",b:`
-<p><b>Formato &rsaquo; Numeri di pagina</b> attiva e disattiva un semplice numero di pagina in
+<p><b>Inserisci &rsaquo; Numeri di pagina</b> attiva e disattiva un semplice numero di pagina in
 fondo a ogni pagina.</p>
 <p>Se configuri un piè di pagina tuo che contiene <code>{page}</code>, questo sostituisce il
 numero semplice: i due non compaiono mai insieme.</p>`},
@@ -32101,14 +32165,14 @@ nel glossario che stai guardando, o come uno nuovo con il nome del file. I termi
 vengono ignorati invece che duplicati.</p>`},
 
  {t:"Note a piè di pagina",k:"nota a piè di pagina;riferimento;note a fondo pagina",b:`
-<p><b>Strumenti &rsaquo; Inserisci nota a piè di pagina</b> mette un richiamo numerato al
+<p><b>Inserisci &rsaquo; Nota a piè di pagina</b> mette un richiamo numerato al
 cursore e mette la nota in fondo alla pagina su cui cade.</p>
 <p>Le note a piè di pagina si rinumerano da sole mentre scrivi e si spostano con il testo a cui
 appartengono. Eliminare il richiamo rimuove anche la nota.</p>
-<p><b>Strumenti &rsaquo; Inserisci nota di chiusura</b> funziona allo stesso modo, ma raccoglie le note alla fine del documento, numerate i, ii, iii come in Word. Un clic sul richiamo ne modifica il testo.</p>`},
+<p><b>Inserisci &rsaquo; Nota di chiusura</b> funziona allo stesso modo, ma raccoglie le note alla fine del documento, numerate i, ii, iii come in Word. Un clic sul richiamo ne modifica il testo.</p>`},
 
  {t:"Sommario e indice delle figure",k:"sommario;indice;contenuto;figure",b:`
-<p><b>Strumenti &rsaquo; Inserisci sommario</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd>)
+<p><b>Inserisci &rsaquo; Sommario</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>I</kbd>)
 costruisce un elenco a partire dai titoli del documento. Offre la scelta dello stile, quanti
 livelli di titolo includere, se mostrare i numeri di pagina e quale riempimento usare tra la
 voce e il numero.</p>
@@ -33091,6 +33155,7 @@ window.matchMedia("(max-width:600px)").addEventListener("change",handyAnwenden);
    Schrift wird geladen) — im Leerlauf vorab, damit die Liste sofort aufgeht */
 setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>schriftenAlle().catch(()=>{})),2500);
 $("#formatBtn").onclick=formatMenu;
+$("#insBtn").onclick=einfuegenMenu;
 $("#toolsBtn").onclick=toolsMenu;
 $("#focusOut").onclick=()=>{document.body.classList.remove("focus");
   const ed=$("#editor");ed&&ed.focus()};
