@@ -1545,6 +1545,28 @@ body.focus .outline{display:none}
 .zwinfo{display:flex;flex-direction:column;gap:2px}
 .zwinfo b{font-size:13px}
 .zwinfo span{font-size:12px;color:var(--ink-soft)}
+/* Ein/Aus-Einstellungen wie in Words Optionen (2026-10-27, Tom: „sieht
+   etwas komisch und nach links gestaucht aus“): Kästchen vorn, Titel und
+   Erklärung darunter über die ganze Breite. Vorher standen Kästchen und
+   Satz zusammen in der 210 px schmalen rechten Spalte der .setrow, die
+   Mitte blieb leer. Die ganze Zeile ist anklickbar. */
+.setopt{display:flex;gap:11px;align-items:flex-start;padding:10px 2px;border-bottom:1px solid var(--rule);cursor:pointer}
+.setopt input{width:auto;margin:2px 0 0;flex:none;accent-color:var(--stamp);cursor:pointer}
+.setopt-t{display:flex;flex-direction:column;gap:2px;min-width:0}
+.setopt-t b{font-size:13px;font-weight:600;color:var(--ink)}
+.setopt-d{font-size:12px;line-height:1.45;color:var(--ink-soft)}
+.setopt-d::first-letter{text-transform:uppercase}
+.setgrp{border-bottom:1px solid var(--rule);padding-bottom:11px}
+.setgrp>.setopt{border-bottom:none}
+/* Zugehöriges unter einer Einstellung (Ausnahmen der Großschreibung):
+   eingerückt auf die Höhe des Titels */
+.setsub{margin:0 2px 0 28px;padding:9px 12px;border:1px solid var(--rule);border-radius:var(--radius);
+  background:var(--chrome-2);display:flex;flex-direction:column;gap:6px}
+.setsub b{font-size:12px;font-weight:600;color:var(--ink)}
+.setsub .setopt-d::first-letter{text-transform:none}
+.setsub .pills{display:flex;flex-wrap:wrap;gap:5px}
+/* Ist die Einstellung aus, wirkt das Zugehörige nicht — es tritt zurück */
+.setgrp:has(>.setopt input:not(:checked))>.setsub{opacity:.55}
 .setstd{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .setstd span{font-size:12px;color:var(--ink-soft)}
 .setstd .btn{white-space:nowrap}
@@ -12379,7 +12401,17 @@ function zelleFormat(td){
 const zelleHatFormat=f=>!!(f&&(f.bg||f.va||Object.keys(f.rand||{}).length));
 /* Breite in % des Satzspiegels; 100, wenn nichts gesetzt ist */
 function tabelleBreiteProz(t){const w=t.style&&t.style.width;return /%$/.test(w||"")?Math.max(5,Math.min(100,parseFloat(w))):100}
-const tabelleKopf=proz=>proz>0&&proz<99.5?' style="width:'+(Math.round(proz*10)/10)+'%"':"";
+/* Tabellenkopf: Breite in % und Einzug (2026-10-27): Lage der linken
+   Tabellenkante zum Textrand in pt, als margin-left. Word rückt Tabellen
+   alter Dateien um den Zellabstand nach links, damit der Zelltext auf der
+   Linie des Fließtexts beginnt — im Goethe-Dokument −5,4 pt; bis dahin
+   stand die Tabelle hier um diesen Betrag zu weit rechts. */
+const tabelleKopf=(proz,einPt)=>{
+  const st=[proz>0&&proz<99.5&&"width:"+(Math.round(proz*10)/10)+"%",
+    einPt&&Math.abs(einPt)>=0.5&&"margin-left:"+ptCalc(Math.round(einPt*10)/10)].filter(Boolean);
+  return st.length?' style="'+st.join(";")+'"':"";
+};
+const tabelleEinzugPt=t=>{const v=t&&t.style&&ptAusCalc(t.style.marginLeft);return v&&Math.abs(v)>=0.5?v:0};
 /* So schreibt PureQuill eine Tabelle ohne eigenes Format hinaus (dünn,
    grau) — kommt sie so zurück, bleibt sie ohne Inline-Stil wie vorher */
 const randStandard=r=>!!r&&r!=="none"&&r.art==="solid"&&Math.abs(r.pt-0.5)<0.13&&r.farbe==="999999";
@@ -12846,8 +12878,14 @@ async function tabelleXml(table,ctx){
      anderer Vorgabe wieder welche. */
   const ohne=table.getAttribute("data-rahmen")==="ohne";
   const seite=n=>ohne?`<w:${n} w:val="nil"/>`:`<w:${n} w:val="single" w:sz="4" w:color="999999"/>`;
-  return `<w:tbl><w:tblPr><w:tblW w:w="${tabTw}" w:type="dxa"/>`+
+  /* Zellabstand wie in der Anzeige (Word-Tabellen 1,9 mm, eigene .3em/.45em)
+     und Einzug: Word öffnet diese Datei mit Kompatibilität 12, dort misst
+     tblInd bis zum Zelltext — also Kante plus linker Zellabstand */
+  const wz=table.hasAttribute("data-wz"),marLR=wz?108:Math.round(0.45*ctx.docSize*20),marTB=wz?0:Math.round(0.3*ctx.docSize*20);
+  const einTw=Math.round(tabelleEinzugPt(table)*20)+marLR;
+  return `<w:tbl><w:tblPr><w:tblW w:w="${tabTw}" w:type="dxa"/><w:tblInd w:w="${einTw}" w:type="dxa"/>`+
     `<w:tblBorders>${["top","left","bottom","right","insideH","insideV"].map(seite).join("")}</w:tblBorders>`+
+    `<w:tblCellMar><w:top w:w="${marTB}" w:type="dxa"/><w:left w:w="${marLR}" w:type="dxa"/><w:bottom w:w="${marTB}" w:type="dxa"/><w:right w:w="${marLR}" w:type="dxa"/></w:tblCellMar>`+
     `</w:tblPr><w:tblGrid>${grid}</w:tblGrid>${zeilen}</w:tbl><w:p/>`;
 }
 async function figurXml(fig,ctx){
@@ -13433,7 +13471,8 @@ async function odtBlob(d){
     const cg=t.querySelector(":scope > colgroup");
     const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
     const tProz=tabelleBreiteProz(t),tBreite=textbreiteMm*tProz/100;
-    const tn=stilName("table","Tab",`<style:table-properties style:width="${odfZahl(tBreite)}mm" table:align="${tProz<99.5?"left":"margins"}"${umbruch?' fo:break-before="page"':""}/>`);
+    const tEin=tabelleEinzugPt(t);
+    const tn=stilName("table","Tab",`<style:table-properties style:width="${odfZahl(tBreite)}mm" table:align="${tProz<99.5||tEin?"left":"margins"}"${tEin?` fo:margin-left="${odfZahl(tEin)}pt"`:""}${umbruch?' fo:break-before="page"':""}/>`);
     umbruch=false;
     let x=`<table:table table:name="Tabelle${++zaehl.tabelle}" table:style-name="${tn}">`;
     for(let i=0;i<breite;i++){
@@ -13910,7 +13949,9 @@ async function rtfBlob(d){
     const cg=t.querySelector(":scope > colgroup");
     const proz=cg?[...cg.children].map(c=>parseFloat(c.style.width)||0):[];
     const ohne=t.getAttribute("data-rahmen")==="ohne";
-    const grenze=[];let x0=0;
+    /* Einzug: \trleft ist die linke Kante, die Zellgrenzen rücken mit */
+    const einTw=Math.round(tabelleEinzugPt(t)*20);
+    const grenze=[];let x0=einTw;
     const tabTw=textbreiteTw*tabelleBreiteProz(t)/100;
     for(let i=0;i<breite;i++){x0+=Math.round(proz[i]?tabTw*proz[i]/100:tabTw/breite);grenze.push(x0)}
     /* Zellformat: Rahmen je Seite mit Farbe, Schattierung (clcbpat) */
@@ -13927,7 +13968,7 @@ async function rtfBlob(d){
     const rahmenTw=ohne?"":"\\clbrdrt"+grau+"\\clbrdrl"+grau+"\\clbrdrb"+grau+"\\clbrdrr"+grau;
     let x="";
     for(let r=0;r<zeilen.length;r++){
-      let def="\\trowd\\trgaph108\\trleft0"+(umbruch?"":"")+(r<kopfZeilenZahl(zeilen)?"\\trhdr":"");
+      let def="\\trowd\\trgaph108\\trleft"+einTw+(umbruch?"":"")+(r<kopfZeilenZahl(zeilen)?"\\trhdr":"");
       for(let g=0;g<breite;g++){
         const z=raster[r][g]||{};
         def+=(z.cs>1&&!z.hor?"\\clmgf":"")+(z.hor?"\\clmrg":"")+(z.rs>1&&!z.ver?"\\clvmgf":"")+(z.ver?"\\clvmrg":"")+(z.td?zellRtf(z.td):rahmenTw)+"\\cellx"+grenze[g];
@@ -17257,6 +17298,14 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const tw=KIND(KIND(t,"tblPr"),"tblW"),twTyp=String(xattrN(tw,"type")||""),twW=parseInt(xattrN(tw,"w"),10)||0;
     const textBreiteTw=bild.breiteMm?bild.breiteMm*1440/25.4:0;
     const breiteProz=twTyp==="pct"&&twW>0?twW/50:textBreiteTw?(twTyp==="dxa"&&twW>0?twW:summe)/textBreiteTw*100:100;
+    /* Einzug: tblInd misst ab Word 2013 (Kompatibilität 15) bis zur Kante,
+       davor bis zum Zelltext — dann liegt die Kante um den linken
+       Zellabstand weiter links (ohne Angabe 108 Twips wie Words Vorgabe) */
+    const tPr=KIND(t,"tblPr"),ti=KIND(tPr,"tblInd"),cm=KIND(tPr,"tblCellMar");
+    const indTw=String(xattrN(ti,"type")||"dxa")==="dxa"?parseInt(xattrN(ti,"w"),10)||0:0;
+    const marEl=KIND(cm,"left")||KIND(cm,"start"),marTw=marEl?parseInt(xattrN(marEl,"w"),10)||0:108;
+    const jcT=String(xattrN(KIND(tPr,"jc"),"val")||"");
+    const kanteTw=/^(center|right|end)$/.test(jcT)?0:(z.kompat>=15?indTw:indTw-marTw);
     let r="<table\uE003>";
     /* senkrecht: Spalte → laufende Verbindung; alleSenkrecht hält jede fest */
     const senkrecht={},alleSenkrecht={};let zellNr=0;
@@ -17325,7 +17374,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
     const zs=tabelleZellStile(zellInfo,!docxTabelleMitRahmen(t,rahmenStile));
     return (r+"</table>").replace(/(\d+)/g,(m,nr)=>hoehe[nr]?' rowspan="'+hoehe[nr]+'"':"")
       .replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
-      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+tabelleKopf(breiteProz));
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+tabelleKopf(breiteProz,kanteTw/20));
   };
   let nachTabelle=false;
   docxBloecke(body).forEach(el=>{
@@ -18005,6 +18054,9 @@ function odtLesen(inhaltXml,stilXml,bilder){
     if(tp&&tp.getAttribute("table:align")!=="margins"){
       const rw=tp.getAttribute("style:rel-width"),w=odfPt(tp.getAttribute("style:width"));
       proz=rw&&/%$/.test(rw)?parseFloat(rw):w&&textbreitePt?w/textbreitePt*100:100}
+    /* Einzug: linker Rand der Tabelle, außer sie steht zentriert/rechts */
+    const tal=tp&&tp.getAttribute("table:align")||"margins";
+    const einPt=tp&&/^(left|margins)$/.test(tal)?odfPt(tp.getAttribute("fo:margin-left"))||0:0;
     const zellInfo=[];
     let r="<table\uE003>";
     const summe=spalten.reduce((a,b)=>a+b,0);
@@ -18036,7 +18088,7 @@ function odtLesen(inhaltXml,stilXml,bilder){
     zellInfo.forEach(z=>ZELL_SEITEN.forEach(s=>{if(randStandard(z.rand[s]))delete z.rand[s]}));
     const zs=tabelleZellStile(zellInfo,!rahmen);
     return (r+"</table>").replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
-      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+tabelleKopf(proz));
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+tabelleKopf(proz,einPt));
   };
 
   const bloecke=el=>[...el.children].forEach(x=>{
@@ -18579,7 +18631,7 @@ function wortSatz(absaetze,ctx){
     const zs=tabelleZellStile(zellInfo,ohneVorher);
     const proz=textBreite&&grenzen.length>1?(grenzen[grenzen.length-1]-grenzen[0])*25.4/1440/textBreite*100:100;
     r=r.replace(/\uE002(\d+)\uE002/g,(m,i)=>zellStilAttr(zs.stile[+i]))
-      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+(mitFormat?tabelleKopf(proz):""));
+      .replace("\uE003",(zs.ohne?' data-rahmen="ohne"':"")+(zs.stile.some(x=>/background|border/.test(x))?' data-wz="1"':"")+tabelleKopf(mitFormat?proz:100,grenzen.length?grenzen[0]/20:0));
     html+=r+"</table>";
     zeilen=[];zellen=[];zelleTeile=[];
   };
@@ -19662,8 +19714,11 @@ async function zipDokument(name,buf){
       const roh={map:{},n:0,genutzt:new Set(),
         rels:Object.fromEntries(wRelsListe(rel).map(r=>[r.id,r])),
         kommentare:wKommentare(await hol("word/comments.xml"))};
+      /* Kompatibilitätsstufe: bestimmt, wie Word den Tabelleneinzug misst */
+      const kompatXml=await hol("word/settings.xml");
+      const km=kompatXml&&/w:name="compatibilityMode"[^>]*w:val="(\d+)"/.exec(kompatXml);
       const erg=docxToHtml(xml,stil,num,
-        {fussnoten:docxFussnoten(fuss),endnoten:docxFussnoten(endn,"endnote"),bilder,breiteMm,thema,roh,
+        {kompat:km?+km[1]:12,fussnoten:docxFussnoten(fuss),endnoten:docxFussnoten(endn,"endnote"),bilder,breiteMm,thema,roh,
          randLinksMm:vorabFmt?vorabFmt.m[3]:25});
       if(!erg||!erg.html)return null;
       /* Kopf- und Fußzeile liegen je in einer eigenen Teildatei, auf die das
@@ -28298,8 +28353,8 @@ function settings(){
     ["zwi","Zwischenstände",'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5M12 7.5V12l3 2"/>']];
   if(!reiter.some(r=>r[0]===setTab))setTab="allg";
   const zeile=(titel,inhalt)=>`<div class="setrow"><label>${titel}</label><div class="ctl">${inhalt}</div></div>`;
-  const haken=(id,an,text)=>`<input type="checkbox" id="${id}" ${an?"checked":""} style="width:auto">
-      <span style="color:var(--ink-soft);font-size:12px;flex:1;text-align:left">${text}</span>`;
+  const option=(id,an,titel,text)=>`<label class="setopt"><input type="checkbox" id="${id}" ${an?"checked":""}>
+      <span class="setopt-t"><b>${titel}</b><span class="setopt-d">${text}</span></span></label>`;
   const allg=`
     <div class="setsec">${tr("Sprache")}</div>
     ${zeile(tr("Programm"),`<select id="sUiLang">${UI_LANGS.map(([v,n])=>
@@ -28310,12 +28365,12 @@ function settings(){
     ${zeile(tr("Farbschema"),`<button class="btn" id="sThemeBtn">${
       tr((THEMES.find(t=>t.k===s.theme)||THEMES[0]).n)} &hellip;</button>`)}
     <div class="setsec">${tr("Schreiben")}</div>
-    ${zeile(tr("Zeile beim Schreiben"),haken("sTw",s.typewriter!==false,tr("in der Fenstermitte halten")))}
-    ${zeile(tr("Leisten beim Schreiben"),haken("sDim",s.dimUi,tr("abblenden, solange du tippst")))}
+    ${option("sTw",s.typewriter!==false,tr("Zeile beim Schreiben"),tr("in der Fenstermitte halten"))}
+    ${option("sDim",s.dimUi,tr("Leisten beim Schreiben"),tr("abblenden, solange du tippst"))}
     <div class="setsec">${tr("Bearbeiten")}</div>
     ${zeile(tr("Maßeinheit"),`<select id="sUnit"><option value="mm" ${(s.unit||"mm")==="mm"?"selected":""}>${tr("Millimeter")}</option>
       <option value="in" ${s.unit==="in"?"selected":""}>${tr("Zoll")}</option></select>`)}
-    ${zeile(tr("Abbildungsverzeichnis"),haken("sTof",s.tofEnabled,tr("im Menü Einfügen anbieten")))}
+    ${option("sTof",s.tofEnabled,tr("Abbildungsverzeichnis"),tr("im Menü Einfügen anbieten"))}
     <div class="setsec">${tr("Autor")}</div>
     ${zeile(tr("Dein Name"),`<input type="text" id="sName" autocomplete="off" value="${esc(s.meinName||"")}" placeholder="${tr("Vorname Nachname")}">`)}
     <p class="setnote">${tr("Wird beim Export als PDF oder EPUB als Autor vorgeschlagen.")}</p>`;
@@ -28338,18 +28393,19 @@ function settings(){
       <span>${WORD_VORGABE.font} ${zahlText(WORD_VORGABE.size)} · ${tr("Zeilenabstand")} ${zahlText(WORD_VORGABE.lh)} · ${tr(FORMATS[WORD_VORGABE.fmt].n)}</span></div>`)}`;
   const autoc=`
     <div class="setsec">${tr("Beim Tippen")}</div>
-    ${zeile(tr("Anführungszeichen"),haken("acQuotes",a.quotes,tr("Gerade \" und ' werden zu typografischen Anführungszeichen")))}
-    ${zeile(tr("Gedankenstrich"),haken("acDash",a.dash,tr("Zwei Bindestriche (--) werden zum Gedankenstrich (–)")))}
-    ${zeile(tr("Großschreibung"),haken("acCap",a.cap,tr("Nach . ! ? beginnt der nächste Satz groß")))}
-    ${zeile(tr("Ausnahmen"),`<div style="flex:1;text-align:left">
-      ${(S.capAusnahmen||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:5px">${S.capAusnahmen.map((w,i)=>
-        `<button class="pill" data-acx="${i}" title="${tr("Entfernen")}">${esc(w)}. ✕</button>`).join("")}</div>`:""}
-      <span style="color:var(--ink-soft);font-size:12px;line-height:1.45">${tr("Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.")}</span></div>`)}
-    ${zeile(tr("Listen"),haken("acLists",a.lists,tr("„- “ oder „1. “ am Zeilenanfang beginnt eine Liste")))}
-    ${zeile(tr("Linien"),haken("acLinien",a.linien,tr("„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***")))}
-    <div class="setrow" style="border-bottom:none;padding-top:2px">
-      <label style="font-size:12px;color:var(--ink-soft);line-height:1.45">
-        ${tr("Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).")}</label></div>`;
+    ${option("acQuotes",a.quotes,tr("Anführungszeichen"),tr("Gerade \" und ' werden zu typografischen Anführungszeichen"))}
+    ${option("acDash",a.dash,tr("Gedankenstrich"),tr("Zwei Bindestriche (--) werden zum Gedankenstrich (–)"))}
+    <div class="setgrp">
+      ${option("acCap",a.cap,tr("Großschreibung"),tr("Nach . ! ? beginnt der nächste Satz groß"))}
+      <div class="setsub"><b>${tr("Ausnahmen")}</b>
+        <span class="setopt-d">${tr("Nach Abkürzungen wie „z. B.“ bleibt es klein. Machst du einen Großbuchstaben mit der Rücktaste oder Strg+Z wieder klein, merkt sich das Programm das Wort davor.")}</span>
+        ${(S.capAusnahmen||[]).length?`<div class="pills">${S.capAusnahmen.map((w,i)=>
+          `<button class="pill" data-acx="${i}" title="${tr("Entfernen")}">${esc(w)}. ✕</button>`).join("")}</div>`:""}
+      </div>
+    </div>
+    ${option("acLists",a.lists,tr("Listen"),tr("„- “ oder „1. “ am Zeilenanfang beginnt eine Liste"))}
+    ${option("acLinien",a.linien,tr("Linien"),tr("„---“ und Eingabe ergibt eine Linie, ebenso ___, === und ***"))}
+    <p class="setnote" style="margin-top:10px">${tr("Welche Anführungszeichen gesetzt werden, richtet sich nach der Sprache der Rechtschreibprüfung (Allgemein).")}</p>`;
   /* Seit 1.2 (Toms Durchsicht): erst erklären, dann einstellen. Ein Feld
      „Automatisch anlegen“ mit „Aus“ als erstem Eintrag statt eines
      unbeschrifteten Hakens neben der Liste; darunter der Kasten zum aktiven

@@ -203,6 +203,34 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Einstellungen: Ein/Aus-Zeilen wie in Words Optionen** (Tom: „sieht
+  etwas komisch und nach links gestaucht aus“, Wahl „A“): Kästchen vorn,
+  Titel fett, Erklärung darunter über die ganze Breite, die ganze Zeile
+  anklickbar. Vorher standen Kästchen und Satz zusammen in der 210 px
+  schmalen rechten Spalte, die Mitte blieb leer. Gilt für Autokorrektur und
+  die Haken unter Allgemein; Auswahllisten bleiben rechts. Die Ausnahmen der
+  Großschreibung stehen als Kasten direkt darunter und treten zurück, wenn
+  die Großschreibung aus ist. Keine neuen Texte.
+- **Tabelleneinzug wie in Word**: Im Goethe-Dokument stand die Tabelle
+  5,4 pt zu weit rechts. Word rückt Tabellen älterer Dateien um den
+  Zellabstand nach links, damit der Zelltext auf der Linie des
+  Fließtexts beginnt. Mit echtem Word geprüft: In Dateien mit
+  Kompatibilitätsstufe 15 (ab Word 2013) misst tblInd bis zur Kante,
+  davor bis zum Zelltext; PureQuills eigene .docx öffnet Word mit Stufe 12.
+  Neu als margin-left an der Tabelle (pt mit Zoom, auf 0,1 pt gerundet).
+  - Lesen: .doc und .rtf aus der linken Zellkante (rgdxaCenter[0] bzw.
+    \trleft), .odt aus fo:margin-left, .docx aus tblInd je nach
+    Kompatibilitätsstufe (settings.xml) und linkem Zellabstand.
+  - Schreiben: .docx mit tblInd plus Zellabstand und erstmals mit
+    tblCellMar — bis dahin hatten PureQuills Tabellen in Word nur 0,5 pt
+    Zellabstand. .odt mit fo:margin-left, .rtf mit \trleft samt
+    verschobenen Zellgrenzen.
+  Ergebnis Goethe, Zelltext Spalte 1/2/3: Word 70,9/250,6/315,6 pt,
+  PureQuill 71,6/250,5/315,2 (vorher 77,0/255,9/320,6). Die übrigen
+  0,7 pt in Spalte 1 sind der halbe Pixel der aufgerundeten Rahmenlinie.
+  Umlauf je 53/53 (neues Merkmal „Tabelleneinzug“). LibreOffices eigener
+  RTF-Export rechnet die halbe Rahmenbreite in \trleft ein (−99 statt −108),
+  LO-RTF deshalb 49/53.
 - **Tabstopps in Kopf- und Fußzeile wie in Word**: Die Seitenzahl der
   Goethe-Fußzeile stand 14 pt neben Words Stelle — PureQuill setzte den
   Teil nach dem Tab immer in die Mitte der Zeile, Word an den Stopp der
