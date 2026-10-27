@@ -203,6 +203,19 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Tabstopps in Kopf- und Fußzeile wie in Word**: Die Seitenzahl der
+  Goethe-Fußzeile stand 14 pt neben Words Stelle — PureQuill setzte den
+  Teil nach dem Tab immer in die Mitte der Zeile, Word an den Stopp der
+  Vorlage „Fußzeile“ (zentriert bei 8 cm). Neu `v.tabs` (wie data-tabs,
+  „c4536 r9540“ in Twips). Gelesen aus .docx (w:tabs samt Vorlagenkette,
+  „clear“), .doc (sprmPChgTabs, neu), .odt (style:tab-stops) und .rtf
+  (\tqc/\tqr/\tx); angezeigt und gedruckt an genau dieser Stelle; geschrieben
+  in .docx, .odt und .rtf — ODT und RTF schrieben in Kopf-/Fußzeilen bisher
+  gar keine Stopps, LibreOffice nahm dort die Standardstopps alle 1,25 cm.
+  Stopps, die der bisherigen Regel entsprechen (Mitte, rechter Rand), werden
+  nicht gemerkt, damit der Umlauf zeichengleich bleibt. Goethe: Seitenzahl
+  bei x = 295,4 pt, Word 295,6. Umlauf je 52/52 (neues Merkmal
+  „Fusszeile Tabstopps“, auch über LibreOffices .doc), Hilfe in 7 Sprachen.
 - **Druck bricht Tabellen wie Bildschirm und Word um**: Den echten Druckweg
   der Desktop-Fassung nachgebildet (paginate, stripScreenPagination,
   printFrame, setPrintPage, printToPDF mit den Optionen aus main.js) und

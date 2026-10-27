@@ -12127,7 +12127,7 @@ async function hfTeil(d,which,groesse){
      Vorlage „Kopfzeile“ — Mitte und rechter Rand —, damit Word die Zeile so
      setzt wie diese Anzeige (hfTabZeilen). */
   const zeilenH=hf.html!=null?String(hf.html).split("<br>"):null;
-  const tabs=`<w:tabs><w:tab w:val="center" w:pos="${mmToTwip(cw/2)}"/><w:tab w:val="right" w:pos="${mmToTwip(cw)}"/></w:tabs>`;
+  const tabs=`<w:tabs>${hfStopps(hf,cw).map(st=>`<w:tab w:val="${{l:"left",c:"center",r:"right",d:"decimal"}[st.a]}" w:pos="${mmToTwip(st.mm)}"/>`).join("")}</w:tabs>`;
   const abs=zeilen.map((zeile,i)=>{
     const vor=(hf.ty&&!fuss&&i===0?hf.ty:0)+(fuss&&i===0?zusatz:0);
     const nach=(hf.ty&&fuss&&i===zeilen.length-1?hf.ty:0)+(!fuss&&i===zeilen.length-1?zusatz:0);
@@ -13600,7 +13600,13 @@ async function odtBlob(d){
     const psLeer=(i,grund)=>{const em=!zeilen[i]&&zeilenHtml?hfLeerEm(zeilenHtml[i]):null;if(!em)return grund;
       const a=hfZeilenAlign(v,i);
       return hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${a==="left"?"start":a==="right"?"end":"center"}" fo:margin-bottom="0pt"/><style:text-properties fo:font-size="${odfZahl(Math.round(groesse*0.85*em*2)/2)}pt"/>`)};
-    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${psLeer(i,i?psZ(i):psErst)}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
+    /* Zeile mit Tab: dieselbe Zeilenvorlage samt Stopps (bis 2026-10-27 ohne —
+       LibreOffice nahm die Standardstopps alle 1,25 cm) */
+    const psTab=(i,n)=>{if(!String(zeilen[i]).includes("\t")||!/^PQ_Zeile_/.test(n))return n;const a=hfZeilenAlign(v,i);
+      return hfAutoName("paragraph",`<style:paragraph-properties fo:text-align="${a==="left"?"start":a==="right"?"end":"center"}" fo:margin-bottom="0pt"><style:tab-stops>`+
+        hfStopps(v,cw).map(st=>`<style:tab-stop style:position="${odfZahl(st.mm)}mm"${st.a==="c"?' style:type="center"':st.a==="r"||st.a==="d"?' style:type="right"':""}/>`).join("")+
+        `</style:tab-stops></style:paragraph-properties><style:text-properties fo:font-size="${odfZahl(groesse*0.85)}pt"/>`)};
+    return `<style:${elem}>`+bildAbsatz(vor)+(t.trim()?zeilen.map((z,i)=>`<text:p text:style-name="${psTab(i,psLeer(i,i?psZ(i):psErst))}">${zeileXml(zeilenHtml?zeilenHtml[i]:null,z)}</text:p>`).join(""):"")+bildAbsatz(nach)+`</style:${elem}>`;
   };
   const hfFertig={};
   for(const [w,e] of [["hdr","header"],["hdr2","header-left"],["hdr1","header-first"],["ftr","footer"],["ftr2","footer-left"],["ftr1","footer-first"]])hfFertig[w]=await hfXml(w,e);
@@ -14035,7 +14041,7 @@ async function rtfBlob(d){
     const zeile=z=>z.split(/(\{(?:seiten|pages|seite|page|titel|title|datum|date)\})/i).map(s=>
       /^\{(seiten|pages)\}$/i.test(s)?feld("NUMPAGES","1"):/^\{(seite|page)\}$/i.test(s)?feld("PAGE","1"):
       /^\{(titel|title)\}$/i.test(s)?feld("TITLE",tr(d.title)||""):/^\{(datum|date)\}$/i.test(s)?feld("DATE",new Date().toLocaleDateString()):txt(s)).join("");
-    return `{\\${ziel}`+bildAbs(teile.vor)+(t.trim()?t.split("\n").map((z,i)=>`\\pard\\plain${v.za?{left:"\\ql",right:"\\qr"}[hfZeilenAlign(v,i)]||"\\qc":q}${!i&&extra?"\\sb"+extra:""}\\f0\\fs${fs(groesse*0.85)} ${zeileFmt(zeilenHtml?zeilenHtml[i]:null,z)}\\par`).join(""):"")+bildAbs(teile.nach)+"}\n";
+    return `{\\${ziel}`+bildAbs(teile.vor)+(t.trim()?t.split("\n").map((z,i)=>`\\pard\\plain${z.includes("\t")?hfStopps(v,cw).map(st=>(st.a==="c"?"\\tqc":st.a==="l"?"":"\\tqr")+"\\tx"+tw(st.mm)).join(""):""}${v.za?{left:"\\ql",right:"\\qr"}[hfZeilenAlign(v,i)]||"\\qc":q}${!i&&extra?"\\sb"+extra:""}\\f0\\fs${fs(groesse*0.85)} ${zeileFmt(zeilenHtml?zeilenHtml[i]:null,z)}\\par`).join(""):"")+bildAbs(teile.nach)+"}\n";
   };
   const kopf=hfRtf("hdr",d.geradeAnders?"headerr":"header")+hfRtf("hdr2","headerl")+hfRtf("hdr1","headerf")+
     hfRtf("ftr",d.geradeAnders?"footerr":"footer")+hfRtf("ftr2","footerl")+hfRtf("ftr1","footerf");
@@ -15876,6 +15882,7 @@ function docxStile(xml){
       bdr:KIND(pPr,"pBdr")||null,
       gliederung:ol?parseInt(xattr(ol,"val"),10):null,
       jc:KIND(pPr,"jc")?String(xattr(KIND(pPr,"jc"),"val")||""):null,
+      tabs:KIND(pPr,"tabs")||null,
       standard:xattr(e,"default")==="1"
     };
   });
@@ -16191,6 +16198,17 @@ function docxHfVml(shape,f,spalteX){
   if(rv==="margin")return {b,h,x,yBlatt:f.m[0]+yOff};
   return {b,h,x,absatz:yOff};
 }
+/* Wirksame Tabstopps eines Absatzes: Vorlagenkette, dann direkt; „clear“
+   nimmt einen geerbten Stopp weg. Als Text wie data-tabs. */
+function docxTabsText(stile,id,direkt){
+  const t=new Map();
+  const nimm=el=>{if(!el)return;[...el.children].filter(x=>x.localName==="tab").forEach(x=>{
+    const pos=parseInt(xattrN(x,"pos"),10),v=String(xattrN(x,"val")||"left");if(!(pos>0))return;
+    if(v==="clear")t.delete(pos);else{const k={left:"l",start:"l",right:"r",end:"r",center:"c",decimal:"d"}[v];if(k)t.set(pos,k)}})};
+  if(stile)docxKette(stile,id).forEach(s=>nimm(s.tabs));
+  nimm(direkt);
+  return t.size?[...t].sort((p,q)=>p[0]-q[0]).map(([p,k])=>k+p).join(" "):null;
+}
 function docxHf(xml,zub){
   if(!xml)return null;
   const dom=new DOMParser().parseFromString(xml,"application/xml");
@@ -16200,7 +16218,7 @@ function docxHf(xml,zub){
   const cw=f.w-f.m[1]-f.m[3];
   const zeilen=[],zeilenH=[],zeilenA=[],bilder=[],offen=[];
   /* Text kann aus mehreren Zellen kommen; dann zählt die ganze Breite. */
-  let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false,formatiert=false;
+  let y=0,ty=null,align=null,spalte=null,textZellen=new Set(),bildImText=false,formatiert=false,tabsErst=null;
   const absatz=(p,x0,w0,zelle)=>{
     const pPr=KIND(p,"pPr"),sp=KIND(pPr,"spacing"),ind=KIND(pPr,"ind");
     y+=mmVonTwip(xattrN(sp,"before"));
@@ -16208,6 +16226,7 @@ function docxHf(xml,zub){
     const hz={out:"",basisPt:zub.basisPt,grundF:zub.grundF,formatiert:false};
     const t=docxHfAbsatz(p,hz),al=docxHfAusrichtung(p);
     if(hz.formatiert)formatiert=true;
+    if(tabsErst===null&&t.includes("\t"))tabsErst=docxTabsText(zub.stile,xattrN(KIND(pPr,"pStyle"),"val")||"",KIND(pPr,"tabs"))||"";
     const imText=[];
     for(const el of p.getElementsByTagName("*")){
       const n=el.localName;
@@ -16293,6 +16312,7 @@ function docxHf(xml,zub){
   if(!text.trim()&&!bilder.length)return null;
   const erg={on:true,text,align:align||"center"};
   const za=hfZaPacken(zeilenA,erg.align);if(za)erg.za=za;
+  {const tb=hfTabsMerken(tabsErst,cw);if(tb)erg.tabs=tb}
   if(formatiert)erg.html=zeilenH.join("<br>");
   if(bilder.length){
     erg.bilder=bilder.map(i=>{
@@ -16363,6 +16383,7 @@ function hfAusAbsaetzen(abs,f,fuss){
   if(!text.trim()&&!bilder.length&&!frei.length)return null;
   const erg={on:true,text,align:align==="justify"?"left":(align||"left")};
   const za=hfZaPacken(zeilenA,erg.align);if(za)erg.za=za;
+  {const mitTab=abs.find(a=>a.tabs&&String(a.text||"").includes("\t"));const tb=mitTab&&hfTabsMerken(mitTab.tabs,cw);if(tb)erg.tabs=tb}
   if(formatiert)erg.html=zeilenH.join("<br>");
   if(bilder.length||frei.length){
     const gesamt=y;
@@ -17484,6 +17505,12 @@ function odfAbsatzEig(pp){
   const bb=g("fo:break-before"),ba=g("fo:break-after");
   if(bb)o.umbVor=bb==="page";
   if(ba)o.umbNach=ba==="page";
+  /* Tabstopps (Lage ab dem Absatzrand) */
+  const ts=[...pp.children].find(c=>c.localName==="tab-stops");
+  if(ts){const l=[...ts.children].filter(c=>c.localName==="tab-stop").map(c=>{
+      const p=odfPt(c.getAttribute("style:position")),ty=c.getAttribute("style:type")||"left";
+      const k={left:"l",center:"c",right:"r",char:"d"}[ty]||"l";return p>0?k+Math.round(p*20):""}).filter(Boolean);
+    if(l.length)o.tabs=l.join(" ")}
   return o;
 }
 /* Vorlagen, Listenvorlagen, Seitenlayouts und Schriftnamen einer Teildatei.
@@ -17578,7 +17605,7 @@ function odfHf(el,k,z){
     const abs=ps.map(p=>{
       const name=p.getAttribute("text:style-name"),pe=odfWirkP(k,name);
       const a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:pe.al==="center"?"center":pe.al==="right"?"right":"left",
-        vor:pe.mt?pe.mt*25.4/72:0,nach:pe.mb?pe.mb*25.4/72:0};
+        vor:pe.mt?pe.mt*25.4/72:0,nach:pe.mb?pe.mb*25.4/72:0,tabs:pe.tabs||null};
       const lauf=(n,w)=>[...n.childNodes].forEach(c=>{
         if(c.nodeType===3){const t=c.nodeValue.replace(/[\t\n\r]+/g," ");a.text+=t;a.html+=hfLaufHtml(t,w,z.basisPt,a,z.grundF);return}
         if(c.nodeType!==1)return;
@@ -18334,6 +18361,13 @@ function docPap(o,g){
       case 0x6649:o.itap=g[i]|(g[i+1]<<8)|(g[i+2]<<16)|(g[i+3]<<24);break;
       case 0x260A:o.ilvl=v;break;case 0x460B:o.ilfo=v2;break;case 0x2640:o.outLvl=v;break;
       case 0x2407:o.umbruch=!!v;break;
+      /* sprmPChgTabs: Stopps löschen, dann hinzufügen (Lage in Twips, Art in
+         den unteren drei Bits: 0 links, 1 Mitte, 2 rechts, 3 Dezimal, 4 Leiste) */
+      case 0xC60D:{const t=new Map(o.tabs||[]);let j=i+1;
+        const nDel=g[j++];for(let q=0;q<nDel;q++){t.delete((g[j]|(g[j+1]<<8))<<16>>16);j+=2}
+        const nAdd=g[j++],pos=[];for(let q=0;q<nAdd;q++){pos.push((g[j]|(g[j+1]<<8))<<16>>16);j+=2}
+        pos.forEach((p,q)=>{const jc=g[j+q]&7;if(jc<4)t.set(p,"lcrd"[jc]);else t.delete(p)});
+        o.tabs=t;break}
       case 0x3404:o.kopf=!!v;break;   /* sprmTTableHeader */
       /* Zeilenabstand (LSPD: Höhe, „mehrfach“-Merker) und Abstand danach */
       case 0x6412:o.zeile={dya:s2,mehrfach:(g[i+2]|(g[i+3]<<8))===1};break;
@@ -19048,7 +19082,8 @@ function docLesen(buf){
         const c=zch[cp],k=c.charCodeAt(0),fd=felder[felder.length-1];
         if(!a){const px=finde(papx,fcs[cp]);const pap=docPap({...stilPap(px?px.istd:0),tdef:null},px?px.g:leer);
           sc=stilChp(px?px.istd:0);
-          a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:ausrichtung(pap)||"left",vor:pap.vor>0?twipMm(pap.vor):0,nach:pap.nach>0?twipMm(pap.nach):0}}
+          a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:ausrichtung(pap)||"left",vor:pap.vor>0?twipMm(pap.vor):0,nach:pap.nach>0?twipMm(pap.nach):0,
+            tabs:pap.tabs&&pap.tabs.size?[...pap.tabs].sort((p,q)=>p[0]-q[0]).filter(([p])=>p>0).map(([p,k])=>k+p).join(" "):null}}
         const x=finde(chpx,fcs[cp]);const chp=x?docChp({...sc},x.g,sc,schriften):sc;
         if(chp.versteckt||chp.weg)continue;
         if(k===0x13){felder.push({befehl:"",phase:0});continue}
@@ -19365,7 +19400,9 @@ function rtfLesen(roh){
         case "s":setP("s",p);break;
         case "ql":setP("jc","");break;case "qc":setP("jc","center");break;case "qr":setP("jc","right");break;
         case "qj":case "qd":setP("jc","justify");break;
-        case "li":case "lin":setP("li",p||0);break;case "fi":setP("fi",p||0);break;
+        case "li":case "lin":setP("li",p||0);break;
+        case "tqc":gs.tabArt="c";break;case "tqr":gs.tabArt="r";break;case "tqdec":gs.tabArt="d";break;
+        case "tx":if(p>0)setP("tabs",(st.pap.tabs?st.pap.tabs+" ":"")+(gs.tabArt||"l")+p);gs.tabArt=null;break;case "fi":setP("fi",p||0);break;
         case "intbl":setP("intbl",true);break;case "itap":setP("itap",p||0);break;
         case "ls":setP("ls",p||0);break;case "ilvl":setP("ilvl",p||0);break;
         case "pagebb":setP("umbruch",p!==0);break;
@@ -19550,7 +19587,7 @@ function rtfLesen(roh){
     const abs=gs.abs.map(ab=>{
       const jc=ab.pap.jc;
       const a={text:"",html:"",formatiert:false,bilder:[],anker:[],al:jc==="center"?"center":jc==="right"?"right":"left",
-        vor:ab.pap.sb>0?twipMm(ab.pap.sb):0,nach:ab.pap.sa>0?twipMm(ab.pap.sa):0};
+        vor:ab.pap.sb>0?twipMm(ab.pap.sb):0,nach:ab.pap.sa>0?twipMm(ab.pap.sa):0,tabs:ab.pap.tabs||null};
       ab.runs.forEach(r=>{
         if(r.bild){if(r.bild.uri)a.bilder.push({uri:r.bild.uri,b:r.bild.breiteMm,h:r.bild.hoeheMm});return}
         if(r.t==null)return;
@@ -19645,7 +19682,7 @@ async function zipDokument(name,buf){
            (word/_rels/header2.xml.rels), nicht an der des Dokuments. */
         const teilRel=await hol(ziel.replace(/([^/]+)$/,"_rels/$1.rels"));
         const bilderHf=await docxBildKarte(buf,teilRel);
-        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt,basisPt:(erg.size||S.settings.size||11)*0.85,grundF:erg.font||""});
+        erg[feld]=docxHf(await hol(ziel),{bilder:bilderHf,fmt:erg.fmt,basisPt:(erg.size||S.settings.size||11)*0.85,grundF:erg.font||"",stile:docxStile(stil).stile});
         if(erg[feld])hfRoh.push({feld,ziel,stand:wStand(erg[feld])});
       }
       erg.word=await wPaketBewahren(buf,xml,roh,erg,hfRoh);
@@ -22743,7 +22780,7 @@ function hfInhalt(v,page,total,forPrint){
     return String(v.html).split("<br>").map((z,i)=>{
       const g=hfZeileHeben(z);
       let h=hfText(g.html,page,total,forPrint,true);
-      if(h.includes("\t"))h=hfTabZeilen(h);
+      if(h.includes("\t"))h=hfTabZeilen(h,v.tabs?hfStopps(v):null);
       return hfZeileDiv(hfZeilenAlign(v,i),h,g.em);
     }).join("");
   }
@@ -22752,16 +22789,34 @@ function hfInhalt(v,page,total,forPrint){
     const zeilen=v.html!=null?String(v.html).split("<br>"):String(v.text||"").split("\n");
     return zeilen.map((z,i)=>{
       let h=v.html!=null?hfText(z,page,total,forPrint,true):hfText(z,page,total,forPrint);
-      if(h.includes("\t"))h=hfTabZeilen(h);
+      if(h.includes("\t"))h=hfTabZeilen(h,v.tabs?hfStopps(v):null);
       return `<div style="text-align:${hfZeilenAlign(v,i)}">${h||"<br>"}</div>`;
     }).join("");
   }
   let html=v.html!=null?hfText(v.html,page,total,forPrint,true)
     :hfText(v.text,page,total,forPrint).replace(/\n/g,"<br>");
   if(/<br>$/.test(html))html+="<br>";
-  return html.includes("\t")?hfTabZeilen(html):html;
+  return html.includes("\t")?hfTabZeilen(html,v.tabs?hfStopps(v):null):html;
 }
-function hfTabZeilen(html){
+/* Tabstopps der Kopf-/Fußzeile (2026-10-27, Goethe-Fußzeile: die Seitenzahl
+   stand 14 pt neben Words Stelle). v.tabs wie data-tabs im Text: Art und
+   Lage in Twips ab dem linken Rand der Zeile, „c4536 r9072“. Ohne Angabe
+   die bisherige Regel — Mitte und rechter Rand der Zeile —, die bei 16 cm
+   Textbreite mit Words Vorlage „Fußzeile“ zusammenfällt. */
+function hfStopps(v,cwMm){
+  const s=String(v&&v.tabs||"").split(/\s+/).map(x=>({a:x[0],mm:(parseInt(x.slice(1),10)||0)*TWIP_MM}))
+    .filter(x=>/^[lcrd]$/.test(x.a)&&x.mm>0).sort((p,q)=>p.mm-q.mm);
+  return s.length?s:[{a:"c",mm:cwMm/2},{a:"r",mm:cwMm}];
+}
+/* Gelesene Stopps nur behalten, wenn sie von der bisherigen Regel abweichen
+   — sonst bliebe der Umlauf nicht zeichengleich */
+function hfTabsMerken(tabs,cwMm){
+  if(!tabs)return null;
+  const s=hfStopps({tabs},cwMm);
+  const std=s.length===2&&s[0].a==="c"&&Math.abs(s[0].mm-cwMm/2)<0.6&&s[1].a==="r"&&Math.abs(s[1].mm-cwMm)<0.6;
+  return std?null:tabs;
+}
+function hfTabZeilen(html,stopps){
   const box=document.createElement("div");box.innerHTML=html;
   /* in Zeilen an den <br> der obersten Ebene */
   const zeilen=[[]];
@@ -22769,7 +22824,7 @@ function hfTabZeilen(html){
   const außen=d=>{const t=document.createElement("div");t.appendChild(d);return t.innerHTML};
   /* Eine Tab-Zeile ist ein Block: ein <br> davor oder danach ergäbe eine
      leere Zeile, die es in Word nicht gibt (Goethe-Fußzeile, 2026-10-26) */
-  const blockZ=z=>z.startsWith("<span class=\"hfzeile\">");
+  const blockZ=z=>z.startsWith("<span class=\"hfzeile\">")||z.startsWith("<span class=\"hfstz\"");
   return zeilen.map(knoten=>{
     const z=document.createElement("div");knoten.forEach(k=>z.appendChild(k));
     if(!z.textContent.includes("\t"))return z.innerHTML;
@@ -22780,6 +22835,12 @@ function hfTabZeilen(html){
     const teile=[];let ab=[z,0];
     for(const [k,i] of stellen){const r=document.createRange();r.setStart(...ab);r.setEnd(k,i);teile.push(außen(r.cloneContents()));ab=[k,i+1]}
     const r=document.createRange();r.setStart(...ab);r.setEnd(z,z.childNodes.length);teile.push(außen(r.cloneContents()));
+    /* Mit eigenen Stopps: jeder Teil an seinem Stopp, wie in Word; der
+       erste im Fluss trägt die Zeilenhöhe (dazu das Nullbreite-Leerzeichen) */
+    if(stopps){let letzt=0;
+      return '<span class="hfstz" style="display:block;position:relative;white-space:pre">&#8203;'+teile[0]+
+        teile.slice(1).map((t,k)=>{const st=stopps[k]||{a:"l",mm:(Math.floor(letzt/12.7)+1)*12.7};letzt=st.mm;
+          return '<span style="position:absolute;top:0;left:calc('+st.mm.toFixed(2)+'mm * var(--zoom,1));transform:translateX('+(st.a==="c"?"-50%":st.a==="l"?"0":"-100%")+')">'+t+'</span>'}).join("")+'</span>';}
     return `<span class="hfzeile"><span>${teile[0]}</span><span>${teile[1]||""}</span><span>${teile.slice(2).join(" ")}</span></span>`;
   }).reduce((out,z,i,alle)=>out+(i&&!blockZ(alle[i-1])&&!blockZ(z)?"<br>":"")+z,"");
 }
@@ -29034,7 +29095,7 @@ Word document come along and stay where they were in Word.</p>
 <p><b>Different first page</b> in the <b>Header and footer</b> dialog gives page 1 its own
 header and footer, as in Word — for a letterhead with the logo only on the first sheet, or a
 cover page without a header. They start out empty; the distances from the edge are shared.</p>
-<p>Inside the line, <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> and <kbd>U</kbd> work as in the text. Formatting and tabs from Word come along: the first tab jumps to the centre, the second to the right edge, as in Word's header style.</p>
+<p>Inside the line, <kbd>Ctrl</kbd>+<kbd>B</kbd>, <kbd>I</kbd> and <kbd>U</kbd> work as in the text. Formatting and tabs from Word come along: tab stops from Word, LibreOffice and RTF stay where they were set there. Without them the first tab jumps to the centre, the second to the right edge, as in Word's header style.</p>
 <p><b>Different odd and even pages</b> works the same way: pages 2, 4, 6 … get their own header and footer, for instance with the page number on the outside edge. A different first page takes precedence.</p>
 <p><kbd>Enter</kbd> starts a new line, <kbd>Shift</kbd>+<kbd>Enter</kbd> only breaks the line, <kbd>Tab</kbd> inserts a tab. To finish: <b>Close header and footer</b>, <kbd>Esc</kbd> or a double-click in the text.</p>`},
 
@@ -29671,7 +29732,7 @@ Word-Datei kommen mit und stehen dort, wo sie in Word standen.</p>
 <p><b>Erste Seite anders</b> im Dialog <b>Kopf- und Fußzeile</b> gibt Seite 1 eigene Kopf- und
 Fußzeilen, wie in Word — für einen Briefbogen mit Logo nur auf dem ersten Blatt oder ein
 Deckblatt ohne Kopfzeile. Sie beginnen leer; die Abstände zum Rand gelten für beide.</p>
-<p>In der Zeile wirken Fett, Kursiv und Unterstrichen mit denselben Tasten wie im Text. Formatierung und Tabulatoren aus Word kommen mit: der erste Tab springt zur Mitte, der zweite an den rechten Rand, wie in Words Kopfzeilen-Vorlage.</p>
+<p>In der Zeile wirken Fett, Kursiv und Unterstrichen mit denselben Tasten wie im Text. Formatierung und Tabulatoren aus Word kommen mit: Tabstopps aus Word, LibreOffice und RTF stehen an derselben Stelle wie dort. Ohne sie springt der erste Tab zur Mitte, der zweite an den rechten Rand, wie in Words Kopfzeilen-Vorlage.</p>
 <p><b>Gerade Seiten anders</b> arbeitet genauso: Seite 2, 4, 6 … bekommen eigene Kopf- und Fußzeilen, etwa mit der Seitenzahl jeweils außen. Eine eigene erste Seite geht vor.</p>
 <p><kbd>Eingabe</kbd> beginnt eine neue Zeile, <kbd>⇧</kbd>+<kbd>Eingabe</kbd> bricht nur um, <kbd>Tab</kbd> setzt einen Tabulator. Beenden: <b>Kopf- und Fußzeile schließen</b>, <kbd>Esc</kbd> oder ein Doppelklick in den Text.</p>`},
 
@@ -30332,7 +30393,7 @@ pie de un documento de Word se conservan y quedan donde estaban en Word.</p>
 página 1 su propio encabezado y pie, como en Word: para un papel con membrete y logotipo solo en
 la primera hoja o una portada sin encabezado. Empiezan vacíos; las distancias al borde son
 comunes.</p>
-<p>Dentro de la línea, negrita, cursiva y subrayado funcionan con las mismas teclas que en el texto. El formato y las tabulaciones de Word se conservan: la primera tabulación salta al centro y la segunda al margen derecho, como en el estilo de encabezado de Word.</p>
+<p>Dentro de la línea, negrita, cursiva y subrayado funcionan con las mismas teclas que en el texto. El formato y las tabulaciones de Word se conservan: las posiciones de tabulación de Word, LibreOffice y RTF quedan en el mismo sitio. Sin ellas, la primera tabulación salta al centro y la segunda al margen derecho, como en el estilo de encabezado de Word.</p>
 <p><b>Páginas pares e impares diferentes</b> funciona igual: las páginas 2, 4, 6… tienen su propio encabezado y pie, por ejemplo con el número de página en el borde exterior. Una primera página diferente tiene prioridad.</p>
 <p><kbd>Intro</kbd> empieza una línea nueva, <kbd>Mayús</kbd>+<kbd>Intro</kbd> solo salta de línea, <kbd>Tab</kbd> inserta una tabulación. Para terminar: <b>Cerrar encabezado y pie de página</b>, <kbd>Esc</kbd> o un doble clic en el texto.</p>`},
 
@@ -30987,7 +31048,7 @@ documento do Word vêm junto e ficam onde estavam no Word.</p>
 <p><b>Primeira página diferente</b>, na caixa <b>Cabeçalho e rodapé</b>, dá à página 1 seu
 próprio cabeçalho e rodapé, como no Word — para um papel timbrado com o logotipo só na primeira
 folha ou uma capa sem cabeçalho. Eles começam vazios; as distâncias da borda são as mesmas.</p>
-<p>Na linha, negrito, itálico e sublinhado funcionam com as mesmas teclas que no texto. A formatação e as tabulações do Word são mantidas: a primeira tabulação vai para o centro e a segunda para a margem direita, como no estilo de cabeçalho do Word.</p>
+<p>Na linha, negrito, itálico e sublinhado funcionam com as mesmas teclas que no texto. A formatação e as tabulações do Word são mantidas: as paradas de tabulação do Word, do LibreOffice e de RTF ficam na mesma posição. Sem elas, a primeira tabulação vai para o centro e a segunda para a margem direita, como no estilo de cabeçalho do Word.</p>
 <p><b>Páginas pares e ímpares diferentes</b> funciona do mesmo jeito: as páginas 2, 4, 6… têm cabeçalho e rodapé próprios, por exemplo com o número da página na borda externa. Uma primeira página diferente tem prioridade.</p>
 <p><kbd>Enter</kbd> começa uma nova linha, <kbd>Shift</kbd>+<kbd>Enter</kbd> só quebra a linha, <kbd>Tab</kbd> insere uma tabulação. Para terminar: <b>Fechar cabeçalho e rodapé</b>, <kbd>Esc</kbd> ou um clique duplo no texto.</p>`},
 
@@ -31656,7 +31717,7 @@ de page d'un document Word sont reprises et restent là où elles étaient dans 
 page 1 son propre en-tête et pied de page, comme dans Word — pour un papier à en-tête avec le
 logo sur la première feuille seulement, ou une page de garde sans en-tête. Ils sont vides au
 départ ; les distances au bord sont communes.</p>
-<p>Dans la ligne, gras, italique et souligné s'appliquent avec les mêmes touches que dans le texte. La mise en forme et les tabulations de Word sont conservées : la première tabulation va au centre, la seconde à la marge droite, comme dans le style d'en-tête de Word.</p>
+<p>Dans la ligne, gras, italique et souligné s'appliquent avec les mêmes touches que dans le texte. La mise en forme et les tabulations de Word sont conservées : les taquets de tabulation de Word, LibreOffice et RTF restent à la même place. Sans eux, la première tabulation va au centre, la seconde à la marge droite, comme dans le style d'en-tête de Word.</p>
 <p><b>Pages paires et impaires différentes</b> fonctionne de la même façon : les pages 2, 4, 6… ont leurs propres en-tête et pied de page, par exemple avec le numéro de page côté extérieur. Une première page différente a la priorité.</p>
 <p><kbd>Entrée</kbd> commence une nouvelle ligne, <kbd>Maj</kbd>+<kbd>Entrée</kbd> ne fait qu'un saut de ligne, <kbd>Tab</kbd> insère une tabulation. Pour terminer : <b>Fermer l'en-tête et le pied de page</b>, <kbd>Échap</kbd> ou un double-clic dans le texte.</p>`},
 
@@ -32317,7 +32378,7 @@ w Wordzie.</p>
 <p><b>Inna pierwsza strona</b> w oknie <b>Nagłówek i stopka</b> daje stronie 1 własny nagłówek
 i stopkę, jak w Wordzie — dla papieru firmowego z logo tylko na pierwszym arkuszu albo strony
 tytułowej bez nagłówka. Na początku są puste; odległości od krawędzi są wspólne.</p>
-<p>W wierszu pogrubienie, kursywa i podkreślenie działają tymi samymi klawiszami co w tekście. Formatowanie i tabulatory z Worda zostają: pierwszy tabulator przeskakuje na środek, drugi do prawej krawędzi, jak w stylu nagłówka Worda.</p>
+<p>W wierszu pogrubienie, kursywa i podkreślenie działają tymi samymi klawiszami co w tekście. Formatowanie i tabulatory z Worda zostają: pozycje tabulatorów z Worda, LibreOffice i RTF zostają w tym samym miejscu. Bez nich pierwszy tabulator przeskakuje na środek, drugi do prawej krawędzi, jak w stylu nagłówka Worda.</p>
 <p><b>Inne strony parzyste i nieparzyste</b> działa tak samo: strony 2, 4, 6… mają własny nagłówek i stopkę, np. z numerem strony przy zewnętrznej krawędzi. Inna pierwsza strona ma pierwszeństwo.</p>
 <p><kbd>Enter</kbd> zaczyna nową linię, <kbd>Shift</kbd>+<kbd>Enter</kbd> tylko łamie wiersz, <kbd>Tab</kbd> wstawia tabulator. Zakończenie: <b>Zamknij nagłówek i stopkę</b>, <kbd>Esc</kbd> albo dwukrotne kliknięcie w tekst.</p>`},
 
@@ -32970,7 +33031,7 @@ erano in Word.</p>
 pagina 1 intestazione e piè di pagina propri, come in Word — per una carta intestata con il logo
 solo sul primo foglio o una copertina senza intestazione. All'inizio sono vuoti; le distanze dal
 bordo sono comuni.</p>
-<p>Nella riga, grassetto, corsivo e sottolineato funzionano con gli stessi tasti del testo. Formattazione e tabulazioni di Word vengono mantenute: la prima tabulazione va al centro, la seconda al margine destro, come nello stile intestazione di Word.</p>
+<p>Nella riga, grassetto, corsivo e sottolineato funzionano con gli stessi tasti del testo. Formattazione e tabulazioni di Word vengono mantenute: le tabulazioni impostate in Word, LibreOffice e RTF restano nella stessa posizione. Senza di esse la prima tabulazione va al centro, la seconda al margine destro, come nello stile intestazione di Word.</p>
 <p><b>Pagine pari e dispari diverse</b> funziona allo stesso modo: le pagine 2, 4, 6… hanno intestazione e piè di pagina propri, per esempio con il numero di pagina sul bordo esterno. Una prima pagina diversa ha la precedenza.</p>
 <p><kbd>Invio</kbd> inizia una nuova riga, <kbd>Maiusc</kbd>+<kbd>Invio</kbd> va solo a capo, <kbd>Tab</kbd> inserisce una tabulazione. Per finire: <b>Chiudi intestazione e piè di pagina</b>, <kbd>Esc</kbd> o un doppio clic nel testo.</p>`},
 
