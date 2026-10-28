@@ -203,6 +203,11 @@ immer genau einen Commit, der sie anfasst.
 - **Handy: Symbolleiste zeigt, dass sie weitergeht** (Toms Wahl „A“): am
   Rand verblasst die Leiste mit „›“ bzw. „‹“, Antippen schiebt weiter; die
   Pfeile erscheinen nur, wo noch Symbole verborgen sind.
+- **Notizkarten auf Französisch und Spanisch: zwei gleiche Knöpfe**: „lösen“
+  (nur die Textstelle trennen) und „löschen“ (Notiz weg) hießen dort beide
+  „supprimer“ bzw. „eliminar“. Jetzt „détacher“ und „desvincular“; dazu
+  „1 endroit“ statt „1 emplacement“, das in der Kartenzeile umbrach.
+  Aufgefallen bei den neuen Store-Bildern.
 - **Tabellenvorlage: „Erste Spalte hervorheben“ wie in Word** (Tom fragte,
   ob die Kopfzeile fetter oder größer sein sollte): Word setzt die Kopfzeile
   seiner Vorlagen fett (auf Farbe weiß), aber nicht größer — so war es hier
