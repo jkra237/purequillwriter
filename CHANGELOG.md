@@ -70,13 +70,16 @@ immer genau einen Commit, der sie anfasst.
 
 ### Offen, noch nicht entschieden
 
+Derzeit nichts.
 
-- **`Store-Texte-PartnerCenter.txt` ist nicht auf dem Stand des Eingetragenen.**
-  Beim Ausfüllen am 2026-10-02 geändert, in der Datei nicht nachgezogen:
-  (1) Suchbegriffe — `docx` und `odt` ersetzen je zwei schwache Begriffe;
-  fremde Marken wie „Word" oder „OpenOffice" wurden bewusst **nicht**
-  genommen, die sind in Suchbegriffen ein Ablehnungsgrund.
-  (2) „Neuigkeiten" als Aufzählung statt Fließtext.
+---
+
+## 1.5.0 — 2026-10-28
+
+Gebaut aus `3142a8e` (Versions-Commit `1ce1679` plus die Übersetzung der
+Notizkarten-Knöpfe). Browser-Fassung, Linux-Pakete und Website am
+2026-10-28 live, am selben Tag im Store freigegeben. Store-Texte,
+Bildunterschriften und Bilder dazu neu (suvantra-site dd24e52, 3940897).
 
 ### Behoben (Tabellen und Kopfzeilen wie in Word)
 
