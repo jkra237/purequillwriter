@@ -74,6 +74,27 @@ Derzeit nichts.
 
 ### Neu
 
+- **„Alle Befehle“ überarbeitet** (Toms Wahl „alles“): Vorher fehlten
+  Rechtschreibprüfung, Schreibziel, Wortwiederholungen, Text bereinigen,
+  Hilfe, Unterschrift und „Speichern als“ ganz, die Namen wichen von den
+  Menüs ab („Als PDF exportieren“), leer geöffnet standen die ersten 40 von
+  112 Einträgen in Code-Reihenfolge da (17 davon „Schema: …“), und die
+  Suche fand „odt“ in „Fokusmodus umschalten“, weil sie verstreute
+  Buchstaben gelten ließ. Jetzt:
+  - Leer geöffnet oben „Zuletzt benutzt“ (fünf, `S.befehleZuletzt`), darunter
+    alles nach den Menüs gruppiert: Datei, Bearbeiten, Einfügen, Format,
+    Ansicht, Tools, Notizen, Glossar.
+  - Namen wie im Menü, darunter klein der Menüpfad, wo er mehr sagt als die
+    Gruppe („Datei › Speichern als“ bei „PDF-Dokument“).
+  - 123 Befehle; lange Unterlisten (Farbschemata, Zeilenabstände, Notizen,
+    Glossarbegriffe, zuletzt verwendete Dateien, andere Reiter) erscheinen
+    nur beim Suchen.
+  - Suche über Name, Suchwörter (deutsch und englisch, z. B. „dunkel“,
+    „export“, „spell“) und Pfad; Treffer am Namensanfang zuerst, mehrere
+    Wörter müssen alle treffen, der getroffene Teil fett. `befehlTreffer`
+    ersetzt `fuzzy`.
+  - Schalter zeigen „an“/„aus“, Fußzeile mit der Tastenbedienung, die Liste
+    hat eine feste Höhe, damit das Fenster beim Tippen nicht springt.
 - **Zuletzt verwendet** (Tom, wie Word und LibreOffice): Dateien, die man
   geöffnet oder gespeichert hat, stehen im Startfenster (alle Reiter
   geschlossen) und unter Datei › Zuletzt verwendet ›. Das Startfenster wird

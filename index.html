@@ -1986,6 +1986,20 @@ body.typing .topbar,body.typing .rail,body.typing .tools,body.typing .status{opa
 .kbd{font-family:var(--mono);font-size:11px;color:var(--ink-soft);
   border:1px solid var(--rule);border-radius:3px;padding:1px 6px;white-space:nowrap}
 .hintk{font-family:var(--mono);font-size:11px;color:var(--ink-soft)}
+/* Alle Befehle: Gruppen wie die Menüs, Pfad unter dem Treffer, Zustand der Schalter */
+.modal.befehle{width:min(560px,94vw)}
+.befehle .befsuche{padding-bottom:10px}
+.befehle .cmdlist{height:min(56vh,440px);max-height:none;border-top:1px solid var(--rule)}
+.befehle .cmd{border-bottom:0;padding:7px 16px;gap:10px}
+.befehle .cmd .lab{display:flex;flex-direction:column;gap:1px}
+.befehle .cmd .lab b{font-weight:600;color:var(--ink)}
+.befname{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.befehle .cmd .lab small{font-size:11.5px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis}
+.befgrp{padding:12px 16px 4px;font:600 11px/1 var(--ui);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-soft)}
+.befan{font-size:11px;line-height:1;padding:3px 7px;border-radius:99px;border:1px solid var(--rule);color:var(--ink-soft);flex:none}
+.befan.an{border-color:color-mix(in srgb,var(--ok) 60%,transparent);color:var(--ok)}
+.befleer{padding:16px;color:var(--ink-soft)}
+.beffuss{padding:8px 16px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-soft)}
 .hist{max-height:340px;overflow:auto}
 /* Fließtext („wiederherstellen", „Noch keine gesicherten Stände.") in der
    Oberflächenschrift, nur der Zeitstempel mit der Wortzahl bleibt monospace. */
@@ -3228,6 +3242,9 @@ en:{
   "Word-Dokument":"Word document",
   "Einstellungen&hellip;":"Settings&hellip;",
   "Alle Befehle":"All commands",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Search commands – e.g. “pdf”, “dark”, “spelling”",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ select · Enter run · Esc close",
+  "Zuletzt benutzt":"Recently used",
   "Hilfe":"Help",
   "Jetzt schreiben":"Write now",
   "Alles sichern":"Save everything",
@@ -4251,6 +4268,9 @@ fr:{
   "Word-Dokument":"Document Word",
   "Einstellungen&hellip;":"Paramètres&hellip;",
   "Alle Befehle":"Toutes les commandes",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Rechercher une commande – p. ex. « pdf », « sombre », « orthographe »",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ choisir · Entrée exécuter · Échap fermer",
+  "Zuletzt benutzt":"Utilisées récemment",
   "Hilfe":"Aide",
   "Jetzt schreiben":"Écrire maintenant",
   "Alles sichern":"Tout enregistrer",
@@ -5274,6 +5294,9 @@ es:{
   "Word-Dokument":"Documento Word",
   "Einstellungen&hellip;":"Configuración&hellip;",
   "Alle Befehle":"Todos los comandos",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Buscar comando: p. ej., «pdf», «oscuro», «ortografía»",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ elegir · Intro ejecutar · Esc cerrar",
+  "Zuletzt benutzt":"Usados recientemente",
   "Hilfe":"Ayuda",
   "Jetzt schreiben":"Escribir ahora",
   "Alles sichern":"Guardar todo",
@@ -6297,6 +6320,9 @@ pt:{
   "Word-Dokument":"Documento Word",
   "Einstellungen&hellip;":"Configurações&hellip;",
   "Alle Befehle":"Todos os comandos",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Buscar comando – p. ex. “pdf”, “escuro”, “ortografia”",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ escolher · Enter executar · Esc fechar",
+  "Zuletzt benutzt":"Usados recentemente",
   "Hilfe":"Ajuda",
   "Jetzt schreiben":"Gravar agora",
   "Alles sichern":"Salvar tudo",
@@ -7320,6 +7346,9 @@ pl:{
   "Word-Dokument":"Dokument Word",
   "Einstellungen&hellip;":"Ustawienia&hellip;",
   "Alle Befehle":"Wszystkie polecenia",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Szukaj polecenia – np. „pdf”, „ciemny”, „pisownia”",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ wybierz · Enter wykonaj · Esc zamknij",
+  "Zuletzt benutzt":"Ostatnio używane",
   "Hilfe":"Pomoc",
   "Jetzt schreiben":"Zapisz teraz",
   "Alles sichern":"Zapisz wszystko",
@@ -8350,6 +8379,9 @@ it:{
   "Word-Dokument":"Documento Word",
   "Einstellungen&hellip;":"Impostazioni&hellip;",
   "Alle Befehle":"Tutti i comandi",
+  "Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“":"Cerca un comando – es. «pdf», «scuro», «ortografia»",
+  "↑↓ wählen · Enter ausführen · Esc schließen":"↑↓ scegli · Invio esegui · Esc chiudi",
+  "Zuletzt benutzt":"Usati di recente",
   "Hilfe":"Aiuto",
   "Jetzt schreiben":"Scrivi ora",
   "Alles sichern":"Salva tutto",
@@ -9176,6 +9208,7 @@ if(!S.notes){
 S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
 if(!Array.isArray(S.zuletzt))S.zuletzt=[];
+if(!Array.isArray(S.befehleZuletzt))S.befehleZuletzt=[];
 if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
 if(S.settings&&(!S.settings.listStil||typeof S.settings.listStil!=="object"))S.settings.listStil={ul:"",ol:""};
@@ -12212,163 +12245,243 @@ function importGloss(dateiname,liste,ziel){
 }
 
 /* ---- Kommandopalette ---- */
+/* ================= Alle Befehle =================
+   Überarbeitet 2026-10-31 (Tom). Vorher fehlten Rechtschreibung, Schreibziel,
+   Wortwiederholungen, Hilfe und „Speichern als“ ganz; die Namen wichen von
+   den Menüs ab („Als PDF exportieren“), leer geöffnet standen die ersten 40
+   von 112 Einträgen in Code-Reihenfolge da (17 davon „Schema: …“), und die
+   Suche fand „odt“ in „Fokusmodus umschalten“, weil die Buchstaben darin
+   verstreut vorkommen.
+   Jetzt: Namen und Gruppen wie in den Menüs, darunter der Menüpfad; jeder
+   Befehl hat Suchwörter (deutsch und englisch, unübersetzt — sie helfen in
+   jeder Oberflächensprache); Schalter zeigen „an“/„aus“; lange Unterlisten
+   (Farbschemata, Notizen, Dateien) erscheinen nur beim Suchen. Leer
+   geöffnet oben die fünf zuletzt benutzten Befehle (S.befehleZuletzt). */
+const ent=s=>String(s).replace(/&hellip;/g,"…").replace(/&amp;/g,"&");
+const BEARBEITEN=()=>PL("Bearbeiten","Edit","Édition","Edición","Editar","Edycja","Modifica");
 function commandList(){
-  const c=[];
-  /* Die Hinweise kommen aus kz() und sind damit schon uebersetzt und je
-     Fassung richtig. Die Ersetzung bleibt fuer die Handvoll geerbter
-     Browserkuerzel (Strg Z/Y), die nicht in KUERZEL stehen, weil
-     das Programm sie nicht setzt. */
-  const add=(grp,label,hint,run)=>c.push({grp:tr(grp),label:tr(label),hint:hint?hint.replace(/Strg/,tr("Strg")):hint,run});
-  add("Ansicht","Schreiben",kz("ansSchr"),()=>setMode("write"));
-  add("Ansicht","Notizen",kz("ansNotiz"),()=>setMode("notes"));
-  add("Ansicht","Glossar",kz("ansGloss"),()=>setMode("gloss"));
-  add("Ansicht","Fokusmodus umschalten",kz("fokus"),()=>{document.body.classList.toggle("focus")});
-  add("Ansicht","Dokument-Memo",kz("memo"),toggleMemo);
-  add("Ansicht","Leseansicht",kz("lesen"),readView);
-  add("Ansicht","Druckvorschau",kz("vorschau"),printPreview);
-  add("Ansicht","Seitenränder umschalten","",()=>{S.guides=!S.guides;save();render()});
-  add("Ansicht","Farbschema wählen","",themeDialog);
-  THEMES.forEach(t=>add("Ansicht",tr("Schema: ")+tr(t.n),"",()=>{S.settings.theme=t.k;save();applyTheme()}));
-  add("Ansicht","Wörter zählen…","",()=>{
-    const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")});
-  add("Ansicht","Seitenzahlen umschalten","",()=>{S.pagenum=S.pagenum===false;save();
-    if(S.mode==="write")paginate()});
-  add("Ansicht","Vergrößern",kz("zoomAuf"),()=>setZoom(S.zoom+.1));
-  add("Ansicht","Verkleinern",kz("zoomAb"),()=>setZoom(S.zoom-.1));
-  add("Ansicht","Seitenbreite einpassen",kz("einpassen"),toggleFitPage);
+  const c=[],D=tr("Datei"),E=EINFUEGEN_MENU(),F=tr("Format"),A=tr("Ansicht"),T=tr("Tools"),
+    N=tr("Notizen"),G=tr("Glossar"),B=BEARBEITEN();
+  /* id aus den deutschen Quelltexten: bleibt beim Sprachwechsel gleich */
+  const add=(grp,id,label,o={})=>c.push({grp,id,label:ent(label),pfad:o.pfad||grp,hint:o.k||"",
+    such:o.such||"",an:o.an,nurSuche:!!o.nurSuche,run:o.run});
+  const imText=fn=>()=>{if(S.mode!=="write")setMode("write");setTimeout(fn,40)};
+  const fmt=fn=>()=>formatAct(fn);
 
-  const fmtCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
-    if(S.mode!=="write")setMode("write");
-    const ed=$("#editor");if(ed)ed.focus();fn();dirty=true;queuePaginate();drawStatus()});
-  fmtCmd("Fett",kz("fett"),()=>document.execCommand("bold"));
-  fmtCmd("Kursiv",kz("kursiv"),()=>document.execCommand("italic"));
-  fmtCmd("Unterstrichen",kz("unter"),()=>document.execCommand("underline"));
-  fmtCmd("Durchgestrichen","",()=>document.execCommand("strikeThrough"));
-  fmtCmd("Fließtext","",fliesstext);
-  fmtCmd("Titel","",()=>blockAnwenden("titel"));
-  fmtCmd("Untertitel","",()=>blockAnwenden("untertitel"));
-  [1,2,3,4].forEach(n=>fmtCmd("Überschrift "+n,"",()=>blockAnwenden("h"+n)));
-  fmtCmd("Aufzählung","",()=>listeUmschalten("insertUnorderedList"));
-  fmtCmd("Nummerierung","",()=>listeUmschalten("insertOrderedList"));
-  const blockCmd=(label,hint,fn)=>add("Format",label,hint,()=>{
-    if(S.mode!=="write"){setMode("write");setTimeout(fn,40)}else fn()});
-  blockCmd("Einrücken","Tab",()=>indentBlocks(1));
-  blockCmd("Ausrücken","⇧ Tab",()=>indentBlocks(-1));
-  fmtCmd("Linksbündig",kz("links"),()=>document.execCommand("justifyLeft"));
-  fmtCmd("Zentriert",kz("mitte"),()=>document.execCommand("justifyCenter"));
-  fmtCmd("Bild einfügen","",pickImage);
-  fmtCmd("Suchen",kz("suchen"),()=>fdOpen(false));
-  fmtCmd("Suchen und ersetzen",kz("ersetzen"),()=>fdOpen(true));
-  fmtCmd("Rechtsbündig",kz("rechts"),()=>document.execCommand("justifyRight"));
-  fmtCmd("Blocksatz",kz("blocksatz"),()=>document.execCommand("justifyFull"));
-  fmtCmd("Link einfügen oder bearbeiten…",kz("link"),linkDialog);
-  fmtCmd("Seitenumbruch einfügen",kz("umbruch"),insertPageBreak);
-  fmtCmd("Horizontale Linie","",()=>linieEinfuegen(""));
-  fmtCmd("Fußnote einfügen","",insertFootnote);
-  fmtCmd("Endnote einfügen","",insertEndnote);
-  fmtCmd("Inhaltsverzeichnis einfügen",kz("toc"),insertToc);
-  if(S.settings.tofEnabled)fmtCmd("Abbildungsverzeichnis einfügen","",insertTof);
-  fmtCmd("Formatierung entfernen","",formatierungEntfernen);
-  fmtCmd("Rückgängig","Strg Z",()=>document.execCommand("undo"));
-  fmtCmd("Wiederholen","Strg Y",()=>document.execCommand("redo"));
+  /* ---- Datei ---- */
+  add(D,"neu",tr("Neues Dokument&hellip;"),{k:kz("neuDok"),such:"neu new leer blank anlegen",run:newDocument});
+  add(D,"oeffnen",tr("Datei öffnen"),{k:kz("dateiAuf"),such:"öffnen open laden load docx doc odt rtf word",run:loadDocumentFile});
+  zlListe().forEach(z=>add(D,"zl:"+z.id,tr("Öffnen: ")+z.name,{pfad:D+" › "+ZL_TITEL(),nurSuche:true,
+    such:"zuletzt recent "+zlOrdner(z),run:()=>zlOeffnen(z.id)}));
+  add(D,"umbenennen",tr("Umbenennen")+"…",{such:"titel name rename",run:()=>renameTab(S.active)});
+  add(D,"duplizieren",tr("Duplizieren"),{such:"kopie copy duplicate",run:()=>dokDuplizieren(S.active)});
+  add(D,"seitenformat",tr("Seitenformat&hellip;"),{such:"papier a4 letter quer ränder margins page setup",run:changeFormat});
+  add(D,"drucken",tr("Drucken"),{k:kz("drucken"),such:"print drucker",
+    run:()=>{flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})}});
+  add(D,"schliessen",tr("Dokument schließen"),{k:kz("dokZu"),such:"close reiter tab",run:()=>closeDoc(S.active)});
+  const zw=D+" › "+tr("Zwischenstände");
+  add(D,"verlauf",tr("Versionsverlauf&hellip;"),{pfad:zw,such:"history versionen zurück wiederherstellen restore",run:history});
+  add(D,"stand",tr("Zwischenstand anlegen"),{pfad:zw,k:kz("stand"),such:"snapshot checkpoint",
+    run:()=>{commit();toast(tr("Zwischenstand angelegt"))}});
+  add(D,"autostand",tr("Automatisch"),{pfad:zw,an:!!S.settings.autosave,such:"zwischenstände automatisch autosave snapshots",
+    run:()=>{S.settings.autosave=!S.settings.autosave;save();resetTimer();drawStatus();
+      toast(tr(S.settings.autosave?"Zwischenstände an":"Zwischenstände aus"))}});
+  add(D,"speichern",SPEICHERN(),{k:kz("speichern"),such:"save sichern",run:speichern});
+  const sa=D+" › "+tr("Speichern als");
+  [["docw","Word-Dokument",".docx","word docx export",exportDoc],
+   ["odt","OpenDocument-Text",".odt","libreoffice openoffice odt export",exportOdt],
+   ["rtf","Rich Text Format",".rtf","rtf export",exportRtf],
+   ["pdf","PDF-Dokument",".pdf","pdf export drucken",exportPdf],
+   ["epub","E-Book",".epub","epub ebook kindle tolino export",exportEpub],
+   ["html","Webseite",".html","html web export",exportHtml],
+   ["md","Markdown",".md","markdown md export",exportMd],
+   ["txt","Nur Text",".txt","text txt export",exportTxt],
+   ["csv","Glossar als Tabelle",".csv","csv excel glossar export",exportCsv]]
+   .forEach(([id,lab,k,s,fn])=>add(D,"als:"+id,tr(lab),{pfad:sa,k,such:"speichern als save as "+s,run:fn}));
+  add(D,"ebook",tr("E-Book vorbereiten&hellip;"),{pfad:sa+" › "+tr("E-Book"),such:"epub ebook assistent kapitel buch",run:()=>ebookAssistent("epub")});
+  const as=D+" › "+tr("Alles sichern");
+  add(D,"sich:all",tr("Alles: Dokumente, Notizen, Glossare, Einstellungen"),{pfad:as,k:PQWEXT,such:"sichern backup alles",run:()=>saveBundle("all")});
+  add(D,"sich:doc",tr("Nur dieses Dokument mit seinen Notizen"),{pfad:as,k:PQWEXT,such:"sichern backup dokument",run:()=>saveBundle("doc")});
+  add(D,"sich:notes",tr("Nur Notizen und Glossare"),{pfad:as,k:PQWEXT,such:"sichern backup notizen glossar",run:()=>saveBundle("notes")});
+  add(D,"sich:laden",tr("Sicherung laden…"),{pfad:as,k:PQWEXT,such:"sicherung laden restore backup import",run:importJson});
+  add(D,"einstellungen",tr("Einstellungen&hellip;"),{such:"optionen settings preferences sprache language",run:settings});
+  add(D,"hilfe",tr("Hilfe"),{k:"F1",such:"help anleitung handbuch",run:()=>helpDialog()});
+  add(D,"ueber",tr("Über PureQuill Writer&hellip;"),{such:"about version",run:aboutDialog});
+  S.docs.filter(d=>d.id!==S.active).forEach(d=>add(D,"reiter:"+d.id,tr("Wechseln zu: ")+tr(d.title),
+    {nurSuche:true,such:"reiter tab wechseln switch",run:()=>{flush();S.active=d.id;if(S.mode!=="write")S.mode="write";save();render()}}));
 
-  add("Dokument","Neues Dokument mit Format",kz("neuDok"),newDocument);
-  add("Dokument","Dokument duplizieren","",()=>dokDuplizieren(S.active));
-  add("Dokument","Datei öffnen…",kz("dateiAuf"),loadDocumentFile);
-  add("Dokument","Seitenformat ändern","",changeFormat);
-  LINEHEIGHTS.forEach(([lab,v])=>add("Dokument",
-    tr("Zeilenabstand")+" "+(S.settings.uiLang==="en"?lab.replace(",","."):lab),"",()=>setLineHeight(v)));
-  PARSPACES.forEach(([lab,v])=>add("Dokument",
-    tr("Absatzabstand")+" "+tr(lab).toLowerCase(),"",()=>setParSpace(v)));
-  add("Dokument","Tabelle einfügen","",()=>{if(S.mode!=="write")setMode("write");setTimeout(tablePicker,40)});
-  add("Dokument","Kopf- und Fußzeile","",hfDialog);
-  add("Dokument","Spalten","",spaltenDialog);
-  add("Dokument","Dokument schließen",kz("dokZu"),()=>closeDoc(S.active));
-  S.docs.filter(d=>d.id!==S.active).forEach(d=>
-    add("Dokument",tr("Wechseln zu: ")+tr(d.title),"",()=>{flush();S.active=d.id;save();render()}));
-  add("Dokument",SPEICHERN(),kz("speichern"),speichern);
-  add("Dokument","Zwischenstand anlegen",kz("stand"),()=>{commit();toast(tr("Zwischenstand angelegt"))});
-  add("Dokument","Versionsverlauf","",history);
-  add("Dokument","Über PureQuill Writer","",aboutDialog);
-  add("Dokument","Drucken",kz("drucken"),()=>{flush();withPrintFootnotes(()=>{setPrintPage();setTimeout(()=>window.print(),60)})});
-  add("Dokument","Als TXT exportieren","",exportTxt);
-  add("Dokument","Als Markdown exportieren","",exportMd);
-  add("Dokument","Als Word-Dokument exportieren","",exportDoc);
-  add("Dokument","Als PDF exportieren","",exportPdf);
-  add("Dokument","Als EPUB exportieren","",exportEpub);
-  add("Dokument","Als HTML exportieren","",exportHtml);
+  /* ---- Bearbeiten (Symbolleiste) ---- */
+  add(B,"rueck",tr("Rückgängig"),{k:tr("Strg")+" Z",such:"undo zurück",run:fmt(()=>document.execCommand("undo"))});
+  add(B,"wieder",tr("Wiederholen"),{k:tr("Strg")+" Y",such:"redo",run:fmt(()=>document.execCommand("redo"))});
+  add(B,"suchen",tr("Suchen"),{k:kz("suchen"),such:"find search finden",run:imText(()=>fdOpen(false))});
+  add(B,"ersetzen",tr("Suchen und ersetzen"),{k:kz("ersetzen"),such:"replace find ersetzen",run:imText(()=>fdOpen(true))});
 
-  add("Notiz","Neue Notiz",kz("notiz"),()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")});
-  add("Notiz","Markierte Stelle mit Notiz verknüpfen",kz("notizHeft"),linkSelection);
-  add("Notiz","Notizen am Seitenrand umschalten","",()=>{S.showCol=!S.showCol;save();
-    if(S.mode==="write")drawAnchors()});
-  add("Notiz","Markierungen immer zeigen","",()=>{S.anchImmer=!S.anchImmer;save();
-    if(S.mode==="write")drawAnchors()});
+  /* ---- Einfügen ---- */
+  add(E,"bild",tr("Bild")+"…",{such:"bild image foto picture grafik",run:imText(pickImage)});
+  add(E,"tabelle",tr("Tabelle"),{such:"tabelle table",run:imText(()=>{const ed=$("#editor");if(ed)ed.focus();tablePicker()})});
+  add(E,"link",tr("Link")+"…",{k:kz("link"),such:"link url hyperlink verweis",run:imText(linkDialog)});
+  add(E,"umbruch",tr("Seitenumbruch"),{k:kz("umbruch"),such:"seitenumbruch page break neue seite",run:imText(insertPageBreak)});
+  add(E,"linie",tr("Horizontale Linie"),{such:"linie trennlinie horizontal line rule",run:imText(()=>linieEinfuegen(""))});
+  add(E,"fn",tr("Fußnote"),{such:"fußnote footnote anmerkung",run:imText(insertFootnote)});
+  add(E,"en",tr("Endnote"),{such:"endnote",run:imText(insertEndnote)});
+  add(E,"toc",tr("Inhaltsverzeichnis"),{k:kz("toc"),such:"inhaltsverzeichnis toc contents",run:imText(insertToc)});
+  if(S.settings.tofEnabled)add(E,"tof",tr("Abbildungsverzeichnis"),{such:"abbildungen figures",run:imText(insertTof)});
+  add(E,"hf",tr("Kopf- und Fußzeile"),{such:"kopfzeile fußzeile header footer",
+    run:imText(()=>{const d=doc();hfEditOpen(hfFuerSeite(d,"hdr",0),0)})});
+  add(E,"pnum",tr("Seitenzahlen")+"…",{such:"seitenzahl page number",run:imText(pageNumDialog)});
+
+  /* ---- Format ---- */
+  const ft=F+" › "+tr("Text");
+  [["bold","Fett","fett",kz("fett"),"bold"],["italic","Kursiv","kursiv",kz("kursiv"),"italic"],
+   ["underline","Unterstrichen","unter",kz("unter"),"underline"],["strikeThrough","Durchgestrichen","","","strike durchgestrichen"],
+   ["superscript","Hochgestellt","","","superscript hochgestellt"],["subscript","Tiefgestellt","","","subscript tiefgestellt"]]
+   .forEach(([cmd,lab,,k,s])=>add(F,"text:"+cmd,tr(lab),{pfad:ft,k,such:s,run:fmt(()=>document.execCommand(cmd))}));
+  const fa=F+" › "+tr("Absatzformat");
+  add(F,"fliess",tr("Fließtext"),{pfad:fa,such:"normal standard body text",run:fmt(fliesstext)});
+  add(F,"titel",tr("Titel"),{pfad:fa,such:"title",run:fmt(()=>blockAnwenden("titel"))});
+  add(F,"untertitel",tr("Untertitel"),{pfad:fa,such:"subtitle",run:fmt(()=>blockAnwenden("untertitel"))});
+  [1,2,3,4].forEach(n=>add(F,"h"+n,tr("Überschrift "+n),{pfad:fa,such:"heading überschrift h"+n,run:fmt(()=>blockAnwenden("h"+n))}));
+  const fr=F+" › "+tr("Ausrichten und einrücken");
+  [["justifyLeft","Linksbündig",kz("links"),"left links"],["justifyCenter","Zentriert",kz("mitte"),"center mitte"],
+   ["justifyRight","Rechtsbündig",kz("rechts"),"right rechts"],["justifyFull","Blocksatz",kz("blocksatz"),"justify blocksatz"]]
+   .forEach(([cmd,lab,k,s])=>add(F,"al:"+cmd,tr(lab),{pfad:fr,k,such:"ausrichten align "+s,run:fmt(()=>document.execCommand(cmd))}));
+  add(F,"einr",tr("Einrücken"),{pfad:fr,k:"Tab",such:"indent einzug",run:fmt(()=>indentBlocks(1))});
+  add(F,"ausr",tr("Ausrücken"),{pfad:fr,k:"⇧ Tab",such:"outdent einzug",run:fmt(()=>indentBlocks(-1))});
+  const fz=F+" › "+tr("Zeilen- und Absatzabstand"),zahl=v=>{const t=v===1.15?"1.15":v.toFixed(1);return S.settings.uiLang==="en"?t:t.replace(".",",")};
+  ZAB_STUFEN.forEach(v=>add(F,"zab:"+v,tr("Zeilenabstand")+" "+zahl(v),{pfad:fz,nurSuche:true,such:"zeilenabstand line spacing",
+    run:()=>{const z=absatzZiele();if(!z.length){toast(tr("Zuerst in einen Absatz klicken."));return}zabTun(z,"z"+v)}}));
+  add(F,"absatz",tr("Absatz…"),{such:"absatz paragraph einzug abstand spacing indent",run:()=>absatzDialog(absatzZiele())});
+  add(F,"ul",tr("Aufzählung"),{such:"liste aufzählung bullets list",run:fmt(()=>listeUmschalten("insertUnorderedList"))});
+  add(F,"ol",tr("Nummerierung"),{such:"liste nummerierung numbered list",run:fmt(()=>listeUmschalten("insertOrderedList"))});
+  add(F,"spalten",tr("Spalten")+"…",{such:"spalten columns",run:spaltenDialog});
+  add(F,"clear",tr("Formatierung entfernen"),{such:"clear formatting zurücksetzen",run:fmt(formatierungEntfernen)});
+
+  /* ---- Ansicht ---- */
+  const sl=A;
+  add(A,"m:write",tr("Schreiben"),{k:kz("ansSchr"),such:"schreiben editor write",run:()=>setMode("write")});
+  add(A,"m:notes",tr("Notizen"),{k:kz("ansNotiz"),such:"notizen notes pinnwand",run:()=>setMode("notes")});
+  add(A,"m:gloss",tr("Glossar"),{k:kz("ansGloss"),such:"glossar glossary",run:()=>setMode("gloss")});
+  add(A,"guides",tr("Seitenränder"),{an:!!S.guides,such:"ränder margins hilfslinien guides",run:()=>{S.guides=!S.guides;save();if(S.mode==="write")paginate()}});
+  add(A,"outline",tr("Gliederung"),{k:kz("gliederung"),an:!!S.outlineOpen,such:"gliederung outline navigation überschriften",run:toggleOutline});
+  add(A,"col",tr("Notizen am Seitenrand"),{an:!!S.showCol,such:"notizen rand margin notes",run:()=>{S.showCol=!S.showCol;save();if(S.mode==="write")drawAnchors()}});
+  add(A,"amark",tr("Markierungen immer zeigen"),{an:!!S.anchImmer,such:"markierungen notizen highlight",run:()=>{S.anchImmer=!S.anchImmer;save();if(S.mode==="write")drawAnchors()}});
+  add(A,"focus",tr("Fokusmodus"),{k:kz("fokus"),an:document.body.classList.contains("focus"),such:"fokus focus ablenkungsfrei",run:()=>document.body.classList.toggle("focus")});
+  add(A,"fit",tr("Seitenbreite einpassen"),{k:kz("einpassen"),such:"einpassen fit zoom breite",run:toggleFitPage});
+  add(A,"zoomin",tr("Vergrößern"),{k:kz("zoomAuf"),such:"zoom größer",run:()=>setZoom(S.zoom+.1)});
+  add(A,"zoomout",tr("Verkleinern"),{k:kz("zoomAb"),such:"zoom kleiner",run:()=>setZoom(S.zoom-.1)});
+  add(A,"read",tr("Leseansicht"),{k:kz("lesen"),such:"lesen read",run:readView});
+  add(A,"pv",tr("Druckvorschau"),{k:kz("vorschau"),such:"druckvorschau print preview",run:printPreview});
+  add(A,"memo",tr("Dokument-Memo"),{k:kz("memo"),an:!!S.memoOpen,such:"memo notiz dokument",run:toggleMemo});
+  add(A,"theme",tr("Farbschema&hellip;"),{such:"farbe farbschema theme design hell dunkel dark light",run:themeDialog});
+  const hell=h=>{const m=h.match(/\w\w/g).map(x=>parseInt(x,16)/255);return .2126*m[0]+.7152*m[1]+.0722*m[2]>.45};
+  THEMES.forEach(t=>add(A,"schema:"+t.k,ent(tr("Farbschema&hellip;")).replace(/…$/,"")+": "+tr(t.n),{pfad:A+" › "+ent(tr("Farbschema&hellip;")).replace(/…$/,""),
+    nurSuche:true,an:S.settings.theme===t.k?true:undefined,
+    such:"farbschema theme "+(hell(t.c[0])?"hell light":"dunkel dark"),run:()=>{S.settings.theme=t.k;save();applyTheme()}}));
+  add(A,"marks",tr("Glossarbegriffe markieren"),{an:!!S.marks,such:"glossar begriffe markieren",
+    run:()=>{S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}}});
+  add(A,"dim",tr("Oberfläche ausblenden"),{an:!!S.settings.dimUi,such:"ausblenden hide ui ablenkung",
+    run:()=>{S.settings.dimUi=!S.settings.dimUi;save();if(!S.settings.dimUi)document.body.classList.remove("typing")}});
+  add(A,"pagenum",tr("Seitenzahlen"),{an:S.pagenum!==false,nurSuche:true,such:"seitenzahlen anzeigen page numbers",
+    run:()=>{S.pagenum=S.pagenum===false;save();if(S.mode==="write")paginate()}});
+  add(A,"typewriter",tr("Schreibmaschinen-Scrollen"),{an:S.settings.typewriter!==false,nurSuche:true,such:"schreibmaschine typewriter scrollen",
+    run:()=>{S.settings.typewriter=S.settings.typewriter===false;save();toast(tr(S.settings.typewriter?"Schreibmaschinen-Scrollen an":"aus"))}});
+
+  /* ---- Tools ---- */
+  add(T,"spell",tr("Rechtschreibprüfung&hellip;"),{k:spellLangName(S.settings.lang),such:"rechtschreibung spelling spell check korrektur fehler",
+    run:()=>{spellState="idle";spellDialog()}});
+  add(T,"clean",tr("Text bereinigen&hellip;"),{such:"bereinigen aufräumen leerzeichen leere absätze clean",run:cleanDialog});
+  add(T,"rep",tr("Wortwiederholungen")+"…",{such:"wiederholungen wortwiederholung repeated words dopplung",run:toggleRep});
+  add(T,"goal",tr("Schreibziel festlegen"),{an:!!(S.goal&&S.goal.on),such:"schreibziel ziel goal wortziel",run:goalDialog});
+  add(T,"count",tr("Wörter zählen"),{such:"wörter zählen word count zeichen statistik",
+    run:()=>{const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")}});
+  add(T,"sig",tr("Unterschrift hinzufügen&hellip;"),{such:"unterschrift signatur signature",run:imText(signatureDialog)});
+
+  /* ---- Notizen ---- */
+  add(N,"notiz",tr("Neue Notiz"),{k:kz("notiz"),such:"notiz note neu",run:()=>{const n=addNote("");setMode("notes");openNote(n.id,"titel")}});
+  add(N,"heften",tr("Markierte Stelle mit Notiz verknüpfen"),{k:kz("notizHeft"),such:"anheften verknüpfen kommentar comment",run:linkSelection});
   [["all","Alle"],["doc","Im ausgewählten Dokument"],["free","Ohne Verknüpfung"]].forEach(([k,n])=>
-    add("Notiz",tr("Pinnwand filtern: ")+tr(n),"",()=>{S.noteFilter=k;save();setMode("notes")}));
-  S.notes.slice(0,14).forEach(n=>{
+    add(N,"nf:"+k,tr("Pinnwand filtern: ")+tr(n),{nurSuche:true,an:S.noteFilter===k?true:undefined,such:"filter pinnwand",
+      run:()=>{S.noteFilter=k;save();setMode("notes")}}));
+  S.notes.forEach(n=>{
     const raw=n.title||noteText(n).trim()||"Leere Notiz";
     const disp=(raw==="Leere Notiz"?tr("Leere Notiz"):raw).slice(0,44);
-    add("Notiz",tr("Öffnen: ")+disp,"",()=>{setMode("notes");openNote(n.id)})});
+    add(N,"no:"+n.id,tr("Öffnen: ")+disp,{nurSuche:true,such:"notiz öffnen "+noteText(n).slice(0,200),run:()=>{setMode("notes");openNote(n.id)}})});
 
-  add("Glossar","Nachschlagen",kz("glossSuch"),glossSearch);
-  add("Glossar","Neuer Eintrag","",()=>{setMode("gloss");setTimeout(()=>openGForm(null),40)});
-  add("Glossar","Neues Glossar anlegen","",()=>{setMode("gloss");newGlossColl()});
-  add("Glossar",S.marks?"Begriffe im Text nicht markieren":"Begriffe im Text markieren","",()=>{
-    S.marks=!S.marks;save();if(S.mode==="write"){S.marks?markTerms():unmark();drawTools()}});
-  add("Glossar","Importieren / Exportieren","",()=>{setMode("gloss");setTimeout(glossIO,40)});
-  add("Glossar","Als CSV exportieren","",exportCsv);
-  if(S.glossaries.length>1)S.glossaries.filter(c=>c.id!==doc().glossaryId).forEach(coll=>
-    add("Glossar",tr("Für dieses Dokument verwenden")+": "+tr(coll.name),"",()=>{
+  /* ---- Glossar ---- */
+  add(G,"nach",tr("Nachschlagen"),{k:kz("glossSuch"),such:"nachschlagen lookup",run:glossSearch});
+  add(G,"neuG",tr("Neuer Eintrag"),{such:"begriff eintrag term",run:()=>{setMode("gloss");setTimeout(()=>openGForm(null),40)}});
+  add(G,"neuColl",tr("Neues Glossar anlegen"),{such:"glossar neu",run:()=>{setMode("gloss");newGlossColl()}});
+  add(G,"io",tr("Importieren / Exportieren"),{such:"import export csv",run:()=>{setMode("gloss");setTimeout(glossIO,40)}});
+  if(S.glossaries.length>1)S.glossaries.filter(x=>x.id!==doc().glossaryId).forEach(coll=>
+    add(G,"gv:"+coll.id,tr("Für dieses Dokument verwenden")+": "+tr(coll.name),{nurSuche:true,such:"glossar zuordnen",run:()=>{
       doc().glossaryId=coll.id;setGView(coll.id);commit();render();
-      toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(coll.name)+"“")}));
-  S.glossary.filter(g=>g.gid===doc().glossaryId).slice(0,14).forEach(g=>
-    add("Glossar",tr("Einfügen: ")+g.term,"",()=>{
+      toast(tr("Dieses Dokument benutzt jetzt")+" „"+tr(coll.name)+"“")}}));
+  S.glossary.filter(g=>g.gid===doc().glossaryId).forEach(g=>
+    add(G,"ge:"+g.id,tr("Einfügen: ")+g.term,{nurSuche:true,such:"begriff einfügen insert",run:()=>{
       if(S.mode!=="write")setMode("write");
-      const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,g.term);dirty=true;drawStatus()}}));
-
-  add("Einstellungen","Einstellungen öffnen","",settings);
-  add("Einstellungen","Sicherung laden…","",importJson);
-  add("Einstellungen",S.settings.typewriter===false?"Schreibmaschinen-Scrollen einschalten":"Schreibmaschinen-Scrollen ausschalten","",
-    ()=>{S.settings.typewriter=S.settings.typewriter===false;save();
-      toast(tr(S.settings.typewriter?"Schreibmaschinen-Scrollen an":"aus"))});
-  add("Einstellungen",S.settings.dimUi?"Oberfläche immer sichtbar lassen":"Oberfläche beim Schreiben ausblenden","",
-    ()=>{S.settings.dimUi=!S.settings.dimUi;save();
-      if(!S.settings.dimUi)document.body.classList.remove("typing")});
-  add("Einstellungen",S.settings.autosave?"Zwischenstände ausschalten":"Zwischenstände einschalten","",()=>{
-    S.settings.autosave=!S.settings.autosave;save();resetTimer();drawStatus();
-    toast(tr(S.settings.autosave?"Zwischenstände an":"Zwischenstände aus"))});
-  add("Dokument","Dieses Dokument mit Notizen sichern","",()=>saveBundle("doc"));
-  add("Einstellungen","Nur Notizen und Glossare sichern","",()=>saveBundle("notes"));
-  add("Einstellungen","Alles sichern — Dokumente, Notizen, Glossare, Einstellungen","",()=>saveBundle("all"));
+      const ed=$("#editor");if(ed){ed.focus();document.execCommand("insertText",false,g.term);dirty=true;drawStatus()}}}));
   return c;
 }
-function fuzzy(q,s){
-  s=s.toLowerCase();q=q.toLowerCase();
-  if(!q)return 0;
-  const i=s.indexOf(q);if(i>=0)return 100-i;
-  let p=0;for(const ch of q){p=s.indexOf(ch,p);if(p<0)return -1;p++}
-  return 10;
+/* Treffer zuerst am Anfang des Namens, dann am Wortanfang, dann irgendwo im
+   Namen, dann in Suchwörtern und Pfad. Mehrere Wörter müssen alle treffen.
+   Verstreute Buchstaben zählen nicht mehr — sie lieferten Unsinn. */
+function befehlTreffer(q,c){
+  const woerter=q.toLowerCase().split(/\s+/).filter(Boolean);if(!woerter.length)return 0;
+  const lab=c.label.toLowerCase(),rest=(c.such+" "+c.pfad+" "+c.grp).toLowerCase();
+  let summe=0;
+  for(const w of woerter){
+    const i=lab.indexOf(w);
+    if(i===0)summe+=300;
+    else if(i>0&&/[\s\-:(„"/›]/.test(lab[i-1]))summe+=200;
+    else if(i>0)summe+=120;
+    else{const j=rest.indexOf(w);if(j<0)return -1;summe+=(j===0||/[\s\-]/.test(rest[j-1]))?90:40}
+  }
+  return summe-(c.nurSuche?5:0);
+}
+function befehlMerken(c){
+  S.befehleZuletzt=[c.id,...(S.befehleZuletzt||[]).filter(x=>x!==c.id)].slice(0,5);save();
 }
 function palette(){
-  overlay(`<div class="modal"><h3>${tr("Befehl oder Suche")}</h3>
-    <div class="pad" style="padding-bottom:9px"><input id="pq" placeholder="${tr("Tippen, um zu filtern")}" autocomplete="off"></div>
-    <div class="cmdlist" id="pl"></div></div>`);
+  overlay(`<div class="modal befehle"><h3>${tr("Alle Befehle")}</h3>
+    <div class="pad befsuche"><input id="pq" type="search" placeholder="${esc(tr("Befehl suchen – z. B. „pdf“, „dunkel“, „Rechtschreibung“"))}" autocomplete="off" spellcheck="false"></div>
+    <div class="cmdlist" id="pl" role="listbox"></div>
+    <div class="beffuss">${esc(tr("↑↓ wählen · Enter ausführen · Esc schließen"))}</div></div>`);
   const all=commandList();let hits=[],idx=0;
   const q=$("#pq"),l=$("#pl");
+  /* Der Pfad steht unter dem Namen, wenn er mehr sagt als die Gruppe darüber
+     („Datei › Speichern als“ bei „PDF-Dokument“), bei Suchtreffern und unter
+     „Zuletzt benutzt“ immer */
+  const zeile=(c,i,v,mitPfad)=>{
+    let lab=esc(c.label);
+    const w=v&&v.toLowerCase().split(/\s+/).filter(Boolean)[0];
+    if(w){const p=c.label.toLowerCase().indexOf(w);
+      if(p>=0)lab=esc(c.label.slice(0,p))+"<b>"+esc(c.label.slice(p,p+w.length))+"</b>"+esc(c.label.slice(p+w.length))}
+    const zustand=c.an===undefined?"":`<span class="befan ${c.an?"an":""}">${tr(c.an?"an":"aus")}</span>`;
+    return `<div class="cmd ${i===idx?"on":""}" data-i="${i}" role="option">
+      <span class="lab"><span class="befname">${lab}</span>${v||mitPfad||c.pfad!==c.grp?`<small>${esc(c.pfad)}</small>`:""}</span>
+      ${zustand}${c.hint?`<span class="kbd">${esc(c.hint)}</span>`:""}</div>`;
+  };
   const paint=()=>{
-    const v=q.value.trim();
-    hits=(v?all.map(c=>({c,s:fuzzy(v,c.label+" "+c.grp)})).filter(x=>x.s>=0)
-            .sort((a,b)=>b.s-a.s).map(x=>x.c):all).slice(0,40);
-    idx=Math.min(idx,Math.max(0,hits.length-1));
-    l.innerHTML=hits.length?hits.map((c,i)=>
-      `<div class="cmd ${i===idx?"on":""}" data-i="${i}">
-        <span class="grp">${c.grp}</span><span class="lab">${esc(c.label)}</span>
-        ${c.hint?`<span class="kbd">${c.hint}</span>`:""}</div>`).join("")
-      :`<div style="padding:14px;color:var(--ink-soft)">${tr("Kein passender Befehl.")}</div>`;
-    const on=l.querySelector(".cmd.on");if(on)on.scrollIntoView({block:"nearest"})};
-  const go=()=>{const c=hits[idx];if(!c)return;closeOvl();c.run()};
-  q.oninput=()=>{idx=0;paint()};
+    const v=q.value.trim();let html="";
+    if(v){
+      hits=all.map(c=>({c,s:befehlTreffer(v,c)})).filter(x=>x.s>=0).sort((a,b)=>b.s-a.s).map(x=>x.c).slice(0,60);
+      idx=Math.min(idx,Math.max(0,hits.length-1));
+      html=hits.length?hits.map((c,i)=>zeile(c,i,v)).join("")
+        :`<div class="befleer">${tr("Kein passender Befehl.")}</div>`;
+    }else{
+      /* Leer: zuletzt benutzt, dann alles nach Menü gruppiert */
+      const zul=(S.befehleZuletzt||[]).map(id=>all.find(c=>c.id===id)).filter(Boolean);
+      const sicht=all.filter(c=>!c.nurSuche);
+      hits=[...zul,...sicht];idx=Math.min(idx,hits.length-1);
+      let i=0,grp=null;
+      if(zul.length){html+=`<div class="befgrp">${esc(tr("Zuletzt benutzt"))}</div>`;zul.forEach(c=>{html+=zeile(c,i++,"",true)})}
+      sicht.forEach(c=>{if(c.grp!==grp){grp=c.grp;html+=`<div class="befgrp">${esc(grp)}</div>`}html+=zeile(c,i++,"")});
+    }
+    l.innerHTML=html;
+    const on=l.querySelector(".cmd.on");if(on)on.scrollIntoView({block:"nearest"});
+  };
+  const go=()=>{const c=hits[idx];if(!c)return;befehlMerken(c);closeOvl();c.run()};
+  q.oninput=()=>{idx=0;paint();l.scrollTop=0};
   q.onkeydown=e=>{
     if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,hits.length-1);paint()}
     else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);paint()}
