@@ -594,6 +594,11 @@ img.inlbild{display:inline;vertical-align:baseline;max-width:none}
 .imgbar.hfleiste .hfname{font:600 12px var(--ui);color:var(--ink);margin-right:2px}
 #hfbar.hfleiste label{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--ink);white-space:nowrap}
 #hfbar.hfleiste input[type=number]{width:58px;padding:2px 4px}
+/* Eingabefelder der Kontextleisten in den Farben des Schemas: ohne eigenen
+   Hintergrund malte der Browser sie weiß, und in den dunklen Schemata stand
+   die helle Schrift unsichtbar darauf (Tom, „Von oben“ in Enzian). */
+.imgbar :is(input:not([type=checkbox]):not([type=radio]),select){background:var(--paper);color:var(--ink);
+  border:1px solid var(--rule);border-radius:var(--radius)}
 #hfbar.hfleiste .hfzu{margin-left:auto}
 /* In der Kopfzeile gilt nur, was dort wirkt: Fett, Kursiv, Unter-/Durch-
    gestrichen, Ausrichtung — der Rest der Symbolleiste tritt zurück */
@@ -1132,6 +1137,8 @@ body.focus .repside{display:none}
 /* Schnellziele: ein Klick statt Tippen. Rechtsbuendig unter dem Zahlenfeld,
    damit sie sichtbar dazugehoeren. */
 .goalquick{display:flex;gap:6px;justify-content:flex-end;margin:8px 0 0}
+.goallaeuft{font:600 11px/1 var(--ui);color:var(--stamp);border:1px solid var(--stamp);border-radius:99px;
+  padding:3px 8px;margin-left:6px;vertical-align:2px}
 .goalquick button{font-family:var(--mono);font-size:11px;padding:3px 8px;
   border:1px solid var(--rule);border-radius:var(--radius);background:var(--paper);color:var(--ink-soft)}
 .goalquick button:hover{border-color:var(--ink-soft);color:var(--ink)}
@@ -1410,6 +1417,52 @@ body.focus .outline{display:none}
 .modal{background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius-lg);width:min(520px,92vw);
   box-shadow:0 10px 34px rgba(0,0,0,.2)}
 .modal.wide{width:min(600px,94vw)}
+/* Startfenster mit „Zuletzt verwendet“: links die Handlungen, rechts die Liste */
+.modal.startzl{width:min(720px,94vw)}
+.startzl .stmarke{display:inline-flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;
+  letter-spacing:0;text-transform:none;color:var(--ink)}
+.startzl .stmarke svg{width:26px;height:26px;border-radius:6px;flex:none}
+.stspalten{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:330px}
+.stlinks{display:flex;flex-direction:column;gap:8px;padding:18px;border-right:1px solid var(--rule)}
+.stlinks .btn{padding:11px 12px;text-align:left}
+.sticon{display:inline-flex;align-items:center;gap:9px}
+.sticon svg{flex:none}
+.strechts{display:flex;flex-direction:column;padding:12px 10px 12px;min-width:0}
+/* Rechte Kante von Suche und „Liste leeren“ bündig mit der Datumsspalte:
+   45px = Zeilenabstand 10 + Lücke 11 + Platz des ×-Knopfs 24 */
+.stkopf{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:2px 45px 8px 10px;
+  font:600 11px/1 var(--ui);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft)}
+#stSuche{margin:0 45px 8px 10px;background:var(--paper);color:var(--ink);border:1px solid var(--rule);
+  border-radius:var(--radius);padding:5px 8px;font:12.5px var(--ui)}
+.zlliste{display:flex;flex-direction:column;gap:2px;overflow-y:auto;max-height:min(52vh,420px)}
+.zlrow{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:8px;cursor:pointer;outline-offset:-2px}
+.zlrow[hidden]{display:none}
+.zlrow:hover,.zlrow:focus-visible{background:var(--chrome-2)}
+.zlart{flex:none;width:38px;text-align:center;font:600 10px/1 var(--mono);letter-spacing:.03em;
+  padding:5px 0;border-radius:4px;color:var(--paper);background:var(--ink-soft)}
+.zlart.word{background:#2B579A;color:#FFF}.zlart.odt{background:#2E7D5B;color:#FFF}.zlart.rtf{background:#9A6A1C;color:#FFF}
+.zlname{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.zlname b{font-weight:500;font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zlname small{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zlzeit{flex:none;font-size:11.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.zlx{flex:none;width:24px;height:24px;border:0;border-radius:6px;background:none;color:var(--ink-soft);
+  font-size:16px;line-height:1;cursor:pointer;opacity:0}
+.zlrow:hover .zlx,.zlrow:focus-within .zlx,.zlrow.fehlt .zlx{opacity:1}
+.zlx:hover{background:var(--chrome);color:var(--ink)}
+.zlrow.fehlt .zlart{background:var(--ink-faint)}
+.zlrow.fehlt b{text-decoration:line-through;color:var(--ink-soft)}
+.zlrow.fehlt .zlname,.zlrow.fehlt .zlzeit{opacity:.75}
+#stLeeren{align-self:flex-end;margin:12px 45px 0 0;font:400 12px/1 var(--ui);color:var(--ink-soft);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule)}
+#stLeeren:hover{color:var(--ink)}
+@media (max-width:600px){.stspalten{grid-template-columns:1fr}.stlinks{border-right:0;border-bottom:1px solid var(--rule)}
+}
+/* Untermenü Datei › Zuletzt verwendet */
+.zlmi{display:flex;gap:10px;align-items:baseline;min-width:0}
+.zlmi .zlnr{color:var(--ink-soft);font-variant-numeric:tabular-nums;width:1ch;flex:none}
+.zlmi span:last-child{display:flex;flex-direction:column;min-width:0}
+.zlmi small{font-size:11px;color:var(--ink-soft)}
+.zlmi.fehlt{opacity:.55}
 /* ---- Hilfefenster ----
    Zweigeteilt wie die WinHelp-Fenster: links der Wegweiser (Inhalt, Index,
    Suchen), rechts das Thema. Beide Seiten rollen für sich, damit die Auswahl
@@ -2795,10 +2848,17 @@ en:{
   "Wörterbuch laden":"Load dictionary",
   "Verbleibend":"Remaining",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Counts what's been added since you switched the goal on or reset it — across all documents.",
+"Ziel starten":"Start goal",
+"Ziel beenden":"End goal",
+"Neu beginnen":"Start over",
+"läuft":"running",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"Counts what's been added since the start — across all documents. “Start over” counts from zero again.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"Counts what's added from the start — across all documents. Your progress appears in the status bar.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insert page break (Alt+⇧+Enter)",
   "Neue Notiz":"New note",
   "Notizen durchsuchen":"Search notes",
   "Im ausgewählten Dokument":"In the selected document",
+"Notizen dieses Dokuments anzeigen":"Show this document’s notes",
   "Ohne Verknüpfung":"Unlinked",
   "Rasteransicht (frei verschiebbar)":"Grid view (freely movable)",
   "Listenansicht":"List view",
@@ -2964,6 +3024,14 @@ en:{
   "Seitenansicht":"Page view",
   "OpenDocument-Text":"OpenDocument Text",
   "Zuletzt verwendet":"Recently used",
+  "Liste leeren":"Clear list",
+  "heute":"today",
+  "gestern":"yesterday",
+  "Nicht gefunden – verschoben oder gelöscht?":"Not found – moved or deleted?",
+  "Nicht gefunden":"Not found",
+  "Aus der Liste entfernen":"Remove from list",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"The file was not found — moved or deleted?",
+  "Liste geleert":"List cleared",
   "Alle Schriftarten":"All fonts",
   "Schriftart wählen":"Choose font",
   "Eingabetaste übernimmt":"Press Enter to use",
@@ -3802,10 +3870,17 @@ fr:{
   "Wörterbuch laden":"Charger le dictionnaire",
   "Verbleibend":"Restant",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Est compté ce qui s'est ajouté depuis l'activation ou la réinitialisation — tous documents confondus.",
+"Ziel starten":"Démarrer l'objectif",
+"Ziel beenden":"Arrêter l'objectif",
+"Neu beginnen":"Recommencer",
+"läuft":"en cours",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"Est compté ce qui s'est ajouté depuis le démarrage — tous documents confondus. « Recommencer » repart de zéro.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"Est compté ce qui s'ajoute à partir du démarrage — tous documents confondus. La progression s'affiche dans la barre d'état.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insérer un saut de page (Alt+⇧+Entrée)",
   "Neue Notiz":"Nouvelle note",
   "Notizen durchsuchen":"Rechercher dans les notes",
   "Im ausgewählten Dokument":"Dans le document sélectionné",
+"Notizen dieses Dokuments anzeigen":"Afficher les notes de ce document",
   "Ohne Verknüpfung":"Sans lien",
   "Rasteransicht (frei verschiebbar)":"Vue en grille (déplaçable librement)",
   "Listenansicht":"Vue en liste",
@@ -3971,6 +4046,14 @@ fr:{
   "Seitenansicht":"Affichage page",
   "OpenDocument-Text":"Texte OpenDocument",
   "Zuletzt verwendet":"Récemment utilisées",
+  "Liste leeren":"Vider la liste",
+  "heute":"aujourd'hui",
+  "gestern":"hier",
+  "Nicht gefunden – verschoben oder gelöscht?":"Introuvable – déplacé ou supprimé ?",
+  "Nicht gefunden":"Introuvable",
+  "Aus der Liste entfernen":"Retirer de la liste",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"Fichier introuvable — déplacé ou supprimé ?",
+  "Liste geleert":"Liste vidée",
   "Alle Schriftarten":"Toutes les polices",
   "Schriftart wählen":"Choisir la police",
   "Eingabetaste übernimmt":"Entrée pour utiliser",
@@ -4809,10 +4892,17 @@ es:{
   "Wörterbuch laden":"Cargar diccionario",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Se cuenta lo que se ha añadido desde que se activó o se restableció — en todos los documentos.",
+"Ziel starten":"Iniciar objetivo",
+"Ziel beenden":"Terminar objetivo",
+"Neu beginnen":"Empezar de nuevo",
+"läuft":"en curso",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"Se cuenta lo que se ha añadido desde el inicio — en todos los documentos. «Empezar de nuevo» vuelve a contar desde cero.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"Se cuenta lo que se añade a partir del inicio — en todos los documentos. El progreso aparece en la barra de estado.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Insertar salto de página (Alt+⇧+Intro)",
   "Neue Notiz":"Nueva nota",
   "Notizen durchsuchen":"Buscar en las notas",
   "Im ausgewählten Dokument":"En el documento seleccionado",
+"Notizen dieses Dokuments anzeigen":"Mostrar las notas de este documento",
   "Ohne Verknüpfung":"Sin vínculo",
   "Rasteransicht (frei verschiebbar)":"Vista de cuadrícula (movible libremente)",
   "Listenansicht":"Vista de lista",
@@ -4978,6 +5068,14 @@ es:{
   "Seitenansicht":"Vista de página",
   "OpenDocument-Text":"Texto OpenDocument",
   "Zuletzt verwendet":"Usadas recientemente",
+  "Liste leeren":"Vaciar la lista",
+  "heute":"hoy",
+  "gestern":"ayer",
+  "Nicht gefunden – verschoben oder gelöscht?":"No encontrado: ¿movido o eliminado?",
+  "Nicht gefunden":"No encontrado",
+  "Aus der Liste entfernen":"Quitar de la lista",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"No se encontró el archivo: ¿movido o eliminado?",
+  "Liste geleert":"Lista vaciada",
   "Alle Schriftarten":"Todas las fuentes",
   "Schriftart wählen":"Elegir fuente",
   "Eingabetaste übernimmt":"Pulse Intro para usar",
@@ -5816,10 +5914,17 @@ pt:{
   "Wörterbuch laden":"Carregar dicionário",
   "Verbleibend":"Restante",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"É contado o que foi adicionado desde a ativação ou a redefinição — em todos os documentos.",
+"Ziel starten":"Iniciar meta",
+"Ziel beenden":"Encerrar meta",
+"Neu beginnen":"Recomeçar",
+"läuft":"em andamento",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"É contado o que foi adicionado desde o início — em todos os documentos. “Recomeçar” volta a contar do zero.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"É contado o que for adicionado a partir do início — em todos os documentos. O progresso aparece na barra de status.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserir quebra de página (Alt+⇧+Enter)",
   "Neue Notiz":"Nova nota",
   "Notizen durchsuchen":"Buscar nas notas",
   "Im ausgewählten Dokument":"No documento selecionado",
+"Notizen dieses Dokuments anzeigen":"Mostrar as notas deste documento",
   "Ohne Verknüpfung":"Sem vínculo",
   "Rasteransicht (frei verschiebbar)":"Visualização em grade (movível livremente)",
   "Listenansicht":"Visualização em lista",
@@ -5985,6 +6090,14 @@ pt:{
   "Seitenansicht":"Visualização de página",
   "OpenDocument-Text":"Texto OpenDocument",
   "Zuletzt verwendet":"Usadas recentemente",
+  "Liste leeren":"Limpar lista",
+  "heute":"hoje",
+  "gestern":"ontem",
+  "Nicht gefunden – verschoben oder gelöscht?":"Não encontrado – movido ou excluído?",
+  "Nicht gefunden":"Não encontrado",
+  "Aus der Liste entfernen":"Remover da lista",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"O arquivo não foi encontrado — movido ou excluído?",
+  "Liste geleert":"Lista limpa",
   "Alle Schriftarten":"Todas as fontes",
   "Schriftart wählen":"Escolher fonte",
   "Eingabetaste übernimmt":"Pressione Enter para usar",
@@ -6823,10 +6936,17 @@ pl:{
   "Wörterbuch laden":"Wczytaj słownik",
   "Verbleibend":"Pozostało",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Liczone jest to, co przybyło od włączenia lub zresetowania — we wszystkich dokumentach.",
+"Ziel starten":"Rozpocznij cel",
+"Ziel beenden":"Zakończ cel",
+"Neu beginnen":"Zacznij od nowa",
+"läuft":"trwa",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"Liczone jest to, co przybyło od rozpoczęcia — we wszystkich dokumentach. „Zacznij od nowa” liczy znowu od zera.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"Liczone jest to, co przybędzie od rozpoczęcia — we wszystkich dokumentach. Postęp widać na pasku stanu.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Wstaw podział strony (Alt+⇧+⏎)",
   "Neue Notiz":"Nowa notatka",
   "Notizen durchsuchen":"Przeszukaj notatki",
   "Im ausgewählten Dokument":"W wybranym dokumencie",
+"Notizen dieses Dokuments anzeigen":"Pokaż notatki tego dokumentu",
   "Ohne Verknüpfung":"Bez powiązania",
   "Rasteransicht (frei verschiebbar)":"Widok siatki (swobodnie przesuwalny)",
   "Listenansicht":"Widok listy",
@@ -6992,6 +7112,14 @@ pl:{
   "Seitenansicht":"Widok strony",
   "OpenDocument-Text":"Tekst OpenDocument",
   "Zuletzt verwendet":"Ostatnio używane",
+  "Liste leeren":"Wyczyść listę",
+  "heute":"dziś",
+  "gestern":"wczoraj",
+  "Nicht gefunden – verschoben oder gelöscht?":"Nie znaleziono – przeniesiony lub usunięty?",
+  "Nicht gefunden":"Nie znaleziono",
+  "Aus der Liste entfernen":"Usuń z listy",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"Nie znaleziono pliku — przeniesiony lub usunięty?",
+  "Liste geleert":"Lista wyczyszczona",
   "Alle Schriftarten":"Wszystkie czcionki",
   "Schriftart wählen":"Wybierz czcionkę",
   "Eingabetaste übernimmt":"Naciśnij Enter, aby użyć",
@@ -7837,10 +7965,17 @@ it:{
   "Wörterbuch laden":"Carica dizionario",
   "Verbleibend":"Rimanente",
   "Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.":"Si conta ciò che è stato aggiunto da quando hai attivato l'obiettivo o l'hai azzerato — in tutti i documenti.",
+"Ziel starten":"Avvia obiettivo",
+"Ziel beenden":"Termina obiettivo",
+"Neu beginnen":"Ricomincia",
+"läuft":"in corso",
+"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null.":"Si conta ciò che è stato aggiunto dall'avvio — in tutti i documenti. «Ricomincia» riparte da zero.",
+"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.":"Si conta ciò che si aggiunge dall'avvio — in tutti i documenti. Il progresso appare nella barra di stato.",
   "Seitenumbruch einfügen (Alt+⇧+⏎)":"Inserisci interruzione di pagina (Alt+⇧+Invio)",
   "Neue Notiz":"Nuova nota",
   "Notizen durchsuchen":"Cerca nelle note",
   "Im ausgewählten Dokument":"Nel documento selezionato",
+"Notizen dieses Dokuments anzeigen":"Mostra le note di questo documento",
   "Ohne Verknüpfung":"Non collegate",
   "Rasteransicht (frei verschiebbar)":"Vista a griglia (spostabile liberamente)",
   "Listenansicht":"Vista a elenco",
@@ -8006,6 +8141,14 @@ it:{
   "Seitenansicht":"Vista pagina",
   "OpenDocument-Text":"Testo OpenDocument",
   "Zuletzt verwendet":"Usati di recente",
+  "Liste leeren":"Svuota elenco",
+  "heute":"oggi",
+  "gestern":"ieri",
+  "Nicht gefunden – verschoben oder gelöscht?":"Non trovato – spostato o eliminato?",
+  "Nicht gefunden":"Non trovato",
+  "Aus der Liste entfernen":"Rimuovi dall'elenco",
+  "Die Datei wurde nicht gefunden — verschoben oder gelöscht?":"File non trovato — spostato o eliminato?",
+  "Liste geleert":"Elenco svuotato",
   "Alle Schriftarten":"Tutti i tipi di carattere",
   "Schriftart wählen":"Scegli tipo di carattere",
   "Eingabetaste übernimmt":"Premi Invio per usare",
@@ -8655,12 +8798,18 @@ function applyStaticLabels(){
   $("#focusOut").textContent=tr("verlassen (Esc)");
   document.documentElement.lang=S.settings.uiLang||"de";
 }
-/* Nur ein wirklich frischer Start: genau ein leeres Dokument ohne eigenen Titel
-   und sonst nichts. Vorher genügte es, dass alle Dokumente leer sind — dadurch
-   erschien der Startdialog auch bei mehreren leeren Reitern. */
+/* Kein Dokument offen: genau ein leeres Dokument ohne eigenen Titel — beim
+   allerersten Start oder weil zuletzt alle Reiter geschlossen wurden (dann
+   bleibt ein unsichtbarer Platzhalter). Vorher genügte es, dass alle
+   Dokumente leer sind — dadurch erschien der Startdialog auch bei mehreren
+   leeren Reitern. Notizen und Glossar zählten bis 2026-10-31 mit: wer
+   welche hatte und alle Reiter schloss, bekam beim nächsten Start statt des
+   Startfensters ein leeres, unbenanntes Dokument (Tom). Notizen und Glossar
+   bleiben über ihre eigenen Ansichten erreichbar; die Notizen-Ansicht
+   behält ihren Platz, wenn man in ihr aufgehört hat. */
 function isTrulyEmpty(){
   return S.docs.length===1&&!hatInhalt(S.docs[0].html)&&!S.docs[0].customTitle
-    &&!(S.notes&&S.notes.length)&&!(S.glossary&&S.glossary.length);
+    &&(S.mode||"write")==="write";
 }
 /* Hinter dem Startdialog liegt bewusst kein Dokument (kein Reiter, keine
    Werkzeugleiste) - nur die graue Arbeitsfläche, dieselbe Farbe wie hinter
@@ -8705,7 +8854,176 @@ function startNew(){
 function mpfad(...schluessel){
   return schluessel.map(k=>tr(k).replace(/…$/,"")).join(" › ");
 }
+/* ================= Zuletzt verwendet =================
+   Wie Word und LibreOffice (Tom, 2026-10-31): Dateien, die man geöffnet oder
+   gespeichert hat, stehen im Startfenster und unter Datei › Zuletzt verwendet.
+   S.zuletzt hält höchstens ZL_MAX Einträge {id,name,art,zeit,pfad?,fehlt?}.
+   Die Desktop-Fassung merkt sich den Pfad und liest ihn über die Brücke
+   (readPath, nur Dokument-Endungen); Chrome und Edge merken sich den Datei-
+   Handle in der IndexedDB (ZLKEY) und fragen beim Öffnen einmal nach dem
+   Lesezugriff. Firefox kann beides nicht — dort gibt es die Liste nicht.
+   Sicherungen (.pqw) zählen nicht: das sind keine Dokumente. */
+/* Symbole der Startknöpfe: Blatt mit Plus, offener Ordner */
+const ST_NEU='<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/><path d="M12 12v6M9 15h6"/>';
+const ST_AUF='<path d="M3 7a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L21.8 12a1.5 1.5 0 0 0-1.4-2H7.6a2 2 0 0 0-1.9 1.4L3 19"/>';
+const ZL_MAX=15,ZLKEY=id=>"zuletzt:"+id;
+/* Eigene Fassung statt tr(): „Zuletzt verwendet“ der Schriftliste ist in
+   fr/es weiblich (polices, fuentes), hier geht es um Dateien */
+const ZL_TITEL=()=>PL("Zuletzt verwendet","Recent","Récents","Recientes","Recentes","Ostatnio używane","Recenti");
+const zlMoeglich=()=>!!(PQWD()&&PQWD().readPath)||hatDateien();
+const zlListe=()=>zlMoeglich()?(S.zuletzt||[]):[];
+const zlArt=n=>((String(n).match(/\.([a-z0-9]+)$/i)||[,""])[1]).toLowerCase();
+const zlGleich=(a,b)=>PQWD()&&PQWD().platform==="win32"?a.toLowerCase()===b.toLowerCase():a===b;
+async function zlMerken(name,pfad,handle){
+  if(!zlMoeglich()||!name)return;
+  const art=zlArt(name);if(!art||PQWLESEN.includes("."+art))return;
+  S.zuletzt=S.zuletzt||[];
+  let alt=null;
+  if(pfad)alt=S.zuletzt.find(z=>z.pfad&&zlGleich(z.pfad,pfad));
+  else if(handle&&handle.isSameEntry){
+    for(const z of S.zuletzt){if(z.pfad)continue;
+      const h=await handleGet(ZLKEY(z.id));
+      try{if(h&&await h.isSameEntry(handle)){alt=z;break}}catch(e){}}
+  }else return;
+  const e=alt||{id:uid()};
+  if(!pfad){try{await handleSet(ZLKEY(e.id),handle)}catch(x){return}}
+  else e.pfad=pfad;
+  e.name=name;e.art=art;e.zeit=Date.now();delete e.fehlt;
+  const neu=[e,...S.zuletzt.filter(z=>z!==e)];
+  neu.slice(ZL_MAX).forEach(z=>{if(!z.pfad)handleDel(ZLKEY(z.id))});
+  S.zuletzt=neu.slice(0,ZL_MAX);save();
+}
+function zlEntfernen(id){
+  const z=(S.zuletzt||[]).find(x=>x.id===id);if(z&&!z.pfad)handleDel(ZLKEY(id));
+  S.zuletzt=(S.zuletzt||[]).filter(x=>x.id!==id);save();
+}
+function zlLeeren(){(S.zuletzt||[]).forEach(z=>{if(!z.pfad)handleDel(ZLKEY(z.id))});S.zuletzt=[];save()}
+/* Ordner als die letzten zwei Stufen („Goethe › DLL 6“) statt C:\Users\… */
+function zlOrdner(z){
+  if(!z.pfad)return "";
+  let t=z.pfad.split(/[\\/]/).filter(Boolean);t.pop();
+  /* Den eigenen Benutzerordner weglassen: „Desktop“ statt „tom › Desktop“ */
+  const h=t.findIndex((x,i)=>i<=1&&/^(users|home)$/i.test(x));
+  if(h>=0&&t.length>h+1)t=t.slice(h+2);
+  return t.slice(-2).join(" › ");
+}
+/* Datum, wie man es sagt: „heute 14:20“, „gestern“, „28.10.“ */
+function zlZeit(ms){
+  const d=new Date(ms),h=new Date(),tag=x=>new Date(x.getFullYear(),x.getMonth(),x.getDate()).getTime();
+  const tage=Math.round((tag(h)-tag(d))/864e5);
+  if(tage===0)return tr("heute")+" "+d.toLocaleTimeString(LOC(),{hour:"2-digit",minute:"2-digit"});
+  if(tage===1)return tr("gestern");
+  return d.toLocaleDateString(LOC(),d.getFullYear()===h.getFullYear()
+    ?{day:"numeric",month:"numeric"}:{day:"numeric",month:"numeric",year:"numeric"});
+}
+/* Desktop: nachsehen, welche Dateien es noch gibt. Liefert true, wenn sich
+   an der Markierung etwas geändert hat. Im Browser ginge das nur mit
+   Nachfrage — dort zeigt sich eine fehlende Datei erst beim Öffnen. */
+async function zlPruefen(){
+  const D=PQWD(),l=zlListe().filter(z=>z.pfad);
+  if(!D||!D.pathsExist||!l.length)return false;
+  let da;try{da=await D.pathsExist(l.map(z=>z.pfad))}catch(e){return false}
+  let anders=false;
+  l.forEach((z,i)=>{const fehlt=!da[i];if(!!z.fehlt!==fehlt){anders=true;if(fehlt)z.fehlt=true;else delete z.fehlt}});
+  if(anders)save();
+  return anders;
+}
+function zlFehlt(z){
+  z.fehlt=true;save();
+  toast(tr("Die Datei wurde nicht gefunden — verschoben oder gelöscht?"));
+  if($("#stZl"))startupDialog();
+}
+function zlZuReiter(d){
+  if(lockedOvl||$("#stZl")){lockedOvl=false;closeOvl()}
+  if(S.mode!=="write")S.mode="write";
+  S.active=d.id;save();render();
+}
+async function zlOeffnen(id){
+  const z=zlListe().find(x=>x.id===id);if(!z)return;
+  /* Schon in einem Reiter offen: dorthin wechseln statt ein zweites Mal laden */
+  if(z.pfad){
+    const offen=S.docs.find(d=>d.ziel&&d.ziel.pfad&&zlGleich(d.ziel.pfad,z.pfad));
+    if(offen)return zlZuReiter(offen);
+    const x=await PQWD().readPath(z.pfad);
+    if(!x)return zlFehlt(z);
+    delete z.fehlt;
+    desktopDateienLaden([x]);
+    return;
+  }
+  const h=await handleGet(ZLKEY(z.id));
+  if(!h)return zlFehlt(z);
+  for(const d of S.docs){if(!d.ziel||d.ziel.pfad)continue;
+    const dh=await handleGet(ZIELKEY(d.id));
+    try{if(dh&&await dh.isSameEntry(h))return zlZuReiter(d)}catch(e){}}
+  try{
+    const o={mode:"read"};
+    if(await h.queryPermission(o)!=="granted"&&await h.requestPermission(o)!=="granted")return;
+    const f=await h.getFile();f.pqwHandle=h;
+    delete z.fehlt;
+    await ladeDokumente([f]);
+  }catch(e){
+    if(e&&e.name==="NotFoundError")return zlFehlt(z);
+    toast(tr("Diese Datei ließ sich nicht lesen"));
+  }
+}
+const ZLFARBE={docx:"word",docm:"word",dotx:"word",dotm:"word",doc:"word",dot:"word",
+  odt:"odt",ott:"odt",fodt:"odt",rtf:"rtf"};
+function zlZeilen(liste){
+  return liste.map(z=>`<div class="zlrow${z.fehlt?" fehlt":""}" role="button" tabindex="0" data-zl="${z.id}"
+      title="${esc(z.pfad||z.name)}">
+      <span class="zlart ${ZLFARBE[z.art]||"text"}">${esc(z.art.toUpperCase().slice(0,4))}</span>
+      <span class="zlname"><b>${esc(z.name.replace(/\.[a-z0-9]+$/i,""))}</b>
+        <small>${z.fehlt?esc(tr("Nicht gefunden – verschoben oder gelöscht?")):esc(zlOrdner(z))}</small></span>
+      <span class="zlzeit">${esc(zlZeit(z.zeit))}</span>
+      <button class="zlx" data-zlx="${z.id}" title="${esc(tr("Aus der Liste entfernen"))}" aria-label="${esc(tr("Aus der Liste entfernen"))}">&times;</button>
+    </div>`).join("");
+}
+/* Startfenster mit Liste: zweispaltig wie bei LibreOffice — links die beiden
+   Handlungen, rechts die Dateien. Sprache und Farbschema stehen hier nicht
+   (Toms Wahl): wer eine Liste hat, hat beides schon gewählt — sie stehen in
+   den Einstellungen, und das Fenster bleibt ganz bei den Dokumenten. */
+function startZuletzt(){
+  const liste=zlListe();
+  overlay(`<div class="modal startzl"><h3><span class="stmarke"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <rect width="512" height="512" rx="96" fill="#8C3B2E"/> <g transform="translate(256 256) scale(2.0586) translate(-27.4 -117)"> <path d="M90.4 20C90.4 96 36.4 150 -17.6 186C-28.4 134 -3.2 62 90.4 20Z" fill="#FCFBF8"/> <path d="M40 114C23.8 137 4 161 -12.2 181" stroke="#8C3B2E" stroke-width="7" stroke-linecap="round" fill="none"/> <path d="M-17.6 186 -35.6 214" stroke="#EAE8E0" stroke-width="11" stroke-linecap="round"/> </g> </svg> PureQuill Writer</span>
+      <button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3>
+    <div class="stspalten">
+      <div class="stlinks">
+        <button class="btn pri sticon" id="stNew">${ICO(ST_NEU)}${tr("Neues Dokument")}</button>
+        <button class="btn sticon" id="stOpen">${ICO(ST_AUF)}${tr("Datei öffnen")}</button>
+      </div>
+      <div class="strechts" id="stZl">
+        <div class="stkopf"><span>${ZL_TITEL()}</span></div>
+        ${liste.length>8?`<input type="search" id="stSuche" placeholder="${esc(tr("Suchen"))}" aria-label="${esc(tr("Suchen"))}">`:""}
+        <div class="zlliste" id="stListe">${zlZeilen(liste)}</div>
+        <a id="stLeeren" role="button" tabindex="0">${tr("Liste leeren")}</a>
+      </div>
+    </div></div>`,true);
+  const klick=(el,fn)=>{if(!el)return;el.onclick=fn;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fn(e)}}};
+  $("#stSkip").onclick=startSkip;
+  $("#stNew").onclick=startNew;
+  $("#stOpen").onclick=loadDocumentFile;
+  klick($("#stLeeren"),()=>{zlLeeren();startupDialog()});
+  const li=$("#stListe");
+  li.onclick=e=>{
+    const x=e.target.closest("[data-zlx]");
+    if(x){e.stopPropagation();zlEntfernen(x.dataset.zlx);startupDialog();return}
+    const r=e.target.closest("[data-zl]");if(r)zlOeffnen(r.dataset.zl);
+  };
+  li.onkeydown=e=>{const r=e.target.closest("[data-zl]");if(!r)return;
+    if(e.key==="Enter"){e.preventDefault();zlOeffnen(r.dataset.zl)}
+    if(e.key==="Delete"){e.preventDefault();zlEntfernen(r.dataset.zl);startupDialog()}
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();
+      const alle=[...li.querySelectorAll(".zlrow:not([hidden])")],i=alle.indexOf(r);
+      const n=alle[i+(e.key==="ArrowDown"?1:-1)];if(n)n.focus()}};
+  const su=$("#stSuche");
+  if(su)su.oninput=()=>{const q=su.value.trim().toLowerCase();
+    li.querySelectorAll(".zlrow").forEach(r=>{const z=liste.find(x=>x.id===r.dataset.zl);
+      r.hidden=!!q&&!(z.name.toLowerCase().includes(q)||zlOrdner(z).toLowerCase().includes(q))})};
+  /* Fehlende Dateien erst danach markieren — das Fenster steht sofort */
+  zlPruefen().then(anders=>{if(anders&&$("#stZl"))startupDialog()});
+}
 function startupDialog(){
+  if(zlListe().length)return startZuletzt();
   overlay(`<div class="modal"><h3>${tr("Willkommen")}<button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad">
     <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
       <label>${tr("Sprache")}</label><div class="ctl">
@@ -8720,8 +9038,8 @@ function startupDialog(){
     <p style="margin:0 0 14px;font-family:Georgia,serif;font-size:14px;line-height:1.55;color:var(--ink-soft)">
       ${tr("Wie möchtest du beginnen?")}</p>
     <div style="display:flex;gap:10px">
-      <button class="btn pri" id="stNew" style="flex:1;padding:11px">${tr("Neues Dokument")}</button>
-      <button class="btn" id="stOpen" style="flex:1;padding:11px">${tr("Datei öffnen")}&hellip;</button>
+      <button class="btn pri sticon" id="stNew" style="flex:1;padding:11px;justify-content:center">${ICO(ST_NEU)}${tr("Neues Dokument")}</button>
+      <button class="btn sticon" id="stOpen" style="flex:1;padding:11px;justify-content:center">${ICO(ST_AUF)}${tr("Datei öffnen")}</button>
     </div>
     <div style="border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;
       font-family:Georgia,serif;font-size:13px;line-height:1.5;color:var(--ink-soft)">
@@ -8817,6 +9135,7 @@ if(!S.notes){
 }
 S.docs.forEach(d=>{if(d.notes){S.notes.push(...d.notes);delete d.notes}});
 if(!S.noteFilter)S.noteFilter="all";
+if(!Array.isArray(S.zuletzt))S.zuletzt=[];
 if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
 if(S.settings&&(!S.settings.listStil||typeof S.settings.listStil!=="object"))S.settings.listStil={ul:"",ol:""};
@@ -11034,6 +11353,18 @@ function goalHtml(txt){
       '<svg class="goalcheck" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>':""}
     <span class="goalbar phase${phase} ${done?"done":""}"><i style="width:${anteil}%"></i></span></span>`;
 }
+/* Die Statuszeile zählte alle Notizen aus allen Dokumenten — neben Wort- und
+   Seitenzahl dieses Dokuments las sich das wie dessen Notizen. Jetzt nur die
+   an diesem Dokument angehefteten; ein Klick öffnet die Notizen-Ansicht mit
+   dem Filter „Im ausgewählten Dokument“ (Tom, 2026-10-31). */
+function notizHinweis(d){
+  const n=S.mode==="write"&&$("#editor")?anchoredIds().length
+    :S.notes.filter(x=>anchorsInDoc(x.id,d)>0).length;
+  const plWort=n===1?"notatka":n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?"notatki":"notatek";
+  const wort=n===1?PL("Notiz","note","note","nota","nota",plWort,"nota")
+    :PL("Notizen","notes","notes","notas","notas",plWort,"note");
+  return `<span id="notizHint" data-n="${n}" style="cursor:pointer" title="${esc(tr("Notizen dieses Dokuments anzeigen"))}">${n.toLocaleString(LOC())} ${wort}</span>`;
+}
 function drawStatus(){
   const ed=$("#editor");const d=doc();
   const txt=ed?(ed.innerText||""):stripHtml(d.html);
@@ -11045,7 +11376,7 @@ function drawStatus(){
      Schreibmarke den ganzen Text neu durchzaehlen. */
   zaehlerGesamt={words,chars};
   $("#status").innerHTML=`<span id="wcHint" style="cursor:pointer" title="${tr("Wörter zählen")}">${words.toLocaleString(LOC())} ${tr("Wörter")}</span>
-    <span id="chHint">${chars.toLocaleString(LOC())} ${tr("Zeichen")}</span>
+    <span id="chHint" style="cursor:pointer" title="${tr("Wörter zählen")}">${chars.toLocaleString(LOC())} ${tr("Zeichen")}</span>
     ${goalHtml(txt)}
     <span>${S.mode==="write"?(pageCount+" "+PL("Seite"+(pageCount>1?"n":""),
       pageCount>1?"pages":"page",pageCount>1?"pages":"page",pageCount>1?"páginas":"página",
@@ -11055,8 +11386,7 @@ function drawStatus(){
     ${(()=>{const n=((d.html||"").match(/data-wsect="/g)||[]).length+1;
       return n>1?`<span title="${esc(tr("Abschnitte aus Word: PureQuill zeigt alle Seiten im Format des letzten Abschnitts; jeder Abschnitt behält beim Speichern als Word sein eigenes Format."))}">${n} ${tr("Abschnitte")}</span>`:""})()}
     ${d.spalten&&d.spalten.n>1?`<span id="spHint" style="cursor:pointer" title="${esc(tr("In Word mehrspaltig. PureQuill zeigt und druckt den Text einspaltig; die Spalten bleiben beim Speichern als Word erhalten."))}">${d.spalten.n} ${tr("Spalten")}</span>`:""}
-    <span>${S.notes.length} ${PL("Notizen","notes","notes","notas","notas","notatki",
-      "note")}</span>
+    ${notizHinweis(d)}
     <span class="grow"></span>
     ${dateiAnzeige(d)}
     <span class="sicherstand" title="${esc(storageOk?saveHint():tr("Der Browserspeicher nimmt nichts mehr an. Sichere über {pfad}.").replace("{pfad}",mpfad("Datei","Alles sichern")))}"
@@ -11072,11 +11402,15 @@ function drawStatus(){
     <span class="hintk" id="pHint" style="cursor:pointer" title="${tr("Kommandopalette öffnen")}">Alt ⇧ P</span>`;
   const ph=$("#pHint");if(ph)ph.onclick=palette;
   const gb=$("#goalBox");if(gb)gb.onclick=goalDialog;
+  const nh=$("#notizHint");if(nh)nh.onclick=()=>{
+    S.noteFilter=+nh.dataset.n>0?"doc":"all";save();setMode("notes")};
   const fh=$("#fmtHint");if(fh)fh.onclick=changeFormat;
   const sh=$("#spHint");if(sh)sh.onclick=spaltenDialog;
   const zh=$("#zielHint");if(zh)zh.onclick=speichern;
-  const wh=$("#wcHint");if(wh)wh.onclick=()=>{
+  const zaehlen=()=>{
     const sel=getSelection();wordCount(sel.rangeCount&&!sel.isCollapsed?sel.toString().trim():"")};
+  const wh=$("#wcHint");if(wh)wh.onclick=zaehlen;
+  const chh=$("#chHint");if(chh)chh.onclick=zaehlen;
   zaehlerAktualisieren();
 }
 /* Markiert man etwas, zeigte die Statuszeile weiter die Zahlen des ganzen
@@ -14233,6 +14567,8 @@ async function zielMerken(d,ziel,name,art){
   }else return;
   d.ziel.art=art||"docx";
   d.ziel.stand=dokStand(d);d.ziel.at=Date.now();
+  /* Gespeichert oder geöffnet: die Datei rückt in „Zuletzt verwendet“ nach vorn */
+  zlMerken(d.ziel.name,ziel.__pfad||null,ziel.__pfad?null:ziel);
   if(d.id===S.active)document.title=fensterTitel(d);
   /* merkeGesichert statt nur drawStatus: es setzt dirty zurück. Sonst stünde
      eine eben geöffnete Datei als „geändert“ da, weil dirty noch vom Tippen
@@ -15493,8 +15829,14 @@ async function ladeDokumente(dateien){
   if(!dateien.length)return;
   let geladen=0,abgelehnt=0,bildZahl=0,bildBytes=0,bildFehlend=0,docFehlt=null;
   /* Fuer "Ohne Bilder": nur die eben entstandenen Dokumente anfassen. */
-  const vorherIds=new Set(S.docs.map(d=>d.id));
+  const vorherIds=new Set(S.docs.map(d=>d.id)),zlNeu=[];
+  /* Für „Zuletzt verwendet“: ob die vorige Datei geladen wurde, zeigt sich
+     erst am Zählerstand zu Beginn der nächsten Runde — die Zweige unten
+     springen mit continue heraus. */
+  let zlDatei=null,zlStand=0;
+  const zlVormerken=()=>{if(zlDatei&&geladen>zlStand&&(zlDatei.pqwPfad||zlDatei.pqwHandle))zlNeu.push(zlDatei)};
   for(const f of dateien){
+    zlVormerken();zlDatei=f;zlStand=geladen;
     const ext=(f.name.match(/\.([a-z0-9]+)$/i)||[,""])[1].toLowerCase();
     try{
       if(PQWLESEN.includes("."+ext)){
@@ -15556,6 +15898,8 @@ async function ladeDokumente(dateien){
       }
     }catch(e){abgelehnt++}
   }
+  zlVormerken();
+  for(const f of zlNeu)await zlMerken(f.name,f.pqwPfad||null,f.pqwHandle||null);
   /* Kam der Aufruf aus dem Willkommensfenster („Datei öffnen…“), ist es mit
      dem geladenen Dokument erledigt. Es ist gesperrt (lockedOvl) und blieb
      darum vor dem Dokument stehen — schon seit 1.0.0; nur der .pqw-Weg über
@@ -20283,6 +20627,7 @@ function fileMenu(){
     <div class="mlabel">${tr("Dokument")}</div>
     <button class="mi" data-act="new"><span class="chk"></span>${tr("Neues Dokument&hellip;")}<span class="k">${kz("neuDok")}</span></button>
     <button class="mi" data-act="loaddoc"><span class="chk"></span>${tr("Datei öffnen…")}<span class="k">${kz("dateiAuf")}</span></button>
+    ${zlListe().length?`<button class="mi" data-act="zlmore"><span class="chk"></span>${ZL_TITEL()}<span class="k">&rsaquo;</span></button>`:""}
     <button class="mi" data-act="rename"><span class="chk"></span>${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-act="dupl"><span class="chk"></span>${tr("Duplizieren")}</button>
     <button class="mi" data-act="fmt"><span class="chk"></span>${tr("Seitenformat&hellip;")}<span class="k">${tr(fmtOf(doc()).n)}</span></button>
@@ -20324,6 +20669,24 @@ function fileMenu(){
       {a:"md",label:"Markdown",k:".md"},
       {a:"txt",label:tr("Nur Text"),k:".txt"},
       {a:"csv",label:tr("Glossar als Tabelle"),k:".csv"}]);
+    /* Zuletzt verwendet: die neun jüngsten, nummeriert — die Ziffer öffnet */
+    if(a==="zlmore"){
+      const l=zlListe().slice(0,9);
+      openSubMenu(b,[...l.map((z,i)=>({a:z.id,
+        label:`<span class="zlmi${z.fehlt?" fehlt":""}"><span class="zlnr">${i+1}</span><span>${esc(z.name)}<small>${
+          esc(z.fehlt?tr("Nicht gefunden"):zlOrdner(z)||zlZeit(z.zeit))}</small></span></span>`})),
+        {sep:true},{a:"__zlleeren",label:tr("Liste leeren")}],
+        w=>{if(w==="__zlleeren"){zlLeeren();toast(tr("Liste geleert"))}else zlOeffnen(w)});
+      const sm=$("#submenu");
+      const taste=e=>{
+        if(!document.body.contains(sm)){removeEventListener("keydown",taste,true);return}
+        const i=+e.key;if(!(i>=1&&i<=l.length))return;
+        e.preventDefault();e.stopPropagation();removeEventListener("keydown",taste,true);
+        closeMenu();zlOeffnen(l[i-1].id);
+      };
+      addEventListener("keydown",taste,true);
+      return;
+    }
     if(a==="bmore")return openSubMenu(b,[
       {a:"ball",label:tr("Alles: Dokumente, Notizen, Glossare, Einstellungen"),k:PQWEXT},
       {a:"bdoc",label:tr("Nur dieses Dokument mit seinen Notizen"),k:PQWEXT},
@@ -21004,6 +21367,23 @@ function drawAnchors(){
     prev=y+el.offsetHeight+9});
   col.style.height=Math.max(0,prev)+"px";
 }
+/* Ein Klick in die Statuszeile nimmt dem Text den Fokus, und das baut die
+   Zeile neu (drawStatus) — zwischen Drücken und Loslassen. Der Klick kam dann
+   gar nicht an — Chrome schickt keinen click, wenn das gedrückte Element
+   beim Loslassen nicht mehr im Dokument steht —, und weder Zielbalken noch
+   Zähler öffneten etwas (Tom, 2026-10-31). Gemerkt wird darum, worauf
+   gedrückt wurde; ist es beim Loslassen ersetzt, bekommt sein Nachfolger
+   mit derselben id den Klick. */
+let statusGedrueckt=null;
+$("#status").addEventListener("mousedown",e=>{
+  const el=e.button===0&&e.target.closest("[id]");
+  statusGedrueckt=el&&el!==e.currentTarget?el:null},true);
+$("#status").addEventListener("mouseup",e=>{
+  const alt=statusGedrueckt;statusGedrueckt=null;
+  if(!alt||alt.isConnected)return;
+  const neu=document.getElementById(alt.id);
+  if(neu&&e.currentTarget.contains(neu))neu.click();
+});
 $("#status").addEventListener("click",e=>{
   if(e.target.id==="zVal"){zoomPresets();return}
   if(e.target.id==="zIn"){setZoom(S.zoom+.1);return}
@@ -28878,13 +29258,21 @@ function goalDialog(){
       <div class="zeile"><span><b>${goalFmtNum(geschafft,unit)}</b> / ${goalFmtNum(g.target,unit)} ${goalUnitAbbr(unit)}</span>
         <span>${anteil} %</span></div>
       <span class="goalbar wide phase${phase} ${fertig?"done":""}"><i style="width:${anteil}%"></i></span>
-      <div class="rest"><span>${tr("Verbleibend")}: ${goalFmtNum(rest,unit)} ${goalUnitAbbr(unit)}</span><button class="btn" id="glReset">${tr("Zurücksetzen")}</button></div>
+      <div class="rest"><span>${tr("Verbleibend")}: ${goalFmtNum(rest,unit)} ${goalUnitAbbr(unit)}</span></div>
     </div>`:"";
   const schnell=(GOAL_QUICK[unit]||[]).map(v=>
     `<button data-q="${v}" class="${v===g.target?"on":""}">${goalFmtNum(v,unit)}</button>`).join("");
-  overlay(`<div class="modal"><h3>${tr("Schreibziel")}</h3><div class="pad">
-    <div class="setrow"><label>${tr("Ziel aktiv")}</label><div class="ctl">
-      <input type="checkbox" id="glOn" ${g.on?"checked":""} style="width:auto"></div></div>
+  /* Ein- und Ausschalten über Knöpfe, die sagen, was passiert (Tom,
+     2026-10-31): bis dahin ein Häkchen „Ziel aktiv“ — wer nur eine Zahl
+     wählte, hatte kein Ziel und merkte es nicht. Ohne Ziel: „Ziel starten“;
+     läuft es: „Neu beginnen“ und links abgesetzt „Ziel beenden“. */
+  const knoepfe=g.on
+    ?`<button class="btn" id="glAus" style="margin-right:auto">${tr("Ziel beenden")}</button>
+      <button class="btn" id="glReset">${tr("Neu beginnen")}</button>
+      <button class="btn pri" id="glOk">${tr("Fertig")}</button>`
+    :`<button class="btn" id="glOk">${tr("Schließen")}</button>
+      <button class="btn pri" id="glStart">${tr("Ziel starten")}</button>`;
+  overlay(`<div class="modal"><h3>${tr("Schreibziel")}${g.on?` <span class="goallaeuft">${tr("läuft")}</span>`:""}</h3><div class="pad">
     <div class="setrow"><label>${tr("Zähleinheit")}</label><div class="ctl">
       <select id="glUnit">${GOAL_UNITS.map(u=>
         `<option value="${u.k}" ${unit===u.k?"selected":""}>${tr(u.label)}</option>`).join("")}</select></div></div>
@@ -28892,22 +29280,30 @@ function goalDialog(){
       <input type="number" id="glTarget" min="${isPages?"0.5":"1"}" step="${isPages?"0.5":"1"}" max="100000" value="${g.target}"></div></div>
     <div class="goalquick" id="glQuick">${schnell}</div>
     ${fortschritt}
-    <div class="fmttip">${tr("Gezählt wird, was seit dem Einschalten oder Zurücksetzen dazugekommen ist — über alle Dokumente hinweg.")}</div>
+    <div class="fmttip">${tr(g.on
+      ?"Gezählt wird, was seit dem Start dazugekommen ist — über alle Dokumente hinweg. „Neu beginnen“ zählt wieder ab null."
+      :"Gezählt wird ab dem Start, was dazukommt — über alle Dokumente hinweg. Der Stand erscheint unten in der Statuszeile.")}</div>
     </div>
-    <div class="rowend">
-      <button class="btn pri" id="glOk">${tr("Fertig")}</button></div></div>`);
+    <div class="rowend">${knoepfe}</div></div>`);
   const lies=()=>+$("#glTarget").value||GOAL_DEFAULT_TARGET[unit];
   /* Jede Aenderung wirkt sofort — der Dialog ist ein Schalterbrett, kein
      Formular. Frueher stand darunter ein blaues "Fertig", das eine
      Bestaetigung versprach, die es nie gab; es schliesst jetzt nur noch. */
   const neuZeichnen=()=>{closeOvl();goalDialog()};
-  $("#glOn").onchange=e=>{setGoal(e.target.checked);neuZeichnen()};
+  /* Eine gerade getippte Zahl übernimmt sonst erst das change beim Verlassen
+     des Feldes — und das zeichnet den Dialog neu, bevor der Klick auf
+     „Ziel starten“ ankommt. Die Knöpfe nehmen dem Feld darum den Fokus nicht
+     und lesen die Zahl selbst. */
+  $(".modal .rowend").onmousedown=e=>{if(e.target.closest("button"))e.preventDefault()};
+  const zahlUebernehmen=()=>{if(lies()!==S.goal.target)setGoal(undefined,lies())};
+  const st=$("#glStart");if(st)st.onclick=()=>{setGoal(true,lies());closeOvl()};
+  const aus=$("#glAus");if(aus)aus.onclick=()=>{setGoal(false);closeOvl()};
   $("#glUnit").onchange=e=>{setGoal(undefined,GOAL_DEFAULT_TARGET[e.target.value],e.target.value);neuZeichnen()};
   $("#glTarget").onchange=()=>{setGoal(undefined,lies());neuZeichnen()};
   $("#glQuick").onclick=e=>{const b=e.target.closest("[data-q]");if(!b)return;
     setGoal(undefined,+b.dataset.q);neuZeichnen()};
-  const rb=$("#glReset");if(rb)rb.onclick=()=>{goalReset();neuZeichnen()};
-  $("#glOk").onclick=closeOvl;
+  const rb=$("#glReset");if(rb)rb.onclick=()=>{zahlUebernehmen();goalReset();neuZeichnen()};
+  $("#glOk").onclick=()=>{zahlUebernehmen();closeOvl()};
 }
 /* ================= Leseansicht ================= */
 let readOn=false;
@@ -29311,10 +29707,10 @@ scrolling and quicker than search.</p>`},
  {t:"Writing goal",k:"goal;word count;target;session",b:`
 <p><b>Tools &rsaquo; Set writing goal</b> puts a small counter beside the word count in the
 status bar — <i>640 / 1,000</i> with a quiet bar.</p>
-<p>It counts what you have written <b>since you switched the goal on or reset it</b>, across
+<p>It counts what you have written <b>since you started the goal or chose “Start over”</b>, across
 all documents, and survives closing the program. Nothing happens when you reach the target
 except that the bar turns green. There is no alarm.</p>
-<p>Click the counter to change the target, reset it, or switch it off.</p>`},
+<p>Click the counter in the status bar to open the goal again: change the target, <b>Start over</b>, or switch the goal off with <b>End goal</b>.</p>`},
 
  {t:"Document memo",k:"memo;document notes;plot notes",b:`
 <p><b>View &rsaquo; Document memo</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>) opens a
@@ -29957,10 +30353,10 @@ als Scrollen und schneller als Suchen.</p>`},
  {t:"Schreibziel",k:"ziel;wortzahl;schreibziel;sitzung",b:`
 <p><b>Werkzeuge &rsaquo; Schreibziel festlegen</b> stellt einen kleinen Zähler neben die
 Wortzahl in der Statuszeile — <i>640 / 1.000</i> mit einem dezenten Balken.</p>
-<p>Gezählt wird, was du <b>seit dem Einschalten oder Zurücksetzen</b> geschrieben hast, über
+<p>Gezählt wird, was du <b>seit „Ziel starten“ oder „Neu beginnen“</b> geschrieben hast, über
 alle Dokumente hinweg, und es übersteht das Schließen des Programms. Beim Erreichen des Ziels
 geschieht nichts weiter, als dass der Balken grün wird. Es gibt keinen Alarm.</p>
-<p>Ein Klick auf den Zähler ändert das Ziel, setzt es zurück oder schaltet es ab.</p>`},
+<p>Ein Klick auf den Zähler in der Statuszeile öffnet das Ziel wieder: Ziel ändern, <b>Neu beginnen</b> oder mit <b>Ziel beenden</b> ausschalten.</p>`},
 
  {t:"Dokument-Memo",k:"memo;dokumentnotizen;handlungsnotizen",b:`
 <p><b>Ansicht &rsaquo; Dokument-Memo</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd>) öffnet ein
@@ -30615,10 +31011,10 @@ desplazarse y más rápida que buscar.</p>`},
  {t:"Objetivo de escritura",k:"objetivo;recuento de palabras;meta;sesión",b:`
 <p><b>Herramientas &rsaquo; Definir objetivo de escritura</b> pone un pequeño contador junto al
 recuento de palabras en la barra de estado —<i>640 / 1.000</i> con una barra discreta.</p>
-<p>Cuenta lo que has escrito <b>desde que activaste el objetivo o lo reiniciaste</b>, en todos
+<p>Cuenta lo que has escrito <b>desde «Iniciar objetivo» o «Empezar de nuevo»</b>, en todos
 los documentos, y sobrevive al cierre del programa. No pasa nada al alcanzar la meta, salvo que
 la barra se pone verde. No hay ninguna alarma.</p>
-<p>Haz clic en el contador para cambiar la meta, reiniciarla o desactivarla.</p>`},
+<p>Un clic en el contador de la barra de estado vuelve a abrir el objetivo: cambiar la meta, <b>Empezar de nuevo</b> o desactivarlo con <b>Terminar objetivo</b>.</p>`},
 
  {t:"Memoria del documento",k:"memo;notas del documento;notas de trama",b:`
 <p><b>Vista &rsaquo; Memo del documento</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>T</kbd>) abre un
@@ -31268,10 +31664,10 @@ e mais rápido que buscar.</p>`},
  {t:"Meta de escrita",k:"meta;contagem de palavras;objetivo;sessão",b:`
 <p><b>Ferramentas &rsaquo; Definir meta de escrita</b> põe um pequeno contador ao lado da
 contagem de palavras na barra de status —<i>640 / 1.000</i> com uma barra discreta.</p>
-<p>Ele conta o que você escreveu <b>desde que ativou a meta ou a redefiniu</b>, em todos os
+<p>Ele conta o que você escreveu <b>desde “Iniciar meta” ou “Recomeçar”</b>, em todos os
 documentos, e sobrevive ao fechamento do programa. Nada acontece quando você atinge o objetivo,
 a não ser que a barra fica verde. Não há alarme.</p>
-<p>Clique no contador para mudar o objetivo, redefini-lo ou desligá-lo.</p>`},
+<p>Um clique no contador da barra de status abre a meta de novo: mudar o objetivo, <b>Recomeçar</b> ou desligá-la com <b>Encerrar meta</b>.</p>`},
 
  {t:"Memorando do documento",k:"memorando;notas do documento;notas de enredo",b:`
 <p><b>Exibir &rsaquo; Memorando do documento</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
@@ -31942,10 +32338,10 @@ que de faire défiler et plus rapide que de chercher.</p>`},
  {t:"Objectif d'écriture",k:"objectif;nombre de mots;cible;session",b:`
 <p><b>Outils &rsaquo; Définir un objectif d'écriture</b> place un petit compteur à côté du
 nombre de mots dans la barre d'état — <i>640 / 1 000</i> avec une barre discrète.</p>
-<p>Il compte ce que vous avez écrit <b>depuis que vous avez activé l'objectif ou l'avez
-réinitialisé</b>, sur tous les documents, et survit à la fermeture du programme. Rien ne se
+<p>Il compte ce que vous avez écrit <b>depuis « Démarrer l'objectif » ou
+« Recommencer »</b>, sur tous les documents, et survit à la fermeture du programme. Rien ne se
 passe quand vous atteignez la cible, sinon que la barre devient verte. Il n'y a pas d'alarme.</p>
-<p>Cliquez sur le compteur pour changer la cible, la réinitialiser ou la désactiver.</p>`},
+<p>Un clic sur le compteur de la barre d'état rouvre l'objectif : changer la cible, <b>Recommencer</b> ou le désactiver avec <b>Arrêter l'objectif</b>.</p>`},
 
  {t:"Mémo du document",k:"mémo;notes du document;notes d'intrigue",b:`
 <p><b>Affichage &rsaquo; Mémo du document</b> (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>T</kbd>) ouvre
@@ -32596,10 +32992,10 @@ i szybszy niż wyszukiwanie.</p>`},
  {t:"Cel pisania",k:"cel;liczba słów;norma;sesja",b:`
 <p><b>Narzędzia &rsaquo; Ustaw cel pisania</b> umieszcza mały licznik obok liczby słów w pasku
 stanu — <i>640 / 1 000</i> z dyskretnym paskiem.</p>
-<p>Liczy to, co napisano <b>od włączenia celu lub jego wyzerowania</b>, we wszystkich
+<p>Liczy to, co napisano <b>od „Rozpocznij cel” lub „Zacznij od nowa”</b>, we wszystkich
 dokumentach, i przetrwa zamknięcie programu. Po osiągnięciu celu nic się nie dzieje poza tym, że
 pasek robi się zielony. Nie ma żadnego alarmu.</p>
-<p>Kliknij licznik, aby zmienić normę, wyzerować ją lub wyłączyć.</p>`},
+<p>Kliknięcie licznika na pasku stanu ponownie otwiera cel: zmień normę, wybierz <b>Zacznij od nowa</b> albo wyłącz go przyciskiem <b>Zakończ cel</b>.</p>`},
 
  {t:"Notatka do dokumentu",k:"notatka;notatki do dokumentu;notatki fabularne",b:`
 <p><b>Widok &rsaquo; Notatka do dokumentu</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>)
@@ -33253,10 +33649,10 @@ scorrimento e più rapido della ricerca.</p>`},
 <p><b>Strumenti &rsaquo; Imposta un obiettivo di scrittura</b> mette un piccolo contatore
 accanto al conteggio delle parole nella barra di stato — <i>640 / 1.000</i> con una barra
 discreta.</p>
-<p>Conta ciò che hai scritto <b>da quando hai attivato l'obiettivo o l'hai azzerato</b>, in
+<p>Conta ciò che hai scritto <b>da «Avvia obiettivo» o «Ricomincia»</b>, in
 tutti i documenti, e sopravvive alla chiusura del programma. Quando raggiungi il traguardo non
 succede nulla, se non che la barra diventa verde. Non c'è alcun allarme.</p>
-<p>Fai clic sul contatore per cambiare il traguardo, azzerarlo o disattivarlo.</p>`},
+<p>Un clic sul contatore nella barra di stato riapre l'obiettivo: cambia il traguardo, <b>Ricomincia</b> o disattivalo con <b>Termina obiettivo</b>.</p>`},
 
  {t:"Promemoria del documento",k:"promemoria;note del documento;note sulla trama",b:`
 <p><b>Vista &rsaquo; Promemoria del documento</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>T</kbd>)

@@ -171,6 +171,24 @@ ipcMain.handle("pqw:openFiles", async (e, opts = {}) => {
   return Promise.all(filePaths.map(leseDatei));
 });
 
+/* „Zuletzt verwendet“ öffnet über den gemerkten Pfad. Die Brücke liest damit
+   ohne Dialog — darum nur Dateien mit einer Endung, die PureQuill selbst
+   öffnet, und nur echte Dateien; alles andere ergibt null wie eine fehlende. */
+const ZULETZT_ENDUNGEN = new Set(["docx", "docm", "dotx", "dotm", "doc", "dot", "odt", "ott", "fodt",
+  "rtf", "txt", "text", "md", "markdown", "html", "htm", "pqw", "json"]);
+function zuletztErlaubt(fp) {
+  if (typeof fp !== "string" || !path.isAbsolute(fp)) return false;
+  return ZULETZT_ENDUNGEN.has(path.extname(fp).slice(1).toLowerCase());
+}
+ipcMain.handle("pqw:readPath", async (e, fp) => {
+  if (!zuletztErlaubt(fp)) return null;
+  try { if (!statSync(fp).isFile()) return null; return await leseDatei(fp); } catch { return null; }
+});
+ipcMain.handle("pqw:pathsExist", (e, list) =>
+  (Array.isArray(list) ? list.slice(0, 50) : []).map(fp => {
+    try { return zuletztErlaubt(fp) && statSync(fp).isFile(); } catch { return false; }
+  }));
+
 /* pfad: damit „Speichern“ in eine geöffnete .docx zurückschreiben kann. */
 async function leseDatei(fp) {
   const buf = await fs.readFile(fp);

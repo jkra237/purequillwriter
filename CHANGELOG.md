@@ -72,6 +72,70 @@ immer genau einen Commit, der sie anfasst.
 
 Derzeit nichts.
 
+### Neu
+
+- **Zuletzt verwendet** (Tom, wie Word und LibreOffice): Dateien, die man
+  geöffnet oder gespeichert hat, stehen im Startfenster (alle Reiter
+  geschlossen) und unter Datei › Zuletzt verwendet ›. Das Startfenster wird
+  dann zweispaltig — links „Neues Dokument“ und „Datei öffnen…“, rechts die
+  Liste mit Dateityp, Name, Ordner (die letzten zwei Stufen, ohne den
+  Benutzerordner) und einem Datum wie „heute 14:20“, „gestern“, „28.10.“;
+  Sprache und Farbschema als kleine Zeile darunter. Ohne Liste (allererster
+  Start, Firefox) bleibt es beim bisherigen Fenster. Einträge einzeln (×,
+  Entf) oder alle entfernen, Suche ab neun Einträgen, Pfeiltasten und
+  Eingabe; im Menü die neun jüngsten, die Ziffer öffnet. Fehlende Dateien
+  stehen durchgestrichen da („Nicht gefunden – verschoben oder gelöscht?“).
+  Eine schon offene .docx/.odt/.rtf öffnet keinen zweiten Reiter.
+  - Desktop: Pfad, gelesen über zwei neue Brückenaufrufe `readPath` und
+    `pathsExist` — main.js lässt nur Dokument-Endungen und echte Dateien zu.
+  - Browser (Chrome/Edge): Datei-Handle in der IndexedDB (`zuletzt:<id>`),
+    beim Öffnen einmal die Frage nach dem Lesezugriff.
+  - `S.zuletzt` höchstens 15 Einträge; Sicherungen (.pqw) zählen nicht,
+    Dateien, die sich nicht laden ließen, auch nicht.
+
+### Geändert
+
+- **Schreibziel mit „Ziel starten“ und „Ziel beenden“ statt Häkchen** (Toms
+  Wahl „A“): Bisher schaltete ein Häkchen „Ziel aktiv“ das Ziel ein — wer
+  nur eine Zahl wählte, hatte kein Ziel und merkte es nicht. Ohne Ziel
+  stehen unten „Schließen“ und „Ziel starten“; läuft es, trägt der Titel
+  das Schildchen „läuft“, unten stehen links abgesetzt „Ziel beenden“,
+  rechts „Neu beginnen“ (vorher „Zurücksetzen“ neben dem Fortschritt) und
+  „Fertig“. Die Knöpfe nehmen dem Zahlenfeld den Fokus nicht und lesen die
+  getippte Zahl selbst — sonst baute das change beim Verlassen des Feldes
+  den Dialog neu, bevor der Klick ankam. Texte und Hilfe in sieben Sprachen.
+- **Klick auf die Zeichenzahl öffnet „Wörter zählen“**, wie schon die
+  Wortzahl.
+- **Notizenzahl in der Statuszeile zählt nur dieses Dokument und führt zu
+  seinen Notizen** (Toms Wahl): Bisher stand dort die Zahl aller Notizen
+  aus allen Dokumenten, neben Wort- und Seitenzahl dieses Dokuments las sie
+  sich wie dessen Notizen. Jetzt zählt sie die hier angehefteten
+  (`notizHinweis`), mit Einzahl („1 Notiz“, polnisch auch 2–4/5+), und ein
+  Klick öffnet die Notizen-Ansicht mit „Im ausgewählten Dokument“ — bei 0
+  mit „Alle“.
+
+### Behoben
+
+- **Startfenster auch mit Notizen** (Tom): Wer Notizen oder ein Glossar
+  hatte, alle Reiter schloss und das Programm beendete, bekam beim nächsten
+  Start statt des Startfensters ein leeres, unbenanntes Dokument —
+  `isTrulyEmpty()` zählte Notizen und Glossar mit. Jetzt zählt nur, ob ein
+  Dokument offen ist; wer zuletzt in der Notizen- oder Glossaransicht war,
+  landet weiter dort.
+- **Klicks in der Statuszeile kamen nicht an** (Tom: Zielbalken öffnet das
+  Schreibziel nicht): Der Klick nimmt dem Text den Fokus, das baut die
+  Statuszeile neu, und Chrome schickt keinen click, wenn das gedrückte
+  Element beim Loslassen nicht mehr im Dokument steht. Betraf Zielbalken,
+  Wort- und Zeichenzahl, solange die Schreibmarke im Text stand. Die Zeile
+  merkt sich jetzt beim Drücken das Element und gibt den Klick beim
+  Loslassen an dessen Nachfolger mit derselben id weiter.
+- **Zahlenfeld der Kopf-/Fußzeilenleiste in dunklen Schemata unsichtbar**
+  (Tom): „Von oben“/„Von unten“ hatte keinen eigenen Hintergrund, der
+  Browser malte es weiß, und die helle Schrift von Enzian, Tinte, Zyan,
+  Bernstein und Phosphor stand mit Kontrast 1,1–1,8 darauf. Eingabefelder
+  aller Kontextleisten (`.imgbar`) nehmen jetzt Papier, Tinte und Linie des
+  Schemas; gemessen über alle 17 Schemata mindestens 9,35:1.
+
 ---
 
 ## 1.5.0 — 2026-10-28

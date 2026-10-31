@@ -34,5 +34,11 @@ contextBridge.exposeInMainWorld("pqwDesktop", {
      startDateien holt die vom ersten Start ab (einmalig), onDateien meldet
      die eines zweiten Starts, während das Fenster schon offen ist. */
   startDateien: () => ipcRenderer.invoke("pqw:startDateien"),
+
+  /* „Zuletzt verwendet“: eine Datei aus der Liste wieder lesen (gleiche Form
+     wie openFiles, null wenn sie fehlt) und nachsehen, welche es noch gibt.
+     main.js lässt nur Dokument-Endungen zu. */
+  readPath: (p) => ipcRenderer.invoke("pqw:readPath", p),
+  pathsExist: (list) => ipcRenderer.invoke("pqw:pathsExist", list),
   onDateien: (cb) => { ipcRenderer.on("pqw:dateien", (_e, list) => cb(list)); }
 });
