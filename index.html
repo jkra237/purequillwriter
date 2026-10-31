@@ -1419,9 +1419,30 @@ body.focus .outline{display:none}
 .modal.wide{width:min(600px,94vw)}
 /* Startfenster mit „Zuletzt verwendet“: links die Handlungen, rechts die Liste */
 .modal.startzl{width:min(720px,94vw)}
-.startzl .stmarke{display:inline-flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;
+/* Willkommensfenster des ersten Starts: ein Takt von 14px um jede Linie.
+   Vorher hatten beide Einstellungszeilen oben 8, unten 12 Pixel und dazu
+   unterschiedliche Außenabstände (12/14) — der Abstand über und unter jeder
+   Linie war verschieden (Tom). */
+.modal .pad.wkpad{padding-top:4px}
+.setrow.wkzeile{padding:14px 0;margin:0}
+/* Beide Auswahlfelder gleich breit und bündig. Die Farbvorschau sitzt im
+   Kasten des Farbschemas hinter dem Namen (Tom); gemessen passt auch der
+   längste Name („Neblina ensolarada“, 119px) mit Luft hinein. */
+.wkzeile .ctl{width:230px}
+.wkzeile .ctl select{flex:1 1 0;min-width:0}
+.modal .wkwahl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;padding:0 8px 0 0;
+  background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);cursor:pointer}
+.modal .wkwahl:focus-within{border-color:var(--ink-soft)}
+.modal .wkwahl select{border:0;background:transparent;outline:none;padding-left:7px}
+.wkflagge svg{width:100%;height:100%;display:block}
+.wkfarbe{flex:0 0 36px;height:21px;border-radius:2px;overflow:hidden;display:flex;border:1px solid var(--rule)}
+.wkfrage{margin:16px 0 12px;font-family:Georgia,serif;font-size:14px;line-height:1.5;color:var(--ink-soft)}
+.wkknoepfe{display:flex;gap:10px}
+.wkfuss{border-top:1px solid var(--rule);margin-top:16px;padding-top:14px;
+  font-family:Georgia,serif;font-size:13px;line-height:1.5;color:var(--ink-soft)}
+.stmarke{display:inline-flex;align-items:center;gap:10px;font-family:Georgia,serif;font-size:17px;
   letter-spacing:0;text-transform:none;color:var(--ink)}
-.startzl .stmarke svg{width:26px;height:26px;border-radius:6px;flex:none}
+.stmarke svg{width:26px;height:26px;border-radius:6px;flex:none}
 .stspalten{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:330px}
 .stlinks{display:flex;flex-direction:column;gap:8px;padding:18px;border-right:1px solid var(--rule)}
 .stlinks .btn{padding:11px 12px;text-align:left}
@@ -3546,6 +3567,7 @@ en:{
   "Allgemein":"General",
   "Speichern":"Saving",
   "Willkommen":"Welcome",
+  "Willkommen bei PureQuill Writer":"Welcome to PureQuill Writer",
   "Sprache":"Language",
   "Wie möchtest du beginnen?":"How would you like to start?",
   "Über PureQuill Writer":"About PureQuill Writer",
@@ -4568,6 +4590,7 @@ fr:{
   "Allgemein":"Général",
   "Speichern":"Enregistrement",
   "Willkommen":"Bienvenue",
+  "Willkommen bei PureQuill Writer":"Bienvenue dans PureQuill Writer",
   "Sprache":"Langue",
   "Wie möchtest du beginnen?":"Comment souhaitez-vous commencer ?",
   "Über PureQuill Writer":"À propos de PureQuill Writer",
@@ -5590,6 +5613,7 @@ es:{
   "Allgemein":"General",
   "Speichern":"Guardado",
   "Willkommen":"Bienvenido",
+  "Willkommen bei PureQuill Writer":"Bienvenido a PureQuill Writer",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"¿Cómo quieres empezar?",
   "Über PureQuill Writer":"Acerca de PureQuill Writer",
@@ -6612,6 +6636,7 @@ pt:{
   "Allgemein":"Geral",
   "Speichern":"Salvamento",
   "Willkommen":"Bem-vindo",
+  "Willkommen bei PureQuill Writer":"Bem-vindo ao PureQuill Writer",
   "Sprache":"Idioma",
   "Wie möchtest du beginnen?":"Como você quer começar?",
   "Über PureQuill Writer":"Sobre o PureQuill Writer",
@@ -7634,6 +7659,7 @@ pl:{
   "Allgemein":"Ogólne",
   "Speichern":"Zapisywanie",
   "Willkommen":"Witamy",
+  "Willkommen bei PureQuill Writer":"Witamy w PureQuill Writer",
   "Sprache":"Język",
   "Wie möchtest du beginnen?":"Jak chcesz zacząć?",
   "Über PureQuill Writer":"O programie PureQuill Writer",
@@ -8667,6 +8693,7 @@ it:{
   "Allgemein":"Generale",
   "Speichern":"Salvataggio",
   "Willkommen":"Benvenuto",
+  "Willkommen bei PureQuill Writer":"Benvenuto in PureQuill Writer",
   "Sprache":"Lingua",
   "Wie möchtest du beginnen?":"Come vuoi iniziare?",
   "Über PureQuill Writer":"Informazioni su PureQuill Writer",
@@ -8864,6 +8891,21 @@ function mpfad(...schluessel){
    Lesezugriff. Firefox kann beides nicht — dort gibt es die Liste nicht.
    Sicherungen (.pqw) zählen nicht: das sind keine Dokumente. */
 /* Symbole der Startknöpfe: Blatt mit Plus, offener Ordner */
+/* Das Programmsymbol (icon.svg) für die Kopfzeile beider Startfenster —
+   eingebettet, weil die Browser-Fassung nur index.html hochlädt */
+const ST_LOGO='<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <rect width="512" height="512" rx="96" fill="#8C3B2E"/> <g transform="translate(256 256) scale(2.0586) translate(-27.4 -117)"> <path d="M90.4 20C90.4 96 36.4 150 -17.6 186C-28.4 134 -3.2 62 90.4 20Z" fill="#FCFBF8"/> <path d="M40 114C23.8 137 4 161 -12.2 181" stroke="#8C3B2E" stroke-width="7" stroke-linecap="round" fill="none"/> <path d="M-17.6 186 -35.6 214" stroke="#EAE8E0" stroke-width="11" stroke-linecap="round"/> </g> </svg>';
+/* Flaggen im Willkommensfenster, im Format der Farbvorschau (36×21).
+   Flaggen stehen für Länder, nicht Sprachen — gewählt nach unserer Fassung
+   und den Store-Einträgen: en-US, es-ES, pt-BR (Tom, 2026-10-31). */
+const FLAGGE={
+  de:'<svg viewBox="0 0 1 3" preserveAspectRatio="none"><rect y="0" width="1" height="1" fill="#000"/><rect y="1" width="1" height="1" fill="#DD0000"/><rect y="2" width="1" height="1" fill="#FFCE00"/></svg>',
+  en:'<svg viewBox="0 0 36 21"><rect y="0.00" width="36" height="1.64" fill="#B22234"/><rect y="1.62" width="36" height="1.64" fill="#FFF"/><rect y="3.23" width="36" height="1.64" fill="#B22234"/><rect y="4.85" width="36" height="1.64" fill="#FFF"/><rect y="6.46" width="36" height="1.64" fill="#B22234"/><rect y="8.08" width="36" height="1.64" fill="#FFF"/><rect y="9.69" width="36" height="1.64" fill="#B22234"/><rect y="11.31" width="36" height="1.64" fill="#FFF"/><rect y="12.92" width="36" height="1.64" fill="#B22234"/><rect y="14.54" width="36" height="1.64" fill="#FFF"/><rect y="16.15" width="36" height="1.64" fill="#B22234"/><rect y="17.77" width="36" height="1.64" fill="#FFF"/><rect y="19.38" width="36" height="1.64" fill="#B22234"/><rect width="14.4" height="11.31" fill="#3C3B6E"/><circle cx="2" cy="2" r=".55" fill="#FFF"/><circle cx="5.470000000000001" cy="2" r=".55" fill="#FFF"/><circle cx="8.940000000000001" cy="2" r=".55" fill="#FFF"/><circle cx="12.41" cy="2" r=".55" fill="#FFF"/><circle cx="2" cy="5.65" r=".55" fill="#FFF"/><circle cx="5.470000000000001" cy="5.65" r=".55" fill="#FFF"/><circle cx="8.940000000000001" cy="5.65" r=".55" fill="#FFF"/><circle cx="12.41" cy="5.65" r=".55" fill="#FFF"/><circle cx="2" cy="9.3" r=".55" fill="#FFF"/><circle cx="5.470000000000001" cy="9.3" r=".55" fill="#FFF"/><circle cx="8.940000000000001" cy="9.3" r=".55" fill="#FFF"/><circle cx="12.41" cy="9.3" r=".55" fill="#FFF"/></svg>',
+  fr:'<svg viewBox="0 0 3 1" preserveAspectRatio="none"><rect x="0" width="1" height="1" fill="#002395"/><rect x="1" width="1" height="1" fill="#FFF"/><rect x="2" width="1" height="1" fill="#ED2939"/></svg>',
+  es:'<svg viewBox="0 0 1 4" preserveAspectRatio="none"><rect width="1" height="4" fill="#AA151B"/><rect y="1" width="1" height="2" fill="#F1BF00"/></svg>',
+  it:'<svg viewBox="0 0 3 1" preserveAspectRatio="none"><rect x="0" width="1" height="1" fill="#009246"/><rect x="1" width="1" height="1" fill="#FFF"/><rect x="2" width="1" height="1" fill="#CE2B37"/></svg>',
+  pl:'<svg viewBox="0 0 1 2" preserveAspectRatio="none"><rect y="0" width="1" height="1" fill="#FFF"/><rect y="1" width="1" height="1" fill="#DC143C"/></svg>',
+  pt:'<svg viewBox="0 0 36 21"><rect width="36" height="21" fill="#009C3B"/><path d="M18 2.2 33.6 10.5 18 18.8 2.4 10.5Z" fill="#FFDF00"/><circle cx="18" cy="10.5" r="5" fill="#002776"/></svg>'
+};
 const ST_NEU='<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z"/><path d="M13 3v6h6"/><path d="M12 12v6M9 15h6"/>';
 const ST_AUF='<path d="M3 7a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v1"/><path d="M3 7v10a2 2 0 0 0 2 2h12.5a2 2 0 0 0 1.9-1.4L21.8 12a1.5 1.5 0 0 0-1.4-2H7.6a2 2 0 0 0-1.9 1.4L3 19"/>';
 const ZL_MAX=15,ZLKEY=id=>"zuletzt:"+id;
@@ -8984,7 +9026,7 @@ function zlZeilen(liste){
    den Einstellungen, und das Fenster bleibt ganz bei den Dokumenten. */
 function startZuletzt(){
   const liste=zlListe();
-  overlay(`<div class="modal startzl"><h3><span class="stmarke"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <rect width="512" height="512" rx="96" fill="#8C3B2E"/> <g transform="translate(256 256) scale(2.0586) translate(-27.4 -117)"> <path d="M90.4 20C90.4 96 36.4 150 -17.6 186C-28.4 134 -3.2 62 90.4 20Z" fill="#FCFBF8"/> <path d="M40 114C23.8 137 4 161 -12.2 181" stroke="#8C3B2E" stroke-width="7" stroke-linecap="round" fill="none"/> <path d="M-17.6 186 -35.6 214" stroke="#EAE8E0" stroke-width="11" stroke-linecap="round"/> </g> </svg> PureQuill Writer</span>
+  overlay(`<div class="modal startzl"><h3><span class="stmarke">${ST_LOGO} PureQuill Writer</span>
       <button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3>
     <div class="stspalten">
       <div class="stlinks">
@@ -9024,25 +9066,23 @@ function startZuletzt(){
 }
 function startupDialog(){
   if(zlListe().length)return startZuletzt();
-  overlay(`<div class="modal"><h3>${tr("Willkommen")}<button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad">
-    <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:12px">
+  overlay(`<div class="modal"><h3><span class="stmarke">${ST_LOGO}${tr("Willkommen bei PureQuill Writer")}</span><button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad wkpad">
+    <div class="setrow wkzeile">
       <label>${tr("Sprache")}</label><div class="ctl">
-        <select id="stLang">${UI_LANGS.map(([v,n])=>
-          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></div></div>
-    <div class="setrow" style="border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:14px">
+        <label class="wkwahl"><select id="stLang" aria-label="${esc(tr("Sprache"))}">${UI_LANGS.map(([v,n])=>
+          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select>${
+          FLAGGE[S.settings.uiLang]?`<span class="wkfarbe wkflagge" aria-hidden="true">${FLAGGE[S.settings.uiLang]}</span>`:""}</label></div></div>
+    <div class="setrow wkzeile">
       <label>${tr("Farbschema")}</label><div class="ctl">
-        <span id="stSwatch" style="flex:0 0 30px;height:22px;border:1px solid var(--rule);border-radius:2px;overflow:hidden;display:flex"></span>
-        <select id="stTheme">${THEMES.map(t=>
-          `<option value="${t.k}" ${S.settings.theme===t.k?"selected":""}>${tr(t.n)}</option>`).join("")}</select>
+        <label class="wkwahl"><select id="stTheme" aria-label="${esc(tr("Farbschema"))}">${THEMES.map(t=>
+          `<option value="${t.k}" ${S.settings.theme===t.k?"selected":""}>${tr(t.n)}</option>`).join("")}</select><span id="stSwatch" class="wkfarbe"></span></label>
       </div></div>
-    <p style="margin:0 0 14px;font-family:Georgia,serif;font-size:14px;line-height:1.55;color:var(--ink-soft)">
-      ${tr("Wie möchtest du beginnen?")}</p>
-    <div style="display:flex;gap:10px">
+    <p class="wkfrage">${tr("Wie möchtest du beginnen?")}</p>
+    <div class="wkknoepfe">
       <button class="btn pri sticon" id="stNew" style="flex:1;padding:11px;justify-content:center">${ICO(ST_NEU)}${tr("Neues Dokument")}</button>
       <button class="btn sticon" id="stOpen" style="flex:1;padding:11px;justify-content:center">${ICO(ST_AUF)}${tr("Datei öffnen")}</button>
     </div>
-    <div style="border-top:1px solid var(--rule);margin-top:14px;padding-top:12px;
-      font-family:Georgia,serif;font-size:13px;line-height:1.5;color:var(--ink-soft)">
+    <div class="wkfuss">
       <p style="margin:0">${tr("Dein Text wird laufend auf diesem Gerät gespeichert und ist beim nächsten Start wieder da.")}
         ${tr("Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:")}
         <a id="stSave" style="color:var(--stamp);text-decoration:underline;cursor:pointer"
