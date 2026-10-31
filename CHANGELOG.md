@@ -122,8 +122,9 @@ Derzeit nichts.
     und unter jedem Feld, 16 an den Linien zu Frage und Fußtext. Die
     Auswahl von Sprache und Farbschema ist gleich breit und steht bündig
     übereinander, beide bis zur Kante der Knöpfe und gleich hoch; die
-    Farbvorschau sitzt im Kasten des Farbschemas hinter dem Namen. Auch der längste Name
-    („Neblina ensolarada“) passt ganz hinein. Im Sprachkasten steht im
+    Farbvorschau sitzt im Kasten des Farbschemas vor dem Namen (Toms Wahl
+    gegen „dahinter“; die Namen beginnen so genau untereinander). Auch der längste Name
+    („Neblina ensolarada“) passt ganz hinein. Im Sprachkasten steht davor im
     selben Format (36×21) die Flagge der Sprache (`FLAGGE`, eingebettete
     SVG); Englisch, Spanisch und Portugiesisch nach unserer Fassung und den
     Store-Einträgen: USA, Spanien, Brasilien.

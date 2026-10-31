@@ -1425,15 +1425,16 @@ body.focus .outline{display:none}
    Linie war verschieden (Tom). */
 .modal .pad.wkpad{padding-top:4px}
 .setrow.wkzeile{padding:14px 0;margin:0}
-/* Beide Auswahlfelder gleich breit und bündig. Die Farbvorschau sitzt im
-   Kasten des Farbschemas hinter dem Namen (Tom); gemessen passt auch der
-   längste Name („Neblina ensolarada“, 119px) mit Luft hinein. */
+/* Beide Auswahlfelder gleich breit und bündig. Flagge und Farbvorschau
+   stehen im Kasten vor dem Namen (Toms Wahl gegen „dahinter“): das Bild
+   erkennt man zuerst, und die Namen beginnen genau untereinander. Gemessen
+   passt auch der längste Name („Neblina ensolarada“, 119px) hinein. */
 .wkzeile .ctl{width:230px}
 .wkzeile .ctl select{flex:1 1 0;min-width:0}
-.modal .wkwahl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;padding:0 8px 0 0;
+.modal .wkwahl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;padding:0 0 0 8px;
   background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);cursor:pointer}
 .modal .wkwahl:focus-within{border-color:var(--ink-soft)}
-.modal .wkwahl select{border:0;background:transparent;outline:none;padding-left:7px}
+.modal .wkwahl select{border:0;background:transparent;outline:none;padding-left:0}
 .wkflagge svg{width:100%;height:100%;display:block}
 .wkfarbe{flex:0 0 36px;height:21px;border-radius:2px;overflow:hidden;display:flex;border:1px solid var(--rule)}
 .wkfrage{margin:16px 0 12px;font-family:Georgia,serif;font-size:14px;line-height:1.5;color:var(--ink-soft)}
@@ -9101,13 +9102,13 @@ function startupDialog(){
   overlay(`<div class="modal"><h3><span class="stmarke">${ST_LOGO}${tr("Willkommen bei PureQuill Writer")}</span><button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad wkpad">
     <div class="setrow wkzeile">
       <label>${tr("Sprache")}</label><div class="ctl">
-        <label class="wkwahl"><select id="stLang" aria-label="${esc(tr("Sprache"))}">${UI_LANGS.map(([v,n])=>
-          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select>${
-          FLAGGE[S.settings.uiLang]?`<span class="wkfarbe wkflagge" aria-hidden="true">${FLAGGE[S.settings.uiLang]}</span>`:""}</label></div></div>
+        <label class="wkwahl">${
+          FLAGGE[S.settings.uiLang]?`<span class="wkfarbe wkflagge" aria-hidden="true">${FLAGGE[S.settings.uiLang]}</span>`:""}<select id="stLang" aria-label="${esc(tr("Sprache"))}">${UI_LANGS.map(([v,n])=>
+          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
     <div class="setrow wkzeile">
       <label>${tr("Farbschema")}</label><div class="ctl">
-        <label class="wkwahl"><select id="stTheme" aria-label="${esc(tr("Farbschema"))}">${THEMES.map(t=>
-          `<option value="${t.k}" ${S.settings.theme===t.k?"selected":""}>${tr(t.n)}</option>`).join("")}</select><span id="stSwatch" class="wkfarbe"></span></label>
+        <label class="wkwahl"><span id="stSwatch" class="wkfarbe"></span><select id="stTheme" aria-label="${esc(tr("Farbschema"))}">${THEMES.map(t=>
+          `<option value="${t.k}" ${S.settings.theme===t.k?"selected":""}>${tr(t.n)}</option>`).join("")}</select></label>
       </div></div>
     <p class="wkfrage">${tr("Wie möchtest du beginnen?")}</p>
     <div class="wkknoepfe">
