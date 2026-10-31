@@ -423,6 +423,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-vis
   border-radius:var(--radius);background:none;cursor:pointer}
 .tb svg{pointer-events:none}
 .mi .tico{display:inline-flex;align-items:center;justify-content:center;flex:0 0 18px;width:18px;color:var(--ink-soft)}
+/* Alle Menüs so dicht wie Word (gemessen an Toms Bildschirmfotos: Word 24px
+   je Eintrag, LibreOffice 20px; vorher 31px mit 14px-Schrift und Trennlinien
+   von 9px). Erst das Rechtsklick-Menü, dann auf Toms Wort auch die Menüs
+   oben, damit es nicht zwei Menügrößen nebeneinander gibt. */
+.menu{padding:3px}
+.menu .mi{padding:3px 8px;font-size:13px;line-height:18px}
+.menu .msep{margin:2px 4px}
+.menu .mlabel{padding:7px 8px 3px}
+.mi[disabled] .tico{opacity:.45}
+/* Symbole in den Menüs oben; eingeschaltet = Rahmen ums Symbol statt Häkchen */
+.menu .mi .chk.mico{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;flex:0 0 22px;
+  margin:-2px 0 -2px -2px;border-radius:4px;color:var(--ink-soft)}
+.menu .mi .chk.mico.an{background:color-mix(in srgb,var(--stamp) 16%,transparent);
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--stamp) 55%,transparent)}
 /* Gruppen trennt Abstand statt einer Linie: 7px Lücke innerhalb einer Gruppe,
    gut das Dreifache dazwischen. Das Element bleibt, nur unsichtbar. */
 .sep{width:12px;height:17px;background:none;flex:none}
@@ -20873,7 +20887,7 @@ function fileMenu(){
     <div class="msep"></div>
     <button class="mi" data-act="help"><span class="chk"></span>${tr("Hilfe")}<span class="k">F1</span></button>
     <button class="mi" data-act="about"><span class="chk"></span>${tr("Über PureQuill Writer&hellip;")}</button>`;
-  $(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
+  menuSymbole(m);$(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
   menuUnterKnopf(m,$("#fileBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-act]");if(!b)return;
@@ -21043,7 +21057,7 @@ function viewMenu(){
     <button class="mi" data-v="theme"><span class="chk"></span>${tr("Farbschema&hellip;")}<span class="k">${tr((THEMES.find(t=>t.k===S.settings.theme)||THEMES[0]).n)}</span></button>
     <button class="mi" data-v="marks"><span class="chk">${c(S.marks)}</span>${tr("Glossarbegriffe markieren")}</button>
     <button class="mi" data-v="dim"><span class="chk">${c(S.settings.dimUi)}</span>${tr("Oberfläche ausblenden")}</button>`;
-  $(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
+  menuSymbole(m);$(".topbar").appendChild(m);$("#viewBtn").classList.add("on");
   menuUnterKnopf(m,$("#viewBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-v]");if(!b)return;
@@ -21097,7 +21111,7 @@ function formatMenu(){
     <button class="mi" data-f="spalten"><span class="chk"></span>${tr("Spalten")}&hellip;</button>
     <div class="msep"></div>
     <button class="mi" data-f="clear"><span class="chk"></span>${tr("Formatierung entfernen")}</button>`;
-  $(".topbar").appendChild(m);$("#formatBtn").classList.add("on");armHoverSubs(m);
+  menuSymbole(m);$(".topbar").appendChild(m);$("#formatBtn").classList.add("on");armHoverSubs(m);
   menuUnterKnopf(m,$("#formatBtn"));
   /* Zustand fürs Häkchen im Menü: dieselbe queryCommandState()-Abfrage, die
      schon die Symbolleiste synchron hält (syncToolbarState) - hier nur
@@ -21192,7 +21206,7 @@ function einfuegenMenu(){
     ${S.settings.tofEnabled?`<button class="mi" data-i="tof"><span class="chk"></span>${tr("Abbildungsverzeichnis")}</button>`:""}
     <button class="mi" data-i="hf"><span class="chk"></span>${tr("Kopf- und Fußzeile")}</button>
     <button class="mi" data-i="pnum"><span class="chk"></span>${tr("Seitenzahlen")}&hellip;</button>`;
-  $(".topbar").appendChild(m);$("#insBtn").classList.add("on");
+  menuSymbole(m);$(".topbar").appendChild(m);$("#insBtn").classList.add("on");
   menuUnterKnopf(m,$("#insBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-i]");if(!b)return;
@@ -21229,7 +21243,7 @@ function toolsMenu(){
       S.goal&&S.goal.on?`<span class="k">${goalFmtNum(S.goal.target,S.goal.unit||"words")} ${goalUnitAbbr(S.goal.unit||"words")}</span>`:""}</button>
     <div class="msep"></div>
     <button class="mi" data-t="sig"><span class="chk"></span>${tr("Unterschrift hinzufügen&hellip;")}</button>`;
-  $(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
+  menuSymbole(m);$(".topbar").appendChild(m);$("#toolsBtn").classList.add("on");
   menuUnterKnopf(m,$("#toolsBtn"));
   m.onclick=e=>{
     const b=e.target.closest("[data-t]");if(!b)return;
@@ -21312,6 +21326,10 @@ function contextMenu(e){
       :`<button class="mi" data-c="glolook"><span class="chk"></span>${tr("Im Glossar nachschlagen")}<span class="k">${kz("glossSuch")}</span></button>`}
     <div class="msep"></div>
     <button class="mi" data-c="count"><span class="chk"></span>${tr("Wörter zählen…")}</button>`;
+  /* Farbige Symbole wie bei den Tabelleneinträgen (Tom, 2026-10-31) — in die
+     leere Häkchenspalte, damit die Texte bündig bleiben */
+  m.querySelectorAll(".mi[data-c]").forEach(b=>{const s=b.querySelector(".chk"),k=KTX_ICO[b.dataset.c];
+    if(s&&k&&!s.textContent.trim()&&!s.firstElementChild){s.classList.add("tico");s.innerHTML=ICOSZ(k,18,1.5)}});
   document.body.appendChild(m);armHoverSubs(m);
   menuPlatzieren(m,e.clientX,e.clientY);
   const anchId=onAnch?onAnch.dataset.n:null;
@@ -24469,6 +24487,26 @@ let tblBarFuer=null,tblBarKopf=null;
    violett, Ausrichtung türkis, Breite rosa, Löschen rot. Mitteltöne, die
    auf hellem wie dunklem Schema lesbar bleiben. Leiste und Kontextmenü
    nehmen dieselben Zeichen. */
+/* Symbole des Rechtsklick-Menüs, im Stil von TAB_ICO: Kontur in der Farbe
+   des Schemas, Akzente nach Bedeutung — blau bearbeiten, rot wegnehmen, gelb
+   Ablage und Notizen, lila Absatz, grün hinzufügen, türkis Glossar. */
+const KTX_ICO={
+  undo:'<path d="M9 14 4.5 9.5 9 5" stroke="#2F7BD8" stroke-width="1.9"/><path d="M4.8 9.5H14a5.2 5.2 0 0 1 0 10.4h-3"/>',
+  redo:'<path d="M15 14l4.5-4.5L15 5" stroke="#2F7BD8" stroke-width="1.9"/><path d="M19.2 9.5H10a5.2 5.2 0 0 0 0 10.4h3"/>',
+  cut:'<circle cx="6.5" cy="17.5" r="2.8" stroke="#D64545" stroke-width="1.8"/><circle cx="17.5" cy="17.5" r="2.8" stroke="#D64545" stroke-width="1.8"/><path d="M8.6 15.6 17 4M15.4 15.6 7 4"/>',
+  copy:'<rect x="8.5" y="8.5" width="11.5" height="12.5" rx="1.6" fill="#2F7BD8" fill-opacity=".18" stroke="#2F7BD8"/><path d="M15.5 6V4.6A1.6 1.6 0 0 0 13.9 3H5.6A1.6 1.6 0 0 0 4 4.6v10.3a1.6 1.6 0 0 0 1.6 1.6H7"/>',
+  paste:'<path d="M8 4.5H6.2A1.7 1.7 0 0 0 4.5 6.2v13.1A1.7 1.7 0 0 0 6.2 21h11.6a1.7 1.7 0 0 0 1.7-1.7V6.2a1.7 1.7 0 0 0-1.7-1.7H16"/><rect x="8" y="2.8" width="8" height="3.6" rx="1" fill="#E3A21A" stroke="#C4860C"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" stroke="#E3A21A" stroke-width="1.6"/>',
+  selall:'<rect x="3.5" y="3.5" width="17" height="17" rx="1.5" stroke-dasharray="2.4 2"/><path d="M7.5 8.5h9M7.5 12h9M7.5 15.5h6" stroke="#2F7BD8" stroke-width="1.8"/>',
+  absatz:'<path d="M14 4v16M18 4v16M18 4h-7.5a4.5 4.5 0 0 0 0 9H14" stroke="#7A5AD8" stroke-width="1.8"/>',
+  insmore:'<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M12 8v8M8 12h8" stroke="#3E9B4F" stroke-width="2.1"/>',
+  link:'<path d="M4 4h16v11l-5 5H4z" fill="#F2C94C" fill-opacity=".55" stroke="#C4980C"/><path d="M15 20v-5h5" stroke="#C4980C"/><path d="M7.5 9h9M7.5 12.5h6"/>',
+  goto:'<path d="M3.5 17h17" stroke="#F2C94C" stroke-width="4" stroke-opacity=".7"/><path d="M6 14 10.5 4h3L18 14M8 10h8"/>',
+  unlink:'<path d="M9.5 14.5 7.3 16.7a3.2 3.2 0 0 1-4.5-4.5L5 10M14.5 9.5l2.2-2.2a3.2 3.2 0 0 1 4.5 4.5L19 14"/><path d="M8 4v3M4 8h3M16 20v-3M20 16h-3" stroke="#D64545" stroke-width="1.8"/>',
+  glomore:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z" fill="#159A80" fill-opacity=".2" stroke="#159A80"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8.5 8h6M8.5 11h4" stroke="#159A80" stroke-width="1.7"/>',
+  glolook:'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H17v11"/><path d="M4 4.5v15A1.5 1.5 0 0 0 5.5 21H11"/><circle cx="16" cy="16" r="3.6" stroke="#159A80" stroke-width="1.9"/><path d="M18.6 18.6 21.5 21.5" stroke="#159A80" stroke-width="2"/>',
+  count:'<path d="M5 5v14M9 5v14M13 5v14M17 5v14" /><path d="M3 15.5 19.5 8" stroke="#D0508A" stroke-width="2"/>',
+  tocvis:'<path d="M4 6h10M4 12h16M4 18h12" /><circle cx="18.5" cy="6" r="2" fill="#2F7BD8" stroke="none"/>'
+};
 const TAB_ICO={
   vorlage:'<path d="M3.6 4.6h16.8V9H3.6z" fill="#4E9A2A" stroke="none"/><path d="M3.6 13h16.8v3.4H3.6z" fill="#4E9A2A" opacity=".35" stroke="none"/><rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M3 13h18M3 16.4h18M9 9v11M15 9v11"/>',
   rowAbove:'<path d="M3.5 10.5h17v5h-17z" fill="#3E9B4F" opacity=".22" stroke="none"/><path d="M12 2.2v5.6M9.2 5h5.6" stroke="#3E9B4F" stroke-width="1.9"/><rect x="3" y="10" width="18" height="11" rx="1.5"/><path d="M3 15.5h18M9.5 10v11M14.5 10v11"/>',
@@ -24485,6 +24523,85 @@ const TAB_ICO={
   kopfw:'<path d="M3.6 4.6h16.8v2.9H3.6zM3.6 13.6h16.8v2.9H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/>',
   headToggle:'<path d="M3.6 5.2h16.8v4H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>'
 };
+/* Symbole der Menüs oben (Tom, 2026-10-31), im Stil von KTX_ICO und
+   TAB_ICO. Schlüssel: Menü-Attribut + Wert, z. B. "v:guides" für data-v.
+   Eingeschaltete Einträge zeigen statt des Häkchens einen Rahmen ums
+   Symbol (wie LibreOffice) — menuSymbole(). */
+const MENU_ICO={
+  /* Datei */
+  "act:new":ST_NEU,
+  "act:loaddoc":ST_AUF,
+  "act:zlmore":'<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2" stroke="#2F7BD8" stroke-width="1.9"/>',
+  "act:rename":'<path d="M4 20h4l10.5-10.5-4-4L4 16z" fill="#E3A21A" fill-opacity=".3" stroke="#C4860C"/><path d="M13.5 6.5l4 4"/>',
+  "act:dupl":'<rect x="8.5" y="8.5" width="11.5" height="12.5" rx="1.6" fill="#2F7BD8" fill-opacity=".18" stroke="#2F7BD8"/><path d="M15.5 6V4.6A1.6 1.6 0 0 0 13.9 3H5.6A1.6 1.6 0 0 0 4 4.6v10.3a1.6 1.6 0 0 0 1.6 1.6H7"/>',
+  "act:fmt":'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="M8 7h8v10H8z" stroke="#159A80" stroke-dasharray="2 1.6"/>',
+  "act:print":'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="1.5"/><path d="M7 14h10v7H7z" stroke-width="1.5"/><circle cx="17.5" cy="11.8" r=".9" fill="#3E9B4F" stroke="none"/>',
+  "act:closedoc":'<path d="M5 3h10l4 4v14H5z"/><path d="M9.5 11.5l5 5M14.5 11.5l-5 5" stroke="#D64545" stroke-width="1.9"/>',
+  "act:hist":'<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" /><path d="M3 4v4h4" stroke="#2F7BD8" stroke-width="1.8"/><path d="M12 7.5V12l3 2" stroke="#2F7BD8" stroke-width="1.8"/>',
+  "act:save":'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3" fill="#3E9B4F" stroke="#3E9B4F"/>',
+  "act:auto":'<path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2" stroke="#3E9B4F" stroke-width="1.8"/>',
+  "act:speichern":'<path d="M5 4h11l3 3v13H5z" fill="#2F7BD8" fill-opacity=".15" stroke="#2F7BD8"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+  "act:expmore":'<path d="M5 3h9l5 5v13H5z"/><path d="M14 3v5h5"/><path d="M12 11v7M9 15l3 3 3-3" stroke="#2F7BD8" stroke-width="1.8"/>',
+  "act:bmore":'<rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a1.5 1.5 0 0 0 1.5 1.5h11A1.5 1.5 0 0 0 19 19V9" fill="#E3A21A" fill-opacity=".25" stroke="#C4860C"/><path d="M10 13h4"/>',
+  "act:set":'<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1" stroke="#7A5AD8" stroke-width="1.8"/>',
+  "act:pal":'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10l3 2-3 2" stroke="#2F7BD8" stroke-width="1.8"/><path d="M12 15h5"/>',
+  "act:help":'<circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.9v.5" stroke="#2F7BD8" stroke-width="1.8"/><circle cx="12" cy="17" r="1" fill="#2F7BD8" stroke="none"/>',
+  "act:about":'<circle cx="12" cy="12" r="8.5"/><path d="M12 11v6" stroke="#159A80" stroke-width="2"/><circle cx="12" cy="7.8" r="1.1" fill="#159A80" stroke="none"/>',
+  /* Ansicht */
+  "v:handyseite":'<rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10 18.5h4" stroke="#2F7BD8" stroke-width="1.8"/>',
+  "v:guides":'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 3v18M16 3v18" stroke="#2F7BD8" stroke-dasharray="2 2"/>',
+  "v:outline":'<path d="M4 6h3M4 12h3M4 18h3" stroke="#2F7BD8" stroke-width="2"/><path d="M10 6h10M12 12h8M12 18h8"/>',
+  "v:col":'<rect x="3" y="3" width="12" height="18" rx="1.5"/><path d="M17 6h4v6l-2 2h-2z" fill="#F2C94C" fill-opacity=".6" stroke="#C4980C"/>',
+  "v:amark":'<path d="M3.5 17h17" stroke="#F2C94C" stroke-width="4" stroke-opacity=".7"/><path d="M6 14 10.5 4h3L18 14M8 10h8"/>',
+  "v:focus":'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/><circle cx="12" cy="12" r="2.6" fill="#7A5AD8" stroke="#7A5AD8"/>',
+  "v:fit":'<rect x="6" y="3" width="12" height="18" rx="1.5"/><path d="M2 12h3M19 12h3M3.5 10.5 2 12l1.5 1.5M20.5 10.5 22 12l-1.5 1.5" stroke="#159A80" stroke-width="1.7"/>',
+  "v:read":'<path d="M3 5.5c3-1.3 6-1.3 9 .8 3-2.1 6-2.1 9-.8v13c-3-1.3-6-1.3-9 .8-3-2.1-6-2.1-9-.8z" fill="#2F7BD8" fill-opacity=".14"/><path d="M12 6.3v13.5"/>',
+  "v:pv":'<path d="M5 3h10l4 4v14H5z"/><circle cx="11" cy="12" r="3.2" stroke="#2F7BD8" stroke-width="1.7"/><path d="M13.4 14.4 16.5 17.5" stroke="#2F7BD8" stroke-width="1.9"/>',
+  "v:memo":'<path d="M5 3h10l4 4v14H5z" fill="#F2C94C" fill-opacity=".45" stroke="#C4980C"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4"/>',
+  "v:theme":'<circle cx="12" cy="12" r="8.5"/><circle cx="8.5" cy="10" r="1.6" fill="#D64545" stroke="none"/><circle cx="12.5" cy="7.5" r="1.6" fill="#E3A21A" stroke="none"/><circle cx="15.8" cy="11" r="1.6" fill="#2F7BD8" stroke="none"/><circle cx="10" cy="15" r="1.6" fill="#3E9B4F" stroke="none"/>',
+  "v:marks":'<path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H19v15H5.5A1.5 1.5 0 0 0 4 19.5z" fill="#159A80" fill-opacity=".2" stroke="#159A80"/><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19v-3"/><path d="M8 9h7" stroke="#F2C94C" stroke-width="3"/>',
+  "v:dim":'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 8h18" stroke-opacity=".4"/><path d="M7 12h10M7 15.5h7"/>',
+  /* Format */
+  "f:text":'<path d="M5 20 11 4h2l6 16M7.5 14h9" stroke-width="1.7"/><path d="M4 21.5h16" stroke="#D64545" stroke-width="2"/>',
+  "f:fore":'<path d="M6 17 11 4h2l5 13M8 12.5h8"/><path d="M4 20.5h16" stroke="#D64545" stroke-width="3"/>',
+  "f:hilite":'<path d="m9 15 7.5-9.5 3 2.5L12 17.5z" fill="#F2C94C" fill-opacity=".5" stroke="#C4980C"/><path d="M9 15l-2.5 3h4L12 17.5"/><path d="M3.5 21h17" stroke="#F2C94C" stroke-width="2.6"/>',
+  "f:block":'<path d="M4 5h9M4 9h16M4 13h16M4 17h11" /><path d="M4 5h9" stroke="#7A5AD8" stroke-width="2.6"/>',
+  "f:align":'<path d="M4 5h16M7 9.5h10M4 14h16M7 18.5h10" stroke="#2F7BD8"/>',
+  "f:lh":'<path d="M11 6h9M11 12h9M11 18h9"/><path d="M5.5 4v16M3.5 6.5l2-2.5 2 2.5M3.5 17.5l2 2.5 2-2.5" stroke="#2F7BD8" stroke-width="1.7"/>',
+  "f:absatz":'<path d="M14 4v16M18 4v16M18 4h-7.5a4.5 4.5 0 0 0 0 9H14" stroke="#7A5AD8" stroke-width="1.8"/>',
+  "f:ul":'<circle cx="5" cy="6.5" r="1.4" fill="#3E9B4F" stroke="none"/><circle cx="5" cy="12" r="1.4" fill="#3E9B4F" stroke="none"/><circle cx="5" cy="17.5" r="1.4" fill="#3E9B4F" stroke="none"/><path d="M9 6.5h11M9 12h11M9 17.5h11"/>',
+  "f:ol":'<path d="M4 4.5h1.5v4M4 8.5h3M3.8 13.6c.3-.8 2.6-.9 2.6.5 0 1-2.6 1.8-2.6 2.9h2.8" stroke="#3E9B4F" stroke-width="1.4"/><path d="M10 6.5h10M10 12h10M10 17.5h10"/>',
+  "f:qs":'<path d="M5 16c0-4 1-7 4-8M13 16c0-4 1-7 4-8" stroke="#7A5AD8" stroke-width="2"/><path d="M5 16h4v-4H5zM13 16h4v-4h-4z" fill="#7A5AD8" fill-opacity=".25" stroke="#7A5AD8"/>',
+  "f:spalten":'<path d="M3.5 5h7M3.5 9h7M3.5 13h7M3.5 17h7M13.5 5h7M13.5 9h7M13.5 13h7M13.5 17h5"/><path d="M12 4v16" stroke="#159A80" stroke-dasharray="2 2"/>',
+  "f:clear":ICO_RADIERER,
+  /* Einfügen */
+  "i:bild":'<rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.4" cy="9.4" r="1.7" fill="#E3A21A" stroke="none"/><path d="m3.5 17 4.5-4.5 3.5 3.5 3-3 6 6" stroke="#3E9B4F" stroke-width="1.7"/>',
+  "i:tabelle":TAB_ICO.vorlage,
+  "i:link":'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7L11.5 6.8" stroke="#2F7BD8" stroke-width="1.8"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1.5-1.5"/>',
+  "i:umbruch":'<path d="M5 3v5h14V3M5 21v-5h14v5"/><path d="M3 12h18" stroke="#2F7BD8" stroke-dasharray="2.4 2"/>',
+  "i:fn":'<path d="M4 6h10M4 10h10M4 14h7"/><path d="M4 19h16" stroke-opacity=".5"/><path d="M16.5 4.5h1.5v5" stroke="#2F7BD8" stroke-width="1.7"/>',
+  "i:en":'<path d="M4 4h16M4 8h16M4 12h10"/><path d="M4 16.5h16" stroke-opacity=".5"/><path d="M4 20h6" stroke="#2F7BD8" stroke-width="1.8"/>',
+  "i:toc":'<path d="M4 6h3M4 12h3M4 18h3" stroke="#2F7BD8" stroke-width="2"/><path d="M10 6h10M10 12h10M10 18h10" stroke-dasharray="1 2.2"/>',
+  "i:tof":'<rect x="3" y="4" width="8" height="6" rx="1" fill="#3E9B4F" fill-opacity=".25" stroke="#3E9B4F"/><path d="M14 7h7M3 15h18M3 19h12" stroke-dasharray="1 2.2"/>',
+  "i:hf":'<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M4 7.5h16M4 16.5h16" stroke="#2F7BD8" stroke-width="1.7"/>',
+  "i:pnum":'<path d="M5 3h10l4 4v14H5z"/><path d="M10.5 14.5h1.5v4M10.5 18.5h3" stroke="#2F7BD8" stroke-width="1.6"/>',
+  /* Tools */
+  "t:find":'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5.5 5.5" stroke="#2F7BD8" stroke-width="2.2"/>',
+  "t:spell":'<path d="M4 15 8 5h1.5l4 10M5.5 11.5h6"/><path d="M13 17.5l3 3 5-6.5" stroke="#3E9B4F" stroke-width="2"/>',
+  "t:clean":'<path d="M12 3v8" stroke="#C4860C" stroke-width="1.8"/><path d="M6 13h12l1.5 8h-15z" fill="#E3A21A" fill-opacity=".3" stroke="#C4860C"/><path d="M9 17v4M12 17v4M15 17v4"/>',
+  "t:rep":'<path d="M4 7h7M13 7h7M4 12h4M10 12h10M4 17h9" /><path d="M13 7h7M10 12h10" stroke="#D0508A" stroke-width="2.4" stroke-opacity=".8"/>',
+  "t:goal":'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.6" fill="#D64545" stroke="#D64545"/>',
+  "t:sig":'<path d="M3 17c2.5 0 3.5-9 6-9s-1 9 1.5 9 3-5 4.5-5 1 3 2.5 3 2-1 3.5-1.5" stroke="#2F7BD8" stroke-width="1.8"/><path d="M3 20.5h18" stroke-opacity=".5"/>'
+};
+function menuSymbole(m){
+  m.querySelectorAll(".mi").forEach(b=>{
+    const attr=["act","v","f","i","t"].find(a=>b.dataset[a]!==undefined);if(!attr)return;
+    const k=MENU_ICO[attr+":"+b.dataset[attr]];const s=b.querySelector(".chk");if(!k||!s)return;
+    const an=/✓/.test(s.textContent);
+    s.className="chk mico"+(an?" an":"");s.innerHTML=ICOSZ(k,18,1.5);
+    if(an)b.setAttribute("aria-checked","true");
+  });
+}
 function drawTblBar(){
   const bar=$("#tblbar");if(!bar)return;
   const ed=$("#editor");

@@ -131,6 +131,20 @@ Derzeit nichts.
 
 ### Geändert
 
+- **Rechtsklick-Menü so dicht wie Word, mit farbigen Symbolen** (Tom): An
+  Toms Bildschirmfotos gemessen hat Word 24 px je Eintrag, LibreOffice
+  20 px; unseres hatte 31 px mit 14-px-Schrift und Trennlinien von 9 px —
+  das Menü war 405 px hoch, jetzt 302 px. `.menu.ctx` (auch die
+  Untermenüs): 24 px je Eintrag, 13-px-Schrift, Trennlinien 5 px. Jeder
+  Eintrag hat ein Symbol im Stil der Tabelleneinträge (`KTX_ICO`): Kontur in
+  der Farbe des Schemas, Akzent nach Bedeutung — blau bearbeiten, rot
+  wegnehmen, gelb Ablage und Notizen, lila Absatz, grün hinzufügen, türkis
+  Glossar. Ausgegraute Einträge zeigen das Symbol blass. Auf Toms Wort
+  dieselbe Dichte und ebensolche Symbole auch in den Menüs oben
+  (`MENU_ICO`, `menuSymbole()`); eingeschaltete Einträge (Seitenränder,
+  Notizen am Rand, Schreibziel, automatische Zwischenstände …) zeigen statt
+  des Häkchens einen Rahmen ums Symbol wie LibreOffice (Datei, Ansicht, Einfügen, Format,
+  Tools), damit es nicht zwei Menügrößen gibt.
 - **Schreibziel mit „Ziel starten“ und „Ziel beenden“ statt Häkchen** (Toms
   Wahl „A“): Bisher schaltete ein Häkchen „Ziel aktiv“ das Ziel ein — wer
   nur eine Zahl wählte, hatte kein Ziel und merkte es nicht. Ohne Ziel
