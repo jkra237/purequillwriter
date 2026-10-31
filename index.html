@@ -15278,8 +15278,10 @@ function mdToHtml(src){
   String(src).replace(/\r\n?/g,"\n").split("\n").forEach(zeile=>{
     const l=zeile.trimEnd();let m;
     if(!l.trim()){absatzZu();listeZu();return}
-    if(m=/^(#{1,4})\s+(.*)$/.exec(l)){absatzZu();listeZu();
-      out+=`<h${m[1].length}>${inline(m[2])}</h${m[1].length}>`;return}
+    /* ##### und ###### werden Überschrift 4 — tiefer kennt das Programm nicht,
+       und vorher blieb „##### Titel“ wörtlich als Absatz stehen */
+    if(m=/^(#{1,6})\s+(.*)$/.exec(l)){absatzZu();listeZu();
+      const st=Math.min(4,m[1].length);out+=`<h${st}>${inline(m[2])}</h${st}>`;return}
     if(/^\s*(---+|\*\*\*+|___+)\s*$/.test(l)){absatzZu();listeZu();
       out+='<div class="pgbreak" contenteditable="false" data-label="'+esc(tr("Seitenumbruch"))+'"></div>';return}
     if(/^\s*([-*_])(\s*\1){2,}\s*$/.test(l)){absatzZu();listeZu();out+="<hr>";return}
@@ -15315,7 +15317,16 @@ function cleanHtml(src){
     while(w.firstChild)body.insertBefore(w.firstChild,w);
     body.removeChild(w);w=body.firstElementChild;
   }
+  ueberschriftenKappen(body);
   return body.innerHTML.trim()||"<p><br></p>";
+}
+/* h5/h6 gibt es im Programm nicht (Überschrift 1–4): ohne Formatvorlage,
+   nicht in Gliederung und Verzeichnis. Wie beim Lesen von Word, .doc und
+   .odt werden sie Überschrift 4 — beim Öffnen von HTML und beim Einfügen. */
+function ueberschriftenKappen(root){
+  const doc=root.ownerDocument;
+  root.querySelectorAll("h5,h6").forEach(h=>{const n=doc.createElement("h4");
+    [...h.attributes].forEach(a=>n.setAttribute(a.name,a.value));while(h.firstChild)n.appendChild(h.firstChild);h.replaceWith(n)});
 }
 /* ================= Einfügen aus der Zwischenablage ================= */
 /* Beim Kopieren von einer Webseite kommt deren ganzes Layout mit: feste
@@ -15507,6 +15518,64 @@ function wordListen(dom,b){
    Überschrift bleibt Überschrift, Liste bleibt Liste — aber Breiten, Floats,
    Schriftgrößen und Farben der fremden Seite bleiben draußen, damit sich der
    Text in dieses Dokument einfügt statt sein altes Layout mitzuschleppen. */
+/* Überschriften aus Webseiten (Tom, 2026-10-31, Goethe-Onlinekurs): Viele
+   Seiten bauen Überschriften als Absatz oder Kasten mit größerer, fetter
+   Schrift — dort <p class="giportfolio_chapter_title" style="font-size:
+   large;font-weight:700">. Weil das Einfügen fremde Schriftgrößen bewusst
+   verwirft, kam daraus fetter Fließtext. Und echte <h5>/<h6> gibt es im
+   Programm nicht (Überschrift 1–4), die Seite schaltete dort obendrein das
+   Fett ab: „Schritt 1:“ sah aus wie Fließtext.
+   Darum hier, solange die Stile noch dastehen:
+   - h5/h6 werden Überschrift 4; Schriftstärke und -stil der Quelle fallen an
+     Überschriften weg, deren Aussehen kommt aus dem Dokument.
+   - Ein kurzer Block ohne Satzende wird Überschrift, wenn er role="heading"
+     trägt, deutlich größer ist als der Fließtext der Quelle (ab 1,3-fach,
+     fett schon ab 1,1-fach) oder fett ist und eine Klasse wie „title“ hat.
+     Nur fett in normaler Größe bleibt fett — sonst würde jede fette Zeile
+     eine Überschrift.
+   - Die Ebene liegt eine Stufe über der höchsten echten Überschrift des
+     Ausschnitts, sonst nach Größe Überschrift 2 oder 3. */
+function pasteSchriftPx(el){
+  const v=(el.style&&el.style.fontSize||"").trim().toLowerCase();if(!v)return 0;
+  const wort={"x-small":10,small:13,medium:16,large:18,"x-large":24,"xx-large":32,"xxx-large":48,larger:19,smaller:13};
+  if(wort[v])return wort[v];
+  const n=parseFloat(v);if(!(n>0))return 0;
+  if(/px$/.test(v))return n;if(/pt$/.test(v))return n*4/3;if(/r?em$/.test(v))return n*16;if(/%$/.test(v))return n*.16;
+  return 0;
+}
+function pasteUeberschriften(dom,b){
+  const fett=el=>{const w=(el.style&&el.style.fontWeight||"").toLowerCase();
+    return w==="bold"||w==="bolder"||+w>=600||!!el.querySelector(":scope>b:only-child,:scope>strong:only-child")};
+  /* Grundgröße der Quelle: die häufigste Größe ihrer Absätze */
+  const zahl=new Map();
+  b.querySelectorAll("p,li,td").forEach(p=>{const s=Math.round(pasteSchriftPx(p));if(s)zahl.set(s,(zahl.get(s)||0)+(p.textContent||"").length)});
+  const grund=[...zahl].sort((x,y)=>y[1]-x[1])[0]?.[0]||16;
+  /* Echte Überschriften: h5/h6 → h4, fremde Stärke und Kursive weg */
+  ueberschriftenKappen(b);
+  const echt=[...b.querySelectorAll("h1,h2,h3,h4")];
+  echt.forEach(h=>{h.style.removeProperty("font-weight");h.style.removeProperty("font-style")});
+  const hoechste=echt.length?Math.min(...echt.map(h=>+h.tagName[1])):0;
+  b.querySelectorAll("p,div").forEach(el=>{
+    if(el.closest("li,td,th,blockquote,h1,h2,h3,h4"))return;
+    if(el.querySelector("p,div,h1,h2,h3,h4,h5,h6,ul,ol,table,img,figure,br"))return;
+    const text=(el.textContent||"").replace(/\s+/g," ").trim();
+    if(!text||text.length>150||/[.,;]$/.test(text))return;
+    const rolle=el.getAttribute("role")==="heading";
+    let px=pasteSchriftPx(el);
+    const innen=el.querySelector(":scope>span:only-child,:scope>b:only-child,:scope>strong:only-child");
+    if(!px&&innen)px=pasteSchriftPx(innen);
+    const f=fett(el)||(innen&&fett(innen)),q=px/grund;
+    const klasse=/(^|[\s_-])(title|titel|heading|headline|ueberschrift|überschrift)([\s_-]|$)/i.test(el.getAttribute("class")||"");
+    if(!(rolle||q>=1.3||(f&&q>=1.1)||(f&&klasse)))return;
+    let ebene=+el.getAttribute("aria-level")||0;
+    if(!ebene)ebene=hoechste?Math.max(1,hoechste-1):(q>=1.6?2:3);
+    ebene=Math.min(4,Math.max(1,ebene));
+    const h=dom.createElement("h"+ebene);
+    while(el.firstChild)h.appendChild(el.firstChild);
+    el.replaceWith(h);
+    h.querySelectorAll("b,strong").forEach(x=>{if(x.textContent.trim()===h.textContent.trim())unwrap(x)});
+  });
+}
 function cleanPasteForeign(src){
   const dom=new DOMParser().parseFromString(String(src),"text/html");
   const b=dom.body;
@@ -15517,6 +15586,7 @@ function cleanPasteForeign(src){
   komm.forEach(n=>n.remove());
   /* Vor dem Abräumen der Attribute: nur jetzt stehen Ebene und Art drin */
   wordListen(dom,b);
+  pasteUeberschriften(dom,b);
 
   /* Die Massangaben eines eingefuegten Bildes fallen gleich mit den uebrigen
      Attributen — und damit weiss der Browser die Hoehe eines noch nicht

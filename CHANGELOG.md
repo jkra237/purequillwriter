@@ -151,6 +151,24 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Überschriften aus Webseiten kamen als Fließtext an** (Tom, Goethe-
+  Onlinekurs): Der Kapiteltitel war dort ein Absatz mit `font-size:large`
+  und Fett, „Schritt 1:“ ein `<h5>` mit abgeschaltetem Fett — das Programm
+  kennt nur Überschrift 1–4. Weil das Einfügen fremde Schriftgrößen verwirft,
+  blieb fetter Fließtext. `pasteUeberschriften()` läuft jetzt, solange die
+  Stile noch dastehen: h5/h6 werden Überschrift 4, Schriftstärke und -stil
+  der Quelle fallen an Überschriften weg; ein kurzer Block ohne Satzende
+  wird Überschrift, wenn er `role="heading"` trägt, deutlich größer ist als
+  der Fließtext der Quelle (ab 1,3-fach, fett ab 1,1-fach) oder fett ist
+  und eine Klasse wie „title“ hat. Nur fett in normaler Größe bleibt fett.
+  Die Ebene liegt eine Stufe über der höchsten echten Überschrift des
+  Ausschnitts, sonst nach Größe 2 oder 3. Am echten Goethe-Text geprüft:
+  Titel → Überschrift 3, „Schritt 1–3“ → Überschrift 4.
+  Dieselbe Regel jetzt auf allen Wegen (`ueberschriftenKappen`): Beim
+  Öffnen von HTML blieben h5/h6 stehen — ohne Formatvorlage, nicht in
+  Gliederung und Verzeichnis —, und Markdown erkannte `#####`/`######` gar
+  nicht, „##### Titel“ stand wörtlich als Absatz da. Word, .doc und .odt
+  kappten schon auf 4.
 - **Startfenster auch mit Notizen** (Tom): Wer Notizen oder ein Glossar
   hatte, alle Reiter schloss und das Programm beendete, bekam beim nächsten
   Start statt des Startfensters ein leeres, unbenanntes Dokument —
