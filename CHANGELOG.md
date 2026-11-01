@@ -80,7 +80,18 @@ Derzeit nichts.
   warmes Papier mit Fasern und Schatten, oben die Walze als Gummizylinder
   mit gerillten Knöpfen und Papierhalter aus Chrom (ein klebendes
   `::before` an der Papierspalte; das Lineal wird darunter zur Skala der
-  Maschine). Schreibmaschinenschrift mit Farbband: ein SVG-Filter lässt die
+  Maschine). Schrift „Special Elite“ (Astigmatic, Apache 2.0 — darf
+  eingebettet mitverkauft werden; Toms Wahl aus fünf Kandidaten, vorher
+  Courier New): die beiden Teile von Google Fonts (latin, latin-ext) als
+  woff2 eingebettet, 78 KB, eigener Familienname „PQ Special Elite“. Alle
+  Zeichen der sieben Sprachen geprüft, auch die polnischen. Nach dem
+  Entpacken der Schrift wird neu umbrochen. Lizenzen von Schrift und
+  Klängen stehen im Über-Fenster. Rechts oben am Schreibtisch ein runder
+  Knopf wie die Walzenknöpfe mit ×, „Schreibmaschine beenden“ (Tom) —
+  bleibt beim Blättern stehen (`modAusKnopf`); darunter ein zweiter Knopf
+  „Schreibmaschine im Vollbild“ — Fokusmodus ohne Leisten plus echtes
+  Vollbild (`smVollbild`), Esc oder derselbe Knopf beenden beides. Beide
+  halb durchsichtig, beim Überfahren voll sichtbar (Tom). Farbband: ein SVG-Filter lässt die
   Tinte ausfransen und ungleich decken, Regler „Farbband“ von frisch bis
   abgenutzt. Tippgeräusche aus Aufnahmen einer echten Schreibmaschine
   (Tom: die im Programm erzeugten Klänge blieben unecht, auch nach zwei
