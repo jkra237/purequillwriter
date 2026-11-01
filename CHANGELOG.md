@@ -74,6 +74,49 @@ Derzeit nichts.
 
 ### Neu
 
+- **Mods: Schreibmaschine** (Toms Idee, das Aushängeschild der Mods; im
+  Farbschema-Fenster unter der Beschreibung eine eingeklappte Zeile
+  „Mods ›“): eine Szene aus Ebenen — Schreibtisch aus dunklem Holz,
+  warmes Papier mit Fasern und Schatten, oben die Walze als Gummizylinder
+  mit gerillten Knöpfen und Papierhalter aus Chrom (ein klebendes
+  `::before` an der Papierspalte; das Lineal wird darunter zur Skala der
+  Maschine). Schreibmaschinenschrift mit Farbband: ein SVG-Filter lässt die
+  Tinte ausfransen und ungleich decken, Regler „Farbband“ von frisch bis
+  abgenutzt. Tippgeräusche aus Aufnahmen einer echten Schreibmaschine
+  (Tom: die im Programm erzeugten Klänge blieben unecht, auch nach zwei
+  Runden Hörproben). Quellen auf Freesound, alle CC0 und damit auch beim
+  Verkauf frei: Anschlag yottasounds #380138, Wagenrücklauf ramsamba
+  #318686, Glocke ramsamba #318687 — aufbereitet zu Mono, 32 kHz, 16 bit,
+  eingebettet (192 KB), nichts wird nachgeladen. Abwechslung wie an der
+  Maschine: jeder Anschlag minimal anders in Tonhöhe und Stärke, nie
+  zweimal gleich; Großbuchstaben tiefer und schwerer; Leertaste dumpf und
+  kurz; schnelles Tippen flacher; kleiner Raumklang. Kein wandernder
+  Stereoklang — die Typenhebel schlagen immer in der Mitte an. Leise
+  voreingestellt (25 %), damit es nicht ablenkt; die Glocke (einmal je
+  Zeile im letzten Achtel, `smGlockePruefen`) ist ein eigener Schalter und
+  aus (Tom). Wer die Mods schon an hatte, wird einmal auf diese Vorgaben
+  gesetzt. Schalter „Tippgeräusche“, „Glocke“, Regler „Lautstärke“.
+  Nur am Bildschirm: `modSchriftPause()` gibt Drucken, PDF, dem Schriftfeld
+  und `schriftNormalisieren` die echte Schrift. Auch die Druckvorschau
+  (`modVorschauPause`) zeigt ohne Mod: sonst teilte sie mit Courier New auf,
+  zeigte aber die echte Schrift — Umbrüche passten nicht, eine Überschrift
+  rutschte in die Kopfzeile, das Papier war gelblich (Tom). Geprüft: gleiche
+  Seiten und Positionen mit und ohne Mod. Im Druck ist die Walze nicht nur
+  unsichtbar, sondern weg — sonst hielte sie ihren Platz und schöbe Seite 1
+  nach unten. Geprüft an echten PDFs mit und ohne Mod: Zeile für Zeile
+  gleich. Vor Druckvorschau, Drucken (Menü, Palette) und PDF erscheint
+  ein kleiner Hinweis (`modHinweis`): die Vorschau zeigt das Dokument in
+  der echten Schrift mit deren Umbrüchen, „ohne den Mod „…““ — allgemein
+  formuliert, damit er für jeden künftigen Mod passt. „Nicht mehr
+  anzeigen“ merkt sich `S.settings.modHinweisAus`. Strg+P läuft ohne
+  Hinweis, dort öffnet der Browser seinen Dialog sofort. Ein Röhrenbildschirm-Mod war zwischendurch gebaut und ist auf
+  Toms Wunsch wieder entfernt (zu anstrengend für die Augen). Gemessen beim Tippen 22 ms je Bild (ohne Mod 16).
+  Solange die Schreibmaschine an ist, ist das Schriftfeld gesperrt
+  (`smSchriftfeld`, auch nach jedem Neuaufbau der Symbolleiste): es zeigt
+  weiter die echte Schrift, ein Hinweis erklärt, dass sie im Dokument
+  bleibt und beim Drucken und Speichern gilt. Die Größe bleibt frei (Tom).
+  `S.settings.sm` {an, farbband, ton, laut}. Mods-Fenster neu geordnet: je
+  Mod Hauptschalter, darunter Regler mit Wert, dann Schalter.
 - **„Alle Befehle“ überarbeitet** (Toms Wahl „alles“): Vorher fehlten
   Rechtschreibprüfung, Schreibziel, Wortwiederholungen, Text bereinigen,
   Hilfe, Unterschrift und „Speichern als“ ganz, die Namen wichen von den
