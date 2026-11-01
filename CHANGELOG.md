@@ -74,6 +74,16 @@ Derzeit nichts.
 
 ### Neu
 
+- **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
+  jetzt „Schließen“ und „Alle Dokumente schließen“ (Toms Wahl gegen „Andere
+  Dokumente schließen“ — Aufräumen am Ende einer Sitzung, danach kommt der
+  Startbildschirm mit „Zuletzt verwendet“). Bewusst nicht im Datei-Menü
+  (Word und LibreOffice haben es dort auch nicht): Schließen nimmt ein
+  Dokument samt Zwischenständen aus dem Programm, ein Fehlklick räumte
+  sonst alles ab. Die Dokumente gehen nacheinander durch `closeDoc()`, jedes
+  mit seiner Rückfrage, das aktive zuletzt; „Abbrechen“ hält die Reihe an
+  (`alleSchliessen`). In der deutschen Hilfe heißt es jetzt „Tabs“ statt
+  „Reiter“ — das Wort kennen viele nicht (Tom).
 - **Mods: Schreibmaschine** (Toms Idee, das Aushängeschild der Mods; im
   Farbschema-Fenster unter der Beschreibung eine eingeklappte Zeile
   „Mods ›“): eine Szene aus Ebenen — Schreibtisch aus dunklem Holz,

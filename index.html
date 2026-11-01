@@ -3726,6 +3726,7 @@ en:{
   "Farbband":"Ribbon",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Typing sounds",
+  "Alle Dokumente schließen":"Close all documents",
   "Schreibmaschine im Vollbild":"Typewriter full screen",
   "Vollbild beenden":"Exit full screen",
   "Schreibmaschine beenden":"Exit typewriter",
@@ -4766,6 +4767,7 @@ fr:{
   "Farbband":"Ruban",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Bruits de frappe",
+  "Alle Dokumente schließen":"Fermer tous les documents",
   "Schreibmaschine im Vollbild":"Machine à écrire en plein écran",
   "Vollbild beenden":"Quitter le plein écran",
   "Schreibmaschine beenden":"Quitter la machine à écrire",
@@ -5806,6 +5808,7 @@ es:{
   "Farbband":"Cinta",
   "Lautstärke":"Volumen",
   "Tippgeräusche":"Sonidos de tecleo",
+  "Alle Dokumente schließen":"Cerrar todos los documentos",
   "Schreibmaschine im Vollbild":"Máquina de escribir en pantalla completa",
   "Vollbild beenden":"Salir de pantalla completa",
   "Schreibmaschine beenden":"Salir de la máquina de escribir",
@@ -6846,6 +6849,7 @@ pt:{
   "Farbband":"Fita",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Sons de digitação",
+  "Alle Dokumente schließen":"Fechar todos os documentos",
   "Schreibmaschine im Vollbild":"Máquina de escrever em tela cheia",
   "Vollbild beenden":"Sair da tela cheia",
   "Schreibmaschine beenden":"Sair da máquina de escrever",
@@ -7886,6 +7890,7 @@ pl:{
   "Farbband":"Taśma",
   "Lautstärke":"Głośność",
   "Tippgeräusche":"Dźwięki pisania",
+  "Alle Dokumente schließen":"Zamknij wszystkie dokumenty",
   "Schreibmaschine im Vollbild":"Maszyna do pisania na pełnym ekranie",
   "Vollbild beenden":"Zamknij pełny ekran",
   "Schreibmaschine beenden":"Wyłącz maszynę do pisania",
@@ -8937,6 +8942,7 @@ it:{
   "Farbband":"Nastro",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Suoni di battitura",
+  "Alle Dokumente schließen":"Chiudi tutti i documenti",
   "Schreibmaschine im Vollbild":"Macchina da scrivere a schermo intero",
   "Vollbild beenden":"Esci da schermo intero",
   "Schreibmaschine beenden":"Esci dalla macchina da scrivere",
@@ -9708,6 +9714,9 @@ function tabContextMenu(e,id){
     <button class="mi" data-ta="rename">${tr("Umbenennen")}&hellip;</button>
     <button class="mi" data-ta="dupl">${tr("Duplizieren")}</button>
     <div class="msep"></div>
+    <button class="mi" data-ta="zu">${tr("Schließen")}</button>
+    ${S.docs.length>1?`<button class="mi" data-ta="allezu">${tr("Alle Dokumente schließen")}</button>`:""}
+    <div class="msep"></div>
     <div class="mlabel">${tr("Farbe")}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;padding:2px 8px 8px">
       <button data-tc="" title="${tr("Keine Farbe")}" style="width:18px;height:18px;border-radius:50%;padding:0;
@@ -9719,10 +9728,32 @@ function tabContextMenu(e,id){
   menuPlatzieren(m,e.clientX,e.clientY);
   m.onclick=ev=>{
     const rb=ev.target.closest("[data-ta]");
-    if(rb){closeMenu();if(rb.dataset.ta==="dupl")dokDuplizieren(id);else renameTab(id);return}
+    if(rb){closeMenu();const a=rb.dataset.ta;
+      if(a==="dupl")dokDuplizieren(id);else if(a==="zu")closeDoc(id);else if(a==="allezu")alleSchliessen();else renameTab(id);return}
     const cb=ev.target.closest("[data-tc]");
     if(cb){d.tabColor=cb.dataset.tc||null;save();closeMenu();drawTabs();return}
   };
+}
+/* Aufräumen am Ende einer Sitzung (Tom; Wahl gegen „Andere schließen“).
+   Bewusst nicht im Datei-Menü: das Schließen nimmt ein Dokument samt
+   Zwischenständen aus dem Programm, und dort räumte ein Fehlklick alles ab.
+   Die Dokumente gehen nacheinander durch closeDoc(), jedes mit seiner eigenen
+   Rückfrage; „Abbrechen“ bei einem hält die Reihe an. Das aktive kommt
+   zuletzt — mit ihm kehrt der Startbildschirm zurück. */
+function alleSchliessen(){
+  const reihe=S.docs.map(d=>d.id).filter(x=>x!==S.active).concat([S.active]);
+  const weiter=()=>{
+    const id=reihe.shift();if(!id)return;
+    if(!S.docs.some(d=>d.id===id)){weiter();return}
+    closeDoc(id);
+    /* Rückfrage offen? Warten, bis sie zu ist; steht das Dokument dann noch,
+       wurde abgebrochen. Nach dem letzten öffnet der Startbildschirm selbst ein
+       Fenster — dann gibt es nichts mehr zu tun. */
+    const warte=()=>{if(!reihe.length)return;if($("#ovl").innerHTML){setTimeout(warte,150);return}
+      if(S.docs.some(d=>d.id===id))return;weiter()};
+    warte();
+  };
+  weiter();
 }
 function renameTab(id){
   const d=S.docs.find(x=>x.id===id);if(!d)return;
@@ -30224,7 +30255,7 @@ document or an existing file.</p>
 or choose <b>File &rsaquo; New document</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
 You are asked for a page format first; it can be changed at any time afterwards.</p>
 <p>Documents appear as tabs along the top. Drag a tab to reorder it. Right-click one to
-rename it, duplicate it or give it a colour. A duplicate opens next to it as “Title (Copy)”, with everything but the file: its first save asks where to put it. Closing the last document returns you to the welcome screen.</p>
+rename it, duplicate it, give it a colour or close it — or close all documents at once. A duplicate opens next to it as “Title (Copy)”, with everything but the file: its first save asks where to put it. Closing the last document returns you to the welcome screen.</p>
 <p>Each document keeps its own title, page format, font and line spacing. Changing those
 affects only the document you are in.</p>`},
 
@@ -30849,8 +30880,8 @@ neues Dokument oder eine vorhandene Datei an.</p>
 <p><b>Ein weiteres Dokument</b> legst du mit dem <b>+</b> rechts in der Reiterleiste an oder
 über <b>Datei &rsaquo; Neues Dokument</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd>). Zuerst
 wird nach dem Seitenformat gefragt; ändern lässt es sich jederzeit.</p>
-<p>Dokumente erscheinen als Reiter oben. Ziehen ordnet sie um. Ein Rechtsklick benennt um, dupliziert oder
-gibt eine Farbe. Ein Duplikat öffnet sich daneben als „Titel (Kopie)“, mit allem außer der Datei: das erste Speichern fragt, wohin. Wird der letzte Reiter geschlossen, kehrt der Startbildschirm zurück.</p>
+<p>Dokumente erscheinen als Tabs oben. Ziehen ordnet sie um. Ein Rechtsklick benennt um, dupliziert,
+gibt eine Farbe oder schließt — auch alle Dokumente auf einmal. Ein Duplikat öffnet sich daneben als „Titel (Kopie)“, mit allem außer der Datei: das erste Speichern fragt, wohin. Wird das letzte Dokument geschlossen, kehrt der Startbildschirm zurück.</p>
 <p>Jedes Dokument behält seinen eigenen Titel, sein Seitenformat, seine Schrift und seinen
 Zeilenabstand. Änderungen daran betreffen nur das Dokument, in dem du gerade bist.</p>`},
 
@@ -31508,7 +31539,7 @@ documento nuevo o un archivo existente.</p>
 elige <b>Archivo &rsaquo; Nuevo documento</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>D</kbd>).
 Primero se pregunta por un formato de página; se puede cambiar en cualquier momento después.</p>
 <p>Los documentos aparecen como pestañas en la parte superior. Arrastra una pestaña para
-reordenarla. Haz clic derecho sobre ella para renombrarla, duplicarla o darle un color. Un duplicado se abre al lado como «Título (copia)», con todo menos el archivo: al guardarlo por primera vez se pregunta dónde. Cerrar el último
+reordenarla. Haz clic derecho sobre ella para renombrarla, duplicarla, darle un color o cerrarla, o para cerrar de una vez todos los documentos. Un duplicado se abre al lado como «Título (copia)», con todo menos el archivo: al guardarlo por primera vez se pregunta dónde. Cerrar el último
 documento devuelve a la pantalla de bienvenida.</p>
 <p>Cada documento conserva su propio título, formato de página, fuente e interlineado.
 Cambiarlos solo afecta al documento en el que estás.</p>`},
@@ -32166,7 +32197,7 @@ documento novo ou um arquivo existente.</p>
 <b>Arquivo &rsaquo; Novo documento</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>). Primeiro é
 perguntado um formato de página; ele pode ser mudado a qualquer momento depois.</p>
 <p>Os documentos aparecem como abas na parte de cima. Arraste uma aba para reordená-la. Clique
-com o botão direito nela para renomeá-la, duplicá-la ou dar uma cor. Uma duplicata abre ao lado como “Título (cópia)”, com tudo menos o arquivo: ao salvar pela primeira vez, o programa pergunta onde. Fechar o último documento leva de volta
+com o botão direito nela para renomeá-la, duplicá-la, dar uma cor ou fechá-la, ou para fechar de uma vez todos os documentos. Uma duplicata abre ao lado como “Título (cópia)”, com tudo menos o arquivo: ao salvar pela primeira vez, o programa pergunta onde. Fechar o último documento leva de volta
 à tela de boas-vindas.</p>
 <p>Cada documento mantém o próprio título, formato de página, fonte e espaçamento entre linhas.
 Mudar isso afeta apenas o documento em que você está.</p>`},
@@ -32823,7 +32854,7 @@ ou choisissez <b>Fichier &rsaquo; Nouveau document</b>
 (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>D</kbd>). Un format de page est demandé d'abord ; il peut
 être modifié à tout moment ensuite.</p>
 <p>Les documents apparaissent sous forme d'onglets en haut. Faites glisser un onglet pour le
-réordonner. Faites un clic droit dessus pour le renommer, le dupliquer ou lui donner une couleur. Un duplicata s’ouvre à côté sous le nom « Titre (copie) », avec tout sauf le fichier : au premier enregistrement, le programme demande où. Fermer le
+réordonner. Faites un clic droit dessus pour le renommer, le dupliquer, lui donner une couleur ou le fermer — ou pour fermer d’un coup tous les documents. Un duplicata s’ouvre à côté sous le nom « Titre (copie) », avec tout sauf le fichier : au premier enregistrement, le programme demande où. Fermer le
 dernier document ramène à l'écran d'accueil.</p>
 <p>Chaque document conserve son propre titre, son format de page, sa police et son interligne.
 Les modifier n'affecte que le document dans lequel vous vous trouvez.</p>`},
@@ -33502,7 +33533,7 @@ dokument albo istniejący plik.</p>
 wybierz <b>Plik &rsaquo; Nowy dokument</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).
 Najpierw program pyta o format strony; można go zmienić w dowolnej chwili później.</p>
 <p>Dokumenty pojawiają się jako karty u góry. Przeciągnij kartę, aby zmienić kolejność. Kliknij
-ją prawym przyciskiem, aby zmienić nazwę, zduplikować ją lub nadać kolor. Duplikat otwiera się obok jako „Tytuł (kopia)”, ze wszystkim oprócz pliku: przy pierwszym zapisie program pyta, gdzie zapisać. Zamknięcie ostatniego dokumentu wraca
+ją prawym przyciskiem, aby zmienić nazwę, zduplikować ją, nadać kolor lub ją zamknąć — albo zamknąć naraz wszystkie dokumenty. Duplikat otwiera się obok jako „Tytuł (kopia)”, ze wszystkim oprócz pliku: przy pierwszym zapisie program pyta, gdzie zapisać. Zamknięcie ostatniego dokumentu wraca
 do ekranu powitalnego.</p>
 <p>Każdy dokument ma własny tytuł, format strony, czcionkę i odstęp między wierszami. Ich zmiana
 dotyczy tylko dokumentu, w którym jesteś.</p>`},
@@ -34140,7 +34171,7 @@ schede, oppure scegli <b>File &rsaquo; Nuovo documento</b>
 (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>D</kbd>). Prima viene chiesto un formato pagina; può
 essere cambiato in qualsiasi momento.</p>
 <p>I documenti compaiono come schede in alto. Trascina una scheda per riordinarla. Fai clic
-destro su di essa per rinominarla, duplicarla o darle un colore. Un duplicato si apre accanto come «Titolo (copia)», con tutto tranne il file: al primo salvataggio il programma chiede dove. Chiudere l'ultimo documento riporta alla
+destro su di essa per rinominarla, duplicarla, darle un colore o chiuderla, oppure per chiudere in un colpo tutti i documenti. Un duplicato si apre accanto come «Titolo (copia)», con tutto tranne il file: al primo salvataggio il programma chiede dove. Chiudere l'ultimo documento riporta alla
 schermata di benvenuto.</p>
 <p>Ogni documento mantiene il proprio titolo, formato pagina, carattere e interlinea. Cambiarli
 riguarda solo il documento in cui ti trovi.</p>`},
