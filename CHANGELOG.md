@@ -74,6 +74,24 @@ Derzeit nichts.
 
 ### Neu
 
+- **Zeitmaschine** (Toms Wahl aus acht Ideen für „Premium, 2026“): der
+  Versionsverlauf ist keine Liste mehr, sondern ein Zeitstrahl unten über
+  dem Dokument, ein Punkt je Zwischenstand plus „Jetzt“. Das Blatt zeigt
+  den gewählten Stand mit Umbruch; was gegenüber dem Stand davor neu ist,
+  grün hinterlegt, Gestrichenes rot durchgestrichen, ganze neue/weggefallene
+  Absätze mit Randmarke. Pfeiltasten gehen Stand für Stand, „Abspielen“
+  lässt den Text entstehen und blättert jeweils zur ersten Änderung,
+  „Änderungen zeigen“ schaltet die Farben ab (gemerkt). Verlassen über „Schließen (Esc)“ (vorher „Zurück zu jetzt“ — Tom: missverständlich). Vergleich erst
+  blockweise, dann in geänderten Absätzen Wort für Wort je Textknoten — der
+  Aufbau (fett, Links) bleibt; reine Formatänderungen zählen nicht.
+  „Diesen Stand wiederherstellen“ legt den jetzigen Text vorher als
+  Zwischenstand ab und setzt den alten per insertHTML ein — ein Schritt,
+  Strg+Z nimmt ihn zurück (alsSchritt fasst einen ganz ausgetauschten Text
+  nicht). Solange sie offen ist, ist der Editor gesperrt und `flush()`
+  schreibt nichts zurück; jede andere Ansicht (`render`), Drucken, PDF und
+  Vorschau beenden sie. Esc kehrt zurück. Hilfe in allen Sprachen
+  angepasst. Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
+  Wiederherstellen, check-export 302/302.
 - **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
   jetzt „Schließen“ und „Alle Dokumente schließen“ (Toms Wahl gegen „Andere
   Dokumente schließen“ — Aufräumen am Ende einer Sitzung, danach kommt der
