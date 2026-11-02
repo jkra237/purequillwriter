@@ -101,7 +101,17 @@ Derzeit nichts.
   die Leiste das Seitenende nicht verdeckt; Leertaste spielt/hält an,
   Pos1/Ende springen zum ersten/letzten Stand; Kopieren aus einem alten
   Stand nimmt Gestrichenes und Markierungen nicht mit (der Weg, einen
-  einzelnen Satz zurückzuholen — steht in der Hilfe). Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
+  einzelnen Satz zurückzuholen — steht in der Hilfe). Zweite Runde:
+  Tagesmarken unter dem Zeitstrahl („Fr“, „Gestern“, „Heute“, ältere mit
+  Datum) — die Punkte liegen gleichmäßig, erst die Marken zeigen, wo Tage
+  dazwischen liegen; Punktgröße nach Änderungsmenge, im Hintergrund ein
+  Vergleich pro Takt gerechnet (Roman mit 2000 Absätzen und 19 Ständen:
+  0,8 s, die Leiste ist sofort bedienbar), Tooltip mit „+x −y“; statt des
+  Hakens „Änderungen: zum Stand davor | zu jetzt | Aus“ — „zu jetzt“ zeigt
+  vor dem Wiederherstellen, was zurückkäme (grün) und was verloren ginge
+  (rot). Nichts davon wird gespeichert außer der Wahl (`zmBezug`). Ein kurzer
+  Absatz, der fast ganz im längeren steckt, gilt jetzt als erweitert statt
+  als gestrichen und neu (Ähnlichkeit ohne Satzzeichen). Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
   Wiederherstellen, check-export 302/302.
 - **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
   jetzt „Schließen“ und „Alle Dokumente schließen“ (Toms Wahl gegen „Andere

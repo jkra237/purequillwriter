@@ -360,7 +360,7 @@ body.smvoll .focusbar{display:none!important}
    gegenüber dem Stand davor neu ist, leuchtet grün auf, Gestrichenes steht
    rot durchgestrichen da. Farben über color-mix, damit sie auf jedem
    Papier der 17 Schemata lesbar bleiben. */
-.zmleiste{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:60;width:min(780px,calc(100vw - 120px));
+.zmleiste{position:fixed;left:50%;bottom:44px;transform:translateX(-50%);z-index:60;width:min(920px,calc(100vw - 120px));
   background:var(--chrome-2);color:var(--ink);border:1px solid var(--rule);border-radius:var(--radius-lg);
   box-shadow:0 10px 32px rgba(0,0,0,.22);padding:10px 14px 9px;font-size:12.5px}
 .zmreihe{display:flex;align-items:center;gap:12px}
@@ -368,10 +368,13 @@ body.smvoll .focusbar{display:none!important}
   background:var(--paper);border:1px solid var(--rule);color:var(--ink);cursor:pointer}
 .zmspiel:hover{border-color:var(--ink-soft)}
 .zmspiel svg{width:15px;height:15px}
-.zmstrahl{position:relative;flex:1;height:30px;cursor:pointer}
+.zmstrahl{position:relative;flex:1;height:44px;cursor:pointer}
+.zmtag{position:absolute;top:31px;font-size:10.5px;line-height:1;color:var(--ink-soft);transform:translateX(-50%);white-space:nowrap;pointer-events:none}
+.zmtag::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--rule)}
+.zminfo select{width:auto;padding:3px 6px;font-size:12.5px}
 .zmlinie{position:absolute;left:0;right:0;top:13px;height:3px;border-radius:2px;background:var(--rule)}
 .zmlinie i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:color-mix(in srgb,var(--stamp) 55%,var(--rule))}
-.zmpkt{position:absolute;top:8px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;padding:0;cursor:pointer;
+.zmpkt{position:absolute;top:8px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;padding:0;cursor:pointer;box-sizing:border-box;
   background:var(--paper);border:2px solid color-mix(in srgb,var(--ink) 45%,var(--rule));transition:transform 140ms,background 140ms}
 .zmpkt:hover{transform:scale(1.25)}
 .zmpkt.an{background:var(--stamp);border-color:var(--stamp);transform:scale(1.35)}
@@ -3778,13 +3781,15 @@ en:{
   "Farbband":"Ribbon",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Typing sounds",
+  "Änderungen":"Changes",
+  "zum Stand davor":"since the version before",
+  "zu jetzt":"compared with now",
   "Zeitmaschine öffnen":"Open time machine",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"No snapshots yet. They appear on their own as you write — or create one now.",
   "Jetzt Zwischenstand anlegen":"Create snapshot now",
   "nur ansehen":"view only",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Close the time machine to edit (Esc)",
   "Zeitmaschine":"Time machine",
-  "Änderungen zeigen":"Show changes",
   "Diesen Stand wiederherstellen":"Restore this version",
   "Abspielen":"Play",
   "Anhalten":"Pause",
@@ -4831,13 +4836,15 @@ fr:{
   "Farbband":"Ruban",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Bruits de frappe",
+  "Änderungen":"Modifications",
+  "zum Stand davor":"depuis la version précédente",
+  "zu jetzt":"par rapport à maintenant",
   "Zeitmaschine öffnen":"Ouvrir la machine à remonter le temps",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Pas encore de point de restauration. Ils se créent tout seuls pendant que vous écrivez — ou créez-en un maintenant.",
   "Jetzt Zwischenstand anlegen":"Créer un point de restauration",
   "nur ansehen":"lecture seule",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Fermez la machine à remonter le temps pour modifier (Échap)",
   "Zeitmaschine":"Machine à remonter le temps",
-  "Änderungen zeigen":"Afficher les modifications",
   "Diesen Stand wiederherstellen":"Restaurer cette version",
   "Abspielen":"Lire",
   "Anhalten":"Pause",
@@ -5884,13 +5891,15 @@ es:{
   "Farbband":"Cinta",
   "Lautstärke":"Volumen",
   "Tippgeräusche":"Sonidos de tecleo",
+  "Änderungen":"Cambios",
+  "zum Stand davor":"desde la versión anterior",
+  "zu jetzt":"respecto a ahora",
   "Zeitmaschine öffnen":"Abrir la máquina del tiempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Aún no hay puntos de restauración. Se crean solos mientras escribes, o crea uno ahora.",
   "Jetzt Zwischenstand anlegen":"Crear punto de restauración ahora",
   "nur ansehen":"solo lectura",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Cierra la máquina del tiempo para editar (Esc)",
   "Zeitmaschine":"Máquina del tiempo",
-  "Änderungen zeigen":"Mostrar cambios",
   "Diesen Stand wiederherstellen":"Restaurar esta versión",
   "Abspielen":"Reproducir",
   "Anhalten":"Pausa",
@@ -6937,13 +6946,15 @@ pt:{
   "Farbband":"Fita",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Sons de digitação",
+  "Änderungen":"Alterações",
+  "zum Stand davor":"desde a versão anterior",
+  "zu jetzt":"em relação a agora",
   "Zeitmaschine öffnen":"Abrir a máquina do tempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Ainda não há pontos de restauração. Eles surgem sozinhos enquanto você escreve — ou crie um agora.",
   "Jetzt Zwischenstand anlegen":"Criar ponto de restauração agora",
   "nur ansehen":"somente leitura",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Feche a máquina do tempo para editar (Esc)",
   "Zeitmaschine":"Máquina do tempo",
-  "Änderungen zeigen":"Mostrar alterações",
   "Diesen Stand wiederherstellen":"Restaurar esta versão",
   "Abspielen":"Reproduzir",
   "Anhalten":"Pausar",
@@ -7990,13 +8001,15 @@ pl:{
   "Farbband":"Taśma",
   "Lautstärke":"Głośność",
   "Tippgeräusche":"Dźwięki pisania",
+  "Änderungen":"Zmiany",
+  "zum Stand davor":"od poprzedniej wersji",
+  "zu jetzt":"względem teraz",
   "Zeitmaschine öffnen":"Otwórz wehikuł czasu",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Brak punktów przywracania. Powstają same podczas pisania — albo utwórz jeden teraz.",
   "Jetzt Zwischenstand anlegen":"Utwórz punkt przywracania teraz",
   "nur ansehen":"tylko podgląd",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Zamknij wehikuł czasu, aby edytować (Esc)",
   "Zeitmaschine":"Wehikuł czasu",
-  "Änderungen zeigen":"Pokaż zmiany",
   "Diesen Stand wiederherstellen":"Przywróć tę wersję",
   "Abspielen":"Odtwórz",
   "Anhalten":"Wstrzymaj",
@@ -9054,13 +9067,15 @@ it:{
   "Farbband":"Nastro",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Suoni di battitura",
+  "Änderungen":"Modifiche",
+  "zum Stand davor":"dalla versione precedente",
+  "zu jetzt":"rispetto ad adesso",
   "Zeitmaschine öffnen":"Apri la macchina del tempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Ancora nessun punto di ripristino. Si creano da soli mentre scrivi, oppure creane uno ora.",
   "Jetzt Zwischenstand anlegen":"Crea un punto di ripristino ora",
   "nur ansehen":"solo lettura",
   "Zum Bearbeiten die Zeitmaschine schließen (Esc)":"Chiudi la macchina del tempo per modificare (Esc)",
   "Zeitmaschine":"Macchina del tempo",
-  "Änderungen zeigen":"Mostra modifiche",
   "Diesen Stand wiederherstellen":"Ripristina questa versione",
   "Abspielen":"Riproduci",
   "Anhalten":"Pausa",
@@ -9534,7 +9549,7 @@ if(S.settings&&!S.settings.sm)S.settings.sm={an:false,farbband:40,ton:true,laut:
    ablenkt, und die Glocke nur auf Wunsch (Tom) */
 if(S.settings&&S.settings.sm&&!S.settings.sm.aufnahmen)Object.assign(S.settings.sm,{laut:25,glocke:false,aufnahmen:true});
 if(S.settings&&typeof S.settings.modHinweisAus!=="boolean")S.settings.modHinweisAus=false;
-if(S.settings&&typeof S.settings.zmZeigen!=="boolean")S.settings.zmZeigen=true;
+if(S.settings&&!S.settings.zmBezug){S.settings.zmBezug=S.settings.zmZeigen===false?"aus":"vorher";delete S.settings.zmZeigen}
 if(S.settings)delete S.settings.crt;
 if(!S.noteView)S.noteView="free";
 if(S.settings&&S.settings.typewriter===undefined)S.settings.typewriter=true;
@@ -29478,12 +29493,13 @@ function zeitmaschine(){
   l.innerHTML=`<div class="zmreihe">
       <button class="zmspiel" id="zmSpiel" title="${tr("Abspielen")}" aria-label="${tr("Abspielen")}"></button>
       <div class="zmstrahl" id="zmStrahl"><div class="zmlinie"><i id="zmFort"></i></div>${st.map((s,i)=>
-        `<button class="zmpkt${s.jetzt?" jetzt":""}" data-i="${i}" style="left:${st.length>1?(i/(st.length-1)*100):0}%" title="${esc(zmZeit(s))}" aria-label="${esc(zmZeit(s))}"></button>`).join("")}</div>
+        `<button class="zmpkt${s.jetzt?" jetzt":""}" data-i="${i}" style="left:${st.length>1?(i/(st.length-1)*100):0}%" title="${esc(zmZeit(s))}" aria-label="${esc(zmZeit(s))}"></button>`).join("")}${zmTage(st)}</div>
     </div>
     <div class="zminfo">
       <span class="zmtitel">${ICOSZ('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2.6 7.4 4.3 10.3 7.2 9z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8"/>',15,1.6)}${tr("Zeitmaschine")}</span>
       <span id="zmStand"></span><span style="flex:1"></span>
-      <label><input type="checkbox" id="zmZeigen" ${S.settings.zmZeigen!==false?"checked":""}>${tr("Änderungen zeigen")}</label>
+      <label>${tr("Änderungen")}<select id="zmBezug">${[["vorher","zum Stand davor"],["jetzt","zu jetzt"],["aus","Aus"]].map(([v,n])=>
+        `<option value="${v}"${(S.settings.zmBezug||"vorher")===v?" selected":""}>${tr(n)}</option>`).join("")}</select></label>
       <button class="btn" id="zmHolen">${tr("Diesen Stand wiederherstellen")}</button>
       <button class="btn" id="zmJetzt">${tr("Schließen")} (Esc)</button>
     </div>`;
@@ -29494,11 +29510,43 @@ function zeitmaschine(){
   $("#zmSpiel").onclick=()=>{if(zmUhr){zmHalt();return}
     let i=zmIdx>=zmStaende.length-1?0:zmIdx;zmZeige(i);zmSpielKnopf(true);
     zmUhr=setInterval(()=>{i++;if(i>=zmStaende.length){zmHalt();return}zmZeige(i)},1500)};
-  $("#zmZeigen").onchange=e=>{S.settings.zmZeigen=e.target.checked;save();zmZeige(zmIdx,true)};
+  $("#zmBezug").onchange=e=>{S.settings.zmBezug=e.target.value;save();zmZeige(zmIdx,true);e.target.blur()};
   $("#zmJetzt").onclick=()=>zmEnde();
   $("#zmHolen").onclick=()=>zmHolen();
   zmSpielKnopf(false);
   zmZeige(zmIdx,true);
+  zmMengen();
+}
+/* Tagesmarken unter dem Zeitstrahl: am ersten Stand jedes Tages „heute“,
+   „gestern“, sonst Wochentag oder Datum. Die Punkte liegen gleichmäßig
+   verteilt — erst die Marken zeigen, wo Tage dazwischen liegen. */
+function zmTage(st){
+  const n=st.length,heute=new Date().toDateString(),gestern=new Date(Date.now()-864e5).toDateString();
+  const gross=s=>s.charAt(0).toUpperCase()+s.slice(1);
+  let vorher="",html="",letzteX=-99;
+  st.forEach((s,i)=>{const tg=new Date(s.ts).toDateString();if(tg===vorher)return;vorher=tg;
+    const x=n>1?i/(n-1)*100:0;if(x-letzteX<7)return;letzteX=x;
+    const z=new Date(s.ts),txt=tg===heute?gross(tr("heute")):tg===gestern?gross(tr("gestern")):
+      z.toLocaleDateString(LOC(),Date.now()-s.ts>6*864e5?{day:"2-digit",month:"2-digit"}:{weekday:"short"});
+    html+=`<span class="zmtag" style="left:${x}%">${esc(txt)}</span>`});
+  return html;
+}
+/* Punktgröße nach Änderungsmenge: je Stand der Vergleich mit dem davor,
+   einer pro Takt, damit auch ein Roman die Leiste nicht aufhält. Die Punkte
+   wachsen, sobald ihr Wert da ist. Nichts davon wird gespeichert. */
+let zmMengenLauf=0;
+function zmMengen(){
+  const lauf=++zmMengenLauf,st=zmStaende;let i=1;
+  const schritt=()=>{
+    if(!zmAn||lauf!==zmMengenLauf||st!==zmStaende)return;
+    if(i<st.length){const r=zmVergleich(st[i-1].html,st[i].html,true);st[i].menge=r.plus+r.minus;st[i].plus=r.plus;st[i].minus=r.minus;i++;setTimeout(schritt,0);return}
+    const max=Math.max(1,...st.map(s=>s.menge||0));
+    document.querySelectorAll("#zmLeiste .zmpkt").forEach((b,k)=>{
+      const s=st[k];const g=k===0?11:Math.round(9+12*Math.sqrt((s.menge||0)/max));
+      b.style.width=b.style.height=g+"px";b.style.marginLeft=(-g/2)+"px";b.style.top=(14.5-g/2)+"px";
+      if(k>0){const tt=zmZeit(s)+" · +"+s.plus+" −"+s.minus;b.title=tt;b.setAttribute("aria-label",tt)}});
+  };
+  setTimeout(schritt,0);
 }
 /* Noch nichts zu vergleichen: die Leiste erklärt, woher Zwischenstände
    kommen, und legt auf Wunsch gleich einen an — statt einer kurzen Meldung,
@@ -29526,9 +29574,12 @@ function zmHalt(){clearInterval(zmUhr);zmUhr=null;zmSpielKnopf(false)}
 function zmZeige(i,still){
   if(!zmAn)return;i=Math.max(0,Math.min(zmStaende.length-1,i));zmIdx=i;
   const s=zmStaende[i],ed=$("#editor");if(!ed)return;
-  const zeigen=S.settings.zmZeigen!==false&&i>0;
+  /* „zu jetzt“: grün ist, was ein Wiederherstellen zurückbrächte, rot, was
+     dabei verloren ginge — die Frage vor dem Zurückholen */
+  const bezug=S.settings.zmBezug||"vorher",basis=bezug==="vorher"?(i>0?zmStaende[i-1]:null):bezug==="jetzt"&&!s.jetzt?zmStaende[zmStaende.length-1]:null;
+  const zeigen=!!basis;
   let plus=0,minus=0;
-  if(zeigen){const r=zmVergleich(zmStaende[i-1].html,s.html);ed.innerHTML=r.html;plus=r.plus;minus=r.minus}
+  if(zeigen){const r=zmVergleich(basis.html,s.html);ed.innerHTML=r.html;plus=r.plus;minus=r.minus}
   else ed.innerHTML=s.html||"<p><br></p>";
   listenOrdnen(ed);paginate();
   const w=stripHtml(s.html).trim().split(/\s+/).filter(Boolean).length;
@@ -29544,7 +29595,7 @@ function zmZeige(i,still){
 /* Vergleich zweier Stände: erst Blöcke (gleiche Absätze überspringen),
    dann in geänderten Absätzen Wort für Wort. Grundlage ist der Text —
    reine Formatänderungen zählen nicht. */
-function zmVergleich(altHtml,neuHtml){
+function zmVergleich(altHtml,neuHtml,nurZahl){
   const blk=h=>{const t=document.createElement("div");t.innerHTML=h||"";return [...t.children]};
   const txt=b=>b.textContent.replace(/\s+/g," ").trim();
   const A=blk(altHtml),B=blk(neuHtml),aT=A.map(txt),bT=B.map(txt);
@@ -29564,6 +29615,7 @@ function zmVergleich(altHtml,neuHtml){
     if(o==="="){leeren();raus.push(B[j])}
     else if(o==="-")wegs.push(i);else neus.push(j)}
   leeren();
+  if(nurZahl)return {plus,minus};
   const box=document.createElement("div");raus.forEach(x=>box.appendChild(x));
   return {html:box.innerHTML,plus,minus};
 }
@@ -29584,9 +29636,10 @@ function zmLcs(a,b){
   return ops;
 }
 function zmAehnlich(x,y){
-  const wa=new Set(x.toLowerCase().match(/\S+/g)||[]),wb=y.toLowerCase().match(/\S+/g)||[];
-  if(!wa.size||!wb.length)return false;let g=0;wb.forEach(w=>{if(wa.has(w))g++});
-  return g/Math.max(wa.size,wb.length)>=.3;
+  const w=s=>(s.toLowerCase().match(/[\p{L}\p{N}]+/gu)||[]);
+  const wa=new Set(w(x)),wb=new Set(w(y));
+  if(!wa.size||!wb.size)return false;let g=0;wb.forEach(v=>{if(wa.has(v))g++});
+  return g/Math.max(wa.size,wb.size)>=.3||(g>=2&&g/Math.min(wa.size,wb.size)>=.6);
 }
 /* Wortweise im neuen Absatz markieren, sein Aufbau (fett, Links …) bleibt.
    Die Wörter werden je Textknoten gebildet, damit keins über eine
@@ -31040,7 +31093,9 @@ rewrite a passage you might want back.</p>
 <p>The <b>time machine</b> opens from <b>File &rsaquo; Snapshots &rsaquo; Time machine</b> or the clock
 at the top right: a timeline at the bottom with one dot per snapshot, and the page shows the
 chosen version. What is new compared with the version before is highlighted in green, what was
-cut is struck through in red. The arrow keys step from version to version, <i>Play</i> lets the
+cut is struck through in red. Under <i>Changes</i> you choose what to compare with: the version before, or now — then
+you see what restoring would bring back (green) and what it would lose (red). Large dots on the
+timeline mean many changes; the days are marked below it. The arrow keys step from version to version, <i>Play</i> lets the
 text grow before your eyes. <i>Restore this version</i> puts it in place of the current text; the
 current one becomes a snapshot first, and <kbd>Ctrl</kbd>+<kbd>Z</kbd> takes it back.
 <kbd>Esc</kbd> returns to the current text. To bring back a single sentence, select it in the old version and copy it (<kbd>Ctrl</kbd>+<kbd>C</kbd>) — struck-out text is left out.</p>
@@ -31697,7 +31752,9 @@ das lohnt sich, bevor du eine Passage umschreibst, die du vielleicht zurückhabe
 <p>Die <b>Zeitmaschine</b> öffnest du über <b>Datei &rsaquo; Zwischenstände &rsaquo; Zeitmaschine</b>
 oder die Uhr oben rechts: unten ein Zeitstrahl mit einem Punkt je Zwischenstand, das Blatt zeigt den
 gewählten Stand. Was gegenüber dem Stand davor neu ist, ist grün hinterlegt, Gestrichenes rot
-durchgestrichen. Mit den Pfeiltasten gehst du Stand für Stand, <i>Abspielen</i> lässt den Text vor
+durchgestrichen. Unter <i>Änderungen</i> wählst du, womit verglichen wird: mit dem Stand davor oder mit
+jetzt — dann siehst du, was ein Wiederherstellen zurückbrächte (grün) und was dabei verloren ginge
+(rot). Große Punkte auf dem Zeitstrahl stehen für viele Änderungen, die Tage stehen darunter. Mit den Pfeiltasten gehst du Stand für Stand, <i>Abspielen</i> lässt den Text vor
 deinen Augen entstehen. <i>Diesen Stand wiederherstellen</i> setzt ihn an die Stelle des aktuellen
 Textes; der aktuelle wird vorher selbst Zwischenstand, und <kbd>Strg</kbd>+<kbd>Z</kbd> nimmt es
 zurück. <kbd>Esc</kbd> kehrt zum jetzigen Text zurück. Einen einzelnen Satz aus einem alten Stand holst du, indem du ihn markierst und kopierst (<kbd>Strg</kbd>+<kbd>C</kbd>) — Gestrichenes kommt dabei nicht mit.</p>
@@ -32355,7 +32412,10 @@ hacerlo antes de reescribir un pasaje que quizá quieras recuperar.</p>
 <p>La <b>máquina del tiempo</b> se abre desde <b>Archivo &rsaquo; Puntos de restauración &rsaquo; Máquina
 del tiempo</b> o el reloj arriba a la derecha: abajo una línea de tiempo con un punto por cada punto de
 restauración, y la página muestra la versión elegida. Lo nuevo respecto a la versión anterior se
-resalta en verde, lo eliminado aparece tachado en rojo. Las flechas pasan de una versión a otra,
+resalta en verde, lo eliminado aparece tachado en rojo. En <i>Cambios</i> eliges con qué comparar: con la
+versión anterior o con ahora; entonces ves qué traería de vuelta una restauración (verde) y qué se
+perdería (rojo). Los puntos grandes de la línea de tiempo indican muchos cambios; debajo se marcan
+los días. Las flechas pasan de una versión a otra,
 <i>Reproducir</i> hace que el texto nazca ante tus ojos. <i>Restaurar esta versión</i> la pone en
 lugar del texto actual; el actual se convierte antes en punto de restauración, y
 <kbd>Ctrl</kbd>+<kbd>Z</kbd> lo deshace. <kbd>Esc</kbd> vuelve al texto actual. Para recuperar una sola frase, selecciónala en la versión antigua y cópiala (<kbd>Ctrl</kbd>+<kbd>C</kbd>): lo tachado no se copia.</p>
@@ -33011,7 +33071,10 @@ trecho que você talvez queira de volta.</p>
 <p>A <b>máquina do tempo</b> abre por <b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Máquina do
 tempo</b> ou pelo relógio no canto superior direito: embaixo uma linha do tempo com um ponto para cada
 ponto de restauração, e a página mostra a versão escolhida. O que é novo em relação à versão
-anterior fica destacado em verde, o que foi cortado aparece riscado em vermelho. As setas passam de
+anterior fica destacado em verde, o que foi cortado aparece riscado em vermelho. Em <i>Alterações</i> você escolhe com o
+que comparar: com a versão anterior ou com agora — aí você vê o que uma restauração traria de volta
+(verde) e o que se perderia (vermelho). Pontos grandes na linha do tempo indicam muitas alterações;
+os dias aparecem embaixo. As setas passam de
 uma versão para outra, <i>Reproduzir</i> faz o texto nascer diante dos seus olhos. <i>Restaurar
 esta versão</i> a coloca no lugar do texto atual; o atual vira antes um ponto de restauração, e
 <kbd>Ctrl</kbd>+<kbd>Z</kbd> desfaz. <kbd>Esc</kbd> volta ao texto atual. Para recuperar só uma frase, selecione-a na versão antiga e copie (<kbd>Ctrl</kbd>+<kbd>C</kbd>): o texto riscado não é copiado.</p>
@@ -33698,7 +33761,10 @@ utile avant de réécrire un passage que vous pourriez vouloir récupérer.</p>
 <p>La <b>machine à remonter le temps</b> s’ouvre par <b>Fichier &rsaquo; Points de restauration &rsaquo;
 Machine à remonter le temps</b> ou l’horloge en haut à droite : en bas une frise avec un point par point de
 restauration, la page montre la version choisie. Ce qui est nouveau par rapport à la version
-précédente est surligné en vert, ce qui a été supprimé est barré en rouge. Les flèches passent
+précédente est surligné en vert, ce qui a été supprimé est barré en rouge. Sous <i>Modifications</i>, vous choisissez la
+comparaison : avec la version précédente ou avec maintenant — vous voyez alors ce qu’une restauration
+ramènerait (en vert) et ce qu’elle ferait perdre (en rouge). Les gros points de la frise signalent
+beaucoup de modifications ; les jours sont indiqués dessous. Les flèches passent
 d’une version à l’autre, <i>Lire</i> fait naître le texte sous vos yeux. <i>Restaurer cette
 version</i> la remet à la place du texte actuel ; celui-ci devient d’abord un point de restauration,
 et <kbd>Ctrl</kbd>+<kbd>Z</kbd> annule. <kbd>Échap</kbd> revient au texte actuel. Pour ne reprendre qu’une phrase, sélectionnez-la dans l’ancienne version et copiez-la (<kbd>Ctrl</kbd>+<kbd>C</kbd>) — le texte barré n’est pas copié.</p>
@@ -34344,7 +34410,9 @@ fragmentu, który być może zechcesz odzyskać.</p>
 <p><b>Wehikuł czasu</b> otwierasz przez <b>Plik &rsaquo; Punkty przywracania &rsaquo; Wehikuł czasu</b>
 albo zegar w prawym górnym rogu: na dole oś czasu z punktem dla każdego punktu przywracania, a strona
 pokazuje wybraną wersję. To, co nowe względem poprzedniej wersji, jest podświetlone na zielono,
-to, co usunięte, przekreślone na czerwono. Strzałki przechodzą od wersji do wersji, <i>Odtwórz</i>
+to, co usunięte, przekreślone na czerwono. W <i>Zmiany</i> wybierasz, z czym porównać: z
+poprzednią wersją czy z teraz — wtedy widzisz, co przywrócenie by przyniosło (na zielono), a co
+by przepadło (na czerwono). Duże punkty na osi czasu oznaczają wiele zmian, pod nią są dni. Strzałki przechodzą od wersji do wersji, <i>Odtwórz</i>
 pokazuje, jak tekst powstaje na twoich oczach. <i>Przywróć tę wersję</i> stawia ją na miejsce
 bieżącego tekstu; bieżący staje się najpierw punktem przywracania, a <kbd>Ctrl</kbd>+<kbd>Z</kbd>
 to cofa. <kbd>Esc</kbd> wraca do bieżącego tekstu. Aby odzyskać tylko jedno zdanie, zaznacz je w starej wersji i skopiuj (<kbd>Ctrl</kbd>+<kbd>C</kbd>) — przekreślony tekst nie zostanie skopiowany.</p>
@@ -35010,7 +35078,10 @@ prima di riscrivere un passaggio che potresti voler recuperare.</p>
 <p>La <b>macchina del tempo</b> si apre da <b>File &rsaquo; Punti di ripristino &rsaquo; Macchina del tempo</b>
 o dall'orologio in alto a destra: in basso una linea del tempo con un punto per ogni punto di
 ripristino, la pagina mostra la versione scelta. Ciò che è nuovo rispetto alla versione precedente
-è evidenziato in verde, ciò che è stato tolto è barrato in rosso. Le frecce passano da una versione
+è evidenziato in verde, ciò che è stato tolto è barrato in rosso. In <i>Modifiche</i> scegli il confronto: con la
+versione precedente o con adesso — allora vedi che cosa riporterebbe un ripristino (verde) e che
+cosa andrebbe perso (rosso). I punti grandi sulla linea del tempo indicano molte modifiche; i giorni
+sono segnati sotto. Le frecce passano da una versione
 all'altra, <i>Riproduci</i> fa nascere il testo davanti ai tuoi occhi. <i>Ripristina questa
 versione</i> la rimette al posto del testo corrente; quello corrente diventa prima un punto di
 ripristino, e <kbd>Ctrl</kbd>+<kbd>Z</kbd> annulla. <kbd>Esc</kbd> torna al testo attuale. Per recuperare una sola frase, selezionala nella versione vecchia e copiala (<kbd>Ctrl</kbd>+<kbd>C</kbd>): il testo barrato non viene copiato.</p>
