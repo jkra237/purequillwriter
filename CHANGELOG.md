@@ -82,10 +82,37 @@ Derzeit nichts.
   Fassungen, nie der Text. Löschen fragt im Knopf selbst nach („Wirklich
   löschen?“, rot, 4 s) statt in einem zweiten Fenster über den
   Einstellungen. Ersetzt den Kasten, der nur das geöffnete Dokument zeigte.
-  Der Umzug der Zwischenstände in IndexedDB ist bewusst verschoben: nötig
-  erst, wenn PureQuill sich an Romanautoren mit sehr langen Texten oder
-  vielen Bildern richtet — bis dahin wirft `commit()` bei vollem Speicher
-  die ältesten Stände weg, nie den Text.
+- **Zwischenstände im großen Speicher (IndexedDB)**: localStorage fasst je
+  Adresse nur rund 5 Mio. Zeichen für alles, und jeder Zwischenstand ist
+  eine volle Kopie — drei Romane à 250 Seiten ließen nur etwa 7 Stände für
+  alle zusammen, ein Foto belegt so viel wie 150 Textseiten (Toms Frage
+  nach der Grenze). Jetzt liegen sie in der vorhandenen Datenbank
+  `pqw.files` (Ablage `hist`, Fassung 3), je Dokument ein Eintrag. Im
+  Arbeitsspeicher bleibt `d.history` wie bisher; `save()` lässt sie nur für
+  Dokumente weg, deren Stände nachweislich geschrieben sind (`histSicher`)
+  — ohne IndexedDB bleibt alles beim alten Weg, und der Umzug bestehender
+  Stände ist gefahrlos. Beim Start führt `histLaden()` beide Quellen
+  zusammen. Schließen löscht den Eintrag, eine geladene Sicherung gleicht
+  ab, „Alle Daten löschen“ leert auch diese Ablage; .pqw-Sicherungen
+  enthalten die Stände weiter. Bei vollem localStorage opfert `commit()`
+  nur noch Stände, die dort noch liegen. Geprüft über mehrere Neustarts im
+  selben Profil: Altbestand zieht um und verlässt localStorage, kommt nach
+  dem Neustart aus IndexedDB, Zeitmaschine sieht alle, drei Romane à 250
+  Seiten mit je 19 Ständen speichern ohne Fehler (localStorage 1,06 Mio.
+  Zeichen statt über 20), Schließen räumt den Eintrag ab.
+  Dazu eine Obergrenze (Tom): Einstellungen › Zwischenstände › „Höchstens
+  belegen“ 50 MB/100 MB/**200 MB**/500 MB/1 GB, die Summe zeigt „x von y“.
+  Wird sie überschritten, fallen die ältesten Stände quer über alle
+  Dokumente weg, der neueste jedes Dokuments bleibt, der Text nie
+  (`histGrenze`, nach jedem Zwischenstand, beim Start und beim Ändern der
+  Grenze) — mit einem Hinweis je Sitzung statt einer Rückfrage mitten im
+  Schreiben. Größe als Zeichenzahl (≈ Bytes), damit das Zählen bei jedem
+  Zwischenstand billig bleibt. Geprüft: 65 MB bei Grenze 50 MB → 49,2 MB,
+  älteste zuerst, jedes Dokument behält mindestens einen Stand.
+- **„Zurücksetzen“ in Einstellungen › Allgemein** sah seit dem Abschnitt
+  „Belegter Speicher“ rot gefüllt und klein aus: dessen Rückfrage-Klasse
+  hieß ebenfalls `gefahr` und überschrieb den Knopf. Umbenannt in
+  `zwfrage`; „Zurücksetzen“ ohne Auslassungspunkte (Tom).
 - **Menüs eine Stufe luftiger**: 28 px je Eintrag mit Schrift 13,5 statt
   24 px/13 (Tom: gequetscht ist nicht gut fürs Auge; die 31 px von vor den
   Symbolen waren zu groß). Gilt für alle Menüs, oben und beim Rechtsklick.

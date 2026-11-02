@@ -12,6 +12,7 @@ Was sich zwischen zwei Veröffentlichungen ansammelt, steht in [`CHANGELOG.md`](
 
 - **Zustand**: globales Objekt `S`, persistiert in `localStorage` via `save()`/`load()`. Enthält `docs[]`, `notes[]`, `glossary[]`, `glossaries[]`, `settings{}`, `mode`, `goal{}`.
 - **Migrationen** laufen beim Start direkt nach `let S=load()||{...}` — jede neue persistente Eigenschaft braucht dort eine Zeile, die alte Zustände nachzieht (siehe die vielen `if(S.settings&&...)`-Zeilen als Vorbild).
+- **Zwischenstände liegen in IndexedDB** (seit 2026-11, `pqw.files` › Ablage `hist`, ein Eintrag je Dokument-ID), nicht in localStorage: im Arbeitsspeicher bleibt `d.history` wie immer, `save()` lässt sie nur für Dokumente in `histSicher` weg (Stände nachweislich geschrieben). Wer `d.history` ändert, ruft danach `histSchreiben(d)`; wer viele Dokumente auf einmal ändert (Sicherung laden), `histAbgleich()`. Ohne IndexedDB bleibt alles in localStorage — dieser Rückfall ist Absicht.
 - **`render()`** ist die zentrale Neuzeichenfunktion: `drawTabs()`, `drawTools()`, moduspezifisches `drawWrite()`/`drawNotes()`/`drawGloss()`, `drawStatus()`.
 - **`doc()`** liefert das aktive Dokument, `fmtOf(d)` sein Seitenformat (inkl. `hd`/`fd` für Kopf-/Fußzeilenabstand).
 - **Glossare**: mehrere benannte Sammlungen (`S.glossaries`), jedes Dokument hat eine `glossaryId` (auch `null` = bewusst ohne Zuordnung). Ansehen (`curGView()`) und Zuordnen sind getrennte Konzepte — ein Reiterklick zeigt nur an, bindet nichts um.

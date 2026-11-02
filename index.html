@@ -1807,7 +1807,7 @@ body.focus .outline{display:none}
 .zwzeile .zwknopf{width:28px;height:28px;display:grid;place-items:center;border-radius:var(--radius);color:var(--ink-soft);flex:0 0 28px}
 .zwzeile .zwknopf:hover{background:var(--chrome-2);color:var(--ink)}
 .zwzeile .zwknopf[disabled]{opacity:.35;pointer-events:none}
-.btn.gefahr,.zwknopf.gefahr{color:var(--paper)!important;background:color-mix(in srgb,#c0392b 82%,var(--ink))!important;
+.btn.zwfrage,.zwknopf.zwfrage{color:var(--paper)!important;background:color-mix(in srgb,#c0392b 82%,var(--ink))!important;
   border-color:transparent!important;width:auto!important;padding:0 9px;font-size:12px;white-space:nowrap}
 /* Ein/Aus-Einstellungen wie in Words Optionen (2026-10-27, Tom: „sieht
    etwas komisch und nach links gestaucht aus“): Kästchen vorn, Titel und
@@ -2672,6 +2672,8 @@ const SNAPSHOTS=[["alle 30 Sekunden",30],["jede Minute",60],["alle 2 Minuten",12
   ["alle 10 Minuten",600],["alle 15 Minuten",900]];
 /* Wie weit der Versionsverlauf zurückreicht (Sekunden). Bis 1.2 galt fest
    „die letzten 12“ — bei 30 s Abstand gut sechs Minuten. */
+/* Höchstens so viel belegen die Zwischenstände aller Dokumente zusammen */
+const HIST_MAXE=[50,100,200,500,1024];
 const HIST_SPANNEN=[["eine Stunde",3600],["einen Tag",86400],["eine Woche",604800],["einen Monat",2592000]];
 const PARSPACES=[["Kompakt",.4],["Normal",.82],["Weit",1.2],["Sehr weit",1.6]];
 /* 0 ist ein gültiger Absatzabstand (häufig in Word-Dateien) — darum nicht
@@ -2837,6 +2839,9 @@ const ICO_BLATT='<path d="M13 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-
 const ICOTB=p=>ICOSZ(p,20,1.3);
 const KEY="lw.v1";
 let mem=null;
+/* Zwischenstände in IndexedDB (siehe histLaden) — hier oben, weil save() schon
+   bei den Migrationen direkt nach load() läuft und sonst in der Totzone läge */
+let histBereit=false,histVersprechen=null;const histSicher=new Set();
 
 /* ================= Übersetzung ================= */
 const I18N={
@@ -3810,6 +3815,9 @@ en:{
   "Farbband":"Ribbon",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Typing sounds",
+  "Höchstens belegen":"Use at most",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Oldest snapshots removed to stay under {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"When the limit is reached, the oldest snapshots drop out on their own; the newest of each document stays.",
   "Unterschied zur vorherigen Version":"Difference from the previous version",
   "Unterschied zur jetzigen Version":"Difference from the latest version",
   "Markierungen einstellen":"Highlighting options",
@@ -4875,6 +4883,9 @@ fr:{
   "Farbband":"Ruban",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Bruits de frappe",
+  "Höchstens belegen":"Utiliser au plus",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Points de restauration les plus anciens supprimés pour rester sous {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Quand la limite est atteinte, les points de restauration les plus anciens disparaissent d’eux-mêmes ; le plus récent de chaque document reste.",
   "Unterschied zur vorherigen Version":"Différence avec la version précédente",
   "Unterschied zur jetzigen Version":"Différence avec la version actuelle",
   "Markierungen einstellen":"Options de surlignage",
@@ -5940,6 +5951,9 @@ es:{
   "Farbband":"Cinta",
   "Lautstärke":"Volumen",
   "Tippgeräusche":"Sonidos de tecleo",
+  "Höchstens belegen":"Ocupar como máximo",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Se eliminaron los puntos de restauración más antiguos para no superar {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Al alcanzar el límite, los puntos de restauración más antiguos desaparecen solos; el más reciente de cada documento se conserva.",
   "Unterschied zur vorherigen Version":"Diferencia con la versión anterior",
   "Unterschied zur jetzigen Version":"Diferencia con la versión actual",
   "Markierungen einstellen":"Opciones de resaltado",
@@ -7005,6 +7019,9 @@ pt:{
   "Farbband":"Fita",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Sons de digitação",
+  "Höchstens belegen":"Ocupar no máximo",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Os pontos de restauração mais antigos foram excluídos para ficar abaixo de {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Quando o limite é atingido, os pontos de restauração mais antigos somem sozinhos; o mais recente de cada documento fica.",
   "Unterschied zur vorherigen Version":"Diferença em relação à versão anterior",
   "Unterschied zur jetzigen Version":"Diferença em relação à versão atual",
   "Markierungen einstellen":"Opções de destaque",
@@ -8070,6 +8087,9 @@ pl:{
   "Farbband":"Taśma",
   "Lautstärke":"Głośność",
   "Tippgeräusche":"Dźwięki pisania",
+  "Höchstens belegen":"Zajmuj najwyżej",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Usunięto najstarsze punkty przywracania, aby nie przekroczyć {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Po osiągnięciu limitu najstarsze punkty przywracania znikają same; najnowszy każdego dokumentu zostaje.",
   "Unterschied zur vorherigen Version":"Różnica względem poprzedniej wersji",
   "Unterschied zur jetzigen Version":"Różnica względem obecnej wersji",
   "Markierungen einstellen":"Ustawienia podświetlania",
@@ -9146,6 +9166,9 @@ it:{
   "Farbband":"Nastro",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Suoni di battitura",
+  "Höchstens belegen":"Occupa al massimo",
+  "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Punti di ripristino più vecchi eliminati per restare sotto {max}.",
+  "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Al raggiungimento del limite i punti di ripristino più vecchi spariscono da soli; il più recente di ogni documento resta.",
   "Unterschied zur vorherigen Version":"Differenza dalla versione precedente",
   "Unterschied zur jetzigen Version":"Differenza dalla versione attuale",
   "Markierungen einstellen":"Opzioni di evidenziazione",
@@ -9579,7 +9602,9 @@ let storageOk=true;
    automatische Sicherung haette ihn nebenbei in den Cloud-Ordner gelegt. */
 let datenGeloescht=false;
 function save(){if(datenGeloescht)return false;
-  const s=JSON.stringify(S);mem=JSON.parse(s);
+  /* Zwischenstände, die sicher in IndexedDB liegen, bleiben hier draußen */
+  const s=histSicher.size?JSON.stringify(S,function(k,v){return k==="history"&&this&&histSicher.has(this.id)?undefined:v}):JSON.stringify(S);
+  mem=JSON.parse(s);
   try{localStorage.setItem(KEY,s);if(!storageOk){storageOk=true;drawStatus()}return true}
   catch(e){
     if(storageOk){storageOk=false;
@@ -9638,6 +9663,7 @@ if(S.settings&&!S.settings.sm)S.settings.sm={an:false,farbband:40,ton:true,laut:
    ablenkt, und die Glocke nur auf Wunsch (Tom) */
 if(S.settings&&S.settings.sm&&!S.settings.sm.aufnahmen)Object.assign(S.settings.sm,{laut:25,glocke:false,aufnahmen:true});
 if(S.settings&&typeof S.settings.modHinweisAus!=="boolean")S.settings.modHinweisAus=false;
+if(S.settings&&!S.settings.histMax)S.settings.histMax=200;
 if(S.settings&&!S.settings.zmBezug){S.settings.zmBezug=S.settings.zmZeigen===false?"aus":"vorher";delete S.settings.zmZeigen}
 if(S.settings)delete S.settings.crt;
 if(!S.noteView)S.noteView="free";
@@ -9793,7 +9819,7 @@ function closeDoc(id){
        Word. Bei mehreren Reitern wird nur neu gezeichnet — vorher entschied das
        an dieser Stelle, ob zufällig alle Dokumente leer sind. */
     const warLetztes=S.docs.length===1;
-    S.docs.splice(i,1);
+    S.docs.splice(i,1);histDel(d.id);
     if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;n.glossaryId=d.glossaryId;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
     save();
@@ -12112,12 +12138,12 @@ function commit(){
   clearTimeout(saveTimer);
   flush();const d=doc();
   const last=d.history[d.history.length-1];
-  if(!last||last.html!==d.html){d.history.push({ts:Date.now(),html:d.html});histAusduennen(d)}
+  if(!last||last.html!==d.html){d.history.push({ts:Date.now(),html:d.html});histAusduennen(d);histSchreiben(d);histGrenze()}
   /* Läuft der Speicher voll, gehen zuerst die ältesten Zwischenstände —
      über alle Dokumente, nie der neueste eines Dokuments und nie der Text. */
   let ok=save();
   for(let i=0;!ok&&!datenGeloescht&&i<60;i++){
-    const voll=S.docs.filter(x=>x.history&&x.history.length>1).sort((a,b)=>a.history[0].ts-b.history[0].ts)[0];
+    const voll=S.docs.filter(x=>!histSicher.has(x.id)&&x.history&&x.history.length>1).sort((a,b)=>a.history[0].ts-b.history[0].ts)[0];
     if(!voll)break;
     voll.history.shift();ok=save();
   }
@@ -20863,8 +20889,8 @@ async function alleDatenWeg(){
   try{
     const db=await idb();
     await new Promise(ok=>{
-      const t=db.transaction(["handles","dict"],"readwrite");
-      t.objectStore("handles").clear();t.objectStore("dict").clear();
+      const t=db.transaction(["handles","dict","hist"],"readwrite");
+      t.objectStore("handles").clear();t.objectStore("dict").clear();t.objectStore("hist").clear();
       t.oncomplete=ok;t.onerror=ok;t.onabort=ok;
     });
   }catch(e){}
@@ -20944,10 +20970,12 @@ const hatDateien=()=>typeof window.showSaveFilePicker==="function";
    Warten anzeigen kann. */
 const FSDB="pqw.files";
 function idb(){return new Promise((ok,fail)=>{
-  const r=indexedDB.open(FSDB,2);
+  const r=indexedDB.open(FSDB,3);
   r.onupgradeneeded=()=>{const db=r.result;
     if(!db.objectStoreNames.contains("handles"))db.createObjectStore("handles");
     if(!db.objectStoreNames.contains("dict"))db.createObjectStore("dict");
+    /* seit 2026-11: die Zwischenstände je Dokument (Schlüssel = Dokument-ID) */
+    if(!db.objectStoreNames.contains("hist"))db.createObjectStore("hist");
   };
   r.onsuccess=()=>ok(r.result);r.onerror=()=>fail(r.error);
 })}
@@ -20965,6 +20993,60 @@ async function dictCachePut(k,v){try{const db=await idb();await new Promise(ok=>
 async function dictCacheDel(k){try{const db=await idb();await new Promise(ok=>{
   const t=db.transaction("dict","readwrite");t.objectStore("dict").delete(k);
   t.oncomplete=ok;t.onerror=ok})}catch(e){}}
+/* ================= Zwischenstände in IndexedDB =================
+   (2026-11-02, Tom.) localStorage fasst je Adresse nur rund 5 Mio. Zeichen,
+   für alles zusammen — und jeder Zwischenstand ist eine volle Kopie des
+   Dokuments. Drei Romane à 250 Seiten ließen nur noch etwa 7 Zwischenstände
+   für alle zusammen übrig, ein Foto belegt so viel wie 150 Textseiten und
+   steckt in jedem Stand noch einmal. IndexedDB fasst Hunderte MB.
+   Im Arbeitsspeicher bleibt alles wie bisher (d.history) — commit, Zeitmaschine
+   und Ausdünnen merken nichts davon. Nur beim Speichern bleibt d.history aus
+   localStorage heraus, und zwar je Dokument erst dann, wenn seine Stände
+   nachweislich in IndexedDB liegen (histSicher). Bis dahin, und überall wo
+   IndexedDB fehlt (manche private Fenster), bleibt es beim alten Weg —
+   dadurch ist auch der Umzug bestehender Stände gefahrlos: sie verlassen
+   localStorage erst, wenn die Kopie geschrieben ist.
+   Beim Start werden die Stände aus beiden Quellen zusammengeführt (falls ein
+   Absturz zwischen beiden lag). Die Grenze bleibt dieselbe: höchstens 19 je
+   Dokument, innerhalb der eingestellten Spanne (histAusduennen). */
+async function histPut(id,daten){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("hist","readwrite");t.objectStore("hist").put(daten,id);
+  t.oncomplete=()=>ok(true);t.onerror=()=>ok(false);t.onabort=()=>ok(false)})}catch(e){return false}}
+async function histDel(id){histSicher.delete(id);try{const db=await idb();await new Promise(ok=>{
+  const t=db.transaction("hist","readwrite");t.objectStore("hist").delete(id);
+  t.oncomplete=ok;t.onerror=ok;t.onabort=ok})}catch(e){}}
+async function histAlle(){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("hist","readonly"),st=t.objectStore("hist"),m=new Map();
+  const c=st.openCursor();c.onsuccess=()=>{const k=c.result;if(k){m.set(k.key,k.value);k.continue()}else ok(m)};
+  c.onerror=()=>ok(null)})}catch(e){return null}}
+/* Ein Dokument schreiben; beim ersten Erfolg verlässt es localStorage */
+async function histSchreiben(d){
+  if(!histBereit||datenGeloescht||!d)return;
+  const ok=await histPut(d.id,(d.history||[]).slice());
+  if(ok&&!histSicher.has(d.id)&&S.docs.some(x=>x.id===d.id)){histSicher.add(d.id);save()}
+}
+/* Nach Ereignissen, die viele Dokumente betreffen (Sicherung geladen,
+   Dokument geschlossen): alle schreiben, verwaiste Einträge löschen */
+async function histAbgleich(){
+  if(!histBereit||datenGeloescht)return;
+  const alle=await histAlle();if(!alle)return;
+  const ids=new Set(S.docs.map(d=>d.id));
+  for(const id of alle.keys())if(!ids.has(id))await histDel(id);
+  for(const d of S.docs)await histSchreiben(d);
+}
+async function histLaden(){
+  const alle=await histAlle();
+  if(!alle)return;   /* kein IndexedDB: alles bleibt in localStorage */
+  for(const d of S.docs){
+    const alt=alle.get(d.id)||[],m=new Map();
+    [...alt,...(d.history||[])].forEach(h=>{if(h&&h.ts)m.set(h.ts+"|"+(h.html||"").length,h)});
+    d.history=[...m.values()].sort((a,b)=>a.ts-b.ts);
+    if(d.history.length>HIST_DICHT)histAusduennen(d);
+  }
+  histBereit=true;
+  histGrenze(true);
+  await histAbgleich();
+}
 /* Billige Echtheitspruefung, damit eine abgebrochene oder verfaelschte Ablage
    nicht dauerhaft haengen bleibt: eine .dic beginnt mit der Wortzahl, eine
    .aff nennt ihre Kodierung. Faellt eine durch, wird sie verworfen und neu
@@ -21189,12 +21271,12 @@ function applyBundle(b){
   if(kind==="all"){
     confirmReplace(()=>{
       const neu={...b};delete neu.pqw;delete neu.kind;delete neu.saved;
-      S=neu;
+      S=neu;histSicher.clear();
       /* Eine Vollsicherung von vor 1.1 bringt die alten Vorgaben mit */
       aufWordWerteUmstellen();
       ensureGlossaries();
       lockedOvl=false;closeOvl();
-      save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"));
+      save();applyTheme();applyStaticLabels();render();toast(tr("Geladen"));histAbgleich();
     });
     return;
   }
@@ -21215,7 +21297,7 @@ function applyBundle(b){
   });
   ensureGlossaries();
   lockedOvl=false;closeOvl();
-  save();applyTheme();applyStaticLabels();render();
+  save();applyTheme();applyStaticLabels();render();histAbgleich();
   const teile=[];
   if(nD)teile.push(nD===1?tr("ein Dokument"):nD+" "+tr("Dokumente"));
   if(nN)teile.push(nN+" "+tr(nN===1?"Notiz":"Notizen"));
@@ -29564,10 +29646,11 @@ function quickNote(){
    der Editor gesperrt und flush() schreibt nichts zurück — sonst landete
    ein alter Stand samt Markierungen im Dokument. Jede andere Ansicht
    (render) beendet sie. */
-let zmAn=false,zmStaende=[],zmIdx=0,zmUhr=null;
+let zmAn=false,zmStaende=[],zmIdx=0,zmUhr=null,zmWarte=false;
 function history(){zeitmaschine()}
 function zeitmaschine(){
   if(zmAn)return;
+  if(!histBereit&&histVersprechen&&!zmWarte){zmWarte=true;histVersprechen.then(()=>{zmWarte=false;zeitmaschine()});return}
   if(S.mode!=="write"){setMode("write");setTimeout(zeitmaschine,60);return}
   flush();const d=doc();
   const st=(d.history||[]).map(h=>({ts:h.ts,html:h.html}));
@@ -29820,8 +29903,26 @@ document.addEventListener("keydown",e=>{
     e.preventDefault();e.stopPropagation();zmHalt();zmZeige(zmIdx+(e.key==="ArrowLeft"?-1:1))}
 },true);
 /* ---- Belegter Speicher der Zwischenstände (Einstellungen) ---- */
-function zwGroesse(d){let n=0;const enc=new TextEncoder();(d.history||[]).forEach(h=>{n+=enc.encode(h.html||"").length+30});return n}
-function zwFmt(b){return b<1048576?Math.max(1,Math.round(b/1024))+" KB":(b/1048576).toLocaleString(LOC(),{maximumFractionDigits:1})+" MB"}
+function zwStandGr(h){return (h.html||"").length+30}
+function zwGroesse(d){let n=0;(d.history||[]).forEach(h=>{n+=zwStandGr(h)});return n}
+/* Grenze einhalten: die ältesten Stände quer über alle Dokumente gehen zuerst,
+   der neueste jedes Dokuments bleibt immer, der Text wird nie angefasst —
+   dieselbe Regel wie bei vollem Speicher. Ein Hinweis je Sitzung genügt;
+   eine Rückfrage mitten im Schreiben wäre schlimmer als das Ausdünnen. */
+let histGrenzeGemeldet=false;
+function histGrenze(still){
+  const max=(S.settings.histMax||200)*1048576;
+  let summe=S.docs.reduce((s,d)=>s+zwGroesse(d),0);if(summe<=max)return 0;
+  const kand=[];S.docs.forEach(d=>(d.history||[]).slice(0,-1).forEach(h=>kand.push({d,h})));
+  kand.sort((a,b)=>a.h.ts-b.h.ts);
+  const betroffen=new Set();let weg=0;
+  for(const {d,h} of kand){if(summe<=max)break;d.history=d.history.filter(x=>x!==h);summe-=zwStandGr(h);betroffen.add(d);weg++}
+  betroffen.forEach(d=>histSchreiben(d));
+  if(weg&&!still&&!histGrenzeGemeldet){histGrenzeGemeldet=true;
+    toast(tr("Älteste Zwischenstände entfernt, um unter {max} zu bleiben.").replace("{max}",zwFmt(max)))}
+  return weg;
+}
+function zwFmt(b){return b<1048576?Math.max(1,Math.round(b/1024))+" KB":b<1073741824?(b/1048576).toLocaleString(LOC(),{maximumFractionDigits:1})+" MB":(b/1073741824).toLocaleString(LOC(),{maximumFractionDigits:1})+" GB"}
 function zwSpeicherHtml(){
   const docs=[...S.docs].sort((x,y)=>(y.id===S.active)-(x.id===S.active));
   const n=S.docs.reduce((s,d)=>s+(d.history||[]).length,0),b=S.docs.reduce((s,d)=>s+zwGroesse(d),0);
@@ -29829,7 +29930,7 @@ function zwSpeicherHtml(){
   const uhr=ICOSZ('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2.6 7.4 4.3 10.3 7.2 9z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8"/>',16,1.6);
   const plus=ICOSZ('<circle cx="12" cy="12" r="8.5"/><path d="M12 8.5v7M8.5 12h7"/>',16,1.6);
   const korb=ICOSZ('<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M10.5 11v5.5M13.5 11v5.5"/>',16,1.6);
-  return `<div class="zwsumme"><span>${n?`<b>${zwFmt(b)}</b> · ${n} ${tr(n===1?"Zwischenstand":"Zwischenstände")} · ${mit} ${tr(mit===1?"Dokument":"Dokumente")}`:tr("Noch keine gesicherten Stände.")}</span>
+  return `<div class="zwsumme"><span>${n?`<b>${zwFmt(b)}</b> ${OFWORD()} ${zwFmt((S.settings.histMax||200)*1048576)} · ${n} ${tr(n===1?"Zwischenstand":"Zwischenstände")} · ${mit} ${tr(mit===1?"Dokument":"Dokumente")}`:tr("Noch keine gesicherten Stände.")}</span>
       <span style="flex:1"></span>${n?`<button class="btn" id="zwAlle" data-text="${esc(tr("Alle löschen"))}">${tr("Alle löschen")}</button>`:""}</div>
     <div class="zwliste">${docs.map(d=>{const h=d.history||[],akt=d.id===S.active;
       return `<div class="zwzeile" data-id="${d.id}">
@@ -29839,23 +29940,26 @@ function zwSpeicherHtml(){
         <button class="zwknopf" data-zw="zm" title="${esc(tr("Zeitmaschine öffnen"))}" aria-label="${esc(tr("Zeitmaschine öffnen"))}">${uhr}</button>
         <button class="zwknopf" data-zw="weg" title="${esc(tr("Zwischenstände löschen"))}" aria-label="${esc(tr("Zwischenstände löschen"))}" ${h.length?"":"disabled"}>${korb}</button>
       </div>`}).join("")}</div>
-    <p class="setnote" style="margin-top:7px">${tr("Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.")}</p>`;
+    <p class="setnote" style="margin-top:7px">${tr("Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.")} ${tr("Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.")}</p>`;
 }
 /* Zweimal klicken statt Rückfragefenster: der erste Klick färbt den Knopf
    rot und fragt, der zweite binnen 4 s führt aus */
 function zwBestaetigen(btn,tun){
-  if(btn.classList.contains("gefahr")){clearTimeout(btn._t);tun();return}
-  btn._alt=btn.innerHTML;btn.classList.add("gefahr");btn.textContent=tr("Wirklich löschen?");
-  btn._t=setTimeout(()=>{btn.classList.remove("gefahr");btn.innerHTML=btn._alt},4000);
+  if(btn.classList.contains("zwfrage")){clearTimeout(btn._t);tun();return}
+  btn._alt=btn.innerHTML;btn.classList.add("zwfrage");btn.textContent=tr("Wirklich löschen?");
+  btn._t=setTimeout(()=>{btn.classList.remove("zwfrage");btn.innerHTML=btn._alt},4000);
 }
 function zwSpeicherVerdrahten(){
+  const mx=$("#sHistMax");
+  if(mx)mx.onchange=()=>{S.settings.histMax=+mx.value;const weg=histGrenze(true);save();settings();
+    if(weg)toast(tr("Älteste Zwischenstände entfernt, um unter {max} zu bleiben.").replace("{max}",zwFmt(S.settings.histMax*1048576)))};
   const alle=$("#zwAlle");
-  if(alle)alle.onclick=()=>zwBestaetigen(alle,()=>{S.docs.forEach(d=>d.history=[]);save();settings();toast(tr("Alle Zwischenstände gelöscht"))});
+  if(alle)alle.onclick=()=>zwBestaetigen(alle,()=>{S.docs.forEach(d=>{d.history=[];histSchreiben(d)});save();settings();toast(tr("Alle Zwischenstände gelöscht"))});
   document.querySelectorAll(".zwzeile [data-zw]").forEach(b=>b.onclick=()=>{
     const id=b.closest(".zwzeile").dataset.id,d=S.docs.find(x=>x.id===id);if(!d)return;
     if(b.dataset.zw==="neu"){commit();settings();return}
     if(b.dataset.zw==="zm"){closeOvl();if(S.active!==id){flush();S.active=id;S.mode="write";render()}setTimeout(zeitmaschine,60);return}
-    if(b.dataset.zw==="weg")zwBestaetigen(b,()=>{d.history=[];save();settings();toast(tr("Zwischenstände gelöscht"))});
+    if(b.dataset.zw==="weg")zwBestaetigen(b,()=>{d.history=[];histSchreiben(d);save();settings();toast(tr("Zwischenstände gelöscht"))});
   });
 }
 /* Welcher Reiter zuletzt offen war. Steht außerhalb, weil settings() sich beim
@@ -29900,7 +30004,7 @@ function settings(){
     <div class="setakt"><span class="setopt-t"><b>${tr("Alle Einstellungen zurücksetzen")}</b>
       <span class="setopt-d">${tr("Alle Einstellungen gehen auf den Auslieferungsstand zurück: Farbschema, Sprache, Schrift und Seitenformat für neue Dokumente, Autokorrektur und Ansicht.")}
         ${tr("Deine Dokumente, Notizen, Glossare, eigenen Formate und dein Wörterbuch bleiben erhalten.")}</span></span>
-      <button class="btn gefahr" id="sWerk">${tr("Zurücksetzen")}&hellip;</button></div>`;
+      <button class="btn gefahr" id="sWerk">${tr("Zurücksetzen")}</button></div>`;
   const neu=`
     <div class="setsec">${tr("Neue Dokumente")}</div>
     <p class="setnote">${tr("Voreinstellungen für neue Dokumente, die du ab jetzt anlegst. Das Format bestehender Dokumente bleibt bestehen.")}</p>
@@ -29950,6 +30054,8 @@ function settings(){
         `<option value="${v}" ${(s.histSpan||604800)==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
     <p class="setnote" style="margin-top:6px">${tr("Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.")}</p>
     <div class="setsec">${tr("Belegter Speicher")}</div>
+    <div class="setrow"><label>${tr("Höchstens belegen")}</label><div class="ctl"><select id="sHistMax">${HIST_MAXE.map(m=>
+      `<option value="${m}" ${(s.histMax||200)==m?"selected":""}>${zwFmt(m*1048576)}</option>`).join("")}</select></div></div>
     ${zwSpeicherHtml()}`;
   const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
@@ -36034,6 +36140,7 @@ function aufWordWerteUmstellen(){
 aufWordWerteUmstellen();
 applyTheme();applyStaticLabels();resetTimer();
 if(isTrulyEmpty()){clearShell();startupDialog();}else render();
+histVersprechen=histLaden();
 /* Desktop: per Doppelklick oder „Öffnen mit“ übergebene Dateien. Beim ersten
    Start lagen sie schon vor dem Fenster bereit und werden abgeholt; läuft das
    Programm schon, schickt main.js sie herüber. Erst hier, nach dem Aufbau —
