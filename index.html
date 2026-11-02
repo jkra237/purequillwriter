@@ -1444,6 +1444,44 @@ body.focus .repside{display:none}
 .outline-item.drop-below{box-shadow:inset 0 -2px 0 var(--stamp)}
 .outline-t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 .outline-empty{color:var(--ink-soft);font-style:italic;font-size:12.5px;padding:10px 14px;line-height:1.5}
+/* Karten (2026-11-02, Tom: verschieben wie WordPress-Blöcke): je Abschnitt
+   Überschrift, erste Zeile, Wortzahl und Status; Pfeile beim Überfahren */
+.outline .ohead small{font-family:var(--ui);font-size:11.5px;color:var(--ink-soft);font-weight:400;margin-left:6px}
+.outline-list{padding:7px 7px 10px;display:flex;flex-direction:column;gap:5px}
+.outline-item{align-items:flex-start;gap:4px;padding:7px 6px 7px 3px;border:1px solid var(--rule);border-left:1px solid var(--rule);
+  border-radius:var(--radius);background:var(--paper);color:var(--ink)}
+.outline-item:hover{background:var(--paper);border-color:color-mix(in srgb,var(--ink) 30%,var(--rule))}
+.outline-item.current{background:var(--paper);box-shadow:inset 3px 0 0 var(--stamp);font-weight:400}
+.outline-item.ol2{margin-left:14px;padding-left:3px}
+.outline-item.ol3{margin-left:28px;padding-left:3px}
+.outline-item.ol4{margin-left:40px;padding-left:3px}
+.outline-drag{margin-top:1px}
+.outline-k{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.outline-k .outline-t{font-weight:600;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:6px}
+.outline-item.ol1 .outline-k .outline-t{font-size:13px}
+.outline-z{font-size:11.5px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:Georgia,serif}
+.outline-m{font-size:11px;color:var(--ink-soft)}
+.ostat{flex:none;width:10px;height:10px;border-radius:50%;padding:0;border:1.5px solid color-mix(in srgb,var(--ink) 35%,var(--rule));background:transparent;cursor:pointer}
+.ostat:hover{transform:scale(1.25)}
+.ostat.entwurf,.statpkt.entwurf{background:#D85A30;border-color:#D85A30}
+.ostat.arbeit,.statpkt.arbeit{background:#E0A030;border-color:#E0A030}
+.ostat.fertig,.statpkt.fertig{background:#1D9E75;border-color:#1D9E75}
+/* Hervorhebung eines Abschnitts nach Klick in der Gliederung: eine Ebene über
+   dem Text statt Klassen an den Absätzen — so berührt sie weder Dokument noch
+   Rückgängig-Verlauf. Bleibt kurz stehen und blendet dann aus. */
+.abschnittmarke{position:absolute;pointer-events:none;z-index:4;border-radius:4px;
+  background:color-mix(in srgb,var(--stamp) 11%,transparent);box-shadow:inset 3px 0 0 var(--stamp);
+  animation:abschnittaus 2.8s ease forwards}
+@keyframes abschnittaus{0%{opacity:0}8%{opacity:1}65%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.abschnittmarke{animation:abschnittaus 2.8s steps(1,end) forwards}}
+@media print{.abschnittmarke{display:none!important}}
+.statpkt{display:inline-block;width:10px;height:10px;border-radius:50%;border:1.5px solid color-mix(in srgb,var(--ink) 35%,var(--rule))}
+.opf{flex:none;display:flex;flex-direction:column;opacity:0;transition:opacity .12s}
+.outline-item:hover .opf,.outline-item:focus-within .opf{opacity:1}
+.opf button{width:20px;height:17px;display:grid;place-items:center;border-radius:4px;color:var(--ink-soft);padding:0}
+.opf button:hover{background:var(--chrome);color:var(--ink)}
+.opf button[disabled]{opacity:.25;pointer-events:none}
+.opf svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 body.focus .outline{display:none}
 
 /* ---- Glossar ---- */
@@ -3815,6 +3853,12 @@ en:{
   "Farbband":"Ribbon",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Typing sounds",
+  "Entwurf":"Draft",
+  "In Arbeit":"In progress",
+  "Kein Status":"No status",
+  "Nach oben":"Move up",
+  "Nach unten":"Move down",
+  "Status":"Status",
   "Höchstens belegen":"Use at most",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Oldest snapshots removed to stay under {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"When the limit is reached, the oldest snapshots drop out on their own; the newest of each document stays.",
@@ -4883,6 +4927,12 @@ fr:{
   "Farbband":"Ruban",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Bruits de frappe",
+  "Entwurf":"Brouillon",
+  "In Arbeit":"En cours",
+  "Kein Status":"Aucun statut",
+  "Nach oben":"Monter",
+  "Nach unten":"Descendre",
+  "Status":"Statut",
   "Höchstens belegen":"Utiliser au plus",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Points de restauration les plus anciens supprimés pour rester sous {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Quand la limite est atteinte, les points de restauration les plus anciens disparaissent d’eux-mêmes ; le plus récent de chaque document reste.",
@@ -5951,6 +6001,12 @@ es:{
   "Farbband":"Cinta",
   "Lautstärke":"Volumen",
   "Tippgeräusche":"Sonidos de tecleo",
+  "Entwurf":"Borrador",
+  "In Arbeit":"En curso",
+  "Kein Status":"Sin estado",
+  "Nach oben":"Subir",
+  "Nach unten":"Bajar",
+  "Status":"Estado",
   "Höchstens belegen":"Ocupar como máximo",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Se eliminaron los puntos de restauración más antiguos para no superar {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Al alcanzar el límite, los puntos de restauración más antiguos desaparecen solos; el más reciente de cada documento se conserva.",
@@ -7019,6 +7075,12 @@ pt:{
   "Farbband":"Fita",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Sons de digitação",
+  "Entwurf":"Rascunho",
+  "In Arbeit":"Em andamento",
+  "Kein Status":"Sem status",
+  "Nach oben":"Mover para cima",
+  "Nach unten":"Mover para baixo",
+  "Status":"Status",
   "Höchstens belegen":"Ocupar no máximo",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Os pontos de restauração mais antigos foram excluídos para ficar abaixo de {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Quando o limite é atingido, os pontos de restauração mais antigos somem sozinhos; o mais recente de cada documento fica.",
@@ -8087,6 +8149,12 @@ pl:{
   "Farbband":"Taśma",
   "Lautstärke":"Głośność",
   "Tippgeräusche":"Dźwięki pisania",
+  "Entwurf":"Szkic",
+  "In Arbeit":"W toku",
+  "Kein Status":"Bez statusu",
+  "Nach oben":"W górę",
+  "Nach unten":"W dół",
+  "Status":"Status",
   "Höchstens belegen":"Zajmuj najwyżej",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Usunięto najstarsze punkty przywracania, aby nie przekroczyć {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Po osiągnięciu limitu najstarsze punkty przywracania znikają same; najnowszy każdego dokumentu zostaje.",
@@ -9166,6 +9234,12 @@ it:{
   "Farbband":"Nastro",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Suoni di battitura",
+  "Entwurf":"Bozza",
+  "In Arbeit":"In corso",
+  "Kein Status":"Nessuno stato",
+  "Nach oben":"Sposta su",
+  "Nach unten":"Sposta giù",
+  "Status":"Stato",
   "Höchstens belegen":"Occupa al massimo",
   "Älteste Zwischenstände entfernt, um unter {max} zu bleiben.":"Punti di ripristino più vecchi eliminati per restare sotto {max}.",
   "Wird die Grenze erreicht, fallen die ältesten Zwischenstände von selbst weg; der neueste jedes Dokuments bleibt.":"Al raggiungimento del limite i punti di ripristino più vecchi spariscono da soli; il più recente di ogni documento resta.",
@@ -26563,13 +26637,25 @@ function drawOutline(){
   if(S.mode!=="write"||!S.outlineOpen||!ed){box.className="outline";box.innerHTML="";return}
   box.className="outline on";
   const secs=outlineSections(ed);
+  /* dieselbe Zählung wie Statusleiste und „Wörter zählen“ */
+  const woerter=el=>countStats(el.innerText!=null?el.innerText:el.textContent).words;
+  const gesamt=woerter(ed);
+  const STAT={entwurf:"Entwurf",arbeit:"In Arbeit",fertig:"Fertig"};
+  const nachbarn=s=>{const i=secs.indexOf(s);let hoch=null,runter=null;
+    for(let k=i-1;k>=0;k--){if(secs[k].lvl<s.lvl)break;if(secs[k].lvl===s.lvl){hoch=secs[k];break}}
+    for(let k=i+1;k<secs.length;k++){if(secs[k].lvl<s.lvl)break;if(secs[k].lvl===s.lvl){runter=secs[k];break}}
+    return {hoch,runter}};
+  const pfeil=d=>`<svg viewBox="0 0 24 24"><path d="${d}"/></svg>`;
   box.innerHTML=`<div class="outline-resize" id="outlineResize" title="${tr("Breite ziehen")}"></div>
-    <div class="ohead"><b>${tr("Gliederung")}</b>
+    <div class="ohead"><b>${tr("Gliederung")}${secs.length?`<small>${gesamt.toLocaleString(LOC())} ${tr("Wörter")}</small>`:""}</b>
       <button class="obtn" id="outlineClose" title="${tr("Schließen")}">${ICO('<path d="M6 6l12 12M18 6 6 18"/>')}</button></div>
     <div class="outline-list" id="outlineList">${secs.length?secs.map(s=>`
       <div class="outline-item ol${s.lvl}" data-oid="${s.id}">
         <span class="outline-drag" title="${tr("Ziehen zum Verschieben")}">${ICO('<circle cx="8" cy="6" r="1.3"/><circle cx="8" cy="12" r="1.3"/><circle cx="8" cy="18" r="1.3"/><circle cx="14" cy="6" r="1.3"/><circle cx="14" cy="12" r="1.3"/><circle cx="14" cy="18" r="1.3"/>')}</span>
-        <span class="outline-t">${esc(s.h.textContent.trim())||tr("(ohne Text)")}</span>
+        <span class="outline-k"><span class="outline-t"><button class="ostat ${s.h.dataset.kstat||""}" data-stat="${s.id}" title="${esc(tr(STAT[s.h.dataset.kstat]||"Status"))}" aria-label="${esc(tr("Status"))}"></button><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(s.h.textContent.trim())||tr("(ohne Text)")}</span></span>
+          ${(()=>{const b=s.run.slice(1).find(n=>!/^H[1-6]$/.test(n.tagName)&&n.textContent.trim());return b&&s.lvl<=2?`<span class="outline-z">${esc(b.textContent.trim().slice(0,90))}</span>`:""})()}
+          <span class="outline-m">${woerter({textContent:s.run.map(n=>n.textContent).join(" ")}).toLocaleString(LOC())} ${tr("Wörter")}${s.h.dataset.kstat?" · "+esc(tr(STAT[s.h.dataset.kstat])):""}</span></span>
+        ${(()=>{const nb=nachbarn(s);return `<span class="opf"><button data-hoch="${s.id}" title="${esc(tr("Nach oben"))}" aria-label="${esc(tr("Nach oben"))}" ${nb.hoch?`data-ziel="${nb.hoch.id}"`:"disabled"}>${pfeil("M6 15l6-6 6 6")}</button><button data-runter="${s.id}" title="${esc(tr("Nach unten"))}" aria-label="${esc(tr("Nach unten"))}" ${nb.runter?`data-ziel="${nb.runter.id}"`:"disabled"}>${pfeil("M6 9l6 6 6-6")}</button></span>`})()}
       </div>`).join(""):`<div class="outline-empty">${tr("Hier erscheinen alle Überschriften des Dokuments. Noch keine Überschriften im Dokument.")}</div>`}
     </div>`;
   $("#outlineClose").onclick=()=>toggleOutline();
@@ -26614,13 +26700,49 @@ function moveOutlineSection(ed,draggedId,targetId,after){
   flush();dirty=true;commit();queuePaginate();
   drawOutline();
 }
+function abschnittZeigen(id){
+  const ed=$("#editor"),paper=$("#paper");if(!ed||!paper)return;
+  paper.querySelectorAll(".abschnittmarke").forEach(m=>m.remove());
+  const s=outlineSections(ed).find(x=>x.id===id);if(!s)return;
+  const p=paper.getBoundingClientRect(),e=ed.getBoundingClientRect(),z=parseFloat(getComputedStyle(paper).getPropertyValue("--zoom"))||1;
+  /* zusammenhängende Blöcke zu einer Fläche; über eine Seitengrenze hinweg
+     neu ansetzen, damit die Lücke zwischen den Blättern frei bleibt */
+  const flaechen=[];
+  s.run.forEach(b=>{const r=b.getBoundingClientRect();if(!r.height)return;
+    const f=flaechen[flaechen.length-1];
+    if(f&&r.top-f.bottom<40*z)f.bottom=Math.max(f.bottom,r.bottom);else flaechen.push({top:r.top,bottom:r.bottom})});
+  flaechen.forEach(f=>{const m=document.createElement("div");m.className="abschnittmarke";
+    m.style.left=(6*z)+"px";m.style.width=(p.width-12*z)+"px";
+    m.style.top=(f.top-p.top-6*z)+"px";m.style.height=(f.bottom-f.top+12*z)+"px";
+    paper.appendChild(m);setTimeout(()=>m.remove(),2900)});
+}
+/* Status je Abschnitt: liegt als data-kstat an der Überschrift, wandert also
+   beim Verschieben mit und bleibt im Dokument; die Exporte lesen ihn nicht. */
+function statusMenue(btn){
+  closeMenu();
+  const id=btn.dataset.stat,h=document.getElementById(id);if(!h)return;
+  const m=document.createElement("div");m.className="menu ctx";
+  m.innerHTML=[["","Kein Status"],["entwurf","Entwurf"],["arbeit","In Arbeit"],["fertig","Fertig"]].map(([v,n])=>
+    `<button class="mi" data-v="${v}"><span class="chk" style="display:inline-flex;align-items:center;justify-content:center"><span class="statpkt ${v}"></span></span>${tr(n)}${(h.dataset.kstat||"")===v?' <span class="k">✓</span>':""}</button>`).join("");
+  document.body.appendChild(m);
+  const r=btn.getBoundingClientRect();menuPlatzieren(m,r.left,r.bottom+4);
+  m.onclick=e=>{const b=e.target.closest("[data-v]");if(!b)return;closeMenu();
+    const v=b.dataset.v;
+    const setzen=()=>{if(v)h.dataset.kstat=v;else delete h.dataset.kstat};
+    if(!einSchritt(setzen))setzen();
+    flush();dirty=true;save();drawOutline()};
+}
 function bindOutlineDrag(){
   const list=$("#outlineList");if(!list)return;
   let dragging=false;
   list.onclick=e=>{
     if(dragging||e.target.closest(".outline-drag"))return;
+    const hb=e.target.closest("[data-hoch],[data-runter]");
+    if(hb){e.stopPropagation();if(hb.dataset.ziel)moveOutlineSection($("#editor"),hb.dataset.hoch||hb.dataset.runter,hb.dataset.ziel,!!hb.dataset.runter);return}
+    const sb=e.target.closest("[data-stat]");
+    if(sb){e.stopPropagation();statusMenue(sb);return}
     const it=e.target.closest(".outline-item");if(!it)return;
-    jumpToHeading("#"+it.dataset.oid);
+    jumpToHeading("#"+it.dataset.oid);abschnittZeigen(it.dataset.oid);
   };
   list.querySelectorAll(".outline-drag").forEach(handle=>{
     handle.onmousedown=e=>{
@@ -31140,7 +31262,12 @@ offered once you switch it on under <b>Settings &rsaquo; General</b>.</p>`},
 <p><b>View &rsaquo; Outline</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) opens a panel
 listing every heading in the document. Clicking one jumps to it.</p>
 <p>For a long manuscript this is usually the quickest way to move around — quicker than
-scrolling and quicker than search.</p>`},
+scrolling and quicker than search.</p>
+<p>Each section appears there as a card with its first line and word count, the total at the
+top. Drag a section by the handle on the left to move it with its subsections; the arrows that
+appear on the right when you hover are more precise. The dot before the heading sets a status —
+<i>Draft</i>, <i>In progress</i> or <i>Done</i> — so you can see where a book stands. The status stays
+in the document; it isn’t written to Word files.</p>`},
 
  {t:"Writing goal",k:"goal;word count;target;session",b:`
 <p><b>Tools &rsaquo; Set writing goal</b> puts a small counter beside the word count in the
@@ -31792,7 +31919,12 @@ angeboten, sobald du es unter <b>Einstellungen &rsaquo; Allgemein</b> einschalte
 <p><b>Ansicht &rsaquo; Gliederung</b> (<kbd>Alt</kbd>+<kbd>⇧</kbd>+<kbd>O</kbd>) öffnet eine
 Leiste mit allen Überschriften des Dokuments. Ein Klick springt zur Stelle.</p>
 <p>Bei einem langen Manuskript ist das meist der schnellste Weg, sich zu bewegen — schneller
-als Scrollen und schneller als Suchen.</p>`},
+als Scrollen und schneller als Suchen.</p>
+<p>Jeder Abschnitt steht dort als Karte mit seiner ersten Zeile und seiner Wortzahl, oben die
+Summe. Am Griff links ziehst du einen Abschnitt samt Unterabschnitten an eine andere Stelle;
+genauer geht es mit den Pfeilen, die beim Überfahren rechts erscheinen. Der Punkt vor der
+Überschrift setzt einen Status — <i>Entwurf</i>, <i>In Arbeit</i> oder <i>Fertig</i> —, damit du
+bei einem Buch siehst, wo du stehst. Der Status bleibt im Dokument, in Word-Dateien kommt er nicht.</p>`},
 
  {t:"Schreibziel",k:"ziel;wortzahl;schreibziel;sitzung",b:`
 <p><b>Werkzeuge &rsaquo; Schreibziel festlegen</b> stellt einen kleinen Zähler neben die
@@ -32456,7 +32588,12 @@ vez que la activas en <b>Configuración &rsaquo; General</b>.</p>`},
 <p><b>Vista &rsaquo; Esquema</b> (<kbd>Alt</kbd>+<kbd>Mayús</kbd>+<kbd>O</kbd>) abre un panel que
 lista cada título del documento. Al hacer clic en uno, saltas a él.</p>
 <p>Para un manuscrito largo suele ser la forma más rápida de moverte: más rápida que
-desplazarse y más rápida que buscar.</p>`},
+desplazarse y más rápida que buscar.</p>
+<p>Cada sección aparece como una tarjeta con su primera línea y su recuento de palabras, arriba el
+total. Arrastra una sección por el asa de la izquierda para moverla con sus subsecciones; las
+flechas que aparecen a la derecha al pasar el ratón son más precisas. El punto antes del título
+fija un estado —<i>Borrador</i>, <i>En curso</i> o <i>Listo</i>— para ver en qué punto está un libro.
+El estado se queda en el documento; no pasa a los archivos de Word.</p>`},
 
  {t:"Objetivo de escritura",k:"objetivo;recuento de palabras;meta;sesión",b:`
 <p><b>Herramientas &rsaquo; Definir objetivo de escritura</b> pone un pequeño contador junto al
@@ -33116,7 +33253,12 @@ oferecido quando você o ativa em <b>Configurações &rsaquo; Geral</b>.</p>`},
 <p><b>Exibir &rsaquo; Estrutura de tópicos</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) abre
 um painel que lista cada título do documento. Clicar num pula para ele.</p>
 <p>Para um manuscrito longo, costuma ser o jeito mais rápido de se mover: mais rápido que rolar
-e mais rápido que buscar.</p>`},
+e mais rápido que buscar.</p>
+<p>Cada seção aparece como um cartão com a primeira linha e a contagem de palavras, com o total no
+topo. Arraste uma seção pela alça à esquerda para movê-la com as subseções; as setas que
+aparecem à direita ao passar o mouse são mais precisas. O ponto antes do título define um status —
+<i>Rascunho</i>, <i>Em andamento</i> ou <i>Concluído</i> — para você ver em que pé está um livro. O status
+fica no documento; ele não vai para arquivos do Word.</p>`},
 
  {t:"Meta de escrita",k:"meta;contagem de palavras;objetivo;sessão",b:`
 <p><b>Ferramentas &rsaquo; Definir meta de escrita</b> põe um pequeno contador ao lado da
@@ -33797,7 +33939,12 @@ Général</b>.</p>`},
 <p><b>Affichage &rsaquo; Plan</b> (<kbd>Alt</kbd>+<kbd>Maj</kbd>+<kbd>O</kbd>) ouvre un panneau
 qui liste chaque titre du document. Cliquer sur l'un y saute.</p>
 <p>Pour un long manuscrit, c'est en général le moyen le plus rapide de se déplacer — plus rapide
-que de faire défiler et plus rapide que de chercher.</p>`},
+que de faire défiler et plus rapide que de chercher.</p>
+<p>Chaque section y figure sous forme de carte avec sa première ligne et son nombre de mots, le
+total en haut. Faites glisser une section par la poignée de gauche pour la déplacer avec ses
+sous-sections ; les flèches qui apparaissent à droite au survol sont plus précises. Le point avant
+le titre donne un statut — <i>Brouillon</i>, <i>En cours</i> ou <i>Terminé</i> — pour voir où en est un
+livre. Le statut reste dans le document ; il ne passe pas dans les fichiers Word.</p>`},
 
  {t:"Objectif d'écriture",k:"objectif;nombre de mots;cible;session",b:`
 <p><b>Outils &rsaquo; Définir un objectif d'écriture</b> place un petit compteur à côté du
@@ -34457,7 +34604,12 @@ włączeniu go w <b>Ustawienia &rsaquo; Ogólne</b>.</p>`},
 <p><b>Widok &rsaquo; Konspekt</b> (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>) otwiera panel z
 listą każdego tytułu w dokumencie. Kliknięcie jednego przeskakuje do niego.</p>
 <p>Dla długiego manuskryptu to zwykle najszybszy sposób poruszania się — szybszy niż przewijanie
-i szybszy niż wyszukiwanie.</p>`},
+i szybszy niż wyszukiwanie.</p>
+<p>Każda sekcja jest tam kartą z pierwszym wierszem i liczbą słów, na górze suma. Przeciągnij
+sekcję za uchwyt po lewej, aby przenieść ją razem z podsekcjami; dokładniej działają strzałki,
+które pojawiają się po prawej po najechaniu. Kropka przed tytułem ustawia status — <i>Szkic</i>,
+<i>W toku</i> albo <i>Gotowe</i> — żebyś widział, na jakim etapie jest książka. Status zostaje w
+dokumencie; nie trafia do plików Worda.</p>`},
 
  {t:"Cel pisania",k:"cel;liczba słów;norma;sesja",b:`
 <p><b>Narzędzia &rsaquo; Ustaw cel pisania</b> umieszcza mały licznik obok liczby słów w pasku
@@ -35119,7 +35271,12 @@ didascalia. Viene proposto una volta che lo attivi in <b>Impostazioni &rsaquo; G
 <p><b>Vista &rsaquo; Struttura del documento</b> (<kbd>Alt</kbd>+<kbd>Maiusc</kbd>+<kbd>O</kbd>)
 apre un pannello con l'elenco di ogni titolo del documento. Fare clic su uno salta ad esso.</p>
 <p>Per un manoscritto lungo è di solito il modo più rapido di spostarsi — più rapido dello
-scorrimento e più rapido della ricerca.</p>`},
+scorrimento e più rapido della ricerca.</p>
+<p>Ogni sezione vi appare come una scheda con la prima riga e il numero di parole, in alto il
+totale. Trascina una sezione dalla maniglia a sinistra per spostarla con le sottosezioni; le
+frecce che compaiono a destra al passaggio del mouse sono più precise. Il punto prima del titolo
+imposta uno stato — <i>Bozza</i>, <i>In corso</i> o <i>Fatto</i> — per vedere a che punto è un libro.
+Lo stato resta nel documento; non finisce nei file di Word.</p>`},
 
  {t:"Obiettivo di scrittura",k:"obiettivo;conteggio parole;traguardo;sessione",b:`
 <p><b>Strumenti &rsaquo; Imposta un obiettivo di scrittura</b> mette un piccolo contatore

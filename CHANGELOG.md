@@ -74,6 +74,23 @@ Derzeit nichts.
 
 ### Neu
 
+- **Gliederung mit Karten** (Tom: verschieben wie WordPress-Blöcke; Name
+  bleibt „Gliederung“, „Kapitelkarte“ war ihm missverständlich, Platz bleibt
+  links wie bei Word/LibreOffice): je Abschnitt eine Karte mit Überschrift,
+  erster Zeile (bis Ebene 2) und Wortzahl, oben die Summe — dieselbe Zählung
+  wie Statusleiste und „Wörter zählen“. Zusätzlich zum Ziehen Pfeile ▲▼ beim
+  Überfahren, die einen Abschnitt samt Unterabschnitten am Nachbarn
+  derselben Ebene vorbei verschieben (`moveOutlineSection`). Ein Punkt vor
+  der Überschrift setzt den Status Entwurf / In Arbeit / Fertig; er liegt
+  als `data-kstat` an der Überschrift, wandert beim Verschieben mit, bleibt
+  im Dokument und geht nicht in Word-Dateien. Ein Klick auf eine Karte
+  springt hin und hebt den ganzen Abschnitt im Text kurz farbig hervor
+  (Tom) — als eigene Ebene über dem Blatt (`abschnittZeigen`), die weder
+  Dokument noch Rückgängig-Verlauf berührt, nach knapp 3 s ausgeblendet.
+  Hilfe in allen sieben Sprachen ergänzt. Nebenbei gefunden (schon vorher so): das Verschieben
+  des allerersten Abschnitts am Dokumentanfang ist nicht rückgängig zu
+  machen, weil `schrittEnde` dort keinen passenden Rand findet — als eigene
+  Aufgabe vorgemerkt.
 - **Einstellungen › Zwischenstände: belegter Speicher** (Tom): Summe
   („156 KB · 15 Zwischenstände · 2 Dokumente“) und darunter je Dokument
   eine Zeile mit Anzahl, Größe und ältestem Stand, dazu Zwischenstand
