@@ -368,7 +368,9 @@ body.smvoll .focusbar{display:none!important}
   background:var(--paper);border:1px solid var(--rule);color:var(--ink);cursor:pointer}
 .zmspiel:hover{border-color:var(--ink-soft)}
 .zmspiel svg{width:15px;height:15px}
-.zmstrahl{position:relative;flex:1;height:44px;cursor:pointer}
+/* Die Punkte sitzen mit ihrer Mitte auf 0 % und 100 % — der Rand rechts
+   bekommt deshalb so viel dazu, dass er dem Abstand links zum Abspielknopf gleicht (Tom) */
+.zmstrahl{position:relative;flex:1;height:44px;cursor:pointer;margin:0 13px 0 4px}
 .zmtag{position:absolute;top:31px;font-size:10.5px;line-height:1;color:var(--ink-soft);transform:translateX(-50%);white-space:nowrap;pointer-events:none}
 .zmtag::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--rule)}
 .zminfo select{width:auto;padding:3px 6px;font-size:12.5px}
@@ -574,8 +576,10 @@ body.zm #sheet{padding-bottom:160px}
    von 9px). Erst das Rechtsklick-Menü, dann auf Toms Wort auch die Menüs
    oben, damit es nicht zwei Menügrößen nebeneinander gibt. */
 .menu{padding:3px}
-.menu .mi{padding:3px 8px;font-size:13px;line-height:18px}
-.menu .msep{margin:2px 4px}
+/* 2026-11-02 eine Stufe luftiger (Tom: „gequetscht ist nicht gut fürs Auge“,
+   ohne Symbole war 31px zu groß): 28px je Eintrag, Schrift 13,5. */
+.menu .mi{padding:5px 8px;font-size:13.5px;line-height:18px}
+.menu .msep{margin:4px 4px}
 .menu .mlabel{padding:7px 8px 3px}
 .mi[disabled] .tico{opacity:.45}
 /* Symbole in den Menüs oben; eingeschaltet = Rahmen ums Symbol statt Häkchen */

@@ -74,6 +74,9 @@ Derzeit nichts.
 
 ### Neu
 
+- **Menüs eine Stufe luftiger**: 28 px je Eintrag mit Schrift 13,5 statt
+  24 px/13 (Tom: gequetscht ist nicht gut fürs Auge; die 31 px von vor den
+  Symbolen waren zu groß). Gilt für alle Menüs, oben und beim Rechtsklick.
 - **Zeitmaschine** (Toms Wahl aus acht Ideen für „Premium, 2026“): der
   Versionsverlauf ist keine Liste mehr, sondern ein Zeitstrahl unten über
   dem Dokument, ein Punkt je Zwischenstand plus „Jetzt“. Das Blatt zeigt
