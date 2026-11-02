@@ -90,7 +90,18 @@ Derzeit nichts.
   nicht). Solange sie offen ist, ist der Editor gesperrt und `flush()`
   schreibt nichts zurück; jede andere Ansicht (`render`), Drucken, PDF und
   Vorschau beenden sie. Esc kehrt zurück. Hilfe in allen Sprachen
-  angepasst. Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
+  angepasst. Nach einer UX-Durchsicht (Tom) dazu: heißt jetzt auch im
+  Menü, an der Uhr, in „Alle Befehle“ und in den Einstellungen
+  „Zeitmaschine“ (vorher nur „Versionsverlauf“ — das Aushängeschild war
+  nicht zu finden); ohne Zwischenstände statt einer kurzen Meldung eine
+  Leiste mit Erklärung und „Jetzt Zwischenstand anlegen“; oben auf dem
+  Blatt „Sa., 14:00 · nur ansehen“, und Tippen erklärt per Hinweis, dass
+  zum Bearbeiten geschlossen werden muss; Neues zusätzlich unterstrichen
+  (Rot/Grün allein unterscheidet nicht jeder); Platz unter dem Blatt, damit
+  die Leiste das Seitenende nicht verdeckt; Leertaste spielt/hält an,
+  Pos1/Ende springen zum ersten/letzten Stand; Kopieren aus einem alten
+  Stand nimmt Gestrichenes und Markierungen nicht mit (der Weg, einen
+  einzelnen Satz zurückzuholen — steht in der Hilfe). Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
   Wiederherstellen, check-export 302/302.
 - **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
   jetzt „Schließen“ und „Alle Dokumente schließen“ (Toms Wahl gegen „Andere
