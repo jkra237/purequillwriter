@@ -334,6 +334,24 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Abschnitt verschieben am Dokumentanfang ließ sich nicht rückgängig
+  machen**: Zog man in der Gliederung das erste Kapitel nach unten (oder
+  ein anderes an den Anfang), nahm Strg+Z nur das davor Getippte zurück.
+  `schrittEnde()` setzt den neuen Stand per `insertHTML` ein und braucht
+  dafür einen Absatz als Rand; am Dokumentanfang steht aber die
+  Überschrift, und Chrome legt an einer Überschrift als Rand alles in sie
+  hinein (`<h1><p>…</p></h1>`) — gleich, wie man markiert (am 2026-11-02 rund
+  zwanzig Varianten durchgemessen, auch vorübergehend gesperrte Ränder; vor
+  einem gesperrten ersten Block verweigert Chrome den Befehl ganz). Eine
+  einzelne Überschrift ersetzt Chrome dagegen sauber. Jetzt werden die
+  Überschriften am Rand einzeln ersetzt, bis der Rest einen Absatz als Rand
+  hat; die so entstehenden Browserschritte bündelt `schrittGruppen`:
+  landet Rückgängig oder Wiederholen auf einem Zwischenstand, geht es gleich
+  weiter — mit Strg+Z/Strg+Y wie über das Menü. Gilt für jeden Befehl,
+  betrifft auch Unterabschnitte ohne Absatz davor (zwei H2 direkt unter
+  der H1 tauschen). Weiter ohne Rückgängig, wie bisher: wenn zwischen den
+  Überschriften gar kein Absatz steht (leere Kapitel) oder Liste/Tabelle
+  den Rand bilden.
 - **Überschriften aus Webseiten kamen als Fließtext an** (Tom, Goethe-
   Onlinekurs): Der Kapiteltitel war dort ein Absatz mit `font-size:large`
   und Fett, „Schritt 1:“ ein `<h5>` mit abgeschaltetem Fett — das Programm

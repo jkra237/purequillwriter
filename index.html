@@ -25455,18 +25455,47 @@ function schrittEnde(st){
     const v0=vorher[a],n0=nachK[a],v1=vorher[vorher.length-1-e],n1=nachK[nachK.length-1-e];
     if(lv===1&&ln===1&&v0.tagName===n0.tagName&&/^H[1-6]$/.test(v0.tagName))return [true,true];
     return [randOk(v0,n0,false),randOk(v1,n1,true)]};
+  const a0=a,e0=e;
   if(!gleich)for(;;){const [an,en]=passt();if(an&&en)break;
     if(!an&&a>0)a--;else if(!en&&e>0)e--;else break}
+  /* Ohne passenden Rand, meist am Dokumentanfang: dort steht eine
+     Überschrift und davor kein Absatz zum Ausweichen. Chrome setzt an einer
+     Überschrift als Rand alles in sie hinein (<h1><p>…</p></h1>), egal wie
+     man markiert — eine einzelne Überschrift ersetzt es aber sauber. Also die
+     Überschriften am Rand einzeln ersetzen, bis der Rest passende Ränder hat.
+     Das sind mehrere Browserschritte; schrittGruppen bündelt sie, damit
+     Rückgängig und Wiederholen sie wie einen behandeln. */
+  const kopf=[],fuss=[];let eG=null;
   if(!gleich&&!passt().every(Boolean)){
+    a=a0;e=e0;
+    const einzeln=(i,j)=>/^H[1-6]$/.test(vorher[i].tagName)&&vorher[i].tagName===nachK[j].tagName;
+    for(;;){const lv=vorher.length-a-e,ln=nachK.length-a-e;if(lv<1||ln<1)break;
+      const [an,en]=passt();if(an&&en)break;
+      if(!an){if(!einzeln(a,a))break;kopf.push(a);a++;continue}
+      if(einzeln(vorher.length-1-e,nachK.length-1-e)){if(eG===null)eG=e;fuss.push(e);e++;continue}
+      if(!fuss.length&&e>0){e--;continue}
+      break}
+  }
+  const ohneRest=a+e===vorher.length&&a+e===nachK.length;
+  if(!gleich&&!(ohneRest&&(kopf.length||fuss.length))&&!passt().every(Boolean)){
     /* Am Dokumentanfang oder -ende ohne passenden Rand: so lassen wie bisher */
     console.info("Schritt: kein passender Rand, ohne Rückgängig");return fertig();
   }
-  const box=document.createElement("div");
-  nachK.slice(a,nachK.length-e).forEach(k=>box.appendChild(k.cloneNode(true)));
-  schrittPutzen(box);
-  const deko=schrittDekoNehmen(box),html=box.innerHTML,ganz=ed.innerHTML;
-  for(let i=st.segs.length-1;i>=0;i--){const g=st.segs[i];
-    if(g.nativ)document.execCommand("undo");else schrittProtokollZurueck(g.dom,ed)}
+  if(eG===null)eG=e;
+  const aG=kopf.length?kopf[0]:a;
+  /* Teile in Dokumentreihenfolge; alt() findet ihre Blöcke im jeweils
+     aktuellen Stand (vorn vom Anfang, hinten vom Ende gezählt) */
+  const teil=(von,bis,alt)=>{const box=document.createElement("div");
+    nachK.slice(von,bis).forEach(k=>box.appendChild(k.cloneNode(true)));
+    schrittPutzen(box);const deko=schrittDekoNehmen(box);
+    return {box,deko,html:box.innerHTML,soll:[...box.children],alt}};
+  const teile=[...kopf.map(i=>teil(i,i+1,()=>[...ed.children].slice(i,i+1)))];
+  if(!ohneRest)teile.push(teil(a,nachK.length-e,()=>{const k=[...ed.children];return k.slice(a,k.length-e)}));
+  [...fuss].reverse().forEach(f=>teile.push(teil(nachK.length-1-f,nachK.length-f,()=>{const k=[...ed.children];return k.slice(k.length-1-f,k.length-f)})));
+  const ganz=ed.innerHTML;
+  schrittGruppeAus=true;
+  try{for(let i=st.segs.length-1;i>=0;i--){const g=st.segs[i];
+    if(g.nativ)document.execCommand("undo");else schrittProtokollZurueck(g.dom,ed)}}finally{schrittGruppeAus=false}
   const jetzt=[...ed.children];
   if(jetzt.length!==vorher.length||jetzt.some((k,i)=>!gl(k,vorher[i]))){
     /* Sollte nicht vorkommen; dann wenigstens der richtige Inhalt */
@@ -25474,37 +25503,58 @@ function schrittEnde(st){
     ed.innerHTML=ganz;return fertig();
   }
   if(gleich)return fertig();
-  const alt=jetzt.slice(a,vorher.length-e);
   /* Markierungen auch vom alten Stand nehmen, den Rückgängig zurückbringt */
-  alt.forEach(k=>{k.querySelectorAll(SCHRITT_MARKEN).forEach(m=>{const p=m.parentNode;m.replaceWith(...m.childNodes);p.normalize()});
+  jetzt.slice(aG,vorher.length-eG).forEach(k=>{k.querySelectorAll(SCHRITT_MARKEN).forEach(m=>{const p=m.parentNode;m.replaceWith(...m.childNodes);p.normalize()});
     SCHRITT_KLASSEN.forEach(x=>k.classList.remove(x));if(k.getAttribute("class")==="")k.removeAttribute("class")});
   ed.focus();
-  const k0=alt[0],k1=alt[alt.length-1],r=document.createRange();
-  if(fest(k0))r.setStartBefore(k0);else r.setStart(k0,0);
-  if(fest(k1))r.setEndAfter(k1);else r.setEnd(k1,k1.childNodes.length);
-  sel.removeAllRanges();sel.addRange(r);
-  const anzahl=ed.children.length,soll=[...box.children];
-  if(html)document.execCommand("insertHTML",false,html);else document.execCommand("delete");
-  const neuK=[...ed.children].slice(a,ed.children.length-e);
+  const staende=[];let n=0,laenge=vorher.length;
+  for(const t of teile){
+    const alt=t.alt();laenge+=t.soll.length-alt.length;
+    const k0=alt[0],k1=alt[alt.length-1],r=document.createRange();
+    if(fest(k0))r.setStartBefore(k0);else r.setStart(k0,0);
+    if(fest(k1))r.setEndAfter(k1);else r.setEnd(k1,k1.childNodes.length);
+    sel.removeAllRanges();sel.addRange(r);
+    if(t.html)document.execCommand("insertHTML",false,t.html);else document.execCommand("delete");
+    n++;if(n<teile.length)staende.push(schrittSig(ed));
+  }
   /* Auch die Nachbarn müssen unberührt sein */
   const stimmt=()=>{const k=ed.children;
-    return (a===0||gl(k[a-1],vorher[a-1]))&&(e===0||gl(k[k.length-e],vorher[vorher.length-e]))&&
-      neuK.length===soll.length&&neuK.every((x,i)=>gl(x,soll[i]))};
-  if(!stimmt()&&ed.children.length-anzahl===soll.length-alt.length&&neuK.every((k,i)=>k.tagName===soll[i].tagName))
-    neuK.forEach((k,i)=>{schrittAngleichen(k,soll[i]);schrittSoll.set(k,soll[i].cloneNode(true))});
+    return k.length===laenge&&(aG===0||gl(k[aG-1],vorher[aG-1]))&&(eG===0||gl(k[k.length-eG],vorher[vorher.length-eG]))&&
+      teile.every(t=>{const neu=t.alt();return neu.length===t.soll.length&&neu.every((x,i)=>gl(x,t.soll[i]))})};
+  if(!stimmt()&&ed.children.length===laenge)teile.forEach(t=>{const neu=t.alt();
+    if(neu.length===t.soll.length&&neu.every((k,i)=>k.tagName===t.soll[i].tagName))
+      neu.forEach((k,i)=>{schrittAngleichen(k,t.soll[i]);schrittSoll.set(k,t.soll[i].cloneNode(true))})});
   if(!stimmt()){
     /* insertHTML hat den Aufbau verändert: zurück und wie früher direkt
        einsetzen (dann ohne Rückgängig, aber mit dem richtigen Inhalt) */
-    console.warn("Schritt: insertHTML wich ab",ed.children.length-anzahl,soll.length-alt.length,"IST",neuK.map(k=>k.outerHTML).join("").slice(0,400),"SOLL",html.slice(0,400));
-    document.execCommand("undo");
-    const alt2=[...ed.children].slice(a,vorher.length-e);
-    if(alt2.length){alt2[0].before(...box.childNodes);alt2.forEach(k=>k.remove())}else ed.innerHTML=ganz;
-    schrittDekoSetzen([...ed.children].slice(a,ed.children.length-e),deko);
+    console.warn("Schritt: insertHTML wich ab",ed.children.length,laenge,"IST",teile.map(t=>t.alt().map(k=>k.outerHTML).join("")).join("¦").slice(0,400),"SOLL",teile.map(t=>t.html).join("¦").slice(0,400));
+    schrittGruppeAus=true;
+    try{for(let i=0;i<n;i++)document.execCommand("undo")}finally{schrittGruppeAus=false}
+    const alt2=[...ed.children].slice(aG,vorher.length-eG);
+    if(alt2.length){teile.forEach(t=>alt2[0].before(...t.box.childNodes));alt2.forEach(k=>k.remove())}else ed.innerHTML=ganz;
+    teile.forEach(t=>schrittDekoSetzen(t.alt(),t.deko));
     return fertig();
   }
-  schrittDekoSetzen(neuK,deko);
+  if(staende.length){schrittGruppen.push({ed,zw:new Set(staende)});if(schrittGruppen.length>30)schrittGruppen.shift()}
+  teile.forEach(t=>schrittDekoSetzen(t.alt(),t.deko));
   fertig();
 }
+/* Mehrere Browserschritte eines Befehls (siehe schrittEnde): landet
+   Rückgängig oder Wiederholen auf einem ihrer Zwischenstände, gleich
+   weitermachen. Aus einem execCommand heraus (Menü) lässt Chrome den
+   zweiten Aufruf nicht zu, dann gleich danach. Erkannt wird ein Stand an
+   Blockfolge und Text, ohne Markierungen und Umbruchhilfen. */
+let schrittGruppen=[],schrittGruppeAus=false;
+function schrittSig(ed){const c=ed.cloneNode(true);schrittPutzen(c);return [...c.children].map(k=>k.tagName).join()+"|"+c.textContent}
+document.addEventListener("input",e=>{
+  if(e.inputType!=="historyUndo"&&e.inputType!=="historyRedo")return;
+  const ed=$("#editor");if(!ed||schrittOffen||schrittGruppeAus||!ed.contains(e.target)&&e.target!==ed)return;
+  schrittGruppen=schrittGruppen.filter(g=>g.ed===ed);
+  if(!schrittGruppen.length)return;
+  const s=schrittSig(ed);if(!schrittGruppen.some(g=>g.zw.has(s)))return;
+  const was=e.inputType==="historyUndo"?"undo":"redo";
+  if(!document.execCommand(was))setTimeout(()=>document.execCommand(was),0);
+},true);
 function alsSchritt(fn){const st=schrittStart();try{return fn()}finally{schrittEnde(st)}}
 function einSchritt(fn){if(schrittOffen||hfEditing||S.mode!=="write"||!$("#editor"))return false;alsSchritt(fn);return true}
 /* Eine eben angelegte, leer gebliebene Fußnote: das Einfügen zurücknehmen
