@@ -373,7 +373,15 @@ body.smvoll .focusbar{display:none!important}
 .zmstrahl{position:relative;flex:1;height:44px;cursor:pointer;margin:0 13px 0 4px}
 .zmtag{position:absolute;top:31px;font-size:10.5px;line-height:1;color:var(--ink-soft);transform:translateX(-50%);white-space:nowrap;pointer-events:none}
 .zmtag::before{content:"";position:absolute;left:50%;top:-6px;width:1px;height:4px;background:var(--rule)}
-.zminfo select{width:auto;padding:3px 6px;font-size:12.5px}
+/* Markierungswahl hinter einem Zahnrad (Tom: „Änderungen: zum Stand davor“ war
+   nicht verständlich) — aufgeklappt drei ganze Sätze zur Wahl */
+.zmeinst{width:30px;height:30px;display:grid;place-items:center;border-radius:var(--radius);color:var(--ink-soft);position:relative}
+.zmeinst:hover,.zmeinst.auf{background:var(--paper);color:var(--ink)}
+.zmpop{position:absolute;right:0;bottom:calc(100% + 8px);z-index:2;min-width:300px;background:var(--paper);color:var(--ink);
+  border:1px solid var(--rule);border-radius:var(--radius-lg);box-shadow:0 8px 24px rgba(0,0,0,.18);padding:10px 12px;text-align:left}
+.zmpop .mlabel{padding:0 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft)}
+.zmpop label{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:13px;cursor:pointer;white-space:nowrap}
+.zmpop input{width:auto;margin:0}
 .zmlinie{position:absolute;left:0;right:0;top:13px;height:3px;border-radius:2px;background:var(--rule)}
 .zmlinie i{position:absolute;left:0;top:0;bottom:0;border-radius:2px;background:color-mix(in srgb,var(--stamp) 55%,var(--rule))}
 .zmpkt{position:absolute;top:8px;width:13px;height:13px;margin-left:-6.5px;border-radius:50%;padding:0;cursor:pointer;box-sizing:border-box;
@@ -1784,6 +1792,23 @@ body.focus .outline{display:none}
 .zwinfo{display:flex;flex-direction:column;gap:2px}
 .zwinfo b{font-size:13px}
 .zwinfo span{font-size:12px;color:var(--ink-soft)}
+/* Belegter Speicher der Zwischenstände: Summe, darunter je Dokument eine Zeile
+   mit Zeitmaschine und Löschen. Löschen fragt im Knopf selbst nach („Wirklich
+   löschen?“, 4 s) statt in einem zweiten Fenster über den Einstellungen. */
+.zwsumme{display:flex;align-items:center;gap:10px;margin:2px 0 8px;font-size:12.5px}
+.zwsumme b{font-weight:600}
+.zwliste{border:1px solid var(--rule);border-radius:var(--radius);max-height:190px;overflow-y:auto;background:var(--paper)}
+.zwzeile{display:flex;align-items:center;gap:8px;padding:7px 10px;border-top:1px solid var(--rule)}
+.zwzeile:first-child{border-top:none}
+.zwzeile .zwtext{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.zwzeile .zwtext b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.zwzeile .zwtext b i{font-style:normal;font-weight:400;color:var(--ink-soft);font-size:11.5px;margin-left:6px}
+.zwzeile .zwtext span{font-size:11.5px;color:var(--ink-soft)}
+.zwzeile .zwknopf{width:28px;height:28px;display:grid;place-items:center;border-radius:var(--radius);color:var(--ink-soft);flex:0 0 28px}
+.zwzeile .zwknopf:hover{background:var(--chrome-2);color:var(--ink)}
+.zwzeile .zwknopf[disabled]{opacity:.35;pointer-events:none}
+.btn.gefahr,.zwknopf.gefahr{color:var(--paper)!important;background:color-mix(in srgb,#c0392b 82%,var(--ink))!important;
+  border-color:transparent!important;width:auto!important;padding:0 9px;font-size:12px;white-space:nowrap}
 /* Ein/Aus-Einstellungen wie in Words Optionen (2026-10-27, Tom: „sieht
    etwas komisch und nach links gestaucht aus“): Kästchen vorn, Titel und
    Erklärung darunter über die ganze Breite. Vorher standen Kästchen und
@@ -3785,9 +3810,19 @@ en:{
   "Farbband":"Ribbon",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Typing sounds",
-  "Änderungen":"Changes",
-  "zum Stand davor":"since the version before",
-  "zu jetzt":"compared with now",
+  "Markierungen einstellen":"Highlighting options",
+  "Farbig markieren":"Highlight",
+  "Was seit dem vorigen Stand neu ist":"What’s new since the previous version",
+  "Unterschied zu deinem jetzigen Text":"Difference from your current text",
+  "Nichts markieren":"Highlight nothing",
+  "Belegter Speicher":"Storage used",
+  "Alle löschen":"Delete all",
+  "geöffnet":"open",
+  "Zwischenstände löschen":"Delete snapshots",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"Deleting removes only the old versions; your texts stay as they are.",
+  "Wirklich löschen?":"Really delete?",
+  "Alle Zwischenstände gelöscht":"All snapshots deleted",
+  "Zwischenstände gelöscht":"Snapshots deleted",
   "Zeitmaschine öffnen":"Open time machine",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"No snapshots yet. They appear on their own as you write — or create one now.",
   "Jetzt Zwischenstand anlegen":"Create snapshot now",
@@ -4840,9 +4875,19 @@ fr:{
   "Farbband":"Ruban",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Bruits de frappe",
-  "Änderungen":"Modifications",
-  "zum Stand davor":"depuis la version précédente",
-  "zu jetzt":"par rapport à maintenant",
+  "Markierungen einstellen":"Options de surlignage",
+  "Farbig markieren":"Surligner",
+  "Was seit dem vorigen Stand neu ist":"Ce qui est nouveau depuis la version précédente",
+  "Unterschied zu deinem jetzigen Text":"Différence avec votre texte actuel",
+  "Nichts markieren":"Ne rien surligner",
+  "Belegter Speicher":"Espace utilisé",
+  "Alle löschen":"Tout supprimer",
+  "geöffnet":"ouvert",
+  "Zwischenstände löschen":"Supprimer les points de restauration",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"La suppression n’enlève que les anciennes versions ; vos textes restent inchangés.",
+  "Wirklich löschen?":"Vraiment supprimer ?",
+  "Alle Zwischenstände gelöscht":"Tous les points de restauration supprimés",
+  "Zwischenstände gelöscht":"Points de restauration supprimés",
   "Zeitmaschine öffnen":"Ouvrir la machine à remonter le temps",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Pas encore de point de restauration. Ils se créent tout seuls pendant que vous écrivez — ou créez-en un maintenant.",
   "Jetzt Zwischenstand anlegen":"Créer un point de restauration",
@@ -5895,9 +5940,19 @@ es:{
   "Farbband":"Cinta",
   "Lautstärke":"Volumen",
   "Tippgeräusche":"Sonidos de tecleo",
-  "Änderungen":"Cambios",
-  "zum Stand davor":"desde la versión anterior",
-  "zu jetzt":"respecto a ahora",
+  "Markierungen einstellen":"Opciones de resaltado",
+  "Farbig markieren":"Resaltar",
+  "Was seit dem vorigen Stand neu ist":"Lo nuevo desde la versión anterior",
+  "Unterschied zu deinem jetzigen Text":"Diferencia con tu texto actual",
+  "Nichts markieren":"No resaltar nada",
+  "Belegter Speicher":"Espacio ocupado",
+  "Alle löschen":"Eliminar todo",
+  "geöffnet":"abierto",
+  "Zwischenstände löschen":"Eliminar puntos de restauración",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"Eliminar quita solo las versiones antiguas; tus textos no cambian.",
+  "Wirklich löschen?":"¿Eliminar de verdad?",
+  "Alle Zwischenstände gelöscht":"Todos los puntos de restauración eliminados",
+  "Zwischenstände gelöscht":"Puntos de restauración eliminados",
   "Zeitmaschine öffnen":"Abrir la máquina del tiempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Aún no hay puntos de restauración. Se crean solos mientras escribes, o crea uno ahora.",
   "Jetzt Zwischenstand anlegen":"Crear punto de restauración ahora",
@@ -6950,9 +7005,19 @@ pt:{
   "Farbband":"Fita",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Sons de digitação",
-  "Änderungen":"Alterações",
-  "zum Stand davor":"desde a versão anterior",
-  "zu jetzt":"em relação a agora",
+  "Markierungen einstellen":"Opções de destaque",
+  "Farbig markieren":"Destacar",
+  "Was seit dem vorigen Stand neu ist":"O que há de novo desde a versão anterior",
+  "Unterschied zu deinem jetzigen Text":"Diferença em relação ao seu texto atual",
+  "Nichts markieren":"Não destacar nada",
+  "Belegter Speicher":"Espaço ocupado",
+  "Alle löschen":"Excluir tudo",
+  "geöffnet":"aberto",
+  "Zwischenstände löschen":"Excluir pontos de restauração",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"Excluir remove só as versões antigas; seus textos continuam iguais.",
+  "Wirklich löschen?":"Excluir mesmo?",
+  "Alle Zwischenstände gelöscht":"Todos os pontos de restauração excluídos",
+  "Zwischenstände gelöscht":"Pontos de restauração excluídos",
   "Zeitmaschine öffnen":"Abrir a máquina do tempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Ainda não há pontos de restauração. Eles surgem sozinhos enquanto você escreve — ou crie um agora.",
   "Jetzt Zwischenstand anlegen":"Criar ponto de restauração agora",
@@ -8005,9 +8070,19 @@ pl:{
   "Farbband":"Taśma",
   "Lautstärke":"Głośność",
   "Tippgeräusche":"Dźwięki pisania",
-  "Änderungen":"Zmiany",
-  "zum Stand davor":"od poprzedniej wersji",
-  "zu jetzt":"względem teraz",
+  "Markierungen einstellen":"Ustawienia podświetlania",
+  "Farbig markieren":"Podświetl",
+  "Was seit dem vorigen Stand neu ist":"Co nowego od poprzedniej wersji",
+  "Unterschied zu deinem jetzigen Text":"Różnica względem twojego obecnego tekstu",
+  "Nichts markieren":"Nic nie podświetlaj",
+  "Belegter Speicher":"Zajęte miejsce",
+  "Alle löschen":"Usuń wszystkie",
+  "geöffnet":"otwarty",
+  "Zwischenstände löschen":"Usuń punkty przywracania",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"Usunięcie kasuje tylko stare wersje, twoje teksty pozostają bez zmian.",
+  "Wirklich löschen?":"Na pewno usunąć?",
+  "Alle Zwischenstände gelöscht":"Usunięto wszystkie punkty przywracania",
+  "Zwischenstände gelöscht":"Usunięto punkty przywracania",
   "Zeitmaschine öffnen":"Otwórz wehikuł czasu",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Brak punktów przywracania. Powstają same podczas pisania — albo utwórz jeden teraz.",
   "Jetzt Zwischenstand anlegen":"Utwórz punkt przywracania teraz",
@@ -9071,9 +9146,19 @@ it:{
   "Farbband":"Nastro",
   "Lautstärke":"Volume",
   "Tippgeräusche":"Suoni di battitura",
-  "Änderungen":"Modifiche",
-  "zum Stand davor":"dalla versione precedente",
-  "zu jetzt":"rispetto ad adesso",
+  "Markierungen einstellen":"Opzioni di evidenziazione",
+  "Farbig markieren":"Evidenzia",
+  "Was seit dem vorigen Stand neu ist":"Cosa c'è di nuovo dalla versione precedente",
+  "Unterschied zu deinem jetzigen Text":"Differenza dal tuo testo attuale",
+  "Nichts markieren":"Non evidenziare nulla",
+  "Belegter Speicher":"Spazio occupato",
+  "Alle löschen":"Elimina tutto",
+  "geöffnet":"aperto",
+  "Zwischenstände löschen":"Elimina punti di ripristino",
+  "Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.":"L'eliminazione toglie solo le versioni vecchie; i tuoi testi restano invariati.",
+  "Wirklich löschen?":"Eliminare davvero?",
+  "Alle Zwischenstände gelöscht":"Tutti i punti di ripristino eliminati",
+  "Zwischenstände gelöscht":"Punti di ripristino eliminati",
   "Zeitmaschine öffnen":"Apri la macchina del tempo",
   "Noch keine Zwischenstände. Sie entstehen beim Schreiben von selbst — oder du legst jetzt einen an.":"Ancora nessun punto di ripristino. Si creano da soli mentre scrivi, oppure creane uno ora.",
   "Jetzt Zwischenstand anlegen":"Crea un punto di ripristino ora",
@@ -29498,14 +29583,15 @@ function zeitmaschine(){
       <button class="zmspiel" id="zmSpiel" title="${tr("Abspielen")}" aria-label="${tr("Abspielen")}"></button>
       <div class="zmstrahl" id="zmStrahl"><div class="zmlinie"><i id="zmFort"></i></div>${st.map((s,i)=>
         `<button class="zmpkt${s.jetzt?" jetzt":""}" data-i="${i}" style="left:${st.length>1?(i/(st.length-1)*100):0}%" title="${esc(zmZeit(s))}" aria-label="${esc(zmZeit(s))}"></button>`).join("")}${zmTage(st)}</div>
+      <span style="position:relative"><button class="zmeinst" id="zmEinst" title="${esc(tr("Markierungen einstellen"))}" aria-label="${esc(tr("Markierungen einstellen"))}" aria-expanded="false">${ICOSZ('<path d="M10.3 4.3c.4-1.8 2.9-1.8 3.4 0a1.7 1.7 0 0 0 2.5 1.1c1.6-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.5c1.8.4 1.8 2.9 0 3.4a1.7 1.7 0 0 0-1.1 2.5c.9 1.6-.8 3.3-2.4 2.4a1.7 1.7 0 0 0-2.5 1.1c-.4 1.8-2.9 1.8-3.4 0a1.7 1.7 0 0 0-2.5-1.1c-1.6.9-3.3-.8-2.4-2.4a1.7 1.7 0 0 0-1.1-2.5c-1.8-.4-1.8-2.9 0-3.4a1.7 1.7 0 0 0 1.1-2.5c-.9-1.6.8-3.3 2.4-2.4a1.7 1.7 0 0 0 2.5-1.1z"/><circle cx="12" cy="12" r="2.6"/>',17,1.5)}</button>
+        <div class="zmpop" id="zmPop" hidden><div class="mlabel">${tr("Farbig markieren")}</div>${[["vorher","Was seit dem vorigen Stand neu ist"],["jetzt","Unterschied zu deinem jetzigen Text"],["aus","Nichts markieren"]].map(([v,n])=>
+          `<label><input type="radio" name="zmBezug" value="${v}"${(S.settings.zmBezug||"vorher")===v?" checked":""}>${tr(n)}</label>`).join("")}</div></span>
     </div>
     <div class="zminfo">
       <span class="zmtitel">${ICOSZ('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2.6 7.4 4.3 10.3 7.2 9z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8"/>',15,1.6)}${tr("Zeitmaschine")}</span>
       <span id="zmStand"></span><span style="flex:1"></span>
-      <label>${tr("Änderungen")}<select id="zmBezug">${[["vorher","zum Stand davor"],["jetzt","zu jetzt"],["aus","Aus"]].map(([v,n])=>
-        `<option value="${v}"${(S.settings.zmBezug||"vorher")===v?" selected":""}>${tr(n)}</option>`).join("")}</select></label>
       <button class="btn" id="zmHolen">${tr("Diesen Stand wiederherstellen")}</button>
-      <button class="btn" id="zmJetzt">${tr("Schließen")} (Esc)</button>
+      <button class="btn" id="zmJetzt" title="Esc">${tr("Schließen")}</button>
     </div>`;
   document.body.appendChild(l);
   l.querySelectorAll(".zmpkt").forEach(b=>b.onclick=e=>{e.stopPropagation();zmHalt();zmZeige(+b.dataset.i)});
@@ -29514,7 +29600,12 @@ function zeitmaschine(){
   $("#zmSpiel").onclick=()=>{if(zmUhr){zmHalt();return}
     let i=zmIdx>=zmStaende.length-1?0:zmIdx;zmZeige(i);zmSpielKnopf(true);
     zmUhr=setInterval(()=>{i++;if(i>=zmStaende.length){zmHalt();return}zmZeige(i)},1500)};
-  $("#zmBezug").onchange=e=>{S.settings.zmBezug=e.target.value;save();zmZeige(zmIdx,true);e.target.blur()};
+  const pop=$("#zmPop"),einst=$("#zmEinst");
+  einst.onclick=e=>{e.stopPropagation();pop.hidden=!pop.hidden;einst.classList.toggle("auf",!pop.hidden);einst.setAttribute("aria-expanded",!pop.hidden)};
+  pop.onclick=e=>e.stopPropagation();
+  pop.querySelectorAll("input").forEach(r=>r.onchange=()=>{S.settings.zmBezug=r.value;save();zmZeige(zmIdx,true);
+    setTimeout(()=>{pop.hidden=true;einst.classList.remove("auf");einst.setAttribute("aria-expanded","false")},180)});
+  document.addEventListener("click",zmPopZu);
   $("#zmJetzt").onclick=()=>zmEnde();
   $("#zmHolen").onclick=()=>zmHolen();
   zmSpielKnopf(false);
@@ -29675,7 +29766,9 @@ function zmWoerter(altB,neuB){
   kn.forEach((k,i)=>{const f=document.createDocumentFragment();teile[i].forEach(x=>f.appendChild(x));k.replaceWith(f)});
   return {plus,minus};
 }
+function zmPopZu(){const p=$("#zmPop");if(p&&!p.hidden){p.hidden=true;const b=$("#zmEinst");if(b){b.classList.remove("auf");b.setAttribute("aria-expanded","false")}}}
 function zmAufraeumen(){
+  document.removeEventListener("click",zmPopZu);
   zmHalt();zmAn=false;document.body.classList.remove("zm");
   const l=$("#zmLeiste");if(l)l.remove();
   document.querySelectorAll(".zmpille").forEach(p=>p.remove());
@@ -29714,8 +29807,8 @@ document.addEventListener("copy",e=>{
 },true);
 document.addEventListener("keydown",e=>{
   if(!zmAn){const l=$("#zmLeiste.leer");if(l&&e.key==="Escape"){e.preventDefault();e.stopPropagation();l.remove()}return}
-  const feld=document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.type!=="checkbox";
-  if(e.key==="Escape"){e.preventDefault();e.stopPropagation();zmEnde();return}
+  const feld=document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)&&document.activeElement.type!=="checkbox"||!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#zmPop"));
+  if(e.key==="Escape"){e.preventDefault();e.stopPropagation();const p=$("#zmPop");if(p&&!p.hidden){zmPopZu();return}zmEnde();return}
   if(feld||e.ctrlKey||e.metaKey||e.altKey)return;
   if(e.key===" "&&!(document.activeElement&&document.activeElement.tagName==="BUTTON")){e.preventDefault();e.stopPropagation();$("#zmSpiel").click();return}
   if(e.key==="Home"||e.key==="End"){e.preventDefault();e.stopPropagation();zmHalt();zmZeige(e.key==="Home"?0:zmStaende.length-1);return}
@@ -29726,6 +29819,45 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowLeft"||e.key==="ArrowRight"){
     e.preventDefault();e.stopPropagation();zmHalt();zmZeige(zmIdx+(e.key==="ArrowLeft"?-1:1))}
 },true);
+/* ---- Belegter Speicher der Zwischenstände (Einstellungen) ---- */
+function zwGroesse(d){let n=0;const enc=new TextEncoder();(d.history||[]).forEach(h=>{n+=enc.encode(h.html||"").length+30});return n}
+function zwFmt(b){return b<1048576?Math.max(1,Math.round(b/1024))+" KB":(b/1048576).toLocaleString(LOC(),{maximumFractionDigits:1})+" MB"}
+function zwSpeicherHtml(){
+  const docs=[...S.docs].sort((x,y)=>(y.id===S.active)-(x.id===S.active));
+  const n=S.docs.reduce((s,d)=>s+(d.history||[]).length,0),b=S.docs.reduce((s,d)=>s+zwGroesse(d),0);
+  const mit=S.docs.filter(d=>(d.history||[]).length).length;
+  const uhr=ICOSZ('<path d="M4.6 9.2A8 8 0 1 1 4 12"/><path d="M2.6 7.4 4.3 10.3 7.2 9z" fill="currentColor"/><path d="M12 8v4.2l2.8 1.8"/>',16,1.6);
+  const plus=ICOSZ('<circle cx="12" cy="12" r="8.5"/><path d="M12 8.5v7M8.5 12h7"/>',16,1.6);
+  const korb=ICOSZ('<path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13M10.5 11v5.5M13.5 11v5.5"/>',16,1.6);
+  return `<div class="zwsumme"><span>${n?`<b>${zwFmt(b)}</b> · ${n} ${tr(n===1?"Zwischenstand":"Zwischenstände")} · ${mit} ${tr(mit===1?"Dokument":"Dokumente")}`:tr("Noch keine gesicherten Stände.")}</span>
+      <span style="flex:1"></span>${n?`<button class="btn" id="zwAlle" data-text="${esc(tr("Alle löschen"))}">${tr("Alle löschen")}</button>`:""}</div>
+    <div class="zwliste">${docs.map(d=>{const h=d.history||[],akt=d.id===S.active;
+      return `<div class="zwzeile" data-id="${d.id}">
+        <div class="zwtext"><b>${esc(tr(d.title)||tr("Ohne Titel"))}${akt?`<i>${tr("geöffnet")}</i>`:""}</b>
+          <span>${h.length?h.length+" "+tr(h.length===1?"Zwischenstand":"Zwischenstände")+" · "+zwFmt(zwGroesse(d))+" · "+tr("ältester")+": "+new Date(h[0].ts).toLocaleString(LOC(),{dateStyle:"short",timeStyle:"short"}):tr("Noch keine gesicherten Stände.")}</span></div>
+        ${akt?`<button class="zwknopf" data-zw="neu" title="${esc(tr("Zwischenstand anlegen"))}" aria-label="${esc(tr("Zwischenstand anlegen"))}">${plus}</button>`:""}
+        <button class="zwknopf" data-zw="zm" title="${esc(tr("Zeitmaschine öffnen"))}" aria-label="${esc(tr("Zeitmaschine öffnen"))}">${uhr}</button>
+        <button class="zwknopf" data-zw="weg" title="${esc(tr("Zwischenstände löschen"))}" aria-label="${esc(tr("Zwischenstände löschen"))}" ${h.length?"":"disabled"}>${korb}</button>
+      </div>`}).join("")}</div>
+    <p class="setnote" style="margin-top:7px">${tr("Löschen entfernt nur die alten Fassungen, deine Texte bleiben unverändert.")}</p>`;
+}
+/* Zweimal klicken statt Rückfragefenster: der erste Klick färbt den Knopf
+   rot und fragt, der zweite binnen 4 s führt aus */
+function zwBestaetigen(btn,tun){
+  if(btn.classList.contains("gefahr")){clearTimeout(btn._t);tun();return}
+  btn._alt=btn.innerHTML;btn.classList.add("gefahr");btn.textContent=tr("Wirklich löschen?");
+  btn._t=setTimeout(()=>{btn.classList.remove("gefahr");btn.innerHTML=btn._alt},4000);
+}
+function zwSpeicherVerdrahten(){
+  const alle=$("#zwAlle");
+  if(alle)alle.onclick=()=>zwBestaetigen(alle,()=>{S.docs.forEach(d=>d.history=[]);save();settings();toast(tr("Alle Zwischenstände gelöscht"))});
+  document.querySelectorAll(".zwzeile [data-zw]").forEach(b=>b.onclick=()=>{
+    const id=b.closest(".zwzeile").dataset.id,d=S.docs.find(x=>x.id===id);if(!d)return;
+    if(b.dataset.zw==="neu"){commit();settings();return}
+    if(b.dataset.zw==="zm"){closeOvl();if(S.active!==id){flush();S.active=id;S.mode="write";render()}setTimeout(zeitmaschine,60);return}
+    if(b.dataset.zw==="weg")zwBestaetigen(b,()=>{d.history=[];save();settings();toast(tr("Zwischenstände gelöscht"))});
+  });
+}
 /* Welcher Reiter zuletzt offen war. Steht außerhalb, weil settings() sich beim
    Sprachwechsel selbst neu aufruft — sonst spränge man dabei zurück. */
 let setTab="allg";
@@ -29817,15 +29949,8 @@ function settings(){
     ${zeile(tr("Aufbewahren"),`<select id="sSpan">${HIST_SPANNEN.map(([lab,v])=>
         `<option value="${v}" ${(s.histSpan||604800)==v?"selected":""}>${tr(lab)}</option>`).join("")}</select>`)}
     <p class="setnote" style="margin-top:6px">${tr("Neuere Stände bleiben vollständig, ältere werden nach und nach ausgedünnt, damit der Speicher nicht vollläuft.")}</p>
-    ${zd?`<div class="zwbox">
-      <div class="zwinfo"><b>${esc(tr(zd.title)||tr("Ohne Titel"))}</b>
-        <span>${zh.length
-          ?zh.length+" "+tr(zh.length===1?"Zwischenstand":"Zwischenstände")+" · "+tr("ältester")+": "+new Date(zh[0].ts).toLocaleString(LOC(),{dateStyle:"medium",timeStyle:"short"})
-          :tr("Noch keine gesicherten Stände.")}</span></div>
-      <div class="storeact" style="margin-top:0">
-        <button class="btn" id="sSnap">${tr("Zwischenstand anlegen")}</button>
-        <button class="btn" id="sHist">${tr("Zeitmaschine öffnen")}&hellip;</button></div>
-    </div>`:""}`;
+    <div class="setsec">${tr("Belegter Speicher")}</div>
+    ${zwSpeicherHtml()}`;
   const spei=`
     <div class="setsec">${tr("Speicherort")}</div>
       <p class="storeintro">${tr(istApp()?"Deine Arbeit liegt immer im Programmspeicher. Sichern kannst du sie zusätzlich automatisch oder von Hand."
@@ -29921,7 +30046,7 @@ function settings(){
   const anBtn=(id,fn)=>{const b=$("#"+id);if(b)b.onclick=fn};
   anBtn("sBackup",()=>{closeOvl();saveBundle("all")});
   anBtn("sHist",()=>{closeOvl();history()});
-  anBtn("sSnap",()=>{commit();settings()});
+  zwSpeicherVerdrahten();
   anBtn("sWipe",()=>{closeOvl();wipeDialog()});
   anBtn("sRestore",()=>{closeOvl();importJson()});
   /* Die Berechtigungsfrage des Browsers kommt so immer direkt nach einem
@@ -31097,7 +31222,7 @@ rewrite a passage you might want back.</p>
 <p>The <b>time machine</b> opens from <b>File &rsaquo; Snapshots &rsaquo; Time machine</b> or the clock
 at the top right: a timeline at the bottom with one dot per snapshot, and the page shows the
 chosen version. What is new compared with the version before is highlighted in green, what was
-cut is struck through in red. Under <i>Changes</i> you choose what to compare with: the version before, or now — then
+cut is struck through in red. The cog in the bar lets you choose what to compare with: the version before, or now — then
 you see what restoring would bring back (green) and what it would lose (red). Large dots on the
 timeline mean many changes; the days are marked below it. The arrow keys step from version to version, <i>Play</i> lets the
 text grow before your eyes. <i>Restore this version</i> puts it in place of the current text; the
@@ -31756,7 +31881,7 @@ das lohnt sich, bevor du eine Passage umschreibst, die du vielleicht zurückhabe
 <p>Die <b>Zeitmaschine</b> öffnest du über <b>Datei &rsaquo; Zwischenstände &rsaquo; Zeitmaschine</b>
 oder die Uhr oben rechts: unten ein Zeitstrahl mit einem Punkt je Zwischenstand, das Blatt zeigt den
 gewählten Stand. Was gegenüber dem Stand davor neu ist, ist grün hinterlegt, Gestrichenes rot
-durchgestrichen. Unter <i>Änderungen</i> wählst du, womit verglichen wird: mit dem Stand davor oder mit
+durchgestrichen. Über das Zahnrad in der Leiste wählst du, womit verglichen wird: mit dem Stand davor oder mit
 jetzt — dann siehst du, was ein Wiederherstellen zurückbrächte (grün) und was dabei verloren ginge
 (rot). Große Punkte auf dem Zeitstrahl stehen für viele Änderungen, die Tage stehen darunter. Mit den Pfeiltasten gehst du Stand für Stand, <i>Abspielen</i> lässt den Text vor
 deinen Augen entstehen. <i>Diesen Stand wiederherstellen</i> setzt ihn an die Stelle des aktuellen
@@ -32416,7 +32541,7 @@ hacerlo antes de reescribir un pasaje que quizá quieras recuperar.</p>
 <p>La <b>máquina del tiempo</b> se abre desde <b>Archivo &rsaquo; Puntos de restauración &rsaquo; Máquina
 del tiempo</b> o el reloj arriba a la derecha: abajo una línea de tiempo con un punto por cada punto de
 restauración, y la página muestra la versión elegida. Lo nuevo respecto a la versión anterior se
-resalta en verde, lo eliminado aparece tachado en rojo. En <i>Cambios</i> eliges con qué comparar: con la
+resalta en verde, lo eliminado aparece tachado en rojo. Con el engranaje de la barra eliges con qué comparar: con la
 versión anterior o con ahora; entonces ves qué traería de vuelta una restauración (verde) y qué se
 perdería (rojo). Los puntos grandes de la línea de tiempo indican muchos cambios; debajo se marcan
 los días. Las flechas pasan de una versión a otra,
@@ -33075,7 +33200,7 @@ trecho que você talvez queira de volta.</p>
 <p>A <b>máquina do tempo</b> abre por <b>Arquivo &rsaquo; Pontos de restauração &rsaquo; Máquina do
 tempo</b> ou pelo relógio no canto superior direito: embaixo uma linha do tempo com um ponto para cada
 ponto de restauração, e a página mostra a versão escolhida. O que é novo em relação à versão
-anterior fica destacado em verde, o que foi cortado aparece riscado em vermelho. Em <i>Alterações</i> você escolhe com o
+anterior fica destacado em verde, o que foi cortado aparece riscado em vermelho. Na engrenagem da barra você escolhe com o
 que comparar: com a versão anterior ou com agora — aí você vê o que uma restauração traria de volta
 (verde) e o que se perderia (vermelho). Pontos grandes na linha do tempo indicam muitas alterações;
 os dias aparecem embaixo. As setas passam de
@@ -33765,7 +33890,7 @@ utile avant de réécrire un passage que vous pourriez vouloir récupérer.</p>
 <p>La <b>machine à remonter le temps</b> s’ouvre par <b>Fichier &rsaquo; Points de restauration &rsaquo;
 Machine à remonter le temps</b> ou l’horloge en haut à droite : en bas une frise avec un point par point de
 restauration, la page montre la version choisie. Ce qui est nouveau par rapport à la version
-précédente est surligné en vert, ce qui a été supprimé est barré en rouge. Sous <i>Modifications</i>, vous choisissez la
+précédente est surligné en vert, ce qui a été supprimé est barré en rouge. La roue dentée de la barre permet de choisir la
 comparaison : avec la version précédente ou avec maintenant — vous voyez alors ce qu’une restauration
 ramènerait (en vert) et ce qu’elle ferait perdre (en rouge). Les gros points de la frise signalent
 beaucoup de modifications ; les jours sont indiqués dessous. Les flèches passent
@@ -34414,7 +34539,7 @@ fragmentu, który być może zechcesz odzyskać.</p>
 <p><b>Wehikuł czasu</b> otwierasz przez <b>Plik &rsaquo; Punkty przywracania &rsaquo; Wehikuł czasu</b>
 albo zegar w prawym górnym rogu: na dole oś czasu z punktem dla każdego punktu przywracania, a strona
 pokazuje wybraną wersję. To, co nowe względem poprzedniej wersji, jest podświetlone na zielono,
-to, co usunięte, przekreślone na czerwono. W <i>Zmiany</i> wybierasz, z czym porównać: z
+to, co usunięte, przekreślone na czerwono. Kołem zębatym na pasku wybierasz, z czym porównać: z
 poprzednią wersją czy z teraz — wtedy widzisz, co przywrócenie by przyniosło (na zielono), a co
 by przepadło (na czerwono). Duże punkty na osi czasu oznaczają wiele zmian, pod nią są dni. Strzałki przechodzą od wersji do wersji, <i>Odtwórz</i>
 pokazuje, jak tekst powstaje na twoich oczach. <i>Przywróć tę wersję</i> stawia ją na miejsce
@@ -35082,7 +35207,7 @@ prima di riscrivere un passaggio che potresti voler recuperare.</p>
 <p>La <b>macchina del tempo</b> si apre da <b>File &rsaquo; Punti di ripristino &rsaquo; Macchina del tempo</b>
 o dall'orologio in alto a destra: in basso una linea del tempo con un punto per ogni punto di
 ripristino, la pagina mostra la versione scelta. Ciò che è nuovo rispetto alla versione precedente
-è evidenziato in verde, ciò che è stato tolto è barrato in rosso. In <i>Modifiche</i> scegli il confronto: con la
+è evidenziato in verde, ciò che è stato tolto è barrato in rosso. Con l'ingranaggio nella barra scegli il confronto: con la
 versione precedente o con adesso — allora vedi che cosa riporterebbe un ripristino (verde) e che
 cosa andrebbe perso (rosso). I punti grandi sulla linea del tempo indicano molte modifiche; i giorni
 sono segnati sotto. Le frecce passano da una versione

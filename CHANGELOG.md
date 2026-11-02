@@ -74,6 +74,18 @@ Derzeit nichts.
 
 ### Neu
 
+- **Einstellungen › Zwischenstände: belegter Speicher** (Tom): Summe
+  („156 KB · 15 Zwischenstände · 2 Dokumente“) und darunter je Dokument
+  eine Zeile mit Anzahl, Größe und ältestem Stand, dazu Zwischenstand
+  anlegen (geöffnetes Dokument), Zeitmaschine öffnen (auch für ein anderes
+  Dokument) und Löschen; oben „Alle löschen“. Gelöscht werden nur die alten
+  Fassungen, nie der Text. Löschen fragt im Knopf selbst nach („Wirklich
+  löschen?“, rot, 4 s) statt in einem zweiten Fenster über den
+  Einstellungen. Ersetzt den Kasten, der nur das geöffnete Dokument zeigte.
+  Der Umzug der Zwischenstände in IndexedDB ist bewusst verschoben: nötig
+  erst, wenn PureQuill sich an Romanautoren mit sehr langen Texten oder
+  vielen Bildern richtet — bis dahin wirft `commit()` bei vollem Speicher
+  die ältesten Stände weg, nie den Text.
 - **Menüs eine Stufe luftiger**: 28 px je Eintrag mit Schrift 13,5 statt
   24 px/13 (Tom: gequetscht ist nicht gut fürs Auge; die 31 px von vor den
   Symbolen waren zu groß). Gilt für alle Menüs, oben und beim Rechtsklick.
@@ -114,7 +126,11 @@ Derzeit nichts.
   vor dem Wiederherstellen, was zurückkäme (grün) und was verloren ginge
   (rot). Nichts davon wird gespeichert außer der Wahl (`zmBezug`). Ein kurzer
   Absatz, der fast ganz im längeren steckt, gilt jetzt als erweitert statt
-  als gestrichen und neu (Ähnlichkeit ohne Satzzeichen). Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
+  als gestrichen und neu (Ähnlichkeit ohne Satzzeichen). Die Auswahl „Änderungen: …“
+  war nicht verständlich (Tom) und liegt jetzt hinter einem Zahnrad in der
+  Leiste: „Farbig markieren — Was seit dem vorigen Stand neu ist | Unterschied
+  zu deinem jetzigen Text | Nichts markieren“; Esc schließt zuerst diese
+  Auswahl. „Schließen“ ohne „(Esc)“ im Namen, die Taste steht im Tooltip. Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
   Wiederherstellen, check-export 302/302.
 - **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
   jetzt „Schließen“ und „Alle Dokumente schließen“ (Toms Wahl gegen „Andere
