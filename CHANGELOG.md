@@ -128,8 +128,10 @@ Derzeit nichts.
   Absatz, der fast ganz im längeren steckt, gilt jetzt als erweitert statt
   als gestrichen und neu (Ähnlichkeit ohne Satzzeichen). Die Auswahl „Änderungen: …“
   war nicht verständlich (Tom) und liegt jetzt hinter einem Zahnrad in der
-  Leiste: „Farbig markieren — Was seit dem vorigen Stand neu ist | Unterschied
-  zu deinem jetzigen Text | Nichts markieren“; Esc schließt zuerst diese
+  Leiste: „Farbig markieren — Unterschied zur vorherigen Version |
+  Unterschied zur jetzigen Version | Nichts markieren“ (Toms Wortlaut,
+  „jetzigen“ statt „aktuellen“, weil man gerade einen alten Stand ansieht
+  und „aktuell“ den meinen könnte); Esc schließt zuerst diese
   Auswahl. „Schließen“ ohne „(Esc)“ im Namen, die Taste steht im Tooltip. Geprüft: Markierungen landen nie im Dokument, Rückgängig nach
   Wiederherstellen, check-export 302/302.
 - **Alle Dokumente schließen**: der Rechtsklick auf ein Dokument oben hat
