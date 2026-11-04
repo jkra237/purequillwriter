@@ -2304,6 +2304,31 @@ body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)
   input,select,textarea,.tools select,.tools input[type=text],
   .modal select,.modal input,.modal textarea,.setrow select,.setrow input{font-size:16px}
 }
+/* Einführungstour: ein Rahmen um die gezeigte Stelle, der Rest gedimmt
+   (der Schatten des Rahmens ist die Abdunklung), daneben eine Karte. Die
+   Ebene fängt alle Klicks ab — während der Tour wird nichts bedient. */
+.tour{position:fixed;inset:0;z-index:95}
+.tour .tspot{position:fixed;border-radius:8px;pointer-events:none;
+  box-shadow:0 0 0 9999px color-mix(in srgb,#000 48%,transparent),0 0 0 2px var(--paper),0 0 0 4px var(--stamp);
+  transition:left .28s ease,top .28s ease,width .28s ease,height .28s ease}
+.tour .tspot.leer{box-shadow:0 0 0 9999px color-mix(in srgb,#000 48%,transparent)}
+.tour .tkarte{position:fixed;width:min(380px,calc(100vw - 24px));box-sizing:border-box;background:var(--paper);color:var(--ink);
+  border:1px solid var(--rule);border-radius:var(--radius-lg);box-shadow:0 12px 40px rgba(0,0,0,.28);
+  padding:18px 20px 14px;font:14px/1.5 var(--ui);transition:left .28s ease,top .28s ease}
+.tour .tschritt{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+.tour h3{margin:0 0 6px;font-size:17px;font-weight:600;text-wrap:balance}
+.tour p{margin:0;color:var(--ink-soft)}
+.tour .tfuss{display:flex;align-items:center;gap:8px;margin-top:16px}
+.tour .tpunkte{display:flex;gap:5px;flex:1}
+.tour .tpunkte i{width:7px;height:7px;border-radius:50%;background:var(--rule)}
+.tour .tpunkte i.an{background:var(--stamp)}
+.tour .btn{white-space:nowrap;padding:6px 12px}
+.tour .tweg{border:none;background:none;color:var(--ink-soft);font:inherit;font-size:13px;padding:6px 4px;cursor:pointer;white-space:nowrap}
+.tour .tweg:hover{color:var(--ink)}
+.tour .tzeiger{position:absolute;width:14px;height:14px;background:var(--paper);border:1px solid var(--rule);transform:rotate(45deg)}
+.tour .tzeiger.oben{top:-8px;border-right:none;border-bottom:none}
+.tour .tzeiger.unten{bottom:-8px;border-left:none;border-top:none}
+.tour .tzeiger.links{left:-8px;border-right:none;border-top:none}
 /* Wer im Betriebssystem weniger Bewegung eingestellt hat, bekommt keine.
    Ganz am Ende, damit die Regel jede vorherige übersteuert. */
 @media (prefers-reduced-motion:reduce){
@@ -3047,6 +3072,22 @@ en:{
   "Nur ganze Wörter":"Whole words only",
   "hier ohne Wirkung":"no effect here",
   "Fokusmodus":"Focus mode",
+  "Einfach losschreiben":"Just start writing",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"Your text is saved locally as you go. Nothing goes online, unless you also set a cloud folder (e.g. Google Drive, Dropbox) as a save location.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"You can create, open and save Word or OpenOffice files. You can also export as PDF or EPUB.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Here you can choose your personal color scheme, show the outline of your document or use focus mode.",
+  "Tools für bessere Ergebnisse":"Tools for better results",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Spell check, finding repeated words, cleaning up text and setting a writing goal.",
+  "Die Zeitmaschine":"The time machine",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"The clock in the toolbar shows earlier versions of the document on a timeline. You can bring back earlier versions.",
+  "Notizen und Glossar":"Notes and glossary",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"Use the left bar to add notes to your document or create a glossary. For more help, press F1.",
+  "Überspringen":"Skip",
+  "Los geht’s":"Let’s go",
+  "Schritt":"Step",
+  "Neu hier?":"New here?",
+  "Kurze Führung":"Quick tour",
+  "Kurze Führung (1 Minute)":"Quick tour (1 minute)",
   "verlassen (Esc)":"exit (Esc)",
   "Neues Dokument":"New document",
   "Dokument schließen":"Close document",
@@ -4121,6 +4162,22 @@ fr:{
   "Nur ganze Wörter":"Mots entiers uniquement",
   "hier ohne Wirkung":"sans effet ici",
   "Fokusmodus":"Mode focus",
+  "Einfach losschreiben":"Commencez simplement à écrire",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"Votre texte est enregistré en continu sur cet appareil. Rien ne part en ligne, sauf si vous choisissez en plus un dossier cloud (p. ex. Google Drive, Dropbox) comme emplacement d’enregistrement.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"Vous pouvez créer, ouvrir et enregistrer des fichiers Word ou OpenOffice. L’export en PDF ou EPUB est aussi possible.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Ici, vous choisissez votre thème de couleurs, affichez le plan de votre document ou utilisez le mode focus.",
+  "Tools für bessere Ergebnisse":"Des outils pour de meilleurs résultats",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Vérification orthographique, détection des répétitions, nettoyage du texte et objectif d’écriture.",
+  "Die Zeitmaschine":"La machine à remonter le temps",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"L’horloge dans la barre montre les versions précédentes du document sur une frise. Vous pouvez restaurer les versions précédentes.",
+  "Notizen und Glossar":"Notes et glossaire",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"Dans la barre de gauche, ajoutez des notes à votre document ou créez un glossaire. Pour plus d’aide, appuyez sur F1.",
+  "Überspringen":"Passer",
+  "Los geht’s":"C’est parti",
+  "Schritt":"Étape",
+  "Neu hier?":"Nouveau ici ?",
+  "Kurze Führung":"Visite rapide",
+  "Kurze Führung (1 Minute)":"Visite rapide (1 minute)",
   "verlassen (Esc)":"quitter (Échap)",
   "Neues Dokument":"Nouveau document",
   "Dokument schließen":"Fermer le document",
@@ -5195,6 +5252,22 @@ es:{
   "Nur ganze Wörter":"Solo palabras completas",
   "hier ohne Wirkung":"sin efecto aquí",
   "Fokusmodus":"Modo enfoque",
+  "Einfach losschreiben":"Simplemente empieza a escribir",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"El texto se guarda continuamente en este equipo. Nada se envía a internet, salvo que además elijas una carpeta en la nube (p. ej., Google Drive, Dropbox) como ubicación de guardado.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"Puedes crear, abrir y guardar archivos de Word u OpenOffice. También puedes exportar a PDF o EPUB.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Aquí puedes elegir tu esquema de color, mostrar el esquema de tu documento o usar el modo enfoque.",
+  "Tools für bessere Ergebnisse":"Herramientas para mejores resultados",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Revisión ortográfica, detección de repeticiones, limpieza del texto y objetivo de escritura.",
+  "Die Zeitmaschine":"La máquina del tiempo",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"El reloj de la barra muestra versiones anteriores del documento en una línea de tiempo. Puedes recuperar versiones anteriores.",
+  "Notizen und Glossar":"Notas y glosario",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"En la barra izquierda puedes añadir notas a tu documento o crear un glosario. Para más ayuda, pulsa F1.",
+  "Überspringen":"Omitir",
+  "Los geht’s":"¡Vamos!",
+  "Schritt":"Paso",
+  "Neu hier?":"¿Nuevo aquí?",
+  "Kurze Führung":"Recorrido rápido",
+  "Kurze Führung (1 Minute)":"Recorrido rápido (1 minuto)",
   "verlassen (Esc)":"salir (Esc)",
   "Neues Dokument":"Nuevo documento",
   "Dokument schließen":"Cerrar documento",
@@ -6269,6 +6342,22 @@ pt:{
   "Nur ganze Wörter":"Somente palavras inteiras",
   "hier ohne Wirkung":"sem efeito aqui",
   "Fokusmodus":"Modo de foco",
+  "Einfach losschreiben":"Comece a escrever",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"O texto é salvo continuamente neste dispositivo. Nada vai para a internet, a menos que você também defina uma pasta na nuvem (por exemplo, Google Drive, Dropbox) como local de salvamento.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"Você pode criar, abrir e salvar arquivos do Word ou do OpenOffice. Também é possível exportar como PDF ou EPUB.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Aqui você escolhe seu esquema de cores, exibe a estrutura de tópicos do documento ou usa o modo de foco.",
+  "Tools für bessere Ergebnisse":"Ferramentas para resultados melhores",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Verificação ortográfica, detecção de repetições, limpeza do texto e definição da meta de escrita.",
+  "Die Zeitmaschine":"A máquina do tempo",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"O relógio na barra mostra versões anteriores do documento em uma linha do tempo. Você pode restaurar versões anteriores.",
+  "Notizen und Glossar":"Notas e glossário",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"Na barra à esquerda, adicione notas ao seu documento ou crie um glossário. Para mais ajuda, pressione F1.",
+  "Überspringen":"Pular",
+  "Los geht’s":"Vamos lá",
+  "Schritt":"Passo",
+  "Neu hier?":"Novo aqui?",
+  "Kurze Führung":"Tour rápido",
+  "Kurze Führung (1 Minute)":"Tour rápido (1 minuto)",
   "verlassen (Esc)":"sair (Esc)",
   "Neues Dokument":"Novo documento",
   "Dokument schließen":"Fechar documento",
@@ -7343,6 +7432,22 @@ pl:{
   "Nur ganze Wörter":"Tylko całe wyrazy",
   "hier ohne Wirkung":"bez efektu tutaj",
   "Fokusmodus":"Tryb skupienia",
+  "Einfach losschreiben":"Po prostu zacznij pisać",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"Tekst jest na bieżąco zapisywany lokalnie. Nic nie trafia do internetu, chyba że dodatkowo wybierzesz folder w chmurze (np. Google Drive, Dropbox) jako miejsce zapisu.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"Możesz tworzyć, otwierać i zapisywać pliki Word lub OpenOffice. Możliwy jest też eksport do PDF lub EPUB.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Tutaj wybierzesz swój schemat kolorów, wyświetlisz konspekt dokumentu albo włączysz tryb skupienia.",
+  "Tools für bessere Ergebnisse":"Narzędzia dla lepszych efektów",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Sprawdzanie pisowni, wykrywanie powtórzeń, czyszczenie tekstu i ustawianie celu pisania.",
+  "Die Zeitmaschine":"Wehikuł czasu",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"Zegar na pasku pokazuje wcześniejsze wersje dokumentu na osi czasu. Możesz przywrócić wcześniejsze wersje.",
+  "Notizen und Glossar":"Notatki i słowniczek",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"Na lewym pasku dodasz notatki do dokumentu albo utworzysz słowniczek. Więcej pomocy: naciśnij F1.",
+  "Überspringen":"Pomiń",
+  "Los geht’s":"Zaczynamy",
+  "Schritt":"Krok",
+  "Neu hier?":"Nowy tutaj?",
+  "Kurze Führung":"Krótki przewodnik",
+  "Kurze Führung (1 Minute)":"Krótki przewodnik (1 minuta)",
   "verlassen (Esc)":"zamknij (Esc)",
   "Neues Dokument":"Nowy dokument",
   "Dokument schließen":"Zamknij dokument",
@@ -8417,6 +8522,22 @@ it:{
   "Nur ganze Wörter":"Solo parole intere",
   "hier ohne Wirkung":"nessun effetto qui",
   "Fokusmodus":"Modalità concentrazione",
+  "Einfach losschreiben":"Inizia semplicemente a scrivere",
+  "Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest.":"Il testo viene salvato continuamente in locale. Nulla va online, a meno che tu non scelga anche una cartella cloud (ad es. Google Drive, Dropbox) come posizione di salvataggio.",
+  "Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich.":"Puoi creare, aprire e salvare file Word o OpenOffice. È possibile anche esportare in PDF o EPUB.",
+  "Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen.":"Qui puoi scegliere il tuo tema colori, mostrare la struttura del documento o usare la modalità concentrazione.",
+  "Tools für bessere Ergebnisse":"Strumenti per risultati migliori",
+  "Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen.":"Controllo ortografico, ricerca delle ripetizioni, pulizia del testo e obiettivo di scrittura.",
+  "Die Zeitmaschine":"La macchina del tempo",
+  "Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren.":"L’orologio nella barra mostra le versioni precedenti del documento su una linea del tempo. Puoi ripristinare le versioni precedenti.",
+  "Notizen und Glossar":"Note e glossario",
+  "Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1.":"Nella barra a sinistra puoi aggiungere note al documento o creare un glossario. Per altro aiuto premi F1.",
+  "Überspringen":"Salta",
+  "Los geht’s":"Iniziamo",
+  "Schritt":"Passo",
+  "Neu hier?":"Prima volta qui?",
+  "Kurze Führung":"Tour rapido",
+  "Kurze Führung (1 Minute)":"Tour rapido (1 minuto)",
   "verlassen (Esc)":"esci (Esc)",
   "Neues Dokument":"Nuovo documento",
   "Dokument schließen":"Chiudi documento",
@@ -9640,8 +9761,8 @@ function startupDialog(){
         ${tr("Sichern kannst du zusätzlich auf deinem Computer oder automatisch in einen Cloud-Ordner:")}
         <a id="stSave" style="color:var(--stamp);text-decoration:underline;cursor:pointer"
           >${esc(mpfad("Einstellungen","Speichern"))}</a></p>
-      <p style="margin:7px 0 0">${esc(tr("Neu hier? Beginne mit"))}
-        <a id="stHelp" style="color:var(--stamp);text-decoration:underline;cursor:pointer">${esc(helpErstes())}</a>.</p>
+      <p style="margin:7px 0 0">${esc(tr("Neu hier?"))}
+        <a id="stTour" style="color:var(--stamp);text-decoration:underline;cursor:pointer">${esc(tr("Kurze Führung (1 Minute)"))}</a></p>
     </div>
     </div></div>`,true);
   const paintSwatch=k=>{
@@ -9663,7 +9784,7 @@ function startupDialog(){
   $("#stSkip").onclick=startSkip;
   $("#stNew").onclick=startNew;
   $("#stOpen").onclick=loadDocumentFile;
-  $("#stHelp").onclick=()=>{zurueckZumWillkommen=true;helpDialog(helpErstes())};
+  $("#stTour").onclick=()=>{startSkip();tourStart()};
   $("#stSave").onclick=()=>{zurueckZumWillkommen=true;setTab="save";settings()};
 }
 
@@ -12875,6 +12996,7 @@ function commandList(){
   add(D,"sich:laden",tr("Sicherung laden…"),{pfad:as,k:PQWEXT,such:"sicherung laden restore backup import",run:importJson});
   add(D,"einstellungen",tr("Einstellungen&hellip;"),{such:"optionen settings preferences sprache language",run:settings});
   add(D,"hilfe",tr("Hilfe"),{k:"F1",such:"help anleitung handbuch",run:()=>helpDialog()});
+  add(D,"tour",tr("Kurze Führung"),{such:"tour führung einführung tutorial onboarding rundgang",run:tourStart});
   add(D,"ueber",tr("Über PureQuill Writer&hellip;"),{such:"about version",run:aboutDialog});
   S.docs.filter(d=>d.id!==S.active).forEach(d=>add(D,"reiter:"+d.id,tr("Wechseln zu: ")+tr(d.title),
     {nurSuche:true,such:"reiter tab wechseln switch",run:()=>{flush();S.active=d.id;if(S.mode!=="write")S.mode="write";save();render()}}));
@@ -21502,6 +21624,7 @@ function fileMenu(){
     <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">${kz("palette")}</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="help"><span class="chk"></span>${tr("Hilfe")}<span class="k">F1</span></button>
+    <button class="mi" data-act="tour"><span class="chk"></span>${tr("Kurze Führung")}</button>
     <button class="mi" data-act="about"><span class="chk"></span>${tr("Über PureQuill Writer&hellip;")}</button>`;
   menuSymbole(m);$(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
   menuUnterKnopf(m,$("#fileBtn"));
@@ -21584,6 +21707,7 @@ function openSubMenu(anchor,items,cb=runFileAct){
 function runFileAct(a){
   if(a==="help")helpDialog();
   if(a==="about")aboutDialog();
+  if(a==="tour")tourStart();
   if(a==="new")newDocument();
   if(a==="loaddoc")loadDocumentFile();
   if(a==="rename")renameTab(S.active);
@@ -35815,8 +35939,119 @@ function helpMalen(){
     ? `<div class="hpath">${esc(t.bk)}</div><h4>${esc(t.t)}</h4>${t.b}`
     : `<div class="hwelcome"><h4>${esc(tr("PureQuill Writer Hilfe"))}</h4>
         <p>${tr("Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.")}</p>
-        <p>${esc(tr("Neu hier? Beginne mit"))} <a data-goto="${esc(helpErstes())}">${esc(helpErstes())}</a>.</p></div>`;
+        <p>${esc(tr("Neu hier? Beginne mit"))} <a data-goto="${esc(helpErstes())}">${esc(helpErstes())}</a>.</p>
+        <p><a data-tour="1" href="#">${esc(tr("Kurze Führung (1 Minute)"))}</a></p></div>`;
 }
+/* ================= Einführungstour =================
+   Sechs Karten über der echten Oberfläche (Tom, 2026-11-04; die Texte sind
+   seine). Nur angeboten — im Willkommensfenster, unter Datei, auf der
+   Startseite der Hilfe und in der Befehlspalette —, sie startet nie von
+   selbst. Menüknöpfe werden nur hervorgehoben, nichts klappt auf. Ist ein
+   Ziel nicht zu sehen (schmales Fenster, Handy), steht die Karte ohne Rahmen
+   in der Mitte; der Text nennt den Ort ohnehin. */
+const TOUR=[
+  {ziel:["#pane"],mitte:true,t:"Einfach losschreiben",
+   b:"Der Text wird laufend lokal gesichert. Nichts geht online, es sei denn, du legst zusätzlich einen Cloud-Ordner (z. B. Google Drive, Dropbox) als Speicherort fest."},
+  {ziel:["#fileBtn"],alt:["#menuBtn"],t:"Datei",
+   b:"Du kannst Word- oder OpenOffice-Dateien anlegen, öffnen und speichern. Zusätzlich ist ein Export als PDF oder EPUB möglich."},
+  {ziel:["#viewBtn"],alt:["#menuBtn"],t:"Ansicht",
+   b:"Hier kannst du dein persönliches Farbschema wählen, die Gliederung deines Dokuments einblenden oder den Fokusmodus nutzen."},
+  {ziel:["#toolsBtn"],alt:["#menuBtn"],t:"Tools für bessere Ergebnisse",
+   b:"Rechtschreibung, Wortwiederholungen erkennen, Text bereinigen und das Schreibziel festlegen."},
+  {ziel:["#histBtn"],t:"Die Zeitmaschine",
+   b:"Die Uhr in der Leiste zeigt frühere Versionen des Dokuments auf einer Zeitleiste. Du kannst frühere Versionen reaktivieren."},
+  {ziel:[".rb[data-mode=notes]",".rb[data-mode=gloss]"],rechts:true,t:"Notizen und Glossar",
+   b:"Lege in der linken Leiste Notizen zu deinem Dokument oder ein Glossar an. Für weitere Hilfe drücke die Taste F1."},
+];
+let tourI=-1;
+function tourZiel(s){
+  let r=null;
+  for(const sel of s.ziel){const el=document.querySelector(sel);if(!el)continue;
+    const q=el.getBoundingClientRect();
+    if(!q.width||!q.height||q.right<0||q.bottom<0||q.left>innerWidth||q.top>innerHeight)continue;
+    r=r?{left:Math.min(r.left,q.left),top:Math.min(r.top,q.top),right:Math.max(r.right,q.right),bottom:Math.max(r.bottom,q.bottom)}
+       :{left:q.left,top:q.top,right:q.right,bottom:q.bottom}}
+  /* Auf dem Handy stecken die Menüs hinter dem Menüknopf */
+  if(!r&&s.alt)return tourZiel({ziel:s.alt});
+  return r;
+}
+function tourZeigen(){
+  const box=$("#tour");if(!box)return;
+  const s=TOUR[tourI],n=TOUR.length,letzter=tourI===n-1;
+  const k=box.querySelector(".tkarte"),sp=box.querySelector(".tspot"),f=box.querySelector(".tzeiger");
+  k.querySelector(".tschritt").textContent=`${tr("Schritt")} ${tourI+1} ${OFWORD()} ${n}`;
+  k.querySelector("h3").textContent=tr(s.t);k.querySelector("p").textContent=tr(s.b);
+  k.querySelector(".tpunkte").innerHTML=TOUR.map((_,j)=>`<i class="${j===tourI?"an":""}"></i>`).join("");
+  $("#tourZur").style.visibility=tourI?"visible":"hidden";
+  $("#tourVor").textContent=letzter?tr("Los geht’s"):tr("Weiter");
+  const r=tourZiel(s),vw=innerWidth,vh=innerHeight,kw=k.offsetWidth,kh=k.offsetHeight,abst=12;
+  let x,y,pfeil="",pf=0;
+  if(!r){sp.className="tspot leer";Object.assign(sp.style,{left:vw/2+"px",top:vh/2+"px",width:"0px",height:"0px"});
+    x=(vw-kw)/2;y=(vh-kh)/2}
+  else{
+    /* Der Rahmen bleibt 4px im Fenster, sonst schneidet der Rand ihn an
+       (Datei sitzt ganz links oben) */
+    const pad=s.mitte?0:6,L=Math.max(4,r.left-pad),T=Math.max(4,r.top-pad),
+      W=Math.min(vw-4,r.right+pad)-L,H=Math.min(vh-4,r.bottom+pad)-T;
+    sp.className="tspot";Object.assign(sp.style,{left:L+"px",top:T+"px",width:W+"px",height:H+"px"});
+    /* Erste Karte unter dem Textanfang, nicht darüber */
+    if(s.mitte){x=(vw-kw)/2;y=Math.min(vh-kh-abst,Math.max(T+abst,vh*.64-kh/2))}
+    else if(s.rechts&&L+W+abst+kw<vw){x=L+W+abst;y=Math.min(Math.max(abst,T+H/2-kh/2),vh-kh-abst);pfeil="links";pf=T+H/2-y-7}
+    else{x=Math.min(Math.max(abst,L+W/2-kw/2),vw-kw-abst);
+      if(T+H+abst+kh<=vh){y=T+H+abst;pfeil="oben"}else{y=Math.max(abst,T-abst-kh);pfeil="unten"}
+      pf=L+W/2-x-7}
+  }
+  f.className="tzeiger "+pfeil;f.hidden=!pfeil;
+  if(pfeil==="links"){f.style.left="";f.style.top=Math.max(14,Math.min(kh-28,pf))+"px"}
+  else if(pfeil){f.style.top="";f.style.left=Math.max(14,Math.min(kw-28,pf))+"px"}
+  k.style.left=Math.round(x)+"px";k.style.top=Math.round(y)+"px";
+  $("#tourVor").focus();
+}
+function tourSchritt(d){
+  if(tourI+d>=TOUR.length||tourI+d<0){if(d>0)tourEnde();return}
+  tourI+=d;tourZeigen();
+}
+function tourTaste(e){
+  if(!$("#tour"))return;
+  e.stopPropagation();
+  if(e.key==="Escape"){e.preventDefault();tourEnde()}
+  else if(e.key==="ArrowRight"){e.preventDefault();tourSchritt(1)}
+  else if(e.key==="ArrowLeft"){e.preventDefault();tourSchritt(-1)}
+  else if(e.key==="Tab"){e.preventDefault();
+    const b=[...$("#tour").querySelectorAll("button")].filter(x=>x.style.visibility!=="hidden"),
+      i=b.indexOf(document.activeElement);b[(i+(e.shiftKey?b.length-1:1))%b.length].focus()}
+  else if(e.key!=="Enter"&&e.key!==" ")e.preventDefault();
+}
+function tourStart(){
+  closeMenu();if($("#ovl").innerHTML)startSkip();
+  /* Aus dem Willkommensfenster liegt dahinter noch kein sichtbares Dokument
+     (clearShell) — ohne Werkzeugleiste gäbe es Datei, Uhr usw. nicht zu zeigen */
+  if(S.mode!=="write")setMode("write");else if(ohneDokument)render();
+  $("#tour")?.remove();
+  const box=document.createElement("div");box.className="tour";box.id="tour";
+  box.setAttribute("role","dialog");box.setAttribute("aria-modal","true");box.setAttribute("aria-labelledby","tourT");
+  box.innerHTML=`<div class="tspot"></div><div class="tkarte"><div class="tzeiger"></div>
+    <div class="tschritt"></div><h3 id="tourT"></h3><p aria-live="polite"></p>
+    <div class="tfuss"><div class="tpunkte" aria-hidden="true"></div>
+      <button class="tweg" id="tourWeg">${esc(tr("Überspringen"))}</button>
+      <button class="btn" id="tourZur">${esc(tr("Zurück"))}</button>
+      <button class="btn pri" id="tourVor"></button></div></div>`;
+  document.body.appendChild(box);
+  $("#tourWeg").onclick=tourEnde;
+  $("#tourZur").onclick=()=>tourSchritt(-1);
+  $("#tourVor").onclick=()=>tourSchritt(1);
+  document.addEventListener("keydown",tourTaste,true);
+  addEventListener("resize",tourZeigen);
+  tourI=0;tourZeigen();
+}
+function tourEnde(){
+  $("#tour")?.remove();tourI=-1;
+  document.removeEventListener("keydown",tourTaste,true);
+  removeEventListener("resize",tourZeigen);
+  const ed=document.getElementById("editor");if(ed)ed.focus();
+}
+/* Verweise auf die Tour in Fenstern (Startseite der Hilfe) */
+document.addEventListener("click",e=>{if(e.target.closest("[data-tour]")){e.preventDefault();tourStart()}});
 /* ================= Ueber-Fenster =================
    Das Programm sagte bisher nirgends, welche Fassung es ist. Im Store gekauft
    heisst das: bei einer Rueckfrage kann weder der Kaeufer noch wir sagen,

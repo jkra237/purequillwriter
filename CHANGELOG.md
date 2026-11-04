@@ -77,6 +77,22 @@ immer genau einen Commit, der sie anfasst.
 
 Derzeit nichts.
 
+### Neu
+
+- **Kurze Führung für neue Nutzer** (Tom): sechs Karten über der echten
+  Oberfläche, der Rest gedimmt, die gezeigte Stelle hell umrandet:
+  Losschreiben (laufend lokal gesichert), Datei (Word/OpenOffice, PDF,
+  EPUB), Ansicht (Farbschema, Gliederung, Fokusmodus), Tools, die
+  Zeitmaschine und Notizen/Glossar. Texte von Tom, in allen sieben
+  Sprachen. Startet nie von selbst: angeboten im Willkommensfenster
+  („Neu hier? Kurze Führung (1 Minute)“ statt „Beginne mit Über
+  PureQuill Writer“), unter Datei, auf der Startseite der Hilfe und in
+  der Befehlspalette. Menüs werden nur hervorgehoben, nicht aufgeklappt.
+  Bedienung mit Pfeiltasten, Tab bleibt in der Karte, Esc beendet. Ist
+  ein Ziel nicht zu sehen, zeigt die Karte auf den Menüknopf (Handy) oder
+  steht in der Mitte. Aus dem Willkommensfenster heraus wird vorher das
+  leere Dokument gezeigt, sonst fehlte die Werkzeugleiste mit der Uhr.
+
 ---
 
 ## 1.6.0 — 2026-11-04
