@@ -68,9 +68,23 @@ immer genau einen Commit, der sie anfasst.
   sie nicht, siehe CLAUDE.md). Das Ladenbild zeigt darum den ausgegrauten
   Haken samt Hinweis — ehrlich, aber kein Werbebild.
 
+- **Statusnamen der Gliederung in der Hilfe weichen ab** (gefunden nach
+  dem Bau von 1.6.0): Die Hilfe nennt den Status „fertig“ auf Spanisch
+  „Terminado“ und auf Italienisch „Finito“, die Oberfläche zeigt „Listo“
+  und „Fatto“. Hilfetext an die Oberfläche angleichen.
+
 ### Offen, noch nicht entschieden
 
 Derzeit nichts.
+
+---
+
+## 1.6.0 — 2026-11-04
+
+Gebaut aus `ff98dff` (Versions-Commit auf `779f5c3`). Browser-Fassung,
+Linux-Pakete und Website am 2026-11-03 live, am 2026-11-04 im Store
+freigegeben. Store-Texte und Neuigkeiten dazu neu, „wie Word“ auf
+„hohe Kompatibilität“ zurückgenommen (suvantra-site 07aa0b2, 84c1932).
 
 ### Neu
 
