@@ -76,7 +76,17 @@
   --paper:#1A1B1D; --chrome:#232426; --chrome-2:#2A2B2E; --canvas:#121314;
   --ink:#E4E2DC; --ink-soft:#9C9E9F; --ink-faint:#6E7072;
   --rule:#37383B; --stamp:#C2705F; --manila:#3A342A;
-  --ok:#7FAE8B; --pageedge:rgba(255,255,255,.22); --err:#E8776A; --on-err:#141414;
+  --ok:#7FAE8B; --pageedge:rgba(0,0,0,.55); --err:#E8776A; --on-err:#141414;
+}
+/* Seit 2026-11-05 wie Tiefsee mit weißem Blatt (Tom: das Papier soll weiß
+   sein, nicht in der Farbe des Schemas). Der Terrakotta-Akzent ist im Blatt
+   dunkler, sonst läge er auf Weiß bei 3,6:1. */
+[data-theme="tinte"] .paper{
+  --paper:#FFFFFF; --chrome:#F1F0EC; --chrome-2:#F7F6F3;
+  --ink:#1E1F21; --ink-soft:#55575A; --ink-faint:#8E9093;
+  --rule:#D9D7D2; --stamp:#9E4F3F; --on-stamp:#FFFFFF; --manila:#EBDFC4;
+  --ok:#2F6B45; --err:#C0392B; --on-err:#FFFFFF;
+  color:var(--ink);
 }
 /* Grüner Röhrenbildschirm, wie frühe Tabellenkalkulationen und DOS-Editoren */
 [data-theme="phosphor"]{
@@ -135,6 +145,30 @@
   --rule:#9A9A9A; --stamp:#0B7580; --manila:#EBDFC4;
   --ok:#12708A; --pageedge:rgba(0,0,0,.45);
 }
+/* Dunkle Leisten in Petrol mit türkisem Akzent wie Rewrite PDF, aber das
+   Blatt bleibt weiß (Tom, 2026-11-05) — das einzige Schema mit dunkler
+   Oberfläche und hellem Dokument. Die Oberfläche nimmt die Werte hier; im
+   Blatt (.paper) gelten helle Werte, damit Text, Tabellen, Kopf-/Fußzeile
+   und Markierungen wie auf weißem Papier aussehen. Der Akzent ist im Blatt
+   dunkler, Türkis auf Weiß läge bei 2:1. */
+[data-theme="tiefsee"]{
+  --on-stamp:#062421;
+  --paper:#14232B; --chrome:#0F1C23; --chrome-2:#182A33; --canvas:#0A141A;
+  --ink:#E6EEF0; --ink-soft:#A3B6BD; --ink-faint:#6B8089;
+  --rule:#2A3E48; --stamp:#2CC7BD; --manila:#3A342A;
+  --ok:#5FD39A; --pageedge:rgba(0,0,0,.55); --err:#FF8A80; --on-err:#141414;
+}
+[data-theme="tiefsee"] .paper{
+  --paper:#FFFFFF; --chrome:#EEF3F4; --chrome-2:#F5F8F9;
+  --ink:#1A2328; --ink-soft:#4E5C63; --ink-faint:#86959C;
+  --rule:#D2DCE0; --stamp:#0B746F; --on-stamp:#FFFFFF; --manila:#EBDFC4;
+  --ok:#1F7A52; --err:#C0392B; --on-err:#FFFFFF;
+  color:var(--ink);
+}
+/* Die Seite läuft ohne Doctype im Quirks-Modus: dort erben Tabellen die
+   Schriftfarbe von body, nicht vom Blatt. Bei Tiefsee (und in der
+   Druckvorschau dunkler Schemata) stand Tabellentext so hell auf Weiß. */
+.paper table{color:inherit}
 /* Schwarzer Bildschirm mit Cyan, wie farbige Tabellenkalkulationen der DOS-Zeit */
 [data-theme="zyan"]{
   --on-stamp:#141414;
@@ -1641,12 +1675,26 @@ body.focus .outline{display:none}
    passt auch der längste Name („Neblina ensolarada“, 119px) hinein. */
 .wkzeile .ctl{width:230px}
 .wkzeile .ctl select{flex:1 1 0;min-width:0}
-.modal .wkwahl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;padding:0 0 0 8px;
-  background:var(--paper);border:1px solid var(--rule);border-radius:var(--radius);cursor:pointer}
-.modal .wkwahl:focus-within{border-color:var(--ink-soft)}
-.modal .wkwahl select{border:0;background:transparent;outline:none;padding-left:0}
+/* Eigene Auswahl statt <select> (Tom, 2026-11-05): die Liste eines
+   <select> zeichnet das System und kann nur Text — Flaggen und
+   Farbvorschauen fehlten darin, und sie hing eingerückt unter dem Kasten.
+   Knopf und Liste sind gleich breit, jede Zeile zeigt Bild und Name. */
+.modal .wkwahl{flex:1 1 0;min-width:0;display:flex;align-items:center;gap:8px;padding:5px 8px;
+  background:var(--paper);color:var(--ink);border:1px solid var(--rule);border-radius:var(--radius);
+  cursor:pointer;font:inherit;text-align:left}
+.modal .wkwahl:hover,.modal .wkwahl[aria-expanded="true"]{border-color:var(--ink-soft)}
+.wkwahl .wkname,.wkmi .wkname{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wkwahl .wkpfeil{flex:0 0 auto;color:var(--ink-soft);display:flex}
+.menu.wkliste{min-width:0;overflow-y:auto}
+.menu.wkliste .wkmi{padding:5px 7px}
+.menu.wkliste .wkmi[aria-selected="true"]{background:color-mix(in srgb,var(--stamp) 14%,transparent)}
+.menu.wkliste .wkmi.akt{background:var(--chrome)}
+.menu.wkliste .wkmi[aria-selected="true"].akt{background:color-mix(in srgb,var(--stamp) 22%,transparent)}
 .wkflagge svg{width:100%;height:100%;display:block}
-.wkfarbe{flex:0 0 36px;height:21px;border-radius:2px;overflow:hidden;display:flex;border:1px solid var(--rule)}
+/* Rahmen kräftiger als --rule: viele Schemata sind außen weiß wie das
+   Fenster, die Vorschau muss sich trotzdem abheben (Tom) */
+.wkfarbe{flex:0 0 36px;height:21px;border-radius:2px;overflow:hidden;display:flex;
+  border:1px solid color-mix(in srgb,var(--ink) 30%,transparent)}
 .wkfrage{margin:16px 0 12px;font-family:Georgia,serif;font-size:14px;line-height:1.5;color:var(--ink-soft)}
 .wkknoepfe{display:flex;gap:10px}
 .wkfuss{border-top:1px solid var(--rule);margin-top:16px;padding-top:14px;
@@ -2876,8 +2924,9 @@ const THEMES=[
   {k:"platin",   n:"Platin",     d:"Klassische Macintosh-Grautöne",     c:["#FFFFFF","#9B9B9B","#33449B"]},
   {k:"papier",   n:"Papier",     d:"Warmes Naturweiß",                  c:["#FCFBF8","#8B8F94","#8C3B2E"]},
   {k:"aquamarin",n:"Aquamarin",  d:"Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro", c:["#FFFFFF","#7E8C8C","#0B7580"]},
+  {k:"tiefsee",  n:"Tiefsee",    d:"Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß", c:["#FFFFFF","#0A141A","#2CC7BD"]},
   {k:"enzian",   n:"Enzian",     d:"Blauer Textmodus der DOS-Zeit",     c:["#12256E","#050C33","#FFC24A"]},
-  {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#1A1B1D","#121314","#C2705F"]},
+  {k:"tinte",    n:"Tinte",      d:"Dunkelmodus",                       c:["#FFFFFF","#121314","#C2705F"]},
   {k:"zyan",     n:"Zyan",       d:"Schwarz mit Cyan und Gelb — erinnert an Lotus 1-2-3 in Farbe",         c:["#05161A","#02090B","#67E8F9"]},
   {k:"bernstein",n:"Bernstein",  d:"Monochromer Bernsteinbildschirm",   c:["#171208","#0A0804","#FFB53D"]},
   {k:"phosphor", n:"Phosphor",   d:"Grüner Röhrenschirm — erinnert an Lotus 1-2-3 und frühe DOS-Editoren", c:["#02120A","#010B06","#3CFF74"]}
@@ -3842,6 +3891,8 @@ en:{
   "Hell":"Light","Dunkel":"Dark",
   "Phosphor":"Phosphor",
   "Lagune":"Lagoon",
+  "Tiefsee":"Deep Sea",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Dark petrol bars with a turquoise accent, the page stays white",
   "Aquamarin":"Aquamarine",
   "Zyan":"Cyan",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Gray Windows office with a teal infobox — reminiscent of Lotus Word Pro",
@@ -4932,6 +4983,8 @@ fr:{
   "Hell":"Clair","Dunkel":"Sombre",
   "Phosphor":"Phosphore",
   "Lagune":"Lagune",
+  "Tiefsee":"Abysses",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Barres pétrole foncé avec accent turquoise, la page reste blanche",
   "Aquamarin":"Aigue-marine",
   "Zyan":"Cyan",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Bureau Windows gris avec encadré turquoise — rappelle Lotus Word Pro",
@@ -6022,6 +6075,8 @@ es:{
   "Hell":"Claro","Dunkel":"Oscuro",
   "Phosphor":"Fósforo",
   "Lagune":"Laguna",
+  "Tiefsee":"Mar profundo",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Barras de color petróleo oscuro con acento turquesa; la página sigue blanca",
   "Aquamarin":"Aguamarina",
   "Zyan":"Cian",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Oficina Windows gris con recuadro turquesa — recuerda a Lotus Word Pro",
@@ -7112,6 +7167,8 @@ pt:{
   "Hell":"Claro","Dunkel":"Escuro",
   "Phosphor":"Fósforo",
   "Lagune":"Laguna",
+  "Tiefsee":"Mar profundo",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Barras em azul-petróleo escuro com destaque turquesa; a página continua branca",
   "Aquamarin":"Água-marinha",
   "Zyan":"Ciano",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Escritório Windows cinza com caixa turquesa — lembra o Lotus Word Pro",
@@ -8202,6 +8259,8 @@ pl:{
   "Hell":"Jasne","Dunkel":"Ciemne",
   "Phosphor":"Fosfor",
   "Lagune":"Laguna",
+  "Tiefsee":"Głębia morska",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Ciemne paski w kolorze petrolu z turkusowym akcentem, strona pozostaje biała",
   "Aquamarin":"Akwamaryna",
   "Zyan":"Cyjan",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Szare biuro Windows z turkusowym polem informacyjnym — przypomina Lotus Word Pro",
@@ -9303,6 +9362,8 @@ it:{
   "Dunkel":"Scuri",
   "Phosphor":"Fosforo",
   "Lagune":"Laguna",
+  "Tiefsee":"Abissi",
+  "Dunkle Leisten in Petrol mit türkisem Akzent, das Blatt bleibt weiß":"Barre color petrolio scuro con accento turchese, la pagina resta bianca",
   "Aquamarin":"Acquamarina",
   "Zyan":"Ciano",
   "Graues Windows-Büro mit türkiser Infobox — erinnert an Lotus Word Pro":"Ufficio Windows grigio con riquadro turchese — ricorda Lotus Word Pro",
@@ -9738,18 +9799,67 @@ function startZuletzt(){
   /* Fehlende Dateien erst danach markieren — das Fenster steht sofort */
   zlPruefen().then(anders=>{if(anders&&$("#stZl"))startupDialog()});
 }
+/* Bild einer Zeile: Flagge der Sprache bzw. drei Farben des Schemas */
+const WK_PFEIL='<span class="wkpfeil" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>';
+const wkBildSprache=v=>FLAGGE[v]?`<span class="wkfarbe wkflagge" aria-hidden="true">${FLAGGE[v]}</span>`:"";
+const wkBildSchema=t=>`<span class="wkfarbe wkbild" aria-hidden="true"><span style="flex:2;background:${t.c[0]}"></span><span
+  style="flex:1;background:${t.c[1]}"></span><span style="flex:.6;background:${t.c[2]}"></span></span>`;
+/* Aufklappliste unter einem Knopf, genau so breit wie er. Bedienung wie ein
+   <select>: Pfeile, Pos1/Ende, Anfangsbuchstabe, Enter/Leertaste wählt,
+   Esc und Tab schließen. Der Klick daneben schließt über den allgemeinen
+   mousedown-Wächter der Menüs (.menu). */
+function wkListe(knopf,eintraege,wert,wahl){
+  if(knopf.getAttribute("aria-expanded")==="true"){closeMenu();return}
+  closeMenu();
+  const m=document.createElement("div");m.className="menu ctx wkliste";m.setAttribute("role","listbox");
+  m.setAttribute("aria-label",knopf.getAttribute("aria-label"));
+  m.innerHTML=eintraege.map(e=>`<button type="button" class="mi wkmi" role="option" tabindex="-1" data-v="${esc(e.v)}"
+    aria-selected="${e.v===wert}">${e.bild}<span class="wkname">${esc(e.n)}</span></button>`).join("");
+  document.body.appendChild(m);
+  /* Bleibt am Knopf: lieber scrollen als über den Knopf rutschen. Nach oben
+     nur, wenn unten kaum Platz ist und oben mehr. */
+  const r=knopf.getBoundingClientRect();m.style.width=r.width+"px";m.style.left=r.left+"px";
+  const unten=innerHeight-r.bottom-2-OVLRAND,oben=r.top-2-OVLRAND,h=m.offsetHeight;
+  const nachOben=h>unten&&unten<200&&oben>unten;
+  m.style.maxHeight=Math.min(h,nachOben?oben:unten)+"px";
+  m.style.top=(nachOben?r.top-2-m.offsetHeight:r.bottom+2)+"px";
+  knopf.setAttribute("aria-expanded","true");
+  const zeilen=[...m.querySelectorAll(".wkmi")];
+  let i=Math.max(0,eintraege.findIndex(e=>e.v===wert));
+  const markiere=n=>{i=Math.max(0,Math.min(zeilen.length-1,n));zeilen.forEach((z,j)=>z.classList.toggle("akt",j===i));
+    zeilen[i].focus({preventScroll:true});zeilen[i].scrollIntoView({block:"nearest"})};
+  /* closeMenu() von anderswo (Klick daneben) räumt die Liste ab — den Knopf mitnehmen */
+  const wacht=new MutationObserver(()=>{if(!m.isConnected){knopf.setAttribute("aria-expanded","false");wacht.disconnect()}});
+  wacht.observe(document.body,{childList:true});
+  const zu=()=>{m.remove();knopf.setAttribute("aria-expanded","false");wacht.disconnect()};
+  const nimm=n=>{const v=eintraege[n].v;zu();knopf.focus();if(v!==wert)wahl(v)};
+  m.onclick=e=>{const z=e.target.closest(".wkmi");if(z)nimm(zeilen.indexOf(z))};
+  m.onmousemove=e=>{const z=e.target.closest(".wkmi");if(z&&zeilen.indexOf(z)!==i)markiere(zeilen.indexOf(z))};
+  m.onkeydown=e=>{
+    const k=e.key,seite=Math.max(1,Math.floor(m.clientHeight/(zeilen[0].offsetHeight||28))-1);
+    if(k==="ArrowDown")markiere(i+1);else if(k==="ArrowUp")markiere(i-1);
+    else if(k==="Home")markiere(0);else if(k==="End")markiere(zeilen.length-1);
+    else if(k==="PageDown")markiere(i+seite);else if(k==="PageUp")markiere(i-seite);
+    else if(k==="Enter"||k===" ")nimm(i);
+    else if(k==="Escape"||k==="Tab"){zu();knopf.focus();if(k==="Tab")return}
+    else if(k.length===1&&!e.ctrlKey&&!e.altKey&&!e.metaKey){const b=k.toLowerCase();
+      const n=eintraege.findIndex((x,j)=>j>i&&x.n.toLowerCase().startsWith(b));
+      const a=n>=0?n:eintraege.findIndex(x=>x.n.toLowerCase().startsWith(b));if(a>=0)markiere(a)}
+    else return;
+    e.preventDefault();e.stopPropagation()};
+  markiere(i);
+}
 function startupDialog(){
   if(zlListe().length)return startZuletzt();
   overlay(`<div class="modal"><h3><span class="stmarke">${ST_LOGO}${tr("Willkommen bei PureQuill Writer")}</span><button class="modalx" id="stSkip" title="${esc(tr("Schließen"))}">&times;</button></h3><div class="pad wkpad">
     <div class="setrow wkzeile">
       <label>${tr("Sprache")}</label><div class="ctl">
-        <label class="wkwahl">${
-          FLAGGE[S.settings.uiLang]?`<span class="wkfarbe wkflagge" aria-hidden="true">${FLAGGE[S.settings.uiLang]}</span>`:""}<select id="stLang" aria-label="${esc(tr("Sprache"))}">${UI_LANGS.map(([v,n])=>
-          `<option value="${v}" ${S.settings.uiLang===v?"selected":""}>${n}</option>`).join("")}</select></label></div></div>
+        <button type="button" class="wkwahl" id="stLang" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(tr("Sprache"))}">${
+          wkBildSprache(S.settings.uiLang)}<span class="wkname">${esc((UI_LANGS.find(([v])=>v===S.settings.uiLang)||UI_LANGS[0])[1])}</span>${WK_PFEIL}</button></div></div>
     <div class="setrow wkzeile">
       <label>${tr("Farbschema")}</label><div class="ctl">
-        <label class="wkwahl"><span id="stSwatch" class="wkfarbe"></span><select id="stTheme" aria-label="${esc(tr("Farbschema"))}">${THEMES.map(t=>
-          `<option value="${t.k}" ${S.settings.theme===t.k?"selected":""}>${tr(t.n)}</option>`).join("")}</select></label>
+        <button type="button" class="wkwahl" id="stTheme" aria-haspopup="listbox" aria-expanded="false" aria-label="${esc(tr("Farbschema"))}"><span
+          class="wkbild"></span><span class="wkname"></span>${WK_PFEIL}</button>
       </div></div>
     <p class="wkfrage">${tr("Wie möchtest du beginnen?")}</p>
     <div class="wkknoepfe">
@@ -9765,22 +9875,22 @@ function startupDialog(){
         <a id="stTour" style="color:var(--stamp);text-decoration:underline;cursor:pointer">${esc(tr("Kurze Führung (1 Minute)"))}</a></p>
     </div>
     </div></div>`,true);
-  const paintSwatch=k=>{
-    const t=THEMES.find(x=>x.k===k)||THEMES[0];
-    $("#stSwatch").innerHTML=`<span style="flex:2;background:${t.c[0]}"></span>
-      <span style="flex:1;background:${t.c[1]}"></span>
-      <span style="flex:.6;background:${t.c[2]}"></span>`;
-  };
-  paintSwatch(S.settings.theme);
+  const zeigeSchema=k=>{const t=THEMES.find(x=>x.k===k)||THEMES[0];
+    $("#stTheme .wkbild").outerHTML=wkBildSchema(t);$("#stTheme .wkname").textContent=tr(t.n)};
+  zeigeSchema(S.settings.theme);
   /* Die Prüfsprache zieht mit: wer die Oberfläche auf Deutsch stellt, schreibt
      mit großer Wahrscheinlichkeit auch deutsch. Vorher blieb sie auf Englisch
      stehen, und die Rechtschreibprüfung schlug beim ersten Öffnen die falsche
      Sprache vor. Im Prüfdialog selbst lässt sie sich weiterhin umstellen. */
-  $("#stLang").onchange=()=>{S.settings.uiLang=$("#stLang").value;
+  $("#stLang").onclick=()=>wkListe($("#stLang"),UI_LANGS.map(([v,n])=>({v,n,bild:wkBildSprache(v)})),S.settings.uiLang,v=>{
+    S.settings.uiLang=v;
     if(hasSpellDict(S.settings.uiLang))S.settings.lang=S.settings.uiLang;
-    save();applyStaticLabels();startupDialog()};
-  $("#stTheme").onchange=()=>{
-    S.settings.theme=$("#stTheme").value;save();applyTheme();paintSwatch(S.settings.theme)};
+    save();applyStaticLabels();startupDialog();$("#stLang")?.focus()});
+  $("#stTheme").onclick=()=>wkListe($("#stTheme"),THEMES.map(t=>({v:t.k,n:tr(t.n),bild:wkBildSchema(t)})),S.settings.theme,v=>{
+    S.settings.theme=v;save();applyTheme();zeigeSchema(v)});
+  /* Pfeiltasten öffnen die Liste wie bei einem <select> */
+  ["#stLang","#stTheme"].forEach(id=>$(id).onkeydown=e=>{
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();$(id).click()}});
   $("#stSkip").onclick=startSkip;
   $("#stNew").onclick=startNew;
   $("#stOpen").onclick=loadDocumentFile;
@@ -12662,9 +12772,10 @@ function exportTxt(){
    Seitenumbruch); ohne ihn bekäme der Text nur die Browservoreinstellung. */
 function exportCss(d){
   const col=expr=>{
-    const p=document.createElement("span");
-    p.style.cssText="position:absolute;left:-9999px;top:0";p.style.color=expr;
-    document.body.appendChild(p);const c=getComputedStyle(p).color;p.remove();
+    /* Im Blatt gemessen, nicht an body: bei Tiefsee ist nur das Blatt hell */
+    const h=document.createElement("div");h.className="paper";h.style.cssText="position:absolute;left:-9999px;top:0";
+    const p=document.createElement("span");p.style.color=expr;h.appendChild(p);
+    document.body.appendChild(h);const c=getComputedStyle(p).color;h.remove();
     return c||expr;
   };
   const paper=col("var(--paper)"),ink=col("var(--ink)"),soft=col("var(--ink-soft)"),
@@ -21624,7 +21735,6 @@ function fileMenu(){
     <button class="mi" data-act="pal"><span class="chk"></span>${tr("Alle Befehle")}<span class="k">${kz("palette")}</span></button>
     <div class="msep"></div>
     <button class="mi" data-act="help"><span class="chk"></span>${tr("Hilfe")}<span class="k">F1</span></button>
-    <button class="mi" data-act="tour"><span class="chk"></span>${tr("Kurze Führung")}</button>
     <button class="mi" data-act="about"><span class="chk"></span>${tr("Über PureQuill Writer&hellip;")}</button>`;
   menuSymbole(m);$(".topbar").appendChild(m);$("#fileBtn").classList.add("on");armHoverSubs(m);
   menuUnterKnopf(m,$("#fileBtn"));
@@ -21707,7 +21817,6 @@ function openSubMenu(anchor,items,cb=runFileAct){
 function runFileAct(a){
   if(a==="help")helpDialog();
   if(a==="about")aboutDialog();
-  if(a==="tour")tourStart();
   if(a==="new")newDocument();
   if(a==="loaddoc")loadDocumentFile();
   if(a==="rename")renameTab(S.active);
@@ -31676,7 +31785,7 @@ needlessly.</p>
 <nur-b><p>This needs Chrome or Edge. Other browsers are limited to backups made by hand.</p></nur-b>`},
 
  {t:"Appearance",k:"theme;colour scheme;appearance;dark mode;typewriter scrolling",b:`
-<p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers seventeen schemes with live
+<p><b>Settings &rsaquo; General &rsaquo; Colour scheme</b> offers eighteen schemes with live
 miniature previews — from the very light Azure and Alabaster through to Ink, Cyan, Amber and
 Phosphor, several of them drawn from the screens of early word processors.</p>
 <p>Two writing behaviours sit in the same place:</p>
@@ -32342,7 +32451,7 @@ also nicht ohne Grund angefasst.</p>
 <nur-b><p>Dafür braucht es Chrome oder Edge. In anderen Browsern bleibt es bei Sicherungen von Hand.</p></nur-b>`},
 
  {t:"Darstellung",k:"farbschema;darstellung;dunkelmodus;schreibmaschinen-scrollen",b:`
-<p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet siebzehn Schemata mit
+<p><b>Einstellungen &rsaquo; Allgemein &rsaquo; Farbschema</b> bietet achtzehn Schemata mit
 lebenden Miniaturvorschauen — vom sehr hellen Azur und Alabaster bis zu Tinte, Zyan, Bernstein
 und Phosphor, von denen mehrere den Bildschirmen früher Textverarbeitungen nachempfunden sind.</p>
 <p>Zwei Schreibgewohnheiten stehen an derselben Stelle:</p>
@@ -33007,7 +33116,7 @@ se toca sin necesidad.</p>
 <nur-b><p>Esto necesita Chrome o Edge. Los demás navegadores se limitan a las copias hechas a mano.</p></nur-b>`},
 
  {t:"Apariencia",k:"tema;esquema de color;apariencia;modo oscuro;desplazamiento de máquina de escribir",b:`
-<p><b>Configuración &rsaquo; General &rsaquo; Esquema de color</b> ofrece diecisiete esquemas con
+<p><b>Configuración &rsaquo; General &rsaquo; Esquema de color</b> ofrece dieciocho esquemas con
 vistas previas en miniatura en vivo, desde los muy claros Azur y Alabastro hasta Tinta, Cian,
 Ámbar y Fósforo, varios de ellos tomados de las pantallas de los primeros procesadores de
 textos.</p>
@@ -33673,7 +33782,7 @@ necessidade.</p>
 à mão.</p></nur-b>`},
 
  {t:"Aparência",k:"tema;esquema de cores;aparência;modo escuro;rolagem de máquina de escrever",b:`
-<p><b>Configurações &rsaquo; Geral &rsaquo; Esquema de cores</b> oferece dezessete esquemas com
+<p><b>Configurações &rsaquo; Geral &rsaquo; Esquema de cores</b> oferece dezoito esquemas com
 miniaturas de visualização ao vivo, dos bem claros Azur e Alabastro até Tinta, Ciano, Âmbar e
 Fósforo, vários deles tirados das telas dos primeiros processadores de texto.</p>
 <p>Dois comportamentos de escrita ficam no mesmo lugar:</p>
@@ -34369,7 +34478,7 @@ touché sans nécessité.</p>
 main.</p></nur-b>`},
 
  {t:"Apparence",k:"thème;thème de couleurs;apparence;mode sombre;défilement machine à écrire",b:`
-<p><b>Paramètres &rsaquo; Général &rsaquo; Thème de couleurs</b> propose dix-sept thèmes avec des
+<p><b>Paramètres &rsaquo; Général &rsaquo; Thème de couleurs</b> propose dix-huit thèmes avec des
 aperçus miniatures en direct — des très clairs Azur et Albâtre jusqu'à Encre, Cyan, Ambre et
 Phosphore, plusieurs d'entre eux tirés des écrans des premiers traitements de texte.</p>
 <p>Deux comportements d'écriture se trouvent au même endroit :</p>
@@ -35020,7 +35129,7 @@ jest ruszany bez potrzeby.</p>
 ręcznie.</p></nur-b>`},
 
  {t:"Wygląd",k:"motyw;schemat kolorów;wygląd;tryb ciemny;przewijanie maszyny do pisania",b:`
-<p><b>Ustawienia &rsaquo; Ogólne &rsaquo; Schemat kolorów</b> oferuje siedemnaście schematów z
+<p><b>Ustawienia &rsaquo; Ogólne &rsaquo; Schemat kolorów</b> oferuje osiemnaście schematów z
 miniaturami podglądu na żywo — od bardzo jasnych Azur i Alabaster po Atrament, Cyjan, Bursztyn i
 Fosfor, kilka z nich zaczerpniętych z ekranów wczesnych edytorów tekstu.</p>
 <p>Dwa zachowania podczas pisania są w tym samym miejscu:</p>
@@ -35694,7 +35803,7 @@ non viene toccato senza necessità.</p>
 <nur-b><p>Questo richiede Chrome o Edge. Gli altri browser sono limitati ai backup fatti a mano.</p></nur-b>`},
 
  {t:"Aspetto",k:"tema;tema colori;aspetto;modalità scura;scorrimento a macchina da scrivere",b:`
-<p><b>Impostazioni &rsaquo; Generale &rsaquo; Tema colori</b> offre diciassette temi con
+<p><b>Impostazioni &rsaquo; Generale &rsaquo; Tema colori</b> offre diciotto temi con
 miniature di anteprima dal vivo — dai chiarissimi Azzurro e Alabastro fino a Inchiostro, Ciano,
 Ambra e Fosforo, molti di essi tratti dagli schermi dei primi elaboratori di testo.</p>
 <p>Due comportamenti di scrittura si trovano nello stesso posto:</p>
@@ -35939,13 +36048,12 @@ function helpMalen(){
     ? `<div class="hpath">${esc(t.bk)}</div><h4>${esc(t.t)}</h4>${t.b}`
     : `<div class="hwelcome"><h4>${esc(tr("PureQuill Writer Hilfe"))}</h4>
         <p>${tr("Wähle links ein Thema. <b>Inhalt</b> ist als aufklappbare Bücher geordnet, <b>Index</b> ist ein alphabetisches Stichwortverzeichnis, und <b>Suchen</b> durchsucht den Text aller Themen.")}</p>
-        <p>${esc(tr("Neu hier? Beginne mit"))} <a data-goto="${esc(helpErstes())}">${esc(helpErstes())}</a>.</p>
-        <p><a data-tour="1" href="#">${esc(tr("Kurze Führung (1 Minute)"))}</a></p></div>`;
+        <p>${esc(tr("Neu hier? Beginne mit"))} <a data-goto="${esc(helpErstes())}">${esc(helpErstes())}</a>.</p></div>`;
 }
 /* ================= Einführungstour =================
    Sechs Karten über der echten Oberfläche (Tom, 2026-11-04; die Texte sind
-   seine). Nur angeboten — im Willkommensfenster, unter Datei, auf der
-   Startseite der Hilfe und in der Befehlspalette —, sie startet nie von
+   seine). Nur angeboten — im Willkommensfenster, unten im Hilfefenster (Tom: dort,
+   nicht unter Datei) und in der Befehlspalette —, sie startet nie von
    selbst. Menüknöpfe werden nur hervorgehoben, nichts klappt auf. Ist ein
    Ziel nicht zu sehen (schmales Fenster, Handy), steht die Karte ohne Rahmen
    in der Mitte; der Text nennt den Ort ohnehin. */
@@ -36050,7 +36158,7 @@ function tourEnde(){
   removeEventListener("resize",tourZeigen);
   const ed=document.getElementById("editor");if(ed)ed.focus();
 }
-/* Verweise auf die Tour in Fenstern (Startseite der Hilfe) */
+/* Verweise auf die Tour in Fenstern (Knopf im Hilfefenster) */
 document.addEventListener("click",e=>{if(e.target.closest("[data-tour]")){e.preventDefault();tourStart()}});
 /* ================= Ueber-Fenster =================
    Das Programm sagte bisher nirgends, welche Fassung es ist. Im Store gekauft
@@ -36124,7 +36232,7 @@ function helpDialog(titel){
     (helpErsatz()?`<div class="hersatz">${esc(tr("Diese Hilfe gibt es noch nicht in dieser Sprache und wird auf Englisch angezeigt."))}</div>`:"")+
     `<div class="helpsplit"><div class="helpnav" id="helpNav"></div>
       <div class="helpbody" id="helpBody"></div></div>
-    <div class="rowend"><button class="btn" id="helpClose">${esc(tr("Schließen"))}</button></div></div>`);
+    <div class="rowend"><button class="btn" data-tour="1" style="margin-right:auto">${esc(tr("Kurze Führung (1 Minute)"))}</button><button class="btn" id="helpClose">${esc(tr("Schließen"))}</button></div></div>`);
   helpMalen();
   $("#helpClose").onclick=closeOvl;
   $("#helpWin").onclick=e=>{

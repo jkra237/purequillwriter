@@ -86,12 +86,49 @@ Derzeit nichts.
   Zeitmaschine und Notizen/Glossar. Texte von Tom, in allen sieben
   Sprachen. Startet nie von selbst: angeboten im Willkommensfenster
   („Neu hier? Kurze Führung (1 Minute)“ statt „Beginne mit Über
-  PureQuill Writer“), unter Datei, auf der Startseite der Hilfe und in
-  der Befehlspalette. Menüs werden nur hervorgehoben, nicht aufgeklappt.
+  PureQuill Writer“), als Knopf unten im Hilfefenster (auf jeder Seite
+  der Hilfe; Tom: dort, nicht unter Datei) und in der Befehlspalette. Menüs werden nur hervorgehoben, nicht aufgeklappt.
   Bedienung mit Pfeiltasten, Tab bleibt in der Karte, Esc beendet. Ist
   ein Ziel nicht zu sehen, zeigt die Karte auf den Menüknopf (Handy) oder
   steht in der Mitte. Aus dem Willkommensfenster heraus wird vorher das
   leere Dokument gezeigt, sonst fehlte die Werkzeugleiste mit der Uhr.
+- **Farbschema „Tiefsee“** (Tom, nach Rewrite PDF): dunkle Leisten in
+  Petrol mit türkisem Akzent, aber das Blatt bleibt weiß — das einzige
+  Schema mit dunkler Oberfläche und hellem Dokument. Im Blatt (`.paper`)
+  gelten eigene helle Werte, der Akzent ist dort dunkler (Türkis auf Weiß
+  läge bei 2:1). Gemessen: Oberfläche ab 7:1, Blatt ab 5,4:1 für Text.
+  Der HTML-Export misst seine Farben jetzt im Blatt statt an body, sonst
+  bekäme er bei Tiefsee ein dunkles Blatt. Steht in der Reihe zwischen
+  Aquamarin und Enzian; die Hilfe sagt in allen Sprachen „achtzehn“.
+  Website und Store nennen noch 17 Farbschemata — beim nächsten Release
+  nachziehen.
+
+### Geändert
+
+- **Tinte mit weißem Blatt** (Tom): dunkle Oberfläche wie bisher, das
+  Papier ist jetzt weiß mit dunkler Schrift statt in der Farbe des
+  Schemas — wie bei Tiefsee über eigene Werte im Blatt. Der
+  Terrakotta-Akzent ist im Blatt dunkler (#9E4F3F, 5,8:1 statt 3,6:1).
+  Seitenrand dunkel statt hell schimmernd, Vorschaufarbe im Farbschema-
+  Dialog und Willkommensfenster weiß.
+
+### Behoben
+
+- **Sprache und Farbschema im Willkommensfenster: Liste mit Bildern**
+  (Tom): Die Listen der beiden <select> zeichnet das System — sie hingen
+  44px eingerückt und schmaler unter dem Kasten, und sie können nur Text,
+  Flaggen und Farbvorschauen fehlten darin. Jetzt eine eigene Liste im
+  Stil der Menüs, genau so breit wie der Kasten, jede Zeile mit Flagge
+  bzw. Farbvorschau. Bedienung wie ein <select> (Pfeile, Pos1/Ende,
+  Bild auf/ab, Anfangsbuchstabe, Enter, Esc schließt nur die Liste). Die
+  lange Schemaliste bleibt unter dem Kasten und scrollt, statt über ihn
+  zu rutschen. Die Farbvorschauen haben einen kräftigeren Rahmen, damit
+  außen weiße Schemata sich vom weißen Fenster abheben.
+- **Tabellentext in der Druckvorschau dunkler Schemata hell auf Weiß**:
+  Die Seite läuft im Quirks-Modus, dort erben Tabellen die Schriftfarbe
+  von body statt vom Blatt — bei Tinte, Enzian usw. stand der Text in
+  Tabellen der Druckvorschau hell auf dem weißen Vorschaublatt. Gefunden
+  beim Bau von Tiefsee; `.paper table{color:inherit}` behebt beides.
 
 ---
 
