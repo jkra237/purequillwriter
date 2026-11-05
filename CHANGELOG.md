@@ -105,6 +105,13 @@ Derzeit nichts.
 
 ### Geändert
 
+- **Neues Symbol „Feder schreibt“** (Tom): eine Seite mit Zeilen, die
+  Feder schreibt die letzte — statt der einzelnen Feder. Terrakotta mit
+  Verlauf und weichen Schatten, im Stil der Rewrite-PDF-Bilder. Ein
+  Skript zeichnet alle Größen aus einer Vorlage
+  (`werkzeuge/bilder/symbole.js`): icon.svg, icon.png, icon.ico (16–256),
+  die Store-Kacheln in `desktop/build/appx/`, das Symbol im
+  Willkommensfenster, StoreDisplay und die Symbole der Website.
 - **Tinte mit weißem Blatt** (Tom): dunkle Oberfläche wie bisher, das
   Papier ist jetzt weiß mit dunkler Schrift statt in der Farbe des
   Schemas — wie bei Tiefsee über eigene Werte im Blatt. Der
@@ -129,6 +136,13 @@ Derzeit nichts.
   von body statt vom Blatt — bei Tinte, Enzian usw. stand der Text in
   Tabellen der Druckvorschau hell auf dem weißen Vorschaublatt. Gefunden
   beim Bau von Tiefsee; `.paper table{color:inherit}` behebt beides.
+- **Papier stand im Farbschema-Dialog unter „Dunkel“**, sobald ein dunkles
+  Schema aktiv war: Die Sonde in `themeIsDark()` trägt
+  `data-theme="papier"`, aber Papier ist das Grundschema auf `:root` und
+  hatte keinen eigenen Selektor — die Sonde erbte die Werte des aktiven
+  Schemas. Jetzt `:root,[data-theme="papier"]`.
+- **Vorschaukarten von Tiefsee und Tinte** im Farbschema-Dialog zeigten
+  noch ein dunkles Blatt; sie zeigen jetzt das weiße.
 
 ---
 

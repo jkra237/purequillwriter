@@ -6,7 +6,10 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <style>
-:root{
+/* Papier ist das Grundschema. Der eigene Selektor ist für themeIsDark():
+   die Sonde trägt data-theme="papier" und erbte sonst die Werte des
+   aktiven Schemas — bei Tinte oder Tiefsee stand Papier unter „Dunkel“. */
+:root,[data-theme="papier"]{
   --paper:#FCFBF8; --chrome:#EAE8E0; --chrome-2:#F3F1EA; --canvas:#8B8F94;
   --ink:#1E2023; --ink-soft:#65686C; --ink-faint:#9A9C9E;
   --rule:#D6D3C9; --stamp:#8C3B2E; --manila:#EBDFC4;
@@ -81,7 +84,7 @@
 /* Seit 2026-11-05 wie Tiefsee mit weißem Blatt (Tom: das Papier soll weiß
    sein, nicht in der Farbe des Schemas). Der Terrakotta-Akzent ist im Blatt
    dunkler, sonst läge er auf Weiß bei 3,6:1. */
-[data-theme="tinte"] .paper{
+[data-theme="tinte"] .paper,.thprev[data-theme="tinte"]>.thpaper{
   --paper:#FFFFFF; --chrome:#F1F0EC; --chrome-2:#F7F6F3;
   --ink:#1E1F21; --ink-soft:#55575A; --ink-faint:#8E9093;
   --rule:#D9D7D2; --stamp:#9E4F3F; --on-stamp:#FFFFFF; --manila:#EBDFC4;
@@ -158,7 +161,7 @@
   --rule:#2A3E48; --stamp:#2CC7BD; --manila:#3A342A;
   --ok:#5FD39A; --pageedge:rgba(0,0,0,.55); --err:#FF8A80; --on-err:#141414;
 }
-[data-theme="tiefsee"] .paper{
+[data-theme="tiefsee"] .paper,.thprev[data-theme="tiefsee"]>.thpaper{
   --paper:#FFFFFF; --chrome:#EEF3F4; --chrome-2:#F5F8F9;
   --ink:#1A2328; --ink-soft:#4E5C63; --ink-faint:#86959C;
   --rule:#D2DCE0; --stamp:#0B746F; --on-stamp:#FFFFFF; --manila:#EBDFC4;
@@ -9628,7 +9631,7 @@ function mpfad(...schluessel){
 /* Symbole der Startknöpfe: Blatt mit Plus, offener Ordner */
 /* Das Programmsymbol (icon.svg) für die Kopfzeile beider Startfenster —
    eingebettet, weil die Browser-Fassung nur index.html hochlädt */
-const ST_LOGO='<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"> <rect width="512" height="512" rx="96" fill="#8C3B2E"/> <g transform="translate(256 256) scale(2.0586) translate(-27.4 -117)"> <path d="M90.4 20C90.4 96 36.4 150 -17.6 186C-28.4 134 -3.2 62 90.4 20Z" fill="#FCFBF8"/> <path d="M40 114C23.8 137 4 161 -12.2 181" stroke="#8C3B2E" stroke-width="7" stroke-linecap="round" fill="none"/> <path d="M-17.6 186 -35.6 214" stroke="#EAE8E0" stroke-width="11" stroke-linecap="round"/> </g> </svg>';
+const ST_LOGO='<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 112"><defs><linearGradient id="stlG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#AE4B3B"/><stop offset="1" stop-color="#682519"/></linearGradient><linearGradient id="stlF" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B9573F"/><stop offset="1" stop-color="#7A2D21"/></linearGradient></defs><rect width="112" height="112" rx="21" fill="url(#stlG)"/><path d="M25 19h38l14 14v55a5 5 0 0 1-5 5H25a5 5 0 0 1-5-5V24a5 5 0 0 1 5-5z" fill="#FBF6EE"/><path d="M63 19v14h14" fill="#E3D3BE"/><path d="M29 41h25M29 51h33M29 61h21" stroke="#C7B19A" stroke-width="4" stroke-linecap="round"/><path d="M29 76h17" stroke="#8C3B2E" stroke-width="4" stroke-linecap="round"/><path d="M96 24C76 33 62 50 57 72l5 1.5C69 55 81 41 96 24z" fill="url(#stlF)" stroke="#FBF6EE" stroke-width="2.4" stroke-linejoin="round"/><path d="M58.5 74 51 85" stroke="#3A1C16" stroke-width="4.2" stroke-linecap="round"/></svg>';
 /* Flaggen im Willkommensfenster, im Format der Farbvorschau (36×21).
    Flaggen stehen für Länder, nicht Sprachen — gewählt nach unserer Fassung
    und den Store-Einträgen: en-US, es-ES, pt-BR (Tom, 2026-10-31). */
