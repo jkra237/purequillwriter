@@ -87,6 +87,13 @@ Derzeit nichts.
   Ausschneiden leeren die Zellen, Kopieren nimmt sie als Tabelle mit,
   Schattierung, Rahmen und Ausrichtung wirken auf alle, „Zeile/Spalte
   löschen“ löscht alle markierten. Ein Klick in den Text hebt sie auf.
+- **Tabelleneigenschaften…** (Tom, wie Words Reiter „Zeile“): im
+  Rechtsklick-Menü und in der Tabellenleiste. Für die markierten Zeilen
+  bzw. die Zeile der Schreibmarke: Höhe (mindestens, in der Lineal-
+  Einheit), „Zeile darf über Seiten umbrechen“ und „Als Überschrift auf
+  jeder Seite wiederholen“ (nur ab der ersten Zeile). Word speichert und
+  liest `w:cantSplit`, OpenDocument `fo:keep-together`; die Ansicht teilt
+  eine Zeile ohnehin nie. Ein Rückgängig-Schritt; Umlauf 54/54.
 
 ### Geändert
 

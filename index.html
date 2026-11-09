@@ -2999,6 +2999,12 @@ en:{
   "Rahmen":"Borders",
   "Ausrichtung in der Zelle":"Alignment in cell",
   "Spaltenbreite":"Column width",
+  "Tabelleneigenschaften":"Table properties",
+  "Zeile":"Row",
+  "Höhe angeben":"Specify height",
+  "mindestens":"at least",
+  "Zeile darf über Seiten umbrechen":"Allow row to break across pages",
+  "Als Überschrift auf jeder Seite wiederholen":"Repeat as header row at the top of each page",
   "Tabelle markieren":"Select table",
   "Oben":"Top",
   "Unten":"Bottom",
@@ -4092,6 +4098,12 @@ fr:{
   "Rahmen":"Bordures",
   "Ausrichtung in der Zelle":"Alignement dans la cellule",
   "Spaltenbreite":"Largeur des colonnes",
+  "Tabelleneigenschaften":"Propriétés du tableau",
+  "Zeile":"Ligne",
+  "Höhe angeben":"Hauteur",
+  "mindestens":"au moins",
+  "Zeile darf über Seiten umbrechen":"Autoriser le fractionnement des lignes sur plusieurs pages",
+  "Als Überschrift auf jeder Seite wiederholen":"Répéter en haut de chaque page en tant que ligne d’en-tête",
   "Tabelle markieren":"Sélectionner le tableau",
   "Oben":"Haut",
   "Unten":"Bas",
@@ -5185,6 +5197,12 @@ es:{
   "Rahmen":"Bordes",
   "Ausrichtung in der Zelle":"Alineación en la celda",
   "Spaltenbreite":"Ancho de columna",
+  "Tabelleneigenschaften":"Propiedades de tabla",
+  "Zeile":"Fila",
+  "Höhe angeben":"Especificar alto",
+  "mindestens":"como mínimo",
+  "Zeile darf über Seiten umbrechen":"Permitir dividir las filas entre páginas",
+  "Als Überschrift auf jeder Seite wiederholen":"Repetir como fila de encabezado en cada página",
   "Tabelle markieren":"Seleccionar tabla",
   "Oben":"Arriba",
   "Unten":"Abajo",
@@ -6278,6 +6296,12 @@ pt:{
   "Rahmen":"Bordas",
   "Ausrichtung in der Zelle":"Alinhamento na célula",
   "Spaltenbreite":"Largura da coluna",
+  "Tabelleneigenschaften":"Propriedades da tabela",
+  "Zeile":"Linha",
+  "Höhe angeben":"Especificar altura",
+  "mindestens":"no mínimo",
+  "Zeile darf über Seiten umbrechen":"Permitir quebra de linha entre páginas",
+  "Als Überschrift auf jeder Seite wiederholen":"Repetir como linha de cabeçalho em cada página",
   "Tabelle markieren":"Selecionar tabela",
   "Oben":"Em cima",
   "Unten":"Embaixo",
@@ -7371,6 +7395,12 @@ pl:{
   "Rahmen":"Obramowanie",
   "Ausrichtung in der Zelle":"Wyrównanie w komórce",
   "Spaltenbreite":"Szerokość kolumn",
+  "Tabelleneigenschaften":"Właściwości tabeli",
+  "Zeile":"Wiersz",
+  "Höhe angeben":"Określ wysokość",
+  "mindestens":"co najmniej",
+  "Zeile darf über Seiten umbrechen":"Zezwalaj na dzielenie wiersza między stronami",
+  "Als Überschrift auf jeder Seite wiederholen":"Powtarzaj jako wiersz nagłówka na każdej stronie",
   "Tabelle markieren":"Zaznacz tabelę",
   "Oben":"Do góry",
   "Unten":"Do dołu",
@@ -8464,6 +8494,12 @@ it:{
   "Rahmen":"Bordi",
   "Ausrichtung in der Zelle":"Allineamento nella cella",
   "Spaltenbreite":"Larghezza colonne",
+  "Tabelleneigenschaften":"Proprietà tabella",
+  "Zeile":"Riga",
+  "Höhe angeben":"Specifica altezza",
+  "mindestens":"almeno",
+  "Zeile darf über Seiten umbrechen":"Consenti divisione riga tra le pagine",
+  "Als Überschrift auf jeder Seite wiederholen":"Ripeti come riga di intestazione in ogni pagina",
   "Tabelle markieren":"Seleziona tabella",
   "Oben":"In alto",
   "Unten":"In basso",
@@ -14245,7 +14281,7 @@ async function tabelleXml(table,ctx){
       zellen+=`<w:tc><w:tcPr><w:tcW w:w="${breiteVon(g,cs)}" w:type="dxa"/>${cs>1?`<w:gridSpan w:val="${cs}"/>`:""}${rs>1&&r+1<zeilenListe.length?'<w:vMerge w:val="restart"/>':""}${wZellFormat(td)}</w:tcPr>${inhalt||"<w:p/>"}</w:tc>`;
       g+=cs;
     }
-    const trPr=trHeight+(r<nKopf?"<w:tblHeader/>":"");
+    const trPr=(tr.dataset.nichttrennen==="1"?"<w:cantSplit/>":"")+trHeight+(r<nKopf?"<w:tblHeader/>":"");
     zeilen+=`<w:tr>${trPr?`<w:trPr>${trPr}</w:trPr>`:""}${zellen}</w:tr>`;
   }
   if(!zeilen)return "";
@@ -14869,7 +14905,8 @@ async function odtBlob(d){
     for(let r=0;r<zeilen.length;r++){
       const tr=zeilen[r],hEm=parseFloat(tr.style.height);
       if(r===0&&nKopf)x+="<table:table-header-rows>";
-      x+=hEm?`<table:table-row table:style-name="${stilName("table-row","Tab",`<style:table-row-properties style:min-row-height="${odfZahl(hEm*groesse)}pt"/>`)}">`:"<table:table-row>";
+      const zProps=(hEm?` style:min-row-height="${odfZahl(hEm*groesse)}pt"`:"")+(tr.dataset.nichttrennen==="1"?' fo:keep-together="always"':"");
+      x+=zProps?`<table:table-row table:style-name="${stilName("table-row","Tab",`<style:table-row-properties${zProps}/>`)}">`:"<table:table-row>";
       const tds=[...tr.children];
       for(let g=0;g<breite;g++){
         if(belegt[r][g]){x+="<table:covered-table-cell/>";continue}
@@ -18810,7 +18847,8 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const twip=th?parseInt(xattrN(th,"val"),10)||0:0;
       /* Zeilenhöhen stehen hier in em, damit sie mit der Schriftgröße mitgehen */
       const em=twip&&grundGroesse?Math.round(twip/20/grundGroesse*100)/100:0;
-      r+="<tr"+(kw?' data-kopfw="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
+      const cs=KIND(KIND(tr,"trPr"),"cantSplit"),nt=!!cs&&!/^(0|false|off)$/.test(String(xattrN(cs,"val")||""));
+      r+="<tr"+(kw?' data-kopfw="1"':"")+(nt?' data-nichttrennen="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
       /* Zeilen können selbst in Formularfeldern stecken (wiederholbare
          Abschnitte); Zellen ebenso. */
       const zellen=[];
@@ -19581,7 +19619,8 @@ function odtLesen(inhaltXml,stilXml,bilder){
       const hp=zs&&zs.zeile?odfPt(zs.zeile.getAttribute("style:row-height")||zs.zeile.getAttribute("style:min-row-height")):0;
       const em=hp?Math.round(hp/grundGroesse*100)/100:0;
       if(!kopfZ.has(z))kopfZ.clear();
-      r+="<tr"+(kopfZ.has(z)?' data-kopfw="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
+      const nt=zs&&zs.zeile&&zs.zeile.getAttribute("fo:keep-together")==="always";
+      r+="<tr"+(kopfZ.has(z)?' data-kopfw="1"':"")+(nt?' data-nichttrennen="1"':"")+(em>0?` style="height:${em}em"`:"")+">";
       [...z.children].forEach(c=>{
         if(c.localName!=="table-cell")return;
         const cs=parseInt(c.getAttribute("table:number-columns-spanned"),10)||1,rs=parseInt(c.getAttribute("table:number-rows-spanned"),10)||1;
@@ -22277,6 +22316,7 @@ function tabKontext(cell,bereich){
     eintrag("shade","shade",tr("Schattierung")+"…")+eintrag("valign","valign",tr("Zellausrichtung"),1)+
     eintrag("size","size",tr("Spaltenbreite"),1)+eintrag("headToggle","headToggle",tr("Kopfzeile umschalten"))+
     `<button class="mi" data-c="tbl:kopfw">${ic("kopfw")}${tr("Überschriften wiederholen")}<span class="k">${kopfAn?"&#10003;":""}</span></button>`+
+    eintrag("props","props",tr("Tabelleneigenschaften")+"…")+
     `<div class="msep"></div>`;
 }
 function contextMenu(e){
@@ -22369,7 +22409,7 @@ function contextMenu(e){
     if(a.startsWith("tbl:")){
       const w=a.slice(4);
       if(!cell||!ed.contains(cell))return closeMenu();
-      if(["merge","split","headToggle","kopfw"].includes(w)){closeMenu();ed.focus()}
+      if(["merge","split","headToggle","kopfw","props"].includes(w)){closeMenu();ed.focus()}
       tabAktion(w,b,cell,tbB);
       return;
     }
@@ -25539,6 +25579,7 @@ const TAB_ICO={
   colDel:'<rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18"/><path d="M9.5 3.5h5v17h-5z" fill="#D64545" opacity=".22" stroke="none"/><path d="M10.5 9.5l3 5M13.5 9.5l-3 5" stroke="#D64545" stroke-width="1.8"/>',
   tblDel:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M9 4v16M15 4v16" stroke-opacity=".5"/><path d="M7 8l10 10M17 8 7 18" stroke="#D64545" stroke-width="2"/>',
   kopfw:'<path d="M3.6 4.6h16.8v2.9H3.6zM3.6 13.6h16.8v2.9H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/>',
+  props:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M3 14.5h7M9.5 9v11"/><circle cx="16.5" cy="16.5" r="3" stroke="#7A5AD8" stroke-width="1.6"/><path d="M16.5 12.6v1M16.5 19.4v1M12.6 16.5h1M19.4 16.5h1" stroke="#7A5AD8" stroke-width="1.6"/>',
   headToggle:'<path d="M3.6 5.2h16.8v4H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>'
 };
 /* Symbole der Menüs oben (Tom, 2026-10-31), im Stil von KTX_ICO und
@@ -25646,7 +25687,7 @@ function drawTblBar(){
       kn("colLeft","Spalte links einfügen")+kn("colRight","Spalte rechts einfügen")+`<div class="sep"></div>`+
       kn("merge","Zellen verbinden")+kn("split","Zellen teilen")+`<div class="sep"></div>`+
       kn("shade","Schattierung")+kn("borders","Rahmen")+kn("valign","Ausrichtung in der Zelle")+kn("size","Spaltenbreite")+`<div class="sep"></div>`+
-      kn("del","Löschen")+`<div class="sep"></div>`+kn("headToggle","Kopfzeile umschalten");
+      kn("del","Löschen")+`<div class="sep"></div>`+kn("headToggle","Kopfzeile umschalten")+kn("props","Tabelleneigenschaften");
   }
   leisteAndocken(bar,curCell(),neueTab);
 }
@@ -26059,6 +26100,45 @@ function noteVerwerfen(art,id){
    Stelle setzen — so liegt er im selben Verlauf wie jeder Tastendruck.
    Die Abstandszeilen des Seitenumbruchs (tr.pgzeile) gehören nicht dazu.
    Gibt die neue Tabelle zurück (null, wenn sie gelöscht wurde). */
+/* Tabelleneigenschaften (Tom, 2026-11-09, wie Words Reiter „Zeile“): Höhe
+   (mindestens, wie Words Voreinstellung), ob die Zeile über Seiten umbrechen
+   darf (Word cantSplit, ODF keep-together) und die wiederholte Überschrift.
+   Gilt für die markierten Zeilen, sonst die Zeile der Schreibmarke. Die
+   Ansicht teilt eine Zeile ohnehin nie — „darf umbrechen“ wirkt in Word und
+   Writer, wohin es gespeichert wird. */
+function tabEigenschaften(zelle,bereich){
+  const t=zelle.closest("table");if(!t)return;
+  const ra=tabRaster(t);
+  const ri=bereich&&bereich.rect?[...Array(bereich.rect.r1-bereich.rect.r0+1)].map((_,i)=>bereich.rect.r0+i):[ra.zeilen.indexOf(zelle.parentElement)];
+  const zeilen=ri.map(i=>ra.zeilen[i]).filter(Boolean);if(!zeilen.length)return;
+  const fs=parseFloat(getComputedStyle(zeilen[0]).fontSize)||16,pxMm=MM(1)*S.zoom;
+  const hEm=parseFloat(zeilen[0].style.height)||0,hMm=hEm?Math.round(hEm*fs/pxMm):0;
+  const darf=!zeilen.every(z=>z.dataset.nichttrennen==="1");
+  const nKopf=kopfZeilenZahl(ra.zeilen),abOben=ri[0]===0,kopf=abOben&&nKopf>Math.max(...ri);
+  overlay(`<div class="modal"><h3>${tr("Tabelleneigenschaften")}</h3><div class="pad">
+    <div class="setsec">${zeilen.length>1?PL(zeilen.length+" Zeilen",zeilen.length+" rows",zeilen.length+" lignes",zeilen.length+" filas",zeilen.length+" linhas",zeilen.length+" wierszy",zeilen.length+" righe"):tr("Zeile")}</div>
+    <div class="setrow"><label><input type="checkbox" id="teHAn" style="width:auto" ${hMm?"checked":""}> ${tr("Höhe angeben")}</label>
+      <div class="ctl"><input type="number" id="teH" min="1" max="500" step="1" value="${toUnit(hMm||8)}" style="width:80px" ${hMm?"":"disabled"}> ${unitAbbr()} · ${tr("mindestens")}</div></div>
+    <div class="setrow"><label><input type="checkbox" id="teUmbr" style="width:auto" ${darf?"checked":""}> ${tr("Zeile darf über Seiten umbrechen")}</label></div>
+    <div class="setrow"><label><input type="checkbox" id="teKopf" style="width:auto" ${kopf?"checked":""} ${abOben?"":"disabled"}> ${tr("Als Überschrift auf jeder Seite wiederholen")}</label></div>
+  </div><div class="rowend"><button class="btn" id="teNein">${tr("Abbrechen")}</button><button class="btn pri" id="teOk">${tr("OK")}</button></div></div>`);
+  $("#teHAn").onchange=()=>{$("#teH").disabled=!$("#teHAn").checked};
+  $("#teNein").onclick=closeOvl;
+  $("#teOk").onclick=()=>{
+    const hAn=$("#teHAn").checked,mm=Math.max(1,fromUnit($("#teH").value)),umbr=$("#teUmbr").checked,kopfNeu=$("#teKopf").checked;
+    closeOvl();
+    tabUndo(t,()=>{
+      zeilen.forEach(z=>{
+        if(hAn)z.style.height=(Math.round(mm*pxMm/fs*100)/100)+"em";else z.style.removeProperty("height");
+        if(!z.getAttribute("style"))z.removeAttribute("style");
+        if(umbr)z.removeAttribute("data-nichttrennen");else z.setAttribute("data-nichttrennen","1");
+      });
+      if(abOben){const bis=kopfNeu?Math.max(...ri):-1;
+        ra.zeilen.forEach((z,i)=>{if(i<=bis)z.setAttribute("data-kopfw","1");else if(i<=Math.max(...ri))z.removeAttribute("data-kopfw")})}
+      putCaret(zeilen[0].querySelector("td,th")||zelle);
+    });
+  };
+}
 function tabUndo(t,fn){
   const ed=$("#editor");if(!ed||!ed.contains(t)){fn();return t}
   /* Seit 2026-11-09 über schrittStart/schrittEnde wie alle anderen Befehle.
@@ -26318,6 +26398,7 @@ function tabAktion(a0,anker,zelle,bereich){
   if(!bereich||!bereich.zellen.includes(zelle)&&!(bereich.rect&&bereich.t===t))bereich={t,raster:tabRaster(t),zellen:[zelle],rect:null};
   const U=fn=>tabUndo(t,fn);
   if(a0==="vorlage")return tabVorlageMenu(ar,t);
+  if(a0==="props")return tabEigenschaften(zelle,bereich);
   if(a0==="ins")return openSubMenu(b,[{a:"rowAbove",label:tr("Zeile darüber einfügen")},{a:"rowBelow",label:tr("Zeile darunter einfügen")},
       {a:"colLeft",label:tr("Spalte links einfügen")},{a:"colRight",label:tr("Spalte rechts einfügen")}],
     a=>{const ed=$("#editor");if(ed&&ed.contains(zelle))U(()=>tableCmdMitMarke(a,zelle));if(ed)ed.focus();nach()});
