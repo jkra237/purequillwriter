@@ -119,6 +119,22 @@ Derzeit nichts.
   Tabellen der ersten Ebene, `wortSatz` baut sie wie der Word-Leser
   (`zellListenHtml`), RTF schreibt sie als Listenabsätze mit `intbl`.
   Umlauf: Word, ODT, .doc und PQ-RTF 54/54, LO-RTF 50/54 wie vorher.
+- **Tabelle rutschte nach „Zeile einfügen“ in eine Überschrift** (Tom, an
+  einem Goethe-Arbeitsblatt): sprang auf die nächste Seite, wurde fett, und
+  beim Speichern als Word blieb nur Überschriftentext mit
+  zusammengeklebtem Zellinhalt — die Tabelle war weg. `tabUndo()`
+  markierte die ganze Tabelle und setzte sie per `insertHTML` neu ein;
+  Chrome setzte die Marke dabei in den Block danach. Jede neue Zeile
+  fraß so einen leeren Absatz unter der Tabelle, und stand sie dann
+  direkt vor einer Überschrift, landete sie darin. `tabUndo` läuft jetzt
+  über `schrittStart`/`schrittEnde` wie alle anderen Befehle; am
+  Dokumentende bekommt die Tabelle einen leeren Absatz dahinter (wie in
+  Word), damit der Schritt rückgängig machbar bleibt.
+- **Kopierte Aufzählungspunkte verloren ihren Punkt** (Tom: aus einer Zelle
+  in die nächste): kopiert wurde nur der Inhalt der Auswahl, bei einem
+  Punkt also bloßer Text, bei mehreren die <li> ohne Liste.
+  `listeUmAuswahl()` nimmt die Liste mit, wenn ganze Punkte markiert sind
+  — ein Wort mitten aus einem Punkt bleibt Text, wie in Word.
 
 ---
 

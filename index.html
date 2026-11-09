@@ -10666,7 +10666,7 @@ function drawWrite(){
     if(!sel.rangeCount||sel.isCollapsed||!e.clipboardData)return false;
     const box=document.createElement("div");
     box.setAttribute(PQW_MARK,"1");
-    box.appendChild(sel.getRangeAt(0).cloneContents());
+    box.appendChild(listeUmAuswahl(sel.getRangeAt(0)));
     box.querySelectorAll(".hit,.spellerr,.glossterm").forEach(unwrap);
     box.querySelectorAll(".fhwrap,.pgspalt-h").forEach(n=>n.remove());
     box.querySelectorAll(".pgspalt").forEach(unwrap);
@@ -16201,6 +16201,28 @@ function pasteKeepStyle(el,erlaubt){
 /* Aus dem eigenen Dokument: alles bleibt, bis auf das, was sich nicht
    verdoppeln darf. Ein zweites Inhaltsverzeichnis wäre keins mehr, und
    doppelte Überschriften-Kennungen brächten die Gliederung durcheinander. */
+/* Kopierte Listenpunkte behalten ihre Liste (Tom, 2026-11-09: Aufzählung aus
+   einer Zelle in die nächste kopiert, Punkt weg). cloneContents liefert bei
+   einer Auswahl in einem einzigen Punkt nur den Text, über mehrere Punkte
+   die <li> ohne ihr <ul>. Wie in Word: wer ganze Punkte markiert, nimmt die
+   Aufzählung mit — ein Wort mitten aus einem Punkt bleibt Text. */
+function listeUmAuswahl(r){
+  const frag=r.cloneContents();
+  const el=n=>n&&(n.nodeType===1?n:n.parentElement);
+  const ca=el(r.commonAncestorContainer);if(!ca)return frag;
+  const liste=ca.closest("ul,ol");if(!liste)return frag;
+  const huelle=()=>{const l=liste.cloneNode(false);l.removeAttribute("id");return l};
+  /* Mehrere Punkte: die <li> stehen schon da, es fehlt die Liste */
+  if(ca===liste){const l=huelle();l.appendChild(frag);const f=document.createDocumentFragment();f.appendChild(l);return f}
+  /* Ein Punkt: nur, wenn er ganz markiert ist */
+  const li=ca.closest("li");if(!li||li.closest("ul,ol")!==liste)return frag;
+  const ganz=document.createRange();ganz.selectNodeContents(li);
+  const unterliste=li.querySelector(":scope > ul, :scope > ol");if(unterliste)ganz.setEndBefore(unterliste);
+  const text=x=>x.toString().replace(/\s+/g," ").trim();
+  if(!text(r)||text(r)!==text(ganz))return frag;
+  const l=huelle(),neu=li.cloneNode(false);neu.appendChild(frag);l.appendChild(neu);
+  const f=document.createDocumentFragment();f.appendChild(l);return f;
+}
 function cleanPasteOwn(src){
   const b=new DOMParser().parseFromString(String(src),"text/html").body;
   const box=b.querySelector("["+PQW_MARK+"]")||b;
@@ -25894,38 +25916,32 @@ function noteVerwerfen(art,id){
    Gibt die neue Tabelle zurück (null, wenn sie gelöscht wurde). */
 function tabUndo(t,fn){
   const ed=$("#editor");if(!ed||!ed.contains(t)){fn();return t}
-  const ohnePg=el=>{const c=el.cloneNode(true);c.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());return c};
-  const vorher=ohnePg(t).outerHTML;
-  /* Jede Änderung mitschreiben, um sie danach rückwärts zurückzuspielen.
-     Eine Kopie der alten Tabelle reichte nicht: der Verlauf des Browsers
-     zeigt auf die Originalknoten, und das davor Getippte ließe sich dann
-     nicht mehr zurücknehmen. */
-  const mo=new MutationObserver(()=>{});
-  mo.observe(ed,{subtree:true,childList:true,attributes:true,attributeOldValue:true,characterData:true,characterDataOldValue:true});
-  fn();
-  const log=mo.takeRecords();mo.disconnect();
-  const lebt=ed.contains(t),nachher=lebt?ohnePg(t).outerHTML:"";
-  if(lebt&&nachher===vorher)return t;
-  const z=lebt&&curCell(),zeilen=[...t.rows].filter(r=>!r.classList.contains("pgzeile"));
-  const zr=z&&t.contains(z)?zeilen.indexOf(z.parentElement):-1,zs=zr>=0?[...z.parentElement.children].indexOf(z):-1;
-  for(let i=log.length-1;i>=0;i--){const m=log[i];
-    if(m.type==="attributes"){if(m.oldValue==null)m.target.removeAttribute(m.attributeName);else m.target.setAttribute(m.attributeName,m.oldValue)}
-    else if(m.type==="characterData")m.target.data=m.oldValue;
-    else{m.addedNodes.forEach(n=>{if(n.parentNode===m.target)n.remove()});
-      const weg=[...m.removedNodes];
-      if(m.nextSibling&&m.nextSibling.parentNode===m.target)weg.forEach(n=>m.target.insertBefore(n,m.nextSibling));
-      else if(m.previousSibling&&m.previousSibling.parentNode===m.target)weg.reverse().forEach(n=>m.previousSibling.after(n));
-      else weg.forEach(n=>m.target.appendChild(n))}
-  }
-  ed.focus();
-  const r=document.createRange();r.selectNode(t);
-  const sel=getSelection();sel.removeAllRanges();sel.addRange(r);
-  if(nachher)document.execCommand("insertHTML",false,nachher.replace(/^<table/,'<table data-tabneu="1"'));
-  else document.execCommand("delete");
-  const neu=ed.querySelector("table[data-tabneu]");
-  if(neu){neu.removeAttribute("data-tabneu");
-    const zeile=neu.rows[zr],zelle=zeile&&zeile.children[zs];if(zelle)putCaret(zelle)}
-  flush();dirty=true;commit();queuePaginate();drawAnchors();drawTblBar();setTimeout(drawTblBar,260);
+  /* Seit 2026-11-09 über schrittStart/schrittEnde wie alle anderen Befehle.
+     Vorher markierte tabUndo die ganze Tabelle und setzte sie per insertHTML
+     neu ein: Chrome löschte erst die Tabelle und setzte die Marke in den
+     Block danach — ein leerer Absatz darunter ging bei jeder neuen Zeile
+     verloren, und stand die Tabelle dann direkt vor einer Überschrift,
+     landete sie IN der Überschrift (Tom: Tabelle sprang auf Seite 2, wurde
+     fett, beim Speichern als Word blieb nur Überschriftentext). schrittEnde
+     nimmt Nachbarn dazu, bis die Ränder passen, und ersetzt Überschriften
+     am Rand einzeln. */
+  if(schrittOffen){fn();return ed.contains(t)?t:null}
+  /* Am Dokumentende ein leerer Absatz hinter der Tabelle, wie Word ihn immer
+     hat: so findet schrittEnde einen Rand, und man kann unter der Tabelle
+     weiterschreiben. (Am Dokumentanfang gibt es keinen — dort bleibt die
+     Änderung ohne Rückgängig, wie bei schrittEnde ohne Rand üblich.) */
+  if(t.parentElement===ed&&!t.nextElementSibling){const p=document.createElement("p");p.appendChild(document.createElement("br"));t.after(p)}
+  const ti=[...ed.querySelectorAll("table")].indexOf(t);
+  let zr=-1,zs=-1,lebt=true;
+  alsSchritt(()=>{
+    fn();
+    lebt=ed.contains(t);if(!lebt)return;
+    const z=curCell(),zeilen=[...t.rows].filter(r=>!r.classList.contains("pgzeile"));
+    zr=z&&t.contains(z)?zeilen.indexOf(z.parentElement):-1;zs=zr>=0?[...z.parentElement.children].indexOf(z):-1;
+  });
+  const neu=lebt?(ed.contains(t)?t:ed.querySelectorAll("table")[ti]||null):null;
+  if(neu&&zr>=0){const zeile=[...neu.rows].filter(r=>!r.classList.contains("pgzeile"))[zr],zelle=zeile&&zeile.children[zs];if(zelle)putCaret(zelle)}
+  drawTblBar();setTimeout(drawTblBar,260);
   return neu;
 }
 function tabFertig(t,marke){
