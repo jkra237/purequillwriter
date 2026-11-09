@@ -90,6 +90,13 @@ Derzeit nichts.
   den Standard. Jetzt `scrollbar-color` auf `:root` — Rinne in der
   Leistenfarbe, Schieber in der gedämpften Schrift; gemessen in allen 18
   Schemata 3,0 bis 4,7:1.
+- **Tabelle über das Rechtsklick-Menü landete am Anfang des Dokuments**
+  (Tom): Die Größenauswahl ist ein eigenes Menü; der Klick ins Raster nahm
+  dem Text die Auswahl, und `insertTable()` setzte die Marke beim
+  Fokussieren an den Anfang. Die Einfügestelle wird jetzt beim Rechtsklick
+  bzw. beim Öffnen der Auswahl gemerkt und vor dem Einfügen
+  zurückgesetzt; die Auswahl öffnet sich an der Klickstelle statt an der
+  Werkzeugleiste.
 
 ---
 

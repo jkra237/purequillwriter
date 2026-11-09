@@ -22146,6 +22146,12 @@ function contextMenu(e){
   if(S.mode!=="write"||!ed||!ed.contains(e.target))return;
   e.preventDefault();closeMenu();
   const sel=getSelection(),hasSel=sel.rangeCount&&!sel.isCollapsed;
+  /* Wo eingefügt wird: die Schreibmarke beim Rechtsklick (Chrome setzt sie
+     an die Klickstelle), sonst die Stelle unter dem Mauszeiger. Gemerkt,
+     weil die Größenauswahl der Tabelle ein eigenes Menü ist — bis zu dessen
+     Klick ist die Auswahl im Text verloren (Tom: Tabelle landete oben). */
+  const klickZiel=(sel.rangeCount&&ed.contains(sel.getRangeAt(0).startContainer)?sel.getRangeAt(0)
+    :document.caretRangeFromPoint?document.caretRangeFromPoint(e.clientX,e.clientY):null)?.cloneRange()||null;
   const onAnch=e.target.closest(".anch");
   const cell=e.target.closest("td,th");
   const tbB=cell?zellBereich():null;
@@ -22213,7 +22219,7 @@ function contextMenu(e){
         {a:"fn",label:tr("Fußnote einfügen")},
         {a:"en",label:tr("Endnote einfügen")}
       ];
-      openSubMenu(b,items,sub=>{ed.focus();insertAct(sub)});
+      openSubMenu(b,items,sub=>{ed.focus();insertAct(sub,klickZiel,{left:e.clientX,right:e.clientX,top:e.clientY,bottom:e.clientY})});
       return;
     }
     /* Tabellenbefehle wie in Word (2026-10-27): direkt im Menü statt
@@ -22282,10 +22288,10 @@ function contextMenu(e){
   };
 }
 function undoRedo(which){document.execCommand(which);dirty=true;queuePaginate();queueAnchors()}
-function insertAct(a){
+function insertAct(a,ziel,anker){
   if(a==="link2")linkDialog();
   if(a==="img")pickImage();
-  if(a==="tblNew")setTimeout(tablePicker,10);
+  if(a==="tblNew")setTimeout(()=>tablePicker(anker,ziel),10);
   if(a==="pgbr")insertPageBreak();
   if(a==="hr")linieEinfuegen("");
   if(a==="fn")insertFootnote();
@@ -25211,9 +25217,13 @@ function hfDialog(){
 
 /* ================= Tabellen ================= */
 const TG_COLS=8,TG_ROWS=6;
-function tablePicker(anker){
+function tablePicker(anker,ziel){
   if($("#tmenu")){closeMenu();return}
   closeMenu();
+  /* Die Einfügestelle jetzt festhalten: ein Klick ins Raster nimmt dem Text
+     die Auswahl, danach setzte ed.focus() die Marke an den Anfang */
+  if(!ziel){const s=getSelection(),ed=$("#editor");
+    if(s.rangeCount&&ed&&ed.contains(s.getRangeAt(0).startContainer))ziel=s.getRangeAt(0).cloneRange()}
   const m=document.createElement("div");m.className="menu ctx";m.id="tmenu";
   m.style.minWidth="0";
   let cells="";
@@ -25235,16 +25245,17 @@ function tablePicker(anker){
   };
   g.onclick=e=>{
     const i=e.target.closest("i");if(!i)return;
-    closeMenu();insertTable(+i.dataset.r,+i.dataset.c,head);
+    closeMenu();insertTable(+i.dataset.r,+i.dataset.c,head,ziel);
   };
   m.querySelector("[data-t]").onclick=ev=>{
     ev.stopPropagation();head=!head;
     ev.currentTarget.querySelector(".chk").innerHTML=head?"&#10003;":"";
   };
 }
-function insertTable(rows,cols,head){
+function insertTable(rows,cols,head,ziel){
   const ed=$("#editor");if(!ed)return;
   ed.focus();
+  if(ziel&&ed.contains(ziel.startContainer)){const s=getSelection();s.removeAllRanges();s.addRange(ziel)}
   let h="<table>";
   for(let r=0;r<rows;r++){
     h+="<tr>";
