@@ -10572,7 +10572,12 @@ function drawWrite(){
     }
     dirty=true;queueSave();setTyping();markEmpty();
     drawStatus();queueAnchors();queuePaginate();typewriter();slashCheck();syncToolbarState()});
-  ed.addEventListener("beforeinput",autoCorrectInput);
+  ed.addEventListener("beforeinput",e=>{
+    /* Entf/Rücktaste über mehrere Zellen leert sie wie in Word, statt die
+       Tabelle zu löschen (Chrome nahm bei ganz markierter Tabelle alles weg) */
+    if(/^delete/.test(e.inputType)&&zellenLeeren()){e.preventDefault();return}
+    autoCorrectInput(e);
+  });
   /* Bilder dekodiert der Browser asynchron - ihre Höhe ist beim ersten
      paginate() (am Ende von drawWrite, oder per queuePaginate nach dem
      Einfügen/Öffnen) oft noch 0. Ohne diese Nachzündung steht der Umbruch
@@ -10646,13 +10651,16 @@ function drawWrite(){
     const cells=[...table.querySelectorAll("td,th")].filter(c=>!c.closest(".pgzeile"));
     let i=cells.indexOf(cell)+(e.shiftKey?-1:1);
     if(i>=cells.length){
-      const last=table.rows[table.rows.length-1];
-      const nr=document.createElement("tr");
-      [...last.children].forEach(()=>{const td=document.createElement("td");td.innerHTML="<br>";nr.appendChild(td)});
-      last.parentNode.appendChild(nr);
-      i=cells.length;
-      const fresh=[...table.querySelectorAll("td,th")].filter(c=>!c.closest(".pgzeile"));
-      putCaret(fresh[i]);dirty=true;queuePaginate();return;
+      /* Neue Zeile wie in Word — als Rückgängig-Schritt (bis 2026-11-09
+         direkt im DOM: Strg+Z sprang darüber und nahm das davor Getippte
+         zurück). Verbundene Zellen der letzten Zeile behalten ihre Breite. */
+      tabUndo(table,()=>{
+        const zeilen=[...table.rows].filter(r=>!r.classList.contains("pgzeile")),last=zeilen[zeilen.length-1];
+        const nr=document.createElement("tr");
+        [...last.children].forEach(c=>{const td=document.createElement("td");if(c.colSpan>1)td.colSpan=c.colSpan;td.innerHTML="<br>";nr.appendChild(td)});
+        last.after(nr);putCaret(nr.firstElementChild);
+      });
+      return;
     }
     if(i<0)return;
     putCaret(cells[i]);
@@ -10678,6 +10686,8 @@ function drawWrite(){
   ed.addEventListener("copy",stempeln);
   ed.addEventListener("cut",e=>{
     if(!stempeln(e))return;
+    /* Mehrere Zellen: ausschneiden leert sie, die Tabelle bleibt (wie Word) */
+    if(zellenLeeren())return;
     /* Nach preventDefault entfernt der Browser die Auswahl nicht mehr selbst.
        execCommand statt eigenem Löschen: es kennt die Blockgrenzen und hängt
        sich in dieselbe Rückgängig-Kette wie alles andere. */
@@ -25607,6 +25617,16 @@ function tabRaster(t){
 }
 /* Markierte Zellen: von der Zelle am Anfang bis zur Zelle am Ende der
    Auswahl als Rechteck (wie Word), sonst die Zelle der Schreibmarke */
+/* Sind mehrere Zellen einer Tabelle markiert, ihren Inhalt leeren (ein
+   Rückgängig-Schritt) und true liefern — sonst nichts tun. Für Entf,
+   Rücktaste und Ausschneiden. */
+function zellenLeeren(){
+  const sel=getSelection();if(!sel.rangeCount||sel.isCollapsed)return false;
+  const b=zellBereich();if(!b||!b.rect||b.zellen.length<2)return false;
+  const zellen=b.zellen;
+  tabUndo(b.t,()=>{zellen.forEach(td=>{td.innerHTML="<br>"});putCaret(zellen[0])});
+  return true;
+}
 function zellBereich(){
   const sel=getSelection();if(!sel.rangeCount)return null;
   const r=sel.getRangeAt(0),zu=n=>{n=n&&n.nodeType===1?n:n&&n.parentElement;return n&&n.closest("td,th")};

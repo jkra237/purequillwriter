@@ -135,6 +135,14 @@ Derzeit nichts.
   Punkt also bloßer Text, bei mehreren die <li> ohne Liste.
   `listeUmAuswahl()` nimmt die Liste mit, wenn ganze Punkte markiert sind
   — ein Wort mitten aus einem Punkt bleibt Text, wie in Word.
+- **Tab in der letzten Zelle ließ sich nicht rückgängig machen**: die neue
+  Zeile entstand direkt im DOM, Strg+Z sprang darüber und nahm das davor
+  Getippte zurück. Jetzt über `tabUndo`; verbundene Zellen der letzten
+  Zeile geben ihre Breite an die neue weiter.
+- **Entf über mehrere markierte Zellen löschte die ganze Tabelle** (bei ganz
+  markierter Tabelle, ein leerer Rest blieb stehen): Entf, Rücktaste und
+  Ausschneiden leeren jetzt wie in Word nur die markierten Zellen
+  (`zellenLeeren()`), ein Rückgängig-Schritt.
 
 ---
 
