@@ -21810,7 +21810,11 @@ function openSubMenu(anchor,items,cb=runFileAct){
   const alt=document.getElementById("submenu");if(alt)alt.remove();
   const m=document.createElement("div");m.className="menu ctx";m.id="submenu";
   m.innerHTML=items.map(it=>it.sep?'<div class="msep"></div>':
-    `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}><span class="chk">${it.cur?"&#10003;":""}</span>${it.label}<span class="k">${it.k||""}</span></button>`).join("");
+    `<button class="mi" data-sub="${it.a}" ${it.dis?"disabled":""}>${(()=>{
+      /* Symbol wie im Rechtsklick-Menü selbst (Tom: im Untermenü fehlten sie):
+         ausdrücklich über it.ico, sonst das Tabellensymbol gleichen Namens */
+      const ic=it.ico||(!it.cur&&TAB_ICO[it.a]);
+      return ic?`<span class="chk tico">${ICOSZ(ic,18,1.5)}</span>`:`<span class="chk">${it.cur?"&#10003;":""}</span>`})()}${it.label}<span class="k">${it.k||""}</span></button>`).join("");
   document.body.appendChild(m);
   m._opener=anchor;
   m.addEventListener("mouseenter",()=>clearTimeout(subZuTimer));
@@ -22211,13 +22215,13 @@ function contextMenu(e){
       absatzDialog(ziele);return}
     if(a==="insmore"){
       const items=[
-        {a:"link2",label:e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen"),k:"Alt ⇧ K"},
-        {a:"img",label:tr("Bild einfügen")},
-        ...(cell?[]:[{a:"tblNew",label:tr("Tabelle einfügen")}]),
-        {a:"pgbr",label:tr("Seitenumbruch einfügen"),k:"Alt ⇧ ⏎"},
-        {a:"hr",label:tr("Horizontale Linie")},
-        {a:"fn",label:tr("Fußnote einfügen")},
-        {a:"en",label:tr("Endnote einfügen")}
+        {a:"link2",label:e.target.closest("#editor a")?tr("Link bearbeiten"):tr("Link einfügen"),k:"Alt ⇧ K",ico:MENU_ICO["i:link"]},
+        {a:"img",label:tr("Bild einfügen"),ico:MENU_ICO["i:bild"]},
+        ...(cell?[]:[{a:"tblNew",label:tr("Tabelle einfügen"),ico:MENU_ICO["i:tabelle"]}]),
+        {a:"pgbr",label:tr("Seitenumbruch einfügen"),k:"Alt ⇧ ⏎",ico:MENU_ICO["i:umbruch"]},
+        {a:"hr",label:tr("Horizontale Linie"),ico:'<path d="M3 12h18" stroke="#7A5AD8" stroke-width="2.2"/><path d="M5 7h14M5 17h14" stroke-opacity=".45"/>'},
+        {a:"fn",label:tr("Fußnote einfügen"),ico:MENU_ICO["i:fn"]},
+        {a:"en",label:tr("Endnote einfügen"),ico:MENU_ICO["i:en"]}
       ];
       openSubMenu(b,items,sub=>{ed.focus();insertAct(sub,klickZiel,{left:e.clientX,right:e.clientX,top:e.clientY,bottom:e.clientY})});
       return;
@@ -25391,6 +25395,9 @@ const TAB_ICO={
   valign:'<rect x="3.5" y="3.5" width="17" height="17" rx="1"/><path d="M7.5 12h9" stroke="#159A80" stroke-width="2.4"/><path d="M12 5.8v3.6M10.2 7.6 12 9.4l1.8-1.8M12 18.2v-3.6M10.2 16.4 12 14.6l1.8 1.8" stroke="#159A80" stroke-width="1.5"/>',
   size:'<rect x="3.5" y="6" width="17" height="14" rx="1"/><path d="M9.2 6v14M14.8 6v14"/><path d="M4 2.8h16M4 2.8l2-1.6M4 2.8l2 1.6M20 2.8l-2-1.6M20 2.8l-2 1.6" stroke="#D0508A" stroke-width="1.5"/>',
   del:'<g stroke="#D64545"><path d="M3 6.6h12M7.6 4.2h2.8M7.2 6.6l.6 11.6h6.4l.6-11.6"/><path d="M9 9.4v6M12 9.4v6"/></g><path d="M17.6 18.6 19.8 21.4 22 18.6"/>',
+  rowDel:'<rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 9h18M3 15h18"/><path d="M3.5 9.5h17v5h-17z" fill="#D64545" opacity=".22" stroke="none"/><path d="M9.5 10.5l5 3M14.5 10.5l-5 3" stroke="#D64545" stroke-width="1.8"/>',
+  colDel:'<rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18"/><path d="M9.5 3.5h5v17h-5z" fill="#D64545" opacity=".22" stroke="none"/><path d="M10.5 9.5l3 5M13.5 9.5l-3 5" stroke="#D64545" stroke-width="1.8"/>',
+  tblDel:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M9 4v16M15 4v16" stroke-opacity=".5"/><path d="M7 8l10 10M17 8 7 18" stroke="#D64545" stroke-width="2"/>',
   kopfw:'<path d="M3.6 4.6h16.8v2.9H3.6zM3.6 13.6h16.8v2.9H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/>',
   headToggle:'<path d="M3.6 5.2h16.8v4H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>'
 };

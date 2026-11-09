@@ -97,6 +97,11 @@ Derzeit nichts.
   bzw. beim Öffnen der Auswahl gemerkt und vor dem Einfügen
   zurückgesetzt; die Auswahl öffnet sich an der Klickstelle statt an der
   Werkzeugleiste.
+- **Untermenüs des Rechtsklick-Menüs ohne Symbole** (Tom): „Zeile
+  darunter einfügen“ usw. standen ohne Symbol, während das Menü selbst
+  farbige hat. `openSubMenu()` zeigt jetzt ein Symbol (`ico`, sonst das
+  Tabellensymbol gleichen Namens) — bei Einfügen und Löschen in Tabellen
+  (Löschen mit drei neuen roten Symbolen) und bei „Element einfügen ›“.
 
 ---
 
