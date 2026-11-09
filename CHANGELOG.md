@@ -94,6 +94,12 @@ Derzeit nichts.
   jeder Seite wiederholen“ (nur ab der ersten Zeile). Word speichert und
   liest `w:cantSplit`, OpenDocument `fo:keep-together`; die Ansicht teilt
   eine Zeile ohnehin nie. Ein Rückgängig-Schritt; Umlauf 54/54.
+- **Text in Tabelle umwandeln, Tabelle in Text** (Tom, wie Word): unter
+  Einfügen und im Rechtsklick-Menü einer Markierung bzw. einer Tabelle.
+  Jeder markierte Absatz wird eine Zeile, getrennt wird bei Tabstopp,
+  Semikolon, Komma oder einem eigenen Zeichen (Vorschau „3 Zeilen,
+  3 Spalten“); Auszeichnung innerhalb einer Zelle bleibt. Zurück wird
+  jede Zeile ein Absatz, die Zellen durch Tabulatoren getrennt.
 
 ### Geändert
 
