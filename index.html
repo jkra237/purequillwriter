@@ -17443,6 +17443,26 @@ function docxNummern(xml){
 /* Zahlenformat und Zeichen der Vorlage auf die Listenstile dieses Programms
    abbilden. Was hier nicht steht, fällt auf den Grundstil zurück — lieber
    ein schlichter Punkt als eine erfundene Zuordnung. */
+/* Listenart einer Ebene samt der Regeln für Words Grundlisten — eine Stelle
+   für Fließtext und Tabellenzellen (seit 2026-11-09, vorher nur im Fließtext). */
+function docxListenStilEbene(ebenen,ilvl){
+  let stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
+  /* Words Standardnummerierung (1. → a. → i.) ist hier der Grundstil
+     einer verschachtelten Liste, kein eigener Stil — sonst käme „i.“ als
+     „I.“ an und „a.“ beim Speichern als „a)“ zurück. */
+  if(stil&&stil.tag==="ol"&&ilvl>0){
+    const eb=ebenen[String(ilvl)]||{};
+    if(String(eb.fmt||"").toLowerCase()===["decimal","lowerletter","lowerroman"][ilvl%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
+  }
+  /* Ebenso die Grundpunkte (• → o → ▪, in Word  → o → §): beginnt die
+     Liste oben mit einem Punkt, ist „o“ darunter kein Kreis-Stil — sonst
+     kam jede Unterpunkt-Liste als eigene Art zurück */
+  if(stil&&stil.tag==="ul"&&ilvl>0){
+    const oben=String((ebenen["0"]||{}).text||"").trim(),z=String((ebenen[String(ilvl)]||{}).text||"").trim();
+    if(/^[•]$/.test(oben)&&[/^[•]$/,/^o$/,/^[▪§]$/][ilvl%3].test(z))stil={tag:"ul",ls:""};
+  }
+  return stil;
+}
 function docxListenStil(ebene){
   const fmt=String(ebene&&ebene.fmt||"bullet").toLowerCase();
   const zeichen=String(ebene&&ebene.text||"").trim();
@@ -18542,21 +18562,7 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
       const numId=String(xattrN(KIND(numPr,"numId"),"val")||"");
       const ilvl=Math.max(0,Math.min(8,parseInt(xattrN(KIND(numPr,"ilvl"),"val"),10)||0));
       const ebenen=nummern[numId];
-      let stil=docxListenStil(ebenen?ebenen[String(ilvl)]:null);
-      /* Words Standardnummerierung (1. → a. → i.) ist hier der Grundstil
-         einer verschachtelten Liste, kein eigener Stil — sonst käme „i.“ als
-         „I.“ an und „a.“ beim Speichern als „a)“ zurück. */
-      if(stil&&stil.tag==="ol"&&ilvl>0){
-        const eb=ebenen[String(ilvl)]||{};
-        if(String(eb.fmt||"").toLowerCase()===["decimal","lowerletter","lowerroman"][ilvl%3]&&/\.\s*$/.test(eb.text||""))stil={tag:"ol",ls:""};
-      }
-      /* Ebenso die Grundpunkte (• → o → ▪, in Word  → o → §): beginnt die
-         Liste oben mit einem Punkt, ist „o“ darunter kein Kreis-Stil — sonst
-         kam jede Unterpunkt-Liste als eigene Art zurück */
-      if(stil&&stil.tag==="ul"&&ilvl>0){
-        const oben=String((ebenen["0"]||{}).text||"").trim(),z=String((ebenen[String(ilvl)]||{}).text||"").trim();
-        if(/^[•]$/.test(oben)&&[/^[•]$/,/^o$/,/^[▪§]$/][ilvl%3].test(z))stil={tag:"ul",ls:""};
-      }
+      let stil=docxListenStilEbene(ebenen,ilvl);
       /* Einzug und Zeichenfarbe der Ebene, wo sie von Words Grundliste
          (1,27 cm je Ebene, 0,63 cm hängend) abweichen */
       if(stil&&ebenen&&ebenen[String(ilvl)]){
@@ -18757,12 +18763,37 @@ function docxToHtml(xml,stilXml,numXml,zubehoer){
            Abstand. Eine Zelle mit nur einem Absatz bleibt schlicht Text,
            wie bisher. Verschachtelte Tabellen kommen mit. */
         const bloeckeZ=docxBloecke(tc);
-        const teile=bloeckeZ.map(b=>b.localName==="tbl"
-          ?{tabelle:tabelleHtml(b)}
-          :{text:docxLauf(b,zKtx(b)),auf:zellAuf(b,b===bloeckeZ[bloeckeZ.length-1])});
+        const teile=bloeckeZ.map(b=>{
+          if(b.localName==="tbl")return {tabelle:tabelleHtml(b)};
+          const x={text:docxLauf(b,zKtx(b)),auf:zellAuf(b,b===bloeckeZ[bloeckeZ.length-1])};
+          /* Listen in Zellen (2026-11-09, Tom): bis dahin wurden ihre
+             Absätze zu gewöhnlichen — der Export schrieb sie richtig, das
+             Öffnen verlor die Punkte. Art und Ebene wie im Fließtext, die
+             Zählung beginnt je Zelle neu. */
+          const np=KIND(KIND(b,"pPr"),"numPr");
+          if(np){
+            const numId=String(xattrN(KIND(np,"numId"),"val")||"");
+            const ilvl=Math.max(0,Math.min(8,parseInt(xattrN(KIND(np,"ilvl"),"val"),10)||0));
+            const eb=nummern[numId],st=docxListenStilEbene(eb,ilvl);
+            if(st)x.liste={tag:st.tag,ls:st.ls||"",ilvl,start:eb&&eb[String(ilvl)]&&eb[String(ilvl)].start||1};
+          }
+          return x;
+        });
         let inner;
-        if(teile.length===1&&teile[0].text!==undefined&&teile[0].auf==="<p>")inner=teile[0].text;
-        else inner=teile.map(x=>x.tabelle!==undefined?x.tabelle:(x.auf||"<p>")+(x.text||"<br>")+"</p>").join("");
+        if(teile.length===1&&teile[0].text!==undefined&&teile[0].auf==="<p>"&&!teile[0].liste)inner=teile[0].text;
+        else{
+          let h="";const stk=[];
+          const zu=n=>{while(stk.length>n)h+="</li></"+stk.pop().tag+">"};
+          for(const x of teile){
+            if(!x.liste){zu(0);h+=x.tabelle!==undefined?x.tabelle:(x.auf||"<p>")+(x.text||"<br>")+"</p>";continue}
+            const L=x.liste;
+            zu(L.ilvl+1);
+            if(stk.length===L.ilvl+1){const o=stk[L.ilvl];if(o.tag!==L.tag||o.ls!==L.ls)zu(L.ilvl);else h+="</li>"}
+            while(stk.length<L.ilvl+1){h+="<"+L.tag+(L.ls?' data-ls="'+L.ls+'"':"")+(L.tag==="ol"&&L.start>1?' start="'+L.start+'"':"")+">";stk.push(L)}
+            h+="<li>"+(x.text||"<br>");
+          }
+          zu(0);inner=h;
+        }
         r+="<td"+spanne+">"+(inner||"&nbsp;")+"</td>";
       });
       r+="</tr>";
@@ -28749,8 +28780,13 @@ function acListeZuruecknehmen(){
   if(!g||!g.li.isConnected||g.li.textContent||!sel.rangeCount||!g.li.contains(sel.anchorNode))return false;
   const liste=g.li.parentElement;if(!liste||liste.children.length!==1)return false;
   const p=document.createElement("p");p.textContent=g.text.replace(/ $/," ");
-  liste.replaceWith(p);
-  const r=document.createRange();r.setStart(p.firstChild,p.firstChild.length);r.collapse(true);
+  /* In einer Zelle zurück zu blankem Text wie vorher, nicht zu einem <p> */
+  const zelle=liste.parentElement.matches("td,th");
+  const ziel=zelle?document.createTextNode(p.textContent):p;
+  if(zelle&&liste.nextSibling&&liste.nextSibling.nodeName!=="BR")liste.after(document.createElement("br"));
+  liste.replaceWith(ziel);
+  const tk=zelle?ziel:p.firstChild;
+  const r=document.createRange();r.setStart(tk,tk.length);r.collapse(true);
   sel.removeAllRanges();sel.addRange(r);
   nachListe();
   return true;
@@ -28856,7 +28892,12 @@ function autoCorrectInput(e){
     }
     return;
   }
-  if(a.lists&&data===" "&&blk.tagName==="P"){
+  /* Auch in Tabellenzellen (Tom: „- “ wirkte nur im Fließtext): dort steht der
+     Text meist direkt in der Zelle, nicht in einem <p>. Umgewandelt wird
+     dann nur die erste Zeile der Zelle bis zum ersten Umbruch, wie in Word
+     nur der Absatz. */
+  const inZelle=blk.tagName==="TD"||blk.tagName==="TH";
+  if(a.lists&&data===" "&&(blk.tagName==="P"||inZelle)){
     const vor=acTextBefore(blk,range);
     /* Wie Word auch „a) “, „A. “ und „I. “ (römisch, auch „II. “ …). Nur
        mit a/A beginnend — „z. B.“ oder „S. 3“ am Absatzanfang sollen keine
@@ -28881,7 +28922,9 @@ function autoCorrectInput(e){
          im <p>, mal reißt sie sogar den vorigen Absatz mit hinein (mit Test
          nachgestellt, kein Sonderfall). Direkte DOM-Ersetzung umgeht das. */
       const li=document.createElement("li");
-      while(blk.firstChild)li.appendChild(blk.firstChild);
+      if(inZelle){while(blk.firstChild&&!(blk.firstChild.nodeName==="BR"&&li.firstChild))li.appendChild(blk.firstChild);
+        if(blk.firstChild&&blk.firstChild.nodeName==="BR")blk.firstChild.remove()}
+      else while(blk.firstChild)li.appendChild(blk.firstChild);
       /* textContent statt childNodes.length: ein geleerter Absatz behält oft
          einen leeren Textknoten statt gar keinen (siehe deleteContents oben),
          der die Prüfung sonst am ersten Zeichen vorbeischlittern lässt. */
@@ -28893,7 +28936,7 @@ function autoCorrectInput(e){
         if(numArt)liste.setAttribute("data-ls",numArt)}
       else if(vor==="-")liste.setAttribute("data-ls","strich");
       liste.appendChild(li);
-      blk.replaceWith(liste);
+      if(inZelle)blk.insertBefore(liste,blk.firstChild);else blk.replaceWith(liste);
       const sel2=getSelection();sel2.removeAllRanges();
       const r2=document.createRange();r2.setStart(li,0);r2.collapse(true);
       sel2.addRange(r2);

@@ -47,6 +47,11 @@ immer genau einen Commit, der sie anfasst.
 
 ### Nebenbei gefunden, noch nicht behoben
 
+- **Listen in Tabellenzellen bei .doc und .rtf**: der .doc-Leser und
+  RTF (Lesen und Schreiben) machen daraus Absätze — `check-umlauf` zeigt
+  es seit 2026-11-09 („Liste in Zelle“, dazu ul/li/Listenart). Word und
+  ODT sind behoben.
+
 - **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
   („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
   europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
@@ -102,6 +107,16 @@ Derzeit nichts.
   farbige hat. `openSubMenu()` zeigt jetzt ein Symbol (`ico`, sonst das
   Tabellensymbol gleichen Namens) — bei Einfügen und Löschen in Tabellen
   (Löschen mit drei neuen roten Symbolen) und bei „Element einfügen ›“.
+- **„- “ und „1. “ machten in Tabellenzellen keine Liste** (Tom): die
+  Autokorrektur wirkte nur in einem <p>, in einer Zelle steht der Text
+  meist direkt. Jetzt auch dort — umgewandelt wird die Zeile bis zum
+  ersten Umbruch, Strg+Z macht daraus wieder Text in der Zelle.
+- **Listen in Tabellenzellen gingen beim Öffnen von Word-Dateien
+  verloren**: der Export schrieb sie richtig, der Leser machte aus ihren
+  Absätzen gewöhnliche. Jetzt mit Art, Ebenen und Startnummer; die Regeln
+  für Words Grundlisten liegen dafür in `docxListenStilEbene()`, eine
+  Stelle für Fließtext und Zellen. Umlauf Word/ODT 54/54 mit dem neuen
+  Merkmal „Liste in Zelle“ im Prüfdokument.
 
 ---
 

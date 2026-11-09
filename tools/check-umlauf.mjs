@@ -114,7 +114,8 @@ try {
      /* Absatzformat je Absatz (seit 2026-10-25): Zeilenabstand Mehrfach und Genau, Abstand vor, Einzug rechts */
      +'<p data-zab="a2" style="line-height:calc(var(--lhn,1.2) * 2);padding-top:calc(12pt * var(--zoom,1));margin-right:2em">Absatzformat doppelt.</p><p data-zab="g18" style="line-height:calc(18pt * var(--zoom,1))">Absatzformat genau.</p>'
      +'<hr><p>Zwischen Linien.</p><hr data-linie="dick"><p>Zwischen Linien.</p><hr data-linie="doppelt"><p>Zwischen Linien.</p><hr data-linie="punkte">'
-     +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td>A</td><td>B</td></tr></table>'
+     +'<table><tr><td colspan="2">Verbunden</td><td rowspan="2">Hoch</td></tr><tr><td><ul><li>A eins</li><li>A zwei</li></ul></td><td>B</td></tr></table>'
+     /* Liste in einer Zelle (seit 2026-11-09): der Word-Leser machte daraus Absätze */
      /* Zellformat wie Word (seit 2026-10-26): Schattierung, Rahmen je Seite mit Farbe, Tabellenbreite */
      +'<p>Zwischen den Tabellen.</p><table style="width:80%;margin-left:calc(-5.4pt * var(--zoom,1))"><tr data-kopfw="1"><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf</td><td style="background-color:#70AD47;border:1pt solid #70AD47">Kopf zwei</td></tr>'
      +'<tr><td style="vertical-align:middle;border:0.5pt solid #A8D08D">Zelle</td><td style="background-color:#E2EFD9;border-top:0.5pt solid #A8D08D;border-left:0.5pt solid #A8D08D;border-bottom:none;border-right:0.5pt dashed #C00000">Zelle zwei</td></tr></table>'
@@ -166,7 +167,7 @@ try {
       return {"h1":q("h1"),"h2":q("h2"),"h3":q("h3"),"h4":q("h4"),"Titel/Untertitel":q('p[data-fv="titel"]')+"/"+q('p[data-fv="untertitel"]'),"fett":q("b,strong"),"kursiv":q("i,em"),"unterstr.":q("u"),"durchgestr.":q("s,strike"),
        "hoch":q("sup:not(.fn):not(.en)"),"tief":q("sub"),"Schriftart":st("fontFamily"),"Schriftgroesse":st("fontSize"),"Farbe":st("color"),
        "Hervorhebung":st("backgroundColor")+q("mark"),"Ausrichtung":st("textAlign"),"Einzug":st("marginLeft")+st("paddingLeft"),
-       "ol":q("ol"),"ul":q("ul"),"ol verschachtelt":q("ol ol"),"li":q("li"),"ol start":q("ol[start]"),
+       "ol":q("ol"),"ul":q("ul"),"ol verschachtelt":q("ol ol"),"li":q("li"),"ol start":q("ol[start]"),"Liste in Zelle":q("td ul,td ol,th ul,th ol")+"/"+q("td li,th li"),
        "Listenart":[...t.querySelectorAll("ol,ul")].map(o=>o.getAttribute("data-ls")||"-").join("/"),
        "Tabelle":q("table"),"Zellfarbe":[...t.querySelectorAll("td,th")].map(e=>zelleFormat(e).bg).filter(Boolean).join("/")||"-",
        "Zellrahmen":[...new Set([...t.querySelectorAll("td,th")].flatMap(e=>{const f=zelleFormat(e);return ZELL_SEITEN.map(k=>f.rand[k]==null?"":f.rand[k]==="none"?"none":zellRandCss(f.rand[k]))}).filter(Boolean))].sort().join("|")||"-",
