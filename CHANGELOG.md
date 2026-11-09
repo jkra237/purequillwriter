@@ -143,6 +143,13 @@ Derzeit nichts.
   markierter Tabelle, ein leerer Rest blieb stehen): Entf, Rücktaste und
   Ausschneiden leeren jetzt wie in Word nur die markierten Zellen
   (`zellenLeeren()`), ein Rückgängig-Schritt.
+- **Spaltenbreiten wie in Word** (Tom): Ziehen an der Spaltenlinie gab es
+  schon; neu sind Marken im Lineal über den Spaltengrenzen der Tabelle mit
+  der Schreibmarke (ebenfalls ziehbar) und beim Ziehen eine Hilfslinie über
+  die Seite mit beiden Breiten in der Lineal-Einheit. Die erste
+  colgroup misst jetzt die tatsächlichen Breiten (vorher gleich verteilt —
+  die Tabelle sprang beim ersten Ziehen), und bei verbundenen Zellen
+  greift die Linie die richtige Rasterspalte.
 
 ---
 
