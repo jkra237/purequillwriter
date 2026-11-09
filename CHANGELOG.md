@@ -100,6 +100,13 @@ Derzeit nichts.
   Semikolon, Komma oder einem eigenen Zeichen (Vorschau „3 Zeilen,
   3 Spalten“); Auszeichnung innerhalb einer Zelle bleibt. Zurück wird
   jede Zeile ein Absatz, die Zellen durch Tabulatoren getrennt.
+- **Tabelle sortieren…** (Tom, wie Word): im Rechtsklick-Menü einer
+  Tabelle. Nach einer Spalte (mit Überschrift im Auswahlfeld), auf- oder
+  absteigend, Überschrift bleibt oben (vorgewählt bei wiederholter oder
+  fetter erster Zeile). Die Art erkennt es selbst: Daten (3.2.2026,
+  2026-02-03), Zahlen (1.200,50) oder Text nach der Prüfsprache mit
+  „Kapitel 9“ vor „Kapitel 10“; leere Zellen ans Ende. Mit senkrecht
+  verbundenen Zellen lehnt es ab, wie Word.
 
 ### Geändert
 

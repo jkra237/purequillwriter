@@ -2999,6 +2999,13 @@ en:{
   "Rahmen":"Borders",
   "Ausrichtung in der Zelle":"Alignment in cell",
   "Spaltenbreite":"Column width",
+  "Spalte":"Column",
+  "Sortieren":"Sort",
+  "Sortieren nach":"Sort by",
+  "Aufsteigend":"Ascending",
+  "Absteigend":"Descending",
+  "Überschrift nicht mitsortieren":"Header row stays at the top",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Tables with vertically merged cells can't be sorted.",
   "Text in Tabelle umwandeln":"Convert text to table",
   "In Text umwandeln":"Convert to text",
   "Spalten trennen bei":"Separate columns at",
@@ -4106,6 +4113,13 @@ fr:{
   "Rahmen":"Bordures",
   "Ausrichtung in der Zelle":"Alignement dans la cellule",
   "Spaltenbreite":"Largeur des colonnes",
+  "Spalte":"Colonne",
+  "Sortieren":"Trier",
+  "Sortieren nach":"Trier par",
+  "Aufsteigend":"Croissant",
+  "Absteigend":"Décroissant",
+  "Überschrift nicht mitsortieren":"Ne pas trier la ligne d’en-tête",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Les tableaux avec des cellules fusionnées verticalement ne peuvent pas être triés.",
   "Text in Tabelle umwandeln":"Convertir le texte en tableau",
   "In Text umwandeln":"Convertir en texte",
   "Spalten trennen bei":"Séparer les colonnes par",
@@ -5213,6 +5227,13 @@ es:{
   "Rahmen":"Bordes",
   "Ausrichtung in der Zelle":"Alineación en la celda",
   "Spaltenbreite":"Ancho de columna",
+  "Spalte":"Columna",
+  "Sortieren":"Ordenar",
+  "Sortieren nach":"Ordenar por",
+  "Aufsteigend":"Ascendente",
+  "Absteigend":"Descendente",
+  "Überschrift nicht mitsortieren":"No ordenar la fila de encabezado",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Las tablas con celdas combinadas verticalmente no se pueden ordenar.",
   "Text in Tabelle umwandeln":"Convertir texto en tabla",
   "In Text umwandeln":"Convertir en texto",
   "Spalten trennen bei":"Separar columnas en",
@@ -6320,6 +6341,13 @@ pt:{
   "Rahmen":"Bordas",
   "Ausrichtung in der Zelle":"Alinhamento na célula",
   "Spaltenbreite":"Largura da coluna",
+  "Spalte":"Coluna",
+  "Sortieren":"Classificar",
+  "Sortieren nach":"Classificar por",
+  "Aufsteigend":"Crescente",
+  "Absteigend":"Decrescente",
+  "Überschrift nicht mitsortieren":"Não classificar a linha de cabeçalho",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Tabelas com células mescladas verticalmente não podem ser classificadas.",
   "Text in Tabelle umwandeln":"Converter texto em tabela",
   "In Text umwandeln":"Converter em texto",
   "Spalten trennen bei":"Separar colunas em",
@@ -7427,6 +7455,13 @@ pl:{
   "Rahmen":"Obramowanie",
   "Ausrichtung in der Zelle":"Wyrównanie w komórce",
   "Spaltenbreite":"Szerokość kolumn",
+  "Spalte":"Kolumna",
+  "Sortieren":"Sortuj",
+  "Sortieren nach":"Sortuj według",
+  "Aufsteigend":"Rosnąco",
+  "Absteigend":"Malejąco",
+  "Überschrift nicht mitsortieren":"Nie sortuj wiersza nagłówka",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Tabel z pionowo scalonymi komórkami nie można sortować.",
   "Text in Tabelle umwandeln":"Konwertuj tekst na tabelę",
   "In Text umwandeln":"Konwertuj na tekst",
   "Spalten trennen bei":"Rozdziel kolumny przy",
@@ -8534,6 +8569,13 @@ it:{
   "Rahmen":"Bordi",
   "Ausrichtung in der Zelle":"Allineamento nella cella",
   "Spaltenbreite":"Larghezza colonne",
+  "Spalte":"Colonna",
+  "Sortieren":"Ordina",
+  "Sortieren nach":"Ordina per",
+  "Aufsteigend":"Crescente",
+  "Absteigend":"Decrescente",
+  "Überschrift nicht mitsortieren":"Non ordinare la riga di intestazione",
+  "Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren.":"Le tabelle con celle unite verticalmente non possono essere ordinate.",
   "Text in Tabelle umwandeln":"Converti testo in tabella",
   "In Text umwandeln":"Converti in testo",
   "Spalten trennen bei":"Separa le colonne con",
@@ -22366,7 +22408,7 @@ function tabKontext(cell,bereich){
     eintrag("shade","shade",tr("Schattierung")+"…")+eintrag("valign","valign",tr("Zellausrichtung"),1)+
     eintrag("size","size",tr("Spaltenbreite"),1)+eintrag("headToggle","headToggle",tr("Kopfzeile umschalten"))+
     `<button class="mi" data-c="tbl:kopfw">${ic("kopfw")}${tr("Überschriften wiederholen")}<span class="k">${kopfAn?"&#10003;":""}</span></button>`+
-    eintrag("props","props",tr("Tabelleneigenschaften")+"…")+eintrag("totext","totext",tr("In Text umwandeln"))+
+    eintrag("props","props",tr("Tabelleneigenschaften")+"…")+eintrag("sort","sort",tr("Sortieren")+"…")+eintrag("totext","totext",tr("In Text umwandeln"))+
     `<div class="msep"></div>`;
 }
 function contextMenu(e){
@@ -22460,7 +22502,7 @@ function contextMenu(e){
     if(a.startsWith("tbl:")){
       const w=a.slice(4);
       if(!cell||!ed.contains(cell))return closeMenu();
-      if(["merge","split","headToggle","kopfw","props","totext"].includes(w)){closeMenu();ed.focus()}
+      if(["merge","split","headToggle","kopfw","props","totext","sort"].includes(w)){closeMenu();ed.focus()}
       tabAktion(w,b,cell,tbB);
       return;
     }
@@ -25631,6 +25673,7 @@ const TAB_ICO={
   colDel:'<rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18"/><path d="M9.5 3.5h5v17h-5z" fill="#D64545" opacity=".22" stroke="none"/><path d="M10.5 9.5l3 5M13.5 9.5l-3 5" stroke="#D64545" stroke-width="1.8"/>',
   tblDel:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M9 4v16M15 4v16" stroke-opacity=".5"/><path d="M7 8l10 10M17 8 7 18" stroke="#D64545" stroke-width="2"/>',
   kopfw:'<path d="M3.6 4.6h16.8v2.9H3.6zM3.6 13.6h16.8v2.9H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/>',
+  sort:'<path d="M6 4v16M3 17l3 3 3-3" stroke="#2F7BD8" stroke-width="1.7"/><path d="M12 6h9M12 11h6.5M12 16h4"/>',
   totext:'<rect x="2.5" y="4" width="8" height="11" rx="1"/><path d="M2.5 9.5h8M6.5 4v11"/><path d="M11.5 9.5h3M13 8 14.5 9.5 13 11" stroke="#3E9B4F" stroke-width="1.6"/><path d="M16 6h5.5M16 9.5h4M16 13h5.5"/>',
   props:'<rect x="3" y="4" width="18" height="16" rx="1.5"/><path d="M3 9h18M3 14.5h7M9.5 9v11"/><circle cx="16.5" cy="16.5" r="3" stroke="#7A5AD8" stroke-width="1.6"/><path d="M16.5 12.6v1M16.5 19.4v1M12.6 16.5h1M19.4 16.5h1" stroke="#7A5AD8" stroke-width="1.6"/>',
   headToggle:'<path d="M3.6 5.2h16.8v4H3.6z" fill="#2F7BD8" opacity=".55" stroke="none"/><rect x="3" y="4.5" width="18" height="15" rx="1.5"/><path d="M3 9.2h18M9 9.2v10.3M15 9.2v10.3"/>'
@@ -26208,6 +26251,62 @@ function textInTabelle(){
     });
   };
 }
+/* ---- Tabelle sortieren (Tom, 2026-11-09, wie Word): nach einer Spalte, auf-
+   oder absteigend, die Überschrift bleibt oben. Die Art erkennt es selbst:
+   lauter Zahlen nach Wert, lauter Daten nach Datum, sonst Text nach der
+   Sprache der Rechtschreibprüfung (ä bei a, „Kapitel 10“ nach „Kapitel 9“).
+   Leere Zellen ans Ende. Mit senkrecht verbundenen Zellen geht es nicht —
+   Word lehnt das genauso ab. */
+function sortWert(text){
+  const s=text.replace(/ /g," ").trim();if(!s)return {leer:true};
+  const en=S.settings.uiLang==="en";
+  /* Daten vor Zahlen: „3.2.2026“ sähe sonst wie eine Zahl aus */
+  let m;
+  if((m=/^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/.exec(s)))return {datum:Date.UTC(+m[3]<100?2000+ +m[3]:+m[3],m[2]-1,+m[1]),text:s};
+  if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s)))return {datum:Date.UTC(+m[1],m[2]-1,+m[3]),text:s};
+  if((m=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(s))){const j=+m[3]<100?2000+ +m[3]:+m[3];return {datum:en?Date.UTC(j,m[1]-1,+m[2]):Date.UTC(j,m[2]-1,+m[1]),text:s}}
+  const zahl=s.replace(/[€$£%\s]/g,"");
+  if(/^[-+]?[\d.,]+$/.test(zahl)&&/\d/.test(zahl)){
+    const n=parseFloat(en?zahl.replace(/,/g,""):zahl.replace(/\./g,"").replace(",","."));
+    if(isFinite(n))return {zahl:n,text:s};
+  }
+  return {text:s};
+}
+function tabSortieren(zelle){
+  const t=zelle.closest("table"),ed=$("#editor");if(!t||!ed||!ed.contains(t))return;
+  const ra=tabRaster(t);
+  if(ra.zellen.some(z=>z.r1>z.r0)){toast(tr("Tabellen mit senkrecht verbundenen Zellen lassen sich nicht sortieren."));return}
+  const nKopf=kopfZeilenZahl(ra.zeilen),spalteJetzt=(ra.zellen.find(z=>z.td===zelle)||{c0:0}).c0;
+  const kopfText=c=>{const z=ra.zellen.find(z=>z.r0===0&&z.c0<=c&&z.c1>=c);const s=z?z.td.innerText.trim().slice(0,30):"";return s};
+  const ersteFett=!nKopf&&ra.zeilen[0]&&[...ra.zeilen[0].children].every(td=>td.querySelector("b,strong")||td.tagName==="TH");
+  overlay(`<div class="modal"><h3>${tr("Sortieren")}</h3><div class="pad">
+    <div class="setrow"><label>${tr("Sortieren nach")}</label><div class="ctl"><select id="soSp">${[...Array(ra.spalten)].map((_,c)=>
+      `<option value="${c}" ${c===spalteJetzt?"selected":""}>${esc(tr("Spalte")+" "+(c+1)+(kopfText(c)?" – "+kopfText(c):""))}</option>`).join("")}</select></div></div>
+    <div class="setrow"><label><input type="radio" name="soRi" value="auf" style="width:auto" checked> ${tr("Aufsteigend")}</label></div>
+    <div class="setrow"><label><input type="radio" name="soRi" value="ab" style="width:auto"> ${tr("Absteigend")}</label></div>
+    <div class="setrow"><label><input type="checkbox" id="soKopf" style="width:auto" ${nKopf||ersteFett?"checked":""}> ${tr("Überschrift nicht mitsortieren")}</label></div>
+  </div><div class="rowend"><button class="btn" id="soNein">${tr("Abbrechen")}</button><button class="btn pri" id="soOk">${tr("OK")}</button></div></div>`);
+  $("#soNein").onclick=closeOvl;
+  $("#soOk").onclick=()=>{
+    const c=+$("#soSp").value,ab=$("input[name=soRi]:checked").value==="ab",kopf=$("#soKopf").checked?Math.max(1,nKopf):0;
+    closeOvl();
+    tabUndo(t,()=>{
+      t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+      const r2=tabRaster(t),koerper=r2.zeilen.slice(kopf);
+      const wert=tr=>{const z=r2.zellen.find(z=>z.td.parentElement===tr&&z.c0<=c&&z.c1>=c);return sortWert(z?z.td.innerText:"")};
+      const w=koerper.map(tr=>({tr,w:wert(tr)}));
+      const voll=w.filter(x=>!x.w.leer);
+      const art=voll.length&&voll.every(x=>x.w.zahl!=null)?"zahl":voll.length&&voll.every(x=>x.w.datum!=null)?"datum":"text";
+      const coll=new Intl.Collator(S.settings.lang||S.settings.uiLang||"de",{numeric:true,sensitivity:"base"});
+      w.sort((a,b)=>{if(a.w.leer!==b.w.leer)return a.w.leer?1:-1;if(a.w.leer)return 0;
+        const d=art==="zahl"?a.w.zahl-b.w.zahl:art==="datum"?a.w.datum-b.w.datum:coll.compare(a.w.text,b.w.text);return ab?-d:d});
+      const nach=koerper[koerper.length-1]?koerper[koerper.length-1].nextSibling:null,eltern=koerper[0]&&koerper[0].parentNode;
+      if(!eltern)return;
+      w.forEach(x=>eltern.insertBefore(x.tr,nach));
+      putCaret(w[0].tr.querySelector("td,th"));
+    });
+  };
+}
 function tabelleInText(zelle){
   const t=zelle.closest("table"),ed=$("#editor");if(!t||!ed||!ed.contains(t))return;
   const zeilen=tabRaster(t).zeilen;
@@ -26519,6 +26618,7 @@ function tabAktion(a0,anker,zelle,bereich){
   if(a0==="vorlage")return tabVorlageMenu(ar,t);
   if(a0==="props")return tabEigenschaften(zelle,bereich);
   if(a0==="totext")return tabelleInText(zelle);
+  if(a0==="sort")return tabSortieren(zelle);
   if(a0==="ins")return openSubMenu(b,[{a:"rowAbove",label:tr("Zeile darüber einfügen")},{a:"rowBelow",label:tr("Zeile darunter einfügen")},
       {a:"colLeft",label:tr("Spalte links einfügen")},{a:"colRight",label:tr("Spalte rechts einfügen")}],
     a=>{const ed=$("#editor");if(ed&&ed.contains(zelle))U(()=>tableCmdMitMarke(a,zelle));if(ed)ed.focus();nach()});
