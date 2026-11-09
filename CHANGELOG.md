@@ -105,6 +105,9 @@ Derzeit nichts.
 
 ### Geändert
 
+- **Tinte ist das Farbschema für neue Nutzer** (Tom): gilt nur beim
+  ersten Start (`STANDARD_THEMA`); wer schon ein Schema hat, behält es.
+  Vorher Wolke.
 - **Neues Symbol „Feder schreibt“** (Tom): eine Seite mit Zeilen, die
   Feder schreibt die letzte — statt der einzelnen Feder. Terrakotta mit
   Verlauf und weichen Schatten, im Stil der Rewrite-PDF-Bilder. Ein
