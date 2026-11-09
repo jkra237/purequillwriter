@@ -77,6 +77,17 @@ immer genau einen Commit, der sie anfasst.
 
 Derzeit nichts.
 
+### Neu
+
+- **Zeile, Spalte oder Tabelle per Klick markieren** (Tom, wie Word): links
+  neben einer Zeile (Zeiger als Pfeil nach rechts oben), über einer Spalte
+  (Pfeil nach unten) oder am Anfasser oben links an der Tabelle. Die
+  Markierung ist eine eigene Zellauswahl, als Überlagerung im Blatt
+  gezeichnet — nichts davon landet im Dokument. Entf, Rücktaste und
+  Ausschneiden leeren die Zellen, Kopieren nimmt sie als Tabelle mit,
+  Schattierung, Rahmen und Ausrichtung wirken auf alle, „Zeile/Spalte
+  löschen“ löscht alle markierten. Ein Klick in den Text hebt sie auf.
+
 ### Geändert
 
 - **Tinte ist das Farbschema für neue Nutzer** (Tom): gilt nur beim

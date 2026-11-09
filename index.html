@@ -2026,6 +2026,11 @@ body.focus .outline{display:none}
   background:color-mix(in srgb,var(--ink-soft) 55%,transparent);border:1px solid var(--ink-soft)}
 .ruler .tcolm:hover{background:var(--ink-soft)}
 .tabhilfe{position:fixed;width:0;border-left:1.5px dashed var(--stamp);z-index:90;pointer-events:none}
+.zselbox{position:absolute;z-index:3;pointer-events:none;background:color-mix(in srgb,var(--stamp) 20%,transparent);
+  outline:1px solid color-mix(in srgb,var(--stamp) 55%,transparent)}
+.tabanfasser{position:absolute;z-index:4;width:13px;height:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:var(--paper);color:var(--ink-soft);border:1px solid var(--ink-soft);border-radius:2px}
+@media print{.zselbox,.tabanfasser{display:none!important}}
 .tabhilfetip{position:fixed;transform:translateX(-50%);background:var(--ink);color:var(--paper);font:12px/1.3 var(--ui);
   padding:3px 8px;border-radius:5px;z-index:91;pointer-events:none;white-space:pre}
 /* Dreieck statt Balken: eine vertraute Ziehform (Google Docs u.a.), ohne
@@ -2994,6 +2999,7 @@ en:{
   "Rahmen":"Borders",
   "Ausrichtung in der Zelle":"Alignment in cell",
   "Spaltenbreite":"Column width",
+  "Tabelle markieren":"Select table",
   "Oben":"Top",
   "Unten":"Bottom",
   "Spalten gleichmäßig verteilen":"Distribute columns evenly",
@@ -4086,6 +4092,7 @@ fr:{
   "Rahmen":"Bordures",
   "Ausrichtung in der Zelle":"Alignement dans la cellule",
   "Spaltenbreite":"Largeur des colonnes",
+  "Tabelle markieren":"Sélectionner le tableau",
   "Oben":"Haut",
   "Unten":"Bas",
   "Spalten gleichmäßig verteilen":"Répartir les colonnes uniformément",
@@ -5178,6 +5185,7 @@ es:{
   "Rahmen":"Bordes",
   "Ausrichtung in der Zelle":"Alineación en la celda",
   "Spaltenbreite":"Ancho de columna",
+  "Tabelle markieren":"Seleccionar tabla",
   "Oben":"Arriba",
   "Unten":"Abajo",
   "Spalten gleichmäßig verteilen":"Distribuir columnas uniformemente",
@@ -6270,6 +6278,7 @@ pt:{
   "Rahmen":"Bordas",
   "Ausrichtung in der Zelle":"Alinhamento na célula",
   "Spaltenbreite":"Largura da coluna",
+  "Tabelle markieren":"Selecionar tabela",
   "Oben":"Em cima",
   "Unten":"Embaixo",
   "Spalten gleichmäßig verteilen":"Distribuir colunas uniformemente",
@@ -7362,6 +7371,7 @@ pl:{
   "Rahmen":"Obramowanie",
   "Ausrichtung in der Zelle":"Wyrównanie w komórce",
   "Spaltenbreite":"Szerokość kolumn",
+  "Tabelle markieren":"Zaznacz tabelę",
   "Oben":"Do góry",
   "Unten":"Do dołu",
   "Spalten gleichmäßig verteilen":"Rozłóż kolumny równomiernie",
@@ -8454,6 +8464,7 @@ it:{
   "Rahmen":"Bordi",
   "Ausrichtung in der Zelle":"Allineamento nella cella",
   "Spaltenbreite":"Larghezza colonne",
+  "Tabelle markieren":"Seleziona tabella",
   "Oben":"In alto",
   "Unten":"In basso",
   "Spalten gleichmäßig verteilen":"Distribuisci colonne uniformemente",
@@ -10678,6 +10689,17 @@ function drawWrite(){
      sind Anzeige, kein Inhalt, und bleiben wie beim Speichern draußen. */
   const stempeln=e=>{
     const sel=getSelection();
+    /* Per Klick markierte Zeilen/Spalten: die Zellen als Tabelle kopieren */
+    if(zellAuswahl&&e.clipboardData&&zellAuswahl.zellen.every(td=>td.isConnected)){
+      const box=document.createElement("div");box.setAttribute(PQW_MARK,"1");
+      const t=document.createElement("table"),zeilen=[];
+      zellAuswahl.zellen.forEach(td=>{let z=zeilen.find(x=>x.tr===td.parentElement);if(!z){z={tr:td.parentElement,zellen:[]};zeilen.push(z)}z.zellen.push(td)});
+      zeilen.forEach(z=>{const tr=document.createElement("tr");z.zellen.forEach(td=>tr.appendChild(td.cloneNode(true)));t.appendChild(tr)});
+      box.appendChild(t);
+      e.clipboardData.setData("text/html",box.outerHTML);
+      e.clipboardData.setData("text/plain",zeilen.map(z=>z.zellen.map(td=>td.innerText.trim()).join("\t")).join("\n"));
+      e.preventDefault();return true;
+    }
     if(!sel.rangeCount||sel.isCollapsed||!e.clipboardData)return false;
     const box=document.createElement("div");
     box.setAttribute(PQW_MARK,"1");
@@ -10822,6 +10844,27 @@ function drawWrite(){
     const edge=findTableEdge(e.clientX,e.clientY);
     ed.style.cursor=edge?(edge.type==="col"?"col-resize":"row-resize"):"";
   });
+  /* Zeile/Spalte/Tabelle markieren: am Blatt, weil die Stellen links neben
+     und über der Tabelle meist im Seitenrand liegen, außerhalb von #editor */
+  const shZw=$("#sheet");
+  shZw.addEventListener("mousemove",e=>{
+    if(tableDragActive)return;
+    const z=zellRandZiel(e.clientX,e.clientY);
+    if(z){shZw.style.cursor=ed.style.cursor=ZW_ZEIGER[z.art]}else shZw.style.cursor="";
+    const t=z?z.t:e.target.closest&&e.target.closest("#editor table");
+    tabAnfasser(t&&!t.closest("td,th")?t:null);
+  });
+  shZw.addEventListener("mousedown",e=>{
+    if(e.button!==0)return;
+    const z=zellRandZiel(e.clientX,e.clientY);
+    if(z){e.preventDefault();e.stopPropagation();zellRandWaehlen(z);return}
+    zellAuswahlWeg();
+  },true);
+  ed.addEventListener("keydown",e=>{
+    if(!zellAuswahl||["Delete","Backspace","Shift","Control","Alt","Meta"].includes(e.key))return;
+    if((e.ctrlKey||e.metaKey)&&/^[cx]$/i.test(e.key))return;
+    zellAuswahlWeg();
+  },true);
   ed.addEventListener("mousedown",e=>{
     const edge=findTableEdge(e.clientX,e.clientY);
     if(edge){startTableDrag(e,edge);return}
@@ -25573,6 +25616,7 @@ function menuSymbole(m){
   });
 }
 function drawTblBar(){
+  zellAuswahlZeichnen();
   const bar=$("#tblbar");if(!bar)return;
   const ed=$("#editor");
   const zelle=S.mode==="write"?curCell():null;
@@ -25625,18 +25669,86 @@ function tabRaster(t){
 }
 /* Markierte Zellen: von der Zelle am Anfang bis zur Zelle am Ende der
    Auswahl als Rechteck (wie Word), sonst die Zelle der Schreibmarke */
+/* ---- Zeile, Spalte oder Tabelle per Klick markieren (Tom, 2026-11-09, wie
+   Word): links neben einer Zeile, über einer Spalte oder am Anfasser oben
+   links. Eine DOM-Auswahl kann keine Spalte fassen, darum eine eigene
+   Zellauswahl: gezeichnet als Überlagerung im Blatt (nichts landet im
+   Dokument, schrittEnde sieht keine Änderung), die Schreibmarke steht in
+   der ersten Zelle. zellBereich() liefert sie an alle Tabellenbefehle. */
+let zellAuswahl=null;
+const ZW_LINKS=18,ZW_OBEN=12;
+function zellAuswahlSetzen(t,zellen,art){
+  zellAuswahl={t,zellen,art};putCaret(zellen[0]);
+  const ed=$("#editor");if(ed)ed.focus({preventScroll:true});
+  zellAuswahlZeichnen();drawTblBar();
+}
+function zellAuswahlWeg(){if(!zellAuswahl)return;zellAuswahl=null;zellAuswahlZeichnen()}
+function zellAuswahlZeichnen(){
+  const paper=$("#paper");if(!paper)return;
+  paper.querySelectorAll(".zselbox").forEach(b=>b.remove());
+  if(!zellAuswahl)return;
+  if(!zellAuswahl.zellen.every(td=>td.isConnected)){zellAuswahl=null;return}
+  const pr=paper.getBoundingClientRect();
+  zellAuswahl.zellen.forEach(td=>{const r=td.getBoundingClientRect(),b=document.createElement("div");b.className="zselbox";
+    Object.assign(b.style,{left:(r.left-pr.left)+"px",top:(r.top-pr.top)+"px",width:r.width+"px",height:r.height+"px"});paper.appendChild(b)});
+}
+/* Was liegt unter dem Zeiger am Tabellenrand: Zeile, Spalte oder die ganze
+   Tabelle (Ecke oben links) — oder nichts */
+function zellRandZiel(x,y){
+  const ed=$("#editor");if(!ed||S.mode!=="write")return null;
+  for(const t of ed.querySelectorAll("table")){
+    const r=t.getBoundingClientRect();if(!r.width)continue;
+    if(x>=r.left-ZW_LINKS&&x<r.left-1&&y>=r.top-ZW_OBEN-6&&y<r.top-1)return {art:"tabelle",t};
+    if(x>=r.left-ZW_LINKS&&x<r.left+2&&y>=r.top&&y<=r.bottom){
+      const tr=tabRaster(t).zeilen.find(z=>{const q=z.getBoundingClientRect();return y>=q.top&&y<=q.bottom});
+      if(tr)return {art:"zeile",t,tr}}
+    if(y>=r.top-ZW_OBEN&&y<r.top+2&&x>=r.left&&x<=r.right){
+      const ra=tabRaster(t),z=ra.zellen.find(z=>{const q=z.td.getBoundingClientRect();return x>=q.left&&x<q.right&&z.r0===0});
+      if(z){const q=z.td.getBoundingClientRect(),n=z.c1-z.c0+1;return {art:"spalte",t,c:z.c0+Math.min(n-1,Math.floor((x-q.left)/q.width*n))}}}
+  }
+  return null;
+}
+function zellRandWaehlen(ziel){
+  const ra=tabRaster(ziel.t);
+  const ri=ziel.art==="zeile"?ra.zeilen.indexOf(ziel.tr):-1;
+  const zellen=ra.zellen.filter(z=>ziel.art==="tabelle"||(ziel.art==="zeile"?z.r0<=ri&&z.r1>=ri:z.c0<=ziel.c&&z.c1>=ziel.c)).map(z=>z.td);
+  if(zellen.length)zellAuswahlSetzen(ziel.t,zellen,ziel.art);
+}
+/* Zeiger: Pfeil nach rechts oben für Zeilen, nach unten für Spalten (Word) */
+const ZW_ZEIGER={
+  zeile:`url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M4 16 15 5M8 5h7v7" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M4 16 15 5M8 5h7v7" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round"/></svg>')}") 15 5, pointer`,
+  spalte:`url("data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><path d="M10 3v13M5 11l5 5 5-5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M10 3v13M5 11l5 5 5-5" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round"/></svg>')}") 10 17, pointer`,
+  tabelle:"pointer"
+};
+/* Anfasser oben links an der Tabelle unter dem Zeiger (Word zeigt ihn beim
+   Überfahren) */
+function tabAnfasser(t){
+  const paper=$("#paper");if(!paper)return;
+  let a=paper.querySelector(".tabanfasser");
+  if(!t){if(a)a.remove();return}
+  if(!a){a=document.createElement("div");a.className="tabanfasser";a.title=tr("Tabelle markieren");
+    a.innerHTML=ICOSZ('<path d="M12 3v18M3 12h18M12 3 9.5 5.5M12 3l2.5 2.5M12 21l-2.5-2.5M12 21l2.5-2.5M3 12l2.5-2.5M3 12l2.5 2.5M21 12l-2.5-2.5M21 12l-2.5 2.5"/>',12,1.6);paper.appendChild(a)}
+  const pr=paper.getBoundingClientRect(),r=t.getBoundingClientRect();
+  a.style.left=(r.left-pr.left-15)+"px";a.style.top=(r.top-pr.top-15)+"px";
+}
 /* Sind mehrere Zellen einer Tabelle markiert, ihren Inhalt leeren (ein
    Rückgängig-Schritt) und true liefern — sonst nichts tun. Für Entf,
    Rücktaste und Ausschneiden. */
 function zellenLeeren(){
-  const sel=getSelection();if(!sel.rangeCount||sel.isCollapsed)return false;
-  const b=zellBereich();if(!b||!b.rect||b.zellen.length<2)return false;
+  const sel=getSelection();if(!sel.rangeCount||(sel.isCollapsed&&!zellAuswahl))return false;
+  const b=zellBereich();if(!b||!b.rect||(b.zellen.length<2&&!zellAuswahl))return false;
   const zellen=b.zellen;
   tabUndo(b.t,()=>{zellen.forEach(td=>{td.innerHTML="<br>"});putCaret(zellen[0])});
   return true;
 }
 function zellBereich(){
   const sel=getSelection();if(!sel.rangeCount)return null;
+  /* Per Klick markierte Zeile/Spalte/Tabelle geht vor */
+  if(zellAuswahl&&zellAuswahl.zellen.every(td=>td.isConnected)&&zellAuswahl.t.contains(sel.anchorNode)){
+    const t=zellAuswahl.t,raster=tabRaster(t),zs=raster.zellen.filter(z=>zellAuswahl.zellen.includes(z.td));
+    const rect={r0:Math.min(...zs.map(z=>z.r0)),c0:Math.min(...zs.map(z=>z.c0)),r1:Math.max(...zs.map(z=>z.r1)),c1:Math.max(...zs.map(z=>z.c1))};
+    return {t,raster,zellen:[...zellAuswahl.zellen],rect};
+  }
   const r=sel.getRangeAt(0),zu=n=>{n=n&&n.nodeType===1?n:n&&n.parentElement;return n&&n.closest("td,th")};
   const a=zu(r.startContainer),b=zu(r.endContainer)||a;if(!a)return null;
   const t=a.closest("table");if(!b||b.closest("table")!==t)return {t,raster:tabRaster(t),zellen:[a],rect:null};
@@ -26230,7 +26342,14 @@ function tabAktion(a0,anker,zelle,bereich){
                    {a:"tblDel",label:tr("Tabelle löschen")}],
       a=>{
         const ed=$("#editor");
-        if(ed&&ed.contains(zelleFest))U(()=>tableCmdMitMarke(a,zelleFest));
+        /* Markierte Zeilen/Spalten alle auf einmal, wie Word */
+        const ziele=zellAuswahl&&(a==="rowDel"||a==="colDel")&&zellAuswahl.t===t?zellAuswahl.zellen:null;
+        if(ziele&&ed&&ed.contains(t)){const ra=tabRaster(t),zs=ra.zellen.filter(z=>ziele.includes(z.td));
+          const nr=a==="rowDel"?[...new Set(zs.map(z=>z.r0))].sort((x,y)=>y-x):[...new Set(zs.map(z=>z.c0))].sort((x,y)=>y-x);
+          zellAuswahlWeg();
+          U(()=>nr.forEach(n=>{const r2=tabRaster(t),z=r2.zellen.find(z=>a==="rowDel"?z.r0===n:z.c0===n);if(z&&t.isConnected)tableCmdMitMarke(a,z.td)}));
+        }
+        else if(ed&&ed.contains(zelleFest))U(()=>tableCmdMitMarke(a,zelleFest));
         if(ed)ed.focus();
         nach();
       });
