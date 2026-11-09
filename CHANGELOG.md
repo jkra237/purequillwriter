@@ -47,11 +47,6 @@ immer genau einen Commit, der sie anfasst.
 
 ### Nebenbei gefunden, noch nicht behoben
 
-- **Listen in Tabellenzellen bei .doc und .rtf**: der .doc-Leser und
-  RTF (Lesen und Schreiben) machen daraus Absätze — `check-umlauf` zeigt
-  es seit 2026-11-09 („Liste in Zelle“, dazu ul/li/Listenart). Word und
-  ODT sind behoben.
-
 - **Portugiesisch gemischt**: Die Oberfläche ist überwiegend brasilianisch
   („Salvar tudo“, „você“, „arquivo“), einzelne ältere Einträge sind
   europäisch („ficheiro“, „guardado“, „definições“), etwa „Não foi possível
@@ -117,6 +112,13 @@ Derzeit nichts.
   für Words Grundlisten liegen dafür in `docxListenStilEbene()`, eine
   Stelle für Fließtext und Zellen. Umlauf Word/ODT 54/54 mit dem neuen
   Merkmal „Liste in Zelle“ im Prüfdokument.
+- **Listen in Tabellenzellen auch bei .doc und RTF** (Tom: „ja mach“):
+  beide Leser suchten Listen nur außerhalb von Tabellen (`tief<1`), der
+  gemeinsame Satzbau `wortSatz()` legte Zellabsätze ohne Liste an, und
+  `rtfBlob()` filterte Listen in Zellen ganz heraus. Jetzt Listen in
+  Tabellen der ersten Ebene, `wortSatz` baut sie wie der Word-Leser
+  (`zellListenHtml`), RTF schreibt sie als Listenabsätze mit `intbl`.
+  Umlauf: Word, ODT, .doc und PQ-RTF 54/54, LO-RTF 50/54 wie vorher.
 
 ---
 

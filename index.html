@@ -15222,7 +15222,9 @@ async function rtfBlob(d){
   /* Listen: eine Listendefinition je Liste, Ebenen aus den tatsächlich
      verschachtelten Listen; \lsN am Absatz */
   const listDefs=[],listOver=[];
-  const liste=el=>{
+  /* Mit nurEintraege die Absätze als Liste {el,extra} statt fertigem RTF —
+     für Tabellenzellen, deren letzter Absatz mit \cell enden muss */
+  const liste=(el,nurEintraege)=>{
     const ebenen=[];
     const sammle=(l,i)=>{if(i>8)return;if(!ebenen[i])ebenen[i]={tag:l.tagName.toLowerCase(),ls:listStyleOf(l),start:parseInt(l.getAttribute("start"),10)||1};
       l.querySelectorAll(":scope > li > ul, :scope > li > ol").forEach(u=>sammle(u,i+1))};
@@ -15237,19 +15239,19 @@ async function rtfBlob(d){
       return `{\\listlevel\\levelnfc${nfc}\\levelnfcn${nfc}\\leveljc0\\leveljcn0\\levelfollow0\\levelstartat${e.start||1}{\\leveltext\\'02\\'0${i}${txt(v.suffix)};}{\\levelnumbers\\'01;}${lage}}`;
     }).join("")+`{\\listname ;}\\listid${id}}`);
     listOver.push(`{\\listoverride\\listid${id}\\listoverridecount0\\ls${nr}}`);
-    const eintraege=(l,i)=>{
-      let x="";
+    const eintraege=(l,i,aus)=>{
       [...l.children].forEach(li=>{
         if(li.tagName.toLowerCase()!=="li")return;
         const unter=li.querySelector(":scope > ul, :scope > ol");
         const klon=li.cloneNode(true);
         if(unter)klon.querySelector(":scope > ul, :scope > ol").remove();
-        x+=absatz(klon,0,`\\ls${nr}\\ilvl${i}\\fi-360\\li${(i+1)*720}`);
-        if(unter)x+=eintraege(unter,i+1);
+        aus.push({el:klon,extra:`\\ls${nr}\\ilvl${i}\\fi-360\\li${(i+1)*720}`});
+        if(unter)eintraege(unter,i+1,aus);
       });
-      return x;
+      return aus;
     };
-    return eintraege(el,0);
+    const alle=eintraege(el,0,[]);
+    return nurEintraege?alle:alle.map(e=>absatz(e.el,0,e.extra)).join("");
   };
   const tabelle=async t=>{
     const zeilen=[...t.rows].filter(tr=>tr.children.length);
@@ -15294,9 +15296,11 @@ async function rtfBlob(d){
         const z=raster[r][g];
         if(!z||!z.erst){x+="\\pard\\plain\\intbl\\f0\\fs"+fs(groesse)+" \\cell\n";continue}
         const td=z.td;
-        const bl=td.querySelector("p,ul,ol,figure,h1,h2,h3,h4")?[...td.children].filter(c=>!/^(ul|ol|table)$/i.test(c.tagName)):[td];
-        const teile=bl.length?bl:[td];
-        teile.forEach((b,k)=>{x+=absatz(b,0,ausr(jcVon(b)),{intbl:true,ende:k===teile.length-1?"\\cell":"\\par"})});
+        /* Listen in der Zelle als Listenabsätze (seit 2026-11-09; vorher
+           fielen sie hier heraus) */
+        const bl=td.querySelector("p,ul,ol,figure,h1,h2,h3,h4")?[...td.children].filter(c=>!/^table$/i.test(c.tagName)):[td];
+        const teile=(bl.length?bl:[td]).flatMap(b=>/^(ul|ol)$/i.test(b.tagName)?liste(b,true):[{el:b,extra:ausr(jcVon(b))}]);
+        teile.forEach((b,k)=>{x+=absatz(b.el,0,b.extra,{intbl:true,ende:k===teile.length-1?"\\cell":"\\par"})});
       }
       x+=def+"\\row\n";
     }
@@ -20020,6 +20024,23 @@ function wortSatz(absaetze,ctx){
     }
     html+="<li>"+(inhalt(ab).join("")||"<br>");
   };
+  /* Listen in Zellen (2026-11-09, Tom): wie im Fließtext je Ebene, aber nur
+     innerhalb der einen Zelle — bis dahin wurden es gewöhnliche Absätze */
+  const zellListenHtml=teile=>{
+    let h="";const stk=[];
+    const zu=n=>{while(stk.length>n)h+="</li></"+stk.pop().tag+">"};
+    for(const x of teile){
+      if(!x.liste){zu(0);h+=x.auf+(x.h||"<br>")+"</p>";continue}
+      const {ebene,stil,nummer}=x.liste;
+      zu(ebene+1);
+      if(stk.length===ebene+1){const o=stk[ebene];if(o.tag!==stil.tag||o.ls!==stil.ls)zu(ebene);else h+="</li>"}
+      while(stk.length<ebene+1){const tiefer=stk.length<ebene,s=tiefer?{tag:"ul",ls:""}:stil;
+        h+="<"+s.tag+(s.ls?' data-ls="'+s.ls+'"':"")+(s.tag==="ol"&&!tiefer&&nummer!==1?' start="'+nummer+'"':"")+">";
+        stk.push(s);if(tiefer)h+="<li>"}
+      h+="<li>"+(x.h||"<br>");
+    }
+    zu(0);return h;
+  };
   /* Tabellen: Zellen bis zur Zeilenmarke; die Zellgrenzen der Zeile ergeben
      colspan, die Verbund-Merker rowspan, die Grenzen die Spaltenbreiten. */
   let zeilen=[],zellen=[],zelleTeile=[];
@@ -20071,9 +20092,9 @@ function wortSatz(absaetze,ctx){
       if(ab.tief>1&&ab.innerTtp)continue;
       const tz=inhalt(ab);
       const zh=tz.join("")+tz.bilder.map(b=>figurHtml(b,ab.jc)).join("");
-      zelleTeile.push({h:zh,auf:pAuf(ab,!!ab.zelle,!zh.replace(/<br>/g,"").trim())});
+      zelleTeile.push({h:zh,auf:pAuf(ab,!!ab.zelle,!zh.replace(/<br>/g,"").trim()),liste:ab.liste||null});
       if(ab.zelle&&ab.tief===1){
-        zellen.push(zelleTeile.length===1&&zelleTeile[0].auf==="<p>"?zelleTeile[0].h:zelleTeile.map(x=>x.auf+(x.h||"<br>")+"</p>").join(""));
+        zellen.push(zelleTeile.length===1&&zelleTeile[0].auf==="<p>"&&!zelleTeile[0].liste?zelleTeile[0].h:zellListenHtml(zelleTeile));
         zelleTeile=[];
       }
       continue;
@@ -20515,7 +20536,7 @@ function docLesen(buf){
     const tief=ab.pap.itap||(ab.pap.inTable?1:0);
     const sa=stilArt(ab.istd);
     let h=sa.h||(ab.pap.outLvl!=null&&ab.pap.outLvl<9?Math.min(4,ab.pap.outLvl+1):0),art=h?"":sa.art,liste=null;
-    if(tief<1&&ab.pap.ilfo>0&&ab.pap.ilfo<=lfo.length){
+    if(tief<=1&&ab.pap.ilfo>0&&ab.pap.ilfo<=lfo.length){
       const ilvl=Math.min(8,ab.pap.ilvl||0),ebenen=listen.get(lfo[ab.pap.ilfo-1])||[];
       const {stil,start}=wortListenStil(ebenen,ilvl);
       const k=ab.pap.ilfo+":"+ilvl;
@@ -21030,7 +21051,7 @@ function rtfLesen(roh){
     const pap=ab.pap,tief=ab.ttp?1:ab.innerTtp?2:pap.itap||(pap.intbl?1:0);
     let {h,art}=vorlage(pap.s),liste=null;
     if(!h&&pap.outline!=null&&pap.outline<9)h=Math.min(4,pap.outline+1);
-    if(tief<1&&pap.ls&&lsListe[pap.ls]!=null){
+    if(tief<=1&&pap.ls&&lsListe[pap.ls]!=null){
       const ebenen=listen[lsListe[pap.ls]]||[],ilvl=Math.min(8,pap.ilvl||0);
       const {stil,start}=wortListenStil(ebenen,ilvl);
       const k2=pap.ls+":"+ilvl;
