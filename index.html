@@ -2355,6 +2355,11 @@ body.handy #editor .pgbreak{height:0!important;border-top:1px dashed var(--rule)
   input,select,textarea,.tools select,.tools input[type=text],
   .modal select,.modal input,.modal textarea,.setrow select,.setrow input{font-size:16px}
 }
+/* Scrollleisten in den Farben des Schemas (Tom, 2026-11-09): ohne Angabe
+   zeichnet Windows sie immer hellgrau, auch in Tinte oder Tiefsee. Rinne in
+   der Leistenfarbe, Schieber in der gedämpften Schrift — sichtbar auf jedem
+   der 18 Schemata. Erbt von :root auf alle scrollbaren Bereiche. */
+:root{scrollbar-color:color-mix(in srgb,var(--ink-soft) 75%,var(--chrome-2)) var(--chrome-2)}
 /* Einführungstour: ein Rahmen um die gezeigte Stelle, der Rest gedimmt
    (der Schatten des Rahmens ist die Abdunklung), daneben eine Karte. Die
    Ebene fängt alle Klicks ab — während der Tour wird nichts bedient. */

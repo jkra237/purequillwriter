@@ -77,6 +77,27 @@ immer genau einen Commit, der sie anfasst.
 
 Derzeit nichts.
 
+### Geändert
+
+- **Tinte ist das Farbschema für neue Nutzer** (Tom): gilt nur beim
+  ersten Start (`STANDARD_THEMA`); wer schon ein Schema hat, behält es.
+  Vorher Wolke.
+
+### Behoben
+
+- **Scrollleisten blieben in jedem Farbschema hellgrau** (Tom, in der
+  installierten Fassung): sie waren nirgends gestaltet, Windows zeichnete
+  den Standard. Jetzt `scrollbar-color` auf `:root` — Rinne in der
+  Leistenfarbe, Schieber in der gedämpften Schrift; gemessen in allen 18
+  Schemata 3,0 bis 4,7:1.
+
+---
+
+## 1.6.1 — eingereicht 2026-11-05, wartet auf Freigabe
+
+Gebaut aus `d5721a0` (Versions-Commit auf `a1ca595`). Nach der Freigabe:
+Datum statt „eingereicht“, Tag `v1.6.1` auf `d5721a0`.
+
 ### Neu
 
 - **Kurze Führung für neue Nutzer** (Tom): sechs Karten über der echten
@@ -105,9 +126,6 @@ Derzeit nichts.
 
 ### Geändert
 
-- **Tinte ist das Farbschema für neue Nutzer** (Tom): gilt nur beim
-  ersten Start (`STANDARD_THEMA`); wer schon ein Schema hat, behält es.
-  Vorher Wolke.
 - **Neues Symbol „Feder schreibt“** (Tom): eine Seite mit Zeilen, die
   Feder schreibt die letzte — statt der einzelnen Feder. Terrakotta mit
   Verlauf und weichen Schatten, im Stil der Rewrite-PDF-Bilder. Ein
