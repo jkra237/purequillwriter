@@ -96,6 +96,12 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Kurze Tabellen sprangen als Ganzes auf die nächste Seite** (Tom): die
+  Ansicht teilte eine Tabelle nur, wenn sie länger als eine Seite war —
+  Word teilt jede zwischen den Zeilen, und der Druck tat das auch, die
+  Ansicht wich davon ab. Jetzt zeilenweise wie Word; passt schon die erste
+  Zeile nicht, wandert die Tabelle. Druck gegen Schirm: Word-Pruefung 26/26,
+  gemischt 41/41 Seiten, check-export 302/302.
 - **Scrollleisten blieben in jedem Farbschema hellgrau** (Tom, in der
   installierten Fassung): sie waren nirgends gestaltet, Windows zeichnete
   den Standard. Jetzt `scrollbar-color` auf `:root` — Rinne in der

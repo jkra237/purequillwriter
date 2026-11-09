@@ -23041,9 +23041,9 @@ function paginate(){
           const nr=n.getBoundingClientRect(),nt=nr.top-edTop;
           let anfang=nr.height;
           if(LISTE_TAG.test(n.tagName)&&n.querySelector("li"))anfang=n.querySelector("li").getBoundingClientRect().bottom-nr.top;
-          /* Eine Tabelle bricht nur zeilenweise, wenn sie länger als eine
-             Seite ist — eine kürzere wandert als Ganzes, also zählt sie ganz */
-          else if(n.tagName==="TABLE"&&n.rows[0]&&nr.height>contentH)anfang=n.rows[0].getBoundingClientRect().bottom-nr.top;
+          /* Eine Tabelle bricht zeilenweise (seit 2026-11-09 jede): es zählt
+             ihre erste Zeile */
+          else if(n.tagName==="TABLE"&&n.rows[0])anfang=n.rows[0].getBoundingClientRect().bottom-nr.top;
           /* Ein teilbarer Absatz ab vier Zeilen bricht um; dann genügen,
              wie bei der Absatzkontrolle, seine ersten zwei Zeilen */
           else if(TEILBAR(n)){const zl=zeilenVon(n,nr.top);if(zl.length>=4)anfang=zl[1].bottom+zl[0].top}
@@ -23060,7 +23060,12 @@ function paginate(){
          gegen die Ansicht versetzt (gemessen: 24 gegen 25 Seiten). Die
          Abstandszeilen sind reine Anzeige wie margin-top: flush() und der
          Druck nehmen sie heraus, Tabellenbefehle räumen sie vorher ab. */
-      if(b.tagName==="TABLE"&&!zwang&&h>contentH&&top+h>limit+1){
+      /* Seit 2026-11-09 jede Tabelle, nicht nur die über eine Seite langen
+         (Tom: eine kurze Tabelle sprang als Ganzes auf die nächste Seite,
+         Word teilt sie zwischen den Zeilen — und der Druck tat es auch, die
+         Ansicht wich davon ab). Passt schon die erste Zeile nicht, wandert
+         die Tabelle (i===0 unten). */
+      if(b.tagName==="TABLE"&&!zwang&&top+h>limit+1){
         const zeilen=[...b.rows],nKopf=kopfZeilenZahl(zeilen);
         const spalten=Math.max(1,...zeilen.map(r=>[...r.cells].reduce((n,c)=>n+(c.colSpan||1),0)));
         zeilen.forEach((r,i)=>{
