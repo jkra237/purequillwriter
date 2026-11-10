@@ -116,6 +116,21 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Tabellen mit verbundenen Zellen bekamen Löcher** (Tabellentest
+  2026-11-10): Zeile/Spalte einfügen und löschen, Tab in der letzten Zelle
+  und Überschriftenzeile zählten die Zellen der HTML-Zeile statt der
+  Spalten — neben einem colspan oder unter einem rowspan entstanden zu
+  viele oder zu wenige Zellen, die Überschriftenzeile verlor ihr colspan.
+  Jetzt über das Raster wie Word: eine verbundene Zelle, über die die neue
+  Zeile/Spalte hinweggeht, wird größer; beim Löschen wird sie kleiner oder
+  rückt in die nächste Zeile; Löschen nimmt alle Zeilen/Spalten, die die
+  Zelle bedeckt. Verbinden, das eine Zeile leert, kürzt jetzt auch die
+  Zellen, die über diese Zeile reichten.
+- **Spaltenbreite ziehen ließ sich am Dokumentende nicht rückgängig
+  machen**: wie bei den übrigen Tabellenbefehlen kommt dort ein leerer
+  Absatz hinter die Tabelle.
+- **Tabelle löschen oder in Text umwandeln am Dokumentanfang/-ende ohne
+  Rückgängig**: leerer Absatz als Rand (`tabRandAbsaetze`).
 - **Kurze Tabellen sprangen als Ganzes auf die nächste Seite** (Tom): die
   Ansicht teilte eine Tabelle nur, wenn sie länger als eine Seite war —
   Word teilt jede zwischen den Zeilen, und der Druck tat das auch, die

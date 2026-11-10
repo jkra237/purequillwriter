@@ -10799,10 +10799,9 @@ function drawWrite(){
          direkt im DOM: Strg+Z sprang darüber und nahm das davor Getippte
          zurück). Verbundene Zellen der letzten Zeile behalten ihre Breite. */
       tabUndo(table,()=>{
-        const zeilen=[...table.rows].filter(r=>!r.classList.contains("pgzeile")),last=zeilen[zeilen.length-1];
-        const nr=document.createElement("tr");
-        [...last.children].forEach(c=>{const td=document.createElement("td");if(c.colSpan>1)td.colSpan=c.colSpan;td.innerHTML="<br>";nr.appendChild(td)});
-        last.after(nr);putCaret(nr.firstElementChild);
+        table.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+        const nr=tabZeileNeu(table,tabRaster(table).zeilen.length-1,true);
+        if(nr&&nr.firstElementChild)putCaret(nr.firstElementChild);
       });
       return;
     }
@@ -25578,43 +25577,96 @@ function kopfZeilenUmschalten(zelle){
   else zeilen.slice(0,i+1).forEach(r=>r.setAttribute("data-kopfw","1"));
   flush();dirty=true;commit();queuePaginate();
 }
+/* Zeilen und Spalten über das Raster (2026-11-10, Tabellentest): verbundene
+   Zellen zählen wie in Word als die Spalten bzw. Zeilen, die sie bedecken.
+   Vorher zählte tableCmd die Zellen der DOM-Zeile — neben einer Zelle mit
+   colspan oder unter einer mit rowspan bekam die neue Zeile zu wenige oder
+   zu viele Zellen, Löschen verschob ganze Spalten, und die Tabelle hatte
+   danach Löcher. */
+function spanSetzen(td,art,n){if(n>1)td[art]=n;else td.removeAttribute(art==="colSpan"?"colspan":"rowspan")}
+function tabZeileNeu(t,R,unten){
+  const ra=tabRaster(t),ref=ra.zeilen[R];if(!ref)return null;
+  const nr=document.createElement("tr"),gesehen=new Set();
+  for(let c=0;c<ra.spalten;){
+    const o=ra.belegt[R][c];
+    if(!o){const n=document.createElement("td");n.innerHTML="<br>";nr.appendChild(n);c++;continue}
+    /* Reicht eine Zelle über die neue Zeile hinweg, wird sie nur länger */
+    if(unten?o.r1>R:o.r0<R){if(!gesehen.has(o)){gesehen.add(o);spanSetzen(o.td,"rowSpan",o.r1-o.r0+2)}}
+    else{const n=document.createElement(o.td.tagName==="TH"&&!unten?"th":"td");n.innerHTML="<br>";
+      if(o.td.getAttribute("style"))n.setAttribute("style",o.td.getAttribute("style"));
+      spanSetzen(n,"colSpan",o.c1-o.c0+1);nr.appendChild(n)}
+    c=o.c1+1;
+  }
+  if(ref.hasAttribute("data-kopfw")&&(!unten||ra.zeilen[R+1]&&ra.zeilen[R+1].hasAttribute("data-kopfw")))nr.setAttribute("data-kopfw","1");
+  if(unten)ref.after(nr);else ref.before(nr);
+  return nr;
+}
+function tabZeileWeg(t,R){
+  const ra=tabRaster(t),tr=ra.zeilen[R];if(!tr)return;
+  if(ra.zeilen.length<=1){t.remove();return}
+  const nx=ra.zeilen[R+1],c0=td=>{const z=ra.zellen.find(q=>q.td===td);return z?z.c0:1e9};
+  ra.zellen.forEach(o=>{
+    if(o.r0>R||o.r1<R||o.r0===o.r1)return;
+    spanSetzen(o.td,"rowSpan",o.r1-o.r0);
+    /* Beginnt die Zelle in der gelöschten Zeile, rückt sie in die nächste */
+    if(o.r0===R&&nx)nx.insertBefore(o.td,[...nx.children].find(td=>c0(td)>o.c0)||null);
+  });
+  tr.remove();
+}
+function tabSpalteNeu(t,C,rechts){
+  const ra=tabRaster(t),B=rechts?C+1:C,gesehen=new Set();
+  ra.zeilen.forEach((tr,r)=>{
+    const o=ra.belegt[r][B];
+    if(o&&o.c0<B){if(!gesehen.has(o)){gesehen.add(o);spanSetzen(o.td,"colSpan",o.c1-o.c0+2)}return}
+    const vorbild=ra.belegt[r][C]||tr.lastElementChild&&{td:tr.lastElementChild};
+    const n=document.createElement(vorbild&&vorbild.td.tagName==="TH"?"th":"td");n.innerHTML="<br>";
+    if(vorbild&&vorbild.td.getAttribute("style"))n.setAttribute("style",vorbild.td.getAttribute("style"));
+    const nach=[...tr.children].find(td=>{const z=ra.zellen.find(q=>q.td===td);return z&&z.c0>=B});
+    tr.insertBefore(n,nach||null);
+  });
+}
+/* Leere Zeilen entfernen und die Zellen, die über sie hinwegreichten, um
+   sie kürzen — sonst zählte das rowspan die verschwundene Zeile weiter mit
+   und schob die Zellen darunter nach rechts */
+function leereZeilenWeg(t){
+  const ra=tabRaster(t);
+  ra.zeilen.forEach((tr,r)=>{if(tr.children.length)return;
+    ra.zellen.forEach(z=>{if(z.r0<r&&z.r1>=r)spanSetzen(z.td,"rowSpan",(z.td.rowSpan||1)-1)});
+    tr.remove()});
+}
+function tabSpalteWeg(t,A,E){
+  const ra=tabRaster(t);
+  if(A<=0&&E>=ra.spalten-1){t.remove();return}
+  ra.zellen.forEach(o=>{if(o.c1<A||o.c0>E)return;
+    const rest=(o.c1-o.c0+1)-(Math.min(o.c1,E)-Math.max(o.c0,A)+1);
+    if(rest<=0)o.td.remove();else spanSetzen(o.td,"colSpan",rest)});
+  leereZeilenWeg(t);
+}
 function tableCmd(a,cell){
   if(!cell)return;
   const row=cell.parentElement,table=cell.closest("table");
   table.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
-  const idx=[...row.children].indexOf(cell);
-  const mk=tag=>{const e=document.createElement(tag);e.innerHTML="<br>";return e};
-  if(a==="rowAbove"||a==="rowBelow"){
-    const nr=document.createElement("tr");
-    [...row.children].forEach(c=>{const n=mk(c.tagName==="TH"&&a==="rowAbove"?"th":"td");if(c.getAttribute("style"))n.setAttribute("style",c.getAttribute("style"));nr.appendChild(n)});
-    if(row.hasAttribute("data-kopfw")&&(a==="rowAbove"||row.nextElementSibling&&row.nextElementSibling.hasAttribute("data-kopfw")))nr.setAttribute("data-kopfw","1");
-    row.parentNode.insertBefore(nr,a==="rowAbove"?row:row.nextSibling);
-  }
+  const ra=tabRaster(table),z=ra.zellen.find(q=>q.td===cell)||{r0:Math.max(0,ra.zeilen.indexOf(row)),c0:0};
+  if(z.r1==null){z.r1=z.r0;z.c1=z.c0}
+  if(a==="rowAbove"||a==="rowBelow")tabZeileNeu(table,a==="rowAbove"?z.r0:z.r1,a==="rowBelow");
   if(a==="colLeft"||a==="colRight"||a==="colDel"){
     /* Die Spaltenzahl ändert sich — von Hand gezogene Spaltenbreiten passen
        danach zu keiner Spalte mehr. Zurück zur gleichmäßigen Aufteilung ist
        hier einfacher und ehrlicher als sie zu erraten. */
     const cg=table.querySelector(":scope > colgroup");if(cg)cg.remove();
   }
-  if(a==="colLeft"||a==="colRight"){
-    [...table.rows].forEach(r=>{
-      const ref=r.children[idx];
-      const nc=mk(ref&&ref.tagName==="TH"?"th":"td");
-      const vorbild=ref||r.lastElementChild;if(vorbild&&vorbild.getAttribute("style"))nc.setAttribute("style",vorbild.getAttribute("style"));
-      r.insertBefore(nc,a==="colLeft"?ref:(ref?ref.nextSibling:null));
-    });
-  }
-  if(a==="rowDel"){if(table.rows.length>1)row.remove();else table.remove()}
-  if(a==="colDel"){
-    if(table.rows[0].children.length>1)[...table.rows].forEach(r=>{const c=r.children[idx];if(c)c.remove()});
-    else table.remove();
-  }
+  if(a==="colLeft"||a==="colRight")tabSpalteNeu(table,a==="colLeft"?z.c0:z.c1,a==="colRight");
+  /* Wie Word: alle Zeilen bzw. Spalten, die die Zelle bedeckt */
+  if(a==="rowDel")for(let r=z.r1;r>=z.r0;r--)if(table.isConnected)tabZeileWeg(table,r);
+  if(a==="colDel")tabSpalteWeg(table,z.c0,z.c1);
   if(a==="tblDel")table.remove();
   if(a==="headToggle"){
     const first=table.rows[0];
     const toTh=first.children[0].tagName==="TD";
     [...first.children].forEach(c=>{
-      const n=document.createElement(toTh?"th":"td");n.innerHTML=c.innerHTML;c.replaceWith(n)});
+      /* Attribute mitnehmen — sonst verlor eine verbundene Kopfzelle ihr colspan */
+      const n=document.createElement(toTh?"th":"td");for(const at of c.attributes)n.setAttribute(at.name,at.value);
+      n.innerHTML=c.innerHTML;c.replaceWith(n)});
   }
   flush();dirty=true;commit();queuePaginate();drawAnchors();
 }
@@ -26307,8 +26359,22 @@ function tabSortieren(zelle){
     });
   };
 }
+/* Steht eine Tabelle ganz am Anfang oder Ende des Dokuments, hat ein
+   Schritt, der sie durch etwas anderes ersetzt (löschen, in Text
+   umwandeln), keinen Rand — schrittEnde ließe ihn ohne Rückgängig, und
+   Strg+Z nähme das zuletzt Getippte zurück. Ein leerer Absatz davor bzw.
+   dahinter gibt den Rand (Word hat dort ohnehin immer einen Absatz). */
+function tabRandAbsaetze(t){
+  const ed=$("#editor");if(!ed||t.parentElement!==ed)return {};
+  const neu=()=>{const p=document.createElement("p");p.innerHTML="<br>";return p};
+  let vorn=null,hinten=null;
+  if(!t.previousElementSibling){vorn=neu();t.before(vorn)}
+  if(!t.nextElementSibling){hinten=neu();t.after(hinten)}
+  return {vorn,hinten};
+}
 function tabelleInText(zelle){
   const t=zelle.closest("table"),ed=$("#editor");if(!t||!ed||!ed.contains(t))return;
+  const rand=tabRandAbsaetze(t);
   const zeilen=tabRaster(t).zeilen;
   const absaetze=zeilen.map(tr=>{const p=document.createElement("p");
     p.innerHTML=[...tr.children].map(td=>{
@@ -26316,7 +26382,8 @@ function tabelleInText(zelle){
       const bl=td.querySelectorAll("p,li,h1,h2,h3,h4,blockquote");
       return bl.length?[...bl].map(b=>b.innerHTML).join(" "):td.innerHTML.replace(/<br\s*\/?>\s*$/,"");
     }).join(WTAB_HTML)||"<br>";return p});
-  alsSchritt(()=>{absaetze.forEach(p=>t.before(p));t.remove();putCaret(absaetze[0])});
+  /* Der Rand vorn wird mit ersetzt (sonst bliebe oben eine Leerzeile) */
+  alsSchritt(()=>{absaetze.forEach(p=>t.before(p));t.remove();if(rand.vorn)rand.vorn.remove();putCaret(absaetze[0])});
 }
 /* Tabelleneigenschaften (Tom, 2026-11-09, wie Words Reiter „Zeile“): Höhe
    (mindestens, wie Words Voreinstellung), ob die Zeile über Seiten umbrechen
@@ -26402,7 +26469,7 @@ function zellenVerbinden(b){
   if(ziel.colSpan===1)ziel.removeAttribute("colspan");if(ziel.rowSpan===1)ziel.removeAttribute("rowspan");
   b.zellen.slice(1).forEach(td=>td.remove());
   /* Zeilen, die dadurch leer wurden, fallen weg (Word tut dasselbe) */
-  [...b.t.rows].forEach(tr=>{if(!tr.children.length)tr.remove()});
+  leereZeilenWeg(b.t);
   tabFertig(b.t,ziel);
 }
 function zelleTeilen(td){
@@ -26651,11 +26718,18 @@ function tabAktion(a0,anker,zelle,bereich){
         /* Markierte Zeilen/Spalten alle auf einmal, wie Word */
         const ziele=zellAuswahl&&(a==="rowDel"||a==="colDel")&&zellAuswahl.t===t?zellAuswahl.zellen:null;
         if(ziele&&ed&&ed.contains(t)){const ra=tabRaster(t),zs=ra.zellen.filter(z=>ziele.includes(z.td));
-          const nr=a==="rowDel"?[...new Set(zs.map(z=>z.r0))].sort((x,y)=>y-x):[...new Set(zs.map(z=>z.c0))].sort((x,y)=>y-x);
+          /* Jede Zeile bzw. Spalte, die eine markierte Zelle bedeckt, von hinten
+             her — so bleiben die Nummern der noch offenen gültig */
+          const nr=new Set();zs.forEach(z=>{const [v,b]=a==="rowDel"?[z.r0,z.r1]:[z.c0,z.c1];for(let i=v;i<=b;i++)nr.add(i)});
+          const liste=[...nr].sort((x,y)=>y-x);
           zellAuswahlWeg();
-          U(()=>nr.forEach(n=>{const r2=tabRaster(t),z=r2.zellen.find(z=>a==="rowDel"?z.r0===n:z.c0===n);if(z&&t.isConnected)tableCmdMitMarke(a,z.td)}));
+          U(()=>{t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+            if(a==="colDel"){const cg=t.querySelector(":scope > colgroup");if(cg)cg.remove()}
+            liste.forEach(n=>{if(t.isConnected){if(a==="rowDel")tabZeileWeg(t,n);else tabSpalteWeg(t,n,n)}});
+            if(t.isConnected){const z=t.querySelector("td,th");if(z)putCaret(z)}
+            flush();dirty=true;commit();queuePaginate();drawAnchors()});
         }
-        else if(ed&&ed.contains(zelleFest))U(()=>tableCmdMitMarke(a,zelleFest));
+        else if(ed&&ed.contains(zelleFest)){if(a==="tblDel")tabRandAbsaetze(t);U(()=>tableCmdMitMarke(a,zelleFest))}
         if(ed)ed.focus();
         nach();
       });
@@ -26738,6 +26812,10 @@ document.addEventListener("selectionchange",()=>{if(!tableDragActive)rulerSpalte
 function startTableDrag(e,edge){
   e.preventDefault();
   tableDragActive=true;
+  /* Wie tabUndo: am Dokumentende ein leerer Absatz hinter der Tabelle, sonst
+     findet schrittEnde keinen Rand und das Ziehen bliebe ohne Rückgängig */
+  const ed0=$("#editor"),t0=edge.table||(edge.row&&edge.row.closest("table"));
+  if(ed0&&t0&&t0.parentElement===ed0&&!t0.nextElementSibling){const p=document.createElement("p");p.innerHTML="<br>";t0.after(p)}
   const schritt=schrittStart();
   const ed=$("#editor");
   ed.style.cursor=edge.type==="col"?"col-resize":"row-resize";
