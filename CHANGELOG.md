@@ -79,6 +79,12 @@ Derzeit nichts.
 
 ### Neu
 
+- **Fett, Kursiv, Unterstrichen mitten im Wort gilt fürs ganze Wort**
+  (wie Word): ohne Markierung mit der Marke in einem Wort formatieren
+  Strg+B/I/U und die Knöpfe das ganze Wort, die Marke bleibt stehen. Am
+  Wortrand weiter nur fürs Weiterschreiben.
+- **„Wort - Wort“ wird zu „Wort – Wort“** (Autokorrektur Gedankenstrich,
+  wie Words AutoFormat): beim Weiterschreiben nach dem folgenden Wort.
 - **Zeile, Spalte oder Tabelle per Klick markieren** (Tom, wie Word): links
   neben einer Zeile (Zeiger als Pfeil nach rechts oben), über einer Spalte
   (Pfeil nach unten) oder am Anfasser oben links an der Tabelle. Die
@@ -116,6 +122,18 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Absatz an Überschrift gehängt blieb klein** (Editor-Test 2026-11-10):
+  Rücktaste am Absatzanfang, Entf am Absatzende oder eine Markierung über
+  mehrere Absätze löschen — Chrome packte den hinteren Text in einen
+  `<span style="font-size:16px">`, mitten in der Überschrift stand er dann
+  in Fließtextgröße (und so ging er auch nach Word). Jetzt verbindet
+  PureQuill die Absätze selbst, wie Word: der hintere Text nimmt das Format
+  des vorderen an, eigene Formatierung (fett, Farbe) bleibt; ist der
+  vordere Absatz leer, bleibt der hintere (die Leerzeile vor einer
+  Überschrift verschwindet, die Überschrift bleibt). Ein Rückgängig-Schritt.
+- **Gedankenstrich der Autokorrektur war der lange (—)**, obwohl die
+  Einstellungen „–“ versprechen; jetzt „–“, nur Englisch „—“ (wie
+  „Bereinigen“).
 - **Tastatur an den Rändern einer Tabelle wie in Word** (Tom: „so
   benutzerfreundlich wie Windows“):
   - Rücktaste am Anfang des Absatzes unter einer Tabelle zerriss diesen

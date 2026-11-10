@@ -10720,6 +10720,7 @@ function drawWrite(){
     /* Entf/Rücktaste über mehrere Zellen leert sie wie in Word, statt die
        Tabelle zu löschen (Chrome nahm bei ganz markierter Tabelle alles weg) */
     if(/^delete/.test(e.inputType)&&zellenLeeren()){e.preventDefault();return}
+    if(blockGrenzeLoeschen(e)){e.preventDefault();return}
     autoCorrectInput(e);
   });
   /* Bilder dekodiert der Browser asynchron - ihre Höhe ist beim ersten
@@ -11417,7 +11418,34 @@ function cmd(c){
   if(hfEditing){const hb=$("#hfedit");document.execCommand(c,false,null);hb&&hb.focus();hfLive();syncToolbarState();return}
   if(c==="removeFormat"){formatierungEntfernen();return}
   if(c==="insertOrderedList"||c==="insertUnorderedList"){listeUmschalten(c);return}
-  document.execCommand(c,false,null);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
+  wortFormat(c);$("#editor")&&$("#editor").focus();dirty=true;drawStatus();syncToolbarState()}
+/* Wie Word: Fett, Kursiv, Unterstrichen, Durchgestrichen ohne Markierung
+   mitten in einem Wort gelten für das ganze Wort, die Schreibmarke bleibt
+   an ihrer Stelle (Editor-Test 2026-11-10: vorher schaltete Strg+B nur das
+   Format für den nächsten getippten Buchstaben um). Am Wortrand bleibt es
+   beim Umschalten fürs Weiterschreiben, auch wie Word. */
+const GANZWORT_CMDS=["bold","italic","underline","strikeThrough"];
+function wortFormat(c){
+  const sel=getSelection(),ed=$("#editor");
+  if(GANZWORT_CMDS.includes(c)&&ed&&!hfEditing&&sel.rangeCount&&sel.isCollapsed&&ed.contains(sel.anchorNode)&&sel.anchorNode.nodeType===3){
+    const tn=sel.anchorNode,o=sel.anchorOffset,tx=tn.data,W=/[\p{L}\p{N}_]/u;
+    if(o>0&&o<tx.length&&W.test(tx[o-1])&&W.test(tx[o])){
+      let s=o,e=o;while(s>0&&W.test(tx[s-1]))s--;while(e<tx.length&&W.test(tx[e]))e++;
+      const r=document.createRange();r.setStart(tn,s);r.setEnd(tn,e);sel.removeAllRanges();sel.addRange(r);
+      document.execCommand(c,false,null);
+      /* Marke zurück: vom Wortanfang aus o-s Zeichen weiter */
+      const rr=sel.rangeCount?sel.getRangeAt(0):null;if(!rr)return;
+      let rest=o-s;const w=document.createTreeWalker(ed,NodeFilter.SHOW_TEXT);
+      let n=rr.startContainer.nodeType===3?rr.startContainer:null,off=n?rr.startOffset:0;
+      if(!n){w.currentNode=rr.startContainer.childNodes[rr.startOffset]||rr.startContainer;n=w.currentNode.nodeType===3?w.currentNode:w.nextNode()}
+      else w.currentNode=n;
+      while(n&&off+rest>n.length){rest-=n.length-off;off=0;n=w.nextNode()}
+      if(n){const q=document.createRange();q.setStart(n,off+rest);q.collapse(true);sel.removeAllRanges();sel.addRange(q)}
+      return;
+    }
+  }
+  document.execCommand(c,false,null);
+}
 /* Die Werkzeugleiste zeigte nie, was an der Schreibmarke gerade gilt - der
    Fett-Knopf blieb inaktiv, auch mitten in fettem Text, und "Absatzformat"
    stand immer auf Fließtext, selbst in einer Überschrift. Die CSS-Klasse
@@ -13334,7 +13362,7 @@ function commandList(){
   [["bold","Fett","fett",kz("fett"),"bold"],["italic","Kursiv","kursiv",kz("kursiv"),"italic"],
    ["underline","Unterstrichen","unter",kz("unter"),"underline"],["strikeThrough","Durchgestrichen","","","strike durchgestrichen"],
    ["superscript","Hochgestellt","","","superscript hochgestellt"],["subscript","Tiefgestellt","","","subscript tiefgestellt"]]
-   .forEach(([cmd,lab,,k,s])=>add(F,"text:"+cmd,tr(lab),{pfad:ft,k,such:s,run:fmt(()=>document.execCommand(cmd))}));
+   .forEach(([cmd,lab,,k,s])=>add(F,"text:"+cmd,tr(lab),{pfad:ft,k,such:s,run:fmt(()=>wortFormat(cmd))}));
   const fa=F+" › "+tr("Absatzformat");
   add(F,"fliess",tr("Fließtext"),{pfad:fa,such:"normal standard body text",run:fmt(fliesstext)});
   add(F,"titel",tr("Titel"),{pfad:fa,such:"title",run:fmt(()=>blockAnwenden("titel"))});
@@ -16982,6 +17010,51 @@ function pasteBarPlain(){
    eingefügten Absatz damit — richtig so, ein Absatz kann nur eine Ausrichtung
    haben. Dabei rechnet Chrome dessen Blockeigenschaften aber in Inline-Spans
    um, wo sie nichts bewirken. Die tragen nichts und werden hier abgeräumt. */
+/* Löschen über eine Absatzgrenze (Rücktaste am Absatzanfang, Entf am Ende,
+   Markierung über mehrere Absätze; Editor-Test 2026-11-10): Chrome rechnet
+   dabei die Schrift des hinteren Absatzes in einen <span style="font-size:
+   16px"> um — an eine Überschrift gehängter Fließtext blieb so klein, mitten
+   in der Überschrift. Word übernimmt das Format des vorderen Absatzes. Hier:
+   derselbe Browserbefehl in einem Schritt, danach die neuen Schrift-Spans
+   wieder auspacken. Eigene Formatierung (Spans, die es vorher schon gab)
+   bleibt. */
+const GRENZ_BLOCK="p,h1,h2,h3,h4,h5,h6,li,blockquote,pre";
+function blockGrenzeLoeschen(e){
+  const t=e.inputType;if(t!=="deleteContentBackward"&&t!=="deleteContentForward")return false;
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount||schrittOffen||hfEditing||S.mode!=="write")return false;
+  const r=sel.getRangeAt(0);if(!ed.contains(r.commonAncestorContainer))return false;
+  const blk=n=>{n=n.nodeType===1?n:n.parentElement;const b=n&&n.closest(GRENZ_BLOCK);return b&&ed.contains(b)?b:null};
+  const a=blk(r.startContainer),b=blk(r.endContainer);if(!a||!b||a.closest("td,th")||b.closest("td,th"))return false;
+  if(r.collapsed){
+    const rr=document.createRange();
+    if(t==="deleteContentBackward"){rr.setStart(a,0);rr.setEnd(r.startContainer,r.startOffset)}
+    else{rr.setStart(r.endContainer,r.endOffset);rr.setEnd(a,a.childNodes.length)}
+    if(rr.toString().length||rr.cloneContents().querySelector("img,br:not(:last-child)"))return false;
+    const nb=t==="deleteContentBackward"?a.previousElementSibling:a.nextElementSibling;
+    if(!nb||!nb.matches(GRENZ_BLOCK)||a.tagName==="LI"||nb.tagName==="LI")return false;
+  }else if(a===b||a.tagName==="LI"||b.tagName==="LI"||a.contains(b)||b.contains(a))return false;
+  alsSchritt(()=>{
+    let vorn,hinten;
+    if(r.collapsed){[vorn,hinten]=t==="deleteContentBackward"?[a.previousElementSibling,a]:[a,a.nextElementSibling]}
+    else{r.deleteContents();vorn=a;hinten=b}
+    const leer=x=>!x.textContent.replace(/​/g,"").length&&!x.querySelector("img,figure,.fn,.en,.wtab");
+    const s=getSelection(),setz=(n,o)=>{const q=document.createRange();q.setStart(n,o);q.collapse(true);s.removeAllRanges();s.addRange(q)};
+    if(!vorn.isConnected||!hinten.isConnected){if(vorn.isConnected)setz(vorn,vorn.childNodes.length);return}
+    /* Wie Word: ist der vordere Absatz leer, bleibt der hintere mit seinem
+       Format (leere Zeile vor einer Überschrift weg — die Überschrift bleibt
+       Überschrift). Sonst wandert der hintere Text samt eigener Formatierung
+       in den vorderen und nimmt dessen Absatzformat an. */
+    if(leer(vorn)){vorn.remove();setz(hinten,0);return}
+    if(vorn.lastChild&&vorn.lastChild.nodeName==="BR")vorn.lastChild.remove();
+    const n=vorn.childNodes.length;
+    if(!leer(hinten))while(hinten.firstChild)vorn.appendChild(hinten.firstChild);
+    hinten.remove();
+    if(!vorn.firstChild)vorn.appendChild(document.createElement("br"));
+    setz(vorn,Math.min(n,vorn.childNodes.length));
+  });
+  return true;
+}
 function pasteTidy(){
   const ed=$("#editor");if(!ed)return;
   ed.querySelectorAll("span[style],b[style],i[style],em[style],strong[style],u[style],a[style]")
@@ -29520,10 +29593,29 @@ function autoCorrectInput(e){
     const vor=acTextBefore(blk,range);
     if(vor.endsWith("-")&&!vor.endsWith("--")){
       e.preventDefault();
-      if(!acReplace(range,1,"—"))document.execCommand("insertText",false,"-");
+      /* Wie in den Einstellungen versprochen „–“ (Halbgeviertstrich, im
+         Deutschen der Gedankenstrich); nur Englisch setzt den langen „—“ —
+         dieselbe Regel wie „Bereinigen“. Bis 2026-11-10 immer „—“. */
+      if(!acReplace(range,1,lang==="en"?"—":"–"))document.execCommand("insertText",false,"-");
       return;
     }
     return;
+  }
+  /* „Wort - Wort“ wird beim Weiterschreiben zu „Wort – Wort“, wie Words
+     AutoFormat (Editor-Test 2026-11-10: das kannte nur „--“) */
+  if(a.dash&&/^[\s.,;:!?)]$/.test(data)&&range.startContainer.nodeType===3){
+    const vor=acTextBefore(blk,range).replace(/ /g," ");
+    const m=/\S - ([^\s-]+)$/.exec(vor),off=range.startOffset;
+    if(m&&off>=m[1].length+2){
+      e.preventDefault();
+      const tn=range.startContainer,r=document.createRange();
+      r.setStart(tn,off-m[1].length-2);r.setEnd(tn,off-m[1].length-1);
+      const sel2=getSelection();sel2.removeAllRanges();sel2.addRange(r);
+      document.execCommand("insertText",false,"–");
+      const r2=document.createRange();r2.setStart(tn,Math.min(off,tn.length));r2.collapse(true);sel2.removeAllRanges();sel2.addRange(r2);
+      document.execCommand("insertText",false,data);
+      return;
+    }
   }
   if(a.cap&&/^\p{Ll}$/u.test(data)){
     const vor=acTextBefore(blk,range);
@@ -37156,7 +37248,7 @@ function helpKuerzel(html,sprache,alsApp){
    täte der Browser bei Strg+B ebenfalls nichts. */
 function zeichenFormat(c){
   const a=document.activeElement;
-  if(a&&a.isContentEditable)document.execCommand(c);
+  if(a&&a.id==="editor")wortFormat(c);else if(a&&a.isContentEditable)document.execCommand(c);
 }
 /* Namen, die anders heissen als der Tastenwert des Ereignisses. */
 const KZ_ZEIGE={Enter:"Eingabe","-":"−"};
