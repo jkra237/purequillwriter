@@ -10747,6 +10747,7 @@ function drawWrite(){
     if(e.key==="Backspace"&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&listenPunktWeg()){e.preventDefault();return}
     if((e.key==="Backspace"||e.key==="Delete")&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&umbruchWeg(ed,e.key)){e.preventDefault();return}
     if(!/^(Shift|Control|Alt|Meta)$/.test(e.key))umbruchAbwaehlen(ed);
+    if((e.key==="Backspace"||e.key==="Enter")&&!e.shiftKey&&!e.ctrlKey&&!e.altKey&&!e.metaKey&&tabRandTaste(ed,e.key)){e.preventDefault();return}
     /* Zweimal Enter auf einer bereits leeren Zitatzeile verlässt das Zitat -
        genau wie der Browser es bei Aufzählungen/Nummerierungen schon von
        selbst tut. Ohne diesen Sonderfall setzt formatBlock("blockquote")
@@ -26372,6 +26373,51 @@ function tabRandAbsaetze(t){
   if(!t.nextElementSibling){hinten=neu();t.after(hinten)}
   return {vorn,hinten};
 }
+/* Tastatur an den Rändern einer Tabelle wie in Word (Tom, 2026-11-10:
+   „so benutzerfreundlich wie Windows“). Gemessen vorher:
+   - Rücktaste am Anfang des Absatzes unter einer Tabelle: Chrome zog den
+     Absatz auseinander, sein Text stand danach lose ohne <p> im Dokument.
+     Word springt in die letzte Zelle; ein leerer Absatz verschwindet dabei
+     (außer dem letzten des Dokuments, den Word immer behält).
+   - Enter am Anfang der ersten Zelle einer Tabelle ganz oben: nur ein
+     Zeilenumbruch in der Zelle. Word setzt einen Absatz über die Tabelle —
+     sonst kommt man dort nie mehr hin. */
+function amBlockAnfang(block,sel){
+  const r=document.createRange();r.setStart(block,0);r.setEnd(sel.anchorNode,sel.anchorOffset);
+  return !r.toString().length&&!r.cloneContents().querySelector("img,figure,.wtab");
+}
+function tabRandTaste(ed,key){
+  const sel=getSelection();if(!sel.rangeCount||!sel.isCollapsed||!ed.contains(sel.anchorNode)||schrittOffen||hfEditing)return false;
+  const n=sel.anchorNode.nodeType===1?sel.anchorNode:sel.anchorNode.parentElement;if(!n)return false;
+  if(key==="Backspace"){
+    const b=n===ed?null:n.closest("#editor > *");
+    if(!b||b.tagName==="TABLE"||!b.previousElementSibling||b.previousElementSibling.tagName!=="TABLE"||!amBlockAnfang(b,sel))return false;
+    const letzte=[...b.previousElementSibling.querySelectorAll("td,th")].filter(z=>!z.closest(".pgzeile")).pop();
+    if(!b.textContent.replace(/​/g,"").length&&!b.querySelector("img,figure,table,hr")&&b.nextElementSibling)alsSchritt(()=>b.remove());
+    if(letzte){const r=document.createRange();r.selectNodeContents(letzte);r.collapse(false);sel.removeAllRanges();sel.addRange(r)}
+    return true;
+  }
+  const z=n.closest("td,th"),t=z&&z.closest("table");
+  if(!t||t.parentElement!==ed||t.previousElementSibling&&t.previousElementSibling.tagName!=="TABLE")return false;
+  if(z!==[...t.querySelectorAll("td,th")].find(x=>!x.closest(".pgzeile"))||!amBlockAnfang(z,sel))return false;
+  const p=document.createElement("p");p.innerHTML="<br>";
+  alsSchritt(()=>t.before(p));putCaret(p);
+  return true;
+}
+/* Unter einer Tabelle am Dokumentende (oder zwischen zwei Tabellen) gibt es
+   keinen Absatz — Pfeil nach unten oder ein Klick darunter setzte die Marke
+   neben die Tabelle, und Getipptes stand lose ohne <p> im Dokument. Word hat
+   dort immer einen Absatz; er entsteht hier, sobald die Marke dorthin will. */
+document.addEventListener("selectionchange",()=>{
+  const ed=$("#editor"),sel=getSelection();
+  if(!ed||!sel.rangeCount||!sel.isCollapsed||sel.anchorNode!==ed||schrittOffen||tableDragActive||hfEditing)return;
+  const vor=ed.childNodes[sel.anchorOffset-1],nach=ed.childNodes[sel.anchorOffset];
+  const istT=x=>x&&x.nodeName==="TABLE";
+  if(!(istT(vor)&&(!nach||istT(nach))||istT(nach)&&!vor))return;
+  const p=document.createElement("p");p.innerHTML="<br>";
+  if(istT(vor))vor.after(p);else nach.before(p);
+  putCaret(p);dirty=true;queuePaginate();
+});
 function tabelleInText(zelle){
   const t=zelle.closest("table"),ed=$("#editor");if(!t||!ed||!ed.contains(t))return;
   const rand=tabRandAbsaetze(t);

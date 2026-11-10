@@ -116,6 +116,16 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Tastatur an den Rändern einer Tabelle wie in Word** (Tom: „so
+  benutzerfreundlich wie Windows“):
+  - Rücktaste am Anfang des Absatzes unter einer Tabelle zerriss diesen
+    Absatz (sein Text stand danach lose, ohne Formatierung). Jetzt springt
+    die Marke in die letzte Zelle; ein leerer Absatz verschwindet dabei.
+  - Unter einer Tabelle am Dokumentende gab es keinen Absatz: Pfeil nach
+    unten oder ein Klick darunter, und Getipptes stand lose im Dokument.
+    Jetzt entsteht dort ein Absatz, sobald die Marke hinwill.
+  - Über einer Tabelle ganz oben konnte man nicht schreiben. Enter am
+    Anfang der ersten Zelle setzt jetzt einen Absatz darüber.
 - **Tabellen mit verbundenen Zellen bekamen Löcher** (Tabellentest
   2026-11-10): Zeile/Spalte einfügen und löschen, Tab in der letzten Zelle
   und Überschriftenzeile zählten die Zellen der HTML-Zeile statt der
