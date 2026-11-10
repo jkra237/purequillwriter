@@ -233,7 +233,7 @@ Derzeit nichts.
 
 ---
 
-## 1.6.1 — eingereicht 2026-11-05, wartet auf Freigabe
+## 1.6.1 — freigegeben 2026-11-10
 
 Gebaut aus `d5721a0` (Versions-Commit auf `a1ca595`). Nach der Freigabe:
 Datum statt „eingereicht“, Tag `v1.6.1` auf `d5721a0`.
