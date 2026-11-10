@@ -79,6 +79,15 @@ Derzeit nichts.
 
 ### Neu
 
+- **Rücktaste löscht markierte Zeile, Spalte oder Tabelle** (Tom, wie Word):
+  per Klick links neben der Zeile, über der Spalte oder am Anfasser
+  markiert, nimmt die Rücktaste sie weg (ein Rückgängig-Schritt, die Marke
+  steht danach im Absatz an der Stelle der Tabelle); Entf leert wie bisher
+  nur den Inhalt.
+- **Rechtsklickmenü: „Überschriftenzeile“ mit Häkchen** statt „Kopfzeile
+  umschalten“ (Words Name; daneben „Überschriften wiederholen“, ebenfalls
+  mit Häkchen). „Zellen verbinden/teilen“ stehen dort schon, sobald mehrere
+  Zellen markiert sind bzw. die Zelle verbunden ist.
 - **Fett, Kursiv, Unterstrichen mitten im Wort gilt fürs ganze Wort**
   (wie Word): ohne Markierung mit der Marke in einem Wort formatieren
   Strg+B/I/U und die Knöpfe das ganze Wort, die Marke bleibt stehen. Am

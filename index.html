@@ -3679,7 +3679,7 @@ en:{
   "Zeile darunter einfügen":"Insert row below",
   "Spalte links einfügen":"Insert column left",
   "Spalte rechts einfügen":"Insert column right",
-  "Kopfzeile umschalten":"Toggle header row",
+  "Überschriftenzeile":"Header row",
   "Zeile löschen":"Delete row",
   "Spalte löschen":"Delete column",
   "Tabelle löschen":"Delete table",
@@ -4793,7 +4793,7 @@ fr:{
   "Zeile darunter einfügen":"Insérer une ligne en dessous",
   "Spalte links einfügen":"Insérer une colonne à gauche",
   "Spalte rechts einfügen":"Insérer une colonne à droite",
-  "Kopfzeile umschalten":"Basculer la ligne d'en-tête",
+  "Überschriftenzeile":"Ligne d'en-tête",
   "Zeile löschen":"Supprimer la ligne",
   "Spalte löschen":"Supprimer la colonne",
   "Tabelle löschen":"Supprimer le tableau",
@@ -5907,7 +5907,7 @@ es:{
   "Zeile darunter einfügen":"Insertar fila abajo",
   "Spalte links einfügen":"Insertar columna a la izquierda",
   "Spalte rechts einfügen":"Insertar columna a la derecha",
-  "Kopfzeile umschalten":"Alternar fila de encabezado",
+  "Überschriftenzeile":"Fila de encabezado",
   "Zeile löschen":"Eliminar fila",
   "Spalte löschen":"Eliminar columna",
   "Tabelle löschen":"Eliminar tabla",
@@ -7021,7 +7021,7 @@ pt:{
   "Zeile darunter einfügen":"Inserir linha abaixo",
   "Spalte links einfügen":"Inserir coluna à esquerda",
   "Spalte rechts einfügen":"Inserir coluna à direita",
-  "Kopfzeile umschalten":"Alternar linha de cabeçalho",
+  "Überschriftenzeile":"Linha de cabeçalho",
   "Zeile löschen":"Excluir linha",
   "Spalte löschen":"Excluir coluna",
   "Tabelle löschen":"Excluir tabela",
@@ -8135,7 +8135,7 @@ pl:{
   "Zeile darunter einfügen":"Wstaw wiersz poniżej",
   "Spalte links einfügen":"Wstaw kolumnę z lewej",
   "Spalte rechts einfügen":"Wstaw kolumnę z prawej",
-  "Kopfzeile umschalten":"Przełącz wiersz nagłówka",
+  "Überschriftenzeile":"Wiersz nagłówka",
   "Zeile löschen":"Usuń wiersz",
   "Spalte löschen":"Usuń kolumnę",
   "Tabelle löschen":"Usuń tabelę",
@@ -9256,7 +9256,7 @@ it:{
   "Zeile darunter einfügen":"Inserisci riga sotto",
   "Spalte links einfügen":"Inserisci colonna a sinistra",
   "Spalte rechts einfügen":"Inserisci colonna a destra",
-  "Kopfzeile umschalten":"Attiva/disattiva riga di intestazione",
+  "Überschriftenzeile":"Riga di intestazione",
   "Zeile löschen":"Elimina riga",
   "Spalte löschen":"Elimina colonna",
   "Tabelle löschen":"Elimina tabella",
@@ -10719,6 +10719,7 @@ function drawWrite(){
   ed.addEventListener("beforeinput",e=>{
     /* Entf/Rücktaste über mehrere Zellen leert sie wie in Word, statt die
        Tabelle zu löschen (Chrome nahm bei ganz markierter Tabelle alles weg) */
+    if(e.inputType==="deleteContentBackward"&&zellAuswahlLoeschen()){e.preventDefault();return}
     if(/^delete/.test(e.inputType)&&zellenLeeren()){e.preventDefault();return}
     if(blockGrenzeLoeschen(e)){e.preventDefault();return}
     autoCorrectInput(e);
@@ -22479,7 +22480,7 @@ function tabKontext(cell,bereich){
     `<div class="msep"></div>`+
     eintrag("vorlage","vorlage",tr("Tabellenvorlage")+"…")+eintrag("borders","borders",tr("Rahmen"),1)+
     eintrag("shade","shade",tr("Schattierung")+"…")+eintrag("valign","valign",tr("Zellausrichtung"),1)+
-    eintrag("size","size",tr("Spaltenbreite"),1)+eintrag("headToggle","headToggle",tr("Kopfzeile umschalten"))+
+    eintrag("size","size",tr("Spaltenbreite"),1)+`<button class="mi" data-c="tbl:headToggle">${ic("headToggle")}${tr("Überschriftenzeile")}<span class="k">${cell.closest("table").rows[0]&&cell.closest("table").rows[0].cells[0]&&cell.closest("table").rows[0].cells[0].tagName==="TH"?"&#10003;":""}</span></button>`+
     `<button class="mi" data-c="tbl:kopfw">${ic("kopfw")}${tr("Überschriften wiederholen")}<span class="k">${kopfAn?"&#10003;":""}</span></button>`+
     eintrag("props","props",tr("Tabelleneigenschaften")+"…")+eintrag("sort","sort",tr("Sortieren")+"…")+eintrag("totext","totext",tr("In Text umwandeln"))+
     `<div class="msep"></div>`;
@@ -25910,12 +25911,12 @@ function drawTblBar(){
       kn("colLeft","Spalte links einfügen")+kn("colRight","Spalte rechts einfügen")+`<div class="sep"></div>`+
       kn("merge","Zellen verbinden")+kn("split","Zellen teilen")+`<div class="sep"></div>`+
       kn("shade","Schattierung")+kn("borders","Rahmen")+kn("valign","Ausrichtung in der Zelle")+kn("size","Spaltenbreite")+`<div class="sep"></div>`+
-      kn("del","Löschen")+`<div class="sep"></div>`+kn("headToggle","Kopfzeile umschalten")+kn("props","Tabelleneigenschaften");
+      kn("del","Löschen")+`<div class="sep"></div>`+kn("headToggle","Überschriftenzeile")+kn("props","Tabelleneigenschaften");
   }
   leisteAndocken(bar,curCell(),neueTab);
 }
 /* Ein Tabellenbefehl kann die Zelle unter der Schreibmarke aufloesen:
-   "Kopfzeile umschalten" ersetzt die td der ersten Reihe durch th, Loeschen
+   "Überschriftenzeile" ersetzt die td der ersten Reihe durch th, Loeschen
    nimmt Zeile oder Spalte ganz weg. Ohne Marke faende sich die Leiste nicht
    mehr in einer Tabelle und klappte weg, und der naechste Klick liefe ins
    Leere. Ueber Zeilen- und Spaltenindex landet die Marke danach wieder an
@@ -25982,6 +25983,41 @@ function zellRandWaehlen(ziel){
   const ri=ziel.art==="zeile"?ra.zeilen.indexOf(ziel.tr):-1;
   const zellen=ra.zellen.filter(z=>ziel.art==="tabelle"||(ziel.art==="zeile"?z.r0<=ri&&z.r1>=ri:z.c0<=ziel.c&&z.c1>=ziel.c)).map(z=>z.td);
   if(zellen.length)zellAuswahlSetzen(ziel.t,zellen,ziel.art);
+}
+/* Rücktaste bei markierter Zeile, Spalte oder Tabelle löscht sie, wie Word
+   (Tom, 2026-11-10); Entf leert nur den Inhalt (zellenLeeren). */
+function zellAuswahlLoeschen(){
+  const za=zellAuswahl,ed=$("#editor");
+  if(!za||!ed||!za.t.isConnected||!ed.contains(za.t)||!["zeile","spalte","tabelle"].includes(za.art))return false;
+  const t=za.t,ra=tabRaster(t),zs=ra.zellen.filter(z=>za.zellen.includes(z.td));if(!zs.length)return false;
+  zellAuswahlWeg();
+  if(za.art==="tabelle"){
+    const rand=tabRandAbsaetze(t);
+    /* Die Marke an den Anfang des Absatzes, der an die Stelle der Tabelle
+       rückt. Über die Stelle in #editor, nicht über das Element: schrittEnde
+       setzt die Nachbarblöcke für den Rückgängig-Verlauf neu ein, die alte
+       Referenz hängt danach nicht mehr im Dokument (und seine Textposition
+       „3“ landete am Ende des Absatzes davor). */
+    /* Der Rand vorn diente nur dem Rückgängig-Schritt: im Schritt wieder
+       weg, wie bei „In Text umwandeln“ — sonst blieben zwei Leerzeilen */
+    const i=[...ed.children].indexOf(t)-(rand.vorn?1:0);
+    alsSchritt(()=>{t.remove();if(rand.vorn)rand.vorn.remove()});
+    const ziel=ed.children[i]||ed.lastElementChild;if(ziel)putCaret(ziel);
+    drawTblBar();return true;
+  }
+  const nr=new Set();zs.forEach(z=>{const [v,b]=za.art==="zeile"?[z.r0,z.r1]:[z.c0,z.c1];for(let i=v;i<=b;i++)nr.add(i)});
+  /* Nur die tatsächlich markierte Zeile/Spalte, nicht alles, was eine
+     verbundene Zelle darin sonst noch bedeckt */
+  const genau=za.art==="zeile"?[...nr].filter(i=>zs.every(z=>z.r0<=i&&z.r1>=i)):[...nr].filter(i=>zs.every(z=>z.c0<=i&&z.c1>=i));
+  const liste=(genau.length?genau:[...nr]).sort((x,y)=>y-x);
+  const alle=za.art==="zeile"?liste.length>=ra.zeilen.length:liste.length>=ra.spalten;
+  if(alle)tabRandAbsaetze(t);
+  tabUndo(t,()=>{t.querySelectorAll("tr.pgzeile").forEach(r=>r.remove());
+    if(za.art==="spalte"){const cg=t.querySelector(":scope > colgroup");if(cg)cg.remove()}
+    liste.forEach(n=>{if(t.isConnected){if(za.art==="zeile")tabZeileWeg(t,n);else tabSpalteWeg(t,n,n)}});
+    if(t.isConnected){const z=t.querySelector("td,th");if(z)putCaret(z)}
+    flush();dirty=true;commit();queuePaginate();drawAnchors()});
+  return true;
 }
 /* Zeiger: Pfeil nach rechts oben für Zeilen, nach unten für Spalten (Word) */
 const ZW_ZEIGER={
