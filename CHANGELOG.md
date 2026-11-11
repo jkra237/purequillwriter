@@ -73,6 +73,12 @@ immer genau einen Commit, der sie anfasst.
   „Terminado“ und auf Italienisch „Finito“, die Oberfläche zeigt „Listo“
   und „Fatto“. Hilfetext an die Oberfläche angleichen.
 
+
+## 1.6.2 — eingereicht 2026-11-11, wartet auf Freigabe
+
+Gebaut aus dem Versions-Commit „Setze die Version auf 1.6.2“. Nach der
+Freigabe: Datum statt „eingereicht“, Tag `v1.6.2` auf diesen Commit.
+
 ### Offen, noch nicht entschieden
 
 Derzeit nichts.
