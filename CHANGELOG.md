@@ -131,6 +131,20 @@ Derzeit nichts.
 
 ### Behoben
 
+- **Browser-Fassung: nach zwei, drei Bildern wurde nichts mehr gespeichert**
+  (Tom, 2026-11-11: jemand wollte mehrere Fotos für ein PDF einfügen). Der
+  Browser hält im localStorage nur rund 5 MB, ein Foto belegte 0,4 MB, ein
+  PNG bis 3 MB — danach kam nur „Speicher voll“, und alles Weitere ging beim
+  Neuladen verloren. Jetzt zieht der Text eines Dokuments ab 200.000 Zeichen
+  (also sobald Bilder drin sind) nach IndexedDB um, wie seit 1.6.0 die
+  Zwischenstände; dort ist Platz für Hunderte MB. Erst wenn er dort
+  nachweislich liegt, verlässt er localStorage; beim Start wird er vor dem
+  ersten Zeichnen zurückgeholt, Sicherungen warten darauf. Reine
+  Textdokumente bleiben, wo sie waren. Gemessen: acht Fotos (je 4–10 MB)
+  bei simulierter 5-MB-Grenze gespeichert, nach dem Neuladen alle wieder da.
+- **Große PNG-Fotos werden als JPEG eingebettet**, wenn sie keine
+  durchsichtige Stelle haben — rund ein Siebtel so groß. Kleine PNGs
+  (Bildschirmfotos von Text, Grafiken) und alles mit Transparenz bleiben PNG.
 - **Absatz an Überschrift gehängt blieb klein** (Editor-Test 2026-11-10):
   Rücktaste am Absatzanfang, Entf am Absatzende oder eine Markierung über
   mehrere Absätze löschen — Chrome packte den hinteren Text in einen

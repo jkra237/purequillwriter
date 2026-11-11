@@ -2977,6 +2977,10 @@ let mem=null;
 /* Zwischenstände in IndexedDB (siehe histLaden) — hier oben, weil save() schon
    bei den Migrationen direkt nach load() läuft und sonst in der Totzone läge */
 let histBereit=false,histVersprechen=null;const histSicher=new Set();
+/* Große Dokumente in IndexedDB (siehe docsSchreiben): docSicher = Text liegt
+   nachweislich dort, docOffen = beim Start noch nicht zurückgeholt (nie
+   schreiben!), docGeschrieben = zuletzt geschriebener Stand je ID */
+const docSicher=new Set(),docOffen=new Set(),docGeschrieben=new Map();let docLaeuft=0,docNachholen=false;
 
 /* ================= Übersetzung ================= */
 const I18N={
@@ -2999,6 +3003,7 @@ en:{
   "Rahmen":"Borders",
   "Ausrichtung in der Zelle":"Alignment in cell",
   "Spaltenbreite":"Column width",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"A document with images could not be loaded — please reload the page.",
   "Spalte":"Column",
   "Sortieren":"Sort",
   "Sortieren nach":"Sort by",
@@ -4113,6 +4118,7 @@ fr:{
   "Rahmen":"Bordures",
   "Ausrichtung in der Zelle":"Alignement dans la cellule",
   "Spaltenbreite":"Largeur des colonnes",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"Un document contenant des images n’a pas pu être chargé — veuillez recharger la page.",
   "Spalte":"Colonne",
   "Sortieren":"Trier",
   "Sortieren nach":"Trier par",
@@ -5227,6 +5233,7 @@ es:{
   "Rahmen":"Bordes",
   "Ausrichtung in der Zelle":"Alineación en la celda",
   "Spaltenbreite":"Ancho de columna",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"No se pudo cargar un documento con imágenes; vuelve a cargar la página.",
   "Spalte":"Columna",
   "Sortieren":"Ordenar",
   "Sortieren nach":"Ordenar por",
@@ -6341,6 +6348,7 @@ pt:{
   "Rahmen":"Bordas",
   "Ausrichtung in der Zelle":"Alinhamento na célula",
   "Spaltenbreite":"Largura da coluna",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"Não foi possível carregar um documento com imagens — recarregue a página.",
   "Spalte":"Coluna",
   "Sortieren":"Classificar",
   "Sortieren nach":"Classificar por",
@@ -7455,6 +7463,7 @@ pl:{
   "Rahmen":"Obramowanie",
   "Ausrichtung in der Zelle":"Wyrównanie w komórce",
   "Spaltenbreite":"Szerokość kolumn",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"Nie udało się wczytać dokumentu z obrazami — odśwież stronę.",
   "Spalte":"Kolumna",
   "Sortieren":"Sortuj",
   "Sortieren nach":"Sortuj według",
@@ -8569,6 +8578,7 @@ it:{
   "Rahmen":"Bordi",
   "Ausrichtung in der Zelle":"Allineamento nella cella",
   "Spaltenbreite":"Larghezza colonne",
+  "Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden.":"Non è stato possibile caricare un documento con immagini — ricarica la pagina.",
   "Spalte":"Colonna",
   "Sortieren":"Ordina",
   "Sortieren nach":"Ordina per",
@@ -10063,10 +10073,19 @@ let storageOk=true;
 let datenGeloescht=false;
 function save(){if(datenGeloescht)return false;
   /* Zwischenstände, die sicher in IndexedDB liegen, bleiben hier draußen */
-  const s=histSicher.size?JSON.stringify(S,function(k,v){return k==="history"&&this&&histSicher.has(this.id)?undefined:v}):JSON.stringify(S);
+  docsSchreiben();
+  /* … und ebenso der Text großer Dokumente, sobald er dort liegt */
+  const s=histSicher.size||docSicher.size?JSON.stringify(S,function(k,v){
+    if(k==="history"&&this&&histSicher.has(this.id))return undefined;
+    if(k==="html"&&this&&docSicher.has(this.id))return undefined;
+    return v}):JSON.stringify(S);
   mem=JSON.parse(s);
   try{localStorage.setItem(KEY,s);if(!storageOk){storageOk=true;drawStatus()}return true}
   catch(e){
+    /* Läuft gerade ein Umzug nach IndexedDB, versucht dessen Abschluss es
+       gleich noch einmal — erst wenn es dann noch scheitert, ist der
+       Speicher wirklich voll */
+    if(docLaeuft){docNachholen=true;return false}
     if(storageOk){storageOk=false;
       setTimeout(()=>toast(String(e).includes("quota")||String(e).includes("Quota")
         ?tr("Speicher voll — bitte über {pfad} auslagern").replace("{pfad}",mpfad("Datei","Alles sichern"))
@@ -10109,6 +10128,9 @@ let S=load()||{
      behält sie; das betrifft nur neue Nutzer. */
   gsort:"alpha",marks:false,zoom:1,fitPage:false,guides:true,showCol:true,wordWerte:1
 };
+/* Dokumente, deren Text in IndexedDB liegt (docsSchreiben), kommen ohne html
+   aus localStorage: vormerken, docsLaden() holt ihn vor dem ersten Zeichnen */
+(S.docs||[]).forEach(d=>{if(d&&typeof d.html!=="string"){d.html="";docOffen.add(d.id);docSicher.add(d.id)}});
 if(S.showCol===undefined)S.showCol=true;
 if(!S.notes){
   S.notes=[];
@@ -10279,7 +10301,7 @@ function closeDoc(id){
        Word. Bei mehreren Reitern wird nur neu gezeichnet — vorher entschied das
        an dieser Stelle, ob zufällig alle Dokumente leer sind. */
     const warLetztes=S.docs.length===1;
-    S.docs.splice(i,1);histDel(d.id);
+    S.docs.splice(i,1);histDel(d.id);docDel(d.id);
     if(!S.docs.length){const n=blankDoc();n.fmt=d.fmt;n.glossaryId=d.glossaryId;S.docs.push(n)}
     if(S.active===id)S.active=S.docs[Math.max(0,i-1)].id;
     save();
@@ -21544,8 +21566,8 @@ async function alleDatenWeg(){
   try{
     const db=await idb();
     await new Promise(ok=>{
-      const t=db.transaction(["handles","dict","hist"],"readwrite");
-      t.objectStore("handles").clear();t.objectStore("dict").clear();t.objectStore("hist").clear();
+      const t=db.transaction(["handles","dict","hist","docs"],"readwrite");
+      t.objectStore("handles").clear();t.objectStore("dict").clear();t.objectStore("hist").clear();t.objectStore("docs").clear();
       t.oncomplete=ok;t.onerror=ok;t.onabort=ok;
     });
   }catch(e){}
@@ -21625,12 +21647,14 @@ const hatDateien=()=>typeof window.showSaveFilePicker==="function";
    Warten anzeigen kann. */
 const FSDB="pqw.files";
 function idb(){return new Promise((ok,fail)=>{
-  const r=indexedDB.open(FSDB,3);
+  const r=indexedDB.open(FSDB,4);
   r.onupgradeneeded=()=>{const db=r.result;
     if(!db.objectStoreNames.contains("handles"))db.createObjectStore("handles");
     if(!db.objectStoreNames.contains("dict"))db.createObjectStore("dict");
     /* seit 2026-11: die Zwischenstände je Dokument (Schlüssel = Dokument-ID) */
     if(!db.objectStoreNames.contains("hist"))db.createObjectStore("hist");
+    /* seit 2026-11-11: der Text großer Dokumente (Schlüssel = Dokument-ID) */
+    if(!db.objectStoreNames.contains("docs"))db.createObjectStore("docs");
   };
   r.onsuccess=()=>ok(r.result);r.onerror=()=>fail(r.error);
 })}
@@ -21688,6 +21712,71 @@ async function histAbgleich(){
   const ids=new Set(S.docs.map(d=>d.id));
   for(const id of alle.keys())if(!ids.has(id))await histDel(id);
   for(const d of S.docs)await histSchreiben(d);
+  await docAbgleich();
+}
+/* ================= Große Dokumente in IndexedDB =================
+   (2026-11-11, Tom: in der Browser-Fassung ließen sich nicht mehr als drei
+   Bilder einfügen.) localStorage fasst je Adresse rund 5 MB für alles; ein
+   Foto belegt nach dem Verkleinern 0,4 MB, ein PNG bis zu 3 MB. Danach
+   wurde nichts mehr gespeichert — nur „Speicher voll“.
+   Ab GROSS_DOK Zeichen (praktisch: sobald Bilder drin sind) zieht der Text
+   eines Dokuments nach IndexedDB, das Hunderte MB fasst — dasselbe Muster
+   wie bei den Zwischenständen: im Arbeitsspeicher bleibt d.html wie immer;
+   save() lässt es für Dokumente in docSicher weg, und zwar erst, wenn der
+   Text nachweislich geschrieben ist. Reine Textdokumente bleiben, wo sie
+   waren — für sie ändert sich nichts. Beim Start holt docsLaden() die Texte
+   zurück, bevor irgendetwas gezeichnet oder gesichert wird; bis dahin steht
+   ihre ID in docOffen, und nichts schreibt über sie hinweg. Ohne IndexedDB
+   (manche private Fenster) bleibt es beim alten Weg. */
+const GROSS_DOK=200000;
+async function docPut(id,html){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("docs","readwrite");t.objectStore("docs").put(html,id);
+  t.oncomplete=()=>ok(true);t.onerror=()=>ok(false);t.onabort=()=>ok(false)})}catch(e){return false}}
+async function docDel(id){docSicher.delete(id);docGeschrieben.delete(id);try{const db=await idb();await new Promise(ok=>{
+  const t=db.transaction("docs","readwrite");t.objectStore("docs").delete(id);
+  t.oncomplete=ok;t.onerror=ok;t.onabort=ok})}catch(e){}}
+async function docAlle(){try{const db=await idb();return await new Promise(ok=>{
+  const t=db.transaction("docs","readonly"),st=t.objectStore("docs"),m=new Map();
+  const c=st.openCursor();c.onsuccess=()=>{const k=c.result;if(k){m.set(k.key,k.value);k.continue()}else ok(m)};
+  c.onerror=()=>ok(null)})}catch(e){return null}}
+/* Aus save(): jedes große oder schon umgezogene Dokument, dessen Text sich
+   seit dem letzten Schreiben geändert hat. Gleichzeitige Schreibvorgänge für
+   dieselbe ID laufen in IndexedDB in der Reihenfolge ihres Starts ab — der
+   letzte gewinnt. */
+function docsSchreiben(){
+  if(datenGeloescht||typeof indexedDB==="undefined"||!S||!S.docs)return;
+  for(const d of S.docs){
+    if(docOffen.has(d.id))continue;
+    const h=d.html||"";
+    if(!docSicher.has(d.id)&&h.length<GROSS_DOK)continue;
+    if(docGeschrieben.get(d.id)===h)continue;
+    docGeschrieben.set(d.id,h);docLaeuft++;
+    docPut(d.id,h).then(ok=>{
+      docLaeuft--;
+      if(!ok){docGeschrieben.delete(d.id);if(docSicher.has(d.id)){docSicher.delete(d.id);docNachholen=true}}
+      else if(!docSicher.has(d.id)&&S.docs.some(x=>x.id===d.id)){docSicher.add(d.id);docNachholen=true}
+      if(!docLaeuft&&docNachholen){docNachholen=false;save()}
+    });
+  }
+}
+/* Beim Start: Texte der umgezogenen Dokumente zurückholen. Fehlt IndexedDB
+   gerade, bleiben sie gesperrt (docOffen) — lieber eine Meldung als ein leer
+   überschriebener Text. */
+async function docsLaden(){
+  const alle=await docAlle();
+  if(!alle){toast(tr("Ein Dokument mit Bildern konnte nicht geladen werden — bitte die Seite neu laden."));return}
+  for(const d of S.docs){
+    if(!docOffen.has(d.id))continue;
+    const h=alle.get(d.id);
+    if(typeof h==="string"){d.html=h;docGeschrieben.set(d.id,h)}
+    else docSicher.delete(d.id);
+    docOffen.delete(d.id);
+  }
+}
+async function docAbgleich(){
+  const alle=await docAlle();if(!alle)return;
+  const ids=new Set(S.docs.map(d=>d.id));
+  for(const id of alle.keys())if(!ids.has(id))await docDel(id);
 }
 async function histLaden(){
   const alle=await histAlle();
@@ -21861,7 +21950,9 @@ function abStand(){
 let abLetzterStand="",abTimer=null,abLaeuft=false;
 async function abSichern(erzwingen){
   const a=S.autoBackup;
-  if(datenGeloescht)return;
+  /* Fehlt noch der Text eines großen Dokuments (docsLaden), nicht sichern —
+     die Sicherung trüge es sonst leer in die Datei */
+  if(datenGeloescht||docOffen.size)return;
   if(!a||!a.on||!hatDateien()||abLaeuft)return;
   const {roh,text}=abStand();
   if(!erzwingen&&roh===abLetzterStand)return;
@@ -21926,7 +22017,7 @@ function applyBundle(b){
   if(kind==="all"){
     confirmReplace(()=>{
       const neu={...b};delete neu.pqw;delete neu.kind;delete neu.saved;
-      S=neu;histSicher.clear();
+      S=neu;histSicher.clear();docSicher.clear();docOffen.clear();docGeschrieben.clear();
       /* Eine Vollsicherung von vor 1.1 bringt die alten Vorgaben mit */
       aufWordWerteUmstellen();
       ensureGlossaries();
@@ -29992,8 +30083,19 @@ function scaleToDataUrl(src,alsPng){
       const sc=Math.min(1,IMG_MAXPX/Math.max(w,h));
       w=Math.round(w*sc);h=Math.round(h*sc);
       const cv=document.createElement("canvas");cv.width=w;cv.height=h;
-      cv.getContext("2d").drawImage(im,0,0,w,h);
-      try{resolve(cv.toDataURL(alsPng?"image/png":"image/jpeg",IMG_Q))}
+      const g=cv.getContext("2d");g.drawImage(im,0,0,w,h);
+      try{
+        let url=cv.toDataURL(alsPng?"image/png":"image/jpeg",IMG_Q);
+        /* Ein großes PNG ohne durchsichtige Stelle ist ein Foto (Handy,
+           Bildschirmfoto eines Fotos): als JPEG rund ein Fünftel so groß.
+           Kleine PNGs (Bildschirmfotos von Text, Grafiken) bleiben scharf. */
+        if(alsPng&&url.length>800000){
+          const px=g.getImageData(0,0,w,h).data;let deckend=true;
+          for(let i=3;i<px.length;i+=4)if(px[i]<255){deckend=false;break}
+          if(deckend){const j=cv.toDataURL("image/jpeg",IMG_Q);if(j.length<url.length)url=j}
+        }
+        resolve(url);
+      }
       catch(e){reject(e)}          /* fremdes Bild ohne CORS: Canvas ist gesperrt */
     };
     im.onerror=()=>reject(new Error("laden"));
@@ -30012,7 +30114,8 @@ function addImage(file){
     .then(roh=>scaleToDataUrl(roh,magPng(file.type)))
     .then(data=>{
       insertFigure(data,file.name.replace(/\.[^.]+$/,""));
-      if(data.length>1.2e6)toast(tr("Großes Bild — der Browser-Speicher ist begrenzt"));
+      /* Mit IndexedDB (große Dokumente) ist der Platz kein Thema mehr */
+      if(data.length>1.2e6&&typeof indexedDB==="undefined")toast(tr("Großes Bild — der Browser-Speicher ist begrenzt"));
     })
     .catch(()=>toast(tr("Bild konnte nicht gelesen werden")));
 }
@@ -37545,20 +37648,28 @@ function aufWordWerteUmstellen(){
 }
 aufWordWerteUmstellen();
 applyTheme();applyStaticLabels();resetTimer();
-if(isTrulyEmpty()){clearShell();startupDialog();}else render();
-histVersprechen=histLaden();
+/* Erst zeichnen, sichern und Dateien annehmen, wenn die Texte großer
+   Dokumente aus IndexedDB zurück sind — sonst stünde kurz ein leeres
+   Dokument da, und eine Sicherung schriebe es so weg */
+const docsVersprechen=docOffen.size?docsLaden():Promise.resolve();
+docsVersprechen.then(()=>{
+  if(isTrulyEmpty()){clearShell();startupDialog();}else render();
+  histVersprechen=histLaden();
+});
 /* Desktop: per Doppelklick oder „Öffnen mit“ übergebene Dateien. Beim ersten
    Start lagen sie schon vor dem Fenster bereit und werden abgeholt; läuft das
    Programm schon, schickt main.js sie herüber. Erst hier, nach dem Aufbau —
    ladeDokumente schließt dabei auch das Willkommensfenster. */
-(()=>{const D=PQWD();if(!D)return;
+docsVersprechen.then(()=>{const D=PQWD();if(!D)return;
   if(D.startDateien)D.startDateien().then(desktopDateienLaden).catch(()=>{});
   if(D.onDateien)D.onDateien(desktopDateienLaden);
-})();
+});
 /* Die Sicherung anlaufen lassen. Der erste Versuch prüft nur nach, ob der
    Zugriff noch gilt — gefragt wird nie ungefragt, sondern erst, wenn der
    Benutzer in den Einstellungen auf „Verbinden" klickt. */
 if(S.autoBackup&&S.autoBackup.on)(async()=>{
+  await docsVersprechen;
+  if(docOffen.size)return;   /* Texte fehlen noch: lieber nicht sichern */
   const h=await handleGet(AB_ID);
   if(await fileOk(h,false)){S.autoBackup.lose=false;save();await abSichern(true);abPlanen()}
 })();
