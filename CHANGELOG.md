@@ -74,10 +74,10 @@ immer genau einen Commit, der sie anfasst.
   und „Fatto“. Hilfetext an die Oberfläche angleichen.
 
 
-## 1.6.2 — eingereicht 2026-11-11, wartet auf Freigabe
+## 1.6.2 — freigegeben 2026-11-17
 
-Gebaut aus dem Versions-Commit „Setze die Version auf 1.6.2“. Nach der
-Freigabe: Datum statt „eingereicht“, Tag `v1.6.2` auf diesen Commit.
+Gebaut aus `ff56a0c` (Versions-Commit „Setze die Version auf 1.6.2“),
+Tag `v1.6.2`.
 
 ### Offen, noch nicht entschieden
 
